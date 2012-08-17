@@ -5,7 +5,7 @@ def play(args):
     length = dsp.stf(2)
     volume = 1.0
     w = 50 
-    measures = 2
+    measures =1 
     beats = 8 
     bpm = 72.0
 
@@ -81,7 +81,7 @@ def play(args):
 
     out = dsp.mix(layers)
 
-    out = dsp.split(out, beat)
+    out = dsp.split(out, beat * 3)
     out = ''.join(dsp.randshuffle(out))
 
     return dsp.play(dsp.amp(out, volume))

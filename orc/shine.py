@@ -15,12 +15,15 @@ def play(args):
     pulse = False
     env = False
     ratios = tune.terry
+    pad = False
+
+    wform = ['sine', 'line', 'phasor']
 
     instrument = 'rhodes'
     tone = dsp.read('sounds/220rhodes.wav').data
 
     #scale = [1,3,5,4]
-    scale = [1,5,8]
+    scale = [1,6,5,4,8]
 
     for arg in args:
         a = arg.split(':')
@@ -49,7 +52,6 @@ def play(args):
                 tone = dsp.mix([dsp.read('sounds/guitar.wav').data, 
                                 dsp.read('sounds/banjo.wav').data])
 
-
         if a[0] == 'q':
             if a[1] == 'M':
                 quality = tune.major
@@ -69,13 +71,16 @@ def play(args):
 
         if a[0] == 'gg':
             glitch = True
-            superglitch = int(a[1]) if len(a) > 1 else 100
+            superglitch = int(a[1]) if len(a) > 1 else 1000
 
         if a[0] == 'e':
             env = a[1] if len(a) > 1 else 'sine'
 
+        if a[0] == 'pad':
+            pad = dsp.mstf(int(a[1]))
+
         if a[0] == 'gp':
-            glitchpad = int(a[1])
+            glitchpad = int(a[1]) if len(a) > 1 else 5000
 
         if a[0] == 'ge':
             glitchenv = True
@@ -88,6 +93,7 @@ def play(args):
 
     out = ''
     for i in range(reps):
+        scale = dsp.randshuffle(scale)
         freq = tune.step(i, note, octave, scale, quality, ratios)
 
         if instrument == 'clarinet':
@@ -105,14 +111,27 @@ def play(args):
         o = [dsp.tone(length, freq * i * 0.5) for i in range(4)]
         o = [dsp.env(oo) for oo in o]
         o = [dsp.pan(oo, dsp.rand()) for oo in o]
-        o = dsp.mix([dsp.amp(oo, dsp.rand(0.4, 0.9)) for oo in o])
 
+        if instrument == 'clarinet':
+            olow = 0.3
+            ohigh = 0.8
+        else:
+            olow = 0.1
+            ohigh = 0.5
+
+        o = dsp.mix([dsp.amp(oo, dsp.rand(olow, ohigh)) for oo in o])
+
+        o = dsp.mix([n, o])
 
         if env is not False:
             o = dsp.env(o, env)
 
+        if pad is not False:
+            o = dsp.pad(o, 0, pad)
 
-        out += dsp.mix([n, o])
+
+
+        out += o
 
     if glitch == True:
         if superglitch is not False:
@@ -124,7 +143,7 @@ def play(args):
         out = [dsp.pan(o, dsp.rand()) for o in out]
 
         if glitchenv == True:
-            out = [dsp.env(o) for o in out]
+            out = [dsp.env(o, dsp.randchoose(wform)) for o in out]
 
         if glitchpad > 0:
             out = [dsp.pad(o, 0, dsp.mstf(dsp.rand(0, glitchpad))) for o in out]
@@ -132,7 +151,7 @@ def play(args):
         out = ''.join(dsp.randshuffle(out))
 
     if pulse == True:
-        plen = dsp.mstf(dsp.rand(100, 1000))
+        plen = dsp.mstf(dsp.rand(500, 1200))
         out = dsp.split(out, plen)
         mpul = len(out) / dsp.randint(4, 8)
 

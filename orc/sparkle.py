@@ -4,16 +4,16 @@ import tune
 def play(args):
     length = dsp.stf(20)
     volume = 0.5 
-    octave = 4 
+    octave = 3
     note = 'd'
     quality = tune.major
     m = 1
     width = 0
-    waveform = 'sine'
-    chirp = False 
+    waveform = 'vary'
+    chirp = False
 
     harmonics = [1,2]
-    scale = [1,5,8]
+    scale = [1,4,6,5,8]
     wtypes = ['sine', 'phasor', 'line', 'saw']
     ratios = tune.terry
 
@@ -89,8 +89,13 @@ def play(args):
             snd = dsp.vsplit(snd, dsp.mstf(10 * m), dsp.mstf(100 * m))
             if width != 0:
                 for ii, s in enumerate(snd):
+                    if width > dsp.mstf(5):
+                        owidth = int(width * dsp.rand(0.5, 2.0))
+                    else:
+                        owidth = width
+
                     olen = dsp.flen(s)
-                    s = dsp.cut(s, 0, width)
+                    s = dsp.cut(s, 0, owidth)
                     s = dsp.pad(s, 0, olen - dsp.flen(s)) 
                     snd[ii] = s
 
@@ -106,6 +111,6 @@ def play(args):
             tones += [ snd ]
 
     out = dsp.mix(tones)
-    out = dsp.env(out, 'gauss')
+    #out = dsp.env(out, 'gauss')
 
     return dsp.play(dsp.amp(out, volume))

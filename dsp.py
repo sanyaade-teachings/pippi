@@ -33,38 +33,6 @@ quiet = True
 
 
 def play(snd):
-
-    #p = pyaudio.PyAudio()
-    #slen = len(snd)
-
-    #def playbit(frame_count, input_time, current_time, output_time, in_data):
-        #played = playbit.played
-        #playbit.played = playbit.played + frame_count
-
-        #if playbit.played < slen:
-            #return (snd[played:played+frame_count], pyaudio.paContinue)
-        #else:
-            #return (snd[played:], pyaudio.paComplete)
-
-    #playbit.played = 0
-
-    #stream = p.open(
-            #format = p.get_format_from_width(2),
-            #channels = audio_params[0],
-            #frames_per_buffer=4,
-            #rate = audio_params[2],
-            #output = True,
-            #stream_callback=playbit)
-
-    #while stream.is_active():
-        #sys.stdout.write('\rPlaying...' + (randint(0, 10) * '.'))
-        #sys.stdout.flush()
-        #delay(0.1)
-
-    #print 'done'
-
-    #stream.close()
-    #p.terminate()
     return snd
 
 def notify(message):
