@@ -5,7 +5,7 @@ import math
 import dsp
 import alsaaudio
 import time
-from multiprocessing import Process, Queue, Condition
+import multiprocessing as mp
 
 class Pippi(cmd.Cmd):
     """ Pippi Console 
@@ -21,6 +21,8 @@ class Pippi(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
 
+        self.server = mp.managers.BaseManager()
+
     def timer(self, condition):
         condition = c.get()[0]
         while True:
@@ -29,18 +31,23 @@ class Pippi(cmd.Cmd):
                 dsp.delay(bpm)
                 condition.notifyAll()
 
-    def out(self, play, args, q, gen, z):
-        regen = False
+    def render(self, play, args, snd):
+        snd['data'] = dsp.split(play(args), 500)
 
-        for arg in args:
-            if arg == 'regen':
-                regen = True
-       
-        snd = play(args)
-        loop = True
-        vol = 1.0
-        tvol = 1.0
+    def out(self, play, args, q, gen, z, snd):
+        """
+            Worker playback process spawned by play()
+            Manages render threads for voices and render buffers for playback
+            Listens for message callbacks via Queue or maybe shared Array
+        """
+        # First, spawn a render thread
+        #   wait to join() before storing in buffer and starting playback
+        #   this is where timer threads should block as well
+        render = mp.Process(target=render, args=(play, args, snd))
+        render.start()
 
+        # Open a connection to an ALSA PCM device
+        # Split buffered sound into packets and push to playback
         if gen == 'sp' or gen == 'sh':
             device = 'T6_pair1'
         elif gen == 'dr':
@@ -57,41 +64,49 @@ class Pippi(cmd.Cmd):
             out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, 'default')
             print
 
-        #out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, 'default')
-
         out.setchannels(2)
         out.setrate(44100)
         out.setformat(alsaaudio.PCM_FORMAT_S16_LE)
         out.setperiodsize(10)
-        snd = dsp.split(snd, 400)
+
+        # On start of playback, check to see if we should be regenerating 
+        # the sound. If so, spawn a new render thread.
+        # If there is a fresher render available, use that instead.
+
+        for arg in args:
+            if arg == 'regen':
+                snd['regen'] = True
+
+        # See if we have a sound ready
+       
+        vol = 1.0
+        tvol = 1.0
         
-        while loop == True:
-            if regen == True:
-                next = play(args)
+        while snd['loop'] == True:
+            if snd['regen'] == True:
+                #next = play(args)
+                pass
 
             for s in snd:
-                if q.empty() != True:
-                    params = q.get()
-                    for i in params:
-                        if i == 'loop':
-                            loop = params[i]
+                #if q.empty() != True:
+                    #params = q.get()
+                    #for i in params:
+                        #if i == 'loop':
+                            #loop = params[i]
 
-                        if i == 'vol':
-                            if params[i] != vol:
-                                tvol = params[i]
+                        #if i == 'vol':
+                            #if params[i] != vol:
+                                #tvol = params[i]
 
-                if tvol != vol:
-                    if tvol < vol:
-                        vol -= 0.0001
-                    elif tvol > vol:
-                        vol += 0.0001
+                #if tvol != vol:
+                    #if tvol < vol:
+                        #vol -= 0.0001
+                    #elif tvol > vol:
+                        #vol += 0.0001
 
-                    s = dsp.amp(s, vol)
+                    #s = dsp.amp(s, vol)
 
                 out.write(s)
-            
-            if regen == True:
-                snd = dsp.split(next, 50)
 
     def play(self, cmd):
         orcs = os.listdir('orc/')
@@ -111,8 +126,14 @@ class Pippi(cmd.Cmd):
                     if c == t or c == 'g':
                         cmd = cmd + self.cc[c]
 
-                q = Queue()
-                process = Process(target=self.out, args=(p.play, cmd, q, t, z))
+                # Create a shared list buffer for the voice
+                snd = self.server.dict()
+                snd['data'] = ''
+                snd['loop'] = True
+                snd['regen'] = False
+
+                q = mp.Queue()
+                process = mp.Process(target=self.out, args=(p.play, cmd, q, t, z, snd))
                 process.start()
 
                 self.vcount += 1
