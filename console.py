@@ -5,7 +5,7 @@ import math
 import dsp
 import alsaaudio
 import time
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Condition
 
 class Pippi(cmd.Cmd):
     """ Pippi Console 
@@ -21,7 +21,15 @@ class Pippi(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
 
-    def out(self, play, args, q):
+    def timer(self, condition):
+        condition = c.get()[0]
+        while True:
+            with condition:
+                bpm = dsp.bpm2ms(72.0) / 1000.0
+                dsp.delay(bpm)
+                condition.notifyAll()
+
+    def out(self, play, args, q, gen, z):
         regen = False
 
         for arg in args:
@@ -33,13 +41,30 @@ class Pippi(cmd.Cmd):
         vol = 1.0
         tvol = 1.0
 
-        out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL)
+        if gen == 'sp' or gen == 'sh':
+            device = 'T6_pair1'
+        elif gen == 'dr':
+            device = 'T6_pair2'
+        elif gen == 'cl':
+            device = 'T6_pair3'
+        else:
+            device = 'default'
+
+        try:
+            out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
+        except:
+            print 'Trying default card'
+            out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, 'default')
+            print
+
+        #out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, 'default')
+
         out.setchannels(2)
         out.setrate(44100)
         out.setformat(alsaaudio.PCM_FORMAT_S16_LE)
         out.setperiodsize(10)
-        snd = dsp.split(snd, 50)
-
+        snd = dsp.split(snd, 400)
+        
         while loop == True:
             if regen == True:
                 next = play(args)
@@ -76,13 +101,18 @@ class Pippi(cmd.Cmd):
                 cmd.pop(0)
                 orc = 'orc.' + orc.split('.')[0]
                 p = __import__(orc, globals(), locals(), ['play'])
+                z = 'default'
+
+                if len(cmd) > 0:
+                    if cmd[0][0] == 'z':
+                        z = cmd[0].split(':')[1] 
 
                 for c in self.cc:
                     if c == t or c == 'g':
                         cmd = cmd + self.cc[c]
 
                 q = Queue()
-                process = Process(target=self.out, args=(p.play, cmd, q))
+                process = Process(target=self.out, args=(p.play, cmd, q, t, z))
                 process.start()
 
                 self.vcount += 1
@@ -144,7 +174,12 @@ class Pippi(cmd.Cmd):
             print 'nope'
 
     def do_p(self, cmd):
-        if cmd == '1a':
+        if cmd == 't':
+            cmd = [
+                    'cl d:k regen bpm:130 v:40',
+                    ]
+
+        elif cmd == '1a':
             cmd = [
                     'sp v:50 w:60 m:150 regen o:1 n:g wf:sine',
                     'sp v:60 w:6 m:150 regen o:1 n:g wf:tri',
@@ -216,12 +251,30 @@ class Pippi(cmd.Cmd):
                     'sh v:50 o:2 i:r regen t:12 n:d tr:just gg:300 p',
                     ]
 
+        elif cmd == '4b':
+            cmd = [
+                    'sh v:7 regen o:3 e:vary i:r pad:1000 t:12 n:d tr:just',
+                    'sh v:7 regen o:2 e:vary i:r pad:1000 t:15 n:d tr:just',
+                    'sh v:30 regen o:1 s:1.8 e:phasor i:r pad:2000 t:12 n:d tr:just',
+                    'sh v:20 regen o:2 s:1.8 e:sine i:c pad:2000 t:12 n:d tr:just',
+                    ]
+
         for c in cmd:
             if len(c) > 2:
                 self.default(c)
 
     def default(self, cmd):
-        self.play(cmd.split(' '))
+        cmd = cmd.split(',')
+        for c in cmd:
+            cc = c.strip().split(' ')
+            try:
+                print c[3:]
+                print cc
+                getattr(self, 'do_' + cc[0])(c[3:])
+
+            except:
+                self.play(cc)
+
 
     def do_EOF(self, line):
         return True

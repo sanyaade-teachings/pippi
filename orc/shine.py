@@ -16,11 +16,34 @@ def play(args):
     env = False
     ratios = tune.terry
     pad = False
+    pulsar = False
 
     wform = ['sine', 'line', 'phasor']
 
     instrument = 'rhodes'
     tone = dsp.read('sounds/220rhodes.wav').data
+
+    #def capture(frames, out=''):
+        #import alsaaudio
+        #import time
+        #i = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, 0, 'T6_pair1')
+
+        #i.setchannels(2)
+        #i.setrate(44100)
+        #i.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+        #i.setperiodsize(160)
+
+        #while frames > 0:
+            #frames -= 1
+            #l,data = i.read()
+            
+            #if l:
+                #out += dsp.byte_string(int(l))
+
+        ##i.close()
+        #return out
+
+    #tone = capture(dsp.mstf(2500))
 
     #scale = [1,3,5,4]
     scale = [1,6,5,4,8]
@@ -66,12 +89,16 @@ def play(args):
         if a[0] == 'p':
             pulse = True
 
+        if a[0] == 'pp':
+            pulsar = True
+
         if a[0] == 'g':
             glitch = True
 
-        if a[0] == 'gg':
-            glitch = True
-            superglitch = int(a[1]) if len(a) > 1 else 1000
+            a[1] = a[1].split('.') if len(a) > 1 else a[1]
+            superglitch = int(a[1][0]) if len(a) > 1 else 1000
+            glitchpad = int(a[1][1]) if len(a) > 1 and len(a[1]) > 1 else 5000
+            glitchenv = a[1][2] if len(a) > 1 and len(a[1]) > 2 else False 
 
         if a[0] == 'e':
             env = a[1] if len(a) > 1 else 'sine'
@@ -79,17 +106,13 @@ def play(args):
         if a[0] == 'pad':
             pad = dsp.mstf(int(a[1]))
 
-        if a[0] == 'gp':
-            glitchpad = int(a[1]) if len(a) > 1 else 5000
-
-        if a[0] == 'ge':
-            glitchenv = True
-
         if a[0] == 'tr':
             ratios = getattr(tune, a[1], tune.terry)
 
         if a[0] == 's':
             scale = [int(s) for s in a[1].split('.')]
+
+    wtypes = ['sine', 'gauss']
 
     out = ''
     for i in range(reps):
@@ -142,8 +165,8 @@ def play(args):
         out = dsp.vsplit(out, dsp.mstf(1), mlen)
         out = [dsp.pan(o, dsp.rand()) for o in out]
 
-        if glitchenv == True:
-            out = [dsp.env(o, dsp.randchoose(wform)) for o in out]
+        if glitchenv is not False:
+            out = [dsp.env(o, glitchenv) for o in out]
 
         if glitchpad > 0:
             out = [dsp.pad(o, 0, dsp.mstf(dsp.rand(0, glitchpad))) for o in out]
@@ -159,5 +182,46 @@ def play(args):
         opads = dsp.wavetable('sine', len(out), dsp.rand(plen * 0.25, plen))
         out = [dsp.pad(o, 0, int(opads[i])) for i, o in enumerate(out)]
         out = dsp.env(''.join(out))
+
+    if pulsar == True:
+
+        out = dsp.split(out, 441)
+        freqs = dsp.wavetable('sine', len(out), 1.01, 0.99)
+        out = [ dsp.transpose(out[i], freqs[i]) for i in range(len(out)) ]
+        out = ''.join(out)
+
+        #out = dsp.pulsar(out)
+        #layers = []
+
+        #for i in range(3):
+            #minlen = dsp.mstf(1)
+            #maxlen = dsp.mstf(250)
+            #pool = dsp.vsplit(out, minlen, maxlen)
+            #layer = []
+
+            #for l in pool:
+                #if dsp.randint(0, 3) == 0:
+                    #if dsp.randint(0, 3) == 0:
+                        #slen = dsp.flen(l)
+                        #cmin = 41 
+                        #cmax = slen 
+                        #clen = dsp.randint(cmin, cmax)
+                        #l = dsp.cut(l, 0, clen)
+                        #l = l * (slen / dsp.flen(l))
+
+                    #if dsp.randint(0, 3) == 2:
+                        #l = dsp.alias(l)
+                        
+
+                    #l = dsp.env(l, dsp.randchoose(wtypes), True)
+                    #l = dsp.pan(l, dsp.rand())
+                    #l = dsp.amp(l, dsp.rand(0.1, 1.0))
+                    #layer += [ l ]
+                #else:
+                    #layer += [ dsp.pad('', 0, dsp.flen(l)) ]
+
+            #layers += [ ''.join(layer) ]
+
+        #out = dsp.mix(layers, True, 6)
 
     return dsp.play(dsp.amp(out, volume))
