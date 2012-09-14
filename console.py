@@ -21,7 +21,9 @@ class Pippi(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
 
-        self.server = mp.managers.BaseManager()
+        self.server = mp.Manager()
+        self.data = self.server.Namespace()
+        self.data.v = {}
 
     def timer(self, condition):
         condition = c.get()[0]
@@ -31,19 +33,23 @@ class Pippi(cmd.Cmd):
                 dsp.delay(bpm)
                 condition.notifyAll()
 
-    def render(self, play, args, snd):
-        snd['data'] = dsp.split(play(args), 500)
+    def render(self, play, args, vid, data):
+        data.v[vid]['snd'] = dsp.split(play(args), 500)
 
-    def out(self, play, args, q, gen, z, snd):
+    def out(self, play, args, q, gen, z, data):
         """
             Worker playback process spawned by play()
             Manages render threads for voices and render buffers for playback
             Listens for message callbacks via Queue or maybe shared Array
         """
+
+        vid = os.getpid()
+        data.v[vid] = {'snd': '', 'loop': True, 'regen': False}
+
         # First, spawn a render thread
         #   wait to join() before storing in buffer and starting playback
         #   this is where timer threads should block as well
-        render = mp.Process(target=render, args=(play, args, snd))
+        render = mp.Process(target=self.render, args=(play, args, vid, data))
         render.start()
 
         # Open a connection to an ALSA PCM device
@@ -75,37 +81,20 @@ class Pippi(cmd.Cmd):
 
         for arg in args:
             if arg == 'regen':
-                snd['regen'] = True
+                data.v[vid]['regen'] = True
 
         # See if we have a sound ready
        
         vol = 1.0
         tvol = 1.0
         
-        while snd['loop'] == True:
-            if snd['regen'] == True:
-                #next = play(args)
+        while data.v[vid]['loop'] == True:
+            if data.v[vid]['regen'] == True:
                 pass
 
-            for s in snd:
-                #if q.empty() != True:
-                    #params = q.get()
-                    #for i in params:
-                        #if i == 'loop':
-                            #loop = params[i]
+            render.join()
 
-                        #if i == 'vol':
-                            #if params[i] != vol:
-                                #tvol = params[i]
-
-                #if tvol != vol:
-                    #if tvol < vol:
-                        #vol -= 0.0001
-                    #elif tvol > vol:
-                        #vol += 0.0001
-
-                    #s = dsp.amp(s, vol)
-
+            for s in data.v[vid]['snd']:
                 out.write(s)
 
     def play(self, cmd):
@@ -127,13 +116,8 @@ class Pippi(cmd.Cmd):
                         cmd = cmd + self.cc[c]
 
                 # Create a shared list buffer for the voice
-                snd = self.server.dict()
-                snd['data'] = ''
-                snd['loop'] = True
-                snd['regen'] = False
-
                 q = mp.Queue()
-                process = mp.Process(target=self.out, args=(p.play, cmd, q, t, z, snd))
+                process = mp.Process(target=self.out, args=(p.play, cmd, q, t, z, self.data))
                 process.start()
 
                 self.vcount += 1
