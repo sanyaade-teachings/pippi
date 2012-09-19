@@ -14,42 +14,73 @@ class Pippi(cmd.Cmd):
     prompt = 'pippi: '
     intro = 'Pippi Console'
 
-    playing = {}
     cc = {} 
-    vcount = 0
+    vid = 0
 
     def __init__(self):
         cmd.Cmd.__init__(self)
 
         self.server = mp.Manager()
         self.data = self.server.Namespace()
+        self.data.p = {}
         self.data.v = {}
         self.vid = 0
-        self.quant = mp.Event()
-        self.grid = mp.Process(target=self.timer, args=(self.quant,))
+        self.qu = {
+                    1: mp.Event(),
+                    4: mp.Event(),
+                    8: mp.Event(),
+                    16: mp.Event(),
+                }
+
+        self.grid = mp.Process(target=self.timer, args=(self.qu,))
         self.grid.start()
 
-    def timer(self, quant):
-        while True:
-            quant.clear()
-            bpm = dsp.bpm2ms(72.0) / 1000.0
-            dsp.delay(bpm / 2)
-            quant.set()
+    def timer(self, qu):
+        os.nice(-19)
+        bar = 0
 
-    def render(self, play, args, vid, data, next='snd'):
+        while True:
+            bpm = (dsp.bpm2ms(72.0) / 1000.0) * 0.25
+            for beat in range(1, 17):
+                dsp.delay(bpm)
+
+                # signal 4 beats
+                if beat == 1:
+                    bar += 1
+
+                if bar == 1 and beat == 1:
+                    qu[1].set()
+
+                if bar == 4 and beat == 1:
+                    bar = 0
+
+                # signal 1 beat
+                if beat == 1:
+                    qu[4].set()
+
+                # signal 0.5 beats
+                if beat % 2 == 0:
+                    qu[8].set()
+
+                # signal 0.25 beats
+                qu[16].set()
+
+                for q in qu:
+                    qu[q].clear()
+
+
+    def render(self, play, args, vid, data, label='snd'):
         d = data.v
-        d[vid][next] = dsp.split(play(args), 500)
+        d[vid][label] = dsp.split(play(args), 500)
         data.v = d
 
-    def out(self, play, args, q, gen, z, data, vid, quant):
+    def out(self, play, args, gen, data, vid, qu):
         """
             Worker playback process spawned by play()
             Manages render threads for voices and render buffers for playback
         """
 
-        # First, spawn a render thread
-        #   wait to join() before storing in buffer and starting playback
-        #   this is where timer threads should block as well
+        # Render sound
         render = mp.Process(target=self.render, args=(play, args, vid, data))
         render.start()
         render.join()
@@ -82,21 +113,23 @@ class Pippi(cmd.Cmd):
         regen = False
         cooking = False
         next = False
-        q = True
+        q = False
 
         for arg in args:
-            if arg == 'regen':
+            if arg == 're':
                 regen = True
 
-            #if arg == 'q':
-                #q = True
+            if arg[:2] == 'qu':
+                q = int(arg[3:].strip())
 
         # See if we have a sound ready
        
         vol = 1.0
         tvol = 1.0
         
-        while data.v[vid]['loop'] == True:
+        v = data.v
+        while v[vid]['loop'] == True:
+            v = data.v
             if regen == True and cooking == False:
                 cooking = True
                 next = mp.Process(target=self.render, args=(play, args, vid, data, 'next'))
@@ -104,15 +137,20 @@ class Pippi(cmd.Cmd):
 
             if next is not False and next.is_alive() == False:
                 cooking = False
-                snd = data.v[vid]['next']
+                snd = v[vid]['next']
             else:
-                snd = data.v[vid]['snd']
+                snd = v[vid]['snd']
 
-            if q == True:
-                quant.wait()
+            if q is not False:
+                qu[q].wait()
 
             for s in snd:
                 out.write(s)
+
+        # Remove self from playback info before terminating the process
+        p = self.data.p
+        p.pop(vid)
+        data.p = p
 
 
     def play(self, cmd):
@@ -123,28 +161,23 @@ class Pippi(cmd.Cmd):
                 cmd.pop(0)
                 orc = 'orc.' + orc.split('.')[0]
                 p = __import__(orc, globals(), locals(), ['play'])
-                z = 'default'
-
-                if len(cmd) > 0:
-                    if cmd[0][0] == 'z':
-                        z = cmd[0].split(':')[1] 
 
                 for c in self.cc:
                     if c == t or c == 'g':
                         cmd = cmd + self.cc[c]
 
                 # Create a shared list buffer for the voice
-                q = mp.Queue()
                 self.vid += 1
                 data = self.data.v
                 data[self.vid] = {'snd': '', 'next': '', 'loop': True, 'regen': False}
                 self.data.v = data
 
-                process = mp.Process(target=self.out, args=(p.play, cmd, q, t, z, self.data, self.vid, self.quant))
+                process = mp.Process(target=self.out, args=(p.play, cmd, t, self.data, self.vid, self.qu))
                 process.start()
 
-                self.vcount += 1
-                self.playing[self.vcount] = {'p': process, 't': t, 'q': q, 'vol': 1.0, 'cmd': cmd}
+                p = self.data.p
+                p[self.vid] = {'t': t, 'cmd': cmd}
+                self.data.p = p
 
                 return True
 
@@ -157,47 +190,54 @@ class Pippi(cmd.Cmd):
         self.cc[t] = cmd
 
     def do_ss(self, cmd):
-        for s in self.playing:
-            self.playing[s]['p'].terminate()
-    
-        self.playing = {}
+        v = self.data.v
+        p = self.data.p
+        for s in p:
+            v[s]['loop'] = False
+
+        self.data.v = v
 
     def do_s(self, cmd):
         cmds = cmd.split(' ')
 
         try:
+            v = self.data.v
             for cmd in cmds:
-                self.playing[int(cmd)]['p'].terminate()
-                self.playing.pop(int(cmd))
+                v[int(cmd)]['loop'] = False
+            self.data.v = v
+
         except KeyError:
             print 'nope'
 
-    def do_vv(self, cmd):
-        cmds = cmd.split(' ')
+    # TODO implement volume control again
+    #def do_vv(self, cmd):
+        #cmds = cmd.split(' ')
 
-        for p in self.playing:
-            if self.playing[p]['t'] == cmds[0] or cmds[0] == 'a':
-                vol = float(cmds[1]) / 100.0
-                self.playing[p]['q'].put({'vol': vol})
-                self.playing[p]['vol'] = vol
+        #for p in self.playing:
+            #if self.playing[p]['t'] == cmds[0] or cmds[0] == 'a':
+                #vol = float(cmds[1]) / 100.0
+                #self.playing[p]['q'].put({'vol': vol})
+                #self.playing[p]['vol'] = vol
 
 
-    def do_v(self, cmd):
-        cmds = cmd.split(' ')
-        try:
-            vol = float(cmds[1]) / 100.0
-            i = int(cmds[0])
-            self.playing[i]['q'].put({'vol': vol})
-            self.playing[i]['vol'] = vol
-        except KeyError:
-            print 'nope, nope'
-        except IndexError:
-            print 'nope'
+    #def do_v(self, cmd):
+        #cmds = cmd.split(' ')
+        #try:
+            #vol = float(cmds[1]) / 100.0
+            #i = int(cmds[0])
+            #self.playing[i]['q'].put({'vol': vol})
+            #self.playing[i]['vol'] = vol
+        #except KeyError:
+            #print 'nope, nope'
+        #except IndexError:
+            #print 'nope'
 
     def do_i(self, cmd=[]):
         try:
-            for p in self.playing:
-                print p, self.playing[p]['t'], self.playing[p]['vol'], self.playing[p]['p'].exitcode, self.playing[p]['cmd']
+            pp = self.data.p
+            for p in pp:
+                print p, pp[p]['t'], pp[p]['cmd']
+
         except KeyError:
             print 'nope'
 
@@ -207,97 +247,15 @@ class Pippi(cmd.Cmd):
                     'cl d:k regen bpm:130 v:40',
                     ]
 
-        elif cmd == '1a':
-            cmd = [
-                    'sp v:50 w:60 m:150 regen o:1 n:g wf:sine',
-                    'sp v:60 w:6 m:150 regen o:1 n:g wf:tri',
-                    ]
-
-        elif cmd == '1b':
-            cmd = [
-                    'sp v:40 w:1200 m:500 regen o:1 n:g wf:tri',
-                    'sp v:30 w:2200 m:700 regen o:1 n:g wf:sine',
-                    ]
-
-        elif cmd == '1c':
-            cmd = [
-                    'sh v:50 regen o:2 e:phasor i:r pad:5000 t:12 n:g',
-                    'sh v:50 regen o:2 e:phasor i:r pad:5000 t:12 n:g',
-                    'sp w:5 m:15 v:15 o:2 wf:vary regen n:g',
-                    ]
-
-        elif cmd == '2a':
-            cmd = [
-                    'sp v:30 w:1200 m:400 regen o:1 n:d wf:tri tr:just',
-                    'sp v:40 w:3200 m:300 regen o:1 n:d wf:sine tr:just',
-                    'sp v:30 w:3200 m:300 regen o:1 n:d wf:sine tr:just',
-                    'sp v:20 w:2200 m:500 regen o:1 n:d wf:tri tr:just',
-                    ]
-
-        elif cmd == '2b':
-            cmd = [
-                    'sh v:5 regen o:3 e:vary i:r pad:1000 t:12 n:d tr:just',
-                    'sh v:5 regen o:3 e:vary i:r pad:1000 t:15 n:d tr:just',
-                    'sh v:30 regen o:1 s:1.8 e:phasor i:r pad:2000 t:12 n:d tr:just',
-                    'sh v:20 regen o:2 s:1.8 e:sine i:c pad:2000 t:12 n:d tr:just',
-                    ]
-
-        elif cmd == '2c':
-            cmd = [
-                    'sh v:55 o:3 s:1 i:r regen e:phasor pad:2000 t:15 n:d tr:just',
-                    'sh v:60 o:2 s:1.6.5 i:r regen e:phasor pad:2000 t:15 n:d tr:just',
-                    'sh v:35 o:3 s:1.5 i:r regen e:sine pad:1000 t:10 n:d tr:just gg:300 gp:500 ge',
-                    'sh v:20 o:3 i:r regen e:sine pad:1000 t:10 n:d tr:just gg:200 gp:800 ge',
-                    ]
-
-        elif cmd == '3a':
-            cmd = [
-                    'dr wf:sine o:1 n:d h:1 t:30 v:50',
-                    'dr wf:sine o:2 n:d h:1 t:25 v:30',
-                    'dr wf:sine o:1 n:a h:1 t:20 v:30',
-                    ]
-
-        elif cmd == '3b':
-            cmd = [
-                    'dr wf:tri o:1 n:d h:1.2.3.4 t:35 v:50',
-                    'dr wf:vary o:1 n:d h:1.2.3.4.5.6 t:25 v:30',
-                    'dr wf:sine o:2 n:a h:1.2 t:27 v:40',
-                    'dr wf:sine o:2 n:d h:1.2.3 v:50',
-                    ]
-
-        elif cmd == '3c':
-            cmd = [
-                    'dr wf:vary o:1 n:d h:1.2.3.4.5.6 t:30 v:50',
-                    'dr wf:tri o:1 n:d h:1.2.3.4.5.6 t:20 v:50',
-                    'dr wf:sine o:2 n:a h:1.2.3 t:24 v:50',
-                    ]
-
-        elif cmd == '4a':
-            cmd = [
-                    'sh v:50 o:3 s:1.5 i:r regen t:10 n:d tr:just gg:300 gp:50 ge p',
-                    'sh v:40 o:3 i:g regen t:12 n:d tr:just gg:500 gp:50 ge p',
-                    'sh v:50 o:2 i:r regen t:12 n:d tr:just gg:300 p',
-                    ]
-
-        elif cmd == '4b':
-            cmd = [
-                    'sh v:7 regen o:3 e:vary i:r pad:1000 t:12 n:d tr:just',
-                    'sh v:7 regen o:2 e:vary i:r pad:1000 t:15 n:d tr:just',
-                    'sh v:30 regen o:1 s:1.8 e:phasor i:r pad:2000 t:12 n:d tr:just',
-                    'sh v:20 regen o:2 s:1.8 e:sine i:c pad:2000 t:12 n:d tr:just',
-                    ]
-
         for c in cmd:
             if len(c) > 2:
                 self.default(c)
 
     def default(self, cmd):
-        cmd = cmd.split(',')
+        cmd = cmd.strip().split(',')
         for c in cmd:
             cc = c.strip().split(' ')
             try:
-                print c[3:]
-                print cc
                 getattr(self, 'do_' + cc[0])(c[3:])
 
             except:

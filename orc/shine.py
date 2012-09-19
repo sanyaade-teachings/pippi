@@ -2,12 +2,12 @@ import dsp
 import tune
 
 def play(args):
-    length = dsp.stf(dsp.rand(5, 10))
+    length = dsp.stf(dsp.rand(0.1, 1))
     volume = 0.2 
     octave = 2 
     note = 'd'
     quality = tune.major
-    reps = dsp.randint(3, 11)
+    reps = dsp.randint(1, 3)
     glitch = False
     superglitch = False
     glitchpad = 0
@@ -70,6 +70,9 @@ def play(args):
             elif a[1] == 'c':
                 instrument = 'clarinet'
                 tone = dsp.read('sounds/clarinet.wav').data
+            elif a[1] == 'v':
+                instrument = 'vibes'
+                tone = dsp.read('sounds/cz-vibes.wav').data
             elif a[1] == 'g':
                 instrument = 'guitar'
                 tone = dsp.mix([dsp.read('sounds/guitar.wav').data, 
