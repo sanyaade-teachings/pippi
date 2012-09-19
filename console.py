@@ -24,33 +24,35 @@ class Pippi(cmd.Cmd):
         self.server = mp.Manager()
         self.data = self.server.Namespace()
         self.data.v = {}
+        self.vid = 0
+        self.quant = mp.Event()
+        self.grid = mp.Process(target=self.timer, args=(self.quant,))
+        self.grid.start()
 
-    def timer(self, condition):
-        condition = c.get()[0]
+    def timer(self, quant):
         while True:
-            with condition:
-                bpm = dsp.bpm2ms(72.0) / 1000.0
-                dsp.delay(bpm)
-                condition.notifyAll()
+            quant.clear()
+            bpm = dsp.bpm2ms(72.0) / 1000.0
+            dsp.delay(bpm / 2)
+            quant.set()
 
-    def render(self, play, args, vid, data):
-        data.v[vid]['snd'] = dsp.split(play(args), 500)
+    def render(self, play, args, vid, data, next='snd'):
+        d = data.v
+        d[vid][next] = dsp.split(play(args), 500)
+        data.v = d
 
-    def out(self, play, args, q, gen, z, data):
+    def out(self, play, args, q, gen, z, data, vid, quant):
         """
             Worker playback process spawned by play()
             Manages render threads for voices and render buffers for playback
-            Listens for message callbacks via Queue or maybe shared Array
         """
-
-        vid = os.getpid()
-        data.v[vid] = {'snd': '', 'loop': True, 'regen': False}
 
         # First, spawn a render thread
         #   wait to join() before storing in buffer and starting playback
         #   this is where timer threads should block as well
         render = mp.Process(target=self.render, args=(play, args, vid, data))
         render.start()
+        render.join()
 
         # Open a connection to an ALSA PCM device
         # Split buffered sound into packets and push to playback
@@ -66,9 +68,8 @@ class Pippi(cmd.Cmd):
         try:
             out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
         except:
-            print 'Trying default card'
-            out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, 'default')
-            print
+            print 'Could not open an ALSA connection.'
+            return False
 
         out.setchannels(2)
         out.setrate(44100)
@@ -78,10 +79,17 @@ class Pippi(cmd.Cmd):
         # On start of playback, check to see if we should be regenerating 
         # the sound. If so, spawn a new render thread.
         # If there is a fresher render available, use that instead.
+        regen = False
+        cooking = False
+        next = False
+        q = True
 
         for arg in args:
             if arg == 'regen':
-                data.v[vid]['regen'] = True
+                regen = True
+
+            #if arg == 'q':
+                #q = True
 
         # See if we have a sound ready
        
@@ -89,13 +97,23 @@ class Pippi(cmd.Cmd):
         tvol = 1.0
         
         while data.v[vid]['loop'] == True:
-            if data.v[vid]['regen'] == True:
-                pass
+            if regen == True and cooking == False:
+                cooking = True
+                next = mp.Process(target=self.render, args=(play, args, vid, data, 'next'))
+                next.start()
 
-            render.join()
+            if next is not False and next.is_alive() == False:
+                cooking = False
+                snd = data.v[vid]['next']
+            else:
+                snd = data.v[vid]['snd']
 
-            for s in data.v[vid]['snd']:
+            if q == True:
+                quant.wait()
+
+            for s in snd:
                 out.write(s)
+
 
     def play(self, cmd):
         orcs = os.listdir('orc/')
@@ -117,7 +135,12 @@ class Pippi(cmd.Cmd):
 
                 # Create a shared list buffer for the voice
                 q = mp.Queue()
-                process = mp.Process(target=self.out, args=(p.play, cmd, q, t, z, self.data))
+                self.vid += 1
+                data = self.data.v
+                data[self.vid] = {'snd': '', 'next': '', 'loop': True, 'regen': False}
+                self.data.v = data
+
+                process = mp.Process(target=self.out, args=(p.play, cmd, q, t, z, self.data, self.vid, self.quant))
                 process.start()
 
                 self.vcount += 1
