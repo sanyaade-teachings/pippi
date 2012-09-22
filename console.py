@@ -40,7 +40,7 @@ class Pippi(cmd.Cmd):
         bar = 0
 
         while True:
-            bpm = (dsp.bpm2ms(72.0) / 1000.0) * 0.25
+            bpm = (dsp.bpm2ms(80.0) / 1000.0) * 0.25
             for beat in range(1, 17):
                 dsp.delay(bpm)
 
@@ -122,11 +122,6 @@ class Pippi(cmd.Cmd):
             if arg[:2] == 'qu':
                 q = int(arg[3:].strip())
 
-        # See if we have a sound ready
-       
-        vol = 1.0
-        tvol = 1.0
-        
         v = data.v
         while v[vid]['loop'] == True:
             v = data.v
@@ -147,7 +142,7 @@ class Pippi(cmd.Cmd):
             for s in snd:
                 out.write(s)
 
-        # Remove self from playback info before terminating the process
+        # Cleanup 
         p = self.data.p
         p.pop(vid)
         data.p = p
@@ -166,7 +161,7 @@ class Pippi(cmd.Cmd):
                     if c == t or c == 'g':
                         cmd = cmd + self.cc[c]
 
-                # Create a shared list buffer for the voice
+                # Create a shared list for the voice
                 self.vid += 1
                 data = self.data.v
                 data[self.vid] = {'snd': '', 'next': '', 'loop': True, 'regen': False}

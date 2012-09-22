@@ -7,7 +7,7 @@ def play(args):
     w = 50 
     measures = 1 
     beats = 8 
-    bpm = 72.0
+    bpm = 80.0
     glitch = False
     alias = False
     skitter = False
