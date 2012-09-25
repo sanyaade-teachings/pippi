@@ -111,6 +111,6 @@ def play(args):
             tones += [ snd ]
 
     out = dsp.mix(tones)
-    #out = dsp.env(out, 'gauss')
+    out = dsp.pan(out, 0)
 
     return dsp.play(dsp.amp(out, volume))

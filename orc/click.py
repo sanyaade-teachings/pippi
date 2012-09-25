@@ -7,7 +7,7 @@ def play(args):
     w = 50 
     measures = 1 
     beats = 8 
-    bpm = 80.0
+    bpm = 75.0
     glitch = False
     alias = False
     skitter = False
@@ -170,5 +170,7 @@ def play(args):
                 out[i] = tweeter(o)
 
         out = ''.join(dsp.randshuffle(out))
+
+    out = dsp.pan(out, 1)
 
     return dsp.play(dsp.amp(out, volume))

@@ -40,7 +40,7 @@ class Pippi(cmd.Cmd):
         bar = 0
 
         while True:
-            bpm = (dsp.bpm2ms(80.0) / 1000.0) * 0.25
+            bpm = (dsp.bpm2ms(75.0) / 1000.0) * 0.25
             for beat in range(1, 17):
                 dsp.delay(bpm)
 
@@ -87,8 +87,10 @@ class Pippi(cmd.Cmd):
 
         # Open a connection to an ALSA PCM device
         # Split buffered sound into packets and push to playback
-        if gen == 'sp' or gen == 'sh':
+        if gen == 'sh':
             device = 'T6_pair1'
+        elif gen == 'sp':
+            device = 'T6_pair3'
         elif gen == 'dr':
             device = 'T6_pair2'
         elif gen == 'cl':
@@ -114,6 +116,8 @@ class Pippi(cmd.Cmd):
         cooking = False
         next = False
         q = False
+        vol = 1.0
+        tvol = 1.0
 
         for arg in args:
             if arg == 're':
@@ -125,6 +129,8 @@ class Pippi(cmd.Cmd):
         v = data.v
         while v[vid]['loop'] == True:
             v = data.v
+            tvol = v[vid]['tvol']
+
             if regen == True and cooking == False:
                 cooking = True
                 next = mp.Process(target=self.render, args=(play, args, vid, data, 'next'))
@@ -140,7 +146,19 @@ class Pippi(cmd.Cmd):
                 qu[q].wait()
 
             for s in snd:
+                if tvol != vol:
+                    if tvol > vol:
+                        vol += 0.01
+                    elif vol > tvol:
+                        vol -= 0.01
+
+                    s = dsp.amp(s, vol)
+
                 out.write(s)
+
+                if vol < 0.002:
+                    v[vid]['loop'] = False
+                    break
 
         # Cleanup 
         p = self.data.p
@@ -155,7 +173,7 @@ class Pippi(cmd.Cmd):
                 t = cmd[0]
                 cmd.pop(0)
                 orc = 'orc.' + orc.split('.')[0]
-                p = __import__(orc, globals(), locals(), ['play'])
+                pl = __import__(orc, globals(), locals(), ['play'])
 
                 for c in self.cc:
                     if c == t or c == 'g':
@@ -164,15 +182,15 @@ class Pippi(cmd.Cmd):
                 # Create a shared list for the voice
                 self.vid += 1
                 data = self.data.v
-                data[self.vid] = {'snd': '', 'next': '', 'loop': True, 'regen': False}
+                data[self.vid] = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0}
                 self.data.v = data
-
-                process = mp.Process(target=self.out, args=(p.play, cmd, t, self.data, self.vid, self.qu))
-                process.start()
 
                 p = self.data.p
                 p[self.vid] = {'t': t, 'cmd': cmd}
                 self.data.p = p
+
+                process = mp.Process(target=self.out, args=(pl.play, cmd, t, self.data, self.vid, self.qu))
+                process.start()
 
                 return True
 
@@ -204,42 +222,62 @@ class Pippi(cmd.Cmd):
         except KeyError:
             print 'nope'
 
-    # TODO implement volume control again
-    #def do_vv(self, cmd):
-        #cmds = cmd.split(' ')
+    def do_vv(self, cmd):
+        cmds = cmd.split(' ')
 
-        #for p in self.playing:
-            #if self.playing[p]['t'] == cmds[0] or cmds[0] == 'a':
-                #vol = float(cmds[1]) / 100.0
-                #self.playing[p]['q'].put({'vol': vol})
-                #self.playing[p]['vol'] = vol
+        pp = self.data.p
+        v = self.data.v
+        for p in pp:
+            if pp[p]['t'] == cmds[0] or cmds[0] == 'a':
+                vol = float(cmds[1]) / 100.0
+                v[p]['tvol'] = vol
+                self.data.v = v 
 
 
-    #def do_v(self, cmd):
-        #cmds = cmd.split(' ')
-        #try:
-            #vol = float(cmds[1]) / 100.0
-            #i = int(cmds[0])
-            #self.playing[i]['q'].put({'vol': vol})
-            #self.playing[i]['vol'] = vol
-        #except KeyError:
-            #print 'nope, nope'
-        #except IndexError:
-            #print 'nope'
+
+    def do_v(self, cmd):
+        cmds = cmd.split(' ')
+        try:
+            vol = float(cmds[1]) / 100.0
+            i = int(cmds[0])
+            v = self.data.v
+            v[i]['tvol'] = vol
+            self.data.v = v
+
+        except KeyError:
+            print 'nope, nope'
+        except IndexError:
+            print 'nope'
 
     def do_i(self, cmd=[]):
         try:
             pp = self.data.p
+            v = self.data.v
             for p in pp:
-                print p, pp[p]['t'], pp[p]['cmd']
+                print p, pp[p]['t'], pp[p]['cmd'], 'v:', v[p]['tvol'], 'l:', v[p]['loop'], 're:', v[p]['regen']
 
         except KeyError:
             print 'nope'
 
     def do_p(self, cmd):
-        if cmd == 't':
+        if cmd == 's1aa':
             cmd = [
-                    'cl d:k regen bpm:130 v:40',
+                    'dr o:2 n:bb t:40 h:1 wf:sine2pi',
+                    'dr o:2 n:eb t:36 h:2 wf:sine2pi',
+                    'dr o:2 n:eb t:35 h:1 wf:sine2pi a v:6',
+                    'dr o:2 n:eb t:25 h:2 wf:sine2pi a v:6',
+                    'sp w:80 m:70 v:40 wf:sine2pi o:2 n:ab re',
+                    'sp w:40 m:120 v:50 wf:sine2pi o:2 n:ab re',
+                    ]
+        elif cmd == 's1ab':
+            cmd = [
+                    'dr o:1 n:eb t:30 h:2.4 wf:tri',
+                    'dr o:2 n:bb t:32 h:1.2.4 wf:sine2pi',
+                    ]
+        elif cmd == 's1ac':
+            cmd = [
+                    'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
+                    'dr o:4 n:eb t:20 h:8 h:1 wf:sine2pi bend re v:1',
                     ]
 
         for c in cmd:
