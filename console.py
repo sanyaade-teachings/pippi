@@ -21,16 +21,16 @@ class Pippi(cmd.Cmd):
         cmd.Cmd.__init__(self)
 
         self.server = mp.Manager()
-        self.data = self.server.Namespace()
-        self.data.p = {}
-        self.data.v = {}
+        self.voices = self.server.Namespace()
+
         self.vid = 0
+
         self.qu = {
-                    1: mp.Event(),
-                    4: mp.Event(),
-                    8: mp.Event(),
-                    16: mp.Event(),
-                }
+                1: mp.Event(),
+                4: mp.Event(),
+                8: mp.Event(),
+                16: mp.Event(),
+            }
 
         self.grid = mp.Process(target=self.timer, args=(self.qu,))
         self.grid.start()
@@ -69,19 +69,19 @@ class Pippi(cmd.Cmd):
                     qu[q].clear()
 
 
-    def render(self, play, args, vid, data, label='snd'):
-        d = data.v
-        d[vid][label] = dsp.split(play(args), 500)
-        data.v = d
+    def render(self, play, args, vid, voices, label='snd'):
+        voice = getattr(voices, str(vid))
+        voice[label] = dsp.split(play(args), 500)
+        setattr(voices, str(vid), voice)
 
-    def out(self, play, args, gen, data, vid, qu):
+    def out(self, play, args, gen, voices, vid, qu):
         """
             Worker playback process spawned by play()
             Manages render threads for voices and render buffers for playback
         """
 
         # Render sound
-        render = mp.Process(target=self.render, args=(play, args, vid, data))
+        render = mp.Process(target=self.render, args=(play, args, vid, voices))
         render.start()
         render.join()
 
@@ -126,21 +126,22 @@ class Pippi(cmd.Cmd):
             if arg[:2] == 'qu':
                 q = int(arg[3:].strip())
 
-        v = data.v
-        while v[vid]['loop'] == True:
-            v = data.v
-            tvol = v[vid]['tvol']
+        voice = getattr(voices, str(vid))
+
+        while voice['loop'] == True:
+            tvol = voice['tvol']
 
             if regen == True and cooking == False:
                 cooking = True
-                next = mp.Process(target=self.render, args=(play, args, vid, data, 'next'))
+                next = mp.Process(target=self.render, args=(play, args, vid, voices, 'next'))
                 next.start()
 
             if next is not False and next.is_alive() == False:
                 cooking = False
-                snd = v[vid]['next']
+                snd = voice['next']
+                setattr(voices, str(vid), voice)
             else:
-                snd = v[vid]['snd']
+                snd = voice['snd']
 
             if q is not False:
                 qu[q].wait()
@@ -157,20 +158,21 @@ class Pippi(cmd.Cmd):
                 out.write(s)
 
                 if vol < 0.002:
-                    v[vid]['loop'] = False
+                    voice['loop'] = False
+                    setattr(voices, str(vid), voice)
                     break
 
+            voice = getattr(voices, str(vid))
+
         # Cleanup 
-        p = self.data.p
-        p.pop(vid)
-        data.p = p
+        delattr(voices, str(vid))
 
 
     def play(self, cmd):
         orcs = os.listdir('orc/')
         for orc in orcs:
             if cmd[0] == orc[0:2]:
-                t = cmd[0]
+                gen = cmd[0]
                 cmd.pop(0)
                 orc = 'orc.' + orc.split('.')[0]
                 pl = __import__(orc, globals(), locals(), ['play'])
@@ -181,15 +183,13 @@ class Pippi(cmd.Cmd):
 
                 # Create a shared list for the voice
                 self.vid += 1
-                data = self.data.v
-                data[self.vid] = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0}
-                self.data.v = data
+                print self.vid, gen, cmd
+                voice_id = self.vid
 
-                p = self.data.p
-                p[self.vid] = {'t': t, 'cmd': cmd}
-                self.data.p = p
+                voice = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0, 'cmd': cmd, 'gen': gen}
+                setattr(self.voices, str(voice_id), voice)
 
-                process = mp.Process(target=self.out, args=(pl.play, cmd, t, self.data, self.vid, self.qu))
+                process = mp.Process(target=self.out, args=(pl.play, cmd, gen, self.voices, voice_id, self.qu))
                 process.start()
 
                 return True
@@ -203,61 +203,46 @@ class Pippi(cmd.Cmd):
         self.cc[t] = cmd
 
     def do_ss(self, cmd):
-        v = self.data.v
-        p = self.data.p
-        for s in p:
-            v[s]['loop'] = False
-
-        self.data.v = v
+        for vid in range(1, self.vid + 1):
+            if hasattr(self.voices, str(vid)):
+                voice = getattr(self.voices, str(vid))
+                voice['loop'] = False
+                setattr(self.voices, str(vid), voice)
 
     def do_s(self, cmd):
         cmds = cmd.split(' ')
 
-        try:
-            v = self.data.v
-            for cmd in cmds:
-                v[int(cmd)]['loop'] = False
-            self.data.v = v
+        for cmd in cmds:
+            vid = cmd.strip() 
+            voice = getattr(self.voices, vid)
+            voice['loop'] = False
+            setattr(self.voices, vid, voice)
 
-        except KeyError:
-            print 'nope'
 
     def do_vv(self, cmd):
         cmds = cmd.split(' ')
 
-        pp = self.data.p
-        v = self.data.v
-        for p in pp:
-            if pp[p]['t'] == cmds[0] or cmds[0] == 'a':
-                vol = float(cmds[1]) / 100.0
-                v[p]['tvol'] = vol
-                self.data.v = v 
-
-
+        for vid in range(1, self.vid + 1):
+            self.setvol(vid, cmds[1], cmds[0])
 
     def do_v(self, cmd):
         cmds = cmd.split(' ')
-        try:
-            vol = float(cmds[1]) / 100.0
-            i = int(cmds[0])
-            v = self.data.v
-            v[i]['tvol'] = vol
-            self.data.v = v
+        self.setvol(cmds[0], cmds[1])
 
-        except KeyError:
-            print 'nope, nope'
-        except IndexError:
+    def setvol(self, vid, vol, gen='a'):
+        if hasattr(self.voices, str(vid)):
+            voice = getattr(self.voices, str(vid))
+            if gen == voice['gen'] or gen == 'a':
+                voice['tvol'] = float(vol) / 100.0
+                setattr(self.voices, str(vid), voice)
+        else:
             print 'nope'
 
     def do_i(self, cmd=[]):
-        try:
-            pp = self.data.p
-            v = self.data.v
-            for p in pp:
-                print p, pp[p]['t'], pp[p]['cmd'], 'v:', v[p]['tvol'], 'l:', v[p]['loop'], 're:', v[p]['regen']
-
-        except KeyError:
-            print 'nope'
+        for vid in range(1, self.vid + 1):
+            if hasattr(self.voices, str(vid)):
+                voice = getattr(self.voices, str(vid))
+                print vid, voice['gen'], voice['cmd'], 'v:', voice['tvol'], 'l:', voice['loop'], 're:', voice['regen']
 
     def do_p(self, cmd):
         if cmd == 's1aa':
@@ -269,20 +254,64 @@ class Pippi(cmd.Cmd):
                     'sp w:80 m:70 v:40 wf:sine2pi o:2 n:ab re',
                     'sp w:40 m:120 v:50 wf:sine2pi o:2 n:ab re',
                     ]
+
         elif cmd == 's1ab':
             cmd = [
                     'dr o:1 n:eb t:30 h:2.4 wf:tri',
                     'dr o:2 n:bb t:32 h:1.2.4 wf:sine2pi',
                     ]
+
         elif cmd == 's1ac':
             cmd = [
                     'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
                     'dr o:4 n:eb t:20 h:8 h:1 wf:sine2pi bend re v:1',
                     ]
 
+        elif cmd == 's1ba':
+            cmd = [
+                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
+                    ]
+
+        elif cmd == 's1bb':
+            cmd = [
+                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
+                    ]
+
+        elif cmd == 's1ca':
+            cmd = [
+                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
+                    ]
+
+        elif cmd == 's1cb':
+            cmd = [
+                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
+                    ]
+
+
+        elif cmd == 's2aa':
+            cmd = [
+                    'sh o:2 n:db s:1 qu:8 t:0.06 r:1',
+                    'sh o:2 n:db s:5 qu:8 t:0.08 r:1',
+                    ]
+
+        elif cmd == 's2ab':
+            cmd = [
+                    'cl w:10 d:h qu:8 b:1',
+                    ]
+
+        elif cmd == 's2ac':
+            cmd = [
+                    'sh o:2 n:db s:8 qu:8 t:0.1 r:1',
+                    'cl d:h qu:16 b:1',
+                    ]
+
+
+
+
         for c in cmd:
             if len(c) > 2:
                 self.default(c)
+                dsp.delay(0.2)
 
     def default(self, cmd):
         cmd = cmd.strip().split(',')
