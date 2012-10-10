@@ -17,39 +17,25 @@ def play(args):
     ratios = tune.terry
     pad = False
     pulsar = False
+    harmonics = False
+    bpm = 75.0
+    arps = False
 
     wform = ['sine', 'line', 'phasor']
 
     instrument = 'rhodes'
     tone = dsp.read('sounds/220rhodes.wav').data
 
-    #def capture(frames, out=''):
-        #import alsaaudio
-        #import time
-        #i = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, 0, 'T6_pair1')
-
-        #i.setchannels(2)
-        #i.setrate(44100)
-        #i.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-        #i.setperiodsize(160)
-
-        #while frames > 0:
-            #frames -= 1
-            #l,data = i.read()
-            
-            #if l:
-                #out += dsp.byte_string(int(l))
-
-        ##i.close()
-        #return out
-
-    #tone = capture(dsp.mstf(2500))
-
-    #scale = [1,3,5,4]
     scale = [1,6,5,4,8]
 
     for arg in args:
         a = arg.split(':')
+
+        if a[0] == 'bpm':
+            bpm = float(a[1])
+
+        if a[0] == 'a':
+            arps = True
 
         if a[0] == 't':
             length = dsp.stf(float(a[1]))
@@ -62,6 +48,9 @@ def play(args):
 
         if a[0] == 'n':
             note = a[1]
+
+        if a[0] == 'h':
+            harmonics = True
 
         if a[0] == 'i':
             if a[1] == 'r':
@@ -132,22 +121,28 @@ def play(args):
         if env is not False:
             n = dsp.env(n, env)
 
+        if arps is not False:
+            length = dsp.mstf(((60000.0 / bpm) / 2) / reps)
+
         n = dsp.fill(n, length)
 
-        o = [dsp.tone(length, freq * i * 0.5) for i in range(4)]
-        o = [dsp.env(oo) for oo in o]
-        o = [dsp.pan(oo, dsp.rand()) for oo in o]
+        if harmonics:
+            o = [dsp.tone(length, freq * i * 0.5) for i in range(4)]
+            o = [dsp.env(oo) for oo in o]
+            o = [dsp.pan(oo, dsp.rand()) for oo in o]
 
-        if instrument == 'clarinet':
-            olow = 0.3
-            ohigh = 0.8
+            if instrument == 'clarinet':
+                olow = 0.3
+                ohigh = 0.8
+            else:
+                olow = 0.1
+                ohigh = 0.5
+
+            o = dsp.mix([dsp.amp(oo, dsp.rand(olow, ohigh)) for oo in o])
+
+            o = dsp.mix([n, o])
         else:
-            olow = 0.1
-            ohigh = 0.5
-
-        o = dsp.mix([dsp.amp(oo, dsp.rand(olow, ohigh)) for oo in o])
-
-        o = dsp.mix([n, o])
+            o = n
 
         if env is not False:
             o = dsp.env(o, env)
@@ -227,4 +222,4 @@ def play(args):
 
         #out = dsp.mix(layers, True, 6)
 
-    return dsp.play(dsp.amp(out, volume))
+    return dsp.amp(out, volume)

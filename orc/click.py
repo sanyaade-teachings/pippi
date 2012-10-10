@@ -13,6 +13,7 @@ def play(args):
     skitter = False
     bend = True 
     tweet = False
+    pattern = True
 
     drums = [{
         'name': 'clap',
@@ -85,6 +86,9 @@ def play(args):
         if a[0] == 'g':
             glitch = True
 
+        if a[0] == 'single':
+            pattern = False
+
         if a[0] == 's':
             skitter = True
 
@@ -138,10 +142,14 @@ def play(args):
             s = dsp.mix([s, dsp.tone(dsp.flen(s), 13000, amp=0.4)])
 
             s = dsp.pad(s, prebeat, beat - dsp.flen(s))
-            if dsp.randint(0,8) == 0:
-                amp = snd['vary'][b % len(snd['vary'])]
+
+            if pattern == True:
+                if dsp.randint(0,8) == 0:
+                    amp = snd['vary'][b % len(snd['vary'])]
+                else:
+                    amp = snd['pat'][b % len(snd['pat'])]
             else:
-                amp = snd['pat'][b % len(snd['pat'])]
+                amp = 1.0
 
             if amp == 1:
                 out += s
@@ -173,4 +181,4 @@ def play(args):
 
     out = dsp.pan(out, 1)
 
-    return dsp.play(dsp.amp(out, volume))
+    return dsp.amp(out, volume)

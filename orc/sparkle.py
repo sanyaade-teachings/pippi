@@ -113,4 +113,4 @@ def play(args):
     out = dsp.mix(tones)
     out = dsp.pan(out, 0)
 
-    return dsp.play(dsp.amp(out, volume))
+    return dsp.amp(out, volume)

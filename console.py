@@ -5,6 +5,7 @@ import math
 import dsp
 import alsaaudio
 import time
+import rt
 import multiprocessing as mp
 
 class Pippi(cmd.Cmd):
@@ -26,147 +27,12 @@ class Pippi(cmd.Cmd):
         self.vid = 0
 
         self.qu = {
-                1: mp.Event(),
-                4: mp.Event(),
-                8: mp.Event(),
-                16: mp.Event(),
+                'downbeat': mp.Event(),
+                'tick': mp.Event(),
             }
 
-        self.grid = mp.Process(target=self.timer, args=(self.qu,))
+        self.grid = mp.Process(target=rt.grid, args=(self.qu,))
         self.grid.start()
-
-    def timer(self, qu):
-        os.nice(-19)
-        bar = 0
-
-        while True:
-            bpm = (dsp.bpm2ms(75.0) / 1000.0) * 0.25
-            for beat in range(1, 17):
-                dsp.delay(bpm)
-
-                # signal 4 beats
-                if beat == 1:
-                    bar += 1
-
-                if bar == 1 and beat == 1:
-                    qu[1].set()
-
-                if bar == 4 and beat == 1:
-                    bar = 0
-
-                # signal 1 beat
-                if beat == 1:
-                    qu[4].set()
-
-                # signal 0.5 beats
-                if beat % 2 == 0:
-                    qu[8].set()
-
-                # signal 0.25 beats
-                qu[16].set()
-
-                for q in qu:
-                    qu[q].clear()
-
-
-    def render(self, play, args, vid, voices, label='snd'):
-        voice = getattr(voices, str(vid))
-        voice[label] = dsp.split(play(args), 500)
-        setattr(voices, str(vid), voice)
-
-    def out(self, play, args, gen, voices, vid, qu):
-        """
-            Worker playback process spawned by play()
-            Manages render threads for voices and render buffers for playback
-        """
-
-        # Render sound
-        render = mp.Process(target=self.render, args=(play, args, vid, voices))
-        render.start()
-        render.join()
-
-        # Open a connection to an ALSA PCM device
-        # Split buffered sound into packets and push to playback
-        if gen == 'sh':
-            device = 'T6_pair1'
-        elif gen == 'sp':
-            device = 'T6_pair3'
-        elif gen == 'dr':
-            device = 'T6_pair2'
-        elif gen == 'cl':
-            device = 'T6_pair3'
-        else:
-            device = 'default'
-
-        try:
-            out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
-        except:
-            print 'Could not open an ALSA connection.'
-            return False
-
-        out.setchannels(2)
-        out.setrate(44100)
-        out.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-        out.setperiodsize(10)
-
-        # On start of playback, check to see if we should be regenerating 
-        # the sound. If so, spawn a new render thread.
-        # If there is a fresher render available, use that instead.
-        regen = False
-        cooking = False
-        next = False
-        q = False
-        vol = 1.0
-        tvol = 1.0
-
-        for arg in args:
-            if arg == 're':
-                regen = True
-
-            if arg[:2] == 'qu':
-                q = int(arg[3:].strip())
-
-        voice = getattr(voices, str(vid))
-
-        while voice['loop'] == True:
-            tvol = voice['tvol']
-
-            if regen == True and cooking == False:
-                cooking = True
-                next = mp.Process(target=self.render, args=(play, args, vid, voices, 'next'))
-                next.start()
-
-            if next is not False and next.is_alive() == False:
-                cooking = False
-                snd = voice['next']
-                setattr(voices, str(vid), voice)
-            else:
-                snd = voice['snd']
-
-            if q is not False:
-                qu[q].wait()
-
-            for s in snd:
-                if tvol != vol:
-                    if tvol > vol:
-                        vol += 0.01
-                    elif vol > tvol:
-                        vol -= 0.01
-
-                    s = dsp.amp(s, vol)
-
-                out.write(s)
-
-                if vol < 0.002:
-                    voice['loop'] = False
-                    setattr(voices, str(vid), voice)
-                    break
-
-            voice = getattr(voices, str(vid))
-
-        # Cleanup 
-        delattr(voices, str(vid))
-
 
     def play(self, cmd):
         orcs = os.listdir('orc/')
@@ -189,7 +55,7 @@ class Pippi(cmd.Cmd):
                 voice = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0, 'cmd': cmd, 'gen': gen}
                 setattr(self.voices, str(voice_id), voice)
 
-                process = mp.Process(target=self.out, args=(pl.play, cmd, gen, self.voices, voice_id, self.qu))
+                process = mp.Process(target=rt.out, args=(pl.play, gen, self.voices, voice_id, self.qu))
                 process.start()
 
                 return True
@@ -218,6 +84,26 @@ class Pippi(cmd.Cmd):
             voice['loop'] = False
             setattr(self.voices, vid, voice)
 
+    def do_r(self, cmd):
+        cmds = cmd.split(' ')
+
+        for vid in range(1, self.vid + 1):
+            if hasattr(self.voices, str(vid)):
+                update = False
+                voice = getattr(self.voices, str(vid))
+
+                # loop through cmds and split
+                for cmd in cmds:
+                    cmd = cmd.split(':')
+                    for c in voice['cmd']:
+                        if cmd[0] == c[len(cmd[0])]:
+                            update = True
+                            voice['cmd'][i] = cmd[0] + ':' + cmd[1]
+
+                if update is True:
+                    voice['cmd'] += ['one']
+                    setattr(self.voices, str(vid), voice)
+                
 
     def do_vv(self, cmd):
         cmds = cmd.split(' ')
@@ -235,8 +121,6 @@ class Pippi(cmd.Cmd):
             if gen == voice['gen'] or gen == 'a':
                 voice['tvol'] = float(vol) / 100.0
                 setattr(self.voices, str(vid), voice)
-        else:
-            print 'nope'
 
     def do_i(self, cmd=[]):
         for vid in range(1, self.vid + 1):
@@ -257,61 +141,97 @@ class Pippi(cmd.Cmd):
 
         elif cmd == 's1ab':
             cmd = [
+                    'dr o:2 n:eb.ab t:36 h:1.2.4 v:15 re w wf:sine2pi',
                     'dr o:1 n:eb t:30 h:2.4 wf:tri',
                     'dr o:2 n:bb t:32 h:1.2.4 wf:sine2pi',
                     ]
 
         elif cmd == 's1ac':
             cmd = [
-                    'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
-                    'dr o:4 n:eb t:20 h:8 h:1 wf:sine2pi bend re v:1',
+                    'dr o:4 n:eb t:27 h:1 wf:sine2pi bend re v:1',
+                    'dr o:4 n:eb t:20 h:1 wf:sine2pi bend re v:1',
+                    ]
+
+        elif cmd == 's1ad':
+            cmd = [
+                    'dr o:2 n:ab t:27 h:1.2.3.4.5 wf:tri',
+                    'dr o:2 n:eb t:23 h:1.2.3.4 wf:tri',
                     ]
 
         elif cmd == 's1ba':
             cmd = [
-                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
+                    'dr o:1 t:25 n:ab h:1.2.3.4.5.6 wf:tri',
+                    'dr o:1 t:20 n:ab h:1.2.3.4.5.6 wf:tri',
+                    'dr o:1 t:16 n:ab h:1 wf:sine2pi',
                     ]
 
         elif cmd == 's1bb':
             cmd = [
-                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
+                    'dr o:1 t:6 n:ab h:1.2.3.4.5.6 wf:vary w',
+                    'dr o:2 t:9 n:ab h:1.2.3.4.5.6 wf:vary w',
+                    'dr o:2 t:7 n:ab h:1.2.3.4.5.6 wf:vary w',
+                    'dr o:3 t:3 n:ab h:1.2.3.4.5.6 wf:vary w',
+                    'dr o:2 t:10 n:ab h:1.2.3.4.5.6 wf:vary',
+                    'dr o:2 t:10 n:ab h:1.2.3.4.5.6 wf:tri',
+                    'sh o:2 i:c e:sine re t:2 n:ab s:1',
+                    'sh o:2 i:c e:sine re t:1.4 n:ab s:1',
                     ]
-
-        elif cmd == 's1ca':
-            cmd = [
-                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
-                    ]
-
-        elif cmd == 's1cb':
-            cmd = [
-                    #'dr o:4 n:eb t:27 h:8 h:1 wf:sine2pi bend re v:1',
-                    ]
-
 
         elif cmd == 's2aa':
             cmd = [
-                    'sh o:2 n:db s:1 qu:8 t:0.06 r:1',
-                    'sh o:2 n:db s:5 qu:8 t:0.08 r:1',
+                    'sh o:2 n:db s:1 e:phasor qs qu qb:1.3.5.7.9.11.13.15 t:0.06 r:1',
+                    'sh o:2 n:db s:5 e:phasor qs qu qb:1.9 t:0.08 r:1',
                     ]
 
         elif cmd == 's2ab':
             cmd = [
-                    'cl w:10 d:h qu:8 b:1',
+                    'cl w:10 d:h qs qu qb:1.3.5.7.9.11.13.15 b:1',
                     ]
 
         elif cmd == 's2ac':
             cmd = [
-                    'sh o:2 n:db s:8 qu:8 t:0.1 r:1',
-                    'cl d:h qu:16 b:1',
+                    'sh o:2 n:db s:8 qs qu qb:1.3.5.7.9.11.13.15 t:0.1 r:1',
+                    'sh o:2 n:db s:11 qs qu qb:1.5.9.13 t:0.15 r:1',
+                    'cl d:h qu w:10 b:1',
                     ]
 
+        elif cmd == 's2ad':
+            cmd = [
+                    'sh o:3 n:db s:8 qs qu:16 r:1 t:0.08 e:phasor v:5 i:g',
+                    #'sh o:3 n:db s:1.2.5.8 r:3 qu:8 a i:r',
+                    #'sh o:3 n:db s:1.2.5.8 r:3 qu:8 a re i:r',
+                    #'sh o:2 n:db s:1.2.5.8 r:1 qu:8 a re i:r',
+                    #'sh o:2 n:db s:1.2.5.8 r:1 qu:8 a i:r',
+                    'cl d:k qs qu b:1 v:150 single re',
+                    'cl d:c w:15 qs qu qb:1.5.9.13 b:2 v:8 single re',
+                    'cl d:c w:20 qs qu qb:1.3.4.5.7.8.9.11.13.15 b:1 v:5 single',
+                    ]
 
+        elif cmd == 's2b':
+            cmd = [
+                    'sp v:50 w:400 m:10 o:2 wf:tri n:db re',
+                    'sp v:30 w:1400 m:15 o:1 wf:tri n:db',
+                    'sp v:60 w:50 m:15 o:2 wf:tri n:db re',
+                    ]
 
+        elif cmd == 's2c':
+            cmd = [
+                    'sp n:db w:1 m:40 wf:random re',
+                    'sp n:db w:3 o:1 m:50 wf:random re',
+                    ]
+
+        elif cmd == 's2d':
+            cmd = [
+                    'sp n:db w:3 o:2 m:50 wf:random re',
+                    'sp n:db w:10 m:55 wf:random re',
+                    'sp n:db w:5 m:45 wf:random re',
+                    'sp n:db w:20 m:40 o:1 wf:random re',
+                    ]
 
         for c in cmd:
             if len(c) > 2:
                 self.default(c)
-                dsp.delay(0.2)
+                dsp.delay(0.1)
 
     def default(self, cmd):
         cmd = cmd.strip().split(',')
