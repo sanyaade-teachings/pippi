@@ -179,32 +179,33 @@ class Pippi(cmd.Cmd):
 
         elif cmd == 's2aa':
             cmd = [
-                    'sh o:2 n:db s:1 e:phasor qs qu qb:1.3.5.7.9.11.13.15 t:0.06 r:1',
-                    'sh o:2 n:db s:5 e:phasor qs qu qb:1.9 t:0.08 r:1',
+                    'sh o:2 n:db s:1 e:phasor qu t:0.06 r:1',
+                    #'sh o:2 n:db s:5 e:phasor qs qu qb:1 t:0.08 r:1',
+                    #'sh o:3 n:db s:8 e:phasor qs qu qb:3.6.9 t:0.08 r:1',
                     ]
 
         elif cmd == 's2ab':
             cmd = [
-                    'cl w:10 d:h qs qu qb:1.3.5.7.9.11.13.15 b:1',
+                    'cl w:10 d:h qu m:1',
                     ]
 
         elif cmd == 's2ac':
             cmd = [
-                    'sh o:2 n:db s:8 qs qu qb:1.3.5.7.9.11.13.15 t:0.1 r:1',
-                    'sh o:2 n:db s:11 qs qu qb:1.5.9.13 t:0.15 r:1',
+                    'sh o:2 n:db s:8 qu t:0.1 r:1',
+                    'sh o:2 n:db s:11 qu t:0.15 r:1',
                     'cl d:h qu w:10 b:1',
                     ]
 
         elif cmd == 's2ad':
             cmd = [
-                    'sh o:3 n:db s:8 qs qu:16 r:1 t:0.08 e:phasor v:5 i:g',
-                    #'sh o:3 n:db s:1.2.5.8 r:3 qu:8 a i:r',
-                    #'sh o:3 n:db s:1.2.5.8 r:3 qu:8 a re i:r',
-                    #'sh o:2 n:db s:1.2.5.8 r:1 qu:8 a re i:r',
-                    #'sh o:2 n:db s:1.2.5.8 r:1 qu:8 a i:r',
-                    'cl d:k qs qu b:1 v:150 single re',
-                    'cl d:c w:15 qs qu qb:1.5.9.13 b:2 v:8 single re',
-                    'cl d:c w:20 qs qu qb:1.3.4.5.7.8.9.11.13.15 b:1 v:5 single',
+                    'sh o:3 n:db s:8 qu r:1 t:0.08 e:phasor v:5 i:g',
+                    #'sh o:3 n:db s:1.2.5.8 r:3 qu a i:r',
+                    #'sh o:3 n:db s:1.2.5.8 r:3 qu a re i:r',
+                    #'sh o:2 n:db s:1.2.5.8 r:1 qu a re i:r',
+                    #'sh o:2 n:db s:1.2.5.8 r:1 qu a i:r',
+                    'cl d:k qu b:1 v:150 single re',
+                    'cl d:c w:15 qu b:2 v:8 single re',
+                    'cl d:c w:20 qu b:1 v:5 single',
                     ]
 
         elif cmd == 's2b':

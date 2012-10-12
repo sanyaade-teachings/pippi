@@ -629,8 +629,10 @@ def read(filename):
 def delay(frames):
     target = (frames / 44100.0) + time.time()
 
+    time.sleep(fts(frames))
+
     while target > time.time():
-        pass
+        time.sleep(target - time.time())
 
     return True
 

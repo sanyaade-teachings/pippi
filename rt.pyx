@@ -5,23 +5,14 @@ import alsaaudio
 
 def grid(qu):
     os.nice(-19)
+    
+    bpm = dsp.mstf(dsp.bpm2ms(75.0))
+    bpm = bpm / 2 
 
     while True:
-        bpm = dsp.mstf(dsp.bpm2ms(75.0))
-        bpm = bpm / 4.0 # qu: unit
-
-        # qm: meter
-        for beat in range(1, 9):
-            dsp.delay(bpm)
-
-            if beat == 1:
-                qu['downbeat'].set()
-                dsp.delay(10)
-                qu['downbeat'].clear()
-
-            qu['tick'].set()
-            dsp.delay(10)
-            qu['tick'].clear()
+        qu['downbeat'].set()
+        qu['downbeat'].clear()
+        dsp.delay(bpm)
 
 
 def render(play, args, vid, voices, label='snd'):
@@ -45,8 +36,6 @@ def dsp_loop(out, snd, vol, tvol, voice, voices, vid):
             voice['loop'] = False
             setattr(voices, str(vid), voice)
             break
-
-
 
 def out(play, gen, voices, vid, qu):
     """
@@ -97,10 +86,9 @@ def out(play, gen, voices, vid, qu):
     cooking = False
     next = False
     q = False
-    qb = [1]
-    qs = False
     vol = 1.0
     tvol = 1.0
+
     while voice['loop'] == True:
             
         for arg in voice['cmd']:
@@ -111,16 +99,8 @@ def out(play, gen, voices, vid, qu):
                 onegen = True
                 voice['cmd'].remove('one')
 
-            if arg == 'qs':
-                qs = True
-
             if arg[:2] == 'qu':
-                q = arg[3:].strip()
-
-            if arg[:2] == 'qb':
-                qb = arg[3:].strip().split('.')
-                qb = [int(qbqb) for qbqb in qb]
-                qb.sort()
+                q = True
 
         tvol = voice['tvol']
 
@@ -140,23 +120,9 @@ def out(play, gen, voices, vid, qu):
             snd = voice['snd']
 
         if q is not False:
-            icount = 0
+            qu['downbeat'].wait()
 
-            #print 'enter', icount
-
-            if qs == True:
-                qu['downbeat'].wait()
-                icount += 1
-
-            while icount < max(qb) + 1:
-                #print 'tick', icount
-                qu['tick'].wait()
-                icount += 1
-
-                if icount in qb:
-                    dsp_loop(out, snd, vol, tvol, voice, voices, vid)
-        else:
-            dsp_loop(out, snd, vol, tvol, voice, voices, vid)
+        dsp_loop(out, snd, vol, tvol, voice, voices, vid)
 
         voice = getattr(voices, str(vid))
 
