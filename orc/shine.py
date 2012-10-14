@@ -1,5 +1,6 @@
 import dsp
 import tune
+import param
 
 def play(args):
     length = dsp.stf(dsp.rand(0.1, 1))
@@ -20,6 +21,7 @@ def play(args):
     harmonics = False
     bpm = 75.0
     arps = False
+    width = False
 
     wform = ['sine', 'line', 'phasor']
 
@@ -37,8 +39,27 @@ def play(args):
         if a[0] == 'a':
             arps = True
 
+        if a[0] == 'w':
+            if param.istype(a[1], 'b'):
+                width = dsp.bpm2ms(bpm) / param.convert(a[1])
+                width = dsp.mstf(width)
+
+            elif param.istype(a[1], 'ms'):
+                width = dsp.mstf(param.convert(a[1]))
+
+            else:
+                width = param.convert(a[1])
+
         if a[0] == 't':
-            length = dsp.stf(float(a[1]))
+            if param.istype(a[1], 'b'):
+                length = dsp.bpm2ms(bpm) / param.convert(a[1])
+                length = dsp.mstf(length)
+            elif param.istype(a[1], 'ms'):
+                length = dsp.mstf(param.convert(a[1]))
+            elif param.istype(a[1], 's'):
+                length = dsp.stf(param.convert(a[1]))
+            else:
+                length = param.convert(a[1])
 
         if a[0] == 'v':
             volume = float(a[1]) / 100.0
@@ -62,6 +83,9 @@ def play(args):
             elif a[1] == 'v':
                 instrument = 'vibes'
                 tone = dsp.read('sounds/cz-vibes.wav').data
+            elif a[1] == 't':
+                instrument = 'tape triangle'
+                tone = dsp.read('sounds/tape220.wav').data
             elif a[1] == 'g':
                 instrument = 'guitar'
                 tone = dsp.mix([dsp.read('sounds/guitar.wav').data, 
@@ -125,6 +149,12 @@ def play(args):
             length = dsp.mstf(((60000.0 / bpm) / 2) / reps)
 
         n = dsp.fill(n, length)
+
+        if width is not False:
+            if isinstance(width, float):
+                width = int(length * width)
+
+            n = dsp.pad(dsp.cut(n, 0, width), 0, length - width)
 
         if harmonics:
             o = [dsp.tone(length, freq * i * 0.5) for i in range(4)]

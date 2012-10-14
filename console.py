@@ -17,6 +17,7 @@ class Pippi(cmd.Cmd):
 
     cc = {} 
     vid = 0
+    bpm = 75
 
     def __init__(self):
         cmd.Cmd.__init__(self)
@@ -26,12 +27,9 @@ class Pippi(cmd.Cmd):
 
         self.vid = 0
 
-        self.qu = {
-                'downbeat': mp.Event(),
-                'tick': mp.Event(),
-            }
+        self.tick = mp.Event()
 
-        self.grid = mp.Process(target=rt.grid, args=(self.qu,))
+        self.grid = mp.Process(target=rt.grid, args=(self.tick, self.bpm))
         self.grid.start()
 
     def play(self, cmd):
@@ -52,10 +50,12 @@ class Pippi(cmd.Cmd):
                 print self.vid, gen, cmd
                 voice_id = self.vid
 
+                cmd.append('bpm:' + str(self.bpm))
+
                 voice = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0, 'cmd': cmd, 'gen': gen}
                 setattr(self.voices, str(voice_id), voice)
 
-                process = mp.Process(target=rt.out, args=(pl.play, gen, self.voices, voice_id, self.qu))
+                process = mp.Process(target=rt.out, args=(pl.play, gen, self.voices, voice_id, self.tick))
                 process.start()
 
                 return True
@@ -69,11 +69,19 @@ class Pippi(cmd.Cmd):
         self.cc[t] = cmd
 
     def do_ss(self, cmd):
+        gen = 'all'
+
+        cmds = cmd.split(' ')
+        if cmds[0] != '' and cmds[0] != 'all':
+            gen = cmds
+
         for vid in range(1, self.vid + 1):
             if hasattr(self.voices, str(vid)):
                 voice = getattr(self.voices, str(vid))
-                voice['loop'] = False
-                setattr(self.voices, str(vid), voice)
+
+                if voice['gen'] in gen or gen == 'all':
+                    voice['loop'] = False
+                    setattr(self.voices, str(vid), voice)
 
     def do_s(self, cmd):
         cmds = cmd.split(' ')
@@ -179,34 +187,54 @@ class Pippi(cmd.Cmd):
 
         elif cmd == 's2aa':
             cmd = [
-                    'sh o:2 n:db s:1 e:phasor qu t:0.06 r:1',
-                    #'sh o:2 n:db s:5 e:phasor qs qu qb:1 t:0.08 r:1',
-                    #'sh o:3 n:db s:8 e:phasor qs qu qb:3.6.9 t:0.08 r:1',
+                    'sh o:2 i:r n:db s:1 e:phasor qu t:b2 r:2',
+                    'sh o:2 i:r n:db s:5 e:phasor qu t:b2 r:2',
+                    #'cl d:k v:400 m:1 qu',
+                    #'sh o:3 n:db s:8 e:phasor qu qb:3.6.9 t:0.08 r:1',
                     ]
 
         elif cmd == 's2ab':
             cmd = [
-                    'cl w:10 d:h qu m:1',
+                    'cl w:3 d:h qu b:1',
+                    'cl w:3 d:h qu m:1 v:10',
                     ]
 
         elif cmd == 's2ac':
             cmd = [
-                    'sh o:2 n:db s:8 qu t:0.1 r:1',
-                    'sh o:2 n:db s:11 qu t:0.15 r:1',
-                    'cl d:h qu w:10 b:1',
+                    'sh o:3 i:t e:line v:8 n:db s:8 qu t:b2 r:2',
+                    'sh o:2 n:db s:11 qu t:b2 r:2',
+                    'sh o:3 i:r n:db v:15 s:1 e:phasor qu t:b1.5 r:3',
+                    'cl d:c single qu w:5 m:2',
+                    #'cl d:h qu w:5 m:2 re',
                     ]
 
         elif cmd == 's2ad':
             cmd = [
-                    'sh o:3 n:db s:8 qu r:1 t:0.08 e:phasor v:5 i:g',
-                    #'sh o:3 n:db s:1.2.5.8 r:3 qu a i:r',
-                    #'sh o:3 n:db s:1.2.5.8 r:3 qu a re i:r',
-                    #'sh o:2 n:db s:1.2.5.8 r:1 qu a re i:r',
-                    #'sh o:2 n:db s:1.2.5.8 r:1 qu a i:r',
+                    #'sh o:3 n:db s:8 qu r:2 t:b2 e:phasor v:15 i:g',
+                    'sh o:3 n:db s:12 qu r:1 t:b2 w:ms50 e:phasor v:5 re i:t',
+                    'sh o:3 n:db s:10 qu r:1 t:b2 w:ms50 e:phasor v:8 re i:t',
                     'cl d:k qu b:1 v:150 single re',
                     'cl d:c w:15 qu b:2 v:8 single re',
                     'cl d:c w:20 qu b:1 v:5 single',
+                    'dr o:1 t:14 n:db.ab wf:impulse h:1.2.3.4',
                     ]
+
+        elif cmd == 's2ae':
+            cmd = [
+                    'cl d:c.k re qu',
+                    'cl d:h qu',
+                    'cl d:k m:2 qu v:300',
+                    'sh i:t n:db s:1 r:1 t:b1 r:1 qu o:2',
+                    #'sh i:t n:db s:8 r:1 t:b1 r:1 qu o:2',
+                    ]
+
+        #elif cmd == 's2af':
+            #cmd = [
+                    #'sh o:3 n:db s:1.2.5.8 r:3 qu t:b2 i:t',
+                    #'sh o:3 n:db s:1.2.5.8 r:2 qu t:b4 re i:t',
+                    #'sh o:2 n:db s:1.2.5.8 r:6 qu t:b3 re i:t',
+                    #'sh o:2 n:db s:1.2.5.8 r:4 qu t:b2 i:t',
+                    #]
 
         elif cmd == 's2b':
             cmd = [

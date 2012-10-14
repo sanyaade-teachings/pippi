@@ -18,7 +18,7 @@ def play(args):
     drums = [{
         'name': 'clap',
         'shortname': 'c',
-        'snd': dsp.read('sounds/clapshake.wav').data,
+        'snd': dsp.read('sounds/lowpaperclips.wav').data,
         'pat': [0, 0, 1, 0],
         'vary': [0, 0, 1, 1],
         'offset': 100,
@@ -28,13 +28,13 @@ def play(args):
         }, {
         'name': 'hihat',
         'shortname': 'h',
-        'snd': dsp.read('sounds/hihat.wav').data,
+        'snd': dsp.read('sounds/paperclips.wav').data,
         'pat': [1],
-        'vary': [[0,1]],
+        'vary': [1],
         'offset': 400,
         'width': 0.1,
-        'bend': True,
-        'alias': True,
+        'bend': False,
+        'alias': False,
         }, {
         'name': 'snare',
         'shortname': 's',
@@ -48,9 +48,7 @@ def play(args):
         }, {
         'name': 'kick',
         'shortname': 'k',
-        'snd': dsp.read('sounds/kick.wav').data,
-        #'snd': dsp.read('sounds/vinylkick.wav').data,
-        #'snd': dsp.adsr(dsp.chirp(50, 50, 90, wform='sine'), 0.1, 0.9),
+        'snd': dsp.read('sounds/lowpaperclips2.wav').data,
         'pat': [1, 0, 0, 0, 0, 0, 0, 0],
         'vary': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
         'offset': 0,
@@ -104,14 +102,13 @@ def play(args):
 
     out = ''
 
-    if(w <= 11):
-        w = 11
+    #if(w <= 11):
+    #    w = 11
 
     beats = beats * measures
 
     beat = dsp.mstf(60000.0 / bpm) / 4
     w = int(beat * (w / 100.0))
-    #w = beat
 
     def tweeter(o):
         o = dsp.split(o, dsp.randint(3,6))

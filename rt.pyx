@@ -3,15 +3,15 @@ import dsp
 import multiprocessing as mp
 import alsaaudio
 
-def grid(qu):
+def grid(tick, bpm):
     os.nice(-19)
     
-    bpm = dsp.mstf(dsp.bpm2ms(75.0))
-    bpm = bpm / 2 
+    bpm = dsp.mstf(dsp.bpm2ms(bpm))
+    #bpm = bpm / 4 
 
     while True:
-        qu['downbeat'].set()
-        qu['downbeat'].clear()
+        tick.set()
+        tick.clear()
         dsp.delay(bpm)
 
 
@@ -37,7 +37,7 @@ def dsp_loop(out, snd, vol, tvol, voice, voices, vid):
             setattr(voices, str(vid), voice)
             break
 
-def out(play, gen, voices, vid, qu):
+def out(play, gen, voices, vid, tick):
     """
         Worker playback process spawned by play()
         Manages render threads for voices and render buffers for playback
@@ -120,7 +120,7 @@ def out(play, gen, voices, vid, qu):
             snd = voice['snd']
 
         if q is not False:
-            qu['downbeat'].wait()
+            tick.wait()
 
         dsp_loop(out, snd, vol, tvol, voice, voices, vid)
 
