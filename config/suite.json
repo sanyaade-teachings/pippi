@@ -1,0 +1,69 @@
+{
+    "name": "suite",
+    "presets": {
+        "s1aa": [
+            "dr o:2 n:bb t:40 h:1 wf:sine2pi",
+            "dr o:2 n:eb t:36 h:2 wf:sine2pi",
+            "dr o:2 n:eb t:35 h:1 wf:sine2pi a v:6",
+            "dr o:2 n:eb t:25 h:2 wf:sine2pi a v:6",
+            "sp w:80 m:70 v:40 wf:sine2pi o:2 n:ab re",
+            "sp w:40 m:120 v:50 wf:sine2pi o:2 n:ab re"
+            ],
+
+        "s1ba": [
+            "dr o:1 t:25 n:ab h:1.2.3.4.5.6 wf:tri",
+            "dr o:1 t:20 n:ab h:1.2.3.4.5.6 wf:tri",
+            "dr o:1 t:16 n:ab h:1 wf:sine2pi"
+            ],
+
+        "s1bb": [
+            "dr o:1 t:6 n:ab h:1.2.3.4.5.6 wf:vary w",
+            "dr o:2 t:9 n:ab h:1.2.3.4.5.6 wf:vary w",
+            "dr o:2 t:7 n:ab h:1.2.3.4.5.6 wf:vary w",
+            "dr o:3 t:3 n:ab h:1.2.3.4.5.6 wf:vary w",
+            "dr o:2 t:10 n:ab h:1.2.3.4.5.6 wf:vary",
+            "dr o:2 t:10 n:ab h:1.2.3.4.5.6 wf:tri",
+            "sh o:2 i:c e:sine re t:2 n:ab s:1",
+            "sh o:2 i:c e:sine re t:1.4 n:ab s:1"
+            ],
+
+        "s2aa": [
+            "sh o:2 i:r n:db s:1 e:phasor qu t:b2 r:2",
+            "sh o:2 i:r n:db s:5 e:phasor qu t:b2 r:2"
+            ],
+
+        "s2ab": [
+            "cl w:3 d:h qu b:1",
+            "cl w:3 d:h qu m:1 v:10"
+            ],
+
+        "s2ac": [
+            "sh o:3 i:t e:line v:8 n:db s:8 qu t:b2 r:2",
+            "sh o:2 n:db s:11 qu t:b2 r:2",
+            "sh o:3 i:r n:db v:15 s:1 e:phasor qu t:b1.5 r:3",
+            "cl d:c single qu w:5 m:2"
+            ],
+
+        "s2acc": [
+            "sh o:3 n:db s:10 qu r:1 t:b2 w:ms50 e:phasor v:8 re i:r",
+            "sh o:1 n:db s:8 qu r:1 t:b2 w:b1 v:20 i:r"
+            ],
+
+        "s2ad": [
+            "sh o:3 n:db s:12 qu r:1 t:b2 w:ms50 e:phasor v:5 re i:t",
+            "sh o:3 n:db s:10 qu r:1 t:b2 w:ms50 e:phasor v:8 re i:t",
+            "cl d:k qu b:1 v:150 single re",
+            "cl d:c w:15 qu b:2 v:8 single re",
+            "cl d:c w:20 qu b:1 v:5 single",
+            "dr o:1 t:14 n:db.ab wf:impulse h:1.2.3.4"
+            ],
+
+        "s2ae": [
+            "cl d:c.k re qu",
+            "cl d:h qu",
+            "cl d:k m:2 qu v:300",
+            "sh i:t n:db s:1 r:1 t:b1 r:1 qu o:2"
+            ]
+
+    }
+}

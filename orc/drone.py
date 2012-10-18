@@ -14,6 +14,7 @@ def play(args):
     alias = False
     wild = False
     bend = False
+    env = 'gauss'
 
     harmonics = [1,2]
     scale = [1,8]
@@ -62,6 +63,9 @@ def play(args):
 
         if a[0] == 'bend':
             bend = True
+
+        if a[0] == 'e':
+            env = a[1]
 
     layers = []
     for note in notes:
@@ -118,7 +122,7 @@ def play(args):
 
             layer = "%s%s%s" % (dsp.env(outin, 'line'), outmid, dsp.env(outend, 'phasor'))
         else:
-            layer = dsp.env(layer, 'gauss')
+            layer = dsp.env(layer, env)
 
         layers += [ layer ]
 

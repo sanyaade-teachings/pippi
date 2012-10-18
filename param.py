@@ -25,7 +25,7 @@ def convert(value, type='float'):
         result = float(result)
     elif type == 'int' or type == 'integer':
         # Python throws a ValueError if we try to convert a float string 
-        # to an integer directly, so we convert to float first to be safe.
+        # to an integer directly, so convert to float first to be safe.
         result = int(float(result)) 
 
     return result

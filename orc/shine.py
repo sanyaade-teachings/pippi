@@ -128,6 +128,11 @@ def play(args):
         if a[0] == 's':
             scale = [int(s) for s in a[1].split('.')]
 
+        if a[0] == 'bpm':
+            bpm = float(a[1])
+
+
+
     wtypes = ['sine', 'gauss']
 
     out = ''

@@ -38,12 +38,12 @@ def play(args):
         }, {
         'name': 'snare',
         'shortname': 's',
-        'snd': dsp.read('sounds/snare.wav').data,
-        'pat': [0, 0, 1, 0],
+        'snd': dsp.read('sounds/lowpaperclips.wav').data,
+        'pat': [1, 1, 1, 0],
         'vary': [0, 0, 1, 1],
-        'offset': 100,
-        'width': 0.6,
-        'bend': False,
+        'offset': 500,
+        'width': 0.1,
+        'bend': True,
         'alias': True,
         }, {
         'name': 'kick',

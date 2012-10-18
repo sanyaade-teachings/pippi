@@ -208,9 +208,6 @@ def noise(length):
     return ''.join([byte_string(randint(-32768, 32767)) for i in range(length * audio_params[0])])
 
 def cycle(freq, wavetype='sine2pi', amp=1.0):
-    if freq > 11000:
-        wavetype == 'hisine2pi'
-
     wavecycle = wavetable(wavetype, htf(freq))
     return ''.join([pack(amp * s) * audio_params[0] for s in wavecycle])
 
@@ -380,13 +377,6 @@ def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0):
 
     elif wtype == "sine2pi":
         wtable = [math.sin(i * math.pi * 2) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
-
-    elif wtype == "hisine2pi":
-        wtable = frange(size * 100, 1.0, 0.0) * 100
-        #wtable = [math.sin(i * math.pi * 2) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
-        wtable = [math.sin(i * math.pi * 2) * (highval - lowval) + lowval for i in wtable]
-        wtable = [v for i,v in enumerate(wtable) if i % 100 == 0]
-
 
     elif wtype == "cos2pi":
         wtable = [math.cos(i * math.pi * 2) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
