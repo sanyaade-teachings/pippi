@@ -6,6 +6,7 @@ import dsp
 import alsaaudio
 import time
 import json
+import param
 import rt
 import multiprocessing as mp
 
@@ -18,54 +19,74 @@ class Pippi(cmd.Cmd):
 
     cc = {} 
     vid = 0
-    bpm = 75
 
     def __init__(self):
         cmd.Cmd.__init__(self)
 
-        self.config = open('config/suite.json')
-        self.config = json.load(self.config)
+        # TODO: recursively merge config files
+        # Allow for reloading / loading from console
+        config = open('config/global.json')
+        self.config = json.load(config)
+
+        config = open('config/suite.json')
+        self.config.update(json.load(config))
+
+        self.bpm = self.config['bpm']
 
         self.server = mp.Manager()
         self.voices = self.server.Namespace()
 
-        self.vid = 0
+        self.voice_id = 0
 
         self.tick = mp.Event()
 
         self.grid = mp.Process(target=rt.grid, args=(self.tick, self.bpm))
         self.grid.start()
 
+    def play(self, generator, params):
+        # Generator scripts expect a simple dict in 
+        #   { param: value } 
+        # format. Type conversions and range checks should 
+        # always be done before being passed into the generator.
+        #
+        # Malkovitch Malkovitch param param
+        params.bpm = self.bpm # omfg noooo
+        params = { param: params.get(param) for (param, value) in params.data.iteritems() }
 
-    def play(self, cmd):
-        orcs = os.listdir('orc/')
-        for orc in orcs:
-            if cmd[0] == orc[0:2]:
-                gen = cmd[0]
-                cmd.pop(0)
-                orc = 'orc.' + orc.split('.')[0]
-                pl = __import__(orc, globals(), locals(), ['play'])
+        if 'bpm' not in params:
+            params['bpm'] = self.bpm
 
-                for c in self.cc:
-                    if c == t or c == 'g':
-                        cmd = cmd + self.cc[c]
+        try:
+            # Increment voice id and print voice information. TODO: pretty print & abstract
+            self.voice_id += 1
+            print self.voice_id, params 
 
-                # Create a shared list for the voice
-                self.vid += 1
-                print self.vid, gen, [str(c) for c in cmd]
-                voice_id = self.vid
+            # Allocate a new shared voice dict to store generator params, and audio
+            # data for the render process. (Render processes are spawned on demand by 
+            # the voice's playback process.)
+            #
+            # Voices are stored in a shared namespace (self.voices) and keyed by id.
 
-                cmd = ['bpm:' + str(self.bpm)] + cmd
+            voice = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0, 'params': params}
+            setattr(self.voices, str(self.voice_id), voice)
 
-                voice = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0, 'cmd': cmd, 'gen': gen}
-                setattr(self.voices, str(voice_id), voice)
+            # Import the generator as a python module and spawn a playback 
+            # process from rt.out, passing in the generator's play method 
+            # which will be run from within a render process - spawned on demand 
+            # by the voice's playback process. Sheesh.
+            #
+            # Generator scripts are stored in the 'orc' directory for now.
 
-                process = mp.Process(target=rt.out, args=(pl.play, gen, self.voices, voice_id, self.tick))
-                process.start()
+            generator = 'orc.' + generator
+            generator = __import__(generator, globals(), locals(), ['play'])
+            playback_process = mp.Process(target=rt.out, args=(generator.play, self.voices, self.voice_id, self.tick))
+            playback_process.start()
 
-                return True
+        except ImportError:
+            # We'll get an ImportError exception here if a generator has been registered 
+            # in the json config file and there is no matching generator script in the orc/ directory.
 
-        print 'not found'
+            print 'invalid generator'
 
     def do_c(self, cmd):
         cmd = cmd.split(' ')
@@ -80,11 +101,11 @@ class Pippi(cmd.Cmd):
         if cmds[0] != '' and cmds[0] != 'all':
             gen = cmds
 
-        for vid in range(1, self.vid + 1):
+        for vid in range(1, self.voice_id + 1):
             if hasattr(self.voices, str(vid)):
                 voice = getattr(self.voices, str(vid))
 
-                if voice['gen'] in gen or gen == 'all':
+                if voice['params']['generator'] in gen or gen == 'all':
                     voice['loop'] = False
                     setattr(self.voices, str(vid), voice)
 
@@ -97,31 +118,31 @@ class Pippi(cmd.Cmd):
             voice['loop'] = False
             setattr(self.voices, vid, voice)
 
-    def do_r(self, cmd):
-        cmds = cmd.split(' ')
+    #def do_r(self, cmd):
+        #cmds = cmd.split(' ')
 
-        for vid in range(1, self.vid + 1):
-            if hasattr(self.voices, str(vid)):
-                update = False
-                voice = getattr(self.voices, str(vid))
+        #for vid in range(1, self.vid + 1):
+            #if hasattr(self.voices, str(vid)):
+                #update = False
+                #voice = getattr(self.voices, str(vid))
 
-                # loop through cmds and split
-                for cmd in cmds:
-                    cmd = cmd.split(':')
-                    for c in voice['cmd']:
-                        if cmd[0] == c[len(cmd[0])]:
-                            update = True
-                            voice['cmd'][i] = cmd[0] + ':' + cmd[1]
+                ## loop through cmds and split
+                #for cmd in cmds:
+                    #cmd = cmd.split(':')
+                    #for c in voice['cmd']:
+                        #if cmd[0] == c[len(cmd[0])]:
+                            #update = True
+                            #voice['cmd'][i] = cmd[0] + ':' + cmd[1]
 
-                if update is True:
-                    voice['cmd'] += ['one']
-                    setattr(self.voices, str(vid), voice)
+                #if update is True:
+                    #voice['cmd'] += ['one']
+                    #setattr(self.voices, str(vid), voice)
                 
 
     def do_vv(self, cmd):
         cmds = cmd.split(' ')
 
-        for vid in range(1, self.vid + 1):
+        for vid in range(1, self.voice_id + 1):
             self.setvol(vid, cmds[1], cmds[0])
 
     def do_v(self, cmd):
@@ -131,15 +152,15 @@ class Pippi(cmd.Cmd):
     def setvol(self, vid, vol, gen='a'):
         if hasattr(self.voices, str(vid)):
             voice = getattr(self.voices, str(vid))
-            if gen == voice['gen'] or gen == 'a':
+            if gen == voice['params']['generator'] or gen == 'a':
                 voice['tvol'] = float(vol) / 100.0
                 setattr(self.voices, str(vid), voice)
 
     def do_i(self, cmd=[]):
-        for vid in range(1, self.vid + 1):
+        for vid in range(1, self.voice_id + 1):
             if hasattr(self.voices, str(vid)):
                 voice = getattr(self.voices, str(vid))
-                print vid, voice['gen'], [str(c) for c in voice['cmd']], 'v:', voice['tvol'], 'l:', voice['loop'], 're:', voice['regen']
+                print vid, voice['params']['generator'], [str(c) + ': ' + str(voice['params'][c]) for c in voice['params']], 'v:', voice['tvol'], 'l:', voice['loop'], 're:', voice['regen']
 
     def do_p(self, cmd):
         if cmd in self.config['presets']:
@@ -151,15 +172,46 @@ class Pippi(cmd.Cmd):
                     dsp.delay(0.1)
 
     def default(self, cmd):
-        cmd = cmd.strip().split(',')
-        for c in cmd:
-            cc = c.strip().split(' ')
-            try:
-                getattr(self, 'do_' + cc[0])(c[3:])
+        # Break comma separated commands
+        # into a list of command strings
+        cmds = cmd.strip().split(',')
 
-            except:
-                self.play(cc)
+        # For each command string, unpack and load
+        # into a param.Param instance based on 
+        # current json config rules. 
+        #
+        # So:
+        #   sh o:3
+        #
+        # Could become:
+        #   { 'generator': 'shine', 'octave': {'value': 3, 'type': 'integer'} }
+        # 
+        # And:
+        #   dr h:1.2.3.4 t:4b wf:tri n:eb.g
+        # 
+        # Could become:
+        #   {
+        #       'generator': 'drone',
+        #       'harmonics': {'value': '1.2.3.4', 'type': 'integer-list'},
+        #       'length': {'value': '4b', 'type': 'frame'},
+        #       'waveform': {'value': 'tri'},
+        #       'notes': {'value': 'eb.g', 'type': 'note-list'}
+        #   }
+        # 
+        # For a complete list of reserved words and built-in types please 
+        # refer to the documentation I haven't written yet. Oh, bummer.
+        # In the meantime, the patterns in param.py should help a little.
+        #
+        # Finally pass to self.play() to spawn render and playback processes.
 
+        for cmd in cmds:
+            params = param.unpack(cmd, self.config)
+            generator = params.get('generator')
+
+            if generator is False:
+                print 'invalid generator'
+            else:
+                self.play(generator, params)
 
     def do_EOF(self, line):
         return True

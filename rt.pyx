@@ -2,23 +2,24 @@ import os
 import dsp
 import multiprocessing as mp
 import alsaaudio
+import param
 
 def grid(tick, bpm):
     os.nice(-19)
     
     bpm = dsp.mstf(dsp.bpm2ms(bpm))
-    #bpm = bpm / 4 
 
     while True:
         tick.set()
         tick.clear()
         dsp.delay(bpm)
 
+def render(play, voices, voice_id, buffer='snd'):
+    voice = getattr(voices, str(voice_id))
 
-def render(play, args, vid, voices, label='snd'):
-    voice = getattr(voices, str(vid))
-    voice[label] = dsp.split(play(args), 500)
-    setattr(voices, str(vid), voice)
+    voice[buffer] = dsp.split(play(voice['params']), 500)
+    setattr(voices, str(voice_id), voice)
+
 
 def dsp_loop(out, snd, vol, tvol, voice, voices, vid):
     for s in snd:
@@ -37,7 +38,7 @@ def dsp_loop(out, snd, vol, tvol, voice, voices, vid):
             setattr(voices, str(vid), voice)
             break
 
-def out(play, gen, voices, vid, tick):
+def out(play, voices, vid, tick):
     """
         Worker playback process spawned by play()
         Manages render threads for voices and render buffers for playback
@@ -46,26 +47,25 @@ def out(play, gen, voices, vid, tick):
     os.nice(-19)
 
     voice = getattr(voices, str(vid))
+    gen = voice['params']['generator']
 
     # Render sound
-    r = mp.Process(target=render, args=(play, voice['cmd'], vid, voices))
+    r = mp.Process(target=render, args=(play, voices, vid))
     r.start()
     r.join()
 
     # Open a connection to an ALSA PCM device
     # Split buffered sound into packets and push to playback
-    if gen == 'sh':
+    if gen == 'shine':
         device = 'T6_pair1'
-    elif gen == 'sp':
+    elif gen == 'sparkle':
         device = 'T6_pair3'
-    elif gen == 'dr':
+    elif gen == 'drone':
         device = 'T6_pair2'
-    elif gen == 'cl':
+    elif gen == 'click':
         device = 'T6_pair3'
     else:
         device = 'default'
-
-    #device = 'default'
 
     try:
         out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
@@ -91,22 +91,22 @@ def out(play, gen, voices, vid, tick):
 
     while voice['loop'] == True:
             
-        for arg in voice['cmd']:
-            if arg == 're':
+        for arg in voice['params']:
+            if arg == 'regenerate':
                 regen = True
 
             if arg == 'one':
                 onegen = True
                 voice['cmd'].remove('one')
 
-            if arg[:2] == 'qu':
+            if arg == 'quantize':
                 q = True
 
         tvol = voice['tvol']
 
         if (regen == True or onegen == True) and cooking == False:
             cooking = True
-            next = mp.Process(target=render, args=(play, voice['cmd'], vid, voices, 'next'))
+            next = mp.Process(target=render, args=(play, voices, vid, 'next'))
             next.start()
 
             if onegen == True:

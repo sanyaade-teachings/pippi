@@ -2,70 +2,71 @@ import dsp
 import tune
 import math
 
-def play(args):
-    length = dsp.stf(20)
-    volume = 0.2 
-    octave = 2 
-    notes = ['d', 'a']
-    quality = tune.major
-    glitch = False
-    waveform = 'sine'
-    ratios = tune.terry
-    alias = False
-    wild = False
-    bend = False
-    env = 'gauss'
+def play(params={}):
+    length = params.get('length', dsp.stf(20))
+    volume = params.get('volume', 20.0) 
+    volume = volume / 100.0 # TODO move into param filter
+    octave = params.get('octave', 2)
+    notes = params.get('note', ['d', 'a'])
+    quality = params.get('quality', tune.major)
+    glitch = params.get('glitch', False)
+    waveform = params.get('waveform', 'sine')
+    ratios = params.get('ratios', tune.terry)
+    alias = params.get('alias', False)
+    wild = params.get('wii', False)
+    bend = params.get('bend', False)
+    env = params.get('envelope', 'gauss')
+    harmonics = params.get('harmonics', [1,2])
+    scale = params.get('scale', [1,8])
 
-    harmonics = [1,2]
-    scale = [1,8]
     wtypes = ['sine', 'phasor', 'line', 'saw']
 
-    for arg in args:
-        a = arg.split(':')
+    #for arg in args:
+        #a = arg.split(':')
 
-        if a[0] == 't':
-            length = dsp.stf(float(a[1]))
+        #if a[0] == 't':
+            #length = dsp.stf(float(a[1]))
 
-        if a[0] == 'v':
-            volume = float(a[1]) / 100.0
+        #if a[0] == 'v':
+            #volume = float(a[1]) / 100.0
 
-        if a[0] == 'o':
-            octave = int(a[1])
+        #if a[0] == 'o':
+            #octave = int(a[1])
 
-        if a[0] == 'n':
-            notes = a[1].split('.')
+        #if a[0] == 'n':
+            #notes = a[1].split('.')
 
-        if a[0] == 'q':
-            if a[1] == 'M':
-                quality = tune.major
-            elif a[1] == 'm':
-                quality = tune.minor
-            else:
-                quality = tune.major
+        #if a[0] == 'q':
+            #if a[1] == 'M':
+                #quality = tune.major
+            #elif a[1] == 'm':
+                #quality = tune.minor
+            #else:
+                #quality = tune.major
 
-        if a[0] == 'tr':
-            ratios = getattr(tune, a[1], tune.terry)
+        #if a[0] == 'tr':
+            #ratios = getattr(tune, a[1], tune.terry)
 
-        if a[0] == 'h':
-            harmonics = [int(s) for s in a[1].split('.')]
+        #if a[0] == 'h':
+            #harmonics = [int(s) for s in a[1].split('.')]
 
-        if a[0] == 'g':
-            glitch = True
+        #if a[0] == 'g':
+            #glitch = True
 
-        if a[0] == 'a':
-            alias = int(a[1]) if len(a) > 1 else 1
+        #if a[0] == 'a':
+            #alias = int(a[1]) if len(a) > 1 else 1
 
-        if a[0] == 'w':
-            wild = True
+        #if a[0] == 'w':
+            #wild = True
 
-        if a[0] == 'wf':
-            waveform = a[1]
+        #if a[0] == 'wf':
+            #waveform = a[1]
 
-        if a[0] == 'bend':
-            bend = True
+        #if a[0] == 'bend':
+            #bend = True
 
-        if a[0] == 'e':
-            env = a[1]
+        #if a[0] == 'e':
+            #env = a[1]
 
     layers = []
     for note in notes:

@@ -1,19 +1,23 @@
 import dsp
 import tune
 
-def play(args):
-    length = dsp.stf(2)
-    volume = 1.0
-    w = 50 
-    measures = 1 
-    beats = 8 
-    bpm = 75.0
-    glitch = False
-    alias = False
-    skitter = False
-    bend = True 
-    tweet = False
-    pattern = True
+def play(params={}):
+
+    length = params.get('length', dsp.stf(2))
+    volume = params.get('volume', 100.0)
+    volume = volume / 100.0 # TODO: move into param filter
+    width = params.get('width', 50)
+    measures = params.get('multiple', 1)
+    beats = params.get('repeat', 8)
+    bpm = params.get('bpm', 75.0)
+    glitch = params.get('glitch', False)
+    alias = params.get('alias', False)
+    skitter = params.get('skitter', False)
+    bend = params.get('bend', True)
+    tweet = params.get('tweet', False)
+    pattern = params.get('pattern', True)
+    playdrums = params.get('d', 'k.h.c')
+    playdrums = playdrums.split('.') # TODO: move into param filter
 
     drums = [{
         'name': 'clap',
@@ -58,57 +62,54 @@ def play(args):
         }]
 
     wtypes = ['sine', 'phasor', 'line', 'saw']
-    playdrums = ['k', 'h', 'c']
+    #playdrums = ['k', 'h', 'c']
 
-    for arg in args:
-        a = arg.split(':')
+    #for arg in args:
+        #a = arg.split(':')
 
-        if a[0] == 'v':
-            volume = float(a[1]) / 100.0
+        #if a[0] == 'v':
+            #volume = float(a[1]) / 100.0
 
-        if a[0] == 'w':
-            w = int(a[1])
+        #if a[0] == 'width':
+            #width = int(a[1])
 
-        if a[0] == 'm':
-            measures = int(a[1])
+        #if a[0] == 'm':
+            #measures = int(a[1])
 
-        if a[0] == 'b':
-            beats = int(a[1])
+        #if a[0] == 'b':
+            #beats = int(a[1])
 
-        if a[0] == 'bpm':
-            bpm = float(a[1])
+        #if a[0] == 'bpm':
+            #bpm = float(a[1])
 
-        if a[0] == 'd':
-            playdrums = a[1].split('.')
+        #if a[0] == 'd':
+            #playdrums = a[1].split('.')
 
-        if a[0] == 'g':
-            glitch = True
+        #if a[0] == 'g':
+            #glitch = True
 
-        if a[0] == 'single':
-            pattern = False
+        #if a[0] == 'single':
+            #pattern = False
 
-        if a[0] == 's':
-            skitter = True
+        #if a[0] == 's':
+            #skitter = True
 
-        if a[0] == 'a':
-            alias = True
+        #if a[0] == 'a':
+            #alias = True
 
-        if a[0] == 'be':
-            bend = True
+        #if a[0] == 'be':
+            #bend = True
 
-        if a[0] == 't':
-            tweet = True
+        #if a[0] == 't':
+            #tweet = True
 
 
     out = ''
 
-    #if(w <= 11):
-    #    w = 11
-
     beats = beats * measures
 
     beat = dsp.mstf(60000.0 / bpm) / 4
-    w = int(beat * (w / 100.0))
+    width = int(beat * (width / 100.0))
 
     def tweeter(o):
         o = dsp.split(o, dsp.randint(3,6))
@@ -120,7 +121,7 @@ def play(args):
     def kickit(snd):
         out = ''
         for b in range(beats):
-            s = dsp.cut(snd['snd'], dsp.randint(0, snd['offset']), w)
+            s = dsp.cut(snd['snd'], dsp.randint(0, snd['offset']), width)
 
             if snd['alias'] == True:
                 s = dsp.alias(s)
