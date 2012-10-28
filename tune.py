@@ -49,42 +49,59 @@ young = [
     (63.0, 32.0),     # M7 11
 ]
 
+# Handy subsets of the chromatic scale
 major = [0, 2, 4, 5, 7, 9, 11]
 minor = [0, 2, 3, 5, 7, 8, 10]
 
-notes = [ 
-    ['a'], 
-    ['a#', 'bb'], 
-    ['b'], 
-    ['c'], 
-    ['c#', 'db'], 
-    ['d'], 
-    ['d#', 'eb'], 
-    ['e'], 
-    ['f'], 
-    ['f#', 'gb'], 
-    ['g'], 
-    ['g#', 'ab'], 
-]
+# Maps to chromatic ratio lists above
+notes = { 
+        'a': 0,
+        'a#': 1,
+        'bb': 1, 
+        'b': 2,
+        'c': 3, 
+        'c#': 4, 
+        'db': 4, 
+        'd': 5, 
+        'd#': 6, 
+        'eb': 6, 
+        'e': 7, 
+        'f': 8, 
+        'f#': 9, 
+        'gb': 9, 
+        'g': 10, 
+        'g#': 11, 
+        'ab': 11, 
+        }
 
 def nti(note):
     """ Note to index
             returns the index of enharmonic note names
             or False if not found
     """
-    for d, n in enumerate(notes):
-        for e in n:
-            if e == note:
-                return d
-
-    return False 
+    return notes.get(note, False)
 
 def ntf(note, octave=4, ratios=terry):
     """ Note to freq 
     """
     return ratios[nti(note)][0] / ratios[nti(note)][1] * (a0 * (2.0**octave))
 
+def fromdegrees(scale_degrees=[1,3,5], octave=2, root='c', scale=major, ratios=just):
+    freqs = []
+    root = ntf(root, octave, ratios)
+
+    for index, degree in enumerate(scale_degrees):
+        degree = int(degree)
+        register = degree / len(scale)
+        chromatic_degree = scale[degree % len(scale) - 1]
+        ratio = ratios[chromatic_degree]
+        freqs += [ root * (ratio[0] / ratio[1]) * 2**register ]
+
+    return freqs
+
 def step(degree=0, root='c', octave=4, scale=[1,3,5,8], quality=major, ratios=terry):
+    # TODO. Many qualities of jank. Fix.
+
     diatonic = scale[degree % len(scale) - 1]
     chromatic = quality[diatonic % len(quality) - 1]
 

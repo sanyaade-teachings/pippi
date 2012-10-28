@@ -37,6 +37,7 @@ def dsp_loop(out, snd, vol, tvol, voice, voices, vid):
             voice['loop'] = False
             setattr(voices, str(vid), voice)
             break
+    return (vol, tvol)
 
 def out(play, voices, vid, tick):
     """
@@ -106,7 +107,7 @@ def out(play, voices, vid, tick):
 
         if (regen == True or onegen == True) and cooking == False:
             cooking = True
-            next = mp.Process(target=render, args=(play, voices, vid, 'next'))
+            next = mp.Process(target=render, args=(play, voices, vid, 'snd'))
             next.start()
 
             if onegen == True:
@@ -114,7 +115,7 @@ def out(play, voices, vid, tick):
 
         if next is not False and next.is_alive() == False:
             cooking = False
-            snd = voice['next']
+            snd = voice['snd']
             setattr(voices, str(vid), voice)
         else:
             snd = voice['snd']
@@ -122,7 +123,7 @@ def out(play, voices, vid, tick):
         if q is not False:
             tick.wait()
 
-        dsp_loop(out, snd, vol, tvol, voice, voices, vid)
+        vol, tvol = dsp_loop(out, snd, vol, tvol, voice, voices, vid)
 
         voice = getattr(voices, str(vid))
 

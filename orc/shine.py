@@ -5,11 +5,10 @@ def play(params={}):
     length      = params.get('length', dsp.stf(dsp.rand(0.1, 1)))
     volume      = params.get('volume', 20.0)
     volume = volume / 100.0 # TODO: move into param filter
-    octave      = params.get('octave', 2) 
+    octave      = params.get('octave', 2) + 1 # Add one to compensate for an old error for now
     note        = params.get('note', ['d'])
     note = note[0]
     quality     = params.get('quality', tune.major)
-    reps        = params.get('repeats', dsp.randint(1, 3))
     glitch      = params.get('glitch', False)
     superglitch = params.get('superglitch', False)
     glitchpad   = params.get('glitch-padding', 0)
@@ -18,14 +17,14 @@ def play(params={}):
     env         = params.get('envelope', False)
     ratios      = params.get('ratios', tune.terry)
     pad         = params.get('padding', False)
-    pulsar      = params.get('pulsar', False)
-    harmonics   = params.get('harmonics', False)
+    bend        = params.get('bend', False)
     bpm         = params.get('bpm', 75.0)
-    arps        = params.get('arps', False)
     width       = params.get('width', False)
     wform       = params.get('waveforms', ['sine', 'line', 'phasor'])
     instrument  = params.get('instrument', 'r')
     scale       = params.get('scale', [1,6,5,4,8])
+    shuffle     = params.get('shuffle', False) # Reorganize input scale
+    reps        = params.get('repeats', len(scale))
 
     if instrument == 'r':
         instrument = 'rhodes'
@@ -44,85 +43,42 @@ def play(params={}):
         tone = dsp.mix([dsp.read('sounds/guitar.wav').data, 
                         dsp.read('sounds/banjo.wav').data])
 
-
-        #if a[0] == 'w':
-            #if param.istype(a[1], 'b'):
-                #width = dsp.bpm2ms(bpm) / param.convert(a[1])
-                #width = dsp.mstf(width)
-
-            #elif param.istype(a[1], 'ms'):
-                #width = dsp.mstf(param.convert(a[1]))
-
-            #else:
-                #width = param.convert(a[1])
-
-        #if a[0] == 't':
-            #if param.istype(a[1], 'b'):
-                #length = dsp.bpm2ms(bpm) / param.convert(a[1])
-                #length = dsp.mstf(length)
-            #elif param.istype(a[1], 'ms'):
-                #length = dsp.mstf(param.convert(a[1]))
-            #elif param.istype(a[1], 's'):
-                #length = dsp.stf(param.convert(a[1]))
-            #else:
-                #length = param.convert(a[1])
-
-        #if a[0] == 'pp':
-            #pulsar = True
-
-    wtypes = ['sine', 'gauss']
-
     out = ''
+
+    # Translate the list of scale degrees into a list of frequencies
+    freqs = tune.fromdegrees(scale, octave, note, quality, ratios)
+
+    if shuffle is not False:
+        freqs = dsp.randshuffle(freqs)
+
     for i in range(reps):
-        scale = dsp.randshuffle(scale)
-        freq = tune.step(i, note, octave, scale, quality, ratios)
+        #freq = tune.step(i, note, octave, scale, quality, ratios)
+        freq = freqs[i % len(freqs)]
 
         if instrument == 'clarinet':
             diff = freq / 293.7
         else:
             diff = freq / 440.0
 
-        n = dsp.transpose(tone, diff)
+        clang = dsp.transpose(tone, diff)
 
         if env is not False:
-            n = dsp.env(n, env)
+            clang = dsp.env(clang, env)
 
-        #if arps is not False:
-            #length = dsp.mstf(((60000.0 / bpm) / 2) / reps)
-
-        n = dsp.fill(n, length)
+        clang = dsp.fill(clang, length)
 
         if width is not False:
-            #if isinstance(width, float):
-                #width = int(length * width)
+            width = int(length * float(width))
 
-            n = dsp.pad(dsp.cut(n, 0, width), 0, length - width)
-
-        if harmonics:
-            o = [dsp.tone(length, freq * i * 0.5) for i in range(4)]
-            o = [dsp.env(oo) for oo in o]
-            o = [dsp.pan(oo, dsp.rand()) for oo in o]
-
-            if instrument == 'clarinet':
-                olow = 0.3
-                ohigh = 0.8
-            else:
-                olow = 0.1
-                ohigh = 0.5
-
-            o = dsp.mix([dsp.amp(oo, dsp.rand(olow, ohigh)) for oo in o])
-
-            o = dsp.mix([n, o])
-        else:
-            o = n
+            clang = dsp.pad(dsp.cut(clang, 0, width), 0, length - width)
 
         if env is not False:
-            o = dsp.env(o, env)
+            clang = dsp.env(clang, env)
 
         if pad is not False:
-            o = dsp.pad(o, 0, pad)
+            clang = dsp.pad(clang, 0, pad)
 
-        out += o
+        out += clang
 
     if glitch == True:
         if superglitch is not False:
@@ -151,7 +107,7 @@ def play(params={}):
         out = [dsp.pad(o, 0, int(opads[i])) for i, o in enumerate(out)]
         out = dsp.env(''.join(out))
 
-    if pulsar == True:
+    if bend == True:
         out = dsp.split(out, 441)
         freqs = dsp.wavetable('sine', len(out), 1.01, 0.99)
         out = [ dsp.transpose(out[i], freqs[i]) for i in range(len(out)) ]

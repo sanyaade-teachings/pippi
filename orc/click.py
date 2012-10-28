@@ -8,7 +8,7 @@ def play(params={}):
     volume = volume / 100.0 # TODO: move into param filter
     width = params.get('width', 50)
     measures = params.get('multiple', 1)
-    beats = params.get('repeat', 8)
+    beats = params.get('repeats', 8)
     bpm = params.get('bpm', 75.0)
     glitch = params.get('glitch', False)
     alias = params.get('alias', False)
@@ -16,8 +16,8 @@ def play(params={}):
     bend = params.get('bend', True)
     tweet = params.get('tweet', False)
     pattern = params.get('pattern', True)
-    playdrums = params.get('d', 'k.h.c')
-    playdrums = playdrums.split('.') # TODO: move into param filter
+    playdrums = params.get('drum', ['k', 'h', 'c'])
+    pinecone = params.get('pinecone', False)
 
     drums = [{
         'name': 'clap',
@@ -62,47 +62,6 @@ def play(params={}):
         }]
 
     wtypes = ['sine', 'phasor', 'line', 'saw']
-    #playdrums = ['k', 'h', 'c']
-
-    #for arg in args:
-        #a = arg.split(':')
-
-        #if a[0] == 'v':
-            #volume = float(a[1]) / 100.0
-
-        #if a[0] == 'width':
-            #width = int(a[1])
-
-        #if a[0] == 'm':
-            #measures = int(a[1])
-
-        #if a[0] == 'b':
-            #beats = int(a[1])
-
-        #if a[0] == 'bpm':
-            #bpm = float(a[1])
-
-        #if a[0] == 'd':
-            #playdrums = a[1].split('.')
-
-        #if a[0] == 'g':
-            #glitch = True
-
-        #if a[0] == 'single':
-            #pattern = False
-
-        #if a[0] == 's':
-            #skitter = True
-
-        #if a[0] == 'a':
-            #alias = True
-
-        #if a[0] == 'be':
-            #bend = True
-
-        #if a[0] == 't':
-            #tweet = True
-
 
     out = ''
 
@@ -177,6 +136,28 @@ def play(params={}):
 
         out = ''.join(dsp.randshuffle(out))
 
-    out = dsp.pan(out, 1)
+    if pinecone == True:
+        # Do it in packets
+        # Start from position P, take sample of N length (audio rates), apply envelope, move to position P + Q, repeat
+        pminlen = dsp.mstf(1)
+        pmaxlen = dsp.mstf(500)
+        pnum = dsp.randint(3, 5)
+        pinecones = []
+        for p in range(pnum):
+            segment = dsp.cut(out, dsp.randint(0, dsp.flen(out) - pmaxlen), dsp.randint(pminlen, pmaxlen))
+            pskip = dsp.flen(segment) / dsp.randint(3, 500) + 1 
+            ppos = 0
+            pupp = 5000 if dsp.randint(0, 2) == 0 else 50
+            plen = dsp.htf(dsp.rand(5, pupp))
+            while ppos + pskip + 400 < dsp.flen(segment):
+                p = dsp.cut(segment, ppos + dsp.randint(0, 200), plen + dsp.randint(0, 200))
+                p = dsp.env(p, 'random', True, dsp.rand(0.8, 1.0), 0.0)
+                pinecones += [ p ]
+                ppos += pskip
+
+        out = dsp.pan(''.join(pinecones), dsp.rand())
+
+
+    #out = dsp.pan(out, 1)
 
     return dsp.amp(out, volume)

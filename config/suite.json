@@ -39,10 +39,22 @@
             "accepts": ["integer-list"]
         },
 
+        "e": {
+            "name": "envelope",
+            "type": "string",
+            "accepts": ["alphanumeric"]
+        },
+
         "wf": {
             "name": "waveform",
             "type": "string",
             "accepts": ["alphanumeric"]
+        },
+
+        "d": {
+            "name": "drum",
+            "type": "string-list",
+            "accepts": ["string-list"]
         },
 
         "r": {
@@ -125,8 +137,8 @@
             "dr o:3 t:3s n:ab h:1.2.3.4.5.6 wf:vary wii",
             "dr o:2 t:10s n:ab h:1.2.3.4.5.6 wf:vary",
             "dr o:2 t:10s n:ab h:1.2.3.4.5.6 wf:tri",
-            "sh o:2 i:c e:sine reg t:2s n:ab s:1",
-            "sh o:2 i:c e:sine reg t:1.4s n:ab s:1"
+            "sh o:2 i:c e:sine re t:2s n:ab s:1",
+            "sh o:2 i:c e:sine re t:1.4s n:ab s:1"
             ],
 
         "s2aa": [
@@ -147,13 +159,13 @@
             ],
 
         "s2acc": [
-            "sh o:3 n:db s:10 qu r:1 t:b2 w:ms50 e:phasor v:8 re i:r",
+            "sh o:3 n:db s:10 qu r:1 t:b2 w:ms50 e:phasor v:8 i:r",
             "sh o:1 n:db s:8 qu r:1 t:b2 w:b1 v:20 i:r"
             ],
 
         "s2ad": [
-            "sh o:3 n:db s:12 qu r:1 t:b2 w:ms50 e:phasor v:5 re i:t",
-            "sh o:3 n:db s:10 qu r:1 t:b2 w:ms50 e:phasor v:8 re i:t",
+            "sh o:3 n:db s:12 qu r:1 t:b2 w:ms50 e:phasor v:5 i:t",
+            "sh o:3 n:db s:10 qu r:1 t:b2 w:ms50 e:phasor v:8 i:t",
             "cl d:k qu r:1 v:150 single re",
             "cl d:c w:15 qu r:2 v:8 single re",
             "cl d:c w:20 qu r:1 v:5 single",

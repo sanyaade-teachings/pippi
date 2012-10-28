@@ -9,6 +9,7 @@ import json
 import param
 import rt
 import multiprocessing as mp
+from termcolor import colored
 
 class Pippi(cmd.Cmd):
     """ Pippi Console 
@@ -59,7 +60,7 @@ class Pippi(cmd.Cmd):
         try:
             # Increment voice id and print voice information. TODO: pretty print & abstract
             self.voice_id += 1
-            print self.voice_id, params 
+            print self.voice_id, self.format_params(params)
 
             # Allocate a new shared voice dict to store generator params, and audio
             # data for the render process. (Render processes are spawned on demand by 
@@ -67,7 +68,7 @@ class Pippi(cmd.Cmd):
             #
             # Voices are stored in a shared namespace (self.voices) and keyed by id.
 
-            voice = {'snd': '', 'next': '', 'loop': True, 'regen': False, 'tvol': 1.0, 'params': params}
+            voice = {'snd': '', 'next': '', 'loop': True, 'tvol': 1.0, 'params': params}
             setattr(self.voices, str(self.voice_id), voice)
 
             # Import the generator as a python module and spawn a playback 
@@ -114,30 +115,10 @@ class Pippi(cmd.Cmd):
 
         for cmd in cmds:
             vid = cmd.strip() 
-            voice = getattr(self.voices, vid)
-            voice['loop'] = False
-            setattr(self.voices, vid, voice)
-
-    #def do_r(self, cmd):
-        #cmds = cmd.split(' ')
-
-        #for vid in range(1, self.vid + 1):
-            #if hasattr(self.voices, str(vid)):
-                #update = False
-                #voice = getattr(self.voices, str(vid))
-
-                ## loop through cmds and split
-                #for cmd in cmds:
-                    #cmd = cmd.split(':')
-                    #for c in voice['cmd']:
-                        #if cmd[0] == c[len(cmd[0])]:
-                            #update = True
-                            #voice['cmd'][i] = cmd[0] + ':' + cmd[1]
-
-                #if update is True:
-                    #voice['cmd'] += ['one']
-                    #setattr(self.voices, str(vid), voice)
-                
+            if hasattr(self.voices, vid):
+                voice = getattr(self.voices, vid)
+                voice['loop'] = False
+                setattr(self.voices, vid, voice)
 
     def do_vv(self, cmd):
         cmds = cmd.split(' ')
@@ -160,7 +141,15 @@ class Pippi(cmd.Cmd):
         for vid in range(1, self.voice_id + 1):
             if hasattr(self.voices, str(vid)):
                 voice = getattr(self.voices, str(vid))
-                print vid, voice['params']['generator'], [str(c) + ': ' + str(voice['params'][c]) for c in voice['params']], 'v:', voice['tvol'], 'l:', voice['loop'], 're:', voice['regen']
+                print vid, self.format_params(voice['params']), 'v:', voice['tvol'], 'loop:', voice['loop']
+
+    def format_params(self, params=[]):
+        # TODO: translate types & better formatting
+        param_string = ''
+        for param in params:
+            param_string += colored(str(param)[0:3] + ': ', 'cyan') + colored(str(params[param]), 'yellow') + ' '
+        
+        return param_string
 
     def do_p(self, cmd):
         if cmd in self.config['presets']:

@@ -10,10 +10,11 @@ class Param:
             'float':        re.compile(r'\d+\.?\d*'), 
             'integer':      re.compile(r'\d+'), 
 
-            'note':         re.compile(r'[a-gA-G][#b]'), 
+            'note':         re.compile(r'[a-gA-G][#b]?'), 
             'alphanumeric':      re.compile(r'\w+'), 
             'integer-list':      re.compile(r'\d+(.\d+)*'), 
-            'note-list':      re.compile(r'[a-gA-G][#b](.[a-gA-G][#b])*'), 
+            'note-list':      re.compile(r'[a-gA-G][#b]?(.[a-gA-G][#b]?)*'), 
+            'string-list':      re.compile(r'[a-zA-Z]+(.[a-zA-Z]+)*'), 
             }
 
     def __init__(self, data={}):
@@ -24,6 +25,9 @@ class Param:
 
     def convert(self, value, input_type, output_type):
         # This is a dumb way to do this. Rehearsal approaches though...
+        if input_type == 'string-list':
+            return self.convert_string_list(value, output_type)
+
         if input_type == 'integer-list':
             return self.convert_integer_list(value, output_type)
 
@@ -102,6 +106,13 @@ class Param:
         if output_type == 'note-list':
             value = value.split('.')
         
+        return value
+
+    def convert_string_list(self, value, output_type):
+        if output_type == 'string-list':
+            value = value.split('.')
+            value = [str(v) for v in value]
+
         return value
 
     def convert_integer_list(self, value, output_type):
