@@ -1,5 +1,5 @@
-import dsp
-import tune
+from pippi import dsp
+from pippi import tune
 import math
 
 def play(params={}):
@@ -7,7 +7,7 @@ def play(params={}):
     volume = params.get('volume', 20.0) 
     volume = volume / 100.0 # TODO move into param filter
     octave = params.get('octave', 2)
-    notes = params.get('note', ['d', 'a'])
+    notes = params.get('note', ['db', 'bb'])
     quality = params.get('quality', tune.major)
     glitch = params.get('glitch', False)
     waveform = params.get('waveform', 'sine')
@@ -19,56 +19,9 @@ def play(params={}):
     harmonics = params.get('harmonics', [1,2])
     scale = params.get('scale', [1,8])
 
-    wtypes = ['sine', 'phasor', 'line', 'saw']
-
-    #for arg in args:
-        #a = arg.split(':')
-
-        #if a[0] == 't':
-            #length = dsp.stf(float(a[1]))
-
-        #if a[0] == 'v':
-            #volume = float(a[1]) / 100.0
-
-        #if a[0] == 'o':
-            #octave = int(a[1])
-
-        #if a[0] == 'n':
-            #notes = a[1].split('.')
-
-        #if a[0] == 'q':
-            #if a[1] == 'M':
-                #quality = tune.major
-            #elif a[1] == 'm':
-                #quality = tune.minor
-            #else:
-                #quality = tune.major
-
-        #if a[0] == 'tr':
-            #ratios = getattr(tune, a[1], tune.terry)
-
-        #if a[0] == 'h':
-            #harmonics = [int(s) for s in a[1].split('.')]
-
-        #if a[0] == 'g':
-            #glitch = True
-
-        #if a[0] == 'a':
-            #alias = int(a[1]) if len(a) > 1 else 1
-
-        #if a[0] == 'w':
-            #wild = True
-
-        #if a[0] == 'wf':
-            #waveform = a[1]
-
-        #if a[0] == 'bend':
-            #bend = True
-
-        #if a[0] == 'e':
-            #env = a[1]
-
+    wtypes = ['sine', 'phasor', 'line', 'saw']    
     layers = []
+
     for note in notes:
         tones = []
         for i in range(dsp.randint(2,4)):
@@ -84,7 +37,7 @@ def play(params={}):
         if bend is not False:
             def bendit(out=''):
                 out = dsp.split(out, 441)
-                freqs = dsp.wavetable('sine', len(out), dsp.rand(1.0, 1.04), dsp.rand(1.0, 0.96))
+                freqs = dsp.wavetable('sine', len(out), 1.01, 0.99)
                 out = [ dsp.transpose(out[i], freqs[i]) for i in range(len(out)) ]
                 return ''.join(out)
 

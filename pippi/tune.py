@@ -1,4 +1,4 @@
-import dsp
+from pippi import dsp
 
 a0 = 27.5 
 

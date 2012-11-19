@@ -13,12 +13,12 @@ import string
 import time
 import hashlib
 import subprocess
-import platform
+from multiprocessing import Process, Queue 
 import os
 import sys
 from datetime import datetime
-import pyaudio
-from multiprocessing import Process
+import time
+import alsaaudio
 
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 snddir = '' 
@@ -29,21 +29,32 @@ thetime = 0
 seedint = 0
 seedstep = 0
 seedhash = ''
+randconst = 1.0 
 cpop = 0.444
 crpop = 3.9
 quiet = True 
 
-def rpop(low=0.0, high=1.0):
-    global cpop
-    global crpop
-    cpop = crpop * cpop * (1.0 - cpop)
-    
-    return cpop * (high - low) + low
-
-rgo = False 
-
 def notify(message):
     sys.stderr.write(message)
+
+def capture(length=44100):
+    input = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, 0, 'T6_pair1')
+    input.setchannels(1)
+    input.setrate(44100)
+    input.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+    input.setperiodsize(100)
+
+    out = ''
+    count = 0
+    while count < length:
+        rec_frames, rec_data = input.read()
+        count += rec_frames
+        out += rec_data
+
+    out = amp(out, 2)
+    return mixstereo([out, out])
+
+
 
 def lget(list, index, default=True):
     """ Safely return a selected element from a list and handle IndexErrors """
@@ -173,22 +184,10 @@ def tone(length=44100, freq=440, wavetype='sine2pi', amp=1.0, blocksize=0):
 
     return cycles 
 
-def adsr(sound, attack, release):
-    alen = flen(sound) * attack 
-    rlen = flen(sound) * release 
-
-    segments = []
-    segments += [ env(cut(sound, 0, alen), 'line') ]
-    segments += [ env(cut(sound, flen(sound) - rlen, rlen), 'phasor') ]
-
-    return ''.join(segments)
-
-
-
-def chirp(numcycles, lfreq, hfreq, length=0, reps=1, etype=False, wform='sine'):
+def chirp(numcycles, lfreq, hfreq, length=0, reps=1, etype=False):
     # Sweep from low freq to high freq
     freqs = wavetable('line', numcycles, hfreq, lfreq)
-    freqs = [cycle(f, wform) for f in freqs]
+    freqs = [cycle(f) for f in freqs]
     out = ''.join(freqs)
 
     # Envelope
@@ -245,7 +244,14 @@ def stepseed():
     seedstep = seedstep + 1
 
     return seedint
+
+def rpop(low=0.0, high=1.0):
+    global cpop
+    global crpop
+    cpop = crpop * cpop * (1.0 - cpop)
     
+    return cpop * (high - low) + low
+
 def randint(lowbound=0, highbound=1):
     global seedint
 
@@ -256,10 +262,8 @@ def randint(lowbound=0, highbound=1):
 
 def rand(lowbound=0, highbound=1):
     global seedint
-    if seedint > 0 and rgo == False:
+    if seedint > 0:
         return ((stepseed() / 100.0**20) % 1.0) * (highbound - lowbound) + lowbound
-    elif rgo is not False:
-        return rgo(lowbound, highbound)
     else:
         return random.random() * (highbound - lowbound) + lowbound
 
@@ -341,17 +345,17 @@ def breakpoint(values, size=512):
 
     return groups
 
-def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0):
+
+
+def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
     wtable = []
     wave_types = ["sine", "gauss", "cos", "line", "saw", "impulse", "phasor", "sine2pi", "cos2pi", "vary", "flat"]
 
     if wtype == "random":
-        wtype = wave_types[randint(0, len(wave_types) - 1)]
-
+        wtype = wave_types[int(rf(0, len(wave_types) - 1))]
 
     if wtype == "sine":
         wtable = [math.sin(i * math.pi) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
-
     elif wtype == "gauss":
         def gauss(x):
             # From: http://johndcook.com/python_phi.html
@@ -374,10 +378,8 @@ def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0):
             return abs(abs(sign * y) - 1.0)
 
         wtable = [gauss(i) * (highval - lowval) + lowval for i in frange(size, 2.0, -2.0)] 
-
     elif wtype == "sine2pi":
         wtable = [math.sin(i * math.pi * 2) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
-
     elif wtype == "cos2pi":
         wtable = [math.cos(i * math.pi * 2) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
     elif wtype == "cos":
@@ -397,9 +399,9 @@ def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0):
         if size < 32:
             bsize = size
         else:
-            bsize = size / randint(2, 16)
+            bsize = size / int(rf(2, 16))
 
-        btable = [ [wave_types[randint(0, len(wave_types)-1)], rand(lowval, highval)] for i in range(bsize) ]
+        btable = [ [wave_types[int(rf(0, len(wave_types)-1))], rf(lowval, highval)] for i in range(bsize) ]
 
         if len(btable) > 0:
             btable[0] = lowval
@@ -407,9 +409,6 @@ def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0):
             btable = [lowval]
 
         wtable = breakpoint(btable, size) 
-    elif wtype == "vsine":
-        numsines = size / randint(2, 16)
-
     elif wtype == "flat":
         wtable = [highval for i in range(size)]
     
@@ -551,6 +550,14 @@ def ftc(frames):
 
     return frames
 
+def fth(frames):
+    """ frames to hz """
+    if frames > 0:
+        return (1.0 / frames) * audio_params[2]
+
+    return 0
+
+
 def htf(hz):
     """ hz to frames """
     if hz > 0:
@@ -616,6 +623,23 @@ def read(filename):
 
     return snd
 
+def poly(p, a=[]):
+    p = Process(target=p, args=(a,))
+    p.start()
+
+    return p 
+
+def play(out='', cache=False):
+    """ A silly hack to enable another silly hack """
+    if cache: filename = cache(out)
+
+    shhh = open(os.devnull, 'w')
+    s = subprocess.Popen(['aplay', '-q', '-f', 'cd'], stdin=subprocess.PIPE, stdout=shhh, stderr=shhh)
+    s.communicate(out)
+    shhh.close()
+
+    return out
+
 def delay(frames):
     target = (frames / 44100.0) + time.time()
 
@@ -626,8 +650,16 @@ def delay(frames):
 
     return True
 
+def stream(outs=['']):
+    shhh = open(os.devnull, 'w')
 
+    for out in outs:
+        filename = cache(out)
+        p = subprocess.Popen(['aplay', '-f', 'cd', filename], shell=False, stdout=shhh, stderr=shhh)
 
+    shhh.close()
+
+    return outs
 
 def args():
     return [arg for arg in sys.argv if arg != '']
@@ -751,7 +783,7 @@ def pan(slice, pan_pos=0.5, amp=1.0):
     slice = audioop.add(lslice, rslice, audio_params[1])
     return audioop.mul(slice, audio_params[1], amp)
 
-def env(audio_string, wavetable_type="sine", fullres=False, highval=1.0, lowval=0.0, amp=1.0):
+def env(audio_string, wavetable_type="sine", fullres=False, highval=1.0, lowval=0.0):
     # Very short envelopes are possible...
     if flen(audio_string) < dsp_grain * 4 or fullres == True:
         packets = split(audio_string, 1)
@@ -759,7 +791,7 @@ def env(audio_string, wavetable_type="sine", fullres=False, highval=1.0, lowval=
         packets = split(audio_string, dsp_grain)
 
     wtable = wavetable(wavetable_type, len(packets), highval, lowval)
-    packets = [audioop.mul(packet, audio_params[1], wtable[i] * amp) for i, packet in enumerate(packets)]
+    packets = [audioop.mul(packet, audio_params[1], wtable[i]) for i, packet in enumerate(packets)]
 
     return ''.join(packets) 
 
@@ -787,6 +819,7 @@ def drift(sound, amount):
     sound = [ transpose(sound[i], freqs[i]) for i in range(len(sound)) ]
 
     return ''.join(sound)
+
 
 def fnoise(sound, coverage):
     target_frames = int(flen(sound) * coverage)

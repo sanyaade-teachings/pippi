@@ -24,38 +24,35 @@ def play(params={}):
     insamp = params.get('rec', False)
     roll = params.get('roll', False)
 
+
     drums = [{
         'name': 'clap',
         'shortname': 'c',
-        'snd': dsp.read('sounds/lowpaperclips.wav').data if insamp is False else dsp.capture(dsp.mstf(500)),
         'pat': [0, 0, 1, 0],
         'vary': [0, 1, 0, 0],
         'offset': 0,
-        'width': 0.6,
+        'width': 0.1,
         }, {
         'name': 'hihat',
         'shortname': 'h',
-        'snd': dsp.read('sounds/paperclips.wav').data,
         'pat': [[1, 1]],
         'vary': [1, [1, 1]],
         'offset': 400,
-        'width': 0.05,
+        'width': 0.09,
         }, {
         'name': 'snare',
         'shortname': 's',
-        'snd': dsp.read('sounds/lowpaperclips.wav').data,
         'pat': [1, 0, 1, 0],
         'vary': [0, 0, 1, 1],
         'offset': 500,
-        'width': 0.1,
+        'width': 0.5,
         }, {
         'name': 'kick',
         'shortname': 'k',
-        'snd': dsp.read('sounds/lowpaperclips2.wav').data,
         'pat': [1, 0, 1, 0, 0, 0, 0, 0],
         'vary': [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0],
         'offset': 0,
-        'width': 0.4,
+        'width': 0.8,
         }]
 
 
@@ -75,16 +72,19 @@ def play(params={}):
         return dsp.env(''.join(o), dsp.randchoose(wtypes))
 
 
-    def kickit(snd):
+    def kickit(drum):
         out = ''
         for b in range(beats):
-            s = dsp.cut(snd['snd'], dsp.randint(0, snd['offset']), width)
+            #s = dsp.capture(dsp.mstf(dsp.randint(20, 100)))
+            s = dsp.capture(dsp.stf(1))
+            #s = dsp.transpose(s, 2)
+            #s = dsp.cut(snd, dsp.randint(0, drum['offset']), dsp.mstf(10))
 
             if alias == True:
                 s = dsp.alias(s)
 
-            if bend == True:
-                s = dsp.transpose(s, dsp.rand(-0.4, 0.4) + 1)
+            #if bend == True:
+                #s = dsp.transpose(s, dsp.rand(-0.4, 0.4) + 1)
 
             if skitter == True:
                 prebeat = dsp.mstf(dsp.randint(10, 400))
@@ -103,9 +103,9 @@ def play(params={}):
 
             if pattern == True:
                 if dsp.randint(0,3) == 0:
-                    amp = snd['vary'][b % len(snd['vary'])]
+                    amp = drum['vary'][b % len(drum['vary'])]
                 else:
-                    amp = snd['pat'][b % len(snd['pat'])]
+                    amp = drum['pat'][b % len(drum['pat'])]
             else:
                 amp = 1.0
 
@@ -142,26 +142,56 @@ def play(params={}):
     if pinecone == True:
         # Do it in packets
         # Start from position P, take sample of N length (audio rates), apply envelope, move to position P + Q, repeat
-        pminlen = dsp.mstf(1)
+        startlen = dsp.flen(out)
+        num_layers = dsp.randint(3, 7)
+        num_points = dsp.randint(50, 500)
+        pad_curves = [ dsp.breakpoint([ dsp.rand(0, 140) for i in range(dsp.randint(5, 15)) ], num_points) for i in range(num_layers) ]
+        len_curves = [ dsp.breakpoint([ dsp.rand(1, 120) for i in range(dsp.randint(5, 15)) ], num_points) for i in range(num_layers) ]
+        pos_curves = [ dsp.breakpoint([ dsp.rand(0, 1) for i in range(dsp.randint(5, 15)) ], num_points) for i in range(num_layers) ]
+        pan_curves = [ dsp.breakpoint([ dsp.rand(0, 1) for i in range(dsp.randint(5, 15)) ], num_points) for i in range(num_layers) ]
+        amp_curves = [ dsp.breakpoint([ dsp.rand(0.1, 2) for i in range(dsp.randint(15, 35)) ], num_points) for i in range(num_layers) ]
+
+        pminlen = dsp.mstf(60)
         pmaxlen = dsp.mstf(500)
-        pnum = dsp.randint(3, 5)
+    
         pinecones = []
-        for p in range(pnum):
+
+        for pinecone in range(num_layers):
             segment = dsp.cut(out, dsp.randint(0, dsp.flen(out) - pmaxlen), dsp.randint(pminlen, pmaxlen))
-            pskip = dsp.flen(segment) / dsp.randint(30, 500) + 1 
-            ppos = 0
-            pupp = 5000 if dsp.randint(0, 2) == 0 else 50
-            plen = dsp.htf(dsp.rand(5, pupp))
-            while ppos + pskip + 400 < pmaxlen:
-                p = dsp.cut(segment, ppos + dsp.randint(0, 200), plen + dsp.randint(0, 200))
-                p = dsp.env(p, 'random', True, dsp.rand(0.8, 1.0), 0.0)
-                pinecones += [ p ]
-                ppos += pskip
 
-        out = dsp.pan(''.join(pinecones), dsp.rand())
+            pad_curve = pad_curves[pinecone]
+            len_curve = len_curves[pinecone]
+            pos_curve = pos_curves[pinecone]
+            pan_curve = pan_curves[pinecone]
+            amp_curve = amp_curves[pinecone]
 
+            grains = [ dsp.cut(segment, pos_curve[i] * dsp.flen(segment) - dsp.mstf(len_curve[i]), dsp.mstf(len_curve[i])) for i in range(num_points) ]
 
-    #out = dsp.pan(out, 1)
+            grains = [ dsp.pad(grains[i], 0, int(dsp.mstf(pad_curve[i]))) for i in range(num_points) ]
+            grains = [ dsp.pan(grains[i], pan_curve[i]) for i in range(num_points) ]
+            grains = [ dsp.amp(grains[i], amp_curve[i]) for i in range(num_points) ]
+
+            pinecones += [ ''.join(grains) ]
+
+        out = dsp.mix([dsp.pan(pinecone, dsp.rand()) for pinecone in pinecones])
+
+        if dsp.flen(out) > startlen:
+            out = dsp.cut(out, 0, startlen)
+
+        #pinecones = []
+        #for p in range(pnum):
+            #segment = dsp.cut(out, dsp.randint(0, dsp.flen(out) - pmaxlen), dsp.randint(pminlen, pmaxlen))
+            #pskip = dsp.flen(segment) / dsp.randint(30, 500) + 1 
+            #ppos = 0
+            #pupp = 5000 if dsp.randint(0, 2) == 0 else 50
+            #plen = dsp.htf(dsp.rand(5, pupp))
+            #while ppos + pskip + 400 < pmaxlen:
+                #p = dsp.cut(segment, ppos + dsp.randint(0, 200), plen + dsp.randint(0, 200))
+                #p = dsp.env(p, 'random', True, dsp.rand(0.8, 1.0), 0.0)
+                #pinecones += [ p ]
+                #ppos += pskip
+
+        #out = dsp.pan(''.join(pinecones), dsp.rand())
 
     if roll == True:
         out = dsp.split(out, dsp.flen(out) / (measures * 16))

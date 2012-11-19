@@ -1,19 +1,18 @@
-import dsp
-import tune
+from pippi import dsp
+from pippi import tune
 
 def play(params={}):
     length      = params.get('length', dsp.stf(dsp.rand(0.1, 1)))
     volume      = params.get('volume', 20.0)
     volume = volume / 100.0 # TODO: move into param filter
     octave      = params.get('octave', 2) + 1 # Add one to compensate for an old error for now
-    note        = params.get('note', ['d'])
+    note        = params.get('note', ['db'])
     note = note[0]
     quality     = params.get('quality', tune.major)
     glitch      = params.get('glitch', False)
     superglitch = params.get('superglitch', False)
     glitchpad   = params.get('glitch-padding', 0)
     glitchenv   = params.get('glitch-envelope', False)
-    pulse       = params.get('pulse', False)
     env         = params.get('envelope', False)
     ratios      = params.get('ratios', tune.terry)
     pad         = params.get('padding', False)
@@ -25,6 +24,8 @@ def play(params={}):
     scale       = params.get('scale', [1,6,5,4,8])
     shuffle     = params.get('shuffle', False) # Reorganize input scale
     reps        = params.get('repeats', len(scale))
+    alias       = params.get('alias', False)
+    phase       = params.get('phase', False)
 
     if instrument == 'r':
         instrument = 'rhodes'
@@ -34,14 +35,17 @@ def play(params={}):
         tone = dsp.read('sounds/clarinet.wav').data
     elif instrument == 'v':
         instrument = 'vibes'
-        tone = dsp.read('sounds/cz-vibes.wav').data
+        tone = dsp.read('sounds/glock220.wav').data
     elif instrument == 't':
         instrument = 'tape triangle'
         tone = dsp.read('sounds/tape220.wav').data
     elif instrument == 'g':
-        instrument = 'guitar'
-        tone = dsp.mix([dsp.read('sounds/guitar.wav').data, 
-                        dsp.read('sounds/banjo.wav').data])
+        instrument = 'glade'
+        tone = dsp.read('sounds/glade.wav').data 
+    elif instrument == 'i':
+        instrument = 'input'
+        tone = dsp.capture(dsp.stf(1))
+
 
     out = ''
 
@@ -51,12 +55,21 @@ def play(params={}):
     if shuffle is not False:
         freqs = dsp.randshuffle(freqs)
 
+    if phase is not False:
+        ldivs = [0.5, 0.75, 2, 3, 4]
+        ldiv = dsp.randchoose(ldivs)
+        length = dsp.bpm2ms(bpm) / ldiv
+        length = dsp.mstf(length)
+        reps = ldiv if ldiv > 1 else 4
+
     for i in range(reps):
         #freq = tune.step(i, note, octave, scale, quality, ratios)
         freq = freqs[i % len(freqs)]
 
         if instrument == 'clarinet':
             diff = freq / 293.7
+        elif instrument == 'vibes':
+            diff = freq / 740.0 
         else:
             diff = freq / 440.0
 
@@ -66,6 +79,11 @@ def play(params={}):
             clang = dsp.env(clang, env)
 
         clang = dsp.fill(clang, length)
+
+        if instrument == 'vibes':
+            clang = dsp.pad(clang, 0, length - dsp.flen(clang))
+        else: 
+            clang = dsp.fill(clang, length)
 
         if width is not False:
             width = int(length * float(width))
@@ -80,32 +98,20 @@ def play(params={}):
 
         out += clang
 
-    if glitch == True:
-        if superglitch is not False:
-            mlen = dsp.mstf(superglitch)
-        else:
-            mlen = dsp.flen(out) / 8
+    if alias is not False:
+        out = dsp.alias(out)
 
-        out = dsp.vsplit(out, dsp.mstf(1), mlen)
+    if glitch is not False:
+        mlen = dsp.flen(out) / 8
+
+        out = dsp.vsplit(out, dsp.mstf(5), dsp.mstf(300))
         out = [dsp.pan(o, dsp.rand()) for o in out]
 
-        if glitchenv is not False:
-            out = [dsp.env(o, glitchenv) for o in out]
-
-        if glitchpad > 0:
-            out = [dsp.pad(o, 0, dsp.mstf(dsp.rand(0, glitchpad))) for o in out]
+        out = [dsp.env(o, 'sine') for o in out]
+    
+        out = [dsp.pad(o, 0, dsp.mstf(dsp.rand(0, glitchpad))) for o in out]
 
         out = ''.join(dsp.randshuffle(out))
-
-    if pulse == True:
-        plen = dsp.mstf(dsp.rand(500, 1200))
-        out = dsp.split(out, plen)
-        mpul = len(out) / dsp.randint(4, 8)
-
-        out = [dsp.env(o) * mpul for i, o in enumerate(out) if i % mpul == 0]
-        opads = dsp.wavetable('sine', len(out), dsp.rand(plen * 0.25, plen))
-        out = [dsp.pad(o, 0, int(opads[i])) for i, o in enumerate(out)]
-        out = dsp.env(''.join(out))
 
     if bend == True:
         out = dsp.split(out, 441)

@@ -1,5 +1,5 @@
 import re
-import dsp
+from pippi import dsp
 
 class Param:
     patterns = {
@@ -82,8 +82,9 @@ class Param:
         return value
 
     def convert_beat(self, value, output_type):
+        value = self.patterns['float'].search(value).group(0)
         if output_type == 'frame':
-            value = dsp.bpm2ms(self.bpm) / self.convert_integer(value)
+            value = dsp.bpm2ms(self.bpm) / float(value)
             value = dsp.mstf(value)
 
         return value 
@@ -174,7 +175,7 @@ def unpack(cmd, config):
         # Look up the list of registered generators and try to expand
         # the shortname into the full generator name
         if len(cmd) == 1 and cmd[0] in config['generators']:
-            params.data['generator'] = config['generators'][cmd[0]]['name']
+            params.data['generator'] = config['generators'][cmd[0]]
 
         # Look up the list of registered params and try to expand
         # the shortname into the full param name, leaving the value 

@@ -4,3 +4,7 @@
 
 sounds/*.wav
 sounds/*.aif
+renders/*
+
+build/
+dist/
