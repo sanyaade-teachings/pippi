@@ -1,6 +1,8 @@
 Very alpha!
 
-Performance is best when rt.pyx and dsp.pyx are compiled as cython modules, otherwise just rename the files to add a .py extension.
+To install pippi:
+    
+    python setup.py install
 
 Basic usage:
 

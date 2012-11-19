@@ -6,5 +6,6 @@ sounds/*.wav
 sounds/*.aif
 renders/*
 
-build/
-dist/
+/build/
+/dist/
+/*.egg-info/

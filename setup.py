@@ -8,4 +8,7 @@ setup(name='pippi',
         author_email='erik@hecanjog.com',
         license='Public Domain',
         packages=['pippi'],
+        install_requires=[
+            'pyalsaaudio',
+        ],
         zip_safe=False)
