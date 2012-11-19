@@ -10,5 +10,6 @@ setup(name='pippi',
         packages=['pippi'],
         install_requires=[
             'pyalsaaudio',
+            'termcolor',
         ],
         zip_safe=False)
