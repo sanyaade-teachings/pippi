@@ -12,4 +12,7 @@ setup(name='pippi',
             'pyalsaaudio',
             'termcolor',
         ],
+        test_suite='nose.collector',
+        tests_require=['nose'],
+        scripts=['bin/pippi'],
         zip_safe=False)

@@ -1,12 +1,12 @@
 Very alpha!
 
-To install pippi:
+To install pippi (may need to be run as root):
     
     python setup.py install
 
-Basic usage:
+Basic usage after install:
 
-    python console.py
+    pippi
 
     Pippi Console
     pippi: dr o:2 wf:impulse n:d.a.e t:30s h:1.2.3
