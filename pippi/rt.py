@@ -40,7 +40,7 @@ def dsp_loop(out, buffer, params, voice_params, voice_id):
             setattr(voice_params, voice_id, params)
             break
 
-def out(play, buffers, voice_params, voice_id, tick):
+def out(generator, buffers, voice_params, voice_id, tick):
     """ Master playback process spawned by play()
         Manages render and playback processes  
         """
@@ -53,7 +53,7 @@ def out(play, buffers, voice_params, voice_id, tick):
 
     # Spawn a render process which will write generator output
     # into the buffer for this voice
-    r = mp.Process(target=render, args=(play, buffers, params, voice_id))
+    r = mp.Process(target=render, args=(generator.play, buffers, params, voice_id))
     r.start()
     r.join()
 
@@ -89,7 +89,8 @@ def out(play, buffers, voice_params, voice_id, tick):
 
         if regenerate is True and cooking is False:
             cooking = True
-            next = mp.Process(target=render, args=(play, buffers, params, voice_id))
+            generator = reload(generator)
+            next = mp.Process(target=render, args=(generator.play, buffers, params, voice_id))
             next.start()
 
             if params.get('once', False) == True:
@@ -101,10 +102,6 @@ def out(play, buffers, voice_params, voice_id, tick):
 
         if quantize is not False:
             tick.wait()
-
-        #if params['generator']['name'] == 'ins':
-        #    buffer = dsp.split(buffer, dsp.flen(buffer) / 4)
-        #    buffer = ''.join(dsp.randshuffle(buffer))
 
         dsp_loop(out, buffer, params, voice_params, voice_id)
         params = getattr(voice_params, voice_id)

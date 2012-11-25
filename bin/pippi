@@ -66,7 +66,7 @@ class Pippi(cmd.Cmd):
         if 'bpm' not in params:
             params['bpm'] = self.bpm
 
-        #params.pop('device')
+        params.pop('device')
 
         try:
             # Increment voice id and print voice information. TODO: pretty print & abstract
@@ -79,7 +79,6 @@ class Pippi(cmd.Cmd):
             #
             # Voices are stored in a shared namespace (self.voices) and keyed by id.
 
-            #voice = {'snd': '', 'next': '', 'loop': True, 'tvol': 1.0, 'params': params}
             setattr(self.buffers, self.voice_id, '')
             setattr(self.params, self.voice_id, params)
 
@@ -92,7 +91,7 @@ class Pippi(cmd.Cmd):
 
             generator = 'orc.' + params.get('generator')['name']
             generator = __import__(generator, globals(), locals(), ['play'])
-            playback_process = mp.Process(target=rt.out, args=(generator.play, self.buffers, self.params, self.voice_id, self.tick))
+            playback_process = mp.Process(target=rt.out, args=(generator, self.buffers, self.params, self.voice_id, self.tick))
             playback_process.start()
 
         except ImportError:

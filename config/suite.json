@@ -3,6 +3,15 @@
     "bpm": 65.0,
 
     "generators": {
+        "sl": {
+            "name": "slurp",
+            "params": {
+                "device": "T6_pair1",
+                "loop": true
+            }
+        },
+
+
         "sh": {
             "name": "shine",
             "params": {
