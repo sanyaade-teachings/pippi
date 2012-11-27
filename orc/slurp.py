@@ -1,15 +1,17 @@
 from pippi import dsp
 
 def play(params={}):
-    numcycles = dsp.randint(10, 1024)
-    carrier = dsp.wavetable('vary', numcycles)
-    mod = dsp.wavetable('cos2pi', numcycles)
+    numcycles = dsp.randint(10, 524)
 
-    wtable = [ carrier[i] * mod[i] for i in range(numcycles) ]
+    curve_a = dsp.breakpoint([1.0] + [dsp.rand(0.1, 1.0) for r in range(dsp.randint(2, 10))] + [0], numcycles)
+    curve_b = dsp.wavetable('cos', numcycles)
 
-    wtable = [ f * 16000 + 4000 for f in wtable ]
+    pan = dsp.wavetable('vary', numcycles)
 
-    wtable = [ dsp.cycle(f) for f in wtable ]
+    wtable = [ curve_a[i] * curve_b[i] for i in range(numcycles) ]
+    wtable = [ (f * 11000) + 70 for f in wtable ]
 
-    return ''.join(wtable)
+    out = [ dsp.pan(dsp.cycle(wtable[i]), pan[i]) for i in range(numcycles) ]
+
+    return ''.join(out)
 
