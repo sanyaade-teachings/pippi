@@ -4,6 +4,11 @@ import alsaaudio
 import sys
 import time
 
+shortname   = 'cl'
+name        = 'click'
+device      = 'default'
+loop        = True
+
 def play(params={}):
 
     length = params.get('length', dsp.stf(2))

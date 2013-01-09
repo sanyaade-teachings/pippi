@@ -3,6 +3,7 @@ from pippi import dsp
 from pippi import param
 import multiprocessing as mp
 import alsaaudio
+import pyaudio
 
 def grid(tick, bpm):
     os.nice(-19)
@@ -43,13 +44,18 @@ def dsp_loop(out, buffer, params, voice_params, voice_id):
 def out(generator, buffers, voice_params, voice_id, tick):
     """ Master playback process spawned by play()
         Manages render and playback processes  
+
+        Params are collapsed to a key-value dict,
+        where the value is translated to the target 
+        data type, and the key is expanded to the param
+        full name.
         """
 
     # Give this process a high priority to help prevent unwanted audio glitching
     os.nice(-19)
 
     # Fetch voice params from namespace
-    params = getattr(voice_params, voice_id)
+    params = getattr(voice_params, voice_id).collapse()
 
     # Spawn a render process which will write generator output
     # into the buffer for this voice
@@ -63,6 +69,7 @@ def out(generator, buffers, voice_params, voice_id, tick):
     # Open a connection to an ALSA PCM device
     device = params.get('device', 'default')
 
+    # TODO implement pyaudio support
     try:
         out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
     except:
@@ -81,7 +88,7 @@ def out(generator, buffers, voice_params, voice_id, tick):
     volume              = 1.0
     next                = False
 
-    while params['loop'] == True:
+    while params.get('loop', True) == True:
             
         regenerate    = params.get('regenerate', False)
         quantize      = params.get('quantize', False)
@@ -104,10 +111,9 @@ def out(generator, buffers, voice_params, voice_id, tick):
             tick.wait()
 
         dsp_loop(out, buffer, params, voice_params, voice_id)
-        params = getattr(voice_params, voice_id)
+        params = getattr(voice_params, voice_id).collapse()
 
     # Cleanup 
     delattr(voice_params, voice_id)
     delattr(buffers, voice_id)
-
 

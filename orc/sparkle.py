@@ -1,5 +1,10 @@
-import dsp
-import tune
+from pippi import dsp
+from pippi import tune
+
+shortname   = 'sp'
+name        = 'sparkle'
+device      = 'default'
+loop        = True
 
 def play(params={}):
 

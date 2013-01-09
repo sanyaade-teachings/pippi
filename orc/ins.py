@@ -1,6 +1,11 @@
 from pippi import dsp
 from pippi import tune
 
+shortname       = 'in'
+name            = 'ins'
+device          = 'default'
+loop            = True
+
 def play(params={}):
     length          = params.get('length', dsp.mstf(2000))
     buffer_length   = params.get('buffer', dsp.mstf(2000))

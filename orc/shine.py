@@ -1,6 +1,21 @@
 from pippi import dsp
 from pippi import tune
 
+shortname   = 'sh'
+name        = 'shine'
+#device      = 'T6_pair2'
+device      = 'default'
+loop        = True
+
+# Generator-specific param types
+types       = {
+    'o': {
+        'name': 'octave',
+        'type': 'integer',
+        'accepts': ['integer'],
+    }
+}
+
 def play(params={}):
     length      = params.get('length', dsp.stf(dsp.rand(0.1, 1)))
     volume      = params.get('volume', 20.0)

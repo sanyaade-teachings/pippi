@@ -2,6 +2,11 @@ from pippi import dsp
 from pippi import tune
 import math
 
+shortname   = 'dr'
+name        = 'drone'
+device      = 'default'
+loop        = True
+
 def play(params={}):
     length = params.get('length', dsp.stf(20))
     volume = params.get('volume', 20.0) 

@@ -2,6 +2,107 @@ import re
 from pippi import dsp
 
 class Param:
+    types = {
+            'o': {
+                'name': 'octave',
+                'type': 'integer',
+                'accepts': ['integer', 'float'],
+                },
+            'm': {
+                'name': 'multiple',
+                'type': 'integer',
+                'accepts': ['integer'],
+                },
+            'n': {
+                'name': 'note',
+                'type': 'note-list',
+                'accepts': ['note-list'],
+                },
+            'h': {
+                'name': 'harmonic',
+                'type': 'integer-list',
+                'accepts': ['integer-list'],
+                },
+            'e': {
+                'name': 'envelope',
+                'type': 'string',
+                'accepts': ['alphanumeric'],
+                },
+            'wf': {
+                'name': 'waveform',
+                'type': 'string',
+                'accepts': ['alphanumeric'],
+                },
+            'd': {
+                'name': 'drum',
+                'type': 'string-list',
+                'accepts': ['string-list'],
+                },
+            'r': {
+                'name': 'repeats',
+                'type': 'integer',
+                'accepts': ['integer'],
+                },
+            'i': {
+                'name': 'instrument',
+                'type': 'string',
+                'accepts': ['alphanumeric'],
+                },
+            's': {
+                'name': 'scale',
+                'type': 'integer-list',
+                'accepts': ['integer-list'],
+                },
+            'sp': {
+                'name': 'speed',
+                'type': 'float',
+                'accepts': ['float', 'integer'],
+                },
+            't': {
+                'name': 'length',
+                'type': 'frame',
+                'accepts': ['beat', 'second', 'millisecond'],
+                },
+            'w': {
+                'name': 'width',
+                'type': 'frame',
+                'accepts': ['integer', 'beat', 'millisecond', 'second'],
+                },
+            'v': {
+                'name': 'volume',
+                'type': 'float',
+                'input_range': [0, 100],
+                'output_range': [0.0, 1.0],
+                'accepts': ['integer', 'float'],
+                },
+            're': {
+                'name': 'regenerate',
+                },
+            'qu': {
+                'name': 'quantize',
+                },
+            'a': {
+                'name': 'alias',
+                },
+            'tw': {
+                'name': 'tweet',
+                },
+            'be': {
+                'name': 'bend',
+                },
+            'bpm': {
+                'name': 'bpm',
+                'type': 'float',
+                'accepts': ['integer', 'float'],
+                },
+            'generator': {
+                    'name': 'generator',
+                    'type': 'string',
+                    'accepts': ['alphanumeric'],
+                },
+
+            }
+
     patterns = {
             'millisecond':  re.compile(r'^ms\d+\.?\d*|\d+\.?\d*ms$'), 
             'second':       re.compile(r'^s\d+\.?\d*|\d+\.?\d*s$'), 
@@ -18,7 +119,15 @@ class Param:
             }
 
     def __init__(self, data={}):
-        self.data = { param: { 'value': value } for (param, value) in data.iteritems() }
+        """ Create an instance with key-value dict or list of key-value lists
+        """
+        if hasattr(data, 'iteritems'):
+            self.data = { param: { 'value': value } for (param, value) in data.iteritems() }
+        elif hasattr(data, '__iter__'):
+            self.data = {}
+            for param in data:
+                value = param[1] if len(param) == 2 else True
+                self.data[param[0]] = {'value': value}
 
     def istype(self, value, flag):
         return self.patterns[flag].search(value)
@@ -84,7 +193,7 @@ class Param:
     def convert_beat(self, value, output_type):
         value = self.patterns['float'].search(value).group(0)
         if output_type == 'frame':
-            value = dsp.bpm2ms(self.bpm) / float(value)
+            value = dsp.bpm2ms(self.data.get('bpm')['value']) / float(value)
             value = dsp.mstf(value)
 
         return value 
@@ -132,6 +241,10 @@ class Param:
 
         if param_name in self.data:
             param = self.data[param_name]
+            if param_name not in self.types:
+                return param.get('value', False)
+
+            param.update(self.types[param_name])
         else:
             return False
 
@@ -154,8 +267,24 @@ class Param:
 
         return param 
 
+    def set(self, param_key, value):
+        if param_key in self.data:
+            param = self.data[param_key]
+            param['value'] = value
+            self.data[param_key] = param 
 
-def unpack(cmd, config):
+    def collapse(self):
+        data = {}
+
+        for param in self.data:
+            type = self.types.get(param, {'name': param})
+
+            data[type['name']] = self.get(param)
+
+        return data
+
+
+def unpack(cmd, generators, params):
     """ Format an input string as an expanded dictionary based on 
         required configuration options.
         """
@@ -174,6 +303,7 @@ def unpack(cmd, config):
     for cmd in cmds:
         # Look up the list of registered generators and try to expand
         # the shortname into the full generator name
+        #if len(cmd) == 1 and cmd[0] in config['generators']:
         if len(cmd) == 1 and cmd[0] in config['generators']:
             params.data['generator'] = config['generators'][cmd[0]]
 
