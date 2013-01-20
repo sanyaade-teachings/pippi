@@ -447,7 +447,11 @@ def log(message, mode="a"):
 
 def fill(string, length, chans=2):
     if flen(string) < length:
-        repeats = length / flen(string) + 1
+        try:
+            repeats = length / flen(string) + 1
+        except ZeroDivisionError:
+            return string
+
         string = string * repeats
 
     return cut(string, 0, length)

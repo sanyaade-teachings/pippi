@@ -4,6 +4,12 @@ import alsaaudio
 import sys
 import time
 
+shortname   = 'cc'
+name        = 'cedarclick'
+device      = 'T6_pair3'
+#device      = 'default'
+loop        = True
+
 def play(params={}):
 
     length = params.get('length', dsp.stf(2))

@@ -74,6 +74,7 @@ notes = {
         'ab': 11, 
         }
 
+
 def nti(note):
     """ Note to index
             returns the index of enharmonic note names
@@ -85,6 +86,33 @@ def ntf(note, octave=4, ratios=terry):
     """ Note to freq 
     """
     return ratios[nti(note)][0] / ratios[nti(note)][1] * (a0 * (2.0**octave))
+
+def stf(index):
+    degree = index % 24
+    octave = index / 24
+
+    return (2 ** (degree / 24.0)) * (a0 / 4.0) * (2.0 ** octave)
+
+def fts(freq):
+    # Try to find closest eq temp freq to input
+    # Generate entire range of possible eq temp freqs
+    all_freq = [ stf(index) for index in range(2**8) ]
+
+    count = 0
+    cfreq = 0
+    while freq > cfreq and count < 2**8:
+        cfreq = all_freq[count]
+        count = count + 1
+
+    return count - 1
+
+def nts(note, octave):
+    octave = octave if octave >= -2 else -2
+    octave = octave if octave <= 8 else 8 
+
+    degree = notes[note] * 2
+
+    return degree + ((octave + 2) * 24) 
 
 def fromdegrees(scale_degrees=[1,3,5], octave=2, root='c', scale=major, ratios=just):
     freqs = []

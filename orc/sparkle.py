@@ -43,8 +43,10 @@ def play(params={}):
 
     tones = []
     multiple *= 1.0
+    freqs = tune.fromdegrees(dsp.randshuffle(scale), octave, note[0])
     for i in range(dsp.randint(2,4)):
-        freq = tune.step(i, note, octave, dsp.randshuffle(scale), quality, ratios)
+        #freq = tune.step(i, note, octave, dsp.randshuffle(scale), quality, ratios)
+        freq = freqs[i % len(freqs)]
 
         snds = [ dsp.tone(length, freq * h, waveform) for h in harmonics ]
         for snd in snds:

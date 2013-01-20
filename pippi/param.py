@@ -61,12 +61,23 @@ class Param:
             't': {
                 'name': 'length',
                 'type': 'frame',
+                'accepts': ['beat', 'second', 'millisecond', 'integer'],
+                },
+            'p': {
+                'name': 'padding',
+                'type': 'frame',
                 'accepts': ['beat', 'second', 'millisecond'],
                 },
+
             'w': {
                 'name': 'width',
                 'type': 'frame',
                 'accepts': ['integer', 'beat', 'millisecond', 'second'],
+                },
+            'tt': {
+                'name': 'trigger_id',
+                'type': 'integer',
+                'accepts': ['integer'],
                 },
             'v': {
                 'name': 'volume',
@@ -93,8 +104,14 @@ class Param:
             'bpm': {
                 'name': 'bpm',
                 'type': 'float',
-                'accepts': ['integer', 'float'],
+                'accepts': ['float', 'integer'],
                 },
+            'device': {
+                    'name': 'device',
+                    'type': 'string',
+                    'accepts': ['alphanumeric'],
+                },
+
             'generator': {
                     'name': 'generator',
                     'type': 'string',
@@ -130,7 +147,7 @@ class Param:
                 self.data[param[0]] = {'value': value}
 
     def istype(self, value, flag):
-        return self.patterns[flag].search(value)
+        return self.patterns[flag].search(str(value))
 
     def convert(self, value, input_type, output_type):
         # This is a dumb way to do this. Rehearsal approaches though...
@@ -166,7 +183,7 @@ class Param:
 
 
     def convert_float(self, value, output_type='float'):
-        value = self.patterns['float'].search(value).group(0)
+        value = self.patterns['float'].search(str(value)).group(0)
 
         if output_type == 'float':
             value = float(value)
@@ -232,7 +249,7 @@ class Param:
 
         return value
 
-    def get(self, param_name):
+    def get(self, param_name, default=False):
         """ Get a param value by its key and 
             convert from an acceptable input type 
             to the specified output type.
@@ -246,7 +263,7 @@ class Param:
 
             param.update(self.types[param_name])
         else:
-            return False
+            return default
 
         if 'accepts' in param and 'type' in param:
             # Loop through each acceptable input type
@@ -272,6 +289,13 @@ class Param:
             param = self.data[param_key]
             param['value'] = value
             self.data[param_key] = param 
+        else:
+            if param_key in self.types:
+                self.data[param_key] = self.types[param_key]
+            else:
+                self.data[param_key] = {}
+            
+            self.data[param_key]['value'] = value
 
     def collapse(self):
         data = {}

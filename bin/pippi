@@ -1,15 +1,19 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 
 import cmd
 import os
 import sys
 import re
 import time
+import subprocess
 
 from pippi import dsp
 from pippi import param
 from pippi import rt
+from pippi import tune 
 import alsaaudio
+
+from vcosc import osc
 
 import multiprocessing as mp
 from termcolor import colored
@@ -27,6 +31,10 @@ class Pippi(cmd.Cmd):
     vid = 0
 
     def __init__(self):
+
+        if os.system('ssh pi \'sudo date -s "' + time.asctime() + ' CST"\'') == 0:
+            print 'Synced time on raspberry pi'
+
         cmd.Cmd.__init__(self)
 
         # Global pippi config settings including
@@ -61,6 +69,11 @@ class Pippi(cmd.Cmd):
         self.server = mp.Manager()
         self.buffers = self.server.Namespace()
         self.params = self.server.Namespace()
+        self.groups = {}
+
+        self.pi = self.server.Namespace()
+        self.pi_ip = '192.168.1.222'
+        self.pi_port = 9000 
 
         # TODO probably some sort of hash function 
         # would be better than this integer-as-id hack.
@@ -106,70 +119,155 @@ class Pippi(cmd.Cmd):
 
         print
 
+    def do_bpm(self, cmd):
+        try:
+            # Update self.bpm
+            # Restart grid process with new bpm
+            # Recursive update of all running voices by default
+                # Only update master if 'master' param passed
+            self.grid.terminate()
+            self.bpm = float(cmd)
+            self.grid = mp.Process(target=rt.grid, args=(self.tick, self.bpm))
+            self.grid.start()
+        except:
+            pass
 
-    def do_c(self, cmd):
+
+    def do_pi(self, cmd):
         cmd = cmd.split(' ')
-        t = cmd[0]
-        cmd.pop(0)
-        self.cc += [ t ]
-        print self.cc
+        client = osc.Client(self.pi_ip, self.pi_port)
+        client.message("/%s/%s" % (cmd[0], cmd[1]), cmd[2])
+
+    def do_dac(self, cmd):
+        cmd = cmd.split(' ')
+        client = osc.Client(self.pi_ip, self.pi_port)
+        if cmd[1] == 'i':
+            value = int(cmd[2])
+        elif cmd[1] == 'f':
+            value = tune.fts(int(cmd[2]))
+        elif cmd[1] == 'n':
+            value = tune.nts(cmd[2], int(cmd[3]))
+
+        client.message("/dac/%s" % cmd[0], value)
+
+
+    def do_test(self, cmd):
+        cmd = cmd.split(' ')
+        client = osc.Client(self.pi_ip, self.pi_port)
+        octs = range(-2, 10, 1)
+        for i in range(int(cmd[0])):
+            msgs = [('/tick/1', 1, dsp.rand(0.5, 1)) for m in range(5)]
+
+            #client.bundle("/dac/0", tune.nts('a', octs[i % len(octs)]))
+            client.bundle(msgs)
+            #dsp.delay(dsp.mstf(int(cmd[1])))
 
     def do_u(self, cmd):
-        cmds = cmd.split(' ')
-        voice_id = cmds[0]
-        self.update_param(voice_id, cmds[1], cmds[2])
+        try:
+            cmds = cmd.split(' ')
+            voice_id = cmds.pop(0).strip()
+
+            voice_list = re.match(r'^\d+(\.\d+)+$', voice_id)
+
+            if voice_list is not None:
+                voice_list = voice_id.split('.')
+                for voice_id in voice_list:
+                    self.update_param(voice_id, cmds=cmds)
+            else:
+                self.update_param(voice_id, cmds=cmds)
+        except:
+            pass
+
+    def do_uu(self, cmd):
+        try:
+            gen = 'all'
+
+            cmds = cmd.split(' ')
+            if cmds[0] != '' and cmds[0] != 'all':
+                gen = cmds.pop(0)
+
+            for voice_id in range(1, int(self.voice_id) + 1):
+                voice_id = str(voice_id)
+                if hasattr(self.params, voice_id):
+                    params = getattr(self.params, voice_id)
+
+                    if params.get('generator') in gen or gen == 'all':
+                        self.update_param(voice_id, cmds=cmds)
+        except:
+            pass
 
     def do_ss(self, cmd):
-        gen = 'all'
-
-        cmds = cmd.split(' ')
-        if cmds[0] != '' and cmds[0] != 'all':
-            gen = cmds
-
-        for voice_id in range(1, int(self.voice_id) + 1):
-            voice_id = str(voice_id)
-            if hasattr(self.params, voice_id):
-                params = getattr(self.params, voice_id)
-
-                if params.get('generator') in gen or gen == 'all':
-                    self.update_param(voice_id, 'loop', False)
+        try:
+            cmds = cmd.strip().split(' ')
+            gen = cmds.pop(0)
+            gen = gen if len(gen) > 0 else 'all'
+            self.update_params(gen=gen, param='loop', value=False)
+        except:
+            pass
 
     def do_s(self, cmd):
-        cmds = cmd.split(' ')
+        try:
+            cmds = cmd.split(' ')
 
-        for cmd in cmds:
-            voice_id = cmd.strip() 
-            self.update_param(voice_id, 'loop', False)
+            for cmd in cmds:
+                voice_id = cmd.strip() 
+                self.update_param(voice_id, 'loop', False)
+        except:
+            pass
 
     def do_vv(self, cmd):
-        cmds = cmd.split(' ')
-
-        for voice_id in range(1, int(self.voice_id) + 1):
-            self.setvol(str(voice_id), cmds[1], cmds[0])
+        try:
+            cmds = cmd.strip().split(' ')
+            gen = cmds.pop(0)
+            self.update_params(gen=gen, param='target_volume', value=float(cmds[0]) / 100.0)
+        except:
+            pass
 
     def do_v(self, cmd):
-        cmds = cmd.split(' ')
-        self.setvol(cmds[0], cmds[1])
-
-    def setvol(self, voice_id, volume, generator='a'):
-        if hasattr(self.params, voice_id):
-            params = getattr(self.params, voice_id)
-            if generator == params['generator']['name'] or generator == 'a':
-                params['target_volume'] = float(volume) / 100.0
-                setattr(self.params, voice_id, params)
+        try:
+            cmds = cmd.split(' ')
+            self.update_param(cmds[0], 'target_volume', float(cmds[1]) / 100.0)
+        except:
+            pass
 
     def do_i(self, cmd=[]):
-        for voice_id in range(1, int(self.voice_id) + 1):
-            voice_id = str(voice_id)
-            if hasattr(self.params, voice_id):
-                params = getattr(self.params, voice_id)
-                print voice_id, self.format_params(params.data)
+        try:
+            for voice_id in range(1, int(self.voice_id) + 1):
+                voice_id = str(voice_id)
+                if hasattr(self.params, voice_id):
+                    params = getattr(self.params, voice_id)
+                    print voice_id, self.format_params(params.data)
+        except:
+            pass
 
-    def update_param(self, voice_id, param, value):
-        if hasattr(self.params, voice_id):
-            params = getattr(self.params, voice_id)
-            params.set(param, value)
-            setattr(self.params, voice_id, params)
+    def update_params(self, gen='all', param=None, value=None):
+        try:
+            for voice_id in range(1, int(self.voice_id) + 1):
+                voice_id = str(voice_id)
+                if hasattr(self.params, voice_id):
+                    params = getattr(self.params, voice_id)
+
+                    if params.get('generator') == gen or gen == 'all':
+                        self.update_param(voice_id, param, value)
+        except:
+            pass
+
+    def update_param(self, voice_id, param=None, value=None, cmds=None):
+        try:
+            if cmds is not None:
+                for cmd in cmds:
+                    cmd = cmd.split(':')
+                    value = cmd[1] if len(cmd) == 2 else True
+                    value = False if value == 'F' else value
+                    self.update_param(voice_id, cmd[0], value)
+
+            if param is not None and value is not None:
+                if hasattr(self.params, voice_id):
+                    params = getattr(self.params, voice_id)
+                    params.set(param, value)
+                    setattr(self.params, voice_id, params)
+        except:
+            pass
 
     def format_params(self, params=[]):
         # TODO: translate types & better formatting
@@ -178,107 +276,115 @@ class Pippi(cmd.Cmd):
             #value = params[param]['name'] if param == 'generator' else params[param]
             value = params[param]
             param_string += colored(str(param)[0:3] + ': ', 'cyan')
-            param_string += colored(str(value['value']), 'yellow')
+            param_string += colored(str(value['value'])[:10], 'yellow')
             param_string += ' '
         
         return param_string
 
-    def do_p(self, cmd):
-        if cmd in self.config['presets']:
-            cmd = self.config['presets'][cmd]
+    def do_group(self, cmd):
+        try:
+            cmd = cmd.split('--')
+            group = [ a for a in cmd.pop(0).split(' ') if a != '' ]
+            cmd = cmd[0].strip()
 
-            for c in cmd:
-                if len(c) > 2:
-                    self.default(c)
-                    dsp.delay(0.1)
+            for voice in range(int(group[0])):
+                self.default(cmd)
+        except:
+            pass
 
     def default(self, cmd):
-        # Break comma separated commands
-        # into a list of command strings
-        cmds = cmd.strip().split(',')
+        # Safety first!
+        try:
 
-        # For each command string, unpack and load
-        # into a param.Param instance
-        #
-        # For our purposes, a 'command' refers to text typed at the pippi
-        # console, while 'param' refers to the translatable key-value pairs 
-        # passed to the play method of generator scripts.
-        #
-        # So:
-        #   sh o:3
-        #
-        # Could become:
-        #   { 'generator': 'shine', 'octave': {'value': 3, 'type': 'integer'} }
-        # 
-        # And:
-        #   dr h:1.2.3.4 t:4b wf:tri n:eb.g
-        # 
-        # Could become:
-        #   {
-        #       'generator': 'drone',
-        #       'harmonics': {'value': '1.2.3.4', 'type': 'integer-list'},
-        #       'length': {'value': '4b', 'type': 'frame'},
-        #       'waveform': {'value': 'tri'},
-        #       'notes': {'value': 'eb.g', 'type': 'note-list'}
-        #   }
-        # 
-        # For a complete list of reserved words and built-in types please 
-        # refer to the patterns and type settings in param.py.
+            # Break comma separated commands
+            # into a list of command strings
+            cmds = cmd.strip().split(',')
 
-        for cmd in cmds:
-            # Split space-separated params into a list
-            commands = cmd.strip().split()
+            # For each command string, unpack and load
+            # into a param.Param instance
+            #
+            # For our purposes, a 'command' refers to text typed at the pippi
+            # console, while 'param' refers to the translatable key-value pairs 
+            # passed to the play method of generator scripts.
+            #
+            # So:
+            #   sh o:3
+            #
+            # Could become:
+            #   { 'generator': 'shine', 'octave': {'value': 3, 'type': 'integer'} }
+            # 
+            # And:
+            #   dr h:1.2.3.4 t:4b wf:tri n:eb.g
+            # 
+            # Could become:
+            #   {
+            #       'generator': 'drone',
+            #       'harmonics': {'value': '1.2.3.4', 'type': 'integer-list'},
+            #       'length': {'value': '4b', 'type': 'frame'},
+            #       'waveform': {'value': 'tri'},
+            #       'notes': {'value': 'eb.g', 'type': 'note-list'}
+            #   }
+            # 
+            # For a complete list of reserved words and built-in types please 
+            # refer to the patterns and type settings in param.py.
 
-            # Split colon-separated key:value param pairs
-            # into lists.
-            commands = [ command.split(':') for command in commands ]
+            for cmd in cmds:
+                # Split space-separated params into a list
+                commands = cmd.strip().split()
 
-            try:
-                generator = self.generators.get(commands[0][0], False)
-                params = param.Param(commands) 
+                # Split colon-separated key:value param pairs
+                # into lists.
+                commands = [ command.split(':') for command in commands ]
 
-                print generator.name
-
-                if 'bpm' not in params.data:
-                    params.data['bpm'] = { 'value': self.bpm, 'name': 'bpm' }
-
-                if 'loop' not in params.data:
-                    if hasattr(generator, 'loop'):
-                        params.data['loop'] = { 'value': generator.loop, 'name': 'loop' }
-                    else:
-                        params.data['loop'] = { 'value': True, 'name': 'loop' }
-
-                if 'device' not in params.data:
-                    if hasattr(generator, 'device'):
-                        params.data['device'] = { 'value': generator.device, 'name': 'device' }
-
-                if generator.shortname in params.data:
-                    params.data.pop(generator.shortname)
-                    params.data['generator'] = { 'value': generator.name, 'name': 'generator' }
-
-                # Increment voice id and print voice information. TODO: pretty print & abstract
-                self.voice_id = str(int(self.voice_id) + 1)
-                print self.voice_id, self.format_params(params.data)
-
-                # Allocate a new shared voice dict to store generator params, and audio
-                # data for the render process. (Render processes are spawned on demand by 
-                # the voice's playback process.)
-
-                setattr(self.buffers, self.voice_id, '')
-                setattr(self.params, self.voice_id, params)
-
-                # Import the generator as a python module and spawn a playback 
-                # process from rt.out, passing in the generator's play method 
-                # which will be run from within a render process - spawned on demand 
-                # by the voice's playback process. Sheesh.
-
-                playback_process = mp.Process(target=rt.out, args=(generator, self.buffers, self.params, self.voice_id, self.tick))
-                playback_process.start()
+                try:
+                    generator = self.generators.get(commands[0][0], False)
+                    params = param.Param(commands) 
 
 
-            except TypeError as e:
-                print 'invalid generator', e
-                raise
+                    if 'bpm' not in params.data:
+                        params.data['bpm'] = { 'value': self.bpm, 'name': 'bpm' }
+
+                    if 'loop' not in params.data:
+                        if hasattr(generator, 'loop'):
+                            params.data['loop'] = { 'value': generator.loop, 'name': 'loop' }
+                        else:
+                            params.data['loop'] = { 'value': True, 'name': 'loop' }
+
+                    if 'device' not in params.data:
+                        if hasattr(generator, 'device'):
+                            params.data['device'] = { 'value': generator.device, 'name': 'device' }
+
+                    if generator.shortname in params.data:
+                        params.data.pop(generator.shortname)
+                        params.data['generator'] = { 'value': generator.name, 'name': 'generator' }
+
+                    # Increment voice id and print voice information. TODO: pretty print & abstract
+                    self.voice_id = str(int(self.voice_id) + 1)
+                    print self.voice_id, self.format_params(params.data)
+
+                    # Allocate a new shared voice dict to store generator params, and audio
+                    # data for the render process. (Render processes are spawned on demand by 
+                    # the voice's playback process.)
+
+                    setattr(self.buffers, self.voice_id, '')
+                    setattr(self.params, self.voice_id, params)
+
+                    # Import the generator as a python module and spawn a playback 
+                    # process from rt.out, passing in the generator's play method 
+                    # which will be run from within a render process - spawned on demand 
+                    # by the voice's playback process. Sheesh.
+
+                    playback_process = mp.Process(target=rt.out, args=(generator, self.buffers, self.params, self.voice_id, self.tick))
+                    playback_process.start()
+
+
+                except TypeError as e:
+                    print 'invalid generator', e
+                    raise
+        except:
+            print 'Oops, don\'t fuck up.'
+            print
+
 
     def do_EOF(self, line):
         return True
@@ -291,4 +397,9 @@ if __name__ == '__main__':
         console = Pippi()
 
         # Start looping command prompt
-        console.cmdloop()
+        try:
+            console.cmdloop()
+        except KeyboardInterrupt:
+            console.grid.terminate()
+            print 'Shutting down'
+

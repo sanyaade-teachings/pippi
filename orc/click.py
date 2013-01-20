@@ -1,12 +1,8 @@
 from pippi import dsp
-from pippi import tune
-import alsaaudio
-import sys
-import time
 
 shortname   = 'cl'
 name        = 'click'
-device      = 'default'
+device      = 'T6_pair3'
 loop        = True
 
 def play(params={}):
@@ -28,149 +24,189 @@ def play(params={}):
     pinecone = params.get('pinecone', False)
     insamp = params.get('rec', False)
     roll = params.get('roll', False)
+    pi = params.get('pi', True)
+
+    def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
+        """ Time-domain band-limited noise generator
+        """
+        outlen = 0
+        cycles = ''
+        while outlen < length:
+            cycle = dsp.cycle(dsp.rand(low, high), wform)
+            outlen += len(cycle)
+            cycles += cycle
+
+        return cycles
+
+    def eu(length, numpulses):
+        pulses = [ 1 for pulse in range(numpulses) ]
+        pauses = [ 0 for pause in range(length - numpulses) ]
+
+        position = 0
+        while len(pauses) > 0:
+            try:
+                index = pulses.index(1, position)
+                pulses.insert(index + 1, pauses.pop(0))
+                position = index + 1
+            except ValueError:
+                position = 0
+
+        return pulses
+
+    def getevents(lenbeat, pattern):
+        """ Takes pattern: [0, 1]
+            Returns event list: [[0, 44100], [1, 44100]]
+        """
+
+        events = []
+        count = 0
+        value = None
+        event = []
+
+        for p in pattern:
+
+            prev = value
+            value = p
+
+            # Null to zero always starts new zero
+            if prev is None and value is 0:
+                # Start zero, add to length
+                event = [0, lenbeat]
+
+            # Any transition to one always starts new one
+            elif value is 1:
+                # Add last event if not empty to events and start a new one
+                if len(event) == 2:
+                    events += [ event ]
+
+                # Start one, add to length
+                event = [1, lenbeat]
+
+            # One to zero always adds to one
+            # Zero to zero always adds to zero
+            elif prev is 0 or prev is 1 and value is 0:
+                # Add to length
+                event[1] += lenbeat
+
+        return events
+
+    def clap(amp, length):
+        # Two layers of noise: lowmid and high
+        out = dsp.mix([ bln(int(length * 0.2), 600, 1200), bln(int(length * 0.2), 7000, 9000) ])
+        
+        out = dsp.env(out, 'phasor')
+        out = dsp.pad(out, 0, length - dsp.flen(out))
+
+        return out
+
+    def hihat(amp, length):
+        def hat(length):
+            if dsp.randint(0, 6) == 0:
+                out = bln(length, 9000, 14000)
+                out = dsp.env(out, 'line')
+            else:
+                out = bln(int(length * 0.05), 9000, 14000)
+                out = dsp.env(out, 'phasor')
+                out = dsp.pad(out, 0, length - dsp.flen(out))
+
+            return out
+
+        if dsp.randint() == 0:
+            out = ''.join([ hat(length / 2), hat(length / 2) ])
+        else:
+            out = hat(length)
+
+        return out
+
+    def snare(amp, length):
+        # Two layers of noise: lowmid and high
+        out = dsp.mix([ bln(int(length * 0.2), 700, 3200, 'impulse'), bln(int(length * 0.01), 7000, 9000) ])
+        
+        out = dsp.env(out, 'phasor')
+        out = dsp.pad(out, 0, length - dsp.flen(out))
+
+        return out
+
+    def kick(amp, length):
+        fhigh = 160.0
+        flow = 60.0
+        fdelta = fhigh - flow
+
+        target = length
+        pos = 0
+        fpos = fhigh
+
+        out = ''
+        while pos < target:
+            # Add single cycle
+            # Decrease pitch by amount relative to cycle len
+            cycle = dsp.cycle(fpos)
+            pos += dsp.flen(cycle)
+            #fpos = fpos - (fhigh * (length / dsp.htf(fpos)))
+            fpos = fpos - 30.0
+            out += cycle
+
+        return dsp.env(out, 'phasor')
+
+    beats = beats * measures
 
     drums = [{
         'name': 'clap',
         'shortname': 'c',
-        'snd': dsp.read('sounds/lowpaperclips.wav').data if insamp is False else dsp.capture(dsp.mstf(500)),
-        'pat': [0, 0, 1, 0],
-        'vary': [0, 1, 0, 0],
-        'offset': 0,
-        'width': 0.6,
+        'trigger_id': 5,
+        'gen': clap,
+        'pat': eu(beats, dsp.randint(1, beats / 3)),
         }, {
         'name': 'hihat',
         'shortname': 'h',
-        'snd': dsp.read('sounds/paperclips.wav').data,
-        'pat': [[1, 1]],
-        'vary': [1, [1, 1]],
-        'offset': 400,
-        'width': 0.05,
+        'trigger_id': 3,
+        'gen': hihat,
+        'pat': eu(beats, dsp.randint(1, beats / 3)),
         }, {
         'name': 'snare',
         'shortname': 's',
-        'snd': dsp.read('sounds/lowpaperclips.wav').data,
-        'pat': [1, 0, 1, 0],
-        'vary': [0, 0, 1, 1],
-        'offset': 500,
-        'width': 0.1,
+        'trigger_id': 4,
+        'gen': snare,
+        'pat': eu(beats, dsp.randint(1, beats / 2)),
         }, {
         'name': 'kick',
         'shortname': 'k',
-        'snd': dsp.read('sounds/lowpaperclips2.wav').data,
-        'pat': [1, 0, 1, 0, 0, 0, 0, 0],
-        'vary': [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0],
-        'offset': 0,
-        'width': 0.4,
+        'trigger_id': 2,
+        'gen': kick,
+        'pat': eu(beats, dsp.randint(1, beats / 3)),
         }]
 
-
-    wtypes = ['sine', 'phasor', 'line', 'saw']
-
     out = ''
-
-    beats = beats * measures
-
-    beat = dsp.mstf(60000.0 / bpm) / 4
-    width = int(beat * (width / 100.0))
-
-    def tweeter(o):
-        o = dsp.split(o, dsp.randint(3,6))
-        oo = dsp.randchoose(o)
-        o = [ dsp.env(oo, dsp.randchoose(wtypes)) for h in range(len(o)) ]
-        return dsp.env(''.join(o), dsp.randchoose(wtypes))
-
-
-    def kickit(snd):
-        out = ''
-        for b in range(beats):
-            s = dsp.cut(snd['snd'], dsp.randint(0, snd['offset']), width)
-
-            if alias == True:
-                s = dsp.alias(s)
-
-            if bend == True:
-                s = dsp.transpose(s, dsp.rand(-0.4, 0.4) + 1)
-
-            if skitter == True:
-                prebeat = dsp.mstf(dsp.randint(10, 400))
-            else:
-                prebeat = 0
-
-            if tweet == True:
-                s = tweeter(s)
-
-            #if roll is True:
-                #if dsp.randint(0, 3) == 0:
-                    #s = dsp.split(s, dsp.flen(s) / 2)
-                    #s = ''.join([ dsp.amp(s[0], dsp.rand(0.7, 1.0)) for bit in range(beat / dsp.flen(s[0])) ])
-            #else:
-            s = dsp.pad(s, prebeat, beat - dsp.flen(s))
-
-            if pattern == True:
-                if dsp.randint(0,3) == 0:
-                    amp = snd['vary'][b % len(snd['vary'])]
-                else:
-                    amp = snd['pat'][b % len(snd['pat'])]
-            else:
-                amp = 1.0
-
-            if amp == 1:
-                out += s
-            elif amp == [1,1]:
-                out += dsp.cut(s, 0, dsp.flen(s) / 2) * 2
-            elif amp == [0,1]:
-                out += dsp.pad(dsp.cut(s, 0, dsp.flen(s) / 2), dsp.flen(s) / 2, 0) 
-            elif amp == [1,0]:
-                out += dsp.pad(dsp.cut(s, 0, dsp.flen(s) / 2), 0, dsp.flen(s) / 2) 
-            else:
-                out += dsp.pad('', 0, beat)
-
-
-
-        return out
-
+    lenbeat = dsp.mstf(60000.0 / bpm) / 4
     layers = []
+    streams = []
+
     for drum in drums:
         if drum['shortname'] in playdrums:
-            layers += [ kickit(drum) ]
+            events = getevents(lenbeat, drum['pat'])
+            layers += [ ''.join([ drum['gen'](event[0], event[1]) for event in events ]) ]
+
+            stream = []
+            for h in drum['pat']:
+                stream += [ ('/tick/' + str(drum['trigger_id']), int(h), dsp.fts(lenbeat)) ]
+
+            streams += [ stream ]
 
     out = dsp.mix(layers)
 
-    if glitch == True:
-        out = dsp.split(out, int(beat * 0.5))
-        for i,o in enumerate(out):
-            if i % 5 == 0 and dsp.randint(0,1) == 0:
-                out[i] = tweeter(o)
+    if bend is True:
+        pass
 
+    if alias is True:
+        pass
+
+
+    if glitch == True:
+        out = dsp.split(out, int(lenbeat * 0.5))
         out = ''.join(dsp.randshuffle(out))
 
-    if pinecone == True:
-        # Do it in packets
-        # Start from position P, take sample of N length (audio rates), apply envelope, move to position P + Q, repeat
-        pminlen = dsp.mstf(1)
-        pmaxlen = dsp.mstf(500)
-        pnum = dsp.randint(3, 5)
-        pinecones = []
-        for p in range(pnum):
-            segment = dsp.cut(out, dsp.randint(0, dsp.flen(out) - pmaxlen), dsp.randint(pminlen, pmaxlen))
-            pskip = dsp.flen(segment) / dsp.randint(30, 500) + 1 
-            ppos = 0
-            pupp = 5000 if dsp.randint(0, 2) == 0 else 50
-            plen = dsp.htf(dsp.rand(5, pupp))
-            while ppos + pskip + 400 < pmaxlen:
-                p = dsp.cut(segment, ppos + dsp.randint(0, 200), plen + dsp.randint(0, 200))
-                p = dsp.env(p, 'random', True, dsp.rand(0.8, 1.0), 0.0)
-                pinecones += [ p ]
-                ppos += pskip
+    if pi:
+        return (dsp.amp(out, volume), {'value': {'events': streams }})
+    else:
+        return dsp.amp(out, volume)
 
-        out = dsp.pan(''.join(pinecones), dsp.rand())
-
-
-    #out = dsp.pan(out, 1)
-
-    if roll == True:
-        out = dsp.split(out, dsp.flen(out) / (measures * 16))
-        out = dsp.randshuffle(out)
-        out = ''.join(out)
-
-    return dsp.amp(out, volume)

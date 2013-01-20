@@ -3,7 +3,8 @@ from pippi import tune
 
 shortname       = 'in'
 name            = 'ins'
-device          = 'default'
+device          = 'T6_pair3'
+#device          = 'default'
 loop            = True
 
 def play(params={}):

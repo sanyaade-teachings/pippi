@@ -1,13 +1,13 @@
 from pippi import dsp
 from pippi import tune
+from vcosc import osc
 
 shortname   = 'sh'
 name        = 'shine'
-#device      = 'T6_pair2'
-device      = 'default'
+device      = 'T6_pair1'
 loop        = True
 
-# Generator-specific param types
+# Generator-specific param types (unimplemented)
 types       = {
     'o': {
         'name': 'octave',
@@ -21,7 +21,7 @@ def play(params={}):
     volume      = params.get('volume', 20.0)
     volume = volume / 100.0 # TODO: move into param filter
     octave      = params.get('octave', 2) + 1 # Add one to compensate for an old error for now
-    note        = params.get('note', ['db'])
+    note        = params.get('note', ['e'])
     note = note[0]
     quality     = params.get('quality', tune.major)
     glitch      = params.get('glitch', False)
@@ -34,14 +34,17 @@ def play(params={}):
     bend        = params.get('bend', False)
     bpm         = params.get('bpm', 75.0)
     width       = params.get('width', False)
-    wform       = params.get('waveforms', ['sine', 'line', 'phasor'])
+    wform       = params.get('waveform', False)
     instrument  = params.get('instrument', 'r')
     scale       = params.get('scale', [1,6,5,4,8])
     shuffle     = params.get('shuffle', False) # Reorganize input scale
     reps        = params.get('repeats', len(scale))
     alias       = params.get('alias', False)
     phase       = params.get('phase', False)
+    pi          = params.get('pi', True)
+    trigger_id = params.get('trigger_id', 0)
 
+    # Available input samples
     if instrument == 'r':
         instrument = 'rhodes'
         tone = dsp.read('sounds/220rhodes.wav').data
@@ -61,15 +64,22 @@ def play(params={}):
         instrument = 'input'
         tone = dsp.capture(dsp.stf(1))
 
-
     out = ''
+
+    # Shuffle the order of pitches
+    if shuffle is not False:
+        scale = dsp.randshuffle(scale)
 
     # Translate the list of scale degrees into a list of frequencies
     freqs = tune.fromdegrees(scale, octave, note, quality, ratios)
 
-    if shuffle is not False:
-        freqs = dsp.randshuffle(freqs)
+    # Assemble a dictionary of onset times and pitches in midi format
+    events = []
+    events.append([ ('/dac/1', tune.fts(freq), float(dsp.fts(length))) for freq in dsp.randshuffle(freqs) ])
+    events.append([ ('/tick/1', 1, float(dsp.fts(length))) for freq in freqs ])
 
+    # Phase randomly chooses note lengths from a 
+    # set of ratios derived from the current bpm
     if phase is not False:
         ldivs = [0.5, 0.75, 2, 3, 4]
         ldiv = dsp.randchoose(ldivs)
@@ -77,10 +87,15 @@ def play(params={}):
         length = dsp.mstf(length)
         reps = ldiv if ldiv > 1 else 4
 
+
+    # Construct a sequence of notes
     for i in range(reps):
-        #freq = tune.step(i, note, octave, scale, quality, ratios)
+        # Get the freqency
         freq = freqs[i % len(freqs)]
 
+        # Determine the pitch shift required
+        # to arrive at target frequency based on 
+        # the pitch of the original samples.
         if instrument == 'clarinet':
             diff = freq / 293.7
         elif instrument == 'vibes':
@@ -88,37 +103,52 @@ def play(params={}):
         else:
             diff = freq / 440.0
 
-        clang = dsp.transpose(tone, diff)
+        # Transpose the input sample or 
+        # synthesize tone
+        if wform is False:
+            clang = dsp.transpose(tone, diff)
+        elif wform == 'super':
+            clang = dsp.tone(length, freq, 'phasor')
+            clang = [ dsp.drift(clang, dsp.rand(0, 0.02)) for s in range(7) ]
+            clang = dsp.mix(clang)
 
+        else:
+            clang = dsp.tone(length, freq, wform)
+            clang = dsp.amp(clang, 0.6)
+
+        # Give synth tones simple env (can override)
+        if wform is not False and env is False:
+            clang = dsp.env(clang, 'phasor')
+
+        # Apply an optional amplitude envelope
         if env is not False:
             clang = dsp.env(clang, env)
 
-        clang = dsp.fill(clang, length)
-
+        # Stupidly copy the note enough or 
+        # trim it to meet the target length
+        # Vibes always just get silence padding...
         if instrument == 'vibes':
             clang = dsp.pad(clang, 0, length - dsp.flen(clang))
         else: 
             clang = dsp.fill(clang, length)
 
-        if width is not False:
-            width = int(length * float(width))
-
-            clang = dsp.pad(dsp.cut(clang, 0, width), 0, length - width)
-
-        if env is not False:
-            clang = dsp.env(clang, env)
-
+        # Add optional padding between notes
         if pad is not False:
             clang = dsp.pad(clang, 0, pad)
 
+        # Add to the final note sequence
         out += clang
 
+    # Add optional aliasing (crude bitcrushing)
     if alias is not False:
         out = dsp.alias(out)
 
+    # Cut sound into chunks of variable length (between 5 & 300 ms)
+    # Pan each chunk to a random position
+    # Apply a sine amplitude envelope to each chunk
+    # Finally, add variable silence between each chunk and shuffle the
+    # order of the chunks before joining.
     if glitch is not False:
-        mlen = dsp.flen(out) / 8
-
         out = dsp.vsplit(out, dsp.mstf(5), dsp.mstf(300))
         out = [dsp.pan(o, dsp.rand()) for o in out]
 
@@ -128,10 +158,18 @@ def play(params={}):
 
         out = ''.join(dsp.randshuffle(out))
 
+    # Detune between 1.01 and 0.99 times original speed 
+    # as a sine curve whose length equals the total output length
     if bend == True:
         out = dsp.split(out, 441)
         freqs = dsp.wavetable('sine', len(out), 1.01, 0.99)
         out = [ dsp.transpose(out[i], freqs[i]) for i in range(len(out)) ]
         out = ''.join(out)
 
-    return dsp.amp(out, volume)
+    # Adjust output amplitude as needed and return audio + OSC 
+    if pi:
+        #return (dsp.amp(out, volume), {'value': {'pitches': pi_pitches, 'ticks': pi_ticks} })
+        return (dsp.amp(out, volume), {'value': {'events': events }})
+    else:
+        return dsp.amp(out, volume)
+
