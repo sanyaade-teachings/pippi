@@ -44,25 +44,29 @@ def play(params={}):
     pi          = params.get('pi', True)
     trigger_id = params.get('trigger_id', 0)
 
-    # Available input samples
-    if instrument == 'r':
-        instrument = 'rhodes'
-        tone = dsp.read('sounds/220rhodes.wav').data
-    elif instrument == 'c':
-        instrument = 'clarinet'
-        tone = dsp.read('sounds/clarinet.wav').data
-    elif instrument == 'v':
-        instrument = 'vibes'
-        tone = dsp.read('sounds/glock220.wav').data
-    elif instrument == 't':
-        instrument = 'tape triangle'
-        tone = dsp.read('sounds/tape220.wav').data
-    elif instrument == 'g':
-        instrument = 'glade'
-        tone = dsp.read('sounds/glade.wav').data 
-    elif instrument == 'i':
-        instrument = 'input'
-        tone = dsp.capture(dsp.stf(1))
+    try:
+        # Available input samples
+        if instrument == 'r':
+            instrument = 'rhodes'
+            tone = dsp.read('sounds/220rhodes.wav').data
+        elif instrument == 'c':
+            instrument = 'clarinet'
+            tone = dsp.read('sounds/clarinet.wav').data
+        elif instrument == 'v':
+            instrument = 'vibes'
+            tone = dsp.read('sounds/glock220.wav').data
+        elif instrument == 't':
+            instrument = 'tape triangle'
+            tone = dsp.read('sounds/tape220.wav').data
+        elif instrument == 'g':
+            instrument = 'glade'
+            tone = dsp.read('sounds/glade.wav').data 
+        elif instrument == 'i':
+            instrument = 'input'
+            tone = dsp.capture(dsp.stf(1))
+    except:
+        instrument = None
+        tone = None
 
     out = ''
 
@@ -105,12 +109,17 @@ def play(params={}):
 
         # Transpose the input sample or 
         # synthesize tone
-        if wform is False:
+        if wform is False and tone is not None:
             clang = dsp.transpose(tone, diff)
+
         elif wform == 'super':
             clang = dsp.tone(length, freq, 'phasor')
             clang = [ dsp.drift(clang, dsp.rand(0, 0.02)) for s in range(7) ]
             clang = dsp.mix(clang)
+
+        elif wform is False and tone is None:
+            clang = dsp.tone(length, freq, 'sine2pi')
+            clang = dsp.amp(clang, 0.6)
 
         else:
             clang = dsp.tone(length, freq, wform)
