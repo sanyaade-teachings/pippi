@@ -288,14 +288,14 @@ def breakpoint(values, size=512):
 
     # Handle some small size cases
     if size == 0:
-        log('WARNING: breakpoint size 0')
-        log('values: '+str(values))
-        log('')
+        #log('WARNING: breakpoint size 0')
+        #log('values: '+str(values))
+        #log('')
         return []
     elif size < 4 and size > 0:
-        log('WARNING: small breakpoint, size ' + str(size))
-        log('values: '+str(values))
-        log('')
+        #log('WARNING: small breakpoint, size ' + str(size))
+        #log('values: '+str(values))
+        #log('')
         return [values[0] for i in range(size)]
 
     # Need at least one destination value per point computed
@@ -437,7 +437,7 @@ def alias(audio_string, passthru = 0, envelope = 'random', split_size = 0):
     return out 
 
 def log(message, mode="a"):
-    logfile = open("tmplog.txt", mode)
+    logfile = open(os.path.expanduser("~/pippi.error.log"), mode)
     logfile.write(str(message) + "\n")
     return logfile.close()
 
@@ -473,7 +473,7 @@ def mix(layers, leftalign=True, boost=2.0):
 
         if len(layer) != ftc(output_length) or len(out) != ftc(output_length):
             dif = int(math.fabs(len(layer) - len(out)))
-            log('unequal'+str(dif))
+            #log('unequal'+str(dif))
             if len(out) < len(layer):
                 layer = layer[:len(layer) - dif]
             else:
@@ -647,9 +647,9 @@ def replace_into(haystack, needle, position):
 def cut(string, start, length):
     # start and length are both given in frames (aka samples)za
 
-    if start + length > flen(string):
-        log('No cut for you!')
-        log('in len: '+str(flen(string))+'start: '+str(start)+' length: '+str(length))
+    #if start + length > flen(string):
+        #log('No cut for you!')
+        #log('in len: '+str(flen(string))+'start: '+str(start)+' length: '+str(length))
 
     length = int(length) * audio_params[1] * audio_params[0]
     start = int(start) * audio_params[1] * audio_params[0]

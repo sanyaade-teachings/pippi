@@ -204,4 +204,4 @@ def play(params):
     else:
         return dsp.amp(out, volume)
 
-dsp.pipe(play)
+#dsp.pipe(play)

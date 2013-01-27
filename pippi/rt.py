@@ -33,8 +33,11 @@ def grid(tick, bpm):
         dsp.delay(bpm)
         count += 1
 
-def render(play, buffers, voice_params, params, voice_id):
-    buffer = getattr(buffers, voice_id)
+def render(play, buffers, voice_params, once):
+    current = mp.current_process()
+    buffer_type = current.name[0]
+    voice_id = current.name[1:]
+
     params = getattr(voice_params, voice_id).collapse()
 
     out = play(params)
@@ -46,7 +49,15 @@ def render(play, buffers, voice_params, params, voice_id):
         params.data['data'] = data
         setattr(voice_params, voice_id, params)
 
-    setattr(buffers, voice_id, dsp.split(sound, 500))
+    if once is True:
+        params = getattr(voice_params, voice_id)
+        params.set('once', False)
+        params.set('re', False)
+        setattr(voice_params, voice_id, params)
+
+    buffer_id = 'n' + voice_id if buffer_type == 'n' else voice_id
+
+    setattr(buffers, buffer_id, dsp.split(sound, 500))
 
 def dsp_loop(out, buffer, params, voice_params, voice_id):
     params = getattr(voice_params, voice_id)
@@ -118,7 +129,7 @@ def out(generator, buffers, voice_params, voice_id, tick):
 
     # Spawn a render process which will write generator output
     # into the buffer for this voice
-    r = mp.Process(target=render, args=(generator.play, buffers, voice_params, params, voice_id))
+    r = mp.Process(name='r' + voice_id, target=render, args=(generator.play, buffers, voice_params, params))
     r.start()
     r.join()
 
@@ -148,28 +159,25 @@ def out(generator, buffers, voice_params, voice_id, tick):
     next                = False
 
     while params.get('loop', True) == True:
-            
+        params = getattr(voice_params, voice_id).collapse()
+        active = mp.active_children()
+
         regenerate    = params.get('regenerate', False)
-        #regenerate    = params.get('re', False)
         once          = params.get('once', False)
         quantize      = params.get('quantize', False)
         target_volume = params.get('target_volume', 1.0)
 
-        if regenerate is True or once is True and cooking is False:
-            cooking = True
-            #generator = reload(generator)
-            next = mp.Process(target=render, args=(generator.play, buffers, voice_params, params, voice_id))
+        if hasattr(buffers, 'n' + voice_id):
+            buffer = getattr(buffers, 'n' + voice_id)
+            setattr(buffers, voice_id, buffer)
+            delattr(buffers, 'n' + voice_id)
+
+        if len(active) == 0 and (regenerate is True or once is True):
+            next = mp.Process(name='n' + voice_id, target=render, args=(generator.play, buffers, voice_params, once))
             next.start()
-            next.join()
 
-            if once is True:
-                #next.join()
-                params = getattr(voice_params, voice_id)
-                params.set('once', False)
-                setattr(voice_params, voice_id, params)
-
-        if hasattr(next, 'is_alive') and next.is_alive() is False:
-            cooking = False
+        active = mp.active_children()
+        if len(active) == 0:
             buffer = getattr(buffers, voice_id)
 
         if quantize is not False:

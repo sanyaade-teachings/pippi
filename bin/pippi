@@ -24,6 +24,7 @@ class Pippi(cmd.Cmd):
     """ Pippi Console 
     """
 
+    dsp.log('starting', 'w')
     prompt = 'pippi: '
     intro = 'Pippi Console'
 
@@ -81,7 +82,7 @@ class Pippi(cmd.Cmd):
 
         self.tick = mp.Event()
 
-        self.grid = mp.Process(target=rt.grid, args=(self.tick, self.bpm))
+        self.grid = mp.Process(name='grid', target=rt.grid, args=(self.tick, self.bpm))
         self.grid.start()
 
         self.cc = []
@@ -127,7 +128,7 @@ class Pippi(cmd.Cmd):
                 # Only update master if 'master' param passed
             self.grid.terminate()
             self.bpm = float(cmd)
-            self.grid = mp.Process(target=rt.grid, args=(self.tick, self.bpm))
+            self.grid = mp.Process(name='grid', target=rt.grid, args=(self.tick, self.bpm))
             self.grid.start()
 
             for voice_id in range(1, int(self.voice_id) + 1):
@@ -138,7 +139,8 @@ class Pippi(cmd.Cmd):
                     self.update_param(voice_id, 'bpm', self.bpm)
                     self.update_param(voice_id, 'once', True)
  
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
 
@@ -186,7 +188,8 @@ class Pippi(cmd.Cmd):
             else:
                 self.update_param(voice_id, cmds=cmds)
                 self.update_param(voice_id, 'once', True)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def do_uu(self, cmd):
@@ -207,7 +210,8 @@ class Pippi(cmd.Cmd):
 
                     # Force a single regeneration on param update
                     self.update_param(voice_id, 'once', True)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def do_ss(self, cmd):
@@ -216,7 +220,8 @@ class Pippi(cmd.Cmd):
             gen = cmds.pop(0)
             gen = gen if len(gen) > 0 else 'all'
             self.update_params(gen=gen, param='loop', value=False)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def do_s(self, cmd):
@@ -226,7 +231,8 @@ class Pippi(cmd.Cmd):
             for cmd in cmds:
                 voice_id = cmd.strip() 
                 self.update_param(voice_id, 'loop', False)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def do_vv(self, cmd):
@@ -234,24 +240,29 @@ class Pippi(cmd.Cmd):
             cmds = cmd.strip().split(' ')
             gen = cmds.pop(0)
             self.update_params(gen=gen, param='target_volume', value=float(cmds[0]) / 100.0)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def do_v(self, cmd):
         try:
             cmds = cmd.split(' ')
             self.update_param(cmds[0], 'target_volume', float(cmds[1]) / 100.0)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def do_i(self, cmd=[]):
+        active = mp.active_children()
+        dsp.log([ (a.name, a.pid) for a in active])
         try:
             for voice_id in range(1, int(self.voice_id) + 1):
                 voice_id = str(voice_id)
                 if hasattr(self.params, voice_id):
                     params = getattr(self.params, voice_id)
                     print voice_id, self.format_params(params.data)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def update_params(self, gen='all', param=None, value=None):
@@ -263,7 +274,8 @@ class Pippi(cmd.Cmd):
 
                     if params.get('generator') == gen or gen == 'all':
                         self.update_param(voice_id, param, value)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def update_param(self, voice_id, param=None, value=None, cmds=None):
@@ -285,7 +297,8 @@ class Pippi(cmd.Cmd):
                     params = getattr(self.params, voice_id)
                     params.set(param, value)
                     setattr(self.params, voice_id, params)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
 
@@ -314,7 +327,8 @@ class Pippi(cmd.Cmd):
 
             for voice in range(int(group[0])):
                 self.default(cmd)
-        except:
+        except Exception, e:
+            dsp.log(e)
             pass
 
     def default(self, cmd):
@@ -399,16 +413,16 @@ class Pippi(cmd.Cmd):
                     # which will be run from within a render process - spawned on demand 
                     # by the voice's playback process. Sheesh.
 
-                    playback_process = mp.Process(target=rt.out, args=(generator, self.buffers, self.params, self.voice_id, self.tick))
+                    playback_process = mp.Process(name=self.voice_id, target=rt.out, args=(generator, self.buffers, self.params, self.voice_id, self.tick))
                     playback_process.start()
 
 
-                except TypeError as e:
-                    print 'invalid generator', e
-                    raise
-        except:
-            print 'Oops, don\'t fuck up.'
-            print
+                except TypeError, e:
+                    dsp.log('invalid generator', e)
+                    #raise
+
+        except Exception, e:
+            dsp.log(e)
 
 
     def do_EOF(self, line):
