@@ -7,7 +7,7 @@ device          = 'T6_pair3'
 #device          = 'default'
 loop            = True
 
-def play(params={}):
+def play(params):
     length          = params.get('length', dsp.mstf(2000))
     buffer_length   = params.get('buffer', dsp.mstf(2000))
     volume          = params.get('volume', 100.0)

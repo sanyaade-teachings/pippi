@@ -19,6 +19,7 @@ import sys
 from datetime import datetime
 import time
 import alsaaudio
+from docopt import docopt
 
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 snddir = '' 
@@ -54,17 +55,12 @@ def capture(length=44100):
     out = amp(out, 2)
     return mixstereo([out, out])
 
-
-
 def lget(list, index, default=True):
-    """ Safely return a selected element from a list and handle IndexErrors """
+    """ Safely return a selected element from a list """
     try:
         return list[index]
     except IndexError:
-        if default == True:
-            return list[-1]
-        else:
-            return list[0]
+        return list[-1] if default is True else list[0]
 
 def interleave(list_one, list_two):
     """ Combine two lists by interleaving their elements """
@@ -627,23 +623,6 @@ def read(filename):
 
     return snd
 
-def poly(p, a=[]):
-    p = Process(target=p, args=(a,))
-    p.start()
-
-    return p 
-
-def play(out='', cache=False):
-    """ A silly hack to enable another silly hack """
-    if cache: filename = cache(out)
-
-    shhh = open(os.devnull, 'w')
-    s = subprocess.Popen(['aplay', '-q', '-f', 'cd'], stdin=subprocess.PIPE, stdout=shhh, stderr=shhh)
-    s.communicate(out)
-    shhh.close()
-
-    return out
-
 def delay(frames):
     target = (frames / 44100.0) + time.time()
 
@@ -653,20 +632,6 @@ def delay(frames):
         time.sleep(target - time.time())
 
     return True
-
-def stream(outs=['']):
-    shhh = open(os.devnull, 'w')
-
-    for out in outs:
-        filename = cache(out)
-        p = subprocess.Popen(['aplay', '-f', 'cd', filename], shell=False, stdout=shhh, stderr=shhh)
-
-    shhh.close()
-
-    return outs
-
-def args():
-    return [arg for arg in sys.argv if arg != '']
 
 def insert_into(haystack, needle, position):
     # split string at position index
@@ -824,7 +789,6 @@ def drift(sound, amount):
 
     return ''.join(sound)
 
-
 def fnoise(sound, coverage):
     target_frames = int(flen(sound) * coverage)
 
@@ -834,6 +798,12 @@ def fnoise(sound, coverage):
         sound = replace_into(sound, f, randint(0, flen(sound) - 1))
 
     return sound
+
+def pipe(f):
+    if sys.argv is not '':
+        args = docopt(f.__doc__)
+        # TODO parse args and stream to stdout
+        f(args)
 
 class Sound:
     def __init__(self):

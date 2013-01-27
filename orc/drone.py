@@ -7,12 +7,12 @@ name        = 'drone'
 device      = 'T6_pair2'
 loop        = True
 
-def play(params={}):
+def play(params):
     length = params.get('length', dsp.stf(20))
     volume = params.get('volume', 20.0) 
     volume = volume / 100.0 # TODO move into param filter
     octave = params.get('octave', 2)
-    notes = params.get('note', ['e', 'a'])
+    notes = params.get('note', ['c', 'g'])
     quality = params.get('quality', tune.major)
     glitch = params.get('glitch', False)
     waveform = params.get('waveform', 'sine')
@@ -23,6 +23,7 @@ def play(params={}):
     env = params.get('envelope', 'gauss')
     harmonics = params.get('harmonics', [1,2])
     scale = params.get('scale', [1,8])
+    reps      = params.get('repeats', 1)
 
     # These are amplitude envelopes for each partial,
     # randomly selected for each. Not to be confused with 
@@ -88,6 +89,6 @@ def play(params={}):
 
         layers += [ layer ]
 
-    out = dsp.mix(layers)
+    out = dsp.mix(layers) * reps
 
-    return (dsp.amp(out, volume), {'value': {'pitches': [tune.nts(notes[0], octave)] }})
+    return (dsp.amp(out, volume), {'value': {'pitches': [tune.nts(notes[0], octave - 1)] }})

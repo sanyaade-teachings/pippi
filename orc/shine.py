@@ -16,12 +16,15 @@ types       = {
     }
 }
 
-def play(params={}):
+def play(params):
+    """ Usage:
+            shine.py [length] [volume]
+    """
     length      = params.get('length', dsp.stf(dsp.rand(0.1, 1)))
     volume      = params.get('volume', 20.0)
     volume = volume / 100.0 # TODO: move into param filter
     octave      = params.get('octave', 2) + 1 # Add one to compensate for an old error for now
-    note        = params.get('note', ['e'])
+    note        = params.get('note', ['c'])
     note = note[0]
     quality     = params.get('quality', tune.major)
     glitch      = params.get('glitch', False)
@@ -41,7 +44,8 @@ def play(params={}):
     reps        = params.get('repeats', len(scale))
     alias       = params.get('alias', False)
     phase       = params.get('phase', False)
-    pi          = params.get('pi', True)
+    pi          = params.get('pi', False)
+    wild        = params.get('wii', False)
     trigger_id = params.get('trigger_id', 0)
 
     try:
@@ -79,8 +83,8 @@ def play(params={}):
 
     # Assemble a dictionary of onset times and pitches in midi format
     events = []
-    events.append([ ('/dac/1', tune.fts(freq), float(dsp.fts(length))) for freq in dsp.randshuffle(freqs) ])
-    events.append([ ('/tick/1', 1, float(dsp.fts(length))) for freq in freqs ])
+    events.append([ ('/dac/1', tune.fts(freq / 2.0), float(dsp.fts(length))) for freq in dsp.randshuffle(freqs) ])
+    #events.append([ ('/tick/1', 1, float(dsp.fts(length))) for freq in freqs ])
 
     # Phase randomly chooses note lengths from a 
     # set of ratios derived from the current bpm
@@ -146,6 +150,7 @@ def play(params={}):
             clang = dsp.pad(clang, 0, pad)
 
         # Add to the final note sequence
+        clang = dsp.fill(clang, length)
         out += clang
 
     # Add optional aliasing (crude bitcrushing)
@@ -169,9 +174,26 @@ def play(params={}):
 
     # Detune between 1.01 and 0.99 times original speed 
     # as a sine curve whose length equals the total output length
-    if bend == True:
+    if bend is not False:
         out = dsp.split(out, 441)
         freqs = dsp.wavetable('sine', len(out), 1.01, 0.99)
+        out = [ dsp.transpose(out[i], freqs[i]) for i in range(len(out)) ]
+        out = ''.join(out)
+
+    if wild is not False:
+        #out = dsp.vsplit(out, 400, 10000)
+        out = dsp.split(out, 3000)
+        out = [ dsp.amp(dsp.amp(o, dsp.rand(10, 50)), 0.5) for o in out ]
+        #out = [ o * dsp.randint(1, 5) for o in out ]
+        for index, o in enumerate(out):
+            if dsp.randint(0, 1) == 0:
+                out[index] = dsp.env(dsp.cut(o, 0, dsp.flen(o) / 4), 'gauss') * 4 
+
+            if dsp.randint(0, 6) == 0:
+                out[index] = dsp.transpose(o, 8) 
+
+        out = [ dsp.env(o, 'gauss') for o in out ]
+        freqs = dsp.wavetable('sine', len(out), 1.02, 0.98)
         out = [ dsp.transpose(out[i], freqs[i]) for i in range(len(out)) ]
         out = ''.join(out)
 
@@ -182,3 +204,4 @@ def play(params={}):
     else:
         return dsp.amp(out, volume)
 
+dsp.pipe(play)

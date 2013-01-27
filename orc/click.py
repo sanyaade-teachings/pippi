@@ -5,7 +5,7 @@ name        = 'click'
 device      = 'T6_pair3'
 loop        = True
 
-def play(params={}):
+def play(params):
 
     length = params.get('length', dsp.stf(2))
     volume = params.get('volume', 100.0)
@@ -24,7 +24,7 @@ def play(params={}):
     pinecone = params.get('pinecone', False)
     insamp = params.get('rec', False)
     roll = params.get('roll', False)
-    pi = params.get('pi', True)
+    pi = params.get('pi', False)
 
     def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
         """ Time-domain band-limited noise generator

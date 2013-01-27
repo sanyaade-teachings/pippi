@@ -35,6 +35,7 @@ def grid(tick, bpm):
 
 def render(play, buffers, voice_params, params, voice_id):
     buffer = getattr(buffers, voice_id)
+    params = getattr(voice_params, voice_id).collapse()
 
     out = play(params)
 
@@ -89,10 +90,15 @@ def dsp_loop(out, buffer, params, voice_params, voice_id):
         out.write(chunk)
 
         if post_volume < 0.002:
+            params = getattr(voice_params, voice_id)
             params.set('loop', False)
             params.set('post_volume', post_volume)
             setattr(voice_params, voice_id, params)
             break
+
+    params = getattr(voice_params, voice_id)
+    params.set('post_volume', post_volume)
+    setattr(voice_params, voice_id, params)
 
 def out(generator, buffers, voice_params, voice_id, tick):
     """ Master playback process spawned by play()
@@ -144,17 +150,23 @@ def out(generator, buffers, voice_params, voice_id, tick):
     while params.get('loop', True) == True:
             
         regenerate    = params.get('regenerate', False)
+        #regenerate    = params.get('re', False)
+        once          = params.get('once', False)
         quantize      = params.get('quantize', False)
         target_volume = params.get('target_volume', 1.0)
 
-        if regenerate is True and cooking is False:
+        if regenerate is True or once is True and cooking is False:
             cooking = True
-            generator = reload(generator)
+            #generator = reload(generator)
             next = mp.Process(target=render, args=(generator.play, buffers, voice_params, params, voice_id))
             next.start()
+            next.join()
 
-            if params.get('once', False) == True:
-                next.join()
+            if once is True:
+                #next.join()
+                params = getattr(voice_params, voice_id)
+                params.set('once', False)
+                setattr(voice_params, voice_id, params)
 
         if hasattr(next, 'is_alive') and next.is_alive() is False:
             cooking = False

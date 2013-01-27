@@ -129,6 +129,15 @@ class Pippi(cmd.Cmd):
             self.bpm = float(cmd)
             self.grid = mp.Process(target=rt.grid, args=(self.tick, self.bpm))
             self.grid.start()
+
+            for voice_id in range(1, int(self.voice_id) + 1):
+                voice_id = str(voice_id)
+                if hasattr(self.params, voice_id):
+                    params = getattr(self.params, voice_id)
+
+                    self.update_param(voice_id, 'bpm', self.bpm)
+                    self.update_param(voice_id, 'once', True)
+ 
         except:
             pass
 
@@ -173,8 +182,10 @@ class Pippi(cmd.Cmd):
                 voice_list = voice_id.split('.')
                 for voice_id in voice_list:
                     self.update_param(voice_id, cmds=cmds)
+                    self.update_param(voice_id, 'once', True)
             else:
                 self.update_param(voice_id, cmds=cmds)
+                self.update_param(voice_id, 'once', True)
         except:
             pass
 
@@ -193,6 +204,9 @@ class Pippi(cmd.Cmd):
 
                     if params.get('generator') in gen or gen == 'all':
                         self.update_param(voice_id, cmds=cmds)
+
+                    # Force a single regeneration on param update
+                    self.update_param(voice_id, 'once', True)
         except:
             pass
 
@@ -258,10 +272,15 @@ class Pippi(cmd.Cmd):
                 for cmd in cmds:
                     cmd = cmd.split(':')
                     value = cmd[1] if len(cmd) == 2 else True
-                    value = False if value == 'F' else value
+
+                    # Some special values get replaced:
+                    # F becomes False
+                    if value == 'F':
+                        value = False
+
                     self.update_param(voice_id, cmd[0], value)
 
-            if param is not None and value is not None:
+            elif param is not None and value is not None:
                 if hasattr(self.params, voice_id):
                     params = getattr(self.params, voice_id)
                     params.set(param, value)
@@ -269,14 +288,20 @@ class Pippi(cmd.Cmd):
         except:
             pass
 
+
     def format_params(self, params=[]):
         # TODO: translate types & better formatting
         param_string = ''
         for param in params:
             #value = params[param]['name'] if param == 'generator' else params[param]
             value = params[param]
-            param_string += colored(str(param)[0:3] + ': ', 'cyan')
-            param_string += colored(str(value['value'])[:10], 'yellow')
+            if str(param) == 'generator':
+                param_string += colored(str(param)[0:3] + ': ', 'blue')
+                param_string += colored(str(value['value'])[:10].upper(), 'green')
+            else:
+                param_string += colored(str(param)[0:3] + ': ', 'cyan')
+                param_string += colored(str(value['value'])[:10], 'yellow')
+
             param_string += ' '
         
         return param_string

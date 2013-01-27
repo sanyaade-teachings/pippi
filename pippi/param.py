@@ -265,6 +265,43 @@ class Param:
         else:
             return default
 
+        
+        # Translate special R params into random ranges for certain params
+        if hasattr(param['value'], '__getslice__') and param['value'][0] == 'R':
+            # TODO make more robust
+            if param_name == 't':
+                # Length rand range
+                if len(param['value']) > 1:
+                    param['value'] = param['value'][1:].split('.')
+                    tmin = int(param['value'][0])
+                    tmax = int(param['value'][1])
+
+                else:
+                    tmin = 100
+                    tmax = 1000
+
+                param['value'] = str(dsp.randint(tmin, tmax)) + 'ms'
+
+            elif param_name == 'bpm':
+                if len(param['value']) > 1:
+                    param['value'] = param['value'][1:].split('.')
+                    tmin = float(param['value'][0])
+                    tmax = float(param['value'][1])
+
+                else:
+                    tmin = 100
+                    tmax = 1000
+
+                param['value'] = str(dsp.rand(tmin, tmax))
+
+            elif param_name == 's':
+                # My favorite scale degrees
+                param['value'] = '.'.join([ str(dsp.randint(1, 6)) for r in range(dsp.randint(2, 4)) ])
+            elif param_name == 'o':
+                # Octave rand range
+                param['value'] = str(dsp.randint(1, 5))
+
+
         if 'accepts' in param and 'type' in param:
             # Loop through each acceptable input type
             # and check to see if param value matches
