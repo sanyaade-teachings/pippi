@@ -111,7 +111,7 @@ def dsp_loop(out, buffer, params, voice_params, voice_id):
     params.set('post_volume', post_volume)
     setattr(voice_params, voice_id, params)
 
-def out(generator, buffers, voice_params, voice_id, tick):
+def out(generator, buffers, voice_params, tick):
     """ Master playback process spawned by play()
         Manages render and playback processes  
 
@@ -124,12 +124,14 @@ def out(generator, buffers, voice_params, voice_id, tick):
     # Give this process a high priority to help prevent unwanted audio glitching
     os.nice(-19)
 
+    voice_id = mp.current_process().name
+
     # Fetch voice params from namespace
     params = getattr(voice_params, voice_id).collapse()
 
     # Spawn a render process which will write generator output
     # into the buffer for this voice
-    r = mp.Process(name='r' + voice_id, target=render, args=(generator.play, buffers, voice_params, params))
+    r = mp.Process(name='r' + voice_id, target=render, args=(generator.play, buffers, voice_params, False))
     r.start()
     r.join()
 
