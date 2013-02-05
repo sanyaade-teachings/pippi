@@ -52,7 +52,6 @@ def render(play, buffers, voice_params, once):
     if once is True:
         params = getattr(voice_params, voice_id)
         params.set('once', False)
-        params.set('re', False)
         setattr(voice_params, voice_id, params)
 
     buffer_id = 'n' + voice_id if buffer_type == 'n' else voice_id

@@ -424,6 +424,12 @@ class Pippi(cmd.Cmd):
     def postloop(self):
         pass
 
+    def shutdown(self):
+        active = mp.active_children()
+        for p in active:
+            p.terminate()
+            p.join()
+
 if __name__ == '__main__':
         # Create console
         console = Pippi()
@@ -432,6 +438,6 @@ if __name__ == '__main__':
         try:
             console.cmdloop()
         except KeyboardInterrupt:
-            console.grid.terminate()
+            console.shutdown()
             print 'Shutting down'
 
