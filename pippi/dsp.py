@@ -344,6 +344,9 @@ def breakpoint(values, size=512):
 
 
 def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
+    """ TODO: Fix scaling everywhere. Specify number of cycles to try to calculate, attempting to fit 
+        size * numcycles as closely as possible...
+    """
     wtable = []
     wave_types = ["sine", "gauss", "cos", "line", "saw", "impulse", "phasor", "sine2pi", "cos2pi", "vary", "flat"]
 
@@ -352,6 +355,10 @@ def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
 
     if wtype == "sine":
         wtable = [math.sin(i * math.pi) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
+
+    elif wtype == "hann" or wtype == "hanning":
+        wtable = [ 0.5 * ( 1 - math.cos((2 * math.pi * i) / (size - 1))) for i in range(size) ]
+
     elif wtype == "gauss":
         def gauss(x):
             # From: http://johndcook.com/python_phi.html
@@ -376,21 +383,31 @@ def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
         wtable = [gauss(i) * (highval - lowval) + lowval for i in frange(size, 2.0, -2.0)] 
     elif wtype == "sine2pi":
         wtable = [math.sin(i * math.pi * 2) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
+
     elif wtype == "cos2pi":
         wtable = [math.cos(i * math.pi * 2) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
+
     elif wtype == "cos":
         wtable = [math.cos(i * math.pi) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
-    elif wtype == "tri":
-        # Inverse triangle wave, because I'm a dummy. It's late, so it goes.
+
+    elif wtype == "itri":
+        # Inverted triangle
         wtable = [math.fabs(i) for i in frange(size, highval, lowval - highval)] # Only really a triangle wave when centered on zero 
+
+    elif wtype == "tri":
+        wtable = [ (2.0 / (size + 1)) * ((size + 1) / 2.0 - math.fabs(i - ((size - 1) / 2.0))) for i in range(size) ]
+
     elif wtype == "saw" or wtype == "line":
         wtable = [i for i in frange(size, highval, lowval)]
+
     elif wtype == "phasor":
         wtable = wavetable("line", size, highval, lowval)
         list.reverse(wtable)
+
     elif wtype == "impulse":
         wtable = [float(randint(-1, 1)) for i in range(size / randint(2, 12))]
         wtable.extend([0.0 for i in range(size - len(wtable))])
+
     elif wtype == "vary":
         if size < 32:
             bsize = size
