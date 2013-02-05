@@ -195,10 +195,10 @@ def play(params):
     out = dsp.mix(layers)
 
     if bend is True:
-        pass
+        out = dsp.drift(out, dsp.rand(0.1, 2))
 
     if alias is True:
-        pass
+        out = dsp.alias(out)
 
 
     if glitch == True:
