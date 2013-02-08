@@ -9,16 +9,12 @@ import audioop
 import math
 import random
 import struct
-import string
 import time
 import hashlib
-import subprocess
-from multiprocessing import Process, Queue 
 import os
 import sys
 from datetime import datetime
 import time
-import alsaaudio
 from docopt import docopt
 
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
@@ -37,23 +33,6 @@ quiet = True
 
 def notify(message):
     sys.stderr.write(message)
-
-def capture(length=44100):
-    input = alsaaudio.PCM(alsaaudio.PCM_CAPTURE, 0, 'T6_pair1')
-    input.setchannels(1)
-    input.setrate(44100)
-    input.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-    input.setperiodsize(100)
-
-    out = ''
-    count = 0
-    while count < length:
-        rec_frames, rec_data = input.read()
-        count += rec_frames
-        out += rec_data
-
-    out = amp(out, 2)
-    return mixstereo([out, out])
 
 def lget(list, index, default=True):
     """ Safely return a selected element from a list """
@@ -672,13 +651,6 @@ def cut(string, start, length):
     start = int(start) * audio_params[1] * audio_params[0]
 
     return string[start : start + length]
-
-def mixstereo(chans):
-    """ mix a list of two mono sounds into a stereo sound """
-    chans[0] = audioop.tostereo(chans[0], audio_params[1], 1, 0)
-    chans[1] = audioop.tostereo(chans[1], audio_params[1], 0, 1)
-
-    return mix(chans)
 
 def splitmono(string):
     """ split a stereo sound into a list of mono sounds """

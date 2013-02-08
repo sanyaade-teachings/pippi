@@ -11,6 +11,7 @@ setup(name='pippi',
         install_requires=[
             'pyalsaaudio',
             'termcolor',
+            'vcosc',
         ],
         test_suite='nose.collector',
         tests_require=['nose'],
