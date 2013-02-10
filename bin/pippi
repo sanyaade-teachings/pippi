@@ -9,8 +9,16 @@ import subprocess
 
 from pippi import dsp
 from pippi import param
-from pippi import rt
 from pippi import tune 
+
+try:
+    from pippi import rt
+except:
+    print 'Pippi console requires the [realtime] extras to be installed.'
+    print 'The realtime layer requires ALSA, and therefore is Linux-only for now.'
+    print 'To install with realtime extras:'
+    print '    pip install pippi[realtime]'
+    sys.exit(1)
 
 import multiprocessing as mp
 from termcolor import colored
