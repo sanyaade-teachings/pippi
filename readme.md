@@ -1,10 +1,16 @@
-Very alpha!
+Quite alpha!
 
-To install pippi (may need to be run as root):
+Install with pip:
     
-    python setup.py install
+    pip install pippi
 
-Basic usage after install:
+Take a look at the generator scripts in orc/ for some examples of usage. [Docs coming...]
+
+Or, with the optional (linux-only - requires ALSA) interactive console:
+
+    pip install pippi[realtime]
+
+The pippi console:
 
     pippi
 
