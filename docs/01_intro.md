@@ -6,23 +6,26 @@
 
 Pippi takes advantage of a few features of CPython:
 
-    - Doing string manipulations with python's internal C methods (like string.join()) is fast.
-    - The python standard library includes the audioop module (DSP code ripped straight out of the excellent SoX command line utility) which expects audio input as a binary string and returns the same. It is also fast.
-    - There's a handy wave module in the standard library, which makes importing and exporting PCM wave data simple.
+- Doing string manipulations with python's internal C methods (like string.join()) is fast.
+- The python standard library includes the audioop module (DSP code ripped straight out of the excellent SoX command line utility) which expects audio input as a binary string and returns the same. It is also fast.
+- There's a handy wave module in the standard library, which makes importing and exporting PCM wave data simple.
 
 ### Data format
 
-Internally, all sound in pippi is stored and manipulated as binary audio strings. What the hell are those?
+Internally, all sound in pippi is stored and manipulated as binary **string literals**. 
 
-Python's solution for working with binary data is to use its string data type as a wrapper.
+*What?*
 
-16 bit PCM audio has these characteristics:
+Python's approach to working with binary data is to use its string data type as a wrapper. To get a 
+feel for this, lets first look at the structure of the type of binary audio data we're trying to represent.
 
-Each frame of audio represents an instantanious value - corresponding to a position the speaker cone will take 
-when pulsed out of our computer's digital-to-analog converter.
+*Signed 16 bit PCM audio* has these characteristics:
+
+Each frame of audio represents an instantanious value corresponding to a position the speaker cone will take 
+when sent to our computer's digital-to-analog converter. *PCM* stands for Pulse Code Modulation.
 
 It is conventional to use signed 16 bit integers to represent an instantanious speaker cone position - this 
-is the format CD audio is stored in.
+is also the format CD audio takes. 
 
 A signed integer means that instead of having a range between 0 and some positive number, it has a range 
 between some negative number and some positive number.
