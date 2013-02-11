@@ -4,7 +4,7 @@ distribute_setup.use_setuptools()
 from setuptools import setup
 
 setup(name='pippi',
-        version='0.1.1-1',
+        version='0.1.1-3',
         description='A python computer music system',
         url='http://hecanjog.github.com/pippi',
         author='He Can Jog',

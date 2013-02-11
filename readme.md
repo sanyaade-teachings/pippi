@@ -28,6 +28,8 @@ Here's a slightly more interesting example:
     >>> dsp.write(out, 'helloagain')
     'helloagain.wav'
 
+[Here's another more complex (and musical) example.](docs/example.md)
+
 ## 'Realtime' performance layer 
 (linux-only - requires ALSA)
 
