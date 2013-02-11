@@ -573,13 +573,14 @@ def timestamp_filename():
 
     return current_date + "_" + current_time
 
-def write(audio_string, filename, timestamp=True, dirname="renders"):
+def write(audio_string, filename, timestamp=False):
     """ Write audio data to renders directory with the Python wave module """
     if timestamp == True:
-        filename = dirname + '/' + filename + '-' + timestamp_filename() + '.wav' 
+        filename = filename + '-' + timestamp_filename() + '.wav' 
     else:
-        filename = dirname + '/' + filename + '.wav'
-    wavfile = wave.open(filename, "w")
+        filename = filename + '.wav'
+
+    wavfile = wave.open(os.getcwd() + '/' + filename, "w")
     wavfile.setparams(audio_params)
     wavfile.writeframes(audio_string)
     wavfile.close()
