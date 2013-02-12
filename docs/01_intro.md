@@ -19,13 +19,15 @@ Internally, all sound in pippi is stored and manipulated as binary **string lite
 Python's approach to working with binary data is to use its string data type as a wrapper. To get a 
 feel for this, lets first look at the structure of the type of binary audio data we're trying to represent.
 
-*Signed 16 bit PCM audio* has these characteristics:
+Signed 16 bit PCM audio has these characteristics:
 
-Each frame of audio represents an instantanious value corresponding to a position the speaker cone will take 
-when sent to our computer's digital-to-analog converter. *PCM* stands for Pulse Code Modulation.
+Each frame of audio represents an instantanious value corresponding to a position the speaker cones will take 
+when sent to our computer's digital-to-analog converter. *PCM* stands for Pulse Code Modulation - the modulation 
+part refers to the filtering needed to correct for aliasing distortion that would occur if an analog speaker simply 
+jumped from value to value over time, rather than somehow smoothly interpolating between these values.
 
 It is conventional to use signed 16 bit integers to represent an instantanious speaker cone position - this 
-is also the format CD audio takes. 
+is also the format CD audio takes.
 
 A signed integer means that instead of having a range between zero and some positive number, it has a range 
 between some negative number and some positive number.
@@ -42,11 +44,21 @@ That means a signed integer will use about half of those possible values as posi
 Half of `2^16` is `2^15`, or `32,768`. Because we need to account for a zero value, the range of our signed 16 bit integer 
 is actually `-2^15` to `2^15 - 1`. Or `-32,768` to `32,767`.
 
-We could just work with lists of python integers, but doing operations in pure python can get pretty slow - 
+The potential size of the integer - or the number of discrete values it can represent - corresponds to the 
+possible dynamic range that can be represented in the audio recording. More values mean more subtle differences 
+between loud sounds and soft sounds, and everything in between. [Bhob Rainey has a wonderful writeup on why this 
+is something to pay attention to.](http://bhobrainey.wordpress.com/2010/08/04/selected-occasions-of-handsome-deceit/) (Also 
+his music rules, so be sure to check it out.)
+
+All that said, it's fairly accepted that 16 bit audio can represent differences in loudness that comes close to the 
+limit our brains can distinguish. Supporting higher bit rates in pippi is on the list of to dos, but only because that 
+extra dynamic resolution becomes useful when you're transforming very quiet sounds, or sounds with a very limited dynamic range.
+
+So, we could just work with lists of python integers, but doing operations in pure python can get pretty slow - 
 especially when a system will quickly grow to working with minutes and hours audio. By relying on the fast C 
 backend for string manipulation and basic DSP, performance is actually pretty good.
 
-So, we represent each integer as a python string. And when doing synthesis, use the `struct` module to 
+Instead we represent each integer as a python string, and when doing synthesis, use the `struct` module to 
 pack our integers into string literals.
 
 To turn the python integer `32,767` into a string literal, we can give `struct.pack` a format argument and 
@@ -95,3 +107,8 @@ Using the same silence 10 frames from the earlier example, we can check the actu
 To do the cut, `dsp.cut()` accepts three params: first, the string literal to cut from, next the offset in frames 
 where the cut should start, and third the length of the cut in frames. 
 
+### Summary
+
+Part of what pippi provides is a wrapper to working with python string literals. This is actually a very handy thing.
+That's just a small part of the library though. Next we'll talk about doing basic synthesis with pippi, and using some of 
+its waveshape generators for both audio and control data.
