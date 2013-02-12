@@ -55,7 +55,7 @@ limit our brains can distinguish. Supporting higher bit rates in pippi is on the
 extra dynamic resolution becomes useful when you're transforming very quiet sounds, or sounds with a very limited dynamic range.
 
 So, we could just work with lists of python integers, but doing operations in pure python can get pretty slow - 
-especially when a system will quickly grow to working with minutes and hours audio. By relying on the fast C 
+especially when a system will quickly grow to working with minutes and hours of audio. By relying on the fast C 
 backend for string manipulation and basic DSP, performance is actually pretty good.
 
 Instead we represent each integer as a python string, and when doing synthesis, use the `struct` module to 
