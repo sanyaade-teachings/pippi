@@ -6,8 +6,8 @@
 
 Pippi takes advantage of a few features of CPython:
 
-- Doing string manipulations with python's internal C methods (like string.join()) is fast.
-- The python standard library includes the audioop module (DSP code ripped straight out of the excellent SoX command line utility) which expects audio input as a binary string and returns the same. It is also fast.
+- Doing string manipulations with python's internal C methods (like `string.join()`) is fast.
+- The python standard library includes the `audioop` module (DSP code ripped straight out of the excellent SoX command line utility) which expects audio input as a binary string and returns the same. It is also fast.
 - There's a handy wave module in the standard library, which makes importing and exporting PCM wave data simple.
 
 ### Data format
@@ -27,7 +27,7 @@ when sent to our computer's digital-to-analog converter. *PCM* stands for Pulse 
 It is conventional to use signed 16 bit integers to represent an instantanious speaker cone position - this 
 is also the format CD audio takes. 
 
-A signed integer means that instead of having a range between 0 and some positive number, it has a range 
+A signed integer means that instead of having a range between zero and some positive number, it has a range 
 between some negative number and some positive number.
 
 This is great for representing audio - at zero the speaker cone is at rest, at max it is pushed as far out as 
@@ -35,7 +35,7 @@ it can go, and at min it is pulled as far in as it can go.
 
 The number of bits in the integer dictate the size of the number it is possible to represent.
 
-A 16 bit integer can represent 2^16 discrete values - or 65,536 total values.
+A 16 bit integer can represent `2^16` discrete values - or `65,536` total values.
 
 That means a signed integer will use about half of those possible values as positives, and half as negatives.
 
