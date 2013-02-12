@@ -31,62 +31,67 @@ A signed integer means that instead of having a range between 0 and some positiv
 between some negative number and some positive number.
 
 This is great for representing audio - at zero the speaker cone is at rest, at max it is pushed as far out as 
-it can go, and at min it is pulled as far out as it can go.
+it can go, and at min it is pulled as far in as it can go.
 
 The number of bits in the integer dictate the size of the number it is possible to represent.
 
-A 16 bit integer can represent 2^16 discrete values - or 65,536 total values, including zero.
+A 16 bit integer can represent 2^16 discrete values - or 65,536 total values.
 
-That means a signed integer will use half of those possible values as positives, and half as negatives.
+That means a signed integer will use about half of those possible values as positives, and half as negatives.
 
-Half of 2^16 is 2^15, or 32,768. Because we need to account for a zero value, the range of our signed 16 bit integer 
-is actually -2^15 to 2^15 - 1. Or -32,768 to 32,767.
+Half of `2^16` is `2^15`, or `32,768`. Because we need to account for a zero value, the range of our signed 16 bit integer 
+is actually `-2^15` to `2^15 - 1`. Or `-32,768` to `32,767`.
 
-We could just work with lists of python integers internally, but doing operations on them is pretty slow - 
-especially when a system will quickly grow to working with minutes and hours audio.
+We could just work with lists of python integers, but doing operations in pure python can get pretty slow - 
+especially when a system will quickly grow to working with minutes and hours audio. By relying on the fast C 
+backend for string manipulation and basic DSP, performance is actually pretty good.
 
-Instead, we represent each integer as a python string. When doing synthesis, the struct module is useful.
+So, we represent each integer as a python string. And when doing synthesis, use the `struct` module to 
+pack our integers into string literals.
 
-To turn the python integer 32,767 into a binary string, we can give struct.pack a special format argument and 
-it will convert the number into a string.
+To turn the python integer `32,767` into a string literal, we can give `struct.pack` a format argument and 
+it will convert the number into the correct binary string literal.
 
     >>> import struct
     >>> struct.pack('<h', 32767)
     '\xff\x7f'
 
 While it looks like we just got back an eight character string, this is actually a two character string, 
-where the leading \x tells python to interpret the next two characters as a hex value.
+where the leading `\x` is the way python indicates that the next two characters should be read as a hex value.
 
-So if we have 44,100 frames of a single channel of 16 bit audio, internally we'd have a string whose length 
-is actually twice that - 88,200 characters. With two channels, our string will have 176,400 characters.
+So if we have `44,100` frames of a single channel of 16 bit audio, internally we'd have a string whose length 
+is actually twice that - `88,200` characters. With two channels, our string will have `176,400` characters.
 
-One convenience pippi tries to provide is to prevent you from accidentally splitting a sound in the middle 
+One convenience pippi provides is a way to prevent you from accidentally splitting a sound in the middle 
 of a two-character word, which will instantly turn your audio into a brand new Merzbow track.
 
-To cut 100 ms of audio out of a sound, use the cut method:
+If you have a 10 frame 2 channel sound (in the below example, silence) and want to grab the last 5 frames, 
+you could do:
+
+    >>> import struct
+    >>> sound = struct.pack('<h', 0) * 2 * 10
+    >>> len(sound)
+    40
+    >>> sound = sound[:5 * 2 * 2]
+    >>> len(sound)
+    20
+
+Five frames of stereo 16 bit audio represented as a string will have a length of 20 characters.
+
+You may see how this could get annoying, fast. And an off-by-one error will produce Merzbow forthwith.
+
+With pippi, to do the same, we use the cut method:
 
     >>> from pippi import dsp
-    >>> sound = dsp.read('mysound.wav')
     >>> dsp.flen(sound)
-    44100
-    >>> short_sound = dsp.cut(sound, 0, dsp.mstf(100))
-    >>> dsp.flen(short_sound)
-    4410
+    10
+    >>> sound = dsp.cut(sound, 5, 5)
     >>> dsp.flen(sound)
-    44100
+    5 
 
-First, we read a WAV file that is exactly 1 second long and store it as a string into the 'sound' variable.
+Using the same silence 10 frames from the earlier example, we can check the actual length with `dsp.flen()`. 
+(Which is short for 'frame length' or 'length in frames')
 
-Next, we can check the length in frames with the dsp.flen() method, which will always give you a length in 
-frames, no matter how many channels of audio.
-
-To do the cut, dsp.cut() accepts three params: first, the sound string to cut from, next the offset in frames 
-where the cut should start, and third the length of the cut in frames. The function dsp.mstf() is an example of 
-some of the unit conversation utilities pippi provides. It will convert milleseconds to frames at the current 
-sampling rate. (Which is always 44100 - more on that later.)
-
-Finally, we can see the original sound has not been altered. Python strings are not mutable, and all cut does 
-is actually return a slice of the original sound - it may have been more helpfully called 'copy_segment' but that's 
-a bit long to type. :-)
-
+To do the cut, `dsp.cut()` accepts three params: first, the string literal to cut from, next the offset in frames 
+where the cut should start, and third the length of the cut in frames. 
 
