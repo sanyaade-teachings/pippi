@@ -7,8 +7,8 @@
 Pippi takes advantage of a few features of CPython:
 
 - Doing string manipulations with python's internal C methods (like `string.join()`) is fast.
-- The python standard library includes the `audioop` module (DSP code ripped straight out of the excellent SoX command line utility) which expects audio input as a binary string and returns the same. It is also fast.
-- There's a handy wave module in the standard library, which makes importing and exporting PCM wave data simple.
+- The python standard library includes the `audioop` module (DSP code ripped straight out of the excellent SoX command line utility) which accepts audio as a binary string literal and returns the same. It is also fast.
+- There's a handy `wave` module in the standard library, which makes importing and exporting PCM wave data simple.
 
 ### Data format
 
