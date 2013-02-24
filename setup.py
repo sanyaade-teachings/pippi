@@ -4,13 +4,13 @@ distribute_setup.use_setuptools()
 from setuptools import setup
 
 setup(name='pippi',
-        version='0.1.1-3',
+        version='0.1.1-4',
         description='A python computer music system',
         url='http://hecanjog.github.com/pippi',
         author='He Can Jog',
         author_email='erik@hecanjog.com',
         license='Public Domain',
-        packages=['pippi'],
+        packages=['pippi', 'distribute_setup'],
         extras_require = {
             'realtime': ['pyalsaaudio', 'termcolor', 'vcosc'],
         },
