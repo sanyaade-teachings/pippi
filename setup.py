@@ -1,6 +1,3 @@
-import distribute_setup
-distribute_setup.use_setuptools()
-
 from setuptools import setup
 
 setup(name='pippi',
@@ -10,7 +7,8 @@ setup(name='pippi',
         author='He Can Jog',
         author_email='erik@hecanjog.com',
         license='Public Domain',
-        packages=['pippi', 'distribute_setup'],
+        packages=['pippi'],
+        install_requires=['distribute'],
         extras_require = {
             'realtime': ['pyalsaaudio', 'termcolor', 'vcosc'],
         },
