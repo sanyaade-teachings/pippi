@@ -91,4 +91,7 @@ def play(params):
 
     out = dsp.mix(layers) * reps
 
-    return (dsp.amp(out, volume), {'value': {'pitches': [tune.nts(notes[0], octave - 1)] }})
+    # Format is: [ path, offset, id, value ]
+    osc_message = ['/dac', 0.0, 0, tune.nts(notes[0], octave - 1)]
+
+    return (dsp.amp(out, volume), {'osc': [ osc_message ]})

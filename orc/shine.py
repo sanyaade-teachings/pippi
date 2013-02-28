@@ -1,6 +1,5 @@
 from pippi import dsp
 from pippi import tune
-from vcosc import osc
 
 shortname   = 'sh'
 name        = 'shine'
@@ -81,10 +80,8 @@ def play(params):
     # Translate the list of scale degrees into a list of frequencies
     freqs = tune.fromdegrees(scale, octave, note, quality, ratios)
 
-    # Assemble a dictionary of onset times and pitches in midi format
-    events = []
-    events.append([ ('/dac/1', tune.fts(freq / 2.0), float(dsp.fts(length))) for freq in dsp.randshuffle(freqs) ])
-    #events.append([ ('/tick/1', 1, float(dsp.fts(length))) for freq in freqs ])
+    # Format is: [ [ path, offset, id, value ] ]
+    osc_messages = [ ['/dac', float(dsp.fts(length)), 1, tune.fts(freq / 2.0)] for freq in dsp.randshuffle(freqs) ]
 
     # Phase randomly chooses note lengths from a 
     # set of ratios derived from the current bpm
@@ -199,8 +196,7 @@ def play(params):
 
     # Adjust output amplitude as needed and return audio + OSC 
     if pi:
-        #return (dsp.amp(out, volume), {'value': {'pitches': pi_pitches, 'ticks': pi_ticks} })
-        return (dsp.amp(out, volume), {'value': {'events': events }})
+        return (dsp.amp(out, volume), {'osc': osc_messages})
     else:
         return dsp.amp(out, volume)
 

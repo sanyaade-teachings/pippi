@@ -2,31 +2,32 @@ import os
 import time
 from pippi import param
 from pippi import dsp
+from pippi import osc 
 import multiprocessing as mp
 import alsaaudio
-from vcosc import osc
+import liblo
 
 def grid(tick, bpm):
     os.nice(-19)
-    
-    try:
-        client = osc.Client('192.168.1.222', 9000)
-    except:
-        pass
 
     bpm = dsp.mstf(dsp.bpm2ms(bpm))
 
-    tick_bundle = [ ('/tick/0', 1, dsp.fts(bpm) / 2.0) for i in range(16 * 2) ]
+    try:
+        client = osc.Client('192.168.1.222', 9000)
+    except:
+        print 'No OSC server found. Messages will not be sent.'
+
+    pulse_width = dsp.fts(bpm) / 4.0
+
+    osc_messages = []
+    for osc_tick in range(16 * 2):
+        osc_messages += [ ['/tick', pulse_width, 0, 1] ]
+        osc_messages += [ ['/tick', pulse_width, 0, 0] ]
+
+    client.group(osc_messages)
 
     count = 0
     while True:
- 
-        try:
-            if count % 16 == 0:
-                client.bundle(tick_bundle)
-        except:
-            pass
-
         tick.set()
         tick.clear()
         dsp.delay(bpm)
@@ -63,29 +64,21 @@ def dsp_loop(out, buffer, params, voice_params, voice_id):
     target_volume = params.get('target_volume', 1.0)
     post_volume   = params.get('post_volume', 1.0)
 
-    # Send data to osc stream callback
+    # Handle data passed back from generators
     if 'data' in params.data:
-        try:
-            client = osc.Client('192.168.1.222', 9000)
+        # Send osc message groups if any
+        if 'osc' in params.data['data']:
+            try:
+                client = osc.Client('192.168.1.222', 9000)
+            except:
+                print 'Could not connect to OSC server.'
 
-            if 'events' in params.data['data']['value']:
-                for stream in params.data['data']['value']['events']:
-                    client.bundle(stream)
+            osc_message_groups = params.data['data']['osc']
 
-            if 'pitches' in params.data['data']['value']:
-                for dac_id, pitch in enumerate(params.data['data']['value']['pitches'][:9]):
-                    if pitch is not None:
-                        client.message('/dac/%s' % dac_id, pitch)
-            
-            if 'ticks' in params.data['data']['value']:
-                ticks = params.data['data']['value']['ticks']
-                path  = ticks['path']
-                times = ticks['values']
-                ticks = [ (path, 1, time) for time in times ]
-                #client.message(ticks['path'], ticks['values'])
-                client.bundle(ticks)
-        except:
-            pass
+            # Send all message groups
+            for osc_messages in osc_message_groups:
+                # Path is first element in list
+                client.group(osc_messages)
 
     for chunk in buffer:
         if target_volume != post_volume:

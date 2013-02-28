@@ -17,7 +17,7 @@ def play(params):
     glitch = params.get('glitch', False)
     alias = params.get('alias', False)
     skitter = params.get('skitter', False)
-    bend = params.get('bend', True)
+    bend = params.get('bend', False)
     tweet = params.get('tweet', False)
     pattern = params.get('pattern', True)
     playdrums = params.get('drum', ['k', 'h', 'c'])
