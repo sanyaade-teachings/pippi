@@ -238,6 +238,6 @@ static PyMethodDef pippic_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-PyMODINIT_FUNC initpippic(void) {
-    (void) Py_InitModule("pippic", pippic_methods);
+PyMODINIT_FUNC init_pippic(void) {
+    (void) Py_InitModule("_pippic", pippic_methods);
 }

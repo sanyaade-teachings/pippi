@@ -18,6 +18,7 @@ import time
 from docopt import docopt
 import collections
 import numpy
+from _pippic import amp, am, sine
 
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 snddir = '' 
@@ -511,9 +512,6 @@ def iscrossing(first, second):
             return True 
 
     return False
-
-def amp(string, scale):
-    return audioop.mul(string, audio_params[1], scale)
 
 def prob(item_dictionary):
     weighted_list = []
