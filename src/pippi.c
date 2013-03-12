@@ -12,26 +12,22 @@
 typedef int PyInt32;
 typedef unsigned int Py_UInt32;
 
-typedef long Py_Int32;
-typedef unsigned int Py_UInt32;
-
 static PyObject *PippiError;
 
-#define MAKEVAL(data, i) ((short *)(data + i))
+#define BUFFER(data, i) ((short *)(data + i))
+#define MAXVAL 0x7fff
+#define MINVAL -0x7fff
 
 /* Saturate overflows to maximum or minimum
  */
-static double saturate(double value) {
-    double maxvalue = (double) 0x7fff;
-    double minvalue = (double) -0x7fff;
-
-    if(value > maxvalue) {
-        value = maxvalue;
-    } else if(value < minvalue) {
-        value = minvalue;
+static short pp_saturate(double value) {
+    if(value > MAXVAL) {
+        value = MAXVAL;
+    } else if(value < MINVAL) {
+        value = MINVAL;
     }
     
-    return value;
+    return (short)value;
 }
 
 /*
@@ -95,13 +91,10 @@ static PyObject * pippic_amp(PyObject *self, PyObject *args) {
     /* Loop over the sound and multiply each value by the factor. 
      */
     for (i=0; i < length; i += size) {
-        value = (int)*MAKEVAL(input, i);
+        value = *BUFFER(input, i);
         scaled_value = (double)value * factor;
-        scaled_value = saturate(scaled_value);
 
-        value = (int)scaled_value;
-
-        *MAKEVAL(data, i) = (short)value;
+        *BUFFER(data, i) = pp_saturate(scaled_value);
     }
 
     return output;
@@ -141,16 +134,14 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
         value = sin(position * period * frequency) * amplitude;
 
         /* Scale to signed 16 bit integer */
-        value = value * (double)0x7fff;
-
-        value = saturate(value);
-        value = (int)value;
+        value = value * (double)MAXVAL;
+        value = pp_saturate(value);
 
         /* Write to the left channel */
-        *MAKEVAL(data, i) = (short)value;
+        *BUFFER(data, i) = value;
 
         /* Write to the right channel */
-        *MAKEVAL(data, i+size) = (short)value;
+        *BUFFER(data, i + size) = value;
     }
 
     return output;
@@ -163,48 +154,39 @@ static PyObject * pippic_am(PyObject *self, PyObject *args) {
     PyObject *output;
     signed char *data;
 
-    signed char *first_input, *second_input;
-    int first_length, second_length, length;
-
-    double product;
-
-    int first_value, second_value, value = 0;
+    signed char *carrier, *modulator;
+    int carrier_length, modulator_length, length, carrier_value;
+    double product, modulator_value;
 
     int i;
     int size = 2;
 
-    if(!PyArg_ParseTuple(args, "s#s#", &first_input, &first_length, &second_input, &second_length)) {
+    if(!PyArg_ParseTuple(args, "s#s#", &carrier, &carrier_length, &modulator, &modulator_length)) {
         return 0;
     }
 
-    if(first_length > second_length) {
-        length = first_length;
-    } else {
-        length = second_length;
-    }
+    /* The output length is equal to the length of the longest input sound */
+    length = carrier_length > modulator_length ? carrier_length : modulator_length;
 
     output = PyString_FromStringAndSize(NULL, length);
     data = (signed char*)PyString_AsString(output);
 
     for(i=0; i < length; i += size) {
-        if(i < first_length) {
-            first_value = (int)*MAKEVAL(first_input, i);
+        if(i < carrier_length) {
+            carrier_value = (int)*BUFFER(carrier, i);
         } else {
-            first_value = 1.0;
+            carrier_value = 0;
         }
 
-        if(i < second_length) {
-            second_value = (int)*MAKEVAL(second_input, i);
+        if(i < modulator_length) {
+            modulator_value = (int)*BUFFER(modulator, i) / (double)MAXVAL;
         } else {
-            second_value = 1.0;
+            modulator_value = 1.0;
         }
 
-        product = (double)first_value * (double)second_value;
-        product = saturate(product);
+        product = carrier_value * modulator_value;
 
-        value = (int)product;
-
-        *MAKEVAL(data, i) = (short)value;
+        *BUFFER(data, i) = pp_saturate(product);
     }
 
     return output;
