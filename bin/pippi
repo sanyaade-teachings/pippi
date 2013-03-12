@@ -37,10 +37,6 @@ class Pippi(cmd.Cmd):
     vid = 0
 
     def __init__(self):
-
-        if os.system('ssh pi \'sudo date -s "' + time.asctime() + ' CST"\'') == 0:
-            print 'Synced time on raspberry pi'
-
         cmd.Cmd.__init__(self)
 
         # Global pippi config settings including
@@ -65,6 +61,7 @@ class Pippi(cmd.Cmd):
 
 
         self.bpm = self.config.get('global', 'bpm')
+        self.root = 27.5 # TODO add to config
 
         # Update sys.path to include any generator orc/ directories
         # listed in our config
@@ -125,6 +122,10 @@ class Pippi(cmd.Cmd):
 
         print
 
+    def do_sync(self, cmd):
+        if os.system('ssh pi@192.168.1.222 \'sudo date -s "' + time.asctime() + ' CST"\' > /dev/null 2>&1') == 0:
+            print 'Synced time on raspberry pi'
+
     def do_bpm(self, cmd):
         try:
             # Update self.bpm
@@ -145,6 +146,21 @@ class Pippi(cmd.Cmd):
                     self.update_param(voice.name, 'bpm', self.bpm)
                     self.update_param(voice.name, 'once', True)
  
+        except Exception, e:
+            dsp.log(e)
+
+    def do_root(self, cmd):
+        try:
+            self.root = float(cmd)
+
+            active = mp.active_children()
+
+            for voice in active:
+                if hasattr(self.parms, voice.name):
+                    params = getattr(self.params, voice.name)
+                    self.update_param(voice.name, 'root', self.root)
+                    self.update_param(voice.name, 'once', True)
+
         except Exception, e:
             dsp.log(e)
 
@@ -348,6 +364,8 @@ class Pippi(cmd.Cmd):
                     generator = self.generators.get(commands[0][0], False)
                     params = param.Param(commands) 
 
+                    if 'root' not in params.data:
+                        params.data['root'] = { 'value': self.root, 'name': 'root' }
 
                     if 'bpm' not in params.data:
                         params.data['bpm'] = { 'value': self.bpm, 'name': 'bpm' }

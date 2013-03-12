@@ -45,7 +45,10 @@ def play(params):
     phase       = params.get('phase', False)
     pi          = params.get('pi', False)
     wild        = params.get('wii', False)
+    root        = params.get('root', 27.5)
     trigger_id = params.get('trigger_id', 0)
+
+    tune.a0 = float(root)
 
     try:
         # Available input samples
@@ -81,7 +84,8 @@ def play(params):
     freqs = tune.fromdegrees(scale, octave, note, quality, ratios)
 
     # Format is: [ [ path, offset, id, value ] ]
-    osc_messages = [ ['/dac', float(dsp.fts(length)), 1, tune.fts(freq / 2.0)] for freq in dsp.randshuffle(freqs) ]
+    # Offset for video 
+    osc_messages = [ ['/dac', float(dsp.fts(length)), 1, tune.fts(osc_freq)] for osc_freq in freqs ]
 
     # Phase randomly chooses note lengths from a 
     # set of ratios derived from the current bpm

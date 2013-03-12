@@ -16,6 +16,8 @@ import sys
 from datetime import datetime
 import time
 from docopt import docopt
+import collections
+import numpy
 
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 snddir = '' 
@@ -795,7 +797,104 @@ def pipe(f):
         # TODO parse args and stream to stdout
         f(args)
 
-class Sound:
-    def __init__(self):
-        data = ''
-        params = ''
+
+class Sound(collections.MutableSequence):
+    def __init__(self, data='', channels=2, depth=16, rate=44100):
+        super(Sound, self).__init__()
+
+        self.data = data
+        self.channels = channels
+        self.depth = depth
+        self.rate = rate
+
+    def __len__(self):
+        return flen(self.data)
+
+    def __str__(self):
+        return self.data
+
+    def __contains__(self, key):
+        """ TODO: search by frame or group of frames """
+        return False
+
+    def __getitem__(self, index):
+        return cut(self.data, index, 1)
+
+    def __setitem__(self, index, value):
+        replace_into(self.data, value, index)
+
+    def __delitem__(self, value):
+        """ TODO: delete frames by value... """
+        pass
+
+    def insert(self, index, value):
+        insert_into(self.data, value, index)
+
+    def append(self, value):
+        if isinstance(value, Sound) or isinstance(value, list):
+            self.frames += [ value ]
+        else:
+            print 'foo'
+
+    def loop(self, loops):
+        self.data = self.data * loops
+
+    def __iadd(self, value):
+        return self.__add__(value)
+
+    def __add__(self, value):
+        if isinstance(value, int):
+            return value
+        elif isinstance(value, Sound):
+            return Sound(mix([self.data, value.data]))
+
+    def __radd__(self, value):
+        return self.__add__(value)
+
+    def __sub__(self, value):
+        if isinstance(value, int):
+            return Sound([ frame - int(value) for frame in self.frames ])
+        elif isinstance(value, Sound):
+            return Sound([ frame - value[i] for i, frame in enumerate(self.frames) ])
+    
+    def __rsub__(self, value):
+        if isinstance(value, int):
+            return Sound([ int(value) - frame for frame in self.frames ])
+        elif isinstance(value, Sound):
+            return Sound([ value[i] - frame for i, frame in enumerate(self.frames) ])
+
+    def __mul__(self, value):
+        if isinstance(value, int) or isinstance(value, float):
+            return Sound([ frame * value for frame in self.frames ])
+        elif isinstance(value, Sound):
+            return Sound([ frame * value[i] for i, frame in enumerate(self.frames) ])
+
+    def __rmul__(self, value):
+        return self.__mul__(value)
+
+    def toarray(self, buffer_size=1024):
+        chans = self.unpack()
+        left = []
+        right = []
+
+        for i, frame in enumerate(chans):
+            if i % 2 == 0:
+                left.append(frame / float(2**16))
+            else:
+                right.append(frame / float(2**16))
+
+        chunks = []
+        for i in range(len(left)):
+            start = i * buffer_size
+            end = start + buffer_size
+            chunk = numpy.array([left[start:end], right[start:end]], dtype='f')
+            chunks.append(chunk)
+
+        return chunks
+
+
+    def unpack(self, value=None):
+        value = self.data if value is None else value
+
+        return [ struct.unpack('<h', '%s%s' % (frame, value[i]))[0]  for i, frame in enumerate(value) if i % 2 == 0 and i < len(value) - 1 ] 
+

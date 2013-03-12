@@ -13,6 +13,7 @@ def play(params):
     volume = volume / 100.0 # TODO move into param filter
     octave = params.get('octave', 2)
     notes = params.get('note', ['c', 'g'])
+    hertz = params.get('hertz', False)
     quality = params.get('quality', tune.major)
     glitch = params.get('glitch', False)
     waveform = params.get('waveform', 'sine')
@@ -24,6 +25,9 @@ def play(params):
     harmonics = params.get('harmonics', [1,2])
     scale = params.get('scale', [1,8])
     reps      = params.get('repeats', 1)
+    root = params.get('root', 27.5)
+
+    tune.a0 = float(root)
 
     # These are amplitude envelopes for each partial,
     # randomly selected for each. Not to be confused with 
@@ -31,10 +35,19 @@ def play(params):
     wtypes = ['sine', 'phasor', 'line', 'saw']    
     layers = []
 
+    if hertz is not False:
+        notes = hertz
+
     for note in notes:
         tones = []
         for i in range(dsp.randint(2,4)):
-            freq = tune.step(i, note, octave, dsp.randshuffle(scale), quality, ratios)
+            if hertz is not False:
+                if octave > 1:
+                    octave -= 1.0
+
+                freq = float(note) * octave 
+            else:
+                freq = tune.step(i, note, octave, dsp.randshuffle(scale), quality, ratios)
 
             snds = [ dsp.tone(length, freq * h, waveform) for h in harmonics ]
 
@@ -92,6 +105,9 @@ def play(params):
     out = dsp.mix(layers) * reps
 
     # Format is: [ path, offset, id, value ]
-    osc_message = ['/dac', 0.0, 0, tune.nts(notes[0], octave - 1)]
+    if hertz is not False:
+        osc_message = ['/dac', 0.0, 0, tune.fts(notes[0])]
+    else:
+        osc_message = ['/dac', 0.0, 0, tune.nts(notes[0], octave - 1)]
 
     return (dsp.amp(out, volume), {'osc': [ osc_message ]})

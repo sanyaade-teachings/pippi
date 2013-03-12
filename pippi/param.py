@@ -18,6 +18,11 @@ class Param:
                 'type': 'note-list',
                 'accepts': ['note-list'],
                 },
+            'hz': {
+                'name': 'hertz',
+                'type': 'hz-list',
+                'accepts': ['hz-list'],
+                },
             'h': {
                 'name': 'harmonic',
                 'type': 'integer-list',
@@ -128,16 +133,21 @@ class Param:
             'float':        re.compile(r'\d+\.?\d*'), 
             'integer':      re.compile(r'\d+'), 
 
+            'hz':         re.compile(r'\d+\.?\d*hz$'), 
             'note':         re.compile(r'[a-gA-G][#b]?'), 
             'alphanumeric':      re.compile(r'\w+'), 
             'integer-list':      re.compile(r'\d+(.\d+)*'), 
             'note-list':      re.compile(r'[a-gA-G][#b]?(.[a-gA-G][#b]?)*'), 
+            'hz-list':      re.compile(r'\d+\-?\d*hz?(.\d+\.?\d*hz)*'), 
             'string-list':      re.compile(r'[a-zA-Z]+(.[a-zA-Z]+)*'), 
             }
 
-    def __init__(self, data={}):
+    def __init__(self, data=None):
         """ Create an instance with key-value dict or list of key-value lists
         """
+        if data is None:
+            data = {}
+
         if hasattr(data, 'iteritems'):
             self.data = { param: { 'value': value } for (param, value) in data.iteritems() }
         elif hasattr(data, '__iter__'):
@@ -177,6 +187,9 @@ class Param:
 
         if input_type == 'note-list':
             return self.convert_note_list(value, output_type)
+
+        if input_type == 'hz-list':
+            return self.convert_hz_list(value, output_type)
 
         if input_type == 'alphanumeric':
             return value
@@ -228,6 +241,15 @@ class Param:
             value = dsp.stf(value)
 
         return value 
+
+    def convert_hz_list(self, value, output_type):
+        if output_type == 'hz-list':
+            value = value.split('-')
+
+        for i, hz in enumerate(value):
+            value[i] = self.convert_float(hz)
+        
+        return value
 
     def convert_note_list(self, value, output_type):
         if output_type == 'note-list':

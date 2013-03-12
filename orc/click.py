@@ -186,11 +186,13 @@ def play(params):
             events = getevents(lenbeat, drum['pat'])
             layers += [ ''.join([ drum['gen'](event[0], event[1]) for event in events ]) ]
 
-            stream = []
-            for h in drum['pat']:
-                stream += [ ('/tick/' + str(drum['trigger_id']), int(h), dsp.fts(lenbeat)) ]
+            if drum['shortname'] == 's':
+                osc_messages = [ ['/tick', dsp.fts(lenbeat), drum['trigger_id'], int(h)] for h in drum['pat'] ]
+            #stream = []
+            #for h in drum['pat']:
+                #stream += [ ('/tick/' + str(drum['trigger_id']), int(h), dsp.fts(lenbeat)) ]
 
-            streams += [ stream ]
+            #streams += [ stream ]
 
     out = dsp.mix(layers)
 
@@ -206,7 +208,7 @@ def play(params):
         out = ''.join(dsp.randshuffle(out))
 
     if pi:
-        return (dsp.amp(out, volume), {'value': {'events': streams }})
+        return (dsp.amp(out, volume), {'osc': osc_messages })
     else:
         return dsp.amp(out, volume)
 

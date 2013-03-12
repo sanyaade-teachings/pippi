@@ -17,17 +17,18 @@ def grid(tick, bpm):
     except:
         print 'No OSC server found. Messages will not be sent.'
 
-    pulse_width = dsp.fts(bpm) / 4.0
+    pulse_width = dsp.fts(bpm) / 4.0 
 
     osc_messages = []
     for osc_tick in range(16 * 2):
         osc_messages += [ ['/tick', pulse_width, 0, 1] ]
         osc_messages += [ ['/tick', pulse_width, 0, 0] ]
 
-    client.group(osc_messages)
-
     count = 0
     while True:
+        if count % 16 == 0:
+            client.group(osc_messages)
+
         tick.set()
         tick.clear()
         dsp.delay(bpm)
@@ -58,7 +59,7 @@ def render(play, buffers, voice_params, once):
 
     setattr(buffers, buffer_id, dsp.split(sound, 500))
 
-def dsp_loop(out, buffer, params, voice_params, voice_id):
+def dsp_loop(out, buffer, params, voice_params, voice_id, jack=False):
     params = getattr(voice_params, voice_id)
 
     target_volume = params.get('target_volume', 1.0)
@@ -74,11 +75,12 @@ def dsp_loop(out, buffer, params, voice_params, voice_id):
                 print 'Could not connect to OSC server.'
 
             osc_message_groups = params.data['data']['osc']
+            client.group(osc_message_groups)
 
             # Send all message groups
-            for osc_messages in osc_message_groups:
+            #for osc_messages in osc_message_groups:
                 # Path is first element in list
-                client.group(osc_messages)
+                #client.group(osc_messages)
 
     for chunk in buffer:
         if target_volume != post_volume:
@@ -89,7 +91,10 @@ def dsp_loop(out, buffer, params, voice_params, voice_id):
 
             chunk = dsp.amp(chunk, post_volume)
 
-        out.write(chunk)
+        if jack is True:
+            out.process(chunk)
+        else:
+            out.write(chunk)
 
         if post_volume < 0.002:
             params = getattr(voice_params, voice_id)
@@ -132,17 +137,23 @@ def out(generator, buffers, voice_params, tick):
     # Open a connection to an ALSA PCM device
     device = params.get('device', 'default')
 
-    # TODO implement pyaudio support
-    try:
-        out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
-    except:
-        print 'Could not open an ALSA connection.'
-        return False
+    if device == 'jack':
+        jack.attach('pippi')
+        jack.register_port('out_1', jack.IsOutput)
+        jack.register_port('out_2', jack.IsOutput)
 
-    out.setchannels(2)
-    out.setrate(44100)
-    out.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-    out.setperiodsize(10)
+    else:
+        # TODO implement pyaudio support
+        try:
+            out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
+        except:
+            print 'Could not open an ALSA connection.'
+            return False
+
+        out.setchannels(2)
+        out.setrate(44100)
+        out.setformat(alsaaudio.PCM_FORMAT_S16_LE)
+        out.setperiodsize(10)
 
     # On start of playback, check to see if we should be regenerating 
     # the sound. If so, spawn a new render thread.

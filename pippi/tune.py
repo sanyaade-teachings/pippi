@@ -82,9 +82,12 @@ def nti(note):
     """
     return notes.get(note, False)
 
-def ntf(note, octave=4, ratios=terry):
+def ntf(note, octave=4, ratios=None):
     """ Note to freq 
     """
+    if ratios is None:
+        ratios = terry
+
     return ratios[nti(note)][0] / ratios[nti(note)][1] * (a0 * (2.0**octave))
 
 def stf(index):
@@ -104,7 +107,9 @@ def fts(freq):
         cfreq = all_freq[count]
         count = count + 1
 
-    return count - 1
+    count = count - 1
+
+    return count % 55
 
 def nts(note, octave):
     octave = octave if octave >= -2 else -2
@@ -112,9 +117,20 @@ def nts(note, octave):
 
     degree = notes[note] * 2
 
-    return degree + ((octave + 2) * 24) 
+    degree = degree + ((octave + 2) * 24) 
 
-def fromdegrees(scale_degrees=[1,3,5], octave=2, root='c', scale=major, ratios=just):
+    return degree
+
+def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None):
+    if scale_degrees is None:
+        scale_degrees = [1,3,5]
+
+    if ratios is None:
+        ratios = terry
+
+    if scale is None:
+        scale = major
+
     freqs = []
     root = ntf(root, octave, ratios)
 
@@ -127,8 +143,17 @@ def fromdegrees(scale_degrees=[1,3,5], octave=2, root='c', scale=major, ratios=j
 
     return freqs
 
-def step(degree=0, root='c', octave=4, scale=[1,3,5,8], quality=major, ratios=terry):
+def step(degree=0, root='c', octave=4, scale=None, quality=None, ratios=None):
     # TODO. Many qualities of jank. Fix.
+
+    if scale is None:
+        scale = [1,3,5,8]
+
+    if quality is None:
+        quality = major
+
+    if ratios is None:
+        ratios = terry
 
     diatonic = scale[degree % len(scale) - 1]
     chromatic = quality[diatonic % len(quality) - 1]
@@ -139,5 +164,11 @@ def step(degree=0, root='c', octave=4, scale=[1,3,5,8], quality=major, ratios=te
 
     return pitch
 
-def scale(pitches=[1,3,5], quality=major):
+def scale(pitches=None, quality=None):
+    if pitches is None:
+        pitches = [1,3,5]
+
+    if quality is None:
+        quality = major
+
     return [quality[p - 1] for p in pitches]
