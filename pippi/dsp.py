@@ -1,7 +1,7 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python2.7
 # -*- coding: UTF-8 -*-
 
-""" ding dong :: www.hecanjog.com :: (cc) by-nc-sa 
+""" Anti-copywrite. Do whatever you would like with this software.
 """
 
 import wave
@@ -17,9 +17,9 @@ from datetime import datetime
 import time
 from docopt import docopt
 import collections
-import numpy
-from _pippic import amp, am, sine
+from _pippic import amp, am, add, sine, shift, mix
 
+bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 snddir = '' 
 dsp_grain = 64
@@ -34,15 +34,10 @@ cpop = 0.444
 crpop = 3.9
 quiet = True 
 
-def notify(message):
-    sys.stderr.write(message)
 
-def lget(list, index, default=True):
-    """ Safely return a selected element from a list """
-    try:
-        return list[index]
-    except IndexError:
-        return list[-1] if default is True else list[0]
+##############
+# List helpers
+##############
 
 def interleave(list_one, list_two):
     """ Combine two lists by interleaving their elements """
@@ -110,6 +105,17 @@ def rotate(list, start):
 
     return list[start:] + list[:start]
 
+
+
+
+
+
+
+
+#################
+# Runtime helpers
+#################
+
 def timer(cmd='start'):
     """ Counts elapsed time between start and stop events. 
         Useful for tracking render time. """
@@ -126,14 +132,21 @@ def timer(cmd='start'):
         if not quiet: print 'Render time:', themin, 'min', thesec, 'sec'
         return thetime
 
-def transpose(audio_string, amount):
-    """ Transpose an audio fragment by a given amount.
-        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc """
-    amount = 1.0 / float(amount)
 
-    audio_string = audioop.ratecv(audio_string, audio_params[1], audio_params[0], audio_params[2], int(audio_params[2] * amount), None)
-    
-    return audio_string[0]
+
+
+##############
+# Utils
+##############
+
+def log(message, mode="a"):
+    logfile = open(os.path.expanduser("~/pippi.error.log"), mode)
+    logfile.write(str(message) + "\n")
+    return logfile.close()
+
+def flen(string):
+    # string length in frames
+    return len(string) / (audio_params[1] + audio_params[0])
 
 def byte_string(number):
     """ Return integer encoded as bytes formatted for wave data """
@@ -147,47 +160,6 @@ def pack(number):
     number = number * 65535 - 32768
     return byte_string(int(number))
 
-def tone(length=44100, freq=440, wavetype='sine2pi', amp=1.0, blocksize=0):
-    cyclelen = htf(freq * 0.99)
-    numcycles = length / cyclelen
-
-    if blocksize > 0:
-        numblocks = numcycles / blocksize
-        if numcycles % blocksize > 0:
-            numblocks += 1
-
-        cycles = ''.join([blocksize * cycle(freq * rand(0.99, 1.0), wavetype, amp) for i in range(numblocks)])
-    else:
-        cycles = numcycles * cycle(freq * rand(0.99, 1.0), wavetype, amp)
-
-    return cycles 
-
-def chirp(numcycles, lfreq, hfreq, length=0, reps=1, etype=False):
-    # Sweep from low freq to high freq
-    freqs = wavetable('line', numcycles, hfreq, lfreq)
-    freqs = [cycle(f) for f in freqs]
-    out = ''.join(freqs)
-
-    # Envelope
-    if etype is not False:
-        out = env(out, etype, True)
-
-    # Add padding
-    if length > 0:
-        out = pad(out, 0, length - flen(out))
-
-    # Multiply
-    out = out * reps
-
-    return out
-
-def noise(length):
-    return ''.join([byte_string(randint(-32768, 32767)) for i in range(length * audio_params[0])])
-
-def cycle(freq, wavetype='sine2pi', amp=1.0):
-    wavecycle = wavetable(wavetype, htf(freq))
-    return ''.join([pack(amp * s) * audio_params[0] for s in wavecycle])
-
 def scale(low_target, high_target, low, high, pos):
     pos = float(pos - low) / float(high - low) 
     return pos * float(high_target - low_target) + low_target
@@ -198,6 +170,30 @@ def cap(num, max, min=0):
     elif num > max:
         num = max
     return num
+
+def timestamp_filename():
+    """ Generate a datetime string to add to filenames """
+    current_time = str(datetime.time(datetime.now()))
+    current_time = current_time.split(':')
+    current_seconds = current_time[2].split('.')
+    current_time = current_time[0] + '.' + current_time[1] + '.' + current_seconds[0]
+    current_date = str(datetime.date(datetime.now()))
+
+    return current_date + "_" + current_time
+
+
+
+
+
+
+
+
+
+
+
+###############
+# Random
+###############
 
 def seed(theseed=False):
     global seedint
@@ -258,6 +254,339 @@ def randshuffle(input):
             items.remove(item)
 
     return shuffled 
+
+
+
+
+
+
+
+
+###############
+# DSP
+###############
+
+def transpose(audio_string, amount):
+    """ Transpose an audio fragment by a given amount.
+        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc """
+    amount = 1.0 / float(amount)
+
+    audio_string = audioop.ratecv(audio_string, audio_params[1], audio_params[0], audio_params[2], int(audio_params[2] * amount), None)
+    
+    return audio_string[0]
+
+def tone(length=44100, freq=440, wavetype='sine2pi', amp=1.0, blocksize=0):
+    cyclelen = htf(freq * 0.99)
+    numcycles = length / cyclelen
+
+    if blocksize > 0:
+        numblocks = numcycles / blocksize
+        if numcycles % blocksize > 0:
+            numblocks += 1
+
+        cycles = ''.join([blocksize * cycle(freq * rand(0.99, 1.0), wavetype, amp) for i in range(numblocks)])
+    else:
+        cycles = numcycles * cycle(freq * rand(0.99, 1.0), wavetype, amp)
+
+    return cycles 
+
+def alias(audio_string, passthru = 0, envelope = 'random', split_size = 0):
+    if passthru > 0:
+        return audio_string
+
+    if envelope == 'flat':
+        envelope = False
+
+    if split_size == 0:
+        split_size = dsp_grain / randint(1, dsp_grain)
+
+    packets = split(audio_string, split_size)
+    packets = [p*2 for i, p in enumerate(packets) if i % 2]
+
+    out = ''.join(packets)
+
+    if envelope:
+        out = env(out, envelope)
+
+    return out 
+
+def chirp(numcycles, lfreq, hfreq, length=0, reps=1, etype=False):
+    # Sweep from low freq to high freq
+    freqs = wavetable('line', numcycles, hfreq, lfreq)
+    freqs = [cycle(f) for f in freqs]
+    out = ''.join(freqs)
+
+    # Envelope
+    if etype is not False:
+        out = env(out, etype, True)
+
+    # Add padding
+    if length > 0:
+        out = pad(out, 0, length - flen(out))
+
+    # Multiply
+    out = out * reps
+
+    return out
+
+def noise(length):
+    return ''.join([byte_string(randint(-32768, 32767)) for i in range(length * audio_params[0])])
+
+def cycle(freq, wavetype='sine2pi', amp=1.0):
+    wavecycle = wavetable(wavetype, htf(freq))
+    return ''.join([pack(amp * s) * audio_params[0] for s in wavecycle])
+
+def fill(string, length, chans=2):
+    if flen(string) < length:
+        try:
+            repeats = length / flen(string) + 1
+        except ZeroDivisionError:
+            return string
+
+        string = string * repeats
+
+    return cut(string, 0, length)
+
+def pad(string, start, end):
+    # start and end given in samples, as usual 
+    # eg lengths of silence to pad at start and end
+
+    zero = struct.pack('<h', 0)
+    zero = zero[0:1] * audio_params[1] * audio_params[0] # will we ever have a width > 2? donno.
+
+    return "%s%s%s" % ((start * zero), string, (end * zero))
+
+def iscrossing(first, second):
+    """ Detects zero crossing between two mono frames """
+
+    if len(first) == 2 and len(second) == 2:
+        first = struct.unpack("<h", first) 
+        second = struct.unpack("<h", second) 
+
+        if first[0] > 0 and second[0] < 0:
+            return True
+        elif first[0] < 0 and second[0] > 0:
+            return True
+        elif first[0] == 0 and second[0] != 0:
+            return False 
+        elif first[0] != 0 and second[0] == 0:
+            return True 
+
+    return False
+
+def insert_into(haystack, needle, position):
+    # split string at position index
+    hay = cut(haystack, 0, position)
+    stack = cut(haystack, position, flen(haystack) - position)
+    return "%s%s%s" % (hay, needle, stack)
+
+def replace_into(haystack, needle, position):
+    hayend = position * audio_params[1] * audio_params[0]
+    stackstart = hayend - (flen(needle) * audio_params[1] * audio_params[0])
+    return "%s%s%s" % (haystack[:hayend], needle, haystack[stackstart:])
+
+def cut(string, start, length):
+    # start and length are both given in frames (aka samples)za
+
+    #if start + length > flen(string):
+        #log('No cut for you!')
+        #log('in len: '+str(flen(string))+'start: '+str(start)+' length: '+str(length))
+
+    length = int(length) * audio_params[1] * audio_params[0]
+    start = int(start) * audio_params[1] * audio_params[0]
+
+    return string[start : start + length]
+
+def splitmono(string):
+    """ split a stereo sound into a list of mono sounds """
+    left = audioop.tomono(string, audio_params[1], 1, 0)
+    right = audioop.tomono(string, audio_params[1], 0, 1)
+
+    return [left, right] 
+
+def split(string, size, chans=2):
+    """ split a sound into chunks of size N in frames, or by zero crossings """
+    if size == 0:
+        if chans == 2:
+            # split into mono files
+            tracks = splitmono(string)
+
+            for i, track in enumerate(tracks):
+                tracks[i] = split(track, 0, 1)
+
+            return tracks
+
+        elif chans == 1:
+            frames = split(string, 1, 1)
+            chunk, chunks = [], []
+
+            for i, frame in enumerate(frames):
+                try:
+                    if chunk == []:
+                        chunk += [ frame ]
+                    elif iscrossing(frame, frames[i+1]) == False and chunk != []:
+                        chunk += [ frame ]
+                    elif iscrossing(frame, frames[i+1]) == True and chunk != []:
+                        chunk += [ frame ]
+                        chunks += [ ''.join(chunk) ]
+                        chunk = []
+                except IndexError:
+                    chunk += [ frame ]
+                    chunks += [ ''.join(chunk) ]
+
+            return chunks
+
+    elif size > 0:
+        frames = int(size) * audio_params[1] * chans 
+        return [string[frames * count : (frames * count) + frames] for count in range(len(string) / frames)]
+
+def vsplit(input, minsize, maxsize):
+    # min/max size is in frames...
+    output = []
+    pos = 0
+
+    for chunk in range(flen(input) / minsize):
+        chunksize = randint(minsize, maxsize)
+        if pos + chunksize < flen(input) - chunksize:
+            output.append(cut(input, pos, chunksize))
+            pos += chunksize
+
+    return output
+
+def write(audio_string, filename, timestamp=False):
+    """ Write audio data to renders directory with the Python wave module """
+    if timestamp == True:
+        filename = filename + '-' + timestamp_filename() + '.wav' 
+    else:
+        filename = filename + '.wav'
+
+    wavfile = wave.open(os.getcwd() + '/' + filename, "w")
+    wavfile.setparams(audio_params)
+    wavfile.writeframes(audio_string)
+    wavfile.close()
+    return filename
+
+def cache(s='', clear=False):
+    """ Simple write() wrapper to create and clear cache audio """
+    if clear == True:
+        files = os.listdir('renders/cache/')
+        for file in files:
+            os.remove('renders/cache/' + file)
+    else:
+        return write(s, 'cache/c', True)
+
+    return s 
+
+def read(filename):
+    """ Read a 44.1k / 16bit WAV file from disk with the Python wave module. 
+        Mono files are converted to stereo automatically. """
+    filename = snddir + filename
+    if not quiet: print 'loading', filename
+
+    file = wave.open(filename, "r")
+    file_frames = file.readframes(file.getnframes())
+
+    snd = Sound()
+
+    # check for mono files
+    if file.getnchannels() == 1:
+        file_frames = audioop.tostereo(file_frames, file.getsampwidth(), 0.5, 0.5)
+        snd.params = file.getparams()
+        snd.params = (2, snd.params[1], snd.params[2], snd.params[3], snd.params[4], snd.params[5])
+    else:
+        snd.params = file.getparams()
+
+    snd.data = file_frames
+
+    return snd
+
+def pantamp(pan_pos):
+    # Translate the pan position into a tuple size two of left amp and right amp
+    if pan_pos > 0.5:
+        pan_pos -= 0.5
+        pan_pos *= 2.0
+        pan_pos = 1.0 - pan_pos
+        pan_pos = (pan_pos, 1.0)
+    elif pan_pos < 0.5:
+        pan_pos *= 2.0
+        pan_pos = (1.0, pan_pos)
+    else:
+        pan_pos = (1.0, 1.0)
+
+    return pan_pos
+
+def pan(slice, pan_pos=0.5, amp=1.0):
+    amps = pantamp(pan_pos)
+
+    lslice = audioop.tomono(slice, audio_params[1], 1, 0)
+    lslice = audioop.tostereo(lslice, audio_params[1], amps[0], 0)
+
+    rslice = audioop.tomono(slice, audio_params[1], 0, 1)
+    rslice = audioop.tostereo(rslice, audio_params[1], 0, amps[1])
+
+    slice = audioop.add(lslice, rslice, audio_params[1])
+    return audioop.mul(slice, audio_params[1], amp)
+
+def env(audio_string, wavetable_type="sine", fullres=False, highval=1.0, lowval=0.0):
+    # Very short envelopes are possible...
+    if flen(audio_string) < dsp_grain * 4 or fullres == True:
+        packets = split(audio_string, 1)
+    else:
+        packets = split(audio_string, dsp_grain)
+
+    wtable = wavetable(wavetable_type, len(packets), highval, lowval)
+    packets = [audioop.mul(packet, audio_params[1], wtable[i]) for i, packet in enumerate(packets)]
+
+    return ''.join(packets) 
+
+def benv(sound, points):
+    chunksize = flen(sound) / (len(points) - 1)
+    sounds = split(sound, chunksize, audio_params[0])
+
+    return ''.join([env(s, 'line', points[i + 1], points[i]) for i, s in enumerate(sounds)])
+ 
+def panenv(sound, ptype='line', etype='sine', panlow=0.0, panhigh=1.0, envlow=0.0, envhigh=1.0):
+    packets = split(sound, dsp_grain)
+
+    ptable = wavetable(ptype, len(packets), panlow, panhigh)
+    etable = wavetable(etype, len(packets), envlow, envhigh)
+
+    packets = [pan(p, ptable[i], etable[i]) for i, p in enumerate(packets)]
+
+    return ''.join(packets)
+
+def drift(sound, amount):
+    high = (amount * 0.5) + 1.0
+    low = 1.0 - (amount * 0.5)
+    sound = split(sound, 441)
+    freqs = wavetable('sine', len(sound), high, low)
+    sound = [ transpose(sound[i], freqs[i]) for i in range(len(sound)) ]
+
+    return ''.join(sound)
+
+def fnoise(sound, coverage):
+    target_frames = int(flen(sound) * coverage)
+
+    for i in range(target_frames):
+        p = randint(0, flen(sound) - 1)
+        f = cut(sound, p, 1)
+        sound = replace_into(sound, f, randint(0, flen(sound) - 1))
+
+    return sound
+
+
+
+
+
+
+
+
+
+
+
+####################
+# Periodic functions
+####################
 
 def breakpoint(values, size=512):
     """ Takes a list of values, or a pair of wavetable types and values, 
@@ -322,8 +651,6 @@ def breakpoint(values, size=512):
         groups.extend(wavetable(wtype, gsize, endval, startval))
 
     return groups
-
-
 
 def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
     """ TODO: Fix scaling everywhere. Specify number of cycles to try to calculate, attempting to fit 
@@ -414,104 +741,6 @@ def frange(steps, highval=1.0, lowval=0.0):
         return [lowval]
 
     return  [ (i / float(steps-1)) * (highval - lowval) + lowval for i in range(steps)]
-        
-def alias(audio_string, passthru = 0, envelope = 'random', split_size = 0):
-    if passthru > 0:
-        return audio_string
-
-    if envelope == 'flat':
-        envelope = False
-
-    if split_size == 0:
-        split_size = dsp_grain / randint(1, dsp_grain)
-
-    packets = split(audio_string, split_size)
-    packets = [p*2 for i, p in enumerate(packets) if i % 2]
-
-    out = ''.join(packets)
-
-    if envelope:
-        out = env(out, envelope)
-
-    return out 
-
-def log(message, mode="a"):
-    logfile = open(os.path.expanduser("~/pippi.error.log"), mode)
-    logfile.write(str(message) + "\n")
-    return logfile.close()
-
-def fill(string, length, chans=2):
-    if flen(string) < length:
-        try:
-            repeats = length / flen(string) + 1
-        except ZeroDivisionError:
-            return string
-
-        string = string * repeats
-
-    return cut(string, 0, length)
-
-def mix(layers, leftalign=True, boost=2.0):
-    """ mixes N stereo audio strings """
-    attenuation = 1.0 / len(layers)
-    attenuation *= boost 
-    layers.sort(key = len)
-    output_length = flen(layers[-1])
-
-    out = pad('', output_length, 0) 
-
-    for layer in layers:
-        padding = output_length - flen(layer) 
-
-        if leftalign:
-            layer = pad(layer, 0, padding)
-        else:
-            layer = pad(layer, padding, 0)
-
-        layer = audioop.mul(layer, audio_params[1], attenuation)
-
-        if len(layer) != ftc(output_length) or len(out) != ftc(output_length):
-            dif = int(math.fabs(len(layer) - len(out)))
-            #log('unequal'+str(dif))
-            if len(out) < len(layer):
-                layer = layer[:len(layer) - dif]
-            else:
-                out = out[:len(out) - dif]
-
-        out = audioop.add(out, layer, audio_params[1])
-
-    return out 
-
-def flen(string):
-    # string length in frames
-    return len(string) / (audio_params[1] + audio_params[0])
-
-def pad(string, start, end):
-    # start and end given in samples, as usual 
-    # eg lengths of silence to pad at start and end
-
-    zero = struct.pack('<h', 0)
-    zero = zero[0:1] * audio_params[1] * audio_params[0] # will we ever have a width > 2? donno.
-
-    return "%s%s%s" % ((start * zero), string, (end * zero))
-
-def iscrossing(first, second):
-    """ Detects zero crossing between two mono frames """
-
-    if len(first) == 2 and len(second) == 2:
-        first = struct.unpack("<h", first) 
-        second = struct.unpack("<h", second) 
-
-        if first[0] > 0 and second[0] < 0:
-            return True
-        elif first[0] < 0 and second[0] > 0:
-            return True
-        elif first[0] == 0 and second[0] != 0:
-            return False 
-        elif first[0] != 0 and second[0] == 0:
-            return True 
-
-    return False
 
 def prob(item_dictionary):
     weighted_list = []
@@ -520,6 +749,14 @@ def prob(item_dictionary):
             weighted_list.append(item)
 
     return randchoose(weighted_list)
+
+
+
+
+
+#################
+# Unit conversion
+#################
 
 def stf(s):
     ms = s * 1000.0
@@ -553,7 +790,6 @@ def fth(frames):
 
     return 0
 
-
 def htf(hz):
     """ hz to frames """
     if hz > 0:
@@ -563,62 +799,18 @@ def htf(hz):
 
     return int(frames)
 
-def timestamp_filename():
-    """ Generate a datetime string to add to filenames """
-    current_time = str(datetime.time(datetime.now()))
-    current_time = current_time.split(':')
-    current_seconds = current_time[2].split('.')
-    current_time = current_time[0] + '.' + current_time[1] + '.' + current_seconds[0]
-    current_date = str(datetime.date(datetime.now()))
+def bpm2ms(bpm):
+    return 60000.0 / float(bpm)
 
-    return current_date + "_" + current_time
+def bpm2frames(bpm):
+    return int((bpm2ms(bpm) / 1000.0) * audio_params[2]) 
 
-def write(audio_string, filename, timestamp=False):
-    """ Write audio data to renders directory with the Python wave module """
-    if timestamp == True:
-        filename = filename + '-' + timestamp_filename() + '.wav' 
-    else:
-        filename = filename + '.wav'
 
-    wavfile = wave.open(os.getcwd() + '/' + filename, "w")
-    wavfile.setparams(audio_params)
-    wavfile.writeframes(audio_string)
-    wavfile.close()
-    return filename
 
-def cache(s='', clear=False):
-    """ Simple write() wrapper to create and clear cache audio """
-    if clear == True:
-        files = os.listdir('renders/cache/')
-        for file in files:
-            os.remove('renders/cache/' + file)
-    else:
-        return write(s, 'cache/c', True)
 
-    return s 
-
-def read(filename):
-    """ Read a 44.1k / 16bit WAV file from disk with the Python wave module. 
-        Mono files are converted to stereo automatically. """
-    filename = snddir + filename
-    if not quiet: print 'loading', filename
-
-    file = wave.open(filename, "r")
-    file_frames = file.readframes(file.getnframes())
-
-    snd = Sound()
-
-    # check for mono files
-    if file.getnchannels() == 1:
-        file_frames = audioop.tostereo(file_frames, file.getsampwidth(), 0.5, 0.5)
-        snd.params = file.getparams()
-        snd.params = (2, snd.params[1], snd.params[2], snd.params[3], snd.params[4], snd.params[5])
-    else:
-        snd.params = file.getparams()
-
-    snd.data = file_frames
-
-    return snd
+###########
+# Misc
+###########
 
 def delay(frames):
     target = (frames / 44100.0) + time.time()
@@ -630,170 +822,16 @@ def delay(frames):
 
     return True
 
-def insert_into(haystack, needle, position):
-    # split string at position index
-    hay = cut(haystack, 0, position)
-    stack = cut(haystack, position, flen(haystack) - position)
-    return "%s%s%s" % (hay, needle, stack)
-
-def replace_into(haystack, needle, position):
-    hayend = position * audio_params[1] * audio_params[0]
-    stackstart = hayend - (flen(needle) * audio_params[1] * audio_params[0])
-    return "%s%s%s" % (haystack[:hayend], needle, haystack[stackstart:])
-
-def cut(string, start, length):
-    # start and length are both given in frames (aka samples)za
-
-    #if start + length > flen(string):
-        #log('No cut for you!')
-        #log('in len: '+str(flen(string))+'start: '+str(start)+' length: '+str(length))
-
-    length = int(length) * audio_params[1] * audio_params[0]
-    start = int(start) * audio_params[1] * audio_params[0]
-
-    return string[start : start + length]
-
-def splitmono(string):
-    """ split a stereo sound into a list of mono sounds """
-    left = audioop.tomono(string, audio_params[1], 1, 0)
-    right = audioop.tomono(string, audio_params[1], 0, 1)
-
-    return [left, right] 
-
-def split(string, size, chans=2):
-    """ split a sound into chunks of size N in frames, or by zero crossings """
-    if size == 0:
-        if chans == 2:
-            # split into mono files
-            tracks = splitmono(string)
-
-            for i, track in enumerate(tracks):
-                tracks[i] = split(track, 0, 1)
-
-            return tracks
-
-        elif chans == 1:
-            frames = split(string, 1, 1)
-            chunk, chunks = [], []
-
-            for i, frame in enumerate(frames):
-                try:
-                    if chunk == []:
-                        chunk += [ frame ]
-                    elif iscrossing(frame, frames[i+1]) == False and chunk != []:
-                        chunk += [ frame ]
-                    elif iscrossing(frame, frames[i+1]) == True and chunk != []:
-                        chunk += [ frame ]
-                        chunks += [ ''.join(chunk) ]
-                        chunk = []
-                except IndexError:
-                    chunk += [ frame ]
-                    chunks += [ ''.join(chunk) ]
-
-            return chunks
-
-    elif size > 0:
-        frames = int(size) * audio_params[1] * chans 
-        return [string[frames * count : (frames * count) + frames] for count in range(len(string) / frames)]
-
-def vsplit(input, minsize, maxsize):
-    # min/max size is in frames...
-    output = []
-    pos = 0
-
-    for chunk in range(flen(input) / minsize):
-        chunksize = randint(minsize, maxsize)
-        if pos + chunksize < flen(input) - chunksize:
-            output.append(cut(input, pos, chunksize))
-            pos += chunksize
-
-    return output
-
-def bpm2ms(bpm):
-    return 60000.0 / float(bpm)
-
-def bpm2frames(bpm):
-    return int((bpm2ms(bpm) / 1000.0) * audio_params[2]) 
-
-def pantamp(pan_pos):
-    # Translate the pan position into a tuple size two of left amp and right amp
-    if pan_pos > 0.5:
-        pan_pos -= 0.5
-        pan_pos *= 2.0
-        pan_pos = 1.0 - pan_pos
-        pan_pos = (pan_pos, 1.0)
-    elif pan_pos < 0.5:
-        pan_pos *= 2.0
-        pan_pos = (1.0, pan_pos)
-    else:
-        pan_pos = (1.0, 1.0)
-
-    return pan_pos
-
-def pan(slice, pan_pos=0.5, amp=1.0):
-    amps = pantamp(pan_pos)
-
-    lslice = audioop.tomono(slice, audio_params[1], 1, 0)
-    lslice = audioop.tostereo(lslice, audio_params[1], amps[0], 0)
-
-    rslice = audioop.tomono(slice, audio_params[1], 0, 1)
-    rslice = audioop.tostereo(rslice, audio_params[1], 0, amps[1])
-
-    slice = audioop.add(lslice, rslice, audio_params[1])
-    return audioop.mul(slice, audio_params[1], amp)
-
-def env(audio_string, wavetable_type="sine", fullres=False, highval=1.0, lowval=0.0):
-    # Very short envelopes are possible...
-    if flen(audio_string) < dsp_grain * 4 or fullres == True:
-        packets = split(audio_string, 1)
-    else:
-        packets = split(audio_string, dsp_grain)
-
-    wtable = wavetable(wavetable_type, len(packets), highval, lowval)
-    packets = [audioop.mul(packet, audio_params[1], wtable[i]) for i, packet in enumerate(packets)]
-
-    return ''.join(packets) 
-
-def benv(sound, points):
-    chunksize = flen(sound) / (len(points) - 1)
-    sounds = split(sound, chunksize, audio_params[0])
-
-    return ''.join([env(s, 'line', points[i + 1], points[i]) for i, s in enumerate(sounds)])
- 
-def panenv(sound, ptype='line', etype='sine', panlow=0.0, panhigh=1.0, envlow=0.0, envhigh=1.0):
-    packets = split(sound, dsp_grain)
-
-    ptable = wavetable(ptype, len(packets), panlow, panhigh)
-    etable = wavetable(etype, len(packets), envlow, envhigh)
-
-    packets = [pan(p, ptable[i], etable[i]) for i, p in enumerate(packets)]
-
-    return ''.join(packets)
-
-def drift(sound, amount):
-    high = (amount * 0.5) + 1.0
-    low = 1.0 - (amount * 0.5)
-    sound = split(sound, 441)
-    freqs = wavetable('sine', len(sound), high, low)
-    sound = [ transpose(sound[i], freqs[i]) for i in range(len(sound)) ]
-
-    return ''.join(sound)
-
-def fnoise(sound, coverage):
-    target_frames = int(flen(sound) * coverage)
-
-    for i in range(target_frames):
-        p = randint(0, flen(sound) - 1)
-        f = cut(sound, p, 1)
-        sound = replace_into(sound, f, randint(0, flen(sound) - 1))
-
-    return sound
-
 def pipe(f):
     if sys.argv is not '':
         args = docopt(f.__doc__)
         # TODO parse args and stream to stdout
         f(args)
+
+
+
+
+
 
 
 class Sound(collections.MutableSequence):
@@ -869,27 +907,6 @@ class Sound(collections.MutableSequence):
 
     def __rmul__(self, value):
         return self.__mul__(value)
-
-    def toarray(self, buffer_size=1024):
-        chans = self.unpack()
-        left = []
-        right = []
-
-        for i, frame in enumerate(chans):
-            if i % 2 == 0:
-                left.append(frame / float(2**16))
-            else:
-                right.append(frame / float(2**16))
-
-        chunks = []
-        for i in range(len(left)):
-            start = i * buffer_size
-            end = start + buffer_size
-            chunk = numpy.array([left[start:end], right[start:end]], dtype='f')
-            chunks.append(chunk)
-
-        return chunks
-
 
     def unpack(self, value=None):
         value = self.data if value is None else value

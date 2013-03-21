@@ -20,7 +20,7 @@ static PyObject *PippiError;
 
 /* Saturate overflows to maximum or minimum
  */
-static short pp_saturate(double value) {
+static short saturate(double value) {
     if(value > MAXVAL) {
         value = MAXVAL;
     } else if(value < MINVAL) {
@@ -28,6 +28,43 @@ static short pp_saturate(double value) {
     }
     
     return (short)value;
+}
+
+static int depth() {
+    PyObject *pippi_dsp = PyImport_AddModule("pippi.dsp");
+    PyObject *depth = PyObject_GetAttrString(pippi_dsp, "bitdepth");
+
+    int bitdepth = PyInt_AsLong(depth);
+    Py_DECREF(depth);
+
+    return bitdepth;
+}
+
+/* Hermite interpolation
+ *
+ * Ripped directly from Ye Olde musicdsp.org archives. This implementation was 
+ * credited to James "supercollider" McCartney.
+ *
+ * x is the position between the middle two samples - or fractional position
+ * y0 is sample value before current
+ * y1 is current sample
+ * y2 is current sample +1
+ * y3 is current sample +2
+ */
+static double hermite(double x, double y0, double y1, double y2, double y3) {
+    double c0 = y1;
+    double c1 = 0.5 * (y2 - y0);
+    double c3 = 1.5 * (y1 - y2) + 0.5 * (y3 - y0);
+    double c2 = y0 - y1 + c1 - c3;
+
+    return ((c3 * x + c2) * x + c1) * x + c0;
+}
+
+static double get_double(int *input_buffer, int position) {
+    short value = 0;
+
+    value = *BUFFER(input_buffer, position);
+    return value / (double)MAXVAL;
 }
 
 /*
@@ -94,7 +131,7 @@ static PyObject * pippic_amp(PyObject *self, PyObject *args) {
         value = *BUFFER(input, i);
         scaled_value = (double)value * factor;
 
-        *BUFFER(data, i) = pp_saturate(scaled_value);
+        *BUFFER(data, i) = saturate(scaled_value);
     }
 
     return output;
@@ -124,6 +161,7 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
 
     chunk = size + 2;
     length = length * chunk;
+    frequency = frequency * (length / 44100);
 
     output = PyString_FromStringAndSize(NULL, length);
     data = (signed char*)PyString_AsString(output);
@@ -135,7 +173,7 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
 
         /* Scale to signed 16 bit integer */
         value = value * (double)MAXVAL;
-        value = pp_saturate(value);
+        value = saturate(value);
 
         /* Write to the left channel */
         *BUFFER(data, i) = value;
@@ -146,6 +184,110 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
 
     return output;
 }
+
+/* Add two sounds together
+ */
+static char pippic_add_docstring[] = "Add two sounds together.";
+static PyObject * pippic_add(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data;
+
+    signed char *first, *second;
+    int first_length, first_value, second_length, second_value, length, sum;
+
+    int i;
+    int size = 2;
+
+    if(!PyArg_ParseTuple(args, "s#s#:add", &first, &first_length, &second, &second_length)) {
+        return NULL;
+    }
+
+    /* The output length is equal to the length of the longest input sound */
+    length = first_length > second_length ? first_length : second_length;
+
+    output = PyString_FromStringAndSize(NULL, length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < length; i += size) {
+        if(i < first_length) {
+            first_value = (int)*BUFFER(first, i);
+        } else {
+            first_value = 0;
+        }
+
+        if(i < second_length) {
+            second_value = (int)*BUFFER(second, i);
+        } else {
+            second_value = 0;
+        }
+
+        sum = first_value + second_value;
+
+        *BUFFER(data, i) = saturate((double)sum);
+    }
+
+    return output;
+}
+
+static char pippic_mix_docstring[] = "Mix an arbitrary number of sounds together.";
+static PyObject * pippic_mix(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data;
+
+    PyObject *sounds;
+
+    /* Unused, but captured to avoid breaking the old API */
+    PyObject *right_align;
+    double factor;
+
+    int i, f, summed_data, tmp_data = 0;
+    int size = 2;
+
+    if(!PyArg_ParseTuple(args, "O!|Od:mix", &PyList_Type, &sounds, &right_align, &factor)) {
+        return NULL;
+    }
+
+    Py_ssize_t numsounds = PyList_Size(sounds);
+    PyObject *swap;
+    signed char *swap_data;
+    Py_ssize_t swap_length;
+
+    PyList_Sort(sounds);
+
+    swap = PyList_GET_ITEM(sounds, 0);
+    Py_ssize_t maxlength = PyString_GET_SIZE(swap);
+
+    output = PyString_FromStringAndSize(NULL, maxlength);
+    data = (signed char*)PyString_AsString(output);
+
+    /* Write zeros into the output buffer */
+    for(f=0; f < maxlength; f += size) {
+        *BUFFER(data, f) = (short)0;
+    }
+
+    /* Loop through each sound, and add to the output buffer. */
+    for(i=0; i < numsounds; i++) {
+        swap = PyList_GET_ITEM(sounds, i);
+        swap_length = PyString_GET_SIZE(swap);
+        swap_data = (signed char*)PyString_AsString(swap);
+
+        for(f=0; f < maxlength; f += size) {
+            if(f < swap_length) {
+                /* Add to output buffer */
+                summed_data = *BUFFER(data, f);
+                tmp_data = *BUFFER(swap_data, f);
+                summed_data = summed_data + tmp_data;
+
+                *BUFFER(data, f) = saturate((double)summed_data);
+            } else {
+                continue;
+            }
+        }
+    }
+
+    return output;
+}
+
 
 /* Multiply two sounds together
  */
@@ -186,24 +328,64 @@ static PyObject * pippic_am(PyObject *self, PyObject *args) {
 
         product = carrier_value * modulator_value;
 
-        *BUFFER(data, i) = pp_saturate(product);
+        *BUFFER(data, i) = saturate(product);
     }
 
     return output;
 }
 
 /*
- * Add two sounds together
  */
-static PyObject * pippic_add(PyObject *self, PyObject *args) {
+static char pippic_shift_docstring[] = "Change speed.";
+static PyObject * pippic_shift(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data, *input;
 
-}
+    int input_length, input_frames, output_length, left, right, chunk;
+    double speed, output_frames, frame_chunks, frame_delta;
 
-/*
- * Sum two sounds, mixed with equal power
- */
-static PyObject * pippic_mix(PyObject *self, PyObject *args) {
+    int output_count = 0;
+    int frame_count = 0;
+    int num_changes = 0;
+    int size = 2;
+    int i, p = 0;
 
+    if(!PyArg_ParseTuple(args, "s#d", &input, &input_length, &speed)) {
+        return 0;
+    }
+
+    /* Length of input in frames */
+    input_frames = input_length / (size + 2);
+
+    /* A chunk is just the number of elements in our buffer 
+     * needed to store a complete frame. */
+    chunk = size + 2;
+
+    output = PyString_FromStringAndSize(NULL, output_length);
+    data = (signed char*)PyString_AsString(output);
+
+
+    /* always calculate position in frames. 
+     * how do i ensure no frames are skipped? */
+
+    /* Loop over the input buffer frame by frame. Copy frames into 
+     * the output buffer. Duplicate frames when we need to
+     * insert an extra frame, or skip frames when we need to 
+     * remove them.
+     */
+    for(i=0; i < output_length; i += chunk) {
+        /*p = 0;*/
+        /*left = get_double(input, p);*/
+        /*right = get_double(input, p + size);*/
+
+        /**BUFFER(data, i) = saturate(left);*/
+        /**BUFFER(data, i + size) = saturate(right);*/
+
+        *BUFFER(data, i) = saturate(0.0);
+        *BUFFER(data, i + size) = saturate(0.0);
+    }
+
+    return output;
 }
 
 /*
@@ -216,6 +398,9 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
 static PyMethodDef pippic_methods[] = {
     {"amp", pippic_amp, METH_VARARGS, pippic_amp_docstring},
     {"am", pippic_am, METH_VARARGS, pippic_am_docstring},
+    {"add", pippic_add, METH_VARARGS, pippic_add_docstring},
+    {"mix", pippic_mix, METH_VARARGS, pippic_mix_docstring},
+    {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
     {"sine", pippic_sine, METH_VARARGS | METH_KEYWORDS, pippic_sine_docstring},
     {NULL, NULL, 0, NULL}
 };
