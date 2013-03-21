@@ -156,7 +156,7 @@ class Pippi(cmd.Cmd):
             active = mp.active_children()
 
             for voice in active:
-                if hasattr(self.parms, voice.name):
+                if hasattr(self.params, voice.name):
                     params = getattr(self.params, voice.name)
                     self.update_param(voice.name, 'root', self.root)
                     self.update_param(voice.name, 'once', True)
