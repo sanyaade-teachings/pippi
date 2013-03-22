@@ -151,8 +151,8 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
     double amplitude = 1.0;
     int length = 44100;
 
-    double frequency, position, period, value;
-    int i, chunk;
+    double frequency, position, value;
+    int i, chunk, period;
     int size = 2;
 
     if(!PyArg_ParseTupleAndKeywords(args, keywords, "d|id", keyword_list, &frequency, &length, &amplitude)) {
@@ -161,17 +161,24 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
 
     chunk = size + 2;
     length = length * chunk;
-    frequency = frequency * (length / 44100);
+    period = floor((22050.0 / frequency) * 2) * 4;
+    /*printf("Floor: %i\n", period);*/
 
     output = PyString_FromStringAndSize(NULL, length);
     data = (signed char*)PyString_AsString(output);
 
-    period = M_PI * 2.0;
-    for(i=0; i < length; i += chunk) {
-        position = (double)i / (double)length;
-        value = sin(position * period * frequency) * amplitude;
+    double cycles[period];
 
-        /* Scale to signed 16 bit integer */
+    /* Synthesize 4 periods */
+    for(i=0; i < period; i++) {
+        position = (double)i / (double)period;
+        cycles[i] = sin(position * M_PI * 2.0) * amplitude;
+    }
+
+    /* Copy cycles until buffer is full */
+    for(i=0; i < length; i += chunk) {
+
+        value = cycles[i % period];
         value = value * (double)MAXVAL;
         value = saturate(value);
 
@@ -183,6 +190,15 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
     }
 
     return output;
+}
+
+static char pippic_time_docstring[] = "Returns monotonic time.";
+static PyObject * pippic_time(PyObject *self, PyObject*args) {
+    struct timespec now;
+
+    clock_gettime(CLOCK_MONOTONIC, &now);
+
+    return Py_BuildValue("Ll", (long long)now.tv_sec, now.tv_nsec);
 }
 
 /* Add two sounds together
@@ -402,6 +418,7 @@ static PyMethodDef pippic_methods[] = {
     {"mix", pippic_mix, METH_VARARGS, pippic_mix_docstring},
     {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
     {"sine", pippic_sine, METH_VARARGS | METH_KEYWORDS, pippic_sine_docstring},
+    {"mtime", pippic_time, METH_VARARGS, pippic_time_docstring},
     {NULL, NULL, 0, NULL}
 };
 
