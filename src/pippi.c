@@ -195,10 +195,19 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
 static char pippic_time_docstring[] = "Returns monotonic time.";
 static PyObject * pippic_time(PyObject *self, PyObject*args) {
     struct timespec now;
+    long long seconds, offset_seconds = 0;
+    long nanoseconds, offset_nanoseconds = 0;
+
+    if(!PyArg_ParseTuple(args, "|Ll:mtime", &offset_seconds, &offset_nanoseconds)) {
+        return NULL;
+    }
 
     clock_gettime(CLOCK_MONOTONIC, &now);
 
-    return Py_BuildValue("Ll", (long long)now.tv_sec, now.tv_nsec);
+    seconds = (long long)now.tv_sec + offset_seconds;
+    nanoseconds = now.tv_sec + offset_nanoseconds;
+
+    return Py_BuildValue("Ll", seconds, nanoseconds);
 }
 
 /* Add two sounds together
