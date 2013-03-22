@@ -1,6 +1,9 @@
 from setuptools import setup, Extension
 
-pippic = Extension('_pippic', sources = ['src/pippi.c'])
+pippic = Extension('_pippic', 
+        sources = ['src/pippi.c'], 
+        extra_link_args=['-lrt'], 
+        )
 
 setup(name='pippi',
         version='0.2.0',
