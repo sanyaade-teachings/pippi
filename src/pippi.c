@@ -18,18 +18,85 @@ static PyObject *PippiError;
 #define MAXVAL 0x7fff
 #define MINVAL -0x7fff
 
-/* Generate a sine window with a period of pi.
- * Length is in frames
- */
-static void sinewave(double *cycle, int length, double amp, double phase, double offset) {
+#define SINE 0
+#define WT_SINE(position, amp, phase, offset, period) \
+               (sin(position * period + phase) * amp + offset)
+
+#define COS  1 
+#define WT_COS(position, amp, phase, offset, period) \
+               (cos(position * period + phase) * amp + offset)
+
+#define HANN 2
+#define WT_HANN(position, amp, phase, offset, period) \
+               ((0.5 * (1.0 - cos(position * period + phase))) * amp + offset)
+
+#define TRI  3
+#define WT_TRI  0 /* Triangle */
+
+#define SAW  4
+#define WT_SAW  0 /* Sawtooth or line */
+
+#define RSAW 5
+#define WT_RSAW 0 /* Reversed sawtooth or phasor */
+
+#define VARY 6
+#define WT_VARY 0 /* Variable breakpoint envelope */
+
+static void wavetable(int waveform_type, double *buffer, int length, double amp, double phase, double offset, double period) {
     int i;
     double position;
 
-    for(i=0; i < length; i++) {
-        position = (double)i / (double)length;
-        cycle[i] = sin(M_PI * position + phase) * amp + offset;
+    switch(waveform_type) {
+        case COS:
+            for(i=0; i < length; i++) {
+                position = (double)i / (double)length;
+                buffer[i] = WT_COS(position, amp, phase, offset, period);
+            }
+            break;
+
+        case HANN:
+            for(i=0; i < length; i++) {
+                position = (double)i / (double)length;
+                buffer[i] = WT_HANN(position, amp, phase, offset, period);
+            }
+            break;
+
+        case TRI:
+            for(i=0; i < length; i++) {
+                position = (double)i / (double)length;
+                buffer[i] = WT_SINE(position, amp, phase, offset, period);
+            }
+            break;
+
+        case SAW:
+            for(i=0; i < length; i++) {
+                position = (double)i / (double)length;
+                buffer[i] = WT_SINE(position, amp, phase, offset, period);
+            }
+            break;
+
+        case RSAW:
+            for(i=0; i < length; i++) {
+                position = (double)i / (double)length;
+                buffer[i] = WT_SINE(position, amp, phase, offset, period);
+            }
+            break;
+
+        case VARY:
+            for(i=0; i < length; i++) {
+                position = (double)i / (double)length;
+                buffer[i] = WT_SINE(position, amp, phase, offset, period);
+            }
+            break;
+
+        case SINE:
+        default:
+            for(i=0; i < length; i++) {
+                position = (double)i / (double)length;
+                buffer[i] = WT_SINE(position, amp, phase, offset, period);
+            }
     }
-    
+
 }
 
 /* Saturate overflows to maximum or minimum
@@ -327,9 +394,11 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
     int scrub_positions[num_cycles];
     int max_position = (input_length / chunk) - (cycle_length / chunk);
 
-    /* To start, lets just do a linear scrub. */
+    double pos_curve[num_cycles];
+    wavetable(SINE, pos_curve, num_cycles, 1.0, 0.0, 0.0, M_PI);
+
     for(i=0; i < num_cycles; i++) {
-        playhead = (double)i / (double)num_cycles; 
+        playhead = pos_curve[i];
 
         /* Store the actual position in the buffer, not the frame count. */
         scrub_positions[i] = (int)(playhead * max_position) * chunk;
@@ -344,7 +413,7 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
     data = (signed char*)PyString_AsString(output);
 
     double cycle[cycle_length / chunk];
-    sinewave(cycle, cycle_length / chunk, 1.0, 0.0, 0.0);
+    wavetable(HANN, cycle, cycle_length / chunk, 1.0, 0.0, 0.0, M_PI * 2);
 
     int left, right;
 
