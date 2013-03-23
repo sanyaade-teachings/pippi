@@ -17,7 +17,7 @@ from datetime import datetime
 import time
 from docopt import docopt
 import collections
-from _pippic import amp, am, add, sine, shift, mix, mtime
+from _pippic import amp, am, add, sine, shift, mix, mtime, pine
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]

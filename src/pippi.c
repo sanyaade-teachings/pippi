@@ -254,6 +254,90 @@ static PyObject * pippic_add(PyObject *self, PyObject *args) {
     return output;
 }
 
+static char pippic_pine_docstring[] = "Just your average pinecone.";
+static PyObject * pippic_pine(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data, *input;
+
+    int output_length, cycle_length, input_length, cycle_start;
+
+    int size = 2;
+    int channels = 2;
+    int chunk = size + channels;
+
+    double playhead, frequency;
+    int i, f;
+
+    if(!PyArg_ParseTuple(args, "s#id", &input, &input_length, &output_length, &frequency)) {
+        return NULL;
+    }
+
+    output_length *= chunk;
+
+    /* Calculate the length of one cycle at the given frequency. 
+     * This is a lossy calculation and introduces slight tuning errors
+     * that become more extreme as the frequency increases. Deal with it.
+     */
+    cycle_length = (int)(44100.0 / frequency) * chunk;
+
+    /* Calculate the number of cycles needed to generate for the 
+     * desired output length.
+     */
+    int num_cycles = output_length / cycle_length;
+
+    /* Prefer overflows of length to underflows, so check for 
+     * a reminder when calculating and tack an extra cycle up in there.
+     */
+    if(output_length % cycle_length > 0) {
+        num_cycles += 1;
+    }
+
+    /* Generate a scrub position trajectory. The scrub position is 
+     * just the position of the playhead at the start of each cycle.
+     *
+     * The length of this array is equal to the number of cycles calculated 
+     * earlier. 
+     *
+     * Positions will range from 0 to the length of the input minus the length 
+     * of a single cycle. 
+     *
+     * These lengths should both be measured in frames. So: length / chunk.
+     */
+    int scrub_positions[num_cycles];
+    int max_position = (input_length / chunk) - (cycle_length / chunk);
+
+    /* To start, lets just do a linear scrub. */
+    for(i=0; i < num_cycles; i++) {
+        playhead = (double)i / (double)num_cycles; 
+
+        /* Store the actual position in the buffer, not the frame count. */
+        scrub_positions[i] = (int)(playhead * max_position) * chunk;
+    }
+
+    /* Generate each cycle of the stream by looping through the scrub array
+     * and writing into the output buffer. For each cycle, read from the 
+     * current scrub position forward cycle_length frames, and apply an 
+     * amplitude envelope to each cycle as the buffer is filled.
+     */
+    output = PyString_FromStringAndSize(NULL, output_length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < num_cycles; i++) {
+        cycle_start = scrub_positions[i];
+
+        for(f=0; f < cycle_length; f += size) {
+            /* Todo: apply sine envelope here 
+             * Prolly just generate a wavetable the 
+             * length of a single cycle and read through it.
+             * Remember to include both channels.
+             */
+            *BUFFER(data, i * cycle_length + f) = *BUFFER(input, cycle_start + f); 
+        }
+    }
+
+    return output;
+}
+
 static char pippic_mix_docstring[] = "Mix an arbitrary number of sounds together.";
 static PyObject * pippic_mix(PyObject *self, PyObject *args) {
     PyObject *output;
@@ -428,6 +512,7 @@ static PyMethodDef pippic_methods[] = {
     {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
     {"sine", pippic_sine, METH_VARARGS | METH_KEYWORDS, pippic_sine_docstring},
     {"mtime", pippic_time, METH_VARARGS, pippic_time_docstring},
+    {"pine", pippic_pine, METH_VARARGS, pippic_pine_docstring},
     {NULL, NULL, 0, NULL}
 };
 
