@@ -17,7 +17,7 @@ from datetime import datetime
 import time
 from docopt import docopt
 import collections
-from _pippic import amp, am, add, sine, shift, mix, mtime, pine
+from _pippic import amp, am, add, shift, mix, mtime, pine, synth
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
@@ -275,21 +275,29 @@ def transpose(audio_string, amount):
     
     return audio_string[0]
 
-def tone(length=44100, freq=440, wavetype='sine2pi', amp=1.0, blocksize=0):
-    cyclelen = htf(freq * 0.99)
-    numcycles = length / cyclelen
+def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0.0):
+    # Quick and dirty mapping to transition to the new api
+    if wavetype == 'sine2pi' or wavetype == 'sine':
+        wtype = 0
+    elif wavetype == 'cos2pi' or wavetype == 'cos':
+        wtype = 1
+    elif wavetype == 'hann':
+        wtype = 2
+    elif wavetype == 'tri':
+        wtype = 3
+    elif wavetype == 'saw' or wavetype == 'line':
+        wtype = 4
+    elif wavetype == 'isaw' or wavetype == 'phasor':
+        wtype = 5
+    elif wavetype == 'vary':
+        wtype = 6
+    elif wavetype == 'impulse':
+        wtype = 7
+    elif wavetype == 'square':
+        wtype = 8
 
-    if blocksize > 0:
-        numblocks = numcycles / blocksize
-        if numcycles % blocksize > 0:
-            numblocks += 1
-
-        cycles = ''.join([blocksize * cycle(freq * rand(0.99, 1.0), wavetype, amp) for i in range(numblocks)])
-    else:
-        cycles = numcycles * cycle(freq * rand(0.99, 1.0), wavetype, amp)
-
-    return cycles 
-
+    return synth(wtype, float(freq), length, amp, phase, offset)
+        
 def alias(audio_string, passthru = 0, envelope = 'random', split_size = 0):
     if passthru > 0:
         return audio_string
@@ -309,25 +317,6 @@ def alias(audio_string, passthru = 0, envelope = 'random', split_size = 0):
         out = env(out, envelope)
 
     return out 
-
-def chirp(numcycles, lfreq, hfreq, length=0, reps=1, etype=False):
-    # Sweep from low freq to high freq
-    freqs = wavetable('line', numcycles, hfreq, lfreq)
-    freqs = [cycle(f) for f in freqs]
-    out = ''.join(freqs)
-
-    # Envelope
-    if etype is not False:
-        out = env(out, etype, True)
-
-    # Add padding
-    if length > 0:
-        out = pad(out, 0, length - flen(out))
-
-    # Multiply
-    out = out * reps
-
-    return out
 
 def noise(length):
     return ''.join([byte_string(randint(-32768, 32767)) for i in range(length * audio_params[0])])
@@ -653,8 +642,7 @@ def breakpoint(values, size=512):
     return groups
 
 def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
-    """ TODO: Fix scaling everywhere. Specify number of cycles to try to calculate, attempting to fit 
-        size * numcycles as closely as possible...
+    """ The end is near. That'll do, wavetable()
     """
     wtable = []
     wave_types = ["sine", "gauss", "cos", "line", "saw", "impulse", "phasor", "sine2pi", "cos2pi", "vary", "flat"]

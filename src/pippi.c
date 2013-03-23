@@ -31,7 +31,8 @@ static PyObject *PippiError;
                ((0.5 * (1.0 - cos(position * period + phase))) * amp + offset)
 
 #define TRI  3
-#define WT_TRI  0 /* Triangle */
+#define WT_TRI(position, amp, offset) \
+               ((1.0 - fabs((position - 0.5) / 0.5)) * amp + offset)
 
 #define SAW  4
 #define WT_SAW  0 /* Sawtooth or line */
@@ -42,9 +43,14 @@ static PyObject *PippiError;
 #define VARY 6
 #define WT_VARY 0 /* Variable breakpoint envelope */
 
+#define PULSE 7
+#define SQUARE 8 
+#define FLAT 9
+
 static void wavetable(int waveform_type, double *buffer, int length, double amp, double phase, double offset, double period) {
     int i;
     double position;
+    int pulse_length = 3; /* TODO: makes sense to be able to specify a pulse width */
 
     switch(waveform_type) {
         case COS:
@@ -64,7 +70,7 @@ static void wavetable(int waveform_type, double *buffer, int length, double amp,
         case TRI:
             for(i=0; i < length; i++) {
                 position = (double)i / (double)length;
-                buffer[i] = WT_SINE(position, amp, phase, offset, period);
+                buffer[i] = WT_TRI(position, amp, offset);
             }
             break;
 
@@ -89,6 +95,33 @@ static void wavetable(int waveform_type, double *buffer, int length, double amp,
             }
             break;
 
+        case PULSE:
+            for(i=0; i < length; i++) {
+                if(i < pulse_length) {
+                    position = (double)i / (double)pulse_length;
+                    buffer[i] = WT_TRI(position, amp, offset);
+                } else {
+                    buffer[i] = 0.0;
+                }
+            }
+            break;
+
+        case SQUARE:
+            for(i=0; i< length; i++) {
+                if(i < length / 2) {
+                    buffer[i] = amp;
+                } else {
+                    buffer[i] = 0;
+                }
+            }
+            break;
+
+        case FLAT:
+            for(i=0; i< length; i++) {
+                buffer[i] = amp;
+            }
+            break;
+
         case SINE:
         default:
             for(i=0; i < length; i++) {
@@ -100,12 +133,15 @@ static void wavetable(int waveform_type, double *buffer, int length, double amp,
 }
 
 /* Saturate overflows to maximum or minimum
+ *
+ * TODO: Could use rethinking? There's 
+ * probably a more handy way to handle it.
  */
 static short saturate(double value) {
     if(value > MAXVAL) {
-        value = MAXVAL;
+        value = MAXVAL - 1;
     } else if(value < MINVAL) {
-        value = MINVAL;
+        value = MINVAL + 1;
     }
     
     return (short)value;
@@ -225,55 +261,52 @@ static PyObject * pippic_amp(PyObject *self, PyObject *args) {
     return output;
 }
 
-/* Synthesize a sinewave
+/* Synthy
  */
-static char pippic_sine_docstring[] = "Synthesize a sinewave.";
-static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords) {
+static char pippic_synth_docstring[] = "Synthy.";
+static PyObject * pippic_synth(PyObject *self, PyObject *args) {
     PyObject *output;
     signed char *data;
 
-    /* Keyword arguments */
-    static char *keyword_list[] = {"freq", "len", "amp", NULL};
+    int type;
+    double frequency;
 
     /* Defaults for optional args */
-    double amplitude = 1.0;
+    double amp = 1.0;
+    double phase = 0.0;
+    double offset = 0.0;
+    double period = 1.0;
     int length = 44100;
 
-    double frequency, position, value;
-    int i, chunk, period;
+    int i;
     int size = getsize();
 
-    if(!PyArg_ParseTupleAndKeywords(args, keywords, "d|id", keyword_list, &frequency, &length, &amplitude)) {
-        return 0;
+    if(!PyArg_ParseTuple(args, "id|idddd", &type, &frequency, &length, &amp, &phase, &offset, &period)) {
+        return NULL;
     }
 
-    chunk = size + 2;
+    int chunk = size + 2;
     length = length * chunk;
-    period = floor((22050.0 / frequency) * 2) * 4;
-    /*printf("Floor: %i\n", period);*/
+
+    if((type == SINE || type == COS || type == HANN) && period == 1.0) {
+        period = M_PI * 2.0;
+    }
 
     output = PyString_FromStringAndSize(NULL, length);
     data = (signed char*)PyString_AsString(output);
 
-    double cycles[period];
+    int cycle_length = (int)((44100.0 / frequency) * 32.0) * chunk;
 
-    /* Synthesize 4 periods */
-    for(i=0; i < period; i++) {
-        position = (double)i / (double)period;
-        cycles[i] = sin(position * M_PI * 2.0) * amplitude;
-    }
+    double cycle[cycle_length / chunk];
+    wavetable(type, cycle, cycle_length / chunk, amp, phase, offset, period * 32.0);
 
-    /* Copy cycles until buffer is full */
+    int left, right;
+    short value;
+
     for(i=0; i < length; i += chunk) {
+        value = saturate(cycle[(i / chunk) % (cycle_length / chunk)] * MAXVAL);
 
-        value = cycles[i % period];
-        value = value * (double)MAXVAL;
-        value = saturate(value);
-
-        /* Write to the left channel */
         *BUFFER(data, i) = value;
-
-        /* Write to the right channel */
         *BUFFER(data, i + size) = value;
     }
 
@@ -603,7 +636,7 @@ static PyMethodDef pippic_methods[] = {
     {"add", pippic_add, METH_VARARGS, pippic_add_docstring},
     {"mix", pippic_mix, METH_VARARGS, pippic_mix_docstring},
     {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
-    {"sine", pippic_sine, METH_VARARGS | METH_KEYWORDS, pippic_sine_docstring},
+    {"synth", pippic_synth, METH_VARARGS, pippic_synth_docstring},
     {"mtime", pippic_time, METH_VARARGS, pippic_time_docstring},
     {"pine", pippic_pine, METH_VARARGS, pippic_pine_docstring},
     {NULL, NULL, 0, NULL}
