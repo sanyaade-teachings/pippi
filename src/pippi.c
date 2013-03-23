@@ -18,6 +18,20 @@ static PyObject *PippiError;
 #define MAXVAL 0x7fff
 #define MINVAL -0x7fff
 
+/* Generate a sine window with a period of pi.
+ * Length is in frames
+ */
+static void sinewave(double *cycle, int length, double amp, double phase, double offset) {
+    int i;
+    double position;
+
+    for(i=0; i < length; i++) {
+        position = (double)i / (double)length;
+        cycle[i] = sin(M_PI * position + phase) * amp + offset;
+    }
+    
+}
+
 /* Saturate overflows to maximum or minimum
  */
 static short saturate(double value) {
@@ -322,22 +336,25 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
     output = PyString_FromStringAndSize(NULL, output_length);
     data = (signed char*)PyString_AsString(output);
 
+    double cycle[cycle_length / chunk];
+    sinewave(cycle, cycle_length / chunk, 1.0, 0.0, 0.0);
+
+    int left, right;
+
     for(i=0; i < num_cycles; i++) {
         cycle_start = scrub_positions[i];
 
-        for(f=0; f < cycle_length; f += size) {
-            /* Todo: apply sine envelope here 
-             * Prolly just generate a wavetable the 
-             * length of a single cycle and read through it.
-             * Remember to include both channels.
-             */
-            *BUFFER(data, i * cycle_length + f) = *BUFFER(input, cycle_start + f); 
+        for(f=0; f < cycle_length; f += chunk) {
+            left = *BUFFER(input, cycle_start + f);
+            *BUFFER(data, i * cycle_length + f) = saturate(left * cycle[f / chunk]);
+
+            right = *BUFFER(input, cycle_start + f + size);
+            *BUFFER(data, i * cycle_length + f + size) = saturate(right * cycle[f / chunk]);
         }
     }
 
     return output;
 }
-
 static char pippic_mix_docstring[] = "Mix an arbitrary number of sounds together.";
 static PyObject * pippic_mix(PyObject *self, PyObject *args) {
     PyObject *output;
