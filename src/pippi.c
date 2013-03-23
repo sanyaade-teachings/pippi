@@ -44,14 +44,21 @@ static short saturate(double value) {
     return (short)value;
 }
 
-static int depth() {
+/* Returns the byte width corresponding to the 
+ * bit depth currently set as a property on the 
+ * pippi.dsp module.
+ */
+static int getsize() {
     PyObject *pippi_dsp = PyImport_AddModule("pippi.dsp");
     PyObject *depth = PyObject_GetAttrString(pippi_dsp, "bitdepth");
 
-    int bitdepth = PyInt_AsLong(depth);
+    int bitdepth = (int)PyInt_AsLong(depth);
     Py_DECREF(depth);
 
-    return bitdepth;
+    /* We're only interested in the width of the 
+     * data being stored in char array buffers.
+     */
+    return bitdepth / 8;
 }
 
 /* Hermite interpolation
@@ -118,8 +125,8 @@ static PyObject * pippic_amp(PyObject *self, PyObject *args) {
     /* Position in the sound */
     int i;
 
-    /* This is the byte width for a 16 bit integer */
-    int size = 2;
+    /* This is the byte width for the char array buffer */
+    int size = getsize();
 
     /* Convert python arguments to C types.
      * This function expects an audio string and float. 
@@ -167,7 +174,7 @@ static PyObject * pippic_sine(PyObject *self, PyObject *args, PyObject *keywords
 
     double frequency, position, value;
     int i, chunk, period;
-    int size = 2;
+    int size = getsize();
 
     if(!PyArg_ParseTupleAndKeywords(args, keywords, "d|id", keyword_list, &frequency, &length, &amplitude)) {
         return 0;
@@ -235,7 +242,7 @@ static PyObject * pippic_add(PyObject *self, PyObject *args) {
     int first_length, first_value, second_length, second_value, length, sum;
 
     int i;
-    int size = 2;
+    int size = getsize();
 
     if(!PyArg_ParseTuple(args, "s#s#:add", &first, &first_length, &second, &second_length)) {
         return NULL;
@@ -275,7 +282,7 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
 
     int output_length, cycle_length, input_length, cycle_start;
 
-    int size = 2;
+    int size = getsize();
     int channels = 2;
     int chunk = size + channels;
 
@@ -341,7 +348,7 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
 
     int left, right;
 
-    for(i=0; i < num_cycles; i++) {
+    for(i=0; i < num_cycles - 1; i++) {
         cycle_start = scrub_positions[i];
 
         for(f=0; f < cycle_length; f += chunk) {
@@ -367,7 +374,7 @@ static PyObject * pippic_mix(PyObject *self, PyObject *args) {
     double factor;
 
     int i, f, summed_data, tmp_data = 0;
-    int size = 2;
+    int size = getsize();
 
     if(!PyArg_ParseTuple(args, "O!|Od:mix", &PyList_Type, &sounds, &right_align, &factor)) {
         return NULL;
@@ -427,7 +434,7 @@ static PyObject * pippic_am(PyObject *self, PyObject *args) {
     double product, modulator_value;
 
     int i;
-    int size = 2;
+    int size = getsize();
 
     if(!PyArg_ParseTuple(args, "s#s#", &carrier, &carrier_length, &modulator, &modulator_length)) {
         return 0;
@@ -473,7 +480,7 @@ static PyObject * pippic_shift(PyObject *self, PyObject *args) {
     int output_count = 0;
     int frame_count = 0;
     int num_changes = 0;
-    int size = 2;
+    int size = getsize();
     int i, p = 0;
 
     if(!PyArg_ParseTuple(args, "s#d", &input, &input_length, &speed)) {
