@@ -7,11 +7,13 @@ name        = 'drone'
 device      = 'T6_pair2'
 loop        = True
 
-def play(params):
+def play(params=None):
+    params = params or {}
+
     length = params.get('length', dsp.stf(20))
     volume = params.get('volume', 20.0) 
     volume = volume / 100.0 # TODO move into param filter
-    octave = params.get('octave', 2)
+    octave = params.get('octave', 1)
     notes = params.get('note', ['c', 'g'])
     hertz = params.get('hertz', False)
     quality = params.get('quality', tune.major)
@@ -23,7 +25,6 @@ def play(params):
     bend = params.get('bend', False)
     env = params.get('envelope', 'gauss')
     harmonics = params.get('harmonics', [1,2])
-    scale = params.get('scale', [1,8])
     reps      = params.get('repeats', 1)
     root = params.get('root', 27.5)
 
@@ -42,15 +43,14 @@ def play(params):
         tones = []
         for i in range(dsp.randint(2,4)):
             if hertz is not False:
-                if octave > 1:
-                    octave -= 1.0
+                freq = float(note)
 
-                freq = float(note) * octave 
+                if octave > 1:
+                    freq *= octave
             else:
-                freq = tune.step(i, note, octave, dsp.randshuffle(scale), quality, ratios)
+                freq = tune.ntf(note, octave)
 
             snds = [ dsp.tone(length, freq * h, waveform) for h in harmonics ]
-
             snds = [ dsp.env(s, dsp.randchoose(wtypes), highval=dsp.rand(0.2, 0.4)) for s in snds ]
             snds = [ dsp.pan(s, dsp.rand()) for s in snds ]
 
@@ -110,4 +110,5 @@ def play(params):
     else:
         osc_message = ['/dac', 0.0, 0, tune.nts(notes[0], octave - 1)]
 
-    return (dsp.amp(out, volume), {'osc': [ osc_message ]})
+    #return (dsp.amp(out, volume), {'osc': [ osc_message ]})
+    return dsp.amp(out, volume)

@@ -28,6 +28,7 @@ def play(params):
     quality     = params.get('quality', tune.major)
     glitch      = params.get('glitch', False)
     superglitch = params.get('superglitch', False)
+    pinecone    = params.get('pinecone', False)
     glitchpad   = params.get('glitch-padding', 0)
     glitchenv   = params.get('glitch-envelope', False)
     env         = params.get('envelope', False)
@@ -54,6 +55,9 @@ def play(params):
         # Available input samples
         if instrument == 'r':
             instrument = 'rhodes'
+            tone = dsp.read('sounds/synthrhodes.wav').data
+        elif instrument == 's':
+            instrument = 'synthrhodes'
             tone = dsp.read('sounds/220rhodes.wav').data
         elif instrument == 'c':
             instrument = 'clarinet'
@@ -67,6 +71,9 @@ def play(params):
         elif instrument == 'g':
             instrument = 'glade'
             tone = dsp.read('sounds/glade.wav').data 
+        elif instrument == 'p':
+            instrument = 'paperclips'
+            tone = dsp.read('sounds/paperclips.wav').data
         elif instrument == 'i':
             instrument = 'input'
             tone = dsp.capture(dsp.stf(1))
@@ -82,6 +89,7 @@ def play(params):
 
     # Translate the list of scale degrees into a list of frequencies
     freqs = tune.fromdegrees(scale, octave, note, quality, ratios)
+    freqs = [ freq / 4.0 for freq in freqs ] 
 
     # Format is: [ [ path, offset, id, value ] ]
     # Offset for video 
@@ -102,33 +110,37 @@ def play(params):
         # Get the freqency
         freq = freqs[i % len(freqs)]
 
-        # Determine the pitch shift required
-        # to arrive at target frequency based on 
-        # the pitch of the original samples.
-        if instrument == 'clarinet':
-            diff = freq / 293.7
-        elif instrument == 'vibes':
-            diff = freq / 740.0 
-        else:
-            diff = freq / 440.0
-
         # Transpose the input sample or 
         # synthesize tone
         if wform is False and tone is not None:
+            # Determine the pitch shift required
+            # to arrive at target frequency based on 
+            # the pitch of the original samples.
+            if instrument == 'clarinet':
+                diff = freq / 293.7
+            elif instrument == 'vibes':
+                diff = freq / 740.0 
+            else:
+                diff = freq / 440.0
+
             clang = dsp.transpose(tone, diff)
 
         elif wform == 'super':
-            clang = dsp.tone(length, freq, 'phasor')
+            clang = dsp.tone(length, freq, 'phasor', 0.5)
             clang = [ dsp.drift(clang, dsp.rand(0, 0.02)) for s in range(7) ]
             clang = dsp.mix(clang)
 
         elif wform is False and tone is None:
-            clang = dsp.tone(length, freq, 'sine2pi')
+            clang = dsp.tone(length, freq, 'sine2pi', 0.75)
             clang = dsp.amp(clang, 0.6)
 
         else:
-            clang = dsp.tone(length, freq, wform)
+            clang = dsp.tone(length, freq, wform, 0.75)
             clang = dsp.amp(clang, 0.6)
+
+        # Stupidly copy the note enough or 
+        # trim it to meet the target length
+        clang = dsp.fill(clang, length)
 
         # Give synth tones simple env (can override)
         if wform is not False and env is False:
@@ -138,20 +150,11 @@ def play(params):
         if env is not False:
             clang = dsp.env(clang, env)
 
-        # Stupidly copy the note enough or 
-        # trim it to meet the target length
-        # Vibes always just get silence padding...
-        if instrument == 'vibes':
-            clang = dsp.pad(clang, 0, length - dsp.flen(clang))
-        else: 
-            clang = dsp.fill(clang, length)
-
         # Add optional padding between notes
-        if pad is not False:
+        if pad != False:
             clang = dsp.pad(clang, 0, pad)
 
         # Add to the final note sequence
-        clang = dsp.fill(clang, length)
         out += clang
 
     # Add optional aliasing (crude bitcrushing)
@@ -197,6 +200,9 @@ def play(params):
         freqs = dsp.wavetable('sine', len(out), 1.02, 0.98)
         out = [ dsp.transpose(out[i], freqs[i]) for i in range(len(out)) ]
         out = ''.join(out)
+
+    if pinecone == True:
+        out = dsp.pine(out, int(length * dsp.rand(0.5, 8.0)), dsp.randchoose(freqs) * dsp.rand(0.5, 4.0))
 
     # Adjust output amplitude as needed and return audio + OSC 
     if pi:

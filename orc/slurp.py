@@ -3,7 +3,6 @@ from pippi import dsp
 shortname       = 'sl'
 name            = 'slurp'
 device          = 'T6_pair3'
-#device          = 'default'
 loop            = True
 
 def play(params={}):
@@ -11,7 +10,9 @@ def play(params={}):
     volume = volume / 100.0 # TODO: move into param filter
     volume = volume * 0.25
     length = params.get('length', 40)
+    env    = params.get('envelope', False)
     wii    = params.get('wii', False)
+    speed  = params.get('speed', False)
     
     numcycles = dsp.randint(10, 524)
 
@@ -32,5 +33,13 @@ def play(params={}):
         wtype = dsp.randchoose(wtypes)
         out = [ dsp.pan(dsp.cycle(wtable[i], wtype), pan[i]) for i in range(numcycles) ]
 
-    return dsp.amp(''.join(out), volume)
+    out = dsp.amp(''.join(out), volume)
+
+    if speed != False and speed > 0.0:
+        out = dsp.transpose(out, speed)
+
+    if env != False:
+        out = dsp.env(out, env)
+
+    return out
 
