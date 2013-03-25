@@ -17,7 +17,8 @@ from datetime import datetime
 import time
 from docopt import docopt
 import collections
-from _pippic import amp, am, add, shift, mix, mtime, pine, synth
+from _pippic import amp, am, add, shift, mix, mtime, pine, synth, curve
+from _pippic import env as cenv
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
@@ -516,17 +517,32 @@ def pan(slice, pan_pos=0.5, amp=1.0):
     slice = audioop.add(lslice, rslice, audio_params[1])
     return audioop.mul(slice, audio_params[1], amp)
 
-def env(audio_string, wavetable_type="sine", fullres=False, highval=1.0, lowval=0.0):
-    # Very short envelopes are possible...
-    if flen(audio_string) < dsp_grain * 4 or fullres == True:
-        packets = split(audio_string, 1)
-    else:
-        packets = split(audio_string, dsp_grain)
+def env(audio_string, wavetype="sine", fullres=False, highval=1.0, lowval=0.0, wtype=0, amp=1.0, phase=0.0, offset=0.0):
+    """ Temp wrapper for new env function """
 
-    wtable = wavetable(wavetable_type, len(packets), highval, lowval)
-    packets = [audioop.mul(packet, audio_params[1], wtable[i]) for i, packet in enumerate(packets)]
+    # Quick and dirty mapping to transition to the new api
+    if wavetype == 'sine2pi' or wavetype == 'sine':
+        wtype = 0
+    elif wavetype == 'cos2pi' or wavetype == 'cos':
+        wtype = 1
+    elif wavetype == 'hann':
+        wtype = 2
+    elif wavetype == 'tri':
+        wtype = 3
+    elif wavetype == 'saw' or wavetype == 'line':
+        wtype = 4
+    elif wavetype == 'isaw' or wavetype == 'phasor':
+        wtype = 5
+    elif wavetype == 'vary':
+        wtype = 6
+    elif wavetype == 'impulse':
+        wtype = 7
+    elif wavetype == 'square':
+        wtype = 8
+    elif wavetype == 'random':
+        wtype = randint(0, 8)
 
-    return ''.join(packets) 
+    return cenv(audio_string, wtype, amp, phase, offset)
 
 def benv(sound, points):
     chunksize = flen(sound) / (len(points) - 1)
