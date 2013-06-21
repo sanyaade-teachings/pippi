@@ -17,7 +17,7 @@ from datetime import datetime
 import time
 from docopt import docopt
 import collections
-from _pippic import amp, am, add, shift, mix, mtime, pine, synth, curve
+from _pippic import amp, am, add, shift, mix, pine, synth, curve
 from _pippic import env as cenv
 from _pippic import cycle as ccycle
 

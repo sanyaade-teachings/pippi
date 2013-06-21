@@ -2,7 +2,6 @@ from setuptools import setup, Extension
 
 pippic = Extension('_pippic', 
         sources = ['src/pippi.c'], 
-        extra_link_args=['-lrt'], 
         )
 
 setup(name='pippi',
@@ -14,7 +13,7 @@ setup(name='pippi',
         license='Public Domain',
         packages=['pippi'],
         ext_modules = [ pippic ],
-        install_requires=['distribute'],
+        install_requires=['distribute', 'docopt'],
         extras_require = {
             'realtime': ['pyalsaaudio', 'termcolor', 'pyliblo'],
         },
