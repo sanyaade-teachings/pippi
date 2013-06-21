@@ -48,14 +48,14 @@ static PyObject *PippiError;
 #define FLAT 9
 
 static void wavetable(int waveform_type, double *buffer, int length, double amp, double phase, double offset, double period) {
-    int i;
-    double position;
+    int i, last;
+    double position, swap;
     int pulse_length = 3; /* TODO: makes sense to be able to specify a pulse width */
 
     switch(waveform_type) {
         case COS:
             for(i=0; i < length; i++) {
-                position = (double)i / (double)(length - 1);
+                position = (double)i / (double)(length);
                 buffer[i] = WT_COS(position, amp, phase, offset, period);
             }
             break;
@@ -76,19 +76,21 @@ static void wavetable(int waveform_type, double *buffer, int length, double amp,
 
         case SAW:
             for(i=0; i < length; i++) {
-                buffer[i] = fmod(((double)i / (double)(length - 1)) * period, 1.0);
+                buffer[i] = (double)i / (double)(length - 1);
             }
             break;
 
         case RSAW:
             for(i=0; i < length; i++) {
-                if(i > 0) {
-                    position = 1.0 / (double)i;
-                } else {
-                    position = 0.0;
-                }
+                buffer[i] = (double)i / (double)(length - 1);
+            }
 
-                buffer[i] = position;
+            last = length - 1;
+            for(i=0; i < length/2; i++) {
+                swap = buffer[i];
+                buffer[i] = buffer[last];
+                buffer[last] = swap;
+                last--;
             }
             break;
 
@@ -133,7 +135,7 @@ static void wavetable(int waveform_type, double *buffer, int length, double amp,
         case SINE:
         default:
             for(i=0; i < length; i++) {
-                position = (double)i / (double)(length - 1);
+                position = (double)i / (double)(length);
                 buffer[i] = WT_SINE(position, amp, phase, offset, period);
             }
     }
@@ -298,6 +300,52 @@ static PyObject * pippic_curve(PyObject *self, PyObject *args) {
     return output;
 }
 
+static char pippic_cycle_docstring[] = "Generate a single cycle of a waveform.";
+static PyObject * pippic_cycle(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data;
+
+    int i, type, length;
+    short value;
+    double amp = 1.0;
+    double phase = 0.0;
+    double offset = 0.0;
+    double period = 1.0;
+    double multiple = 1.0;
+
+    if(!PyArg_ParseTuple(args, "ii|dddd", &type, &length, &multiple, &amp, &phase, &offset)) {
+        return NULL;
+    }
+
+    int size = getsize();
+    int channels = 2;
+    int chunk = size + channels;
+    double wtable[length];
+
+    switch(type) {
+        case SINE:
+        case COS:
+        case VARY:
+        case HANN:
+            period = M_PI * 2.0;
+            break;
+    }
+
+    output = PyString_FromStringAndSize(NULL, length * chunk);
+    data = (signed char*)PyString_AsString(output);
+
+    wavetable(type, wtable, length, amp, phase, offset, period * multiple);
+
+    for(i=0; i < length; i++) {
+        value = saturate(wtable[i] * (MAXVAL - 1));
+         
+        *BUFFER(data, i * chunk) = value;
+        *BUFFER(data, i * chunk + size) = value;
+    }
+
+    return output;
+}
+
 static char pippic_env_docstring[] = "Apply an envelope to a sound.";
 static PyObject * pippic_env(PyObject *self, PyObject *args) {
     PyObject *output;
@@ -311,8 +359,9 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
     double phase = 0.0;
     double offset = 0.0;
     double period = 1.0;
+    double mult   = 1.0;
 
-    if(!PyArg_ParseTuple(args, "s#i|ddd", &input, &input_length, &type, &amp, &phase, &offset)) {
+    if(!PyArg_ParseTuple(args, "s#i|dddd", &input, &input_length, &type, &amp, &phase, &offset, &mult)) {
         return NULL; 
     }
 
@@ -320,7 +369,7 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
     int channels = 2;
     int chunk = size + channels;
     double wtable[input_length / chunk];
-    double value;
+    double value, left, right;
 
     switch(type) {
         case SINE:
@@ -334,13 +383,18 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
     output = PyString_FromStringAndSize(NULL, input_length);
     data = (signed char*)PyString_AsString(output);
 
-    wavetable(type, wtable, input_length / chunk, amp, phase, offset, period);
+    wavetable(type, wtable, input_length / chunk, amp, phase, offset, period * mult);
 
     for(i=0; i < input_length; i += chunk) {
         value = wtable[i / chunk];
 
-        *BUFFER(data, i) = saturate(*BUFFER(input, i) * value);
-        *BUFFER(data, i + size) = saturate(*BUFFER(input, i + size) * value);
+        left = (double)*BUFFER(input, i);
+        left *= value;
+        right = (double)*BUFFER(input, i + size);
+        right *= value;
+
+        *BUFFER(data, i) = saturate(left);
+        *BUFFER(data, i + size) = saturate(right);
     }
 
     return output;
@@ -363,6 +417,7 @@ static PyObject * pippic_synth(PyObject *self, PyObject *args) {
     double offset = 0.0;
     double period = 1.0;
     int length = 44100;
+    double oversample = 32.0;
 
     int i;
     int size = getsize();
@@ -382,19 +437,19 @@ static PyObject * pippic_synth(PyObject *self, PyObject *args) {
     data = (signed char*)PyString_AsString(output);
 
     if(type == RSAW || type == PULSE || type == SQUARE) {
-        frequency *= 32.0; /* TODO: fix period phase and offset on RSAW and PULSE */
+        frequency *= oversample; /* TODO: fix period phase and offset on RSAW and PULSE */
     }
 
-    int cycle_length = (int)((44100.0 / frequency) * 32.0) * chunk;
+    int cycle_length = (int)((44100.0 / frequency) * oversample) * chunk;
 
     double cycle[cycle_length / chunk];
-    wavetable(type, cycle, cycle_length / chunk, amp, phase, offset, period * 32.0);
+    wavetable(type, cycle, cycle_length / chunk, amp, phase, offset, period * oversample);
 
     int left, right;
     short value;
 
     for(i=0; i < length; i += chunk) {
-        value = saturate(cycle[(i / chunk) % (cycle_length / chunk)] * MAXVAL);
+        value = saturate(cycle[(i / chunk) % (cycle_length / chunk)] * (MAXVAL - 1));
 
         *BUFFER(data, i) = value;
         *BUFFER(data, i + size) = value;
@@ -472,6 +527,12 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
 
     int output_length, cycle_length, input_length, cycle_start;
 
+    int window_type = HANN;
+    int scrub_type = SAW;
+    double window_period = M_PI * 2.0;
+    double scrub_period = 1.0;
+
+
     int size = getsize();
     int channels = 2;
     int chunk = size + channels;
@@ -479,7 +540,7 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
     double playhead, frequency;
     int i, f;
 
-    if(!PyArg_ParseTuple(args, "s#id", &input, &input_length, &output_length, &frequency)) {
+    if(!PyArg_ParseTuple(args, "s#id|idid", &input, &input_length, &output_length, &frequency, &window_type, &window_period, &scrub_type, &scrub_period)) {
         return NULL;
     }
 
@@ -518,7 +579,7 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
     int max_position = (input_length / chunk) - (cycle_length / chunk);
 
     double pos_curve[num_cycles];
-    wavetable(SINE, pos_curve, num_cycles, 1.0, 0.0, 0.0, M_PI);
+    wavetable(scrub_type, pos_curve, num_cycles, 1.0, 0.0, 0.0, scrub_period);
 
     for(i=0; i < num_cycles; i++) {
         playhead = pos_curve[i];
@@ -536,7 +597,7 @@ static PyObject * pippic_pine(PyObject *self, PyObject *args) {
     data = (signed char*)PyString_AsString(output);
 
     double cycle[cycle_length / chunk];
-    wavetable(HANN, cycle, cycle_length / chunk, 1.0, 0.0, 0.0, M_PI * 2);
+    wavetable(window_type, cycle, cycle_length / chunk, 1.0, 0.0, 0.0, window_period);
 
     int left, right;
 
@@ -724,6 +785,7 @@ static PyMethodDef pippic_methods[] = {
     {"pine", pippic_pine, METH_VARARGS, pippic_pine_docstring},
     {"curve", pippic_curve, METH_VARARGS, pippic_curve_docstring},
     {"env", pippic_env, METH_VARARGS, pippic_env_docstring},
+    {"cycle", pippic_cycle, METH_VARARGS, pippic_cycle_docstring},
     {NULL, NULL, 0, NULL}
 };
 

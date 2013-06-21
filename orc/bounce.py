@@ -65,7 +65,5 @@ def play(args):
 
     out = dsp.mix(layers)
 
-    return dsp.play(dsp.amp(out, volume))
+    return dsp.amp(out, volume)
 
-if __name__ == '__main__':
-    print dsp.write(play([]), 'boo')

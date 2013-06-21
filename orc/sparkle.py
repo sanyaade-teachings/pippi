@@ -9,9 +9,9 @@ loop        = True
 def play(params={}):
 
     length    = params.get('length', dsp.stf(20))
-    volume    = params.get('volume', 1.0)
-    octave    = params.get('octave', 3)
-    note      = params.get('note', 'd')
+    volume    = params.get('volume', 0.3)
+    octave    = params.get('octave', 6)
+    note      = params.get('note', 'c')
     quality   = params.get('quality', tune.major)
     multiple  = params.get('multiple', 1)
     width     = params.get('width', 0)

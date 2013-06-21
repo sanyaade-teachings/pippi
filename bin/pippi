@@ -74,10 +74,6 @@ class Pippi(cmd.Cmd):
         self.params = self.server.Namespace()
         self.groups = {}
 
-        self.pi = self.server.Namespace()
-        self.pi_ip = '192.168.1.222'
-        self.pi_port = 9000 
-
         # TODO probably some sort of hash function 
         # would be better than this integer-as-id hack.
         self.voice_id = str(0)
@@ -121,10 +117,6 @@ class Pippi(cmd.Cmd):
                 print 'No generators found in ' + orcpath
 
         print
-
-    def do_sync(self, cmd):
-        if os.system('ssh pi@192.168.1.222 \'sudo date -s "' + time.asctime() + ' CST"\' > /dev/null 2>&1') == 0:
-            print 'Synced time on raspberry pi'
 
     def do_bpm(self, cmd):
         try:
@@ -243,10 +235,16 @@ class Pippi(cmd.Cmd):
         active = mp.active_children()
         dsp.log([ (a.name, a.pid) for a in active])
         try:
+            voices = []
             for voice in active:
                 if hasattr(self.params, voice.name):
                     params = getattr(self.params, voice.name)
-                    print voice.name, self.format_params(params.data)
+                    voices += [ "%02i %s" % (int(voice.name), self.format_params(params.data)) ]
+
+            voices.sort()
+
+            for voice in voices:
+                print voice
 
         except Exception, e:
             dsp.log(e)

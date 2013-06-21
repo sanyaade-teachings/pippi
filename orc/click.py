@@ -1,8 +1,10 @@
 from pippi import dsp
+import math
 
 shortname   = 'cl'
 name        = 'click'
-device      = 'T6_pair3'
+#device      = 'T6_pair3'
+device      = 'default'
 loop        = True
 
 def play(params):
@@ -141,6 +143,7 @@ def play(params):
             # Add single cycle
             # Decrease pitch by amount relative to cycle len
             cycle = dsp.cycle(fpos)
+            #cycle = ''.join([ str(v) for v in dsp.curve(0, dsp.htf(fpos), math.pi * 2) ])
             pos += dsp.flen(cycle)
             #fpos = fpos - (fhigh * (length / dsp.htf(fpos)))
             fpos = fpos - 30.0

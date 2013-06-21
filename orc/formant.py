@@ -2,6 +2,11 @@ from pippi import dsp
 from pippi import tune
 import math
 
+shortname   = 'fo'
+name        = 'formant'
+device      = 'default'
+loop        = True
+
 def play(args):
     length = dsp.stf(30)
     volume = 0.2 
@@ -68,7 +73,7 @@ def play(args):
 
     out = dsp.mix(layers)
 
-    return dsp.play(dsp.amp(out, volume))
+    return dsp.amp(out, volume)
 
 if __name__ == '__main__':
     print dsp.write(play([]), 'weeooo')

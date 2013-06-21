@@ -23,6 +23,11 @@ class Client:
         self.time = time.time()
         self.elapsed = 0.0
 
+    def rtsend(self, path, *args):
+        message = liblo.Message(path)
+        message.add(*args)
+        liblo.send(self.server_address, message)
+
     def send(self, path, timestamp, *args):
         """ Send a timestamped OSC message.
 
@@ -54,3 +59,5 @@ class Client:
             path = message[0]
             self.send(path, now + elapsed, *tuple(message[2:]))
             offset = float(message[1])
+
+        #print elapsed, now

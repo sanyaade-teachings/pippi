@@ -19,6 +19,7 @@ from docopt import docopt
 import collections
 from _pippic import amp, am, add, shift, mix, mtime, pine, synth, curve
 from _pippic import env as cenv
+from _pippic import cycle as ccycle
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
@@ -99,12 +100,33 @@ def list_split(list, packet_size):
 
     return newlist
 
-def rotate(list, start):
+def rotate(list, start=0, rand=False):
     """ Rotate a list by a given offset """
+
+    if rand == True:
+        start = randint(0, len(list) - 1)
+
     if start > len(list) - 1:
         start = len(list) - 1
 
     return list[start:] + list[:start]
+
+def eu(length, numpulses):
+    """ Euclidian pattern generator
+    """
+    pulses = [ 1 for pulse in range(numpulses) ]
+    pauses = [ 0 for pause in range(length - numpulses) ]
+
+    position = 0
+    while len(pauses) > 0:
+        try:
+            index = pulses.index(1, position)
+            pulses.insert(index + 1, pauses.pop(0))
+            position = index + 1
+        except ValueError:
+            position = 0
+
+    return pulses
 
 
 
@@ -267,6 +289,18 @@ def randshuffle(input):
 # DSP
 ###############
 
+def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
+    """ Time-domain band-limited noise generator
+    """
+    outlen = 0
+    cycles = ''
+    while outlen < length:
+        acycle = cycle(rand(low, high), wform)
+        outlen += len(acycle)
+        cycles += acycle
+
+    return cycles
+
 def transpose(audio_string, amount):
     """ Transpose an audio fragment by a given amount.
         1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc """
@@ -296,6 +330,8 @@ def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0
         wtype = 7
     elif wavetype == 'square':
         wtype = 8
+    else:
+        wtype = 0
 
     return synth(wtype, float(freq), length, amp, phase, offset)
         
@@ -323,15 +359,39 @@ def noise(length):
     return ''.join([byte_string(randint(-32768, 32767)) for i in range(length * audio_params[0])])
 
 def cycle(freq, wavetype='sine2pi', amp=1.0):
-    wavecycle = wavetable(wavetype, htf(freq))
-    return ''.join([pack(amp * s) * audio_params[0] for s in wavecycle])
+    #wavecycle = wavetable(wavetype, htf(freq))
+    # Quick and dirty mapping to transition to the new api
+    if wavetype == 'sine2pi' or wavetype == 'sine':
+        wtype = 0
+    elif wavetype == 'cos2pi' or wavetype == 'cos':
+        wtype = 1
+    elif wavetype == 'hann':
+        wtype = 2
+    elif wavetype == 'tri':
+        wtype = 3
+    elif wavetype == 'saw' or wavetype == 'line':
+        wtype = 4
+    elif wavetype == 'isaw' or wavetype == 'phasor':
+        wtype = 5
+    elif wavetype == 'vary':
+        wtype = 6
+    elif wavetype == 'impulse':
+        wtype = 7
+    elif wavetype == 'square':
+        wtype = 8
 
-def fill(string, length, chans=2):
+    #return ''.join([pack(amp * s) * audio_params[0] for s in wavecycle])
+    return ccycle(wtype, htf(freq), 1.0, amp)
+
+def fill(string, length, chans=2, silence=False):
     if flen(string) < length:
-        try:
-            repeats = length / flen(string) + 1
-        except ZeroDivisionError:
-            return string
+        if silence == False:
+            try:
+                repeats = length / flen(string) + 1
+            except ZeroDivisionError:
+                return string
+        else:
+            return pad(string, 0, length - flen(string))
 
         string = string * repeats
 
@@ -517,7 +577,7 @@ def pan(slice, pan_pos=0.5, amp=1.0):
     slice = audioop.add(lslice, rslice, audio_params[1])
     return audioop.mul(slice, audio_params[1], amp)
 
-def env(audio_string, wavetype="sine", fullres=False, highval=1.0, lowval=0.0, wtype=0, amp=1.0, phase=0.0, offset=0.0):
+def env(audio_string, wavetype="sine", fullres=False, highval=1.0, lowval=0.0, wtype=0, amp=1.0, phase=0.0, offset=0.0, mult=1.0):
     """ Temp wrapper for new env function """
 
     # Quick and dirty mapping to transition to the new api
@@ -542,7 +602,7 @@ def env(audio_string, wavetype="sine", fullres=False, highval=1.0, lowval=0.0, w
     elif wavetype == 'random':
         wtype = randint(0, 8)
 
-    return cenv(audio_string, wtype, amp, phase, offset)
+    return cenv(audio_string, wtype, amp, phase, offset, mult)
 
 def benv(sound, points):
     chunksize = flen(sound) / (len(points) - 1)

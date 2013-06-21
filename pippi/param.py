@@ -71,7 +71,7 @@ class Param:
             'p': {
                 'name': 'padding',
                 'type': 'frame',
-                'accepts': ['beat', 'second', 'millisecond'],
+                'accepts': ['beat', 'second', 'millisecond', 'integer'],
                 },
 
             'w': {
@@ -138,7 +138,7 @@ class Param:
             'alphanumeric':      re.compile(r'\w+'), 
             'integer-list':      re.compile(r'\d+(.\d+)*'), 
             'note-list':      re.compile(r'[a-gA-G][#b]?(.[a-gA-G][#b]?)*'), 
-            'hz-list':      re.compile(r'\d+\-?\d*hz?(.\d+\.?\d*hz)*'), 
+            'hz-list':      re.compile(r'\d+\-?\d*?(.\d+\.?\d*)*'), 
             'string-list':      re.compile(r'[a-zA-Z]+(.[a-zA-Z]+)*'), 
             }
 
@@ -244,7 +244,7 @@ class Param:
 
     def convert_hz_list(self, value, output_type):
         if output_type == 'hz-list':
-            value = value.split('-')
+            value = value.split('/')
 
         for i, hz in enumerate(value):
             value[i] = self.convert_float(hz)
@@ -291,20 +291,7 @@ class Param:
         # Translate special R params into random ranges for certain params
         if hasattr(param['value'], '__getslice__') and param['value'][0] == 'R':
             # TODO make more robust
-            if param_name == 't':
-                # Length rand range
-                if len(param['value']) > 1:
-                    param['value'] = param['value'][1:].split('.')
-                    tmin = int(param['value'][0])
-                    tmax = int(param['value'][1])
-
-                else:
-                    tmin = 100
-                    tmax = 1000
-
-                param['value'] = str(dsp.randint(tmin, tmax)) + 'ms'
-
-            elif param_name == 'bpm':
+            if param_name == 'bpm':
                 if len(param['value']) > 1:
                     param['value'] = param['value'][1:].split('.')
                     tmin = float(param['value'][0])
@@ -315,6 +302,20 @@ class Param:
                     tmax = 1000
 
                 param['value'] = str(dsp.rand(tmin, tmax))
+
+            #elif param_name == 't':
+                ## Length rand range
+                #if len(param['value']) > 1:
+                    #param['value'] = param['value'][1:].split('.')
+                    #tmin = int(param['value'][0])
+                    #tmax = int(param['value'][1])
+
+                #else:
+                    #tmin = 100
+                    #tmax = 1000
+
+                #param['value'] = str(dsp.randint(tmin, tmax)) + 'ms'
+
 
             elif param_name == 's':
                 # My favorite scale degrees

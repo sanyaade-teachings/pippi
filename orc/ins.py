@@ -1,9 +1,10 @@
 from pippi import dsp
+from pippi import rt
 from pippi import tune
 
 shortname       = 'in'
 name            = 'ins'
-device          = 'T6_pair3'
+device          = 'T6_pair1'
 #device          = 'default'
 loop            = True
 
@@ -14,7 +15,7 @@ def play(params):
     volume          = volume / 100.0
     scale           = params.get('scale', [1, 5])
     octave          = params.get('octave', 3)
-    envelope        = params.get('envelope', 'sine')
+    envelope        = params.get('envelope', False)
     pad             = params.get('pad', False)
     pinecone = params.get('pinecone', False)
 
@@ -22,7 +23,7 @@ def play(params):
     speeds = [ freq / 220.0 for freq in freqs ]
 
     out = ''
-    input = dsp.capture(buffer_length)
+    input = rt.capture(buffer_length, 'T6_pair1', 1)
 
     grain_length = dsp.flen(input) / 4 
 
