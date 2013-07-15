@@ -3,9 +3,9 @@
 
 Quite alpha!
 
-### Install with pip:
+### Install from source:
     
-    pip install pippi
+    python setup.py install
 
 Take a look at the generator scripts in orc/ for some examples of usage. [Docs coming...]
 
@@ -30,20 +30,3 @@ Here's a slightly more interesting example:
 
 [Here's another more complex (and musical) example.](docs/example.md)
 
-## 'Realtime' performance layer 
-(linux-only - requires ALSA)
-
-### Install with pip: 
-
-    pip install pippi[realtime]
-
-The pippi console:
-
-    pippi
-
-    Pippi Console
-    pippi: dr o:2 wf:impulse n:d.a.e t:30s h:1.2.3
-
-Starts the pippi console and generates a 30 second long stack of impulse trains on D, A, and E each with partials 1, 2, and 3.
-
-Take a look at the scripts in orc/ for more arguments and generators.
