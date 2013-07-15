@@ -7,12 +7,12 @@
 Pippi takes advantage of a few features of CPython:
 
 - Doing string manipulations with python's internal C methods (like `string.join()`) is fast.
-- The python standard library includes the `audioop` module (DSP code ripped straight out of the excellent SoX command line utility) which accepts audio as a binary string literal and returns the same. It is also fast.
+- The python standard library includes the `audioop` module which accepts audio as a binary string and returns the same. It is also fast.
 - There's a handy `wave` module in the standard library, which makes importing and exporting PCM wave data simple.
 
 ### Data format
 
-Internally, all sound in pippi is stored and manipulated as binary **string literals**. 
+Internally, all sound in pippi is stored and manipulated as **binary strings**. 
 
 *What?*
 
@@ -59,10 +59,10 @@ especially when a system will quickly grow to working with minutes and hours of 
 backend for string manipulation and basic DSP, performance is actually pretty good.
 
 Instead we represent each integer as a python string, and when doing synthesis, use the `struct` module to 
-pack our integers into string literals.
+pack our integers into binary strings.
 
-To turn the python integer `32,767` into a string literal, we can give `struct.pack` a format argument and 
-it will convert the number into the correct binary string literal.
+To turn the python integer `32,767` into a binary string, we can give `struct.pack` a format argument and 
+it will convert the number into the correct binary string.
 
     >>> import struct
     >>> struct.pack('<h', 32767)
@@ -104,11 +104,11 @@ With pippi, to do the same, we use the cut method:
 Using the same silence 10 frames from the earlier example, we can check the actual length with `dsp.flen()`. 
 (Which is short for 'frame length' or 'length in frames')
 
-To do the cut, `dsp.cut()` accepts three params: first, the string literal to cut from, next the offset in frames 
+To do the cut, `dsp.cut()` accepts three params: first, the binary string to cut from, next the offset in frames 
 where the cut should start, and third the length of the cut in frames. 
 
 ### Summary
 
-Part of what pippi provides is a wrapper to working with python string literals. This is actually a very handy thing.
+Part of what pippi provides is a wrapper to working with python binary strings. This is actually a very handy thing.
 That's just a small part of the library though. Next we'll talk about doing basic synthesis with pippi, and using some of 
 its waveshape generators for both audio and control data.
