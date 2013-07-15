@@ -5,7 +5,7 @@ pippic = Extension('_pippic',
         )
 
 setup(name='pippi',
-        version='0.2.0',
+        version='0.3.0',
         description='A python computer music system',
         url='http://hecanjog.github.com/pippi',
         author='He Can Jog',
@@ -13,11 +13,7 @@ setup(name='pippi',
         license='Public Domain',
         packages=['pippi'],
         ext_modules = [ pippic ],
-        install_requires=['distribute', 'docopt'],
-        extras_require = {
-            'realtime': ['pyalsaaudio', 'termcolor', 'pyliblo'],
-        },
+        install_requires=['distribute'],
         test_suite='nose.collector',
         tests_require=['nose'],
-        scripts=['bin/pippi'],
         zip_safe=False)
