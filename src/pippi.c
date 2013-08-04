@@ -436,7 +436,7 @@ static PyObject * pippic_synth(PyObject *self, PyObject *args) {
     output = PyString_FromStringAndSize(NULL, length);
     data = (signed char*)PyString_AsString(output);
 
-    if(type == RSAW || type == PULSE || type == SQUARE) {
+    if(type == RSAW || type == SAW || type == VARY || type == PULSE || type == SQUARE) {
         frequency *= oversample; /* TODO: fix period phase and offset on RSAW and PULSE */
     }
 
