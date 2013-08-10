@@ -66,8 +66,8 @@ for i in range(20):
     # Randomly choose a waveform from our list
     waveform_type = dsp.randchoose(waveform_types)
 
-    # Generate a single short tone at 330hz
-    short_tone = dsp.tone(tone_length, 330, waveform_type)
+    # Generate a single short tone at 220hz
+    short_tone = dsp.tone(tone_length, 220, waveform_type)
 
     # Add that tone to our list of short tones
     short_tones.append(short_tone)
@@ -108,3 +108,48 @@ output = ''.join(short_tones_pan_envelope)
 
 # Write output to disk
 dsp.write(output, 'short_tones_pan_envelope')
+
+# Pitch shifted layers
+speeds = [ 1.0, 1.5, 2.0, 1.33, 2.5, 3.0, 4.0, 8.0, 16.0, 32.0 ]
+layers = []
+for layer in range(6):
+    layer = dsp.randshuffle(short_tones_pan_envelope)
+    layer = [ dsp.transpose(tone, dsp.randchoose(speeds)) for tone in layer ]
+    layer = ''.join(layer)
+    layers += [ layer ]
+
+output = dsp.mix(layers)
+dsp.write(output, 'short_tones_layers')
+
+degrees = [ 1, 3, 5, 8, 9, 12 ]
+pitches = tune.fromdegrees(degrees, octave=3, root='a', ratios=tune.terry)
+
+# Some more FX
+for layer_index, layer in enumerate(layers):
+    layer = dsp.vsplit(layer, dsp.mstf(1), dsp.mstf(300))
+    layer = dsp.randshuffle(layer)
+    for i, segment in enumerate(layer):
+        if dsp.randint(0,3) == 0:
+            layer[i] = dsp.pine(segment, dsp.flen(segment) * dsp.randint(1, 10), dsp.randchoose(pitches))
+
+        if dsp.randint(0,2) == 0:
+            layer[i] = dsp.alias(segment)
+
+    layer = ''.join(layer)
+
+    # pulses
+    layer = dsp.split(layer, dsp.mstf(100))
+
+    pulses = dsp.breakpoint( [ dsp.rand() for r in range(4) ], len(layer))
+    pulses = [ dsp.mstf(70 * (p * 0.2 + 1)) for p in pulses ]
+
+    layer = [ dsp.env(segment, 'phasor') for segment in layer ]
+    layer = [ dsp.pad(segment, 0, pulses[si]) for si, segment in enumerate(layer) ]
+    layer = ''.join(layer)
+
+    layers[layer_index] = layer
+
+output = dsp.mix(layers)
+dsp.write(output, 'short_tones_fx')
+
+
