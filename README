@@ -3,11 +3,12 @@
 
 Quite alpha!
 
+### Install from pip:
+    pip install pippi --user
+
 ### Install from source:
     
-    python setup.py install
-
-Take a look at the generator scripts in orc/ for some examples of usage. [Docs coming...]
+    python setup.py install --user
 
 ### Now What?
 
