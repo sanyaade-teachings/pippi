@@ -15,7 +15,6 @@ import os
 import sys
 from datetime import datetime
 import time
-from docopt import docopt
 import collections
 from _pippic import amp, am, add, shift, mix, pine, synth, curve
 from _pippic import env as cenv
@@ -885,14 +884,6 @@ def delay(frames):
         time.sleep(target - time.time())
 
     return True
-
-def pipe(f):
-    if sys.argv is not '':
-        args = docopt(f.__doc__)
-        # TODO parse args and stream to stdout
-        f(args)
-
-
 
 
 
