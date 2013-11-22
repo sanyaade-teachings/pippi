@@ -16,7 +16,7 @@ import sys
 from datetime import datetime
 import time
 import collections
-from _pippic import amp, am, add, shift, mix, pine, synth, curve
+from _pippic import amp, am, add, mul, shift, mix, pine, synth, curve, pulsar
 from _pippic import env as cenv
 from _pippic import cycle as ccycle
 
@@ -249,12 +249,7 @@ def rpop(low=0.0, high=1.0):
     return cpop * (high - low) + low
 
 def randint(lowbound=0, highbound=1):
-    global seedint
-
-    if seedint > 0:
-        return int(rand() * (highbound - lowbound) + lowbound)
-    else:
-        return random.randint(lowbound, highbound)
+    return int(rand() * (highbound - lowbound) + lowbound)
 
 def rand(lowbound=0, highbound=1):
     global seedint
@@ -716,14 +711,14 @@ def breakpoint(values, size=512):
 
     return groups
 
-def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
+def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0):
     """ The end is near. That'll do, wavetable()
     """
     wtable = []
     wave_types = ["sine", "gauss", "cos", "line", "saw", "impulse", "phasor", "sine2pi", "cos2pi", "vary", "flat"]
 
     if wtype == "random":
-        wtype = wave_types[int(rf(0, len(wave_types) - 1))]
+        wtype = wave_types[int(rand(0, len(wave_types) - 1))]
 
     if wtype == "sine":
         wtable = [math.sin(i * math.pi) * (highval - lowval) + lowval for i in frange(size, 1.0, 0.0)]
@@ -784,9 +779,9 @@ def wavetable(wtype="sine", size=512, highval=1.0, lowval=0.0, rf = rand):
         if size < 32:
             bsize = size
         else:
-            bsize = size / int(rf(2, 16))
+            bsize = size / int(rand(2, 16))
 
-        btable = [ [wave_types[int(rf(0, len(wave_types)-1))], rf(lowval, highval)] for i in range(bsize) ]
+        btable = [ [wave_types[int(rand(0, len(wave_types)-1))], rand(lowval, highval)] for i in range(bsize) ]
 
         if len(btable) > 0:
             btable[0] = lowval

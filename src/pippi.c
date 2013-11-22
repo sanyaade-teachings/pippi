@@ -502,6 +502,167 @@ static PyObject * pippic_add(PyObject *self, PyObject *args) {
     return output;
 }
 
+/* Multiply two sounds together
+ */
+static char pippic_mul_docstring[] = "Multiply two sounds together.";
+static PyObject * pippic_mul(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data;
+
+    signed char *first, *second;
+    int first_length, first_value, second_length, second_value, length, mul;
+
+    int i;
+    int size = getsize();
+
+    if(!PyArg_ParseTuple(args, "s#s#:add", &first, &first_length, &second, &second_length)) {
+        return NULL;
+    }
+
+    /* The output length is equal to the length of the longest input sound */
+    length = first_length > second_length ? first_length : second_length;
+
+    output = PyString_FromStringAndSize(NULL, length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < length; i += size) {
+        if(i < first_length) {
+            first_value = (int)*BUFFER(first, i);
+        } else {
+            first_value = 0;
+        }
+
+        if(i < second_length) {
+            second_value = (int)*BUFFER(second, i);
+        } else {
+            second_value = 0;
+        }
+
+        mul = first_value * second_value;
+
+        *BUFFER(data, i) = saturate((double)mul);
+    }
+
+    return output;
+}
+
+static char pippic_pulsar_docstring[] = "Pulsar synthesis.";
+static PyObject * pippic_pulsar(PyObject *self, PyObject *args) {
+    PyObject *output;
+
+    PyObject *waveformIn;
+    PyObject *waveform;
+
+    PyObject *windowIn;
+    PyObject *window;
+
+    PyObject *modIn;
+    PyObject *mod;
+
+    signed char *data;
+
+    int i;
+    int size = getsize();
+    int channels = 2;
+    int chunk = size + channels;
+    double valWaveform, valNextWaveform, valWindow, valNextWindow, valMod, valNextMod, freq, pulsewidth;
+    int length;
+
+    int lenWaveform, cIndexWaveform, paddingWaveform = 0;
+    double indexWaveform, fracWaveform = 0;
+
+    int lenWindow, cIndexWindow, paddingWindow = 0;
+    double indexWindow, fracWindow = 0;
+
+    int lenMod, cIndexMod = 0;
+    double indexMod, fracMod, modRange, freqMod, amp = 0;
+
+    if(!PyArg_ParseTuple(args, "didOOOddd", &freq, &length, &pulsewidth, &waveformIn, &windowIn, &modIn, &modRange, &freqMod, &amp)) {
+        return NULL;
+    }
+
+    length *= chunk;
+
+    waveform = PySequence_Fast(waveformIn, "Could not read waveform wavetable.");
+    lenWaveform = PySequence_Size(waveformIn);
+
+    window = PySequence_Fast(windowIn, "Could not read window wavetable.");
+    lenWindow = PySequence_Size(windowIn);
+
+    mod = PySequence_Fast(modIn, "Could not read freq modulator wavetable.");
+    lenMod = PySequence_Size(modIn);
+
+    if(pulsewidth == 0) {
+        pulsewidth += 0.00001;
+    }
+
+    paddingWaveform = (int)(lenWaveform * (1.0 / pulsewidth)) - lenWaveform + 1;
+    paddingWindow = (int)(lenWindow * (1.0 / pulsewidth)) - lenWindow + 1;
+
+    double pulse[lenWaveform + paddingWaveform];
+
+    for(i=0; i < lenWaveform + paddingWaveform; i++) {
+        if(i < lenWaveform) {
+            pulse[i] = PyFloat_AsDouble(PyList_GET_ITEM(waveform, i));
+        } else {
+            pulse[i] = 0;
+        }
+    }
+
+    double wndw[lenWindow + paddingWindow];
+
+    for(i=0; i < lenWindow + paddingWindow; i++) {
+        if(i < lenWindow) {
+            wndw[i] = PyFloat_AsDouble(PyList_GET_ITEM(window, i));
+        } else {
+            wndw[i] = 0;
+        }
+    }
+
+    output = PyString_FromStringAndSize(NULL, length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < length; i += chunk) {
+        cIndexWaveform = (int)indexWaveform % (lenWaveform + paddingWaveform - 1);
+        cIndexWindow = (int)indexWindow % (lenWindow + paddingWindow - 1);
+        cIndexMod = (int)indexMod % (lenMod - 1);
+
+        valMod = PyFloat_AsDouble(PyList_GET_ITEM(mod, cIndexMod));
+        valNextMod = PyFloat_AsDouble(PyList_GET_ITEM(mod, cIndexMod + 1));
+
+        valWaveform = pulse[cIndexWaveform];
+        valNextWaveform = pulse[cIndexWaveform + 1];
+
+        valWindow = wndw[cIndexWindow];
+        valNextWindow = wndw[cIndexWindow + 1];
+
+        fracWaveform = indexWaveform - (int)indexWaveform;
+        fracWindow = indexWindow - (int)indexWindow;
+        fracMod = indexMod - (int)indexMod;
+
+        valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform;
+
+        valWindow = (1.0 - fracWindow) * valWindow + fracWindow * valNextWindow;
+
+        valMod = (1.0 - fracMod) * valMod + fracMod * valNextMod;
+        valMod = 1.0 + (valMod * modRange);
+
+        *BUFFER(data, i) = saturate(amp * valWaveform * valWindow * (MAXVAL - 1));
+        *BUFFER(data, i + size) = saturate(amp * valWaveform * valWindow * (MAXVAL - 1));
+
+        indexWaveform += (freq * valMod) * (lenWaveform + paddingWaveform) * (1.0 / 44100.0);
+        indexWindow += (freq * valMod) * (lenWindow + paddingWindow) * (1.0 / 44100.0);
+        indexMod += freqMod * lenMod * (1.0 / 44100.0);
+    }
+
+    Py_DECREF(waveform);
+    Py_DECREF(window);
+    Py_DECREF(mod);
+
+    return output;
+}
+
+
 static char pippic_pine_docstring[] = "Just your average pinecone.";
 static PyObject * pippic_pine(PyObject *self, PyObject *args) {
     PyObject *output;
@@ -760,10 +921,12 @@ static PyMethodDef pippic_methods[] = {
     {"amp", pippic_amp, METH_VARARGS, pippic_amp_docstring},
     {"am", pippic_am, METH_VARARGS, pippic_am_docstring},
     {"add", pippic_add, METH_VARARGS, pippic_add_docstring},
+    {"mul", pippic_mul, METH_VARARGS, pippic_mul_docstring},
     {"mix", pippic_mix, METH_VARARGS, pippic_mix_docstring},
     {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
     {"synth", pippic_synth, METH_VARARGS, pippic_synth_docstring},
     {"pine", pippic_pine, METH_VARARGS, pippic_pine_docstring},
+    {"pulsar", pippic_pulsar, METH_VARARGS, pippic_pulsar_docstring},
     {"curve", pippic_curve, METH_VARARGS, pippic_curve_docstring},
     {"env", pippic_env, METH_VARARGS, pippic_env_docstring},
     {"cycle", pippic_cycle, METH_VARARGS, pippic_cycle_docstring},
