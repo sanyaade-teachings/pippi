@@ -603,7 +603,11 @@ static PyObject * pippic_pulsar(PyObject *self, PyObject *args) {
 
     for(i=0; i < lenWaveform + paddingWaveform; i++) {
         if(i < lenWaveform) {
-            pulse[i] = PyFloat_AsDouble(PyList_GET_ITEM(waveform, i));
+            if(PyFloat_Check(PyList_GET_ITEM(waveform, i))) {
+                pulse[i] = PyFloat_AsDouble(PyList_GET_ITEM(waveform, i));
+            } else {
+                pulse[i] = 0;
+            }
         } else {
             pulse[i] = 0;
         }

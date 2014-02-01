@@ -596,7 +596,7 @@ def env(audio_string, wavetype="sine", fullres=False, highval=1.0, lowval=0.0, w
     elif wavetype == 'random':
         wtype = randint(0, 8)
 
-    return cenv(audio_string, wtype, amp, phase, offset, mult)
+    return cenv(audio_string, int(wtype), float(amp), float(phase), float(offset), float(mult))
 
 def benv(sound, points):
     chunksize = flen(sound) / (len(points) - 1)
