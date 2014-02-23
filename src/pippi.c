@@ -361,6 +361,9 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
     double period = 1.0;
     double mult   = 1.0;
 
+    int cIndexWavetable;
+    double indexWavetable, fracWavetable, valWavetable, valNextWavetable = 0;
+
     if(!PyArg_ParseTuple(args, "s#i|dddd", &input, &input_length, &type, &amp, &phase, &offset, &mult)) {
         return NULL; 
     }
@@ -368,7 +371,8 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
     int size = getsize();
     int channels = 2;
     int chunk = size + channels;
-    double wtable[input_length / chunk];
+    //double wtable[input_length / chunk];
+    double wtable[1024];
     double value, left, right;
 
     switch(type) {
@@ -383,9 +387,18 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
     output = PyString_FromStringAndSize(NULL, input_length);
     data = (signed char*)PyString_AsString(output);
 
-    wavetable(type, wtable, input_length / chunk, amp, phase, offset, period * mult);
+    //wavetable(type, wtable, input_length / chunk, amp, phase, offset, period * mult);
+    wavetable(type, wtable, 1024, amp, phase, offset, period * mult);
 
     for(i=0; i < input_length; i += chunk) {
+        cIndexWavetable = (int)indexWavetable % (1025); // Pad wtable with 1
+        valWavetable = wtable[cIndexWavetable];
+        valNextWavetable = wtable[cIndexWavetable + 1];
+        fracWavetable = indexWavetable - (int)indexWavetable;
+
+        valWavetable = (1.0 - fracWavetable) * valWavetable + fracWavetable * valNextWavetable;
+
+        /*
         value = wtable[i / chunk];
 
         left = (double)*BUFFER(input, i);
@@ -395,6 +408,15 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
 
         *BUFFER(data, i) = saturate(left);
         *BUFFER(data, i + size) = saturate(right);
+        */
+
+        left = (double)*BUFFER(input, i);
+        right = (double)*BUFFER(input, i + size);
+
+        *BUFFER(data, i) = saturate(left * valWavetable);
+        *BUFFER(data, i + size) = saturate(right * valWavetable);
+
+        indexWavetable += valWavetable * 1025 * (1.0 / 44100);
     }
 
     return output;
