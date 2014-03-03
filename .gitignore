@@ -9,3 +9,5 @@ renders/*
 /build/
 /dist/
 /*.egg-info/
+
+docs/build/
