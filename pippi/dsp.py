@@ -249,7 +249,7 @@ def rpop(low=0.0, high=1.0):
     return cpop * (high - low) + low
 
 def randint(lowbound=0, highbound=1):
-    return int(rand() * (highbound - lowbound) + lowbound)
+    return int(round(rand() * (highbound - lowbound) + lowbound))
 
 def rand(lowbound=0, highbound=1):
     global seedint
@@ -614,7 +614,7 @@ def panenv(sound, ptype='line', etype='sine', panlow=0.0, panhigh=1.0, envlow=0.
 
     return ''.join(packets)
 
-def drift(sound, amount):
+def drift(sound, amount, size=441):
     high = (amount * 0.5) + 1.0
     low = 1.0 - (amount * 0.5)
     sound = split(sound, 441)
