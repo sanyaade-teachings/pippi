@@ -1,6 +1,7 @@
 Note: the pippi console currently depends on ALSA, and is therefore linux-only. [(The core dsp system is however fully cross platform.)](https://github.com/hecanjog/pippi)
 
-## Quick start
+Quick start
+===========
 
 Pippi only supports python 2.7.x at the moment, so verify that's what you're using
 
