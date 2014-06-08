@@ -554,6 +554,61 @@ static PyObject * pippic_mul(PyObject *self, PyObject *args) {
     return output;
 }
 
+static char pippic_wtread_docstring[] = "Read from a wavetable";
+static PyObject * pippic_wtread(PyObject *self, PyObject *args) {
+    PyObject *output;
+    PyObject *waveformIn;
+    PyObject *ret, *pyfi;
+
+    signed char *data;
+
+    int i, blksize;
+    int size = getsize();
+    int channels = 2;
+    int chunk = size + channels;
+
+    double valWaveform, valNextWaveform, fracWaveform, freq, amp, fi;
+
+    int lenWaveform, cIndexWaveform, frame = 0;
+    double indexWaveform = 0;
+
+    if(!PyArg_ParseTuple(args, "idddiO", &i, &fi, &freq, &amp, &blksize, &waveformIn)) {
+        return NULL;
+    }
+
+    blksize *= chunk;
+
+    lenWaveform = PySequence_Size(waveformIn);
+
+    output = PyString_FromStringAndSize(NULL, blksize);
+    data = (signed char*)PyString_AsString(output);
+
+    for(frame=0; frame < blksize; frame += chunk) {
+        i = ((int)fi + i) % lenWaveform;
+
+        valWaveform = PyFloat_AsDouble(PySequence_GetItem(waveformIn, i % lenWaveform));
+        valNextWaveform = PyFloat_AsDouble(PySequence_GetItem(waveformIn, (i + 1) % lenWaveform));
+
+        fracWaveform = i - (int)i;
+        valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform;
+
+        *BUFFER(data, i) = saturate(amp * valWaveform * (MAXVAL - 1));
+        *BUFFER(data, i + size) = saturate(amp * valWaveform * (MAXVAL - 1));
+
+        indexWaveform += freq * lenWaveform * (1.0 / 44100.0);
+    }
+
+    pyfi = PyFloat_FromDouble(fi);
+
+    ret = PyTuple_Pack(2, output, pyfi);
+
+    Py_DECREF(pyfi);
+    Py_DECREF(output);
+    
+    return ret;
+}
+
+
 static char pippic_pulsar_docstring[] = "Pulsar synthesis.";
 static PyObject * pippic_pulsar(PyObject *self, PyObject *args) {
     PyObject *output;
@@ -937,6 +992,7 @@ static PyMethodDef pippic_methods[] = {
     {"mix", pippic_mix, METH_VARARGS, pippic_mix_docstring},
     {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
     {"synth", pippic_synth, METH_VARARGS, pippic_synth_docstring},
+    {"wtread", pippic_wtread, METH_VARARGS, pippic_wtread_docstring},
     {"pine", pippic_pine, METH_VARARGS, pippic_pine_docstring},
     {"pulsar", pippic_pulsar, METH_VARARGS, pippic_pulsar_docstring},
     {"curve", pippic_curve, METH_VARARGS, pippic_curve_docstring},

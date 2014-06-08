@@ -21,6 +21,7 @@ setup(name='pippi',
         keywords = 'music dsp',
 
         packages=['pippi'],
+        ext_modules=[ pippic ],
 
         test_suite='nose.collector',
         tests_require=['nose'],

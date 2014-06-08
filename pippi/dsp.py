@@ -19,6 +19,7 @@ import collections
 from _pippic import amp, am, add, mul, shift, mix, pine, synth, curve, pulsar
 from _pippic import env as cenv
 from _pippic import cycle as ccycle
+from _pippic import wtread
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
