@@ -281,20 +281,32 @@ static PyObject * pippic_curve(PyObject *self, PyObject *args) {
     double offset = 0.0;
     double period = 1.0;
 
+    int cIndexWavetable;
+    double indexWavetable, fracWavetable, valWavetable, valNextWavetable = 0;
+
     if(!PyArg_ParseTuple(args, "ii|dddd", &type, &length, &period, &amp, &phase, &offset)) {
         return NULL; 
     }
 
-    double data[length];
-
-    wavetable(type, data, length, amp, phase, offset, period);
+    double wtable[1025];
 
     PyObject *output = PyList_New(length);
     PyObject *value;
 
-    for(i=0; i < length; i++) {
-        value = PyFloat_FromDouble(data[i]);
+    wavetable(type, wtable, 1025, amp, phase, offset, period);
+
+    for(i=0; i < length; i += 1) {
+        cIndexWavetable = (int)indexWavetable % 1025; // Pad wtable with 1
+        valWavetable = wtable[cIndexWavetable];
+        valNextWavetable = wtable[cIndexWavetable + 1];
+        fracWavetable = indexWavetable - (int)indexWavetable;
+
+        valWavetable = (1.0 - fracWavetable) * valWavetable + fracWavetable * valNextWavetable;
+        value = PyFloat_FromDouble(valWavetable);
+
         PyList_SetItem(output, i, value);
+
+        indexWavetable += (44100.0 / length) * 1024 * (1.0 / 44100);
     }
 
     return output;
