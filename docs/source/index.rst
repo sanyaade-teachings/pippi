@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    background
+   console_quickstart
 
 Indices and tables
 ==================
