@@ -411,7 +411,7 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
 
 /* Synthy
  */
-static char pippic_synth_docstring[] = "Synthy.";
+static char pippic_synth_docstring[] = "Synthy. Depreciated: use tone() with a python wavetable instead";
 static PyObject * pippic_synth(PyObject *self, PyObject *args) {
     PyObject *output;
     signed char *data;
@@ -607,6 +607,170 @@ static PyObject * pippic_wtread(PyObject *self, PyObject *args) {
     
     return ret;
 }
+
+static char pippic_tone_docstring[] = "Wavetable synthesis.";
+static PyObject * pippic_tone(PyObject *self, PyObject *args) {
+    PyObject *output;
+
+    PyObject *waveformIn;
+    PyObject *waveform;
+
+    signed char *data;
+
+    int i;
+    int size = getsize();
+    int channels = 2;
+    int chunk = size + channels;
+    int length;
+
+    double valWaveform, valNextWaveform, freq, amp;
+    int lenWaveform, cIndexWaveform = 0;
+    double indexWaveform, fracWaveform = 0;
+
+    if(!PyArg_ParseTuple(args, "diOd", &freq, &length, &waveformIn, &amp)) {
+        return NULL;
+    }
+
+    length *= chunk;
+
+    waveform = PySequence_Fast(waveformIn, "Could not read waveform wavetable.");
+    lenWaveform = PySequence_Size(waveformIn);
+
+    double wfrm[lenWaveform];
+    for(i=0; i < lenWaveform; i++) {
+        wfrm[i] = PyFloat_AsDouble(PyList_GET_ITEM(waveform, i));
+    }
+
+    output = PyString_FromStringAndSize(NULL, length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < length; i += chunk) {
+        cIndexWaveform = (int)indexWaveform % (lenWaveform - 1);
+
+        valWaveform = wfrm[cIndexWaveform];
+        valNextWaveform = wfrm[cIndexWaveform + 1];
+
+        fracWaveform = indexWaveform - (int)indexWaveform;
+
+        valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform;
+
+        *BUFFER(data, i) = saturate(amp * valWaveform * (MAXVAL - 1));
+        *BUFFER(data, i + size) = saturate(amp * valWaveform * (MAXVAL - 1));
+
+        indexWaveform += freq * lenWaveform * (1.0 / 44100.0);
+    }
+
+    Py_DECREF(waveform);
+
+    return output;
+}
+
+
+static char pippic_fold_docstring[] = "Wave folding synthesis.";
+static PyObject * pippic_fold(PyObject *self, PyObject *args) {
+    PyObject *output;
+
+    PyObject *waveformIn;
+    PyObject *waveform;
+
+    PyObject *factorsIn;
+    PyObject *factors;
+
+    signed char *data;
+
+    int i;
+    int size = getsize();
+    int channels = 2;
+    int chunk = size + channels;
+    int length;
+
+    double valWaveform, valNextWaveform, freq, factFreq, amp;
+    int lenWaveform, cIndexWaveform = 0;
+    double indexWaveform, fracWaveform = 0;
+
+    double valFactors, valNextFactors;
+    int lenFactors, cIndexFactors = 0;
+    double indexFactors, fracFactors = 0;
+
+    if(!PyArg_ParseTuple(args, "ddiOOd", &freq, &factFreq, &length, &waveformIn, &factorsIn, &amp)) {
+        return NULL;
+    }
+
+    length *= chunk;
+
+    waveform = PySequence_Fast(waveformIn, "Could not read waveform wavetable.");
+    lenWaveform = PySequence_Size(waveformIn);
+
+    double wfrm[lenWaveform];
+    for(i=0; i < lenWaveform; i++) {
+        wfrm[i] = PyFloat_AsDouble(PyList_GET_ITEM(waveform, i));
+    }
+
+    factors = PySequence_Fast(factorsIn, "Could not read factors wavetable.");
+    lenFactors = PySequence_Size(factorsIn);
+
+    double facts[lenFactors];
+    for(i=0; i < lenFactors; i++) {
+        facts[i] = PyFloat_AsDouble(PyList_GET_ITEM(factors, i));
+    }
+
+    int fold_out = 0; 
+    int last_value = 0; 
+    int pos_thresh = 1; 
+    int neg_thresh = -1; 
+    int state = 1; 
+
+    output = PyString_FromStringAndSize(NULL, length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < length; i += chunk) {
+        // Interp waveform wavetable
+        cIndexWaveform = (int)indexWaveform % (lenWaveform - 1);
+        valWaveform = wfrm[cIndexWaveform];
+        valNextWaveform = wfrm[cIndexWaveform + 1];
+        fracWaveform = indexWaveform - (int)indexWaveform;
+        valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform;
+
+        // Interp factors wavetable
+        cIndexFactors = (int)indexFactors % (lenFactors - 1);
+        valFactors = facts[cIndexFactors];
+        valNextFactors = facts[cIndexFactors + 1];
+        fracFactors = indexFactors - (int)indexFactors;
+        valFactors = (1.0 - fracFactors) * valFactors + fracFactors * valNextFactors;
+        valWaveform *= valFactors;
+
+        // Do the folding 
+        // the magic is ripped from guest's posts on muffwiggler: 
+        // http://www.muffwiggler.com/forum/viewtopic.php?p=1586526#1586526
+        int difference = valWaveform - last_value; 
+        last_value = valWaveform; 
+        if(state == 1) { 
+            fold_out -= difference; 
+        } else { 
+            fold_out += difference; 
+        } 
+
+        if (fold_out >= pos_thresh) { 
+            state ^= 1; 
+            fold_out = pos_thresh - (fold_out - pos_thresh); 
+        } else if (fold_out <= neg_thresh) { 
+            state ^= 1; 
+            fold_out = neg_thresh - (fold_out - neg_thresh); 
+        } 
+
+        *BUFFER(data, i) = saturate(amp * fold_out * (MAXVAL - 1));
+        *BUFFER(data, i + size) = saturate(amp * fold_out * (MAXVAL - 1));
+
+        indexWaveform += freq * lenWaveform * (1.0 / 44100.0);
+        indexFactors += factFreq * lenFactors * (1.0 / 44100.0);
+    }
+
+    Py_DECREF(waveform);
+    Py_DECREF(factors);
+
+    return output;
+}
+
 
 
 static char pippic_pulsar_docstring[] = "Pulsar synthesis.";
@@ -995,6 +1159,8 @@ static PyMethodDef pippic_methods[] = {
     {"wtread", pippic_wtread, METH_VARARGS, pippic_wtread_docstring},
     {"pine", pippic_pine, METH_VARARGS, pippic_pine_docstring},
     {"pulsar", pippic_pulsar, METH_VARARGS, pippic_pulsar_docstring},
+    {"fold", pippic_fold, METH_VARARGS, pippic_fold_docstring},
+    {"tone", pippic_tone, METH_VARARGS, pippic_tone_docstring},
     {"curve", pippic_curve, METH_VARARGS, pippic_curve_docstring},
     {"env", pippic_env, METH_VARARGS, pippic_env_docstring},
     {"cycle", pippic_cycle, METH_VARARGS, pippic_cycle_docstring},
