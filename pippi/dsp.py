@@ -634,8 +634,67 @@ def fnoise(sound, coverage):
 
     return sound
 
+def crosstwo(a, b, length):
+    length = mstf(length)
 
+    out = ''
 
+    out += cut(a, 0, flen(a) - length)
+
+    fadeout = cut(a, flen(a) - length, length)
+    fadeout = env(fadeout, 'phasor')
+
+    fadein = cut(b, 0, length)
+    fadein = env(fadein, 'line')
+
+    out += mix([ fadein, fadeout ])
+
+    out += cut(b, length, flen(b) - length)
+
+    return out
+
+def cross(snds, length, maxlen=None):
+    out = ''
+    for i, snd in enumerate(snds):
+        fadelen = length if maxlen is None else rand(length, maxlen)
+
+        if i == 0:
+            out = crosstwo(snds[i], snds[i+1], fadelen)
+        elif i < len(snds) - 1:
+            out = crosstwo(out, snds[i+1], fadelen)
+
+    return out
+
+def adsr(snd, a=10, d=50, s=1.0, r=100):
+    sndlen = flen(snd)
+    attack = mstf(a)
+    decay = mstf(d)
+    sustain_to = s
+    release = mstf(r)
+
+    if attack + decay + release > sndlen:
+        sustain_length = sndlen - (attack + decay + release)
+    else:
+        sustain_length = 0
+        decay = sndlen - (attack + release)
+
+    if attack + release > sndlen:
+        attack = sndlen / 2
+        release = sndlen / 2
+        decay = 0
+
+    out = env(cut(snd, 0, attack), 'line')
+   
+    if decay > 0:
+        decay = cut(snd, flen(out), decay)
+        if sustain_to < 1 and sustain_length > 0:
+            decaytable = wavetable('phasor', 1024, 1, sustain_to)
+            out += benv(decay, decaytable)
+            out += amp(cut(snd, flen(out), sustain_length), sustain_to)
+
+    out += env(cut(snd, flen(out), release), 'phasor')
+
+    return out
 
 
 

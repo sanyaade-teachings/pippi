@@ -47,6 +47,7 @@ static PyObject *PippiError;
 #define SQUARE 8 
 #define FLAT 9
 
+
 static void wavetable(int waveform_type, double *buffer, int length, double amp, double phase, double offset, double period) {
     int i, last;
     double position, swap;
@@ -698,11 +699,13 @@ static PyObject * pippic_fold(PyObject *self, PyObject *args) {
 
     double valWaveform, valNextWaveform, freq, factFreq, amp;
     int lenWaveform, cIndexWaveform = 0;
-    double indexWaveform, fracWaveform = 0;
+    double fracWaveform = 0;
 
     double valFactors, valNextFactors;
     int lenFactors, cIndexFactors = 0;
-    double indexFactors, fracFactors = 0;
+    double fracFactors = 0;
+
+    double indexWaveform, indexFactors = 0;
 
     if(!PyArg_ParseTuple(args, "ddiOOd", &freq, &factFreq, &length, &waveformIn, &factorsIn, &amp)) {
         return NULL;

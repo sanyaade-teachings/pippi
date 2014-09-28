@@ -1,6 +1,65 @@
 from pippi import dsp
+import re
 
 a0 = 27.5 
+match_roman = '[ivIV]?[ivIV]?[iI]?'
+
+intervals = {
+    'P1': 0, 
+    'm2': 1, 
+    'M2': 2, 
+    'm3': 3, 
+    'M3': 4, 
+    'P4': 5, 
+    'TT': 6, 
+    'P5': 7, 
+    'm6': 8, 
+    'M6': 9, 
+    'm7': 10, 
+    'M7': 11,
+    'P8': 12,
+    'm9': 13,
+    'M9': 14,
+    'm10': 15,
+    'M10': 16,
+    'P11': 17,
+    'd12': 18, # TT + P8
+    'P12': 19,
+    'm13': 20,
+    'M13': 21,
+    'm14': 22,
+    'M14': 23,
+    'P15': 24
+}
+
+# what's the best way to handle inversions?
+base_qualities = {
+    '^': ['P1', 'M3', 'P5'],   # major
+    '-': ['P1', 'm3', 'P5'],   # minor
+    '*': ['P1', 'm3', 'TT'],   # diminished 
+    '+': ['P1', 'M3', 'm6'],   # augmented
+}
+
+extensions = {
+    '7': ['m7'],               # dominant 7th
+    '^7': ['M7'],              # major 7th
+    '9': ['m7', 'M9'],         # dominant 9th
+    '^9': ['M7', 'M9'],        # major 9th
+    '11': ['m7', 'M9', 'P11'], # dominant 11th
+    '^11': ['M7', 'M9', 'P11'],
+    '69': ['M6', 'M9'],        # dominant 6/9
+    '6': ['M6'],        
+}
+
+chord_romans = {
+    'i': 0,
+    'ii': 1,
+    'iii': 2,
+    'iv': 3,
+    'v': 4,
+    'vi': 5,
+    'vii': 6,
+}
 
 just = [
     (1.0, 1.0),     # P1
@@ -20,18 +79,18 @@ just = [
 vary = [ (dsp.rand(-0.05, 0.05) + i[0], dsp.rand(-0.05, 0.05) + i[1]) for i in just ]
 
 terry = [
-    (1.0, 1.0),     # P1
-    (16.0, 15.0),   # m2
-    (10.0, 9.0),    # M2
-    (6.0, 5.0),     # m3
-    (5.0, 4.0),     # M3
-    (4.0, 3.0),     # P4
-    (64.0, 45.0),   # TT
-    (3.0, 2.0),     # P5
-    (8.0, 5.0),     # m6
-    (27.0, 16.0),   # M6
-    (16.0, 9.0),    # m7
-    (15.0, 8.0),    # M7
+    (1.0, 1.0),     # P1  C
+    (16.0, 15.0),   # m2  Db
+    (10.0, 9.0),    # M2  D
+    (6.0, 5.0),     # m3  Eb
+    (5.0, 4.0),     # M3  E
+    (4.0, 3.0),     # P4  F
+    (64.0, 45.0),   # TT  Gb
+    (3.0, 2.0),     # P5  G
+    (8.0, 5.0),     # m6  Ab
+    (27.0, 16.0),   # M6  A 
+    (16.0, 9.0),    # m7  Bb
+    (15.0, 8.0),    # M7  B
 ]
 
 young = [
@@ -159,32 +218,81 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
 
     return freqs
 
-def step(degree=0, root='c', octave=4, scale=None, quality=None, ratios=None):
-    # TODO. Many qualities of jank. Fix.
+def getQuality(name):
+    quality = '-' if name.islower() else '^'
+    quality = '*' if re.match(match_roman + '[*]', name) is not None else quality
 
-    if scale is None:
-        scale = [1,3,5,8]
+    return quality
 
-    if quality is None:
-        quality = major
+def getExtension(name):
+    return re.sub(match_roman + '[/*]?', '', name)
 
-    if ratios is None:
-        ratios = terry
+def getIntervals(name):
+    quality = getQuality(name)
+    extension = getExtension(name)
 
-    diatonic = scale[degree % len(scale) - 1]
-    chromatic = quality[diatonic % len(quality) - 1]
+    chord = base_qualities[quality]
 
-    pitch = ratios[chromatic][0] / ratios[chromatic][1]
-    pitch *= octave + int(diatonic / len(quality))
-    pitch *= ntf(root, octave, ratios)
+    if extension != '':
+        chord = chord + extensions[extension]
 
-    return pitch
+    return chord
 
-def scale(pitches=None, quality=None):
-    if pitches is None:
-        pitches = [1,3,5]
+def getFreqFromChordName(name, root=440, octave=3, ratios=just):
+    index = getChordRootIndex(name)
+    freq = ratios[index]
+    freq = root * (freq[0] / freq[1]) * 2**octave
 
-    if quality is None:
-        quality = major
+    return freq
 
-    return [quality[p - 1] for p in pitches]
+
+def getChordRootIndex(name):
+    root = re.sub('[/*^0-9]+', '', name)
+    root = chord_romans[root.lower()]
+
+    return root
+
+def addIntervals(a, b):
+    a = intervals[a]
+    b = intervals[b]
+    c = a + b
+    for interval, index in intervals.iteritems():
+        if c == index:
+            c = interval
+
+    return c
+
+def getRatioFromInterval(interval, ratios):
+    try:
+        index = intervals[interval]
+    except IndexError:
+        log('Interval out of range, doh. Here have a P1')
+        index = 0
+
+    try:
+        ratio = ratios[index]
+        ratio = ratio[0] / ratio[1]
+    except IndexError:
+        base_index = index % 12
+        ratio = ratios[base_index]
+        ratio = ratio[0] / ratio[1]
+
+        register = (index - base_index) / 12
+        ratio *= 2**register
+
+    return ratio
+
+def chord(name, key='c', octave=3, ratios=just):
+    key = ntf(key, octave, ratios)
+    root = ratios[getChordRootIndex(name)]
+    root = key * (root[0] / root[1])
+
+    chord = getIntervals(name)
+    chord = [ getRatioFromInterval(interval, ratios) for interval in chord ]
+    chord = [ root * ratio for ratio in chord ]
+
+    return chord
+
+def chords(names, key='c', octave=3, ratios=just):
+    return [ chord(name, key, octave, ratios) for name in names ]
+

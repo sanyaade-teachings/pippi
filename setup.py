@@ -18,12 +18,15 @@ setup(name='pippi',
             'Programming Language :: Python :: 2.7',  
         ],
 
+        install_requires = [
+            'pyaudio',
+            'pygame'
+        ],
+
         keywords = 'music dsp',
 
         packages=['pippi'],
         ext_modules=[ pippic ],
 
-        test_suite='nose.collector',
-        tests_require=['nose'],
         zip_safe=False
     )
