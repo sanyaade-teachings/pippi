@@ -18,6 +18,7 @@ import time
 import collections
 from _pippic import amp, am, add, mul, shift, mix, pine, synth, curve, pulsar
 from _pippic import env as cenv
+from _pippic import tone as ctone
 from _pippic import cycle as ccycle
 from _pippic import wtread, fold
 
@@ -867,6 +868,14 @@ def prob(item_dictionary):
             weighted_list.append(item)
 
     return randchoose(weighted_list)
+
+def logistic(r=3.8, x=0.5, numpoints=500):
+    vals = []
+    for i in range(numpoints):
+        x = r * x * (1.0 - x)
+        vals += [ x ]
+
+    return vals
 
 
 

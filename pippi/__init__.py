@@ -7,6 +7,37 @@ import time
 import os
 import alsaaudio
 
+class EventManager():
+    def __init__(self, ns, console):
+        self.ns = ns
+        self.console = console
+        self.run = True
+
+    def loop(self):
+        while self.run == True:
+            dsp.delay(4410)
+
+            if hasattr(self.ns, 'console_cmds'):
+                cmds = self.ns.console_cmds
+                del self.ns.console_cmds
+
+                for cmd in cmds:
+                    cmd = cmd.split(' ')
+                    cmd_function = cmd.pop(0)
+                    args = ' '.join(cmd)
+                    if hasattr(console, 'do_%s' % cmd_function):
+                        method = getattr(console, 'do_%s' % cmd_function)
+                        method(args)
+
+    def midi_handler(self):
+        pass
+
+    def osc_handler(self):
+        pass
+
+    def cmd_handler(self):
+        pass
+
 class MidiManager():
     def __init__(self, ns):
         self.ns = ns
@@ -66,8 +97,13 @@ class ParamManager():
 
         params = self.getAll(namespace)
 
-        # TODO param type conversion, yay...
-        return params.get(param, default)
+        value = params.get(param, None)
+
+        if value is None:
+            value = default
+            self.set(param, value, namespace)
+
+        return value
 
     def getAll(self, namespace=None):
         if namespace is None:
@@ -158,10 +194,10 @@ class IOManager():
                 out.write(s)
 
         while True:
+            reload(gen)
+
             playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_manager, param_manager))
             playback.start()
             playback.join()
-
-            reload(gen)
 
         return snd
