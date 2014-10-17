@@ -91,9 +91,18 @@ class ParamManager():
 
         setattr(self.ns, namespace, params)
 
-    def get(self, param, default=None, namespace=None):
+    def get(self, param, default=None, namespace=None, throttle=None):
         if namespace is None:
             namespace = self.namespace
+
+        if throttle is not None:
+            last_updated = self.get('%s-last_updated' % name, time.time(), namespace='meta')
+
+            if time.time() - last_updated >= interval:
+                self.set('%s-last_updated' % name, time.time(), namespace='meta')
+                self.set(name, default, namespace)
+
+            return self.get(name, default, namespace)
 
         params = self.getAll(namespace)
 
