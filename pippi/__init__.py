@@ -188,16 +188,23 @@ class IOManager():
 
         return out
 
-    def play(self, gen, ns):
+    def play(self, gen, ns, voice_id):
         gen = __import__(gen)
         midi_manager = MidiManager(ns)
         param_manager = ParamManager(ns)
 
         out = self.open_alsa_pcm(ns.device)
 
-        def dsp_loop(out, play, midi_manager, param_manager):
+        def dsp_loop(out, play, midi_manager, param_manager, voice_id):
             os.nice(-2)
-            snd = play(midi_manager, param_manager)
+
+            meta = {
+                'midi': midi_manager,
+                'param': param_manager,
+                'id': voice_id
+            }
+
+            snd = play(meta)
             snd = dsp.split(snd, 500)
             for s in snd:
                 out.write(s)
@@ -205,7 +212,7 @@ class IOManager():
         while True:
             reload(gen)
 
-            playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_manager, param_manager))
+            playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_manager, param_manager, voice_id))
             playback.start()
             playback.join()
 
