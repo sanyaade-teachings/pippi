@@ -196,6 +196,26 @@ def nts(note, octave):
 
     return degree
 
+def getscale(degrees, root=261.63, ratios=None, scale=None):
+    if ratios is None:
+        ratios = terry
+
+    if scale is None:
+        scale = major
+
+    multipliers = []
+
+    for degree in degrees:
+        base = scale[(degree - 1) % len(scale)]
+        octave = degree / (len(scale) + 1)
+
+        multiplier = ratios[base][0] / ratios[base][1]
+        multiplier = multiplier * 2**octave
+
+        multipliers += [ multiplier ]
+
+    return [ root * m for m in multipliers ]
+
 def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None):
     if scale_degrees is None:
         scale_degrees = [1,3,5]

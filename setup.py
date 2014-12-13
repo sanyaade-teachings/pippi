@@ -19,9 +19,12 @@ setup(name='pippi',
         ],
 
         install_requires = [
-            'pyaudio',
-            'pygame'
+            'termcolor',
+            'pygame',
+            'pyaudio'
         ],
+
+        scripts = ['bin/pippi'],
 
         keywords = 'music dsp',
 

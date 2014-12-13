@@ -13,6 +13,7 @@ class EventManager():
         self.console = console
         self.run = True
 
+    ## todo: this would be better as an osc server
     def loop(self):
         while self.run == True:
             dsp.delay(4410)
@@ -188,20 +189,21 @@ class IOManager():
 
         return out
 
-    def play(self, gen, ns, voice_id):
+    def play(self, gen, ns, voice_id, voice_index, loop=True):
         gen = __import__(gen)
         midi_manager = MidiManager(ns)
         param_manager = ParamManager(ns)
 
         out = self.open_alsa_pcm(ns.device)
 
-        def dsp_loop(out, play, midi_manager, param_manager, voice_id):
+        def dsp_loop(out, play, midi_manager, param_manager, voice_id, group):
             os.nice(-2)
 
             meta = {
                 'midi': midi_manager,
                 'param': param_manager,
-                'id': voice_id
+                'id': voice_id,
+                'group': group
             }
 
             snd = play(meta)
@@ -211,9 +213,16 @@ class IOManager():
 
         while True:
             reload(gen)
+            
+            group = None
+            if hasattr(gen, 'groups'):
+                group = gen.groups[ voice_index % len(gen.groups) ]
 
-            playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_manager, param_manager, voice_id))
+            playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_manager, param_manager, voice_id, group))
             playback.start()
             playback.join()
 
-        return snd
+            if not loop:
+                break
+
+        return True

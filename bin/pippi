@@ -1,0 +1,169 @@
+#!/usr/bin/env python2.7
+
+import cmd
+import os
+import sys
+import re
+import json
+import subprocess
+import glob
+import docopt
+import uuid
+import pygame.midi
+
+from pippi import dsp
+from pippi import IOManager
+from pippi import ParamManager
+from pippi import EventManager
+
+import multiprocessing as mp
+from termcolor import colored
+
+class Pippi(cmd.Cmd):
+    """ Pippi Console 
+    """
+
+    dsp.log('starting', 'w')
+    prompt = '^_- '
+    intro = 'Pippi Console'
+
+    def __init__(self):
+        cmd.Cmd.__init__(self)
+
+        self.io = IOManager()
+        self.params = ParamManager(self.io.ns)
+        self.events = EventManager(self.io.ns, self)
+
+        self.voices = {}
+
+        # Start rhythm grid tick process
+        #self.tick = mp.Event()
+        #self.grid = mp.Process(name='grid', target=rt.grid, args=(self.tick, settings.config('bpm')))
+        #self.grid.start()
+
+        # Load all available generators into a dict 
+        self.generators = []
+
+        try:
+            gens = glob.glob("*.py")
+            for filename in gens:
+                # Get fileame from relative path and strip .pippi.py extension
+                filename = os.path.basename(filename)[:-3]
+                self.generators += [ filename ]
+
+            print len(gens), 'generators available'
+
+        except OSError:
+            print 'No generators found'
+
+        print
+
+    def do_bpm(self, cmd):
+        try:
+            self.grid.terminate()
+            bpm = float(cmd)
+
+            self.grid = mp.Process(name='grid', target=rt.grid, args=(self.tick, bpm))
+            self.grid.start()
+ 
+        except Exception, e:
+            dsp.log(e)
+
+    def do_i(self, cmd):
+        for generator, process_list in self.voices.iteritems():
+            print generator, len(process_list)
+
+    def do_device(self, device):
+        if device == '':
+            print self.io.ns.device
+        else:
+            self.io.ns.device = device
+
+    def do_set(self, cmd):
+        cmd = cmd.split(' ')
+
+        namespace = cmd[0]
+        param_name = cmd[1]
+        param_value = cmd[2]
+
+        self.params.set(param_name, param_value, namespace)
+
+    def do_get(self, cmd):
+        cmd = cmd.split(' ')
+
+        if len(cmd) == 1:
+            print self.params.getAll(cmd[0])
+        elif len(cmd) == 2:
+            print self.params.get(cmd[1], cmd[0])
+
+    def do_p(self, cmd):
+        self.do_play(cmd)
+
+    def do_play(self, cmd):
+        cmd = cmd.split(' ')
+
+        generator = None
+        for gen in self.generators:
+            if gen == cmd[0]:
+                generator = gen
+
+        try:
+            num_voices = int(cmd[1])
+        except IndexError:
+            num_voices = 1
+
+        if generator is not None:
+            if generator not in self.voices:
+                self.voices[generator] = []
+
+            for i in range(num_voices):
+                p = mp.Process(target=self.io.play, args=(generator, self.io.ns, uuid.uuid4(), i))
+                p.start()
+                self.voices[generator] += [ p ]
+
+    def do_o(self, cmd):
+        self.do_once(cmd)
+
+    def do_once(self, cmd):
+        cmd = cmd.split(' ')
+
+        generator = None
+        for gen in self.generators:
+            if gen == cmd[0]:
+                generator = gen
+
+        try:
+            num_voices = int(cmd[1])
+        except IndexError:
+            num_voices = 1
+
+        for i in range(num_voices):
+            p = mp.Process(target=self.io.play, args=(generator, self.io.ns, uuid.uuid4(), i, False))
+            p.start()
+
+    def do_stop(self, generator):
+        if generator in self.voices:
+            while len(self.voices[generator]) > 0:
+                process = self.voices[generator].pop()
+                process.terminate()
+        else:
+            dsp.log('no %s voices found' % generator)
+
+    def do_quit(self, cmd):
+        exit()
+
+    def do_EOF(self, line):
+        return True
+
+    def postloop(self):
+        pass
+
+if __name__ == '__main__':
+    console = Pippi()
+
+    # Start looping command prompt
+    try:
+        console.cmdloop()
+    except KeyboardInterrupt:
+        exit()
+
