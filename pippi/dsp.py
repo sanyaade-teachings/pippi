@@ -7,10 +7,8 @@
 import wave
 import audioop
 import math
-#import random
 import struct
 import time
-#import hashlib
 import os
 import sys
 from datetime import datetime
@@ -24,17 +22,8 @@ from _pippic import wtread, fold
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
-snddir = '' 
 dsp_grain = 64
-env_min = 2 
-cycle_count = 0
 thetime = 0
-seedint = 0
-seedstep = 0
-seedhash = ''
-randconst = 1.0 
-cpop = 0.444
-crpop = 3.9
 quiet = True 
 
 
@@ -477,7 +466,6 @@ def cache(s='', clear=False):
 def read(filename):
     """ Read a 44.1k / 16bit WAV file from disk with the Python wave module. 
         Mono files are converted to stereo automatically. """
-    filename = snddir + filename
     if not quiet: print 'loading', filename
 
     file = wave.open(filename, "r")

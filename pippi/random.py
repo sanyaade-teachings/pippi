@@ -1,6 +1,10 @@
 import hashlib
 import random
 
+seedint = 0
+seedstep = 0
+seedhash = ''
+
 def seed(theseed=False):
     global seedint
     global seedhash
@@ -24,13 +28,6 @@ def stepseed():
     seedstep = seedstep + 1
 
     return seedint
-
-def rpop(low=0.0, high=1.0):
-    global cpop
-    global crpop
-    cpop = crpop * cpop * (1.0 - cpop)
-    
-    return cpop * (high - low) + low
 
 def randint(lowbound=0, highbound=1):
     return int(round(rand() * (highbound - lowbound) + lowbound))
