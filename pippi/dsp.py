@@ -7,10 +7,10 @@
 import wave
 import audioop
 import math
-import random
+#import random
 import struct
 import time
-import hashlib
+#import hashlib
 import os
 import sys
 from datetime import datetime
@@ -219,62 +219,13 @@ def timestamp_filename():
 # Random
 ###############
 
-def seed(theseed=False):
-    global seedint
-    global seedhash
-
-    if theseed == False:
-        theseed = cycle(440)
-
-    h = hashlib.sha1(theseed)
-    seedhash = h.digest()
-
-    seedint = int(''.join([str(ord(c)) for c in list(seedhash)]))
-    return seedint
-
-def stepseed():
-    global seedint
-    global seedstep
-
-    h = hashlib.sha1(str(seedint))
-    seedint = int(''.join([str(ord(c)) for c in list(h.digest())]))
-
-    seedstep = seedstep + 1
-
-    return seedint
-
-def rpop(low=0.0, high=1.0):
-    global cpop
-    global crpop
-    cpop = crpop * cpop * (1.0 - cpop)
-    
-    return cpop * (high - low) + low
-
-def randint(lowbound=0, highbound=1):
-    return int(round(rand() * (highbound - lowbound) + lowbound))
-
-def rand(lowbound=0, highbound=1):
-    global seedint
-    if seedint > 0:
-        return ((stepseed() / 100.0**20) % 1.0) * (highbound - lowbound) + lowbound
-    else:
-        return random.random() * (highbound - lowbound) + lowbound
-
-def randchoose(items):
-    return items[randint(0, len(items)-1)]
-
-def randshuffle(input):
-    items = input[:]
-    shuffled = []
-    for i in range(len(items)):
-        if len(items) > 0:
-            item = randchoose(items)
-            shuffled.append(item)
-            items.remove(item)
-
-    return shuffled 
-
-
+from pippi.random import seed
+from pippi.random import stepseed
+from pippi.random import rpop
+from pippi.random import randint
+from pippi.random import rand
+from pippi.random import randchoose
+from pippi.random import randshuffle
 
 
 
