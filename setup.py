@@ -5,7 +5,7 @@ pippic = Extension('_pippic',
         )
 
 setup(name='pippi',
-        version='1.0.0b1',
+        version='1.0',
         description='Computer music with python',
         url='http://hecanjog.github.com/pippi',
 
@@ -16,12 +16,6 @@ setup(name='pippi',
         classifiers = [
             'Development Status :: 4 - Beta',
             'Programming Language :: Python :: 2.7',  
-        ],
-
-        install_requires = [
-            'termcolor',
-            'pygame',
-            'pyaudio'
         ],
 
         scripts = ['bin/pippi'],
