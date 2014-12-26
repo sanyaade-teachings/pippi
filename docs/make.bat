@@ -3,11 +3,11 @@
 REM Command file for Sphinx documentation
 
 if "%SPHINXBUILD%" == "" (
-	set SPHINXBUILD=sphinx-build
+	set SPHINXBUILD=sphinx-build2
 )
-set BUILDDIR=build
-set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% source
-set I18NSPHINXOPTS=%SPHINXOPTS% source
+set BUILDDIR=_build
+set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% .
+set I18NSPHINXOPTS=%SPHINXOPTS% .
 if NOT "%PAPER%" == "" (
 	set ALLSPHINXOPTS=-D latex_paper_size=%PAPER% %ALLSPHINXOPTS%
 	set I18NSPHINXOPTS=-D latex_paper_size=%PAPER% %I18NSPHINXOPTS%
@@ -50,9 +50,9 @@ if "%1" == "clean" (
 %SPHINXBUILD% 2> nul
 if errorlevel 9009 (
 	echo.
-	echo.The 'sphinx-build' command was not found. Make sure you have Sphinx
+	echo.The 'sphinx-build2' command was not found. Make sure you have Sphinx
 	echo.installed, then set the SPHINXBUILD environment variable to point
-	echo.to the full path of the 'sphinx-build' executable. Alternatively you
+	echo.to the full path of the 'sphinx-build2' executable. Alternatively you
 	echo.may add the Sphinx directory to PATH.
 	echo.
 	echo.If you don't have Sphinx installed, grab it from
@@ -115,9 +115,9 @@ if "%1" == "qthelp" (
 	echo.
 	echo.Build finished; now you can run "qcollectiongenerator" with the ^
 .qhcp project file in %BUILDDIR%/qthelp, like this:
-	echo.^> qcollectiongenerator %BUILDDIR%\qthelp\Pippi.qhcp
+	echo.^> qcollectiongenerator %BUILDDIR%\qthelp\pippi.qhcp
 	echo.To view the help file:
-	echo.^> assistant -collectionFile %BUILDDIR%\qthelp\Pippi.ghc
+	echo.^> assistant -collectionFile %BUILDDIR%\qthelp\pippi.ghc
 	goto end
 )
 
