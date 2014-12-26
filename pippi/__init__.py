@@ -1,11 +1,15 @@
 import dsp
 import __main__
 import multiprocessing as mp
-import pygame.midi
-import pyaudio
 import time
 import os
-import alsaaudio
+
+try:
+    import pygame.midi
+    import pyaudio
+    import alsaaudio
+except ImportError:
+    pass
 
 class EventManager():
     def __init__(self, ns, console):
