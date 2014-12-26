@@ -11,7 +11,13 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   background
+   console_quickstart
+
 .. automodule:: dsp
+   :members:
+
+.. automodule:: tune
    :members:
 
 Indices and tables

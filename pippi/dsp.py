@@ -14,11 +14,15 @@ import sys
 from datetime import datetime
 import time
 import collections
-from _pippic import amp, am, add, mul, shift, mix, pine, synth, curve, pulsar
-from _pippic import env as cenv
-from _pippic import tone as ctone
-from _pippic import cycle as ccycle
-from _pippic import wtread, fold
+
+try:
+    from _pippic import amp, am, add, mul, shift, mix, pine, synth, curve, pulsar
+    from _pippic import env as cenv
+    from _pippic import tone as ctone
+    from _pippic import cycle as ccycle
+    from _pippic import wtread, fold
+except ImportError:
+    pass
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]

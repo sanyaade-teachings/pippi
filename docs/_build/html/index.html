@@ -23,7 +23,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="pippi 1.0 documentation" href="#" /> 
+    <link rel="top" title="pippi 1.0 documentation" href="#" />
+    <link rel="next" title="Background" href="background.html" /> 
   </head>
   <body>
     <div class="related">
@@ -32,6 +33,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="background.html" title="Background"
+             accesskey="N">next</a> |</li>
         <li><a href="#">pippi 1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -45,9 +52,133 @@
 <h1>Welcome to pippi&#8217;s documentation!<a class="headerlink" href="#welcome-to-pippi-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>Contents:</p>
 <div class="toctree-wrapper compound">
-<ul class="simple">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="background.html">Background</a></li>
+<li class="toctree-l1"><a class="reference internal" href="console_quickstart.html">Console quick start</a></li>
 </ul>
 </div>
+<span class="target" id="module-dsp"></span><p>Anti-copywrite. Do whatever you would like with this software.</p>
+<dl class="function">
+<dt id="dsp.bln">
+<tt class="descclassname">dsp.</tt><tt class="descname">bln</tt><big>(</big><em>length</em>, <em>low=3000.0</em>, <em>high=7100.0</em>, <em>wform='sine2pi'</em><big>)</big><a class="reference internal" href="_modules/dsp.html#bln"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.bln" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time-domain band-limited noise generator</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.breakpoint">
+<tt class="descclassname">dsp.</tt><tt class="descname">breakpoint</tt><big>(</big><em>values</em>, <em>size=512</em><big>)</big><a class="reference internal" href="_modules/dsp.html#breakpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.breakpoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a list of values, or a pair of wavetable types and values, 
+and builds an interpolated list of points between each value using 
+the wavetable type. Default table type is linear.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.byte_string">
+<tt class="descclassname">dsp.</tt><tt class="descname">byte_string</tt><big>(</big><em>number</em><big>)</big><a class="reference internal" href="_modules/dsp.html#byte_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.byte_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return integer encoded as bytes formatted for wave data</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.cache">
+<tt class="descclassname">dsp.</tt><tt class="descname">cache</tt><big>(</big><em>s=''</em>, <em>clear=False</em><big>)</big><a class="reference internal" href="_modules/dsp.html#cache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple write() wrapper to create and clear cache audio</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.env">
+<tt class="descclassname">dsp.</tt><tt class="descname">env</tt><big>(</big><em>audio_string</em>, <em>wavetype='sine'</em>, <em>fullres=False</em>, <em>highval=1.0</em>, <em>lowval=0.0</em>, <em>wtype=0</em>, <em>amp=1.0</em>, <em>phase=0.0</em>, <em>offset=0.0</em>, <em>mult=1.0</em><big>)</big><a class="reference internal" href="_modules/dsp.html#env"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.env" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temp wrapper for new env function</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.fth">
+<tt class="descclassname">dsp.</tt><tt class="descname">fth</tt><big>(</big><em>frames</em><big>)</big><a class="reference internal" href="_modules/dsp.html#fth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.fth" title="Permalink to this definition">¶</a></dt>
+<dd><p>frames to hz</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.htf">
+<tt class="descclassname">dsp.</tt><tt class="descname">htf</tt><big>(</big><em>hz</em><big>)</big><a class="reference internal" href="_modules/dsp.html#htf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.htf" title="Permalink to this definition">¶</a></dt>
+<dd><p>hz to frames</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.iscrossing">
+<tt class="descclassname">dsp.</tt><tt class="descname">iscrossing</tt><big>(</big><em>first</em>, <em>second</em><big>)</big><a class="reference internal" href="_modules/dsp.html#iscrossing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.iscrossing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detects zero crossing between two mono frames</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.pack">
+<tt class="descclassname">dsp.</tt><tt class="descname">pack</tt><big>(</big><em>number</em><big>)</big><a class="reference internal" href="_modules/dsp.html#pack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.pack" title="Permalink to this definition">¶</a></dt>
+<dd><p>wrapper for byte_string that takes -1.0 to 1.0 as input</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.read">
+<tt class="descclassname">dsp.</tt><tt class="descname">read</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="_modules/dsp.html#read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a 44.1k / 16bit WAV file from disk with the Python wave module. 
+Mono files are converted to stereo automatically.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.split">
+<tt class="descclassname">dsp.</tt><tt class="descname">split</tt><big>(</big><em>string</em>, <em>size</em>, <em>chans=2</em><big>)</big><a class="reference internal" href="_modules/dsp.html#split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>split a sound into chunks of size N in frames, or by zero crossings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.splitmono">
+<tt class="descclassname">dsp.</tt><tt class="descname">splitmono</tt><big>(</big><em>string</em><big>)</big><a class="reference internal" href="_modules/dsp.html#splitmono"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.splitmono" title="Permalink to this definition">¶</a></dt>
+<dd><p>split a stereo sound into a list of mono sounds</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.timer">
+<tt class="descclassname">dsp.</tt><tt class="descname">timer</tt><big>(</big><em>cmd='start'</em><big>)</big><a class="reference internal" href="_modules/dsp.html#timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Counts elapsed time between start and stop events. 
+Useful for tracking render time.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.timestamp_filename">
+<tt class="descclassname">dsp.</tt><tt class="descname">timestamp_filename</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/dsp.html#timestamp_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.timestamp_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a datetime string to add to filenames</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.transpose">
+<tt class="descclassname">dsp.</tt><tt class="descname">transpose</tt><big>(</big><em>audio_string</em>, <em>amount</em><big>)</big><a class="reference internal" href="_modules/dsp.html#transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.transpose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transpose an audio fragment by a given amount.
+1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.wavetable">
+<tt class="descclassname">dsp.</tt><tt class="descname">wavetable</tt><big>(</big><em>wtype='sine'</em>, <em>size=512</em>, <em>highval=1.0</em>, <em>lowval=0.0</em><big>)</big><a class="reference internal" href="_modules/dsp.html#wavetable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.wavetable" title="Permalink to this definition">¶</a></dt>
+<dd><p>The end is near. That&#8217;ll do, wavetable()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.write">
+<tt class="descclassname">dsp.</tt><tt class="descname">write</tt><big>(</big><em>audio_string</em>, <em>filename</em>, <em>timestamp=False</em><big>)</big><a class="reference internal" href="_modules/dsp.html#write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write audio data to renders directory with the Python wave module</p>
+</dd></dl>
+
+<span class="target" id="module-tune"></span><dl class="function">
+<dt id="tune.ntf">
+<tt class="descclassname">tune.</tt><tt class="descname">ntf</tt><big>(</big><em>note</em>, <em>octave=4</em>, <em>ratios=None</em><big>)</big><a class="reference internal" href="_modules/tune.html#ntf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tune.ntf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note to freq</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="tune.nti">
+<tt class="descclassname">tune.</tt><tt class="descname">nti</tt><big>(</big><em>note</em><big>)</big><a class="reference internal" href="_modules/tune.html#nti"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tune.nti" title="Permalink to this definition">¶</a></dt>
+<dd><p>Note to index
+returns the index of enharmonic note names
+or False if not found</p>
+</dd></dl>
+
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -70,6 +201,9 @@
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
+  <h4>Next topic</h4>
+  <p class="topless"><a href="background.html"
+                        title="next chapter">Background</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -98,6 +232,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="background.html" title="Background"
+             >next</a> |</li>
         <li><a href="#">pippi 1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
