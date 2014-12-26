@@ -91,6 +91,12 @@ the wavetable type. Default table type is linear.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="dsp.flen">
+<tt class="descclassname">dsp.</tt><tt class="descname">flen</tt><big>(</big><em>snd</em><big>)</big><a class="reference internal" href="_modules/dsp.html#flen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.flen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the length of a sound in frames</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="dsp.fth">
 <tt class="descclassname">dsp.</tt><tt class="descname">fth</tt><big>(</big><em>frames</em><big>)</big><a class="reference internal" href="_modules/dsp.html#fth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.fth" title="Permalink to this definition">¶</a></dt>
 <dd><p>frames to hz</p>
@@ -106,6 +112,14 @@ the wavetable type. Default table type is linear.</p>
 <dt id="dsp.iscrossing">
 <tt class="descclassname">dsp.</tt><tt class="descname">iscrossing</tt><big>(</big><em>first</em>, <em>second</em><big>)</big><a class="reference internal" href="_modules/dsp.html#iscrossing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.iscrossing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detects zero crossing between two mono frames</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dsp.log">
+<tt class="descclassname">dsp.</tt><tt class="descname">log</tt><big>(</big><em>message</em>, <em>mode='a'</em><big>)</big><a class="reference internal" href="_modules/dsp.html#log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write to a temporary log file at ~/pippi.log for debugging.
+Set mode to &#8220;w&#8221; or similar to truncate logs when starting a new 
+session.</p>
 </dd></dl>
 
 <dl class="function">
@@ -136,8 +150,17 @@ Mono files are converted to stereo automatically.</p>
 <dl class="function">
 <dt id="dsp.timer">
 <tt class="descclassname">dsp.</tt><tt class="descname">timer</tt><big>(</big><em>cmd='start'</em><big>)</big><a class="reference internal" href="_modules/dsp.html#timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.timer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Counts elapsed time between start and stop events. 
-Useful for tracking render time.</p>
+<dd><p>Coarse time measurement useful for non-realtime scripts.</p>
+<p>Start the timer at the top of your script:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dsp</span><span class="o">.</span><span class="n">timer</span><span class="p">(</span><span class="s">&#39;start&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And stop it at the end of your script to print the time 
+elapsed in seconds. Make sure dsp.quiet is False so the 
+elapsed time will print to the console.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dsp</span><span class="o">.</span><span class="n">timer</span><span class="p">(</span><span class="s">&#39;stop&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">

@@ -100,8 +100,19 @@
 <span class="c">#################</span>
 
 <div class="viewcode-block" id="timer"><a class="viewcode-back" href="../index.html#dsp.timer">[docs]</a><span class="k">def</span> <span class="nf">timer</span><span class="p">(</span><span class="n">cmd</span><span class="o">=</span><span class="s">&#39;start&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Counts elapsed time between start and stop events. </span>
-<span class="sd">        Useful for tracking render time. &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Coarse time measurement useful for non-realtime scripts.</span>
+
+<span class="sd">        Start the timer at the top of your script::</span>
+
+<span class="sd">            dsp.timer(&#39;start&#39;)</span>
+
+<span class="sd">        And stop it at the end of your script to print the time </span>
+<span class="sd">        elapsed in seconds. Make sure dsp.quiet is False so the </span>
+<span class="sd">        elapsed time will print to the console.::</span>
+
+<span class="sd">            dsp.timer(&#39;stop&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">thetime</span>
     <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&#39;start&#39;</span><span class="p">:</span>
         <span class="n">thetime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -122,15 +133,20 @@
 <span class="c"># Utils</span>
 <span class="c">##############</span>
 </div>
-<span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&quot;a&quot;</span><span class="p">):</span>
-    <span class="n">logfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~/pippi.error.log&quot;</span><span class="p">),</span> <span class="n">mode</span><span class="p">)</span>
+<div class="viewcode-block" id="log"><a class="viewcode-back" href="../index.html#dsp.log">[docs]</a><span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&quot;a&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Write to a temporary log file at ~/pippi.log for debugging.</span>
+<span class="sd">        Set mode to &quot;w&quot; or similar to truncate logs when starting a new </span>
+<span class="sd">        session.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="n">logfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~/pippi.log&quot;</span><span class="p">),</span> <span class="n">mode</span><span class="p">)</span>
     <span class="n">logfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">logfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-<span class="k">def</span> <span class="nf">flen</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-    <span class="c"># string length in frames</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-
+</div>
+<div class="viewcode-block" id="flen"><a class="viewcode-back" href="../index.html#dsp.flen">[docs]</a><span class="k">def</span> <span class="nf">flen</span><span class="p">(</span><span class="n">snd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Returns the length of a sound in frames &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">snd</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</div>
 <div class="viewcode-block" id="byte_string"><a class="viewcode-back" href="../index.html#dsp.byte_string">[docs]</a><span class="k">def</span> <span class="nf">byte_string</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Return integer encoded as bytes formatted for wave data &quot;&quot;&quot;</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">cap</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="mi">32767</span><span class="p">,</span> <span class="o">-</span><span class="mi">32768</span><span class="p">)</span>

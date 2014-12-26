@@ -51,8 +51,19 @@ from pippi.lists import eu
 #################
 
 def timer(cmd='start'):
-    """ Counts elapsed time between start and stop events. 
-        Useful for tracking render time. """
+    """ Coarse time measurement useful for non-realtime scripts.
+
+        Start the timer at the top of your script::
+
+            dsp.timer('start')
+
+        And stop it at the end of your script to print the time 
+        elapsed in seconds. Make sure dsp.quiet is False so the 
+        elapsed time will print to the console.::
+
+            dsp.timer('stop')
+    
+    """
     global thetime
     if cmd == 'start':
         thetime = time.time()
@@ -74,13 +85,18 @@ def timer(cmd='start'):
 ##############
 
 def log(message, mode="a"):
-    logfile = open(os.path.expanduser("~/pippi.error.log"), mode)
+    """ Write to a temporary log file at ~/pippi.log for debugging.
+        Set mode to "w" or similar to truncate logs when starting a new 
+        session.
+        """
+
+    logfile = open(os.path.expanduser("~/pippi.log"), mode)
     logfile.write(str(message) + "\n")
     return logfile.close()
 
-def flen(string):
-    # string length in frames
-    return len(string) / (audio_params[1] + audio_params[0])
+def flen(snd):
+    """ Returns the length of a sound in frames """
+    return len(snd) / (audio_params[1] + audio_params[0])
 
 def byte_string(number):
     """ Return integer encoded as bytes formatted for wave data """
