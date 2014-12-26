@@ -1,37 +1,47 @@
 Console quick start
 ===================
 
-*Note: the pippi console currently depends on ALSA, and is therefore linux-only. `The core dsp system is however fully cross platform. <https://github.com/hecanjog/pippi/>`_*
+*Note: the pippi console currently depends on ALSA, and is therefore linux-only. The core dsp system is however fully cross platform.*
 
 Pippi only supports python 2.7.x at the moment, so verify that's what you're using
 
     $ python --version
 
-Install pippi-console for all users from source::
+The pippi console runs in the current directory, and uses any correctly formatted instrument scripts it finds as voices.
 
-    $ sudo python setup.py install
+First, create a very simple instrument script::
 
-Create a new pippi project::
+    # beep.py
 
-    $ pippi new acoolproject
+    from pippi import dsp
+
+    def play(ctl):
+        # Default args to tone produce a 1 second long sinewave at 440hz
+        out = dsp.tone()        
+
+        # Reduce the volume of the beep by 90%
+        out = dsp.amp(out, 0.1)
+
+        # Pad the output with 0.5 seconds of silence 
+        out = dsp.pad(out, '', dsp.stf(0.5))
+
+        return out
 
 Start pippi::
 
-    $ cd acoolproject
     $ pippi
 
 Run the example generator script::
 
-    ^_- ex re
+    ^_- play beep
 
 The ``^_- `` is just the cheeky prompt for the pippi console. 
 
-The first command ``ex`` is the generator script's 'shortname'. (Short for example of course!)
+The command ``play`` can be shorted to ``p`` - it must be followed by the filename of an instrument script in the same directory.
 
-The second command ``re`` tells pippi to regenerate the buffer produced by the script after each play, so as the 
-output of the script loops, you may modify it to change the behavior.
+*Note: everything below is outdated - the console is currently being rewritten!*
 
-While the generator plays, open the file 'example.py' in the 'orc' directory with your favorite text editor and 
+While the instrument plays, open the file 'example.py' in the 'orc' directory with your favorite text editor and 
 find the line that reads ``freq = tune.ntf('a', octave=2)``. 
 
 Try changing ``'a'`` to ``'e'`` or ``'f#'``. Or maybe try changing ``octave=2`` to ``octave=4`` or ``octave=10``. Or find 

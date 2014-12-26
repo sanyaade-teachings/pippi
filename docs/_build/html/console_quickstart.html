@@ -50,32 +50,41 @@
             
   <div class="section" id="console-quick-start">
 <h1>Console quick start<a class="headerlink" href="#console-quick-start" title="Permalink to this headline">¶</a></h1>
-<p><em>Note: the pippi console currently depends on ALSA, and is therefore linux-only. `The core dsp system is however fully cross platform. &lt;https://github.com/hecanjog/pippi/&gt;`_</em></p>
+<p><em>Note: the pippi console currently depends on ALSA, and is therefore linux-only. The core dsp system is however fully cross platform.</em></p>
 <p>Pippi only supports python 2.7.x at the moment, so verify that&#8217;s what you&#8217;re using</p>
 <blockquote>
 <div>$ python &#8211;version</div></blockquote>
-<p>Install pippi-console for all users from source:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ sudo python setup.py install
-</pre></div>
-</div>
-<p>Create a new pippi project:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ pippi new acoolproject
+<p>The pippi console runs in the current directory, and uses any correctly formatted instrument scripts it finds as voices.</p>
+<p>First, create a very simple instrument script:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># beep.py</span>
+
+<span class="kn">from</span> <span class="nn">pippi</span> <span class="kn">import</span> <span class="n">dsp</span>
+
+<span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="n">ctl</span><span class="p">):</span>
+    <span class="c"># Default args to tone produce a 1 second long sinewave at 440hz</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">tone</span><span class="p">()</span>
+
+    <span class="c"># Reduce the volume of the beep by 90%</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">amp</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="c"># Pad the output with 0.5 seconds of silence</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">dsp</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">dsp</span><span class="o">.</span><span class="n">stf</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">out</span>
 </pre></div>
 </div>
 <p>Start pippi:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ cd acoolproject
-$ pippi
+<div class="highlight-python"><div class="highlight"><pre>$ pippi
 </pre></div>
 </div>
 <p>Run the example generator script:</p>
-<div class="highlight-python"><div class="highlight"><pre>^_- ex re
+<div class="highlight-python"><div class="highlight"><pre>^_- play beep
 </pre></div>
 </div>
 <p>The <a href="#id1"><span class="problematic" id="id2">``</span></a>^_- `` is just the cheeky prompt for the pippi console.</p>
-<p>The first command <tt class="docutils literal"><span class="pre">ex</span></tt> is the generator script&#8217;s &#8216;shortname&#8217;. (Short for example of course!)</p>
-<p>The second command <tt class="docutils literal"><span class="pre">re</span></tt> tells pippi to regenerate the buffer produced by the script after each play, so as the
-output of the script loops, you may modify it to change the behavior.</p>
-<p>While the generator plays, open the file &#8216;example.py&#8217; in the &#8216;orc&#8217; directory with your favorite text editor and
+<p>The command <tt class="docutils literal"><span class="pre">play</span></tt> can be shorted to <tt class="docutils literal"><span class="pre">p</span></tt> - it must be followed by the filename of an instrument script in the same directory.</p>
+<p><em>Note: everything below is outdated - the console is currently being rewritten!</em></p>
+<p>While the instrument plays, open the file &#8216;example.py&#8217; in the &#8216;orc&#8217; directory with your favorite text editor and
 find the line that reads <tt class="docutils literal"><span class="pre">freq</span> <span class="pre">=</span> <span class="pre">tune.ntf('a',</span> <span class="pre">octave=2)</span></tt>.</p>
 <p>Try changing <tt class="docutils literal"><span class="pre">'a'</span></tt> to <tt class="docutils literal"><span class="pre">'e'</span></tt> or <tt class="docutils literal"><span class="pre">'f#'</span></tt>. Or maybe try changing <tt class="docutils literal"><span class="pre">octave=2</span></tt> to <tt class="docutils literal"><span class="pre">octave=4</span></tt> or <tt class="docutils literal"><span class="pre">octave=10</span></tt>. Or find
 <tt class="docutils literal"><span class="pre">sine2pi</span></tt> and try changing it to <tt class="docutils literal"><span class="pre">tri</span></tt>, <tt class="docutils literal"><span class="pre">impulse</span></tt>, <tt class="docutils literal"><span class="pre">vary</span></tt> or <tt class="docutils literal"><span class="pre">hann</span></tt>.</p>
