@@ -203,14 +203,14 @@ def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
 
     return cycles
 
-def transpose(audio_string, amount):
+def transpose(snd, amount):
     """ Change the speed of a sound.
-        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc """
+        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc.
+        
+        This is a wrapper for audioop.ratecv in the standard library."""
     amount = 1.0 / float(amount)
 
-    audio_string = audioop.ratecv(audio_string, audio_params[1], audio_params[0], audio_params[2], int(audio_params[2] * amount), None)
-    
-    return audio_string[0]
+    return audioop.ratecv(snd, audio_params[1], audio_params[0], audio_params[2], int(audio_params[2] * amount), None)[0]
 
 def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0.0):
     """ 
@@ -227,6 +227,8 @@ def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0
         * vary
         * impulse
         * square
+
+        Length is given in frames.
     """
     # Quick and dirty mapping to transition to the new api
     if wavetype == 'sine2pi' or wavetype == 'sine':
@@ -252,17 +254,31 @@ def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0
 
     return synth(wtype, float(freq), length, amp, phase, offset)
         
-def alias(audio_string, passthru = 0, envelope = 'random', split_size = 0):
-    if passthru > 0:
-        return audio_string
+def alias(snd, passthru=False, envelope=None, split_size=0):
+    """
+        A simple time domain bitcrush-like effect.
+
+        The sound is cut into blocks between 1 and 64 frames in size if split_size is zero, 
+        otherwise split_size is the number of frames in each block.
+
+        Every other block is discarded, and each remaining block is repeated in place.
+
+        Set passthru to True to return the sound without processing. (Can be useful when processing grains in list comprehensions.)
+
+        By default, a random amplitude envelope is also applied to the final sound.
+    """
+    if passthru:
+        return snd
 
     if envelope == 'flat':
         envelope = False
+    elif envelope is None:
+        envelope = 'random'
 
     if split_size == 0:
         split_size = dsp_grain / randint(1, dsp_grain)
 
-    packets = split(audio_string, split_size)
+    packets = split(snd, split_size)
     packets = [p*2 for i, p in enumerate(packets) if i % 2]
 
     out = ''.join(packets)

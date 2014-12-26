@@ -252,14 +252,14 @@
 
     <span class="k">return</span> <span class="n">cycles</span>
 </div>
-<div class="viewcode-block" id="transpose"><a class="viewcode-back" href="../index.html#dsp.transpose">[docs]</a><span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+<div class="viewcode-block" id="transpose"><a class="viewcode-back" href="../index.html#dsp.transpose">[docs]</a><span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Change the speed of a sound.</span>
-<span class="sd">        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc &quot;&quot;&quot;</span>
+<span class="sd">        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc.</span>
+<span class="sd">        </span>
+<span class="sd">        This is a wrapper for audioop.ratecv in the standard library.&quot;&quot;&quot;</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
 
-    <span class="n">audio_string</span> <span class="o">=</span> <span class="n">audioop</span><span class="o">.</span><span class="n">ratecv</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">amount</span><span class="p">),</span> <span class="bp">None</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">audio_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">audioop</span><span class="o">.</span><span class="n">ratecv</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">amount</span><span class="p">),</span> <span class="bp">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </div>
 <div class="viewcode-block" id="tone"><a class="viewcode-back" href="../index.html#dsp.tone">[docs]</a><span class="k">def</span> <span class="nf">tone</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">wavetype</span><span class="o">=</span><span class="s">&#39;sine&#39;</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; </span>
@@ -276,6 +276,8 @@
 <span class="sd">        * vary</span>
 <span class="sd">        * impulse</span>
 <span class="sd">        * square</span>
+
+<span class="sd">        Length is given in frames.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># Quick and dirty mapping to transition to the new api</span>
     <span class="k">if</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s">&#39;sine2pi&#39;</span> <span class="ow">or</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s">&#39;sine&#39;</span><span class="p">:</span>
@@ -301,17 +303,31 @@
 
     <span class="k">return</span> <span class="n">synth</span><span class="p">(</span><span class="n">wtype</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">freq</span><span class="p">),</span> <span class="n">length</span><span class="p">,</span> <span class="n">amp</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
         </div>
-<span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">passthru</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">envelope</span> <span class="o">=</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">split_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">passthru</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">audio_string</span>
+<div class="viewcode-block" id="alias"><a class="viewcode-back" href="../index.html#dsp.alias">[docs]</a><span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">passthru</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">split_size</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A simple time domain bitcrush-like effect.</span>
+
+<span class="sd">        The sound is cut into blocks between 1 and 64 frames in size if split_size is zero, </span>
+<span class="sd">        otherwise split_size is the number of frames in each block.</span>
+
+<span class="sd">        Every other block is discarded, and each remaining block is repeated in place.</span>
+
+<span class="sd">        Set passthru to True to return the sound without processing. (Can be useful when processing grains in list comprehensions.)</span>
+
+<span class="sd">        By default, a random amplitude envelope is also applied to the final sound.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">passthru</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">snd</span>
 
     <span class="k">if</span> <span class="n">envelope</span> <span class="o">==</span> <span class="s">&#39;flat&#39;</span><span class="p">:</span>
         <span class="n">envelope</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">elif</span> <span class="n">envelope</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">envelope</span> <span class="o">=</span> <span class="s">&#39;random&#39;</span>
 
     <span class="k">if</span> <span class="n">split_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">split_size</span> <span class="o">=</span> <span class="n">dsp_grain</span> <span class="o">/</span> <span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dsp_grain</span><span class="p">)</span>
 
-    <span class="n">packets</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">split_size</span><span class="p">)</span>
+    <span class="n">packets</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">split_size</span><span class="p">)</span>
     <span class="n">packets</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">*</span><span class="mi">2</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">packets</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span><span class="p">]</span>
 
     <span class="n">out</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">packets</span><span class="p">)</span>
@@ -320,7 +336,7 @@
         <span class="n">out</span> <span class="o">=</span> <span class="n">env</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">envelope</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">out</span> 
-
+</div>
 <span class="k">def</span> <span class="nf">noise</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
     <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">byte_string</span><span class="p">(</span><span class="n">randint</span><span class="p">(</span><span class="o">-</span><span class="mi">32768</span><span class="p">,</span> <span class="mi">32767</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span> <span class="o">*</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])])</span>
 

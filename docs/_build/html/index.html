@@ -59,6 +59,17 @@
 </div>
 <span class="target" id="module-dsp"></span><p>Anti-copywrite. Do whatever you would like with this software.</p>
 <dl class="function">
+<dt id="dsp.alias">
+<tt class="descclassname">dsp.</tt><tt class="descname">alias</tt><big>(</big><em>snd</em>, <em>passthru=False</em>, <em>envelope=None</em>, <em>split_size=0</em><big>)</big><a class="reference internal" href="_modules/dsp.html#alias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.alias" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple time domain bitcrush-like effect.</p>
+<p>The sound is cut into blocks between 1 and 64 frames in size if split_size is zero, 
+otherwise split_size is the number of frames in each block.</p>
+<p>Every other block is discarded, and each remaining block is repeated in place.</p>
+<p>Set passthru to True to return the sound without processing. (Can be useful when processing grains in list comprehensions.)</p>
+<p>By default, a random amplitude envelope is also applied to the final sound.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="dsp.bln">
 <tt class="descclassname">dsp.</tt><tt class="descname">bln</tt><big>(</big><em>length</em>, <em>low=3000.0</em>, <em>high=7100.0</em>, <em>wform='sine2pi'</em><big>)</big><a class="reference internal" href="_modules/dsp.html#bln"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.bln" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time-domain band-limited (citation needed) noise generator.</p>
@@ -220,13 +231,15 @@ elapsed time will print to the console.:</p>
 <li>impulse</li>
 <li>square</li>
 </ul>
+<p>Length is given in frames.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="dsp.transpose">
-<tt class="descclassname">dsp.</tt><tt class="descname">transpose</tt><big>(</big><em>audio_string</em>, <em>amount</em><big>)</big><a class="reference internal" href="_modules/dsp.html#transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.transpose" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dsp.</tt><tt class="descname">transpose</tt><big>(</big><em>snd</em>, <em>amount</em><big>)</big><a class="reference internal" href="_modules/dsp.html#transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.transpose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the speed of a sound.
-1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc</p>
+1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc.</p>
+<p>This is a wrapper for audioop.ratecv in the standard library.</p>
 </dd></dl>
 
 <dl class="function">
