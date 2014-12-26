@@ -99,22 +99,42 @@ def flen(snd):
     return len(snd) / (audio_params[1] + audio_params[0])
 
 def byte_string(number):
-    """ Return integer encoded as bytes formatted for wave data """
+    """ Takes an integer (truncated to between -32768 and 32767) and returns a single 
+    frame of sound. """
     number = cap(number, 32767, -32768)
     return struct.pack("<h", number)
 
 def pack(number):
-    """ wrapper for byte_string that takes -1.0 to 1.0 as input """
+    """ Takes a float between -1.0 to 1.0 and returns a single frame of sound. 
+    A wrapper for byte_string() """
     number = cap(number, 1.0, -1.0)
     number = (number + 1.0) * 0.5
     number = number * 65535 - 32768
     return byte_string(int(number))
 
 def scale(low_target, high_target, low, high, pos):
+    """ Takes a target range (low, high) and source range (low, high) and 
+    a value in the source range and returns a scaled value in the target range.
+    
+    To scale a value between 0 and 1 to a value between 0 and 100::
+
+        >>> print dsp.scale(0, 100, 0, 1, 0.5)
+        50.0
+    """
     pos = float(pos - low) / float(high - low) 
     return pos * float(high_target - low_target) + low_target
     
 def cap(num, max, min=0):
+    """ Takes a number and a maximum and minimum cap and returns a 
+    truncated number within (inclusive) that range::
+
+        >>> dsp.cap(500, 1, 0)
+        1
+
+        >>> dsp.cap(-42424242, 32767, -32768)
+        -32768
+    """
+
     if num < min:
         num = min
     elif num > max:
@@ -122,7 +142,13 @@ def cap(num, max, min=0):
     return num
 
 def timestamp_filename():
-    """ Generate a datetime string to add to filenames """
+    """ Convenience function that formats a datetime string for filenames::
+        
+        >>> dsp.timestamp_filename()
+        '2015-10-21_07.28.00'
+        
+        """
+
     current_time = str(datetime.time(datetime.now()))
     current_time = current_time.split(':')
     current_seconds = current_time[2].split('.')
@@ -162,7 +188,12 @@ from pippi.random import randshuffle
 ###############
 
 def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
-    """ Time-domain band-limited noise generator
+    """ Time-domain band-limited (citation needed) noise generator.
+
+        Generates a series of single cycles of a given wavetype 
+        at random frequences within the supplied range.
+        
+        Sounds nice & warm, if you ask me.
     """
     outlen = 0
     cycles = ''
@@ -174,7 +205,7 @@ def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
     return cycles
 
 def transpose(audio_string, amount):
-    """ Transpose an audio fragment by a given amount.
+    """ Change the speed of a sound.
         1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc """
     amount = 1.0 / float(amount)
 
@@ -183,6 +214,19 @@ def transpose(audio_string, amount):
     return audio_string[0]
 
 def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0.0):
+    """ Synthesize a tone with the given params.
+
+        Possible wavetypes:
+            sine2pi or sine
+            cos2pi or cos
+            hann
+            tri
+            saw or line
+            isaw or phasor
+            vary
+            impulse
+            square
+    """
     # Quick and dirty mapping to transition to the new api
     if wavetype == 'sine2pi' or wavetype == 'sine':
         wtype = 0

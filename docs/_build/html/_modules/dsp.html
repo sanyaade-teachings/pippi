@@ -148,30 +148,56 @@
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">snd</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 </div>
 <div class="viewcode-block" id="byte_string"><a class="viewcode-back" href="../index.html#dsp.byte_string">[docs]</a><span class="k">def</span> <span class="nf">byte_string</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Return integer encoded as bytes formatted for wave data &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Takes an integer (truncated to between -32768 and 32767) and returns a single </span>
+<span class="sd">    frame of sound. &quot;&quot;&quot;</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">cap</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="mi">32767</span><span class="p">,</span> <span class="o">-</span><span class="mi">32768</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&quot;&lt;h&quot;</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="pack"><a class="viewcode-back" href="../index.html#dsp.pack">[docs]</a><span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; wrapper for byte_string that takes -1.0 to 1.0 as input &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Takes a float between -1.0 to 1.0 and returns a single frame of sound. </span>
+<span class="sd">    A wrapper for byte_string() &quot;&quot;&quot;</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">cap</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">number</span> <span class="o">=</span> <span class="p">(</span><span class="n">number</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
     <span class="n">number</span> <span class="o">=</span> <span class="n">number</span> <span class="o">*</span> <span class="mi">65535</span> <span class="o">-</span> <span class="mi">32768</span>
     <span class="k">return</span> <span class="n">byte_string</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">number</span><span class="p">))</span>
 </div>
-<span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">low_target</span><span class="p">,</span> <span class="n">high_target</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+<div class="viewcode-block" id="scale"><a class="viewcode-back" href="../index.html#dsp.scale">[docs]</a><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">low_target</span><span class="p">,</span> <span class="n">high_target</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Takes a target range (low, high) and source range (low, high) and </span>
+<span class="sd">    a value in the source range and returns a scaled value in the target range.</span>
+<span class="sd">    </span>
+<span class="sd">    To scale a value between 0 and 1 to a value between 0 and 100::</span>
+
+<span class="sd">        &gt;&gt;&gt; print dsp.scale(0, 100, 0, 1, 0.5)</span>
+<span class="sd">        50.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pos</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> 
     <span class="k">return</span> <span class="n">pos</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">high_target</span> <span class="o">-</span> <span class="n">low_target</span><span class="p">)</span> <span class="o">+</span> <span class="n">low_target</span>
-    
-<span class="k">def</span> <span class="nf">cap</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="cap"><a class="viewcode-back" href="../index.html#dsp.cap">[docs]</a><span class="k">def</span> <span class="nf">cap</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Takes a number and a maximum and minimum cap and returns a </span>
+<span class="sd">    truncated number within (inclusive) that range::</span>
+
+<span class="sd">        &gt;&gt;&gt; dsp.cap(500, 1, 0)</span>
+<span class="sd">        1</span>
+
+<span class="sd">        &gt;&gt;&gt; dsp.cap(-42424242, 32767, -32768)</span>
+<span class="sd">        -32768</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">if</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">:</span>
         <span class="n">num</span> <span class="o">=</span> <span class="nb">min</span>
     <span class="k">elif</span> <span class="n">num</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">:</span>
         <span class="n">num</span> <span class="o">=</span> <span class="nb">max</span>
     <span class="k">return</span> <span class="n">num</span>
-
+</div>
 <div class="viewcode-block" id="timestamp_filename"><a class="viewcode-back" href="../index.html#dsp.timestamp_filename">[docs]</a><span class="k">def</span> <span class="nf">timestamp_filename</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Generate a datetime string to add to filenames &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Convenience function that formats a datetime string for filenames::</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; dsp.timestamp_filename()</span>
+<span class="sd">        &#39;2015-10-21_07.28.00&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
     <span class="n">current_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()))</span>
     <span class="n">current_time</span> <span class="o">=</span> <span class="n">current_time</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
     <span class="n">current_seconds</span> <span class="o">=</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
@@ -211,7 +237,12 @@
 <span class="c">###############</span>
 
 <div class="viewcode-block" id="bln"><a class="viewcode-back" href="../index.html#dsp.bln">[docs]</a><span class="k">def</span> <span class="nf">bln</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="mf">3000.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">7100.0</span><span class="p">,</span> <span class="n">wform</span><span class="o">=</span><span class="s">&#39;sine2pi&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Time-domain band-limited noise generator</span>
+    <span class="sd">&quot;&quot;&quot; Time-domain band-limited (citation needed) noise generator.</span>
+
+<span class="sd">        Generates a series of single cycles of a given wavetype </span>
+<span class="sd">        at random frequences within the supplied range.</span>
+<span class="sd">        </span>
+<span class="sd">        Sounds nice &amp; warm, if you ask me.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">outlen</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">cycles</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
@@ -223,7 +254,7 @@
     <span class="k">return</span> <span class="n">cycles</span>
 </div>
 <div class="viewcode-block" id="transpose"><a class="viewcode-back" href="../index.html#dsp.transpose">[docs]</a><span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Transpose an audio fragment by a given amount.</span>
+    <span class="sd">&quot;&quot;&quot; Change the speed of a sound.</span>
 <span class="sd">        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc &quot;&quot;&quot;</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
 
@@ -231,7 +262,20 @@
     
     <span class="k">return</span> <span class="n">audio_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </div>
-<span class="k">def</span> <span class="nf">tone</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">wavetype</span><span class="o">=</span><span class="s">&#39;sine&#39;</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<div class="viewcode-block" id="tone"><a class="viewcode-back" href="../index.html#dsp.tone">[docs]</a><span class="k">def</span> <span class="nf">tone</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">wavetype</span><span class="o">=</span><span class="s">&#39;sine&#39;</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Synthesize a tone with the given params.</span>
+
+<span class="sd">        Possible wavetypes:</span>
+<span class="sd">            sine2pi or sine</span>
+<span class="sd">            cos2pi or cos</span>
+<span class="sd">            hann</span>
+<span class="sd">            tri</span>
+<span class="sd">            saw or line</span>
+<span class="sd">            isaw or phasor</span>
+<span class="sd">            vary</span>
+<span class="sd">            impulse</span>
+<span class="sd">            square</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># Quick and dirty mapping to transition to the new api</span>
     <span class="k">if</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s">&#39;sine2pi&#39;</span> <span class="ow">or</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s">&#39;sine&#39;</span><span class="p">:</span>
         <span class="n">wtype</span> <span class="o">=</span> <span class="mi">0</span>
@@ -255,7 +299,7 @@
         <span class="n">wtype</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="n">synth</span><span class="p">(</span><span class="n">wtype</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">freq</span><span class="p">),</span> <span class="n">length</span><span class="p">,</span> <span class="n">amp</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
-        
+        </div>
 <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">passthru</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">envelope</span> <span class="o">=</span> <span class="s">&#39;random&#39;</span><span class="p">,</span> <span class="n">split_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">passthru</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">audio_string</span>
