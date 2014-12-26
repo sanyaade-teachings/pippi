@@ -144,8 +144,8 @@ def cap(num, max, min=0):
 def timestamp_filename():
     """ Convenience function that formats a datetime string for filenames::
         
-        >>> dsp.timestamp_filename()
-        '2015-10-21_07.28.00'
+            >>> dsp.timestamp_filename()
+            '2015-10-21_07.28.00'
     """
 
     current_time = str(datetime.time(datetime.now()))
