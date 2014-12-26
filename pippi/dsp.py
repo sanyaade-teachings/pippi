@@ -213,18 +213,20 @@ def transpose(audio_string, amount):
     return audio_string[0]
 
 def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0.0):
-    """ Synthesize a tone with the given params.
+    """ 
+        Synthesize a tone with the given params.
 
         Possible wavetypes:
-            sine2pi or sine
-            cos2pi or cos
-            hann
-            tri
-            saw or line
-            isaw or phasor
-            vary
-            impulse
-            square
+
+        * sine2pi or sine
+        * cos2pi or cos
+        * hann
+        * tri
+        * saw or line
+        * isaw or phasor
+        * vary
+        * impulse
+        * square
     """
     # Quick and dirty mapping to transition to the new api
     if wavetype == 'sine2pi' or wavetype == 'sine':
