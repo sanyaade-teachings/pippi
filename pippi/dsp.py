@@ -146,8 +146,7 @@ def timestamp_filename():
         
         >>> dsp.timestamp_filename()
         '2015-10-21_07.28.00'
-        
-        """
+    """
 
     current_time = str(datetime.time(datetime.now()))
     current_time = current_time.split(':')
