@@ -59,7 +59,7 @@ def timer(cmd='start'):
 
         And stop it at the end of your script to print the time 
         elapsed in seconds. Make sure dsp.quiet is False so the 
-        elapsed time will print to the console.::
+        elapsed time will print to the console. ::
 
             dsp.timer('stop')
     
@@ -85,21 +85,31 @@ def timer(cmd='start'):
 ##############
 
 def log(message, mode="a"):
-    """ Write to a temporary log file at ~/pippi.log for debugging.
-        Set mode to "w" or similar to truncate logs when starting a new 
-        session.
-        """
+    """ 
+    Write to a temporary log file at ~/pippi.log for debugging.
+    Set mode to "w" or similar to truncate logs when starting a new 
+    session.
+    """
 
     logfile = open(os.path.expanduser("~/pippi.log"), mode)
     logfile.write(str(message) + "\n")
     return logfile.close()
 
 def flen(snd):
-    """ Returns the length of a sound in frames """
+    """ 
+    Returns the length of a sound in frames 
+
+    ::
+
+        >>> dsp.flen(dsp.tone(dsp.mstf(1))) == dsp.mstf(1)
+        True
+
+    """
     return len(snd) / (audio_params[1] + audio_params[0])
 
 def byte_string(number):
-    """ Takes an integer (truncated to between -32768 and 32767) and returns a single 
+    """ 
+    Takes an integer (truncated to between -32768 and 32767) and returns a single 
     frame of sound. """
     number = cap(number, 32767, -32768)
     return struct.pack("<h", number)
@@ -113,19 +123,22 @@ def pack(number):
     return byte_string(int(number))
 
 def scale(low_target, high_target, low, high, pos):
-    """ Takes a target range (low, high) and source range (low, high) and 
+    """ 
+    Takes a target range (low, high) and source range (low, high) and 
     a value in the source range and returns a scaled value in the target range.
     
     To scale a value between 0 and 1 to a value between 0 and 100::
 
         >>> print dsp.scale(0, 100, 0, 1, 0.5)
         50.0
+
     """
     pos = float(pos - low) / float(high - low) 
     return pos * float(high_target - low_target) + low_target
     
 def cap(num, max, min=0):
-    """ Takes a number and a maximum and minimum cap and returns a 
+    """ 
+    Takes a number and a maximum and minimum cap and returns a 
     truncated number within (inclusive) that range::
 
         >>> dsp.cap(500, 1, 0)
@@ -170,12 +183,12 @@ def timestamp_filename():
 # Random
 ###############
 
-from pippi.random import seed
-from pippi.random import stepseed
-from pippi.random import randint
-from pippi.random import rand
-from pippi.random import randchoose
-from pippi.random import randshuffle
+from pippi.rand import seed
+from pippi.rand import stepseed
+from pippi.rand import randint
+from pippi.rand import rand
+from pippi.rand import randchoose
+from pippi.rand import randshuffle
 
 
 

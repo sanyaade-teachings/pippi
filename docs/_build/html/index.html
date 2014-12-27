@@ -123,6 +123,10 @@ truncated number within (inclusive) that range:</p>
 <dt id="dsp.flen">
 <tt class="descclassname">dsp.</tt><tt class="descname">flen</tt><big>(</big><em>snd</em><big>)</big><a class="reference internal" href="_modules/dsp.html#flen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.flen" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the length of a sound in frames</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">flen</span><span class="p">(</span><span class="n">dsp</span><span class="o">.</span><span class="n">tone</span><span class="p">(</span><span class="n">dsp</span><span class="o">.</span><span class="n">mstf</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="o">==</span> <span class="n">dsp</span><span class="o">.</span><span class="n">mstf</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -199,7 +203,7 @@ a value in the source range and returns a scaled value in the target range.</p>
 </div>
 <p>And stop it at the end of your script to print the time 
 elapsed in seconds. Make sure dsp.quiet is False so the 
-elapsed time will print to the console.:</p>
+elapsed time will print to the console.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">dsp</span><span class="o">.</span><span class="n">timer</span><span class="p">(</span><span class="s">&#39;stop&#39;</span><span class="p">)</span>
 </pre></div>
 </div>

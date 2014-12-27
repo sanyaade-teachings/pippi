@@ -1,4 +1,4 @@
-from pippi import random
+from pippi import rand
 
 def interleave(list_one, list_two):
     """ Combine two lists by interleaving their elements """
@@ -8,7 +8,7 @@ def interleave(list_one, list_two):
     elif len(list_two) > len(list_one):
         big_list = len(list_two)
     else:
-        if random.randint(0, 1) == 0:
+        if rand.randint(0, 1) == 0:
             big_list = len(list_one)
         else:
             big_list = len(list_two)
@@ -33,7 +33,7 @@ def packet_shuffle(list, packet_size):
         lists = list_split(list, packet_size)
         shuffled_lists = []
         for sublist in lists:
-            shuffled_lists.append(random.randshuffle(sublist))
+            shuffled_lists.append(rand.randshuffle(sublist))
 
         big_list = []
         for shuffled_list in shuffled_lists:
@@ -63,7 +63,7 @@ def rotate(list, start=0, rand=False):
     """ Rotate a list by a given offset """
 
     if rand == True:
-        start = random.randint(0, len(list) - 1)
+        start = rand.randint(0, len(list) - 1)
 
     if start > len(list) - 1:
         start = len(list) - 1
