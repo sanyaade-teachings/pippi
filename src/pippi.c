@@ -567,6 +567,33 @@ static PyObject * pippic_mul(PyObject *self, PyObject *args) {
     return output;
 }
 
+static char pippic_invert_docstring[] = "Invert a sound.";
+static PyObject * pippic_invert(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data;
+
+    signed char *snd;
+    int value, length, inverted;
+
+    int i;
+    int size = getsize();
+
+    if(!PyArg_ParseTuple(args, "s#:add", &snd, &length)) {
+        return NULL;
+    }
+
+    output = PyString_FromStringAndSize(NULL, length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < length; i += size) {
+        value = (int)*BUFFER(snd, i);
+
+        *BUFFER(data, i) = saturate((double)value * -1);
+    }
+
+    return output;
+}
+
 static char pippic_wtread_docstring[] = "Read from a wavetable";
 static PyObject * pippic_wtread(PyObject *self, PyObject *args) {
     PyObject *output;
@@ -1168,6 +1195,7 @@ static PyMethodDef pippic_methods[] = {
     {"am", pippic_am, METH_VARARGS, pippic_am_docstring},
     {"add", pippic_add, METH_VARARGS, pippic_add_docstring},
     {"mul", pippic_mul, METH_VARARGS, pippic_mul_docstring},
+    {"invert", pippic_invert, METH_VARARGS, pippic_invert_docstring},
     {"mix", pippic_mix, METH_VARARGS, pippic_mix_docstring},
     {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
     {"synth", pippic_synth, METH_VARARGS, pippic_synth_docstring},
