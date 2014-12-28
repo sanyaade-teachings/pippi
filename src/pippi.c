@@ -567,6 +567,48 @@ static PyObject * pippic_mul(PyObject *self, PyObject *args) {
     return output;
 }
 
+static char pippic_subtract_docstring[] = "Subtract one sound from another.";
+static PyObject * pippic_subtract(PyObject *self, PyObject *args) {
+    PyObject *output;
+    signed char *data;
+
+    signed char *first, *second;
+    int first_length, first_value, second_length, second_value, length, sub;
+
+    int i;
+    int size = getsize();
+
+    if(!PyArg_ParseTuple(args, "s#s#:add", &first, &first_length, &second, &second_length)) {
+        return NULL;
+    }
+
+    /* The output length is equal to the length of the longest input sound */
+    length = first_length > second_length ? first_length : second_length;
+
+    output = PyString_FromStringAndSize(NULL, length);
+    data = (signed char*)PyString_AsString(output);
+
+    for(i=0; i < length; i += size) {
+        if(i < first_length) {
+            first_value = (int)*BUFFER(first, i);
+        } else {
+            first_value = 0;
+        }
+
+        if(i < second_length) {
+            second_value = (int)*BUFFER(second, i);
+        } else {
+            second_value = 0;
+        }
+
+        sub = first_value - second_value;
+
+        *BUFFER(data, i) = saturate((double)sub);
+    }
+
+    return output;
+}
+
 static char pippic_invert_docstring[] = "Invert a sound.";
 static PyObject * pippic_invert(PyObject *self, PyObject *args) {
     PyObject *output;
@@ -1195,6 +1237,7 @@ static PyMethodDef pippic_methods[] = {
     {"am", pippic_am, METH_VARARGS, pippic_am_docstring},
     {"add", pippic_add, METH_VARARGS, pippic_add_docstring},
     {"mul", pippic_mul, METH_VARARGS, pippic_mul_docstring},
+    {"subtract", pippic_subtract, METH_VARARGS, pippic_subtract_docstring},
     {"invert", pippic_invert, METH_VARARGS, pippic_invert_docstring},
     {"mix", pippic_mix, METH_VARARGS, pippic_mix_docstring},
     {"shift", pippic_shift, METH_VARARGS, pippic_shift_docstring},
