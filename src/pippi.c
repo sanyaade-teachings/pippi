@@ -536,7 +536,7 @@ static PyObject * pippic_mul(PyObject *self, PyObject *args) {
     int i;
     int size = getsize();
 
-    if(!PyArg_ParseTuple(args, "s#s#:add", &first, &first_length, &second, &second_length)) {
+    if(!PyArg_ParseTuple(args, "s#s#:mul", &first, &first_length, &second, &second_length)) {
         return NULL;
     }
 
@@ -578,7 +578,7 @@ static PyObject * pippic_subtract(PyObject *self, PyObject *args) {
     int i;
     int size = getsize();
 
-    if(!PyArg_ParseTuple(args, "s#s#:add", &first, &first_length, &second, &second_length)) {
+    if(!PyArg_ParseTuple(args, "s#s#:subtract", &first, &first_length, &second, &second_length)) {
         return NULL;
     }
 
@@ -620,7 +620,7 @@ static PyObject * pippic_invert(PyObject *self, PyObject *args) {
     int i;
     int size = getsize();
 
-    if(!PyArg_ParseTuple(args, "s#:add", &snd, &length)) {
+    if(!PyArg_ParseTuple(args, "s#:invert", &snd, &length)) {
         return NULL;
     }
 
