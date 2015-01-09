@@ -1,7 +1,14 @@
 from pippi import rand
 
 def interleave(list_one, list_two):
-    """ Combine two lists by interleaving their elements """
+    """ Interleave the elements of two lists.
+
+        ::
+
+            >>> dsp.interleave([1,1], [0,0])
+            [1, 0, 1, 0]
+    
+    """
     # find the length of the longest list
     if len(list_one) > len(list_two):
         big_list = len(list_one)
@@ -24,13 +31,20 @@ def interleave(list_one, list_two):
 
     return combined_lists
 
-def packet_shuffle(list, packet_size):
-    """ Shuffle a subset of list items in place.
-        Takes a list, splits it into sub-lists of size N
-        and shuffles those sub-lists. Returns flattened list.
+def packet_shuffle(items, size):
+    """ Shuffle the items in a list at a given granularity >= 3
+
+        ::
+
+            >>> dsp.packet_shuffle(range(10), 3)
+            [0, 1, 2, 5, 4, 3, 8, 7, 6]
+    
+            >>> dsp.packet_shuffle(range(10), 3)
+            [1, 2, 0, 4, 3, 5, 7, 6, 8]
+
     """
-    if packet_size >= 3 and packet_size <= len(list):
-        lists = list_split(list, packet_size)
+    if size >= 3 and size <= len(items):
+        lists = list_split(items, size)
         shuffled_lists = []
         for sublist in lists:
             shuffled_lists.append(rand.randshuffle(sublist))
@@ -40,10 +54,17 @@ def packet_shuffle(list, packet_size):
             big_list.extend(shuffled_list)
         return big_list
 
-def list_split(list, packet_size):
-    """ Split a list into groups of size N """
+def list_split(items, packet_size):
+    """ Split a list into lists of a given size
+    
+        ::
+
+            >>> dsp.list_split(range(10), 3)
+            [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+
+    """
     trigs = []
-    for i in range(len(list)):
+    for i in range(len(items)):
         if i % int(packet_size) == 0:
             trigs.append(i)
 
@@ -53,25 +74,46 @@ def list_split(list, packet_size):
         if trig_index < len(trigs) - 1:
             packets = []
             for packet_bit in range(packet_size):
-                packets.append(list[packet_bit + trig])
+                packets.append(items[packet_bit + trig])
 
             newlist.append(packets)
 
     return newlist
 
-def rotate(list, start=0, rand=False):
-    """ Rotate a list by a given offset """
+def rotate(items, start=0, vary=False):
+    """ Rotate a list by a given (optionally variable) offset 
+    
+        :: 
 
-    if rand == True:
-        start = rand.randint(0, len(list) - 1)
+            >>> dsp.rotate(range(10), 3)
+            [3, 4, 5, 6, 7, 8, 9, 0, 1, 2]
 
-    if start > len(list) - 1:
-        start = len(list) - 1
+            >>> dsp.rotate(range(10), vary=True)
+            [6, 7, 8, 9, 0, 1, 2, 3, 4, 5]
 
-    return list[start:] + list[:start]
+            >>> dsp.rotate(range(10), vary=True)
+            [8, 9, 0, 1, 2, 3, 4, 5, 6, 7]
+    
+    """
+
+    if vary == True:
+        start = rand.randint(0, len(items) - 1)
+
+    if start > len(items) - 1:
+        start = len(items) - 1
+
+    return items[start:] + items[:start]
 
 def eu(length, numpulses):
-    """ Euclidian pattern generator
+    """ A euclidian pattern generator
+
+        ::
+
+            >>> dsp.eu(12, 3)
+            [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
+
+            >>> dsp.eu(12, 5)
+            [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0]
     """
     pulses = [ 1 for pulse in range(numpulses) ]
     pauses = [ 0 for pause in range(length - numpulses) ]
