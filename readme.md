@@ -1,14 +1,14 @@
 # Pippi
 ## Computer music with python
 
-Quite alpha!
+Still pretty alpha!
 
-### Install from pip:
-    pip install pippi --user
+### Install last published version from pip:
+    pip install pippi
 
-### Install from source:
+### Install latest version from source:
     
-    python setup.py install --user
+    python setup.py install
 
 ### Now What?
 
@@ -29,5 +29,5 @@ Here's a slightly more interesting example:
     >>> dsp.write(out, 'helloagain')
     'helloagain.wav'
 
-[Here's another more complex (and musical) example.](docs/example.md)
+[More documentation at Read The Docs.](http://pippi.readthedocs.org)
 
