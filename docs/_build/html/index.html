@@ -258,6 +258,68 @@ elapsed time will print to the console.</p>
 <dd><p>Write audio data to renders directory with the Python wave module</p>
 </dd></dl>
 
+<span class="target" id="module-lists"></span><dl class="function">
+<dt id="lists.eu">
+<tt class="descclassname">lists.</tt><tt class="descname">eu</tt><big>(</big><em>length</em>, <em>numpulses</em><big>)</big><a class="reference internal" href="_modules/lists.html#eu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lists.eu" title="Permalink to this definition">¶</a></dt>
+<dd><p>A euclidian pattern generator</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">eu</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">[1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">eu</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="go">[1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lists.interleave">
+<tt class="descclassname">lists.</tt><tt class="descname">interleave</tt><big>(</big><em>list_one</em>, <em>list_two</em><big>)</big><a class="reference internal" href="_modules/lists.html#interleave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lists.interleave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interleave the elements of two lists.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">interleave</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">[1, 0, 1, 0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lists.list_split">
+<tt class="descclassname">lists.</tt><tt class="descname">list_split</tt><big>(</big><em>items</em>, <em>packet_size</em><big>)</big><a class="reference internal" href="_modules/lists.html#list_split"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lists.list_split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a list into lists of a given size</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">list_split</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">[[0, 1, 2], [3, 4, 5], [6, 7, 8]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lists.packet_shuffle">
+<tt class="descclassname">lists.</tt><tt class="descname">packet_shuffle</tt><big>(</big><em>items</em>, <em>size</em><big>)</big><a class="reference internal" href="_modules/lists.html#packet_shuffle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lists.packet_shuffle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shuffle the items in a list at a given granularity &gt;= 3</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">packet_shuffle</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">[0, 1, 2, 5, 4, 3, 8, 7, 6]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">packet_shuffle</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">[1, 2, 0, 4, 3, 5, 7, 6, 8]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="lists.rotate">
+<tt class="descclassname">lists.</tt><tt class="descname">rotate</tt><big>(</big><em>items</em>, <em>start=0</em>, <em>vary=False</em><big>)</big><a class="reference internal" href="_modules/lists.html#rotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lists.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate a list by a given (optionally variable) offset</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="go">[3, 4, 5, 6, 7, 8, 9, 0, 1, 2]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">vary</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">[6, 7, 8, 9, 0, 1, 2, 3, 4, 5]</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsp</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">vary</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">[8, 9, 0, 1, 2, 3, 4, 5, 6, 7]</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <span class="target" id="module-tune"></span><dl class="function">
 <dt id="tune.ntf">
 <tt class="descclassname">tune.</tt><tt class="descname">ntf</tt><big>(</big><em>note</em>, <em>octave=4</em>, <em>ratios=None</em><big>)</big><a class="reference internal" href="_modules/tune.html#ntf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tune.ntf" title="Permalink to this definition">¶</a></dt>

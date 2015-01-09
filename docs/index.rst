@@ -17,6 +17,9 @@ Contents:
 .. automodule:: dsp
    :members:
 
+.. automodule:: lists
+   :members:
+
 .. automodule:: tune
    :members:
 
