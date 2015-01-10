@@ -1,5 +1,4 @@
-# Pippi
-## Computer music with python
+# Pippi: Computer music with python
 
 This is pre-release software. I am working toward a stable 1.0 and would very much appreciate bug reports, feedback and pull requests!
 
