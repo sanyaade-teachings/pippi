@@ -1,14 +1,34 @@
 # Pippi
 ## Computer music with python
 
-Still pretty alpha!
+This is pre-release software. I am working toward a stable 1.0 and would very much appreciate bug reports, feedback and pull requests!
 
-### Install last published version from pip:
+## Installation
+
+> Note: pippi is currently only compatible with Python 2.x
+
+In order to build the C extensions that pippi uses for most DSP, you will need to install the Python development headers.
+
+On debian / ubuntu systems:
+
+    apt-get install python-dev
+
+On arch linux the headers are already installed along with the main `python2` package.
+
+### To install last published version from pip:
+
     pip install pippi
 
-### Install latest version from source:
+### To install latest version from source:
+
+First make sure you have pip installed on your system, since pippi uses the version of `setuptools` distributed with pip for installation.
+
+    pip -V
+
+Then from the root of the pippi repository run:
     
     python setup.py install
+
 
 ### Now What?
 
