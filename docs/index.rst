@@ -20,6 +20,9 @@ Contents:
 .. automodule:: lists
    :members:
 
+.. automodule:: utils
+   :members:
+
 .. automodule:: tune
    :members:
 
