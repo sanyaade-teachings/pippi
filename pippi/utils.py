@@ -1,7 +1,7 @@
 import os
 import struct
 from datetime import datetime
-from pippi import audio_params
+audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 
 def log(message, mode="a"):
     """ 
