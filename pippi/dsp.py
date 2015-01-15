@@ -21,7 +21,7 @@ try:
     from _pippic import cycle as ccycle
     from _pippic import wtread, fold
 except ImportError:
-    pass
+    print 'Warning: could not import C dsp extensions'
 
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]

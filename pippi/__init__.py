@@ -3,6 +3,7 @@ import __main__
 import multiprocessing as mp
 import time
 import os
+import sys
 
 try:
     import pygame.midi
@@ -194,6 +195,7 @@ class IOManager():
         return out
 
     def play(self, gen, ns, voice_id, voice_index, loop=True):
+        sys.path.insert(0, os.getcwd())
         gen = __import__(gen)
         midi_manager = MidiManager(ns)
         param_manager = ParamManager(ns)
@@ -201,7 +203,10 @@ class IOManager():
         out = self.open_alsa_pcm(ns.device)
 
         def dsp_loop(out, play, midi_manager, param_manager, voice_id, group):
-            os.nice(-2)
+            try:
+                os.nice(-2)
+            except OSError:
+                os.nice(0)
 
             meta = {
                 'midi': midi_manager,
