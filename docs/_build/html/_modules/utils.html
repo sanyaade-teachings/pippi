@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>utils &mdash; pippi 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="pippi 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">pippi 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for utils</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="n">audio_params</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">44100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;NONE&quot;</span><span class="p">,</span> <span class="s">&quot;not_compressed&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="log"><a class="viewcode-back" href="../index.html#utils.log">[docs]</a><span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&quot;a&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Write to a temporary log file at ~/pippi.log for debugging.</span>
+<span class="sd">    Set mode to &quot;w&quot; or similar to truncate logs when starting a new </span>
+<span class="sd">    session.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~/pippi.log&quot;</span><span class="p">),</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">logfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">logfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="flen"><a class="viewcode-back" href="../index.html#utils.flen">[docs]</a><span class="k">def</span> <span class="nf">flen</span><span class="p">(</span><span class="n">snd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Returns the length of a sound in frames </span>
+
+<span class="sd">    ::</span>
+
+<span class="sd">        &gt;&gt;&gt; dsp.flen(dsp.tone(dsp.mstf(1))) == dsp.mstf(1)</span>
+<span class="sd">        True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">snd</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="byte_string"><a class="viewcode-back" href="../index.html#utils.byte_string">[docs]</a><span class="k">def</span> <span class="nf">byte_string</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Takes an integer (truncated to between -32768 and 32767) and returns a single </span>
+<span class="sd">    frame of sound. &quot;&quot;&quot;</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">cap</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="mi">32767</span><span class="p">,</span> <span class="o">-</span><span class="mi">32768</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&quot;&lt;h&quot;</span><span class="p">,</span> <span class="n">number</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="pack"><a class="viewcode-back" href="../index.html#utils.pack">[docs]</a><span class="k">def</span> <span class="nf">pack</span><span class="p">(</span><span class="n">number</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Takes a float between -1.0 to 1.0 and returns a single frame of sound. </span>
+<span class="sd">    A wrapper for byte_string() &quot;&quot;&quot;</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">cap</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="p">(</span><span class="n">number</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">number</span> <span class="o">*</span> <span class="mi">65535</span> <span class="o">-</span> <span class="mi">32768</span>
+    <span class="k">return</span> <span class="n">byte_string</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">number</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="scale"><a class="viewcode-back" href="../index.html#utils.scale">[docs]</a><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="n">low_target</span><span class="p">,</span> <span class="n">high_target</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Takes a target range (low, high) and source range (low, high) and </span>
+<span class="sd">    a value in the source range and returns a scaled value in the target range.</span>
+<span class="sd">    </span>
+<span class="sd">    To scale a value between 0 and 1 to a value between 0 and 100::</span>
+
+<span class="sd">        &gt;&gt;&gt; print dsp.scale(0, 100, 0, 1, 0.5)</span>
+<span class="sd">        50.0</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pos</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> 
+    <span class="k">return</span> <span class="n">pos</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">high_target</span> <span class="o">-</span> <span class="n">low_target</span><span class="p">)</span> <span class="o">+</span> <span class="n">low_target</span>
+    </div>
+<div class="viewcode-block" id="cap"><a class="viewcode-back" href="../index.html#utils.cap">[docs]</a><span class="k">def</span> <span class="nf">cap</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Takes a number and a maximum and minimum cap and returns a </span>
+<span class="sd">    truncated number within (inclusive) that range::</span>
+
+<span class="sd">        &gt;&gt;&gt; dsp.cap(500, 1, 0)</span>
+<span class="sd">        1</span>
+
+<span class="sd">        &gt;&gt;&gt; dsp.cap(-42424242, 32767, -32768)</span>
+<span class="sd">        -32768</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="nb">min</span>
+    <span class="k">elif</span> <span class="n">num</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">:</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="nb">max</span>
+    <span class="k">return</span> <span class="n">num</span>
+</div>
+<div class="viewcode-block" id="timestamp_filename"><a class="viewcode-back" href="../index.html#utils.timestamp_filename">[docs]</a><span class="k">def</span> <span class="nf">timestamp_filename</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Convenience function that formats a datetime string for filenames::</span>
+<span class="sd">        </span>
+<span class="sd">            &gt;&gt;&gt; dsp.timestamp_filename()</span>
+<span class="sd">            &#39;2015-10-21_07.28.00&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()))</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">current_time</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+    <span class="n">current_seconds</span> <span class="o">=</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="n">current_time</span> <span class="o">=</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">current_time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">current_seconds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">current_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()))</span>
+
+    <span class="k">return</span> <span class="n">current_date</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="n">current_time</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">pippi 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2014, Erik Schoster.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    </div>
+  </body>
+</html>
