@@ -26,6 +26,9 @@ Contents:
 .. automodule:: tune
    :members:
 
+.. automodule:: _pippic
+   :members:
+
 Indices and tables
 ==================
 

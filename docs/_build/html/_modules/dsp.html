@@ -70,7 +70,7 @@
     <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">cycle</span> <span class="k">as</span> <span class="n">ccycle</span>
     <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">wtread</span><span class="p">,</span> <span class="n">fold</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="k">pass</span>
+    <span class="k">print</span> <span class="s">&#39;Warning: could not import C dsp extensions&#39;</span>
 
 <span class="n">bitdepth</span> <span class="o">=</span> <span class="mi">16</span>
 <span class="n">audio_params</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">44100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;NONE&quot;</span><span class="p">,</span> <span class="s">&quot;not_compressed&quot;</span><span class="p">]</span>
