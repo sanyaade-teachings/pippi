@@ -7,7 +7,6 @@ import re
 import json
 import subprocess
 import glob
-import docopt
 import uuid
 import pygame.midi
 
@@ -17,7 +16,6 @@ from pippi import ParamManager
 from pippi import EventManager
 
 import multiprocessing as mp
-from termcolor import colored
 
 class Pippi(cmd.Cmd):
     """ Pippi Console 
