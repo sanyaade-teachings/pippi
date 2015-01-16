@@ -5,12 +5,26 @@ import time
 import os
 import sys
 
+# Try to enable midi support
 try:
     import pygame.midi
-    import pyaudio
-    import alsaaudio
 except ImportError:
-    pass
+    print 'Midi support disabled. Please install pygame.'
+
+
+# Doing a fallback dance for playback support
+try:
+    import alsaaudio
+    audio_engine = 'alsa'
+except ImportError:
+    try:
+        import pyaudio
+        audio_engine = 'portaudio'
+        print 'Using experimental portaudio bindings. Please install alsaaudio if you have problems with sound playback.'
+    except ImportError:
+        print 'Playback disabled. Please install alsaaudio (ALSA) or pyaudio (PortAudio)'
+
+
 
 class EventManager():
     def __init__(self, ns, console):
@@ -136,7 +150,7 @@ class IOManager():
         self.manager = mp.Manager()
         self.ns = self.manager.Namespace()
 
-        self.ns.device = 'T6'
+        self.ns.device = 'default'
 
         self.m = mp.Process(target=self.capture_midi, args=(self.ns,))
         self.m.start()
@@ -200,7 +214,13 @@ class IOManager():
         midi_manager = MidiManager(ns)
         param_manager = ParamManager(ns)
 
-        out = self.open_alsa_pcm(ns.device)
+        if audio_engine == 'alsa':
+            out = self.open_alsa_pcm(ns.device)
+        elif audio_engine == 'portaudio':
+            out = self.open_pyaudio_pcm(ns.device)
+        else:
+            print 'Playback is disabled.'
+            return False
 
         def dsp_loop(out, play, midi_manager, param_manager, voice_id, group):
             try:
@@ -218,7 +238,11 @@ class IOManager():
             snd = play(meta)
             snd = dsp.split(snd, 500)
             for s in snd:
-                out.write(s)
+                try:
+                    out.write(s)
+                except AttributeError:
+                    dsp.log('Could not write to audio device')
+                    return False
 
         while True:
             reload(gen)

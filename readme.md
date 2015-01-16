@@ -8,7 +8,7 @@ This is pre-release software. I am working toward a stable 1.0 and would very mu
 
 In order to build the C extensions that pippi uses for most DSP, you will need to install the Python development headers.
 
-On debian / ubuntu systems:
+On debian (including ubuntu & raspbian) systems:
 
     apt-get install python-dev
 
@@ -20,11 +20,17 @@ On arch linux the headers are already installed along with the main `python2` pa
 
 ### To install latest version from source:
 
-First make sure you have pip installed on your system, since pippi uses the version of `setuptools` distributed with pip for installation.
+Make sure you have `pip` installed on your system, since pippi uses the version of `setuptools` distributed with pip for installation.
 
-    pip -V
+To use the interactive features you will need to install `pyalsaaudio` (for ALSA support on linux) or `pyaudio` for experimental cross-platform audio support on OSX and Windows.
 
-Then from the root of the pippi repository run:
+You may need to install the `libasound2-dev` package on debian systems with `apt-get` before you will be able to install `pyalsaaudio`.
+
+If you're trying the experimental `pyaudio` support, you may need to install `portaudio` on your system first.
+
+To use optional MIDI support with the interactive features you will need to install `pygame` via `pip`.
+
+When you have the dependencies you selected installed, from the root of the pippi repository run:
     
     python setup.py install
 
