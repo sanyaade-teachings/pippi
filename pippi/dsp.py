@@ -128,6 +128,37 @@ def transpose(snd, amount):
 
     return audioop.ratecv(snd, audio_params[1], audio_params[0], audio_params[2], int(audio_params[2] * amount), None)[0]
 
+def stretch(snd, length=None, speed=None, grain_size=120):
+    """ Crude granular time stretching and pitch shifting """
+
+    original_length = flen(snd)
+
+    if speed is not None:
+        snd = transpose(snd, speed)
+
+    current_length = flen(snd)
+
+    if original_length != current_length or length is not None:
+        grain_size = mstf(grain_size)
+        numgrains = length / (grain_size / 2)
+        block_size = current_length / numgrains
+
+        grains = []
+        original_position = 0
+        count = 0
+
+        while count <= numgrains:
+            grain = cut(snd, original_position, grain_size)
+
+            grains += [ grain ]
+
+            original_position += block_size
+            count += 1
+
+        snd = cross(grains, ftms(grain_size / 2))
+
+    return snd
+
 def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0.0):
     """ 
         Synthesize a tone with the given params.
@@ -352,14 +383,17 @@ def vsplit(input, minsize, maxsize):
 
     return output
 
-def write(audio_string, filename, timestamp=False):
+def write(audio_string, filename, timestamp=False, cwd=True):
     """ Write audio data to renders directory with the Python wave module """
     if timestamp == True:
         filename = filename + '-' + timestamp_filename() + '.wav' 
     else:
         filename = filename + '.wav'
 
-    wavfile = wave.open(os.getcwd() + '/' + filename, "w")
+    if cwd:
+        filename = os.getcwd() + '/' + filename
+
+    wavfile = wave.open(filename, "w")
     wavfile.setparams(audio_params)
     wavfile.writeframes(audio_string)
     wavfile.close()
