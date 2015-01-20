@@ -95,10 +95,21 @@ class Pippi(cmd.Cmd):
             print self.params.get(cmd[1], cmd[0])
 
     def do_key(self, cmd):
+        """ Set default global key.
+
+            Usage:
+
+                tune.default_key = ctl['param'].get('key', 'global')
+        """
         self.params.set('key', cmd, 'global')
 
     def do_tune(self, cmd):
-        """ Set tuning of A4 """
+        """ Set tuning of A4 
+
+            Usage:
+
+                tune.a0 = ctl['param'].get('tune', 'global')
+        """
         self.params.set('tune', float(cmd) / 16.0, 'global')
 
     def do_p(self, cmd):
