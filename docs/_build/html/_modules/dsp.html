@@ -60,7 +60,6 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -75,7 +74,6 @@
 <span class="n">bitdepth</span> <span class="o">=</span> <span class="mi">16</span>
 <span class="n">audio_params</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">44100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;NONE&quot;</span><span class="p">,</span> <span class="s">&quot;not_compressed&quot;</span><span class="p">]</span>
 <span class="n">dsp_grain</span> <span class="o">=</span> <span class="mi">64</span>
-<span class="n">thetime</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">quiet</span> <span class="o">=</span> <span class="bp">True</span> 
 
 
@@ -90,42 +88,10 @@
 <span class="kn">from</span> <span class="nn">pippi.lists</span> <span class="kn">import</span> <span class="n">eu</span>
 
 
-<span class="c">#################</span>
-<span class="c"># Runtime helpers</span>
-<span class="c">#################</span>
-
-<div class="viewcode-block" id="timer"><a class="viewcode-back" href="../index.html#dsp.timer">[docs]</a><span class="k">def</span> <span class="nf">timer</span><span class="p">(</span><span class="n">cmd</span><span class="o">=</span><span class="s">&#39;start&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Coarse time measurement useful for non-realtime scripts.</span>
-
-<span class="sd">        Start the timer at the top of your script::</span>
-
-<span class="sd">            dsp.timer(&#39;start&#39;)</span>
-
-<span class="sd">        And stop it at the end of your script to print the time </span>
-<span class="sd">        elapsed in seconds. Make sure dsp.quiet is False so the </span>
-<span class="sd">        elapsed time will print to the console. ::</span>
-
-<span class="sd">            dsp.timer(&#39;stop&#39;)</span>
-<span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">global</span> <span class="n">thetime</span>
-    <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&#39;start&#39;</span><span class="p">:</span>
-        <span class="n">thetime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;Started render at timestamp&#39;</span><span class="p">,</span> <span class="n">thetime</span>
-        <span class="k">return</span> <span class="n">thetime</span> 
-    <span class="k">elif</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&#39;stop&#39;</span><span class="p">:</span>
-        <span class="n">thetime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">thetime</span>
-        <span class="n">themin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">thetime</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span>
-        <span class="n">thesec</span> <span class="o">=</span> <span class="n">thetime</span> <span class="o">-</span> <span class="p">(</span><span class="n">themin</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;Render time:&#39;</span><span class="p">,</span> <span class="n">themin</span><span class="p">,</span> <span class="s">&#39;min&#39;</span><span class="p">,</span> <span class="n">thesec</span><span class="p">,</span> <span class="s">&#39;sec&#39;</span>
-        <span class="k">return</span> <span class="n">thetime</span>
-
-
 <span class="c">##############</span>
 <span class="c"># Utils</span>
 <span class="c">##############</span>
-</div>
+
 <span class="kn">from</span> <span class="nn">pippi.utils</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">pippi.utils</span> <span class="kn">import</span> <span class="n">flen</span>
 <span class="kn">from</span> <span class="nn">pippi.utils</span> <span class="kn">import</span> <span class="n">byte_string</span>
@@ -133,6 +99,7 @@
 <span class="kn">from</span> <span class="nn">pippi.utils</span> <span class="kn">import</span> <span class="n">scale</span>
 <span class="kn">from</span> <span class="nn">pippi.utils</span> <span class="kn">import</span> <span class="n">cap</span>
 <span class="kn">from</span> <span class="nn">pippi.utils</span> <span class="kn">import</span> <span class="n">timestamp_filename</span>
+<span class="kn">from</span> <span class="nn">pippi.utils</span> <span class="kn">import</span> <span class="n">timer</span>
 
 
 <span class="c">###############</span>
@@ -176,6 +143,37 @@
     <span class="n">amount</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">audioop</span><span class="o">.</span><span class="n">ratecv</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">amount</span><span class="p">),</span> <span class="bp">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="stretch"><a class="viewcode-back" href="../index.html#dsp.stretch">[docs]</a><span class="k">def</span> <span class="nf">stretch</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">grain_size</span><span class="o">=</span><span class="mi">120</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Crude granular time stretching and pitch shifting &quot;&quot;&quot;</span>
+
+    <span class="n">original_length</span> <span class="o">=</span> <span class="n">flen</span><span class="p">(</span><span class="n">snd</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">speed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">snd</span> <span class="o">=</span> <span class="n">transpose</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">speed</span><span class="p">)</span>
+
+    <span class="n">current_length</span> <span class="o">=</span> <span class="n">flen</span><span class="p">(</span><span class="n">snd</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">original_length</span> <span class="o">!=</span> <span class="n">current_length</span> <span class="ow">or</span> <span class="n">length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">grain_size</span> <span class="o">=</span> <span class="n">mstf</span><span class="p">(</span><span class="n">grain_size</span><span class="p">)</span>
+        <span class="n">numgrains</span> <span class="o">=</span> <span class="n">length</span> <span class="o">/</span> <span class="p">(</span><span class="n">grain_size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">block_size</span> <span class="o">=</span> <span class="n">current_length</span> <span class="o">/</span> <span class="n">numgrains</span>
+
+        <span class="n">grains</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">original_position</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">while</span> <span class="n">count</span> <span class="o">&lt;=</span> <span class="n">numgrains</span><span class="p">:</span>
+            <span class="n">grain</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">original_position</span><span class="p">,</span> <span class="n">grain_size</span><span class="p">)</span>
+
+            <span class="n">grains</span> <span class="o">+=</span> <span class="p">[</span> <span class="n">grain</span> <span class="p">]</span>
+
+            <span class="n">original_position</span> <span class="o">+=</span> <span class="n">block_size</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">snd</span> <span class="o">=</span> <span class="n">cross</span><span class="p">(</span><span class="n">grains</span><span class="p">,</span> <span class="n">ftms</span><span class="p">(</span><span class="n">grain_size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">snd</span>
 </div>
 <div class="viewcode-block" id="tone"><a class="viewcode-back" href="../index.html#dsp.tone">[docs]</a><span class="k">def</span> <span class="nf">tone</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">44100</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="mf">440.0</span><span class="p">,</span> <span class="n">wavetype</span><span class="o">=</span><span class="s">&#39;sine&#39;</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; </span>
@@ -401,14 +399,17 @@
 
     <span class="k">return</span> <span class="n">output</span>
 
-<div class="viewcode-block" id="write"><a class="viewcode-back" href="../index.html#dsp.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="write"><a class="viewcode-back" href="../index.html#dsp.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Write audio data to renders directory with the Python wave module &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">timestamp</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s">&#39;-&#39;</span> <span class="o">+</span> <span class="n">timestamp_filename</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;.wav&#39;</span> 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s">&#39;.wav&#39;</span>
 
-    <span class="n">wavfile</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cwd</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span>
+
+    <span class="n">wavfile</span> <span class="o">=</span> <span class="n">wave</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
     <span class="n">wavfile</span><span class="o">.</span><span class="n">setparams</span><span class="p">(</span><span class="n">audio_params</span><span class="p">)</span>
     <span class="n">wavfile</span><span class="o">.</span><span class="n">writeframes</span><span class="p">(</span><span class="n">audio_string</span><span class="p">)</span>
     <span class="n">wavfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>

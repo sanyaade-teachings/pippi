@@ -49,8 +49,10 @@
   <h1>Source code for utils</h1><div class="highlight"><pre>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="n">audio_params</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">44100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;NONE&quot;</span><span class="p">,</span> <span class="s">&quot;not_compressed&quot;</span><span class="p">]</span>
+<span class="n">thetime</span> <span class="o">=</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="log"><a class="viewcode-back" href="../index.html#utils.log">[docs]</a><span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&quot;a&quot;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; </span>
@@ -136,6 +138,33 @@
     <span class="n">current_date</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()))</span>
 
     <span class="k">return</span> <span class="n">current_date</span> <span class="o">+</span> <span class="s">&quot;_&quot;</span> <span class="o">+</span> <span class="n">current_time</span>
+</div>
+<div class="viewcode-block" id="timer"><a class="viewcode-back" href="../index.html#utils.timer">[docs]</a><span class="k">def</span> <span class="nf">timer</span><span class="p">(</span><span class="n">cmd</span><span class="o">=</span><span class="s">&#39;start&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Coarse time measurement useful for non-realtime scripts.</span>
+
+<span class="sd">        Start the timer at the top of your script::</span>
+
+<span class="sd">            dsp.timer(&#39;start&#39;)</span>
+
+<span class="sd">        And stop it at the end of your script to print the time </span>
+<span class="sd">        elapsed in seconds. Make sure dsp.quiet is False so the </span>
+<span class="sd">        elapsed time will print to the console. ::</span>
+
+<span class="sd">            dsp.timer(&#39;stop&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">thetime</span>
+    <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&#39;start&#39;</span><span class="p">:</span>
+        <span class="n">thetime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">log</span><span class="p">(</span><span class="s">&#39;Started render at timestamp </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">thetime</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">thetime</span> 
+
+    <span class="k">elif</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&#39;stop&#39;</span><span class="p">:</span>
+        <span class="n">thetime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">thetime</span>
+        <span class="n">themin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">thetime</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span>
+        <span class="n">thesec</span> <span class="o">=</span> <span class="n">thetime</span> <span class="o">-</span> <span class="p">(</span><span class="n">themin</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">log</span><span class="p">(</span><span class="s">&#39;Render time: </span><span class="si">%s</span><span class="s">min </span><span class="si">%s</span><span class="s">sec&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">themin</span><span class="p">,</span> <span class="n">thesec</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">thetime</span>
 </pre></div></div>
 
           </div>

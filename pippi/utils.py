@@ -1,7 +1,9 @@
 import os
 import struct
+import time
 from datetime import datetime
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
+thetime = 0
 
 def log(message, mode="a"):
     """ 
@@ -87,4 +89,32 @@ def timestamp_filename():
     current_date = str(datetime.date(datetime.now()))
 
     return current_date + "_" + current_time
+
+def timer(cmd='start'):
+    """ Coarse time measurement useful for non-realtime scripts.
+
+        Start the timer at the top of your script::
+
+            dsp.timer('start')
+
+        And stop it at the end of your script to print the time 
+        elapsed in seconds. Make sure dsp.quiet is False so the 
+        elapsed time will print to the console. ::
+
+            dsp.timer('stop')
+    
+    """
+    global thetime
+    if cmd == 'start':
+        thetime = time.time()
+        log('Started render at timestamp %s' % thetime)
+        return thetime 
+
+    elif cmd == 'stop':
+        thetime = time.time() - thetime
+        themin = int(thetime) / 60
+        thesec = thetime - (themin * 60)
+        log('Render time: %smin %ssec' % (themin, thesec))
+        return thetime
+
 

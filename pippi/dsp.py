@@ -11,7 +11,6 @@ import struct
 import time
 import os
 import sys
-import time
 import collections
 
 try:
@@ -26,7 +25,6 @@ except ImportError:
 bitdepth = 16
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 dsp_grain = 64
-thetime = 0
 quiet = True 
 
 
@@ -41,38 +39,6 @@ from pippi.lists import rotate
 from pippi.lists import eu
 
 
-#################
-# Runtime helpers
-#################
-
-def timer(cmd='start'):
-    """ Coarse time measurement useful for non-realtime scripts.
-
-        Start the timer at the top of your script::
-
-            dsp.timer('start')
-
-        And stop it at the end of your script to print the time 
-        elapsed in seconds. Make sure dsp.quiet is False so the 
-        elapsed time will print to the console. ::
-
-            dsp.timer('stop')
-    
-    """
-    global thetime
-    if cmd == 'start':
-        thetime = time.time()
-
-        if not quiet: print 'Started render at timestamp', thetime
-        return thetime 
-    elif cmd == 'stop':
-        thetime = time.time() - thetime
-        themin = int(thetime) / 60
-        thesec = thetime - (themin * 60)
-        if not quiet: print 'Render time:', themin, 'min', thesec, 'sec'
-        return thetime
-
-
 ##############
 # Utils
 ##############
@@ -84,6 +50,7 @@ from pippi.utils import pack
 from pippi.utils import scale
 from pippi.utils import cap
 from pippi.utils import timestamp_filename
+from pippi.utils import timer
 
 
 ###############

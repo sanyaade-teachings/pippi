@@ -136,19 +136,9 @@ Mono files are converted to stereo automatically.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="dsp.timer">
-<tt class="descclassname">dsp.</tt><tt class="descname">timer</tt><big>(</big><em>cmd='start'</em><big>)</big><a class="reference internal" href="_modules/dsp.html#timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.timer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Coarse time measurement useful for non-realtime scripts.</p>
-<p>Start the timer at the top of your script:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">dsp</span><span class="o">.</span><span class="n">timer</span><span class="p">(</span><span class="s">&#39;start&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>And stop it at the end of your script to print the time 
-elapsed in seconds. Make sure dsp.quiet is False so the 
-elapsed time will print to the console.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">dsp</span><span class="o">.</span><span class="n">timer</span><span class="p">(</span><span class="s">&#39;stop&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
+<dt id="dsp.stretch">
+<tt class="descclassname">dsp.</tt><tt class="descname">stretch</tt><big>(</big><em>snd</em>, <em>length=None</em>, <em>speed=None</em>, <em>grain_size=120</em><big>)</big><a class="reference internal" href="_modules/dsp.html#stretch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.stretch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crude granular time stretching and pitch shifting</p>
 </dd></dl>
 
 <dl class="function">
@@ -186,7 +176,7 @@ elapsed time will print to the console.</p>
 
 <dl class="function">
 <dt id="dsp.write">
-<tt class="descclassname">dsp.</tt><tt class="descname">write</tt><big>(</big><em>audio_string</em>, <em>filename</em>, <em>timestamp=False</em><big>)</big><a class="reference internal" href="_modules/dsp.html#write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.write" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">dsp.</tt><tt class="descname">write</tt><big>(</big><em>audio_string</em>, <em>filename</em>, <em>timestamp=False</em>, <em>cwd=True</em><big>)</big><a class="reference internal" href="_modules/dsp.html#write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dsp.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write audio data to renders directory with the Python wave module</p>
 </dd></dl>
 
@@ -306,6 +296,22 @@ a value in the source range and returns a scaled value in the target range.</p>
 <p>To scale a value between 0 and 1 to a value between 0 and 100:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">dsp</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
 <span class="go">50.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.timer">
+<tt class="descclassname">utils.</tt><tt class="descname">timer</tt><big>(</big><em>cmd='start'</em><big>)</big><a class="reference internal" href="_modules/utils.html#timer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coarse time measurement useful for non-realtime scripts.</p>
+<p>Start the timer at the top of your script:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dsp</span><span class="o">.</span><span class="n">timer</span><span class="p">(</span><span class="s">&#39;start&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And stop it at the end of your script to print the time 
+elapsed in seconds. Make sure dsp.quiet is False so the 
+elapsed time will print to the console.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dsp</span><span class="o">.</span><span class="n">timer</span><span class="p">(</span><span class="s">&#39;stop&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
