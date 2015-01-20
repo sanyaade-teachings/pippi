@@ -97,6 +97,10 @@ class Pippi(cmd.Cmd):
     def do_key(self, cmd):
         self.params.set('key', cmd, 'global')
 
+    def do_tune(self, cmd):
+        """ Set tuning of A4 """
+        self.params.set('tune', float(cmd) / 16.0, 'global')
+
     def do_p(self, cmd):
         self.do_play(cmd)
 
