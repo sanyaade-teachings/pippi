@@ -94,6 +94,9 @@ class Pippi(cmd.Cmd):
         elif len(cmd) == 2:
             print self.params.get(cmd[1], cmd[0])
 
+    def do_key(self, cmd):
+        self.params.set('key', cmd, 'global')
+
     def do_p(self, cmd):
         self.do_play(cmd)
 

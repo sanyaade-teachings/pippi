@@ -2,6 +2,7 @@ from pippi import dsp
 import re
 
 a0 = 27.5 
+default_key = 'c'
 match_roman = '[ivIV]?[ivIV]?[iI]?'
 
 intervals = {
@@ -300,7 +301,10 @@ def getRatioFromInterval(interval, ratios):
 
     return ratio
 
-def chord(name, key='c', octave=3, ratios=just):
+def chord(name, key=None, octave=3, ratios=just):
+    if key is None:
+        key = default_key
+
     key = ntf(key, octave, ratios)
     root = ratios[getChordRootIndex(name)]
     root = key * (root[0] / root[1])
@@ -311,6 +315,9 @@ def chord(name, key='c', octave=3, ratios=just):
 
     return chord
 
-def chords(names, key='c', octave=3, ratios=just):
+def chords(names, key=None, octave=3, ratios=just):
+    if key is None:
+        key = default_key
+
     return [ chord(name, key, octave, ratios) for name in names ]
 
