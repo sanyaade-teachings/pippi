@@ -68,16 +68,34 @@ class Pippi(cmd.Cmd):
             dsp.log(e)
 
     def do_i(self, cmd):
+        """
+List the number of voices for currently running instrument scripts.
+        """
         for generator, process_list in self.voices.iteritems():
             print generator, len(process_list)
 
     def do_device(self, device):
+        """
+Calling device with no arguments will print the current audio device.
+Calling device with a device name (eg 'default') will select that audio device for playback.
+        """
         if device == '':
             print self.io.ns.device
         else:
             self.io.ns.device = device
 
     def do_set(self, cmd):
+        """
+Set a session variable within a namespace.
+
+Usage: 
+    set <namespace> <name> <value>
+
+Examples:
+    set global drift 0.5
+    set drone drift 0.5
+    set drone key c#
+        """
         cmd = cmd.split(' ')
 
         namespace = cmd[0]
@@ -87,6 +105,22 @@ class Pippi(cmd.Cmd):
         self.params.set(param_name, param_value, namespace)
 
     def do_get(self, cmd):
+        """
+Get the value of a session variable.
+
+Usage:
+    get <name>
+
+    (Returns all <name> values in any namespace)
+
+    get <namespace> <name>
+
+    (Returns <name> value for given namespace)
+
+Examples:
+    get drift
+    get drone key
+        """
         cmd = cmd.split(' ')
 
         if len(cmd) == 1:
