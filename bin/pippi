@@ -147,9 +147,28 @@ Usage:
         self.params.set('tune', float(cmd) / 16.0, 'global')
 
     def do_p(self, cmd):
+        """
+Shorthand for play
+        """
         self.do_play(cmd)
 
     def do_play(self, cmd):
+        """
+Play instrument voices
+
+Usage:
+    play <instrument_name> <optional:number of voices>
+
+Examples:
+    # Play one drone voice
+    play drone 1
+
+    # Play one drone voice
+    play drone
+
+    # Play five drone voice
+    play drone 5
+        """
         cmd = cmd.split(' ')
 
         generator = None
