@@ -163,7 +163,7 @@ class IOManager():
         self.out.stop_stream()
         self.out.close()
         self.p.terminate()
-        for listener in self.midi_listeners:
+        for listener in self.ns.midi_listeners:
             del listener
 
     def capture_midi(self, ns):
@@ -171,15 +171,15 @@ class IOManager():
             pygame.midi.init()
 
             for device_id in self.ns.midi_devices:
-                self.midi_listeners[device_id] = pygame.midi.Input(device_id) # TODO add to config / init
+                self.ns.midi_listeners[device_id] = pygame.midi.Input(device_id) # TODO add to config / init
 
             while True:
                 for device_id in self.ns.midi_devices:
-                    if device_id not in self.midi_listeners:
-                        self.midi_listeners[device_id] = pygame.midi.Input(device_id)
+                    if device_id not in self.ns.midi_listeners:
+                        self.ns.midi_listeners[device_id] = pygame.midi.Input(device_id)
 
-                    if self.midi_listeners[device_id].poll():
-                        midi_events = self.midi_listeners[device_id].read(10)
+                    if self.ns.midi_listeners[device_id].poll():
+                        midi_events = self.ns.midi_listeners[device_id].read(10)
 
                         for e in midi_events:
                             # timestamp = e[1]
