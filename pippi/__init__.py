@@ -59,7 +59,8 @@ class EventManager():
         pass
 
 class MidiManager():
-    def __init__(self, ns):
+    def __init__(self, device_id, ns):
+        self.device_id = device_id
         self.ns = ns
         self.offset = None
 
@@ -85,7 +86,7 @@ class MidiManager():
             cc = cc + self.offset
 
         try:
-            value = getattr(self.ns, 'cc%s' % cc)
+            value = getattr(self.ns, 'cc%s%s' % (self.device_id, cc))
             return (int(value) / 127.0) * (high - low) + low
         except Exception:
             if default is None:
@@ -152,6 +153,9 @@ class IOManager():
 
         self.ns.device = 'default'
 
+        self.ns.midi_devices = []
+        self.ns.midi_listeners = []
+
         self.m = mp.Process(target=self.capture_midi, args=(self.ns,))
         self.m.start()
 
@@ -159,22 +163,29 @@ class IOManager():
         self.out.stop_stream()
         self.out.close()
         self.p.terminate()
-        del self.md
+        for listener in self.midi_listeners:
+            del listener
 
     def capture_midi(self, ns):
         try:
             pygame.midi.init()
-            self.md = pygame.midi.Input(3) # TODO add to config / init
+
+            for device_id in self.ns.midi_devices:
+                self.midi_listeners[device_id] = pygame.midi.Input(device_id) # TODO add to config / init
 
             while True:
-                if self.md.poll():
-                    midi_events = self.md.read(10)
+                for device_id in self.ns.midi_devices:
+                    if device_id not in self.midi_listeners:
+                        self.midi_listeners[device_id] = pygame.midi.Input(device_id)
 
-                    for e in midi_events:
-                        # timestamp = e[1]
-                        # cc = e[0][1]
-                        # value = e[0][2]
-                        setattr(ns, 'cc%s' % e[0][1], e[0][2])
+                    if self.midi_listeners[device_id].poll():
+                        midi_events = self.midi_listeners[device_id].read(10)
+
+                        for e in midi_events:
+                            # timestamp = e[1]
+                            # cc = e[0][1]
+                            # value = e[0][2]
+                            setattr(ns, 'cc%s%s' % (device_id, e[0][1]), e[0][2])
 
                 time.sleep(0.05)
 
@@ -211,7 +222,15 @@ class IOManager():
     def play(self, gen, ns, voice_id, voice_index, loop=True):
         sys.path.insert(0, os.getcwd())
         gen = __import__(gen)
-        midi_manager = MidiManager(ns)
+        midi_devices = {}
+
+        if hasattr(gen, 'midi'):
+            for device, device_id in gen.midi.iteritems():
+                try:
+                    midi_devices[device] = MidiManager(device_id, ns)
+                except:
+                    dsp.log('Could not load midi device %s with id %s' % (device, device_id))
+
         param_manager = ParamManager(ns)
 
         if audio_engine == 'alsa':
@@ -222,14 +241,14 @@ class IOManager():
             print 'Playback is disabled.'
             return False
 
-        def dsp_loop(out, play, midi_manager, param_manager, voice_id, group):
+        def dsp_loop(out, play, midi_devices, param_manager, voice_id, group):
             try:
                 os.nice(-2)
             except OSError:
                 os.nice(0)
 
             meta = {
-                'midi': midi_manager,
+                'midi': midi_devices,
                 'param': param_manager,
                 'id': voice_id,
                 'group': group
@@ -251,7 +270,7 @@ class IOManager():
             if hasattr(gen, 'groups'):
                 group = gen.groups[ voice_index % len(gen.groups) ]
 
-            playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_manager, param_manager, voice_id, group))
+            playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_devices, param_manager, voice_id, group))
             playback.start()
             playback.join()
 
