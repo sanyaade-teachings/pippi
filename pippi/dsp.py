@@ -14,7 +14,7 @@ import sys
 import collections
 
 try:
-    from _pippic import amp, am, add, subtract, mul, invert, shift, mix, pine, synth, curve, pulsar
+    from _pippic import amp, am, add, subtract, mul, invert, shift, mix, pine, synth, curve, pulsar, pulsarstream
     from _pippic import env as cenv
     from _pippic import tone as ctone
     from _pippic import cycle as ccycle

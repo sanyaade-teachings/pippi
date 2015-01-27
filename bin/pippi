@@ -182,12 +182,16 @@ Examples:
 
         if generator is not None:
             if generator not in self.voices:
-                self.voices[generator] = []
+                self.voices[generator] = {}
 
             for i in range(num_voices):
-                p = mp.Process(target=self.io.play, args=(generator, self.io.ns, uuid.uuid4(), i))
+                voice_id = len(self.voices[generator]) + 1
+
+                setattr(self.io.ns, '%s-%s-loop' % (generator, voice_id), True)
+                p = mp.Process(target=self.io.play, args=(generator, self.io.ns, voice_id, i))
                 p.start()
-                self.voices[generator] += [ p ]
+
+                self.voices[generator][voice_id] = p
 
     def do_o(self, cmd):
         self.do_once(cmd)
@@ -211,9 +215,12 @@ Examples:
 
     def do_stop(self, generator):
         if generator in self.voices:
-            while len(self.voices[generator]) > 0:
-                process = self.voices[generator].pop()
+            for voice_id, process in self.voices[generator].iteritems():
+                setattr(self.io.ns, '%s-%s-loop' % (generator, voice_id), False)
                 process.terminate()
+
+            del self.voices[generator]
+
         else:
             dsp.log('no %s voices found' % generator)
 

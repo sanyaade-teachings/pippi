@@ -153,7 +153,7 @@ class IOManager():
 
         self.ns.device = 'default'
 
-        self.ns.midi_devices = []
+        self.ns.midi_devices = {}
         self.ns.midi_listeners = []
 
         self.m = mp.Process(target=self.capture_midi, args=(self.ns,))
@@ -170,16 +170,21 @@ class IOManager():
         try:
             pygame.midi.init()
 
-            for device_id in self.ns.midi_devices:
-                self.ns.midi_listeners[device_id] = pygame.midi.Input(device_id) # TODO add to config / init
+            for device_id in ns.midi_devices:
+                dsp.log('listening (init) to %s' % device_id)
+                ns.midi_listeners[device_id] = pygame.midi.Input(device_id) # TODO add to config / init
 
             while True:
-                for device_id in self.ns.midi_devices:
-                    if device_id not in self.ns.midi_listeners:
-                        self.ns.midi_listeners[device_id] = pygame.midi.Input(device_id)
+                for device_id in ns.midi_devices:
+                    dsp.log('activating %s' % device_id)
+
+                    if device_id not in ns.midi_listeners:
+                        dsp.log('listening to %s' % device_id)
+                        ns.midi_listeners[device_id] = pygame.midi.Input(device_id)
 
                     if self.ns.midi_listeners[device_id].poll():
-                        midi_events = self.ns.midi_listeners[device_id].read(10)
+                        dsp.log('getting events %s' % device_id)
+                        midi_events = ns.midi_listeners[device_id].read(10)
 
                         for e in midi_events:
                             # timestamp = e[1]
@@ -219,15 +224,18 @@ class IOManager():
 
         return out
 
-    def play(self, gen, ns, voice_id, voice_index, loop=True):
+    def play(self, generator, ns, voice_id, voice_index, loop=True):
         sys.path.insert(0, os.getcwd())
-        gen = __import__(gen)
+        gen = __import__(generator)
+
         midi_devices = {}
 
         if hasattr(gen, 'midi'):
             for device, device_id in gen.midi.iteritems():
+                dsp.log('\ndevice: %s device_id: %s' % (device, device_id))
                 try:
                     midi_devices[device] = MidiManager(device_id, ns)
+                    dsp.log('setting midi manager %s' % device_id)
                 except:
                     dsp.log('Could not load midi device %s with id %s' % (device, device_id))
 
@@ -241,7 +249,7 @@ class IOManager():
             print 'Playback is disabled.'
             return False
 
-        def dsp_loop(out, play, midi_devices, param_manager, voice_id, group):
+        def dsp_loop(out, play, midi_devices, param_manager, generator, voice_id, group, ns):
             try:
                 os.nice(-2)
             except OSError:
@@ -254,27 +262,22 @@ class IOManager():
                 'group': group
             }
 
-            snd = play(meta)
-            snd = dsp.split(snd, 500)
-            for s in snd:
-                try:
-                    out.write(s)
-                except AttributeError:
-                    dsp.log('Could not write to audio device')
-                    return False
+            while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
+                snd = play(meta)
+                snd = dsp.split(snd, 500)
+                for s in snd:
+                    try:
+                        out.write(s)
+                    except AttributeError:
+                        dsp.log('Could not write to audio device')
+                        return False
 
-        while True:
-            reload(gen)
-            
-            group = None
-            if hasattr(gen, 'groups'):
-                group = gen.groups[ voice_index % len(gen.groups) ]
+        group = None
+        if hasattr(gen, 'groups'):
+            group = gen.groups[ voice_index % len(gen.groups) ]
 
-            playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_devices, param_manager, voice_id, group))
-            playback.start()
-            playback.join()
-
-            if not loop:
-                break
+        playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_devices, param_manager, generator, voice_id, group, ns))
+        playback.start()
+        playback.join()
 
         return True
