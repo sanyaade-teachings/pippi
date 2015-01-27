@@ -550,8 +550,16 @@ def adsr(snd, a=10, d=50, s=1.0, r=100):
 
     return out
 
+def taper(snd, amount=441)
+    first = cut(snd, 0, amount)
+    first = env(first, 'line')
 
+    middle = cut(snd, amount, flen(snd) - (amount * 2))
 
+    last = cut(snd, flen(first) + flen(middle), amount)
+    last = env(last, 'phasor')
+
+    return '%s%s%s' % (first, middle, last)
 
 
 
