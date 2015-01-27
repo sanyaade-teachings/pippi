@@ -550,7 +550,7 @@ def adsr(snd, a=10, d=50, s=1.0, r=100):
 
     return out
 
-def taper(snd, amount=441)
+def taper(snd, amount=441):
     first = cut(snd, 0, amount)
     first = env(first, 'line')
 
