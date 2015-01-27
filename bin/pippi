@@ -8,6 +8,9 @@ import json
 import subprocess
 import glob
 import uuid
+import time
+
+import pygame.midi
 
 from pippi import dsp
 from pippi import IOManager
@@ -32,6 +35,7 @@ class Pippi(cmd.Cmd):
         self.events = EventManager(self.io.ns, self)
 
         self.voices = {}
+        self.midi_listeners = {}
 
         # Start rhythm grid tick process
         #self.tick = mp.Event()
@@ -72,6 +76,45 @@ List the number of voices for currently running instrument scripts.
         """
         for generator, process_list in self.voices.iteritems():
             print generator, len(process_list)
+
+    def do_midi(self, selected_id):
+        pygame.midi.init()
+
+        if selected_id == '':
+            for device_id in range(pygame.midi.get_count()):
+                device = pygame.midi.get_device_info(device_id)
+                if device[2] == True:
+                    print '%s: %s' % (device_id, device[1]) 
+
+        else:
+            def capture_midi(device_id, ns):
+                try:
+                    device = pygame.midi.Input(int(device_id))
+                    dsp.log('listening to %s' % device_id)
+
+                    while True:
+                        if device.poll():
+                            midi_events = device.read(10)
+
+                            for e in midi_events:
+                                # timestamp = e[1]
+                                # cc = e[0][1]
+                                # value = e[0][2]
+                                setattr(ns, 'cc%s%s' % (device_id, e[0][1]), e[0][2])
+
+                        time.sleep(0.05)
+
+                except pygame.midi.MidiException:
+                    dsp.log('Midi device not found')
+
+            listener = mp.Process(target=capture_midi, args=(selected_id, self.io.ns))
+            listener.start()
+            self.midi_listeners[selected_id] = listener
+
+            print 'Activated midi device %s' % selected_id
+
+        pygame.midi.quit()
+
 
     def do_device(self, device):
         """

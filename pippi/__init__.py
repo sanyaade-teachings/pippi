@@ -153,49 +153,10 @@ class IOManager():
 
         self.ns.device = 'default'
 
-        self.ns.midi_devices = {}
-        self.ns.midi_listeners = []
-
-        self.m = mp.Process(target=self.capture_midi, args=(self.ns,))
-        self.m.start()
-
     def __del__(self):
         self.out.stop_stream()
         self.out.close()
         self.p.terminate()
-        for listener in self.ns.midi_listeners:
-            del listener
-
-    def capture_midi(self, ns):
-        try:
-            pygame.midi.init()
-
-            for device_id in ns.midi_devices:
-                dsp.log('listening (init) to %s' % device_id)
-                ns.midi_listeners[device_id] = pygame.midi.Input(device_id) # TODO add to config / init
-
-            while True:
-                for device_id in ns.midi_devices:
-                    dsp.log('activating %s' % device_id)
-
-                    if device_id not in ns.midi_listeners:
-                        dsp.log('listening to %s' % device_id)
-                        ns.midi_listeners[device_id] = pygame.midi.Input(device_id)
-
-                    if self.ns.midi_listeners[device_id].poll():
-                        dsp.log('getting events %s' % device_id)
-                        midi_events = ns.midi_listeners[device_id].read(10)
-
-                        for e in midi_events:
-                            # timestamp = e[1]
-                            # cc = e[0][1]
-                            # value = e[0][2]
-                            setattr(ns, 'cc%s%s' % (device_id, e[0][1]), e[0][2])
-
-                time.sleep(0.05)
-
-        except pygame.midi.MidiException:
-            dsp.log('Midi device not found')
 
     def open_alsa_pcm(self, device='default'):
         try:
