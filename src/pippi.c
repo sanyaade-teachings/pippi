@@ -1088,11 +1088,11 @@ static PyObject * pippic_pulsarstream(PyObject *self, PyObject *args) {
         *BUFFER(data, i) = saturate(amp * valWaveform * valWindow * (MAXVAL - 1));
         *BUFFER(data, i + size) = saturate(amp * valWaveform * valWindow * (MAXVAL - 1));
 
-        if(i < length - chunk) {
+        //if(i < length - chunk) {
             indexWaveform += (freq * valMod) * (lenWaveform + paddingWaveform) * (1.0 / 44100.0);
             indexWindow += (freq * valMod) * (lenWindow + paddingWindow) * (1.0 / 44100.0);
             indexMod += freqMod * lenMod * (1.0 / 44100.0);
-        }
+        //}
     }
 
     Py_DECREF(waveform);
