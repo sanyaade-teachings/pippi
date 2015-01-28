@@ -86,14 +86,14 @@ def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
 
     return cycles
 
-def transpose(snd, amount):
+def transpose(snd, amount, chans=2):
     """ Change the speed of a sound.
         1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc.
         
         This is a wrapper for audioop.ratecv in the standard library."""
     amount = 1.0 / float(amount)
-
-    return audioop.ratecv(snd, audio_params[1], audio_params[0], audio_params[2], int(audio_params[2] * amount), None)[0]
+    rate = int(audio_params[2] * amount)
+    return audioop.ratecv(snd, audio_params[1], chans, audio_params[2], rate, None)[0]
 
 def stretch(snd, length=None, speed=None, grain_size=120):
     """ Crude granular time stretching and pitch shifting """
@@ -300,6 +300,12 @@ def splitmono(string):
     right = audioop.tomono(string, audio_params[1], 0, 1)
 
     return [left, right] 
+
+def stereo(snd):
+    """ Just a wrapper for audioop.tostereo from the standard library. 
+        Pass it a mono sound and it will convert it to stereo.
+    """
+    return audioop.tostereo(snd, audio_params[1], 0.5, 0.5)
 
 def split(string, size, chans=2):
     """ split a sound into chunks of size N in frames, or by zero crossings """
