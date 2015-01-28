@@ -260,6 +260,7 @@ Examples:
         if generator in self.voices:
             for voice_id, process in self.voices[generator].iteritems():
                 setattr(self.io.ns, '%s-%s-loop' % (generator, voice_id), False)
+                process.join()
                 process.terminate()
 
             del self.voices[generator]
