@@ -267,6 +267,12 @@ Examples:
         else:
             dsp.log('no %s voices found' % generator)
 
+    def do_reload(self, opt):
+        if opt == 'on':
+            setattr(self.io.ns, 'reload', True)
+        else:
+            setattr(self.io.ns, 'reload', False)
+
     def do_quit(self, cmd):
         exit()
 

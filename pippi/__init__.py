@@ -210,35 +210,36 @@ class IOManager():
             print 'Playback is disabled.'
             return False
 
-        def dsp_loop(out, play, midi_devices, param_manager, generator, voice_id, group, ns):
-            try:
-                os.nice(-2)
-            except OSError:
-                os.nice(0)
-
-            meta = {
-                'midi': midi_devices,
-                'param': param_manager,
-                'id': voice_id,
-                'group': group
-            }
-
-            while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
-                snd = play(meta)
-                snd = dsp.split(snd, 500)
-                for s in snd:
-                    try:
-                        out.write(s)
-                    except AttributeError:
-                        dsp.log('Could not write to audio device')
-                        return False
+        try:
+            os.nice(-2)
+        except OSError:
+            os.nice(0)
 
         group = None
         if hasattr(gen, 'groups'):
             group = gen.groups[ voice_index % len(gen.groups) ]
 
-        playback = mp.Process(target=dsp_loop, args=(out, gen.play, midi_devices, param_manager, generator, voice_id, group, ns))
-        playback.start()
-        playback.join()
+        meta = {
+            'midi': midi_devices,
+            'param': param_manager,
+            'id': voice_id,
+            'group': group
+        }
+
+        if not hasattr(ns, 'reload'):
+            setattr(ns, 'reload', False)
+
+        while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
+            if getattr(ns, 'reload') == True:
+                reload(gen)
+
+            snd = gen.play(meta)
+            snd = dsp.split(snd, 500)
+            for s in snd:
+                try:
+                    out.write(s)
+                except AttributeError:
+                    dsp.log('Could not write to audio device')
+                    return False
 
         return True
