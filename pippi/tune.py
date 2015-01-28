@@ -54,12 +54,12 @@ extensions = {
 
 chord_romans = {
     'i': 0,
-    'ii': 1,
-    'iii': 2,
-    'iv': 3,
-    'v': 4,
-    'vi': 5,
-    'vii': 6,
+    'ii': 2,
+    'iii': 4,
+    'iv': 5,
+    'v': 7,
+    'vi': 9,
+    'vii': 11,
 }
 
 just = ( 
