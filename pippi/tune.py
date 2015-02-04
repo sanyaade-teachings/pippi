@@ -230,7 +230,7 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
 
     for index, degree in enumerate(scale_degrees):
         degree = int(degree)
-        register = degree / len(scale)
+        register = degree / (len(scale) + 1)
         chromatic_degree = scale[degree % len(scale) - 1]
         ratio = ratios[chromatic_degree]
         freqs += [ root * (ratio[0] / ratio[1]) * 2**register ]
