@@ -460,10 +460,11 @@ def env(audio_string, wavetype="sine", fullres=False, highval=1.0, lowval=0.0, w
     return cenv(audio_string, int(wtype), float(amp), float(phase), float(offset), float(mult))
 
 def benv(sound, points):
-    chunksize = flen(sound) / (len(points) - 1)
-    sounds = split(sound, chunksize, audio_params[0])
+    chunksize = mstf(3)
+    sounds = split(sound, chunksize)
+    points = breakpoint(points, len(sounds))
 
-    return ''.join([env(s, 'line', points[i + 1], points[i]) for i, s in enumerate(sounds)])
+    return ''.join([amp(s, points[i]) for i, s in enumerate(sounds)])
  
 def panenv(sound, ptype='line', etype='sine', panlow=0.0, panhigh=1.0, envlow=0.0, envhigh=1.0):
     packets = split(sound, dsp_grain)
