@@ -25,7 +25,6 @@ try:
     from _pippic import synth
     from _pippic import curve
     from _pippic import pulsar
-    from _pippic import wtread
     from _pippic import fold
     from _pippic import env as cenv
     from _pippic import tone as ctone
