@@ -14,11 +14,23 @@ import sys
 import collections
 
 try:
-    from _pippic import amp, am, add, subtract, mul, invert, shift, mix, pine, synth, curve, pulsar, pulsarstream
+    from _pippic import amp
+    from _pippic import am
+    from _pippic import add
+    from _pippic import subtract
+    from _pippic import mul
+    from _pippic import invert
+    from _pippic import mix
+    from _pippic import pine
+    from _pippic import synth
+    from _pippic import curve
+    from _pippic import pulsar
+    from _pippic import wtread
+    from _pippic import fold
     from _pippic import env as cenv
     from _pippic import tone as ctone
     from _pippic import cycle as ccycle
-    from _pippic import wtread, fold
+
 except ImportError:
     print 'Warning: could not import C dsp extensions'
 
