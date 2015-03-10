@@ -156,11 +156,19 @@ def nti(note):
     """
     return notes.get(note, False)
 
-def ntf(note, octave=4, ratios=None):
+def ntf(note, octave=None, ratios=None):
     """ Note to freq 
     """
+    if re.match('[a-zA-Z]\d+', note) is not None:
+        parsed = re.match('([a-zA-Z])(\d+)', note)
+        note = parsed.group(1)
+        octave = int(parsed.group(2))
+
     if ratios is None:
         ratios = terry
+
+    if octave is None:
+        octave = 4
 
     return ratios[nti(note)][0] / ratios[nti(note)][1] * (a0 * (2.0**octave))
 
