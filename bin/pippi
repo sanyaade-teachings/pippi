@@ -256,15 +256,24 @@ Examples:
             p = mp.Process(target=self.io.play, args=(generator, self.io.ns, uuid.uuid4(), i, False))
             p.start()
 
+
+    def stop(self, generator):
+        for voice_id, process in self.voices[generator].iteritems():
+            setattr(self.io.ns, '%s-%s-loop' % (generator, voice_id), False)
+            process.join()
+            process.terminate()
+
+
+
     def do_stop(self, generator):
         if generator in self.voices:
-            for voice_id, process in self.voices[generator].iteritems():
-                setattr(self.io.ns, '%s-%s-loop' % (generator, voice_id), False)
-                process.join()
-                process.terminate()
-
+            self.stop(generator)
             del self.voices[generator]
 
+        elif generator == '' or generator == 'all':
+            for gen in self.voices.keys():
+                self.stop(gen)
+                del self.voices[gen]
         else:
             dsp.log('no %s voices found' % generator)
 
