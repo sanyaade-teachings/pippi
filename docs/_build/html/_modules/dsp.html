@@ -8,7 +8,7 @@
     
     <title>dsp &mdash; pippi 1.0 documentation</title>
     
-    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
@@ -26,8 +26,8 @@
     <link rel="top" title="pippi 1.0 documentation" href="../index.html" />
     <link rel="up" title="Module code" href="index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -36,15 +36,15 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">pippi 1.0 documentation</a> &raquo;</li>
-          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">pippi 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <h1>Source code for dsp</h1><div class="highlight"><pre>
 <span class="c">#!/usr/bin/env python2.7</span>
@@ -63,11 +63,22 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">amp</span><span class="p">,</span> <span class="n">am</span><span class="p">,</span> <span class="n">add</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span> <span class="n">mul</span><span class="p">,</span> <span class="n">invert</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">mix</span><span class="p">,</span> <span class="n">pine</span><span class="p">,</span> <span class="n">synth</span><span class="p">,</span> <span class="n">curve</span><span class="p">,</span> <span class="n">pulsar</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">amp</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">am</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">add</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">subtract</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">mul</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">invert</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">mix</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">pine</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">synth</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">curve</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">pulsar</span>
+    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">fold</span>
     <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">env</span> <span class="k">as</span> <span class="n">cenv</span>
     <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">tone</span> <span class="k">as</span> <span class="n">ctone</span>
     <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">cycle</span> <span class="k">as</span> <span class="n">ccycle</span>
-    <span class="kn">from</span> <span class="nn">_pippic</span> <span class="kn">import</span> <span class="n">wtread</span><span class="p">,</span> <span class="n">fold</span>
+
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">print</span> <span class="s">&#39;Warning: could not import C dsp extensions&#39;</span>
 
@@ -135,14 +146,14 @@
 
     <span class="k">return</span> <span class="n">cycles</span>
 </div>
-<div class="viewcode-block" id="transpose"><a class="viewcode-back" href="../index.html#dsp.transpose">[docs]</a><span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+<div class="viewcode-block" id="transpose"><a class="viewcode-back" href="../index.html#dsp.transpose">[docs]</a><span class="k">def</span> <span class="nf">transpose</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">chans</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Change the speed of a sound.</span>
 <span class="sd">        1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc.</span>
 <span class="sd">        </span>
 <span class="sd">        This is a wrapper for audioop.ratecv in the standard library.&quot;&quot;&quot;</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">audioop</span><span class="o">.</span><span class="n">ratecv</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">amount</span><span class="p">),</span> <span class="bp">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">amount</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">audioop</span><span class="o">.</span><span class="n">ratecv</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">chans</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">rate</span><span class="p">,</span> <span class="bp">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </div>
 <div class="viewcode-block" id="stretch"><a class="viewcode-back" href="../index.html#dsp.stretch">[docs]</a><span class="k">def</span> <span class="nf">stretch</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">grain_size</span><span class="o">=</span><span class="mi">120</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Crude granular time stretching and pitch shifting &quot;&quot;&quot;</span>
@@ -350,6 +361,12 @@
 
     <span class="k">return</span> <span class="p">[</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">]</span> 
 </div>
+<div class="viewcode-block" id="stereo"><a class="viewcode-back" href="../index.html#dsp.stereo">[docs]</a><span class="k">def</span> <span class="nf">stereo</span><span class="p">(</span><span class="n">snd</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Just a wrapper for audioop.tostereo from the standard library. </span>
+<span class="sd">        Pass it a mono sound and it will convert it to stereo.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">audioop</span><span class="o">.</span><span class="n">tostereo</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="split"><a class="viewcode-back" href="../index.html#dsp.split">[docs]</a><span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">chans</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; split a sound into chunks of size N in frames, or by zero crossings &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -476,7 +493,29 @@
     <span class="k">return</span> <span class="n">audioop</span><span class="o">.</span><span class="n">mul</span><span class="p">(</span><span class="nb">slice</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">amp</span><span class="p">)</span>
 
 <div class="viewcode-block" id="env"><a class="viewcode-back" href="../index.html#dsp.env">[docs]</a><span class="k">def</span> <span class="nf">env</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="n">wavetype</span><span class="o">=</span><span class="s">&quot;sine&quot;</span><span class="p">,</span> <span class="n">fullres</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">highval</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lowval</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">wtype</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amp</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">mult</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Temp wrapper for new env function &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; Temp wrapper for new env function \n</span>
+<span class="sd">        Purpose and Function of each parameter:</span>
+<span class="sd">          * wavetype: Specifies the wavetype that the original audio string is multiplied with</span>
+<span class="sd">                    * Options:</span>
+<span class="sd">                        *  sine/sine2pi</span>
+<span class="sd">                        *  cos/cos2pi</span>
+<span class="sd">                        *  hann</span>
+<span class="sd">                        *  tri</span>
+<span class="sd">                        *  saw/line</span>
+<span class="sd">                        *  isaw/phasor</span>
+<span class="sd">                        *  vary</span>
+<span class="sd">                        *  impulse</span>
+<span class="sd">                        *  square</span>
+<span class="sd">                        *  random</span>
+<span class="sd">          * fullres: Does not currently change the sound</span>
+<span class="sd">          * highval: Does not currently change the sound</span>
+<span class="sd">          * lowval: Does not currently change the sound</span>
+<span class="sd">          * wtype: Sets the wave type (0-8), but it is easier just to use the wavetype parameter</span>
+<span class="sd">          * amp: Changes the amplitude of the wave that the audio string is multiplied with</span>
+<span class="sd">          * phase: Changes the phase of the wave that the audio string is multiplied with</span>
+<span class="sd">          * offset: Offsets the wave that the audio string is multiplied with</span>
+<span class="sd">          * mult: A multiplier for the frequency of the wave that the original audio string is multiplied with.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c"># Quick and dirty mapping to transition to the new api</span>
     <span class="k">if</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s">&#39;sine2pi&#39;</span> <span class="ow">or</span> <span class="n">wavetype</span> <span class="o">==</span> <span class="s">&#39;sine&#39;</span><span class="p">:</span>
@@ -503,10 +542,11 @@
     <span class="k">return</span> <span class="n">cenv</span><span class="p">(</span><span class="n">audio_string</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">wtype</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">amp</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">phase</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">offset</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">mult</span><span class="p">))</span>
 </div>
 <span class="k">def</span> <span class="nf">benv</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
-    <span class="n">chunksize</span> <span class="o">=</span> <span class="n">flen</span><span class="p">(</span><span class="n">sound</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">sounds</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">,</span> <span class="n">audio_params</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">chunksize</span> <span class="o">=</span> <span class="n">mstf</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">sounds</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">breakpoint</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sounds</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">env</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s">&#39;line&#39;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sounds</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">amp</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sounds</span><span class="p">)])</span>
  
 <span class="k">def</span> <span class="nf">panenv</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">ptype</span><span class="o">=</span><span class="s">&#39;line&#39;</span><span class="p">,</span> <span class="n">etype</span><span class="o">=</span><span class="s">&#39;sine&#39;</span><span class="p">,</span> <span class="n">panlow</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">panhigh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">envlow</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">envhigh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
     <span class="n">packets</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">sound</span><span class="p">,</span> <span class="n">dsp_grain</span><span class="p">)</span>
@@ -599,8 +639,16 @@
 
     <span class="k">return</span> <span class="n">out</span>
 
+<span class="k">def</span> <span class="nf">taper</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="mi">441</span><span class="p">):</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">amount</span><span class="p">)</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">env</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="s">&#39;line&#39;</span><span class="p">)</span>
 
+    <span class="n">middle</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">flen</span><span class="p">(</span><span class="n">snd</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">amount</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>
 
+    <span class="n">last</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">snd</span><span class="p">,</span> <span class="n">flen</span><span class="p">(</span><span class="n">first</span><span class="p">)</span> <span class="o">+</span> <span class="n">flen</span><span class="p">(</span><span class="n">middle</span><span class="p">),</span> <span class="n">amount</span><span class="p">)</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">env</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="s">&#39;phasor&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">middle</span><span class="p">,</span> <span class="n">last</span><span class="p">)</span>
 
 
 
@@ -938,9 +986,9 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -957,7 +1005,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -966,13 +1014,13 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../index.html">pippi 1.0 documentation</a> &raquo;</li>
-          <li><a href="index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">pippi 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Erik Schoster.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>
