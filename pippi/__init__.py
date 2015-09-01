@@ -225,11 +225,19 @@ class IOManager():
         if hasattr(gen, 'groups'):
             group = gen.groups[ voice_index % len(gen.groups) ]
 
+        if hasattr(gen, 'sbank'):
+            sbank = {}
+            for snd in gen.sbank:
+                sbank[snd[0]] = dsp.read(snd[1]).data
+        else:
+            sbank = None
+
         meta = {
             'midi': midi_devices,
             'param': param_manager,
             'id': voice_id,
-            'group': group
+            'group': group, 
+            'sbank': sbank
         }
 
         if not hasattr(ns, 'reload'):
