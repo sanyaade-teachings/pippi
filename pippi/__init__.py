@@ -244,16 +244,22 @@ class IOManager():
             setattr(ns, 'reload', False)
 
         while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
-            if getattr(ns, 'reload') == True:
+            if getattr(ns, 'reload') == True and not hasattr(gen, 'automate'):
                 reload(gen)
 
-            snd = gen.play(meta)
-            snd = dsp.split(snd, 500)
-            for s in snd:
-                try:
-                    out.write(s)
-                except AttributeError:
-                    dsp.log('Could not write to audio device')
-                    return False
+            # automate will always override play
+            if hasattr(gen, 'play') and not hasattr(gen, 'automate'):
+                snd = gen.play(meta)
+                snd = dsp.split(snd, 500)
+                for s in snd:
+                    try:
+                        out.write(s)
+                    except AttributeError:
+                        dsp.log('Could not write to audio device')
+                        return False
+
+            if hasattr(gen, 'automate'):
+                gen.automate(meta)
+                time.sleep(0.01)
 
         return True
