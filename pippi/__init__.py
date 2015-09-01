@@ -95,7 +95,7 @@ class MidiManager():
             return (int(value) / 127.0) * (high - low) + low
         except Exception:
             if default is None:
-                default = low
+                default = high 
 
             return default
 
