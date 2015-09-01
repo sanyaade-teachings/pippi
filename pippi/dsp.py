@@ -444,7 +444,29 @@ def pan(slice, pan_pos=0.5, amp=1.0):
     return audioop.mul(slice, audio_params[1], amp)
 
 def env(audio_string, wavetype="sine", fullres=False, highval=1.0, lowval=0.0, wtype=0, amp=1.0, phase=0.0, offset=0.0, mult=1.0):
-    """ Temp wrapper for new env function """
+    """ Temp wrapper for new env function \n
+        Purpose and Function of each parameter:
+          * wavetype: Specifies the wavetype that the original audio string is multiplied with
+                    * Options:
+                        *  sine/sine2pi
+                        *  cos/cos2pi
+                        *  hann
+                        *  tri
+                        *  saw/line
+                        *  isaw/phasor
+                        *  vary
+                        *  impulse
+                        *  square
+                        *  random
+          * fullres: Does not currently change the sound
+          * highval: Does not currently change the sound
+          * lowval: Does not currently change the sound
+          * wtype: Sets the wave type (0-8), but it is easier just to use the wavetype parameter
+          * amp: Changes the amplitude of the wave that the audio string is multiplied with
+          * phase: Changes the phase of the wave that the audio string is multiplied with
+          * offset: Offsets the wave that the audio string is multiplied with
+          * mult: A multiplier for the frequency of the wave that the original audio string is multiplied with.
+    """
 
     # Quick and dirty mapping to transition to the new api
     if wavetype == 'sine2pi' or wavetype == 'sine':
