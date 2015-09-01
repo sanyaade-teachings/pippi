@@ -281,6 +281,8 @@ class IOManager():
 
             if hasattr(gen, 'automate'):
                 gen.automate(meta)
-                time.sleep(0.01)
+
+                if hasattr(gen, 'loop_time'):
+                    time.sleep(gen.loop_time)
 
         return True
