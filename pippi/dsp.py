@@ -179,7 +179,7 @@ def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0
 
     return synth(wtype, float(freq), length, amp, phase, offset)
         
-def alias(snd, passthru=False, envelope=None, split_size=0):
+def alias(snd, passthru=False, envelope='flat', split_size=0):
     """
         A simple time domain bitcrush-like effect.
 
