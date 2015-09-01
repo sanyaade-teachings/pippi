@@ -59,10 +59,15 @@ class EventManager():
         pass
 
 class MidiManager():
-    def __init__(self, device_id, ns):
+    def __init__(self, device_id, ns, device_type=None):
         self.device_id = device_id
         self.ns = ns
+        self.device_type = 'input' if device_type is None else device_type
         self.offset = None
+
+        if self.device_type == 'output':
+            pygame.midi.init()
+            self.output = pygame.midi.Output(int(self.device_id))
 
     def setOffset(self, offset):
         self.offset = offset
@@ -93,6 +98,12 @@ class MidiManager():
                 default = low
 
             return default
+
+    def noteon(self, value):
+        self.output.note_on(value)
+
+    def noteoff(self, value):
+        self.output.note_off(value)
 
 class ParamManager():
     def __init__(self, ns):
@@ -200,8 +211,14 @@ class IOManager():
         if hasattr(gen, 'midi'):
             for device, device_id in gen.midi.iteritems():
                 dsp.log('\ndevice: %s device_id: %s' % (device, device_id))
+
+                pygame.midi.init()
+                device_info = pygame.midi.get_device_info(device_id)
+                device_type = 'input' if device_info[2] else 'output'
+                pygame.midi.quit()
+
                 try:
-                    midi_devices[device] = MidiManager(device_id, ns)
+                    midi_devices[device] = MidiManager(device_id, ns, device_type)
                     dsp.log('setting midi manager %s' % device_id)
                 except:
                     dsp.log('Could not load midi device %s with id %s' % (device, device_id))
@@ -243,7 +260,11 @@ class IOManager():
         if not hasattr(ns, 'reload'):
             setattr(ns, 'reload', False)
 
+        iterations = 0
         while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
+            meta['iterations'] = iterations
+            iterations += 1
+
             if getattr(ns, 'reload') == True and not hasattr(gen, 'automate'):
                 reload(gen)
 

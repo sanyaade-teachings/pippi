@@ -80,13 +80,16 @@ List the number of voices for currently running instrument scripts.
     def do_midi(self, selected_id):
         pygame.midi.init()
 
+
         if selected_id == '':
             for device_id in range(pygame.midi.get_count()):
                 device = pygame.midi.get_device_info(device_id)
-                if device[2] == True:
-                    print '%s: %s' % (device_id, device[1]) 
+                print '%s: %s (%s)' % (device_id, device[1], 'input' if device[2] else 'output') 
 
         else:
+            device_info = pygame.midi.get_device_info(int(selected_id))
+            device_type = 'input' if device_info[2] else 'output'
+
             def capture_midi(device_id, ns):
                 try:
                     device = pygame.midi.Input(int(device_id))
@@ -107,11 +110,12 @@ List the number of voices for currently running instrument scripts.
                 except pygame.midi.MidiException:
                     dsp.log('Midi device not found')
 
-            listener = mp.Process(target=capture_midi, args=(selected_id, self.io.ns))
-            listener.start()
-            self.midi_listeners[selected_id] = listener
+            if device_type == 'input':
+                listener = mp.Process(target=capture_midi, args=(selected_id, self.io.ns))
+                listener.start()
+                self.midi_listeners[selected_id] = listener
 
-            print 'Activated midi device %s' % selected_id
+                print 'Activated midi device listener %s' % selected_id
 
         pygame.midi.quit()
 
