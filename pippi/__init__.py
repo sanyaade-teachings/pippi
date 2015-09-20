@@ -27,36 +27,20 @@ except ImportError:
 
 
 class EventManager():
-    def __init__(self, ns, console):
+    def __init__(self, ns):
         self.ns = ns
-        self.console = console
-        self.run = True
 
-    ## todo: this would be better as an osc server
-    def loop(self):
-        while self.run == True:
-            dsp.delay(4410)
+    def grid(self, tick, bpm):
+        os.nice(0)
 
-            if hasattr(self.ns, 'console_cmds'):
-                cmds = self.ns.console_cmds
-                del self.ns.console_cmds
+        beat = dsp.bpm2frames(bpm)
 
-                for cmd in cmds:
-                    cmd = cmd.split(' ')
-                    cmd_function = cmd.pop(0)
-                    args = ' '.join(cmd)
-                    if hasattr(console, 'do_%s' % cmd_function):
-                        method = getattr(console, 'do_%s' % cmd_function)
-                        method(args)
-
-    def midi_handler(self):
-        pass
-
-    def osc_handler(self):
-        pass
-
-    def cmd_handler(self):
-        pass
+        count = 0
+        while getattr(self.ns, 'grid', True):
+            tick.set()
+            tick.clear()
+            dsp.delay(beat)
+            count += 1
 
 class MidiManager():
     def __init__(self, device_id, ns, device_type=None):
