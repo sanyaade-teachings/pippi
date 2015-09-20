@@ -196,10 +196,14 @@ class IOManager():
             for device, device_id in gen.midi.iteritems():
                 dsp.log('\ndevice: %s device_id: %s' % (device, device_id))
 
-                pygame.midi.init()
-                device_info = pygame.midi.get_device_info(device_id)
-                device_type = 'input' if device_info[2] else 'output'
-                pygame.midi.quit()
+                try:
+                    pygame.midi.init()
+                    device_info = pygame.midi.get_device_info(device_id)
+                    device_type = 'input' if device_info[2] else 'output'
+                    pygame.midi.quit()
+                except:
+                    dsp.log('could not read device %s' % device_id)
+                    device_type = 'output'
 
                 try:
                     midi_devices[device] = MidiManager(device_id, ns, device_type)

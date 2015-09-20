@@ -32,15 +32,15 @@ class Pippi(cmd.Cmd):
 
         self.io = IOManager()
         self.params = ParamManager(self.io.ns)
-        self.events = EventManager()
+        #self.events = EventManager(self.io.ns)
 
         self.voices = {}
         self.midi_listeners = {}
 
         # Start rhythm grid tick process
-        self.tick = mp.Event()
-        self.grid = mp.Process(name='grid', target=self.events.grid, args=(self.tick, settings.config('bpm')))
-        self.grid.start()
+        #self.tick = mp.Event()
+        #self.grid = mp.Process(name='grid', target=self.events.grid, args=(self.tick, settings.config('bpm')))
+        #self.grid.start()
 
         # Load all available generators into a dict 
         self.generators = []
@@ -87,8 +87,11 @@ List the number of voices for currently running instrument scripts.
                 print '%s: %s (%s)' % (device_id, device[1], 'input' if device[2] else 'output') 
 
         else:
-            device_info = pygame.midi.get_device_info(int(selected_id))
-            device_type = 'input' if device_info[2] else 'output'
+            try:
+                device_info = pygame.midi.get_device_info(int(selected_id))
+                device_type = 'input' if device_info[2] else 'output'
+            except TypeError:
+                device_type = 'output'
 
             def capture_midi(device_id, ns):
                 try:
