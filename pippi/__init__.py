@@ -43,11 +43,12 @@ class EventManager():
             count += 1
 
 class MidiManager():
-    def __init__(self, device_id, ns, device_type=None):
+    def __init__(self, device_id, ns, device_type=None, mappings=None):
         self.device_id = device_id
         self.ns = ns
         self.device_type = 'input' if device_type is None else device_type
         self.offset = None
+        self.mappings = mappings
 
         if self.device_type == 'output':
             pygame.midi.init()
@@ -59,18 +60,21 @@ class MidiManager():
     def geti(self, cc, default=None, low=0, high=1):
         return int(round(self.get(cc, default, low, high)))
 
-    def getr(self, cc, default=None, low=0, high=1, spread=1):
-        spread = 1 if spread > 1 else spread
-        spread = dsp.rand(0, spread)
+    def getr(self, cc, default=None, low=0, high=1, mul=1):
+        mul = 1 if mul > 1 else mul
+        mul = dsp.rand(0, mul)
 
         value = self.get(cc, default, low, high)
 
-        return value * spread
+        return value * mul
 
     def getri(self, cc, default=None, low=0, high=1, spread=1):
         return int(round(self.getr(cc, default, low, high, spread)))
 
     def get(self, cc, default=None, low=0, high=1):
+        if self.mappings is not None and cc in self.mappings:
+            cc = self.mappings[cc]
+
         if self.offset is not None:
             cc = cc + self.offset
 
@@ -206,7 +210,12 @@ class IOManager():
                     device_type = 'output'
 
                 try:
-                    midi_devices[device] = MidiManager(device_id, ns, device_type)
+                    mappings = None
+                    if hasattr(gen, 'mappings'):
+                        if device in gen.mappings:
+                            mappings = gen.mappings[device]
+
+                    midi_devices[device] = MidiManager(device_id, ns, device_type, mappings)
                     dsp.log('setting midi manager %s' % device_id)
                 except:
                     dsp.log('Could not load midi device %s with id %s' % (device, device_id))
@@ -252,6 +261,8 @@ class IOManager():
         while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
             meta['iterations'] = iterations
             iterations += 1
+
+            dsp.log('playing %s, id %s, iter %s' % (generator, voice_id, iterations))
 
             if getattr(ns, 'reload') == True and not hasattr(gen, 'automate'):
                 reload(gen)
