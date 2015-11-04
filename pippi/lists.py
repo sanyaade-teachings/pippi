@@ -52,7 +52,15 @@ def packet_shuffle(items, size):
         big_list = []
         for shuffled_list in shuffled_lists:
             big_list.extend(shuffled_list)
+
+        if len(items) > len(big_list):
+            spill_length = len(items) - len(big_list)
+            big_list += items[:spill_length]
+
         return big_list
+
+    else:
+        return items
 
 def list_split(items, packet_size):
     """ Split a list into lists of a given size
