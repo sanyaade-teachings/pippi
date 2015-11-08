@@ -26,22 +26,6 @@ except ImportError:
 
 
 
-class EventManager():
-    def __init__(self, ns):
-        self.ns = ns
-
-    def grid(self, tick, bpm):
-        os.nice(0)
-
-        beat = dsp.bpm2frames(bpm)
-
-        count = 0
-        while getattr(self.ns, 'grid', True):
-            tick.set()
-            tick.clear()
-            dsp.delay(beat)
-            count += 1
-
 class MidiManager():
     def __init__(self, device_id, ns, device_type=None, mappings=None):
         self.device_id = device_id
@@ -158,11 +142,41 @@ class IOManager():
 
         self.ns.device = 'default'
 
+        # Start rhythm grid tick process
+        self.tick = mp.Event()
+        self.start_grid()
+
     def __del__(self):
         self.out.stop_stream()
         self.out.close()
         self.p.terminate()
 
+    def stop_grid(self):
+        self.ns.grid = False
+        if self.grid and self.grid.is_alive():
+            self.grid.terminate()
+
+    def start_grid(self, bpm=120):
+        self.grid = mp.Process(name='grid', target=self.grid_handler, args=(self.tick, bpm))
+        self.grid.start()
+        self.ns.grid = True
+
+    def grid_handler(self, tick, bpm):
+        os.nice(0)
+
+        beat = dsp.bpm2frames(bpm)
+
+        count = 0
+        while getattr(self.ns, 'grid', True):
+            tick.set()
+            tick.clear()
+            dsp.delay(beat)
+            count += 1
+
+    def set_bpm(self, bpm):
+        self.grid.terminate()
+        self.start_grid(bpm)
+ 
     def open_alsa_pcm(self, device='default'):
         try:
             out = alsaaudio.PCM(alsaaudio.PCM_PLAYBACK, alsaaudio.PCM_NORMAL, device)
@@ -257,6 +271,12 @@ class IOManager():
         if not hasattr(ns, 'reload'):
             setattr(ns, 'reload', False)
 
+        render_process = None
+
+        def render_again(gen, meta, voice_id, ns):
+            snd = gen.play(meta)
+            setattr(ns, 'buffer-%s' % voice_id, snd)
+
         iterations = 0
         while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
             meta['iterations'] = iterations
@@ -269,8 +289,23 @@ class IOManager():
 
             # automate will always override play
             if hasattr(gen, 'play') and not hasattr(gen, 'automate'):
-                snd = gen.play(meta)
+                if hasattr(ns, 'buffer-%s' % voice_id):
+                    snd = getattr(ns, 'buffer-%s' % voice_id)
+                else:
+                    # First play render
+                    snd = gen.play(meta)
+
+                if render_process is None or not render_process.is_alive():
+                    # async start render of next buffer
+                    render_process = mp.Process(name='render-%s' % voice_id, target=render_again, args=(gen, meta, voice_id, ns))
+                    render_process.start()
+
                 snd = dsp.split(snd, 500)
+
+                # if grid is on, wait for a tick to start playback
+                if ns.grid:
+                    self.tick.wait()
+
                 for s in snd:
                     try:
                         out.write(s)

@@ -15,7 +15,6 @@ import pygame.midi
 from pippi import dsp
 from pippi import IOManager
 from pippi import ParamManager
-from pippi import EventManager
 
 import multiprocessing as mp
 
@@ -32,15 +31,9 @@ class Pippi(cmd.Cmd):
 
         self.io = IOManager()
         self.params = ParamManager(self.io.ns)
-        #self.events = EventManager(self.io.ns)
 
         self.voices = {}
         self.midi_listeners = {}
-
-        # Start rhythm grid tick process
-        #self.tick = mp.Event()
-        #self.grid = mp.Process(name='grid', target=self.events.grid, args=(self.tick, settings.config('bpm')))
-        #self.grid.start()
 
         # Load all available generators into a dict 
         self.generators = []
@@ -59,16 +52,14 @@ class Pippi(cmd.Cmd):
 
         print
 
-    def do_bpm(self, cmd):
-        try:
-            self.grid.terminate()
-            bpm = float(cmd)
+    def do_bpm(self, bpm):
+        if bpm == 'off':
+            self.io.stop_grid()
+        else:
+            if self.io.ns.grid == False:
+                self.io.start_grid(bpm)
 
-            self.grid = mp.Process(name='grid', target=self.events.grid, args=(self.tick, bpm))
-            self.grid.start()
- 
-        except Exception, e:
-            dsp.log(e)
+            self.io.set_bpm(float(bpm))
 
     def do_i(self, cmd):
         """
