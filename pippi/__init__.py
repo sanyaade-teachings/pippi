@@ -137,14 +137,12 @@ class ParamManager():
 
 class IOManager():
     def __init__(self):
-        self.manager = mp.Manager()
-        self.ns = self.manager.Namespace()
+        self.manager   = mp.Manager()
+        self.ns        = self.manager.Namespace()
 
         self.ns.device = 'default'
-
-        # Start rhythm grid tick process
-        self.tick = mp.Event()
-        self.start_grid()
+        self.ns.grid   = False
+        self.tick      = mp.Event()
 
     def __del__(self):
         self.out.stop_stream()
@@ -318,5 +316,7 @@ class IOManager():
 
                 if hasattr(gen, 'loop_time'):
                     time.sleep(gen.loop_time)
+
+        delattr(ns, 'buffer-%s' % voice_id)
 
         return True
