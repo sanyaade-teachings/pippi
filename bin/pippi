@@ -56,6 +56,8 @@ class Pippi(cmd.Cmd):
         if bpm == 'off':
             self.io.stop_grid()
         else:
+            self.params.set('bpm', float(bpm), 'global')
+
             if self.io.ns.grid == False:
                 self.io.start_grid(bpm)
 
