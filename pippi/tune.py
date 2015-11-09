@@ -62,6 +62,21 @@ chord_romans = {
     'vii': 11,
 }
 
+# Common root movements
+progressions = {
+    'I': ['iii', 'vi', 'ii', 'IV', 'V', 'vii*'],
+    'i': ['VII', 'III', 'VI', 'ii*', 'iv', 'V', 'vii*'],
+    'ii': ['V', 'vii*']
+    'iii': ['vi'],
+    'III': ['VI'],
+    'IV': ['V', 'vii*'],
+    'iv': ['V', 'vii*'],
+    'V': ['I', 'i'], # a pivot
+    'vi': ['ii', 'IV'],
+    'VI': ['ii*', 'iv'],
+    'vii*': ['I', 'i'], # a pivot
+}
+
 just = ( 
     (1.0, 1.0),     # P1
     (16.0, 15.0),   # m2
@@ -272,11 +287,12 @@ def getFreqFromChordName(name, root=440, octave=3, ratios=just):
 
     return freq
 
+def stripChord(name):
+    root = re.sub('[/*^0-9]+', '', name)
+    return root.lower()
 
 def getChordRootIndex(name):
-    root = re.sub('[/*^0-9]+', '', name)
-    root = chord_romans[root.lower()]
-
+    root = chord_romans[stripChord(name)]
     return root
 
 def addIntervals(a, b):
@@ -308,6 +324,10 @@ def getRatioFromInterval(interval, ratios):
         ratio *= 2**register
 
     return ratio
+
+def nextChord(name):
+    name = stripChord(name)
+    return dsp.randchoose(progressions[name])
 
 def chord(name, key=None, octave=3, ratios=just):
     if key is None:
