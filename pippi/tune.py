@@ -66,7 +66,7 @@ chord_romans = {
 progressions = {
     'I': ['iii', 'vi', 'ii', 'IV', 'V', 'vii*'],
     'i': ['VII', 'III', 'VI', 'ii*', 'iv', 'V', 'vii*'],
-    'ii': ['V', 'vii*']
+    'ii': ['V', 'vii*'],
     'iii': ['vi'],
     'III': ['VI'],
     'IV': ['V', 'vii*'],
