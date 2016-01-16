@@ -53,4 +53,6 @@ def randshuffle(input):
 
     return shuffled 
 
+def randbool():
+    return randchoose([True, False])
 
