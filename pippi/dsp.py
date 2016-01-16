@@ -73,6 +73,7 @@ from pippi.rand import stepseed
 from pippi.rand import randint
 from pippi.rand import rand
 from pippi.rand import randchoose
+from pippi.rand import randbool
 from pippi.rand import randshuffle
 
 
@@ -96,6 +97,15 @@ def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
         cycles += acycle
 
     return cycles
+
+def reverse(snd):
+    return audioop.reverse(snd, audio_params[1])
+
+def avg(snd):
+    return audioop.avg(snd, audio_params[1])
+
+def max(snd):
+    return audioop.max(snd, audio_params[1])
 
 def transpose(snd, amount, chans=2):
     """ Change the speed of a sound.
@@ -293,7 +303,7 @@ def replace_into(haystack, needle, position):
     stackstart = hayend - (flen(needle) * audio_params[1] * audio_params[0])
     return "%s%s%s" % (haystack[:hayend], needle, haystack[stackstart:])
 
-def cut(string, start, length):
+def cut(snd, start, length):
     # start and length are both given in frames (aka samples)za
 
     #if start + length > flen(string):
@@ -303,12 +313,16 @@ def cut(string, start, length):
     length = int(length) * audio_params[1] * audio_params[0]
     start = int(start) * audio_params[1] * audio_params[0]
 
-    return string[start : start + length]
+    return snd[start : start + length]
 
-def splitmono(string):
+def rcut(snd, length):
+    """ Cut a segment of a given length from a random position in the given sound. """
+    return cut(snd, randint(0, flen(snd) - length), length)
+
+def splitmono(snd):
     """ split a stereo sound into a list of mono sounds """
-    left = audioop.tomono(string, audio_params[1], 1, 0)
-    right = audioop.tomono(string, audio_params[1], 0, 1)
+    left = audioop.tomono(snd, audio_params[1], 1, 0)
+    right = audioop.tomono(snd, audio_params[1], 0, 1)
 
     return [left, right] 
 
