@@ -271,31 +271,31 @@ class IOManager():
 
         render_process = None
 
-        def render_again(gen, meta, voice_id, ns):
+        def render_again(gen, meta, generator, voice_id, ns):
             snd = gen.play(meta)
-            setattr(ns, 'buffer-%s' % voice_id, snd)
+            setattr(ns, 'buffer-%s-%s' % (generator, voice_id), snd)
 
         iterations = 0
         while getattr(ns, '%s-%s-loop' % (generator, voice_id)) == True:
-            meta['iterations'] = iterations
+            meta['count'] = iterations
             iterations += 1
 
-            dsp.log('playing %s, id %s, iter %s' % (generator, voice_id, iterations))
+            # dsp.log('playing %s, id %s, iter %s' % (generator, voice_id, iterations))
 
             if getattr(ns, 'reload') == True and not hasattr(gen, 'automate'):
                 reload(gen)
 
             # automate will always override play
             if hasattr(gen, 'play') and not hasattr(gen, 'automate'):
-                if hasattr(ns, 'buffer-%s' % voice_id):
-                    snd = getattr(ns, 'buffer-%s' % voice_id)
+                if hasattr(ns, 'buffer-%s-%s' % (generator, voice_id)):
+                    snd = getattr(ns, 'buffer-%s-%s' % (generator, voice_id))
                 else:
                     # First play render
                     snd = gen.play(meta)
 
                 if render_process is None or not render_process.is_alive():
                     # async start render of next buffer
-                    render_process = mp.Process(name='render-%s' % voice_id, target=render_again, args=(gen, meta, voice_id, ns))
+                    render_process = mp.Process(name='render-%s-%s' % (generator, voice_id), target=render_again, args=(gen, meta, generator, voice_id, ns))
                     render_process.start()
 
                 snd = dsp.split(snd, 500)
@@ -317,6 +317,6 @@ class IOManager():
                 if hasattr(gen, 'loop_time'):
                     time.sleep(gen.loop_time)
 
-        delattr(ns, 'buffer-%s' % voice_id)
+        delattr(ns, 'buffer-%s-%s' % (generator, voice_id))
 
         return True
