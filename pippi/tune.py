@@ -138,9 +138,47 @@ louis = (
 )
 
 
-# Handy subsets of the chromatic scale
+## scale mappings
+# standard
 major = (0, 2, 4, 5, 7, 9, 11)
 minor = (0, 2, 3, 5, 7, 8, 10)
+
+# notated as semitone deviations from 
+# a major scale for readability
+scales = {
+    'major': major,
+    'minor': minor,
+    'super_locrian': (0, 2-1, 4-1, 5-1, 7-1, 9-1, 11-1),
+    'neapolitan_minor': (0, 2-1, 4-1, 5, 7, 9-1, 11),
+    'neapolitan_major': (0, 2-1, 4-1, 5, 7, 9, 11),
+    'oriental': (0, 2-1, 4, 5, 7-1, 9, 11-1),
+    'double_harmonic': (0, 2-1, 4, 5, 7, 9-1, 11),
+    'enigmatic': (0, 2-1, 4, 5+1, 7+1, 9+1, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+    'major': (0, 2, 4, 5, 7, 9, 11),
+}
 
 # Maps to chromatic ratio lists above
 notes = { 
