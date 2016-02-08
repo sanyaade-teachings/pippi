@@ -58,6 +58,7 @@ from pippi.utils import log
 from pippi.utils import flen
 from pippi.utils import byte_string
 from pippi.utils import pack
+from pippi.utils import unpack
 from pippi.utils import scale
 from pippi.utils import cap
 from pippi.utils import timestamp_filename
@@ -116,7 +117,7 @@ def transpose(snd, amount, chans=2):
     rate = int(audio_params[2] * amount)
     return audioop.ratecv(snd, audio_params[1], chans, audio_params[2], rate, None)[0]
 
-def stretch(snd, length=None, speed=None, grain_size=120):
+def stretch(snd, length=None, speed=None, grain_size=20):
     """ Crude granular time stretching and pitch shifting """
 
     original_length = flen(snd)
@@ -325,6 +326,9 @@ def splitmono(snd):
     right = audioop.tomono(snd, audio_params[1], 0, 1)
 
     return [left, right] 
+
+def tomono(snd):
+    return splitmono(snd)
 
 def stereo(snd):
     """ Just a wrapper for audioop.tostereo from the standard library. 
