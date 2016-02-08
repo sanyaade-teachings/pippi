@@ -2,6 +2,7 @@ from pippi import dsp
 import re
 
 a0 = 27.5 
+a4 = a0 * 2**4
 default_key = 'c'
 match_roman = '[ivIV]?[ivIV]?[iI]?'
 
@@ -76,6 +77,24 @@ progressions = {
     'VI': ['ii*', 'iv'],
     'vii*': ['I', 'i'], # a pivot
 }
+
+def etmult(pos):
+    return 2**(pos/12.0)
+
+et = (
+    (etmult(0), 1.0),
+    (etmult(1), 1.0),
+    (etmult(2), 1.0),
+    (etmult(3), 1.0),
+    (etmult(4), 1.0),
+    (etmult(5), 1.0),
+    (etmult(6), 1.0),
+    (etmult(7), 1.0),
+    (etmult(8), 1.0),
+    (etmult(9), 1.0),
+    (etmult(10), 1.0),
+    (etmult(11), 1.0),
+)
 
 just = ( 
     (1.0, 1.0),     # P1
@@ -212,8 +231,8 @@ def nti(note):
 def ntf(note, octave=None, ratios=None):
     """ Note to freq 
     """
-    if re.match('[a-zA-Z]\d+', note) is not None:
-        parsed = re.match('([a-zA-Z])(\d+)', note)
+    if re.match('[a-zA-Z]#?b?\d+', note) is not None:
+        parsed = re.match('([a-zA-Z]#?b?)(\d+)', note)
         note = parsed.group(1)
         octave = int(parsed.group(2))
 
@@ -223,7 +242,13 @@ def ntf(note, octave=None, ratios=None):
     if octave is None:
         octave = 4
 
-    return ratios[nti(note)][0] / ratios[nti(note)][1] * (a0 * (2.0**octave))
+    note_index = nti(note)
+    mult = ratios[note_index][0] / ratios[note_index][1]
+
+    if note_index >= 3:
+        octave -= 1
+
+    return mult * a0 * 2.0**octave
 
 def stf(index):
     degree = index % 24
@@ -326,12 +351,19 @@ def getFreqFromChordName(name, root=440, octave=3, ratios=just):
     return freq
 
 def stripChord(name):
-    root = re.sub('[/*^0-9]+', '', name)
+    root = re.sub('[#b/*^0-9]+', '', name)
     return root.lower()
 
 def getChordRootIndex(name):
     root = chord_romans[stripChord(name)]
-    return root
+
+    if '#' in name:
+        root += 1
+
+    if 'b' in name:
+        root -= 1
+
+    return root % 12
 
 def addIntervals(a, b):
     a = intervals[a]
@@ -375,6 +407,7 @@ def chord(name, key=None, octave=3, ratios=just):
     root = ratios[getChordRootIndex(name)]
     root = key * (root[0] / root[1])
 
+    name = re.sub('[#b]+', '', name)
     chord = getIntervals(name)
     chord = [ getRatioFromInterval(interval, ratios) for interval in chord ]
     chord = [ root * ratio for ratio in chord ]
