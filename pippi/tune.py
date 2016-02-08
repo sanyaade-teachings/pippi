@@ -330,7 +330,7 @@ def getQuality(name):
     return quality
 
 def getExtension(name):
-    return re.sub(match_roman + '[/*]?', '', name)
+    return re.sub(match_roman + '[/*+]?', '', name)
 
 def getIntervals(name):
     quality = getQuality(name)
@@ -351,7 +351,7 @@ def getFreqFromChordName(name, root=440, octave=3, ratios=just):
     return freq
 
 def stripChord(name):
-    root = re.sub('[#b/*^0-9]+', '', name)
+    root = re.sub('[#b+/*^0-9]+', '', name)
     return root.lower()
 
 def getChordRootIndex(name):
@@ -399,9 +399,12 @@ def nextChord(name):
     name = stripChord(name)
     return dsp.randchoose(progressions[name])
 
-def chord(name, key=None, octave=3, ratios=just):
+def chord(name, key=None, octave=3, ratios=None):
     if key is None:
         key = default_key
+
+    if ratios is None:
+        ratios = terry
 
     key = ntf(key, octave, ratios)
     root = ratios[getChordRootIndex(name)]
