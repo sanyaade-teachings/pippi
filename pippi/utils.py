@@ -43,6 +43,13 @@ def pack(number):
     number = number * 65535 - 32768
     return byte_string(int(number))
 
+def unpack(snd):
+    """ Takes a mono sound string and returns a list of floats between -1 and 1 """
+    snd = [ struct.unpack('<h', '%s%s' % (snd[i], snd[i+1]))[0] for i in range(len(snd)-1) ]
+    snd = [ (frame / 65535.0) - 32768 for frame in snd ]
+
+    return snd
+
 def scale(low_target, high_target, low, high, pos):
     """ 
     Takes a target range (low, high) and source range (low, high) and 
