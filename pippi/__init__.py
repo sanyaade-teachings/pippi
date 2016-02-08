@@ -298,18 +298,15 @@ class IOManager():
                     render_process = mp.Process(name='render-%s-%s' % (generator, voice_id), target=render_again, args=(gen, meta, generator, voice_id, ns))
                     render_process.start()
 
-                snd = dsp.split(snd, 500)
-
                 # if grid is on, wait for a tick to start playback
                 if ns.grid:
                     self.tick.wait()
 
-                for s in snd:
-                    try:
-                        out.write(s)
-                    except AttributeError:
-                        dsp.log('Could not write to audio device')
-                        return False
+                try:
+                    out.write(snd)
+                except AttributeError:
+                    dsp.log('Could not write to audio device')
+                    return False
 
             if hasattr(gen, 'automate'):
                 gen.automate(meta)
