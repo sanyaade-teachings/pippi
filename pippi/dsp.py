@@ -804,11 +804,17 @@ def logistic(r=3.8, x=0.5, numpoints=500):
 # Unit conversion
 #################
 
-def stf(s):
+def stf(s, r=None):
+    if r is not None:
+        s = rand(s, r)
+
     ms = s * 1000.0
     return mstf(ms)
 
-def mstf(ms):
+def mstf(ms, r=None):
+    if r is not None:
+        ms = rand(ms, r)
+
     frames_in_ms = audio_params[2] / 1000.0
     frames = ms * frames_in_ms
 

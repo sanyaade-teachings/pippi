@@ -10,11 +10,9 @@ import glob
 import uuid
 import time
 
-import pygame.midi
-
-from pippi import dsp
-from pippi import IOManager
-from pippi import ParamManager
+from pippi import dsp, midi
+from pippi.io import IOManager
+from pippi.params import ParamManager
 
 import multiprocessing as mp
 
@@ -22,35 +20,15 @@ class Pippi(cmd.Cmd):
     """ Pippi Console 
     """
 
-    dsp.log('starting', 'w')
     prompt = '^_- '
     intro = 'Pippi Console'
 
     def __init__(self):
+        dsp.log('starting', 'w')
         cmd.Cmd.__init__(self)
 
         self.io = IOManager()
         self.params = ParamManager(self.io.ns)
-
-        self.voices = {}
-        self.midi_listeners = {}
-
-        # Load all available generators into a dict 
-        self.generators = []
-
-        try:
-            gens = glob.glob("*.py")
-            for filename in gens:
-                # Get fileame from relative path and strip .pippi.py extension
-                filename = os.path.basename(filename)[:-3]
-                self.generators += [ filename ]
-
-            print len(gens), 'generators available'
-
-        except OSError:
-            print 'No generators found'
-
-        print
 
     def do_bpm(self, bpm):
         if bpm == 'off':
@@ -67,59 +45,31 @@ class Pippi(cmd.Cmd):
         """
 List the number of voices for currently running instrument scripts.
         """
-        for generator, process_list in self.voices.iteritems():
+        print 'Looping:'
+        for generator, process_list in self.io.looping.iteritems():
             print generator, len(process_list)
+        print
 
-    def do_midi(self, selected_id):
-        pygame.midi.init()
+        print 'Armed:'
+        for generator in self.io.getArmed():
+            print generator
+        print
 
-
-        if selected_id == '':
-            for device_id in range(pygame.midi.get_count()):
-                device = pygame.midi.get_device_info(device_id)
-                print '%s: %s (%s)' % (device_id, device[1], 'input' if device[2] else 'output') 
-
-        else:
-            try:
-                device_info = pygame.midi.get_device_info(int(selected_id))
-                device_type = 'input' if device_info[2] else 'output'
-            except TypeError:
-                device_type = 'output'
-
-            def capture_midi(device_id, ns):
-                try:
-                    device = pygame.midi.Input(int(device_id))
-                    dsp.log('listening to %s' % device_id)
-
-                    while True:
-                        if device.poll():
-                            midi_events = device.read(10)
-
-                            for e in midi_events:
-                                # timestamp = e[1]
-                                # cc = e[0][1]
-                                # value = e[0][2]
-                                setattr(ns, 'cc%s%s' % (device_id, e[0][1]), e[0][2])
-
-                        time.sleep(0.05)
-
-                except pygame.midi.MidiException:
-                    dsp.log('Midi device not found')
-
-            if device_type == 'input':
-                listener = mp.Process(target=capture_midi, args=(selected_id, self.io.ns))
-                listener.start()
-                self.midi_listeners[selected_id] = listener
-
-                print 'Activated midi device listener %s' % selected_id
-
-        pygame.midi.quit()
-
+    def do_midi(self, cmd):
+        """ List available midi devices """
+        midi.print_devices()
 
     def do_device(self, device):
         """
 Calling device with no arguments will print the current audio device.
 Calling device with a device name (eg 'default') will select that audio device for playback.
+
+Usage:
+    device <device-name>
+
+Examples:
+    device
+    device default
         """
         if device == '':
             print self.io.ns.device
@@ -194,88 +144,103 @@ Shorthand for play
         """
         self.do_play(cmd)
 
+    def do_arm(self, cmd):
+        cmd = cmd.split(' ')
+
+        try:
+            generator_name = cmd[0]
+        except IndexError:
+            print 'Please specify a generator name. Type "help play" for usage.'
+            return False
+
+        p = mp.Process(target=self.io.armGenerator, args=(generator_name,))
+        p.start()
+
     def do_play(self, cmd):
         """
-Play instrument voices
+Play or loop instrument voices
 
 Usage:
-    play <instrument_name> <optional:number of voices>
+    play <instrument_name> <optional:number of voices> <optional:once|o>
+    p <instrument_name> <optional:number of voices> <optional:once|o>
 
 Examples:
-    # Play one drone voice
+    # Start looping one drone.py generator voice
     play drone 1
 
-    # Play one drone voice
+    # Or: 
     play drone
 
-    # Play five drone voice
-    play drone 5
+    # Start looping five voices
+    p drone 5
+
+    # Play one drone voice once without looping
+    p drone 1 once
+
+    # Play five drone voices once without looping
+    p drone 5 o
+
+    # Or use alternate syntax to play generators without looping
+    # Play one drone voice once without looping
+    once drone
+
+    # Play five drone voices once without looping
+    o drone 5
         """
         cmd = cmd.split(' ')
 
-        generator = None
-        for gen in self.generators:
-            if gen == cmd[0]:
-                generator = gen
+        try:
+            generator_name = cmd[0]
+        except IndexError:
+            print 'Please specify a generator name. Type "help play" for usage.'
+            return False
 
         try:
             num_voices = int(cmd[1])
         except IndexError:
             num_voices = 1
 
-        if generator is not None:
-            if generator not in self.voices:
-                self.voices[generator] = {}
+        try:
+            loop = False if cmd[2] in ['once', 'o'] else True
+        except IndexError:
+            loop = True
 
-            for i in range(num_voices):
-                voice_id = len(self.voices[generator]) + 1
+        print cmd, loop
 
-                setattr(self.io.ns, '%s-%s-loop' % (generator, voice_id), True)
-                p = mp.Process(target=self.io.play, args=(generator, self.io.ns, voice_id, i))
-                p.start()
-
-                self.voices[generator][voice_id] = p
+        self.io.playGenerator(generator_name, num_voices, loop=loop)
 
     def do_o(self, cmd):
         self.do_once(cmd)
 
     def do_once(self, cmd):
+        """ Shortcut for play <generator> <voices> once """
         cmd = cmd.split(' ')
-
-        generator = None
-        for gen in self.generators:
-            if gen == cmd[0]:
-                generator = gen
+        generator = cmd[0]
 
         try:
-            num_voices = int(cmd[1])
+            num_voices = cmd[1]
         except IndexError:
             num_voices = 1
 
-        for i in range(num_voices):
-            p = mp.Process(target=self.io.play, args=(generator, self.io.ns, uuid.uuid4(), i, False))
-            p.start()
+        self.do_play('%s %s once' % (generator, num_voices))
 
-
-    def stop(self, generator):
-        for voice_id, process in self.voices[generator].iteritems():
-            setattr(self.io.ns, '%s-%s-loop' % (generator, voice_id), False)
-            process.join()
-            process.terminate()
-
-
+    def do_disarm(self, generator):
+        if generator in ['', 'all']:
+            self.io.disarmAllGenerators()
+        else:
+            self.io.disarmGenerator(generator)
 
     def do_stop(self, generator):
-        if generator in self.voices:
-            self.stop(generator)
-            del self.voices[generator]
-
-        elif generator == '' or generator == 'all':
-            for gen in self.voices.keys():
-                self.stop(gen)
-                del self.voices[gen]
+        if generator in ['', 'all']:
+            self.io.stopAllGenerators()
         else:
-            dsp.log('no %s voices found' % generator)
+            self.io.stopGenerator(generator)
+
+    def do_kill(self, generator):
+        if generator in ['', 'all']:
+            self.io.stopAllGenerators(kill=True)
+        else:
+            self.io.stopGenerator(generator, kill=True)
 
     def do_reload(self, opt):
         if opt == 'on':
