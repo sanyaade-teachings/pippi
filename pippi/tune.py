@@ -256,6 +256,9 @@ def stf(index):
 
     return (2 ** (degree / 24.0)) * (a0 / 4.0) * (2.0 ** octave)
 
+def mtf(midi_note):
+    return 2**((midi_note - 69) / 12.0) * 440.0
+
 def fts(freq):
     # Try to find closest eq temp freq to input
     # Generate entire range of possible eq temp freqs
