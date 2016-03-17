@@ -63,6 +63,7 @@ from pippi.utils import scale
 from pippi.utils import cap
 from pippi.utils import timestamp_filename
 from pippi.utils import timer
+from pippi.utils import flatten
 
 
 ###############
