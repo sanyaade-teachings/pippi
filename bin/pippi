@@ -37,7 +37,7 @@ class Pippi(cmd.Cmd):
             self.params.set('bpm', float(bpm), 'global')
 
             if self.io.ns.grid == False:
-                self.io.start_grid(bpm)
+                self.io.startGrid(bpm)
 
             self.io.set_bpm(float(bpm))
 
@@ -204,8 +204,6 @@ Examples:
             loop = False if cmd[2] in ['once', 'o'] else True
         except IndexError:
             loop = True
-
-        print cmd, loop
 
         self.io.playGenerator(generator_name, num_voices, loop=loop)
 
