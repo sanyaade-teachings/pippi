@@ -87,7 +87,6 @@ class IOManager:
             while generator_name in armed:
                 respawn.wait()
                 respawn.clear()
-                dsp.log('rearming %s...' % generator_name)
                 p = mp.Process(target=self._armGenerator, args=(generator_name, gen, ctl, trigger, respawn))
                 p.start()
                 armed = getattr(self.ns, 'armed', [])
@@ -183,7 +182,10 @@ class IOManager:
             if getattr(self.ns, '%s-%s-loop' % (generator_name, voice_id)) == False:
                 break
 
-        delattr(self.ns, 'buffer-%s-%s' % (generator_name, voice_id))
+        try:
+            delattr(self.ns, 'buffer-%s-%s' % (generator_name, voice_id))
+        except AttributeError:
+            dsp.log('Could not remove buffer-%s-%s' % (generator_name, voice_id))
 
     def setupCtl(self, gen):
         param_manager = ParamManager(self.ns)
@@ -301,7 +303,7 @@ class IOManager:
 
     def set_bpm(self, bpm):
         self.grid.terminate()
-        self.start_grid(bpm)
+        self.startGrid(bpm)
  
     def open_alsa_pcm(self, device='default'):
         try:
