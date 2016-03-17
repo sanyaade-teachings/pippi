@@ -426,7 +426,11 @@ def chords(names, key=None, octave=3, ratios=just):
 
     return [ chord(name, key, octave, ratios) for name in names ]
 
-def fit(freq, low=20, high=20000):
+def fitScale(freq, scale):
+    # Thanks to @kennytm from stack overflow for this <3 <3
+    return min(scale, key=lambda x:abs(x-freq))
+
+def fit(freq, low=20, high=20000, get_change=False):
     """ fit the given freq within the given freq range, 
     by transposing up or down octaves """
 
@@ -434,13 +438,25 @@ def fit(freq, low=20, high=20000):
     if high < low * 2:
         high = low * 2
 
-    def shift(freq, low, high):
+    def shift(freq, low, high, octave_shift=0):
         if freq < low:
-            return shift(freq * 2, low, high)
+            return shift(freq * 2, low, high, octave_shift + 1)
 
         if freq > high:
-            return shift(freq * 0.5, low, high)
+            return shift(freq * 0.5, low, high, octave_shift - 1)
 
+        return freq, octave_shift
+
+    freq, octave = shift(freq, low, high)
+
+    if octave == 0:
+        mult = 1
+    elif octave > 0:
+        mult = 2**octave
+    elif octave < 0:
+        mult = 1.0 / (2**abs(octave))
+
+    if get_change == True:
+        return freq, mult
+    else:
         return freq
-
-    return shift(freq, low, high)
