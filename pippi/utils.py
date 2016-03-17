@@ -1,6 +1,7 @@
 import os
 import struct
 import time
+import itertools
 from datetime import datetime
 audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 thetime = 0
@@ -124,4 +125,5 @@ def timer(cmd='start'):
         log('Render time: %smin %ssec' % (themin, thesec))
         return thetime
 
-
+def flatten(iterables):
+    return list(itertools.chain.from_iterable(iterables))
