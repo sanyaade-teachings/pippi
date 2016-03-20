@@ -78,24 +78,6 @@ progressions = {
     'vii*': ['I', 'i'], # a pivot
 }
 
-def etmult(pos):
-    return 2**(pos/12.0)
-
-et = (
-    (etmult(0), 1.0),
-    (etmult(1), 1.0),
-    (etmult(2), 1.0),
-    (etmult(3), 1.0),
-    (etmult(4), 1.0),
-    (etmult(5), 1.0),
-    (etmult(6), 1.0),
-    (etmult(7), 1.0),
-    (etmult(8), 1.0),
-    (etmult(9), 1.0),
-    (etmult(10), 1.0),
-    (etmult(11), 1.0),
-)
-
 just = ( 
     (1.0, 1.0),     # P1
     (16.0, 15.0),   # m2
@@ -173,30 +155,6 @@ scales = {
     'oriental': (0, 2-1, 4, 5, 7-1, 9, 11-1),
     'double_harmonic': (0, 2-1, 4, 5, 7, 9-1, 11),
     'enigmatic': (0, 2-1, 4, 5+1, 7+1, 9+1, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
-    'major': (0, 2, 4, 5, 7, 9, 11),
 }
 
 # Maps to chromatic ratio lists above
@@ -220,6 +178,14 @@ notes = {
         'ab': 11, 
         }
 
+def edo(degree, divs=12):
+    return 2**(degree/float(divs))
+
+def edoRatios(divs=12):
+    return [ (edo(i, divs), 1.0) for i in range(1, divs+1) ]
+
+def edoScale(divs=12):
+    return [ edo(i, divs) for i in range(1, divs+1) ]
 
 def nti(note):
     """ Note to index
