@@ -6,6 +6,7 @@ import time
 import __main__
 import multiprocessing as mp
 import midi
+import mido
 from params import ParamManager
 
 # Doing a fallback dance for playback support
@@ -214,7 +215,7 @@ class IOManager:
             'midi': midi_readers,
             'group': group, 
             'samples': samples,
-            'note': None # for armed voices, this will be populated with note/velocity info
+            'note': (None, None) # for armed voices, this will be populated with note/velocity info
         }
 
         return ctl
@@ -271,35 +272,70 @@ class IOManager:
             self.grid.terminate()
 
     def startGrid(self, bpm=120):
-        self.grid = mp.Process(name='grid', target=self.gridHandler, args=(self.tick, bpm))
+        #out_device = 'LPD8 MIDI 1' # TODO set this in a config or via console cmd
+        #midi.register_midi_listener(out_device, self.ns)
+        #out_device = midi.MidiReader(out_device, self.ns)
+        out_device = None
+
+        self.grid = mp.Process(name='grid', target=self.gridHandler, args=(self.tick, bpm, out_device))
         self.grid.start()
         self.ns.grid = True
 
-    def gridHandler(self, tick, bpm, midiout=4):
+    def gridHandler(self, tick, bpm, ctl=None):
         # TODO: send MIDI clock again, assign device via 
         # config file and/or console cmd. Also allow mapping 
         # MIDI control to grid tempo value without resetting
         os.nice(0)
 
-        cdiv = 24
-
-        beat = dsp.bpm2frames(bpm) / cdiv
-
         count = 0
 
-        ts = time.time()
+        out = mido.open_output('MidiSport 2x2 MIDI 1')
+        start = mido.Message('start')
+        stop = mido.Message('stop')
+        clock = mido.Message('clock')
+
+        out.send(start)
 
         while getattr(self.ns, 'grid', True):
-            if count % cdiv == 0:
+            beat = dsp.bpm2frames(bpm) / 24
+
+            out.send(clock)
+            
+            if count % 12 == 0:
                 tick.set()
                 tick.clear()
-
-            ts = time.time()
 
             dsp.delay(beat)
             count += 1
 
-        ts = time.time()
+        out.send(stop)
+
+    def gridHandlerSeq(self, tick, bpm, ctl=None):
+        # TODO: send MIDI clock again, assign device via 
+        # config file and/or console cmd. Also allow mapping 
+        # MIDI control to grid tempo value without resetting
+        os.nice(0)
+
+        count = 0
+
+        divs = [1, 2, 4, 3, 8, 16]
+
+        out = mido.open_output('MidiSport 2x2 MIDI 1')
+        clock = mido.Message('clock')
+
+        while getattr(self.ns, 'grid', True):
+            divi = ctl.geti(5, low=0, high=len(divs)-1, default=0)
+            div = divs[divi] # divisions of the beat
+
+            beat = dsp.bpm2frames(bpm) / div
+
+            tick.set()
+            tick.clear()
+
+            out.send(clock)
+
+            dsp.delay(beat)
+            count += 1
 
     def set_bpm(self, bpm):
         self.grid.terminate()
