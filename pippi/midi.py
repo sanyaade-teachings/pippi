@@ -63,7 +63,7 @@ class MidiTrigger:
                 if msg.type == 'note_on' and msg.note in self.notes:
                     return (msg.note, msg.velocity)
 
-        return False
+        return (None, None)
 
 class MidiWriter:
     def __init__(self):
