@@ -281,7 +281,7 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
         scale = major
 
     freqs = []
-    root = ntf(root, octave, et)
+    root = ntf(root, octave, edoRatios(12))
 
     for index, degree in enumerate(scale_degrees):
         degree = int(degree)
