@@ -130,7 +130,10 @@ def stretch(snd, length=None, speed=None, grain_size=20):
 
     if original_length != current_length or length is not None:
         grain_size = mstf(grain_size)
+
         numgrains = length / (grain_size / 2)
+        numgrains = numgrains if numgrains > 0 else 1
+
         block_size = current_length / numgrains
 
         grains = []
