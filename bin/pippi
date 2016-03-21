@@ -10,7 +10,7 @@ import glob
 import uuid
 import time
 
-from pippi import dsp, midi
+from pippi import dsp, midi, config
 from pippi.io import IOManager
 from pippi.params import ParamManager
 
@@ -26,6 +26,7 @@ class Pippi(cmd.Cmd):
     def __init__(self):
         dsp.log('starting', 'w')
         cmd.Cmd.__init__(self)
+        self.config = config.config()
 
         self.io = IOManager()
         self.params = ParamManager(self.io.ns)
