@@ -3,6 +3,8 @@ import shutil
 
 default_path = os.path.dirname(os.path.abspath(__file__)) + '/default.config'
 
+keys = ['device', 'bpm', 'bpmcc', 'divcc', 'divs', 'key', 'ratios', 'a4']
+
 def parse(config_file):
     default_config = {}
     execfile(default_path, default_config)
@@ -12,11 +14,14 @@ def parse(config_file):
     config = {}
     execfile(config_file, config)
 
-    for key in default_config.iterkeys():
+    parsed = {}
+    for key in keys:
         if key not in config:
-            config[key] = default_config[key]
+            parsed[key] = default_config[key]
+        else:
+            parsed[key] = config[key]
 
-    return config
+    return parsed
 
 def init_user_config():
     config_path = os.path.expanduser('~/pippi.config')
