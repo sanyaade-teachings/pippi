@@ -22,13 +22,23 @@ except ImportError:
         print 'Playback disabled. Please install alsaaudio (ALSA) or pyaudio (PortAudio)'
 
 class IOManager:
-    def __init__(self):
+    def __init__(self, bpm=None, bpmrange=None, divcc=None, bpmcc=None, default_midi_device=None):
         self.manager    = mp.Manager()
         self.ns         = self.manager.Namespace()
 
+        self.default_midi_device = default_midi_device
         self.ns.device  = 'default'
         self.ns.grid    = False
-        self.tick       = mp.Event()
+        self.divcc      = divcc
+        self.bpmcc      = bpmcc
+        self.divs       = [24, 12, 6, 8, 3] # Defines the order for MIDI control
+        self.ticks = {
+            24: mp.Event(), # Quarter note
+            12: mp.Event(), # Eighth note
+            8: mp.Event(),  # Eighth note triplets
+            6: mp.Event(),  # Sixteenth note
+            3: mp.Event(),  # 32nd note
+        }
 
         self.generators = self.findGenerators()
         self.looping    = {}
@@ -65,6 +75,10 @@ class IOManager:
         sys.path.insert(0, os.getcwd())
         return __import__(generator_name)
 
+    def loadGridCtl(self):
+        midi.register_midi_listener(self.default_midi_device, self.ns)
+        return midi.MidiReader(self.default_midi_device, self.ns)
+
     def armGenerator(self, generator_name):
         generator_name = self.validateGenerator(generator_name)
 
@@ -77,18 +91,18 @@ class IOManager:
 
             gen = self.loadGenerator(generator_name)
             ctl = self.setupCtl(gen)
-
+            grid_ctl = self.loadGridCtl()
             trigger = midi.MidiTrigger(gen.trigger['device'], gen.trigger['notes'])
 
             respawn = mp.Event()
 
-            p = mp.Process(target=self._armGenerator, args=(generator_name, gen, ctl, trigger, respawn))
+            p = mp.Process(target=self._armGenerator, args=(generator_name, gen, ctl, trigger, respawn, grid_ctl))
             p.start()
 
             while generator_name in armed:
                 respawn.wait()
                 respawn.clear()
-                p = mp.Process(target=self._armGenerator, args=(generator_name, gen, ctl, trigger, respawn))
+                p = mp.Process(target=self._armGenerator, args=(generator_name, gen, ctl, trigger, respawn, grid_ctl))
                 p.start()
                 armed = getattr(self.ns, 'armed', [])
 
@@ -96,7 +110,10 @@ class IOManager:
     def playGenerator(self, generator_name, num_voices=1, loop=True):
         generator_name = self.validateGenerator(generator_name)
 
+        
         if generator_name is not None:
+            grid_ctl = self.loadGridCtl()
+
             if generator_name not in self.looping:
                 self.looping[generator_name] = {}
 
@@ -107,12 +124,12 @@ class IOManager:
                 voice_id = len(self.looping[generator_name]) + 1
 
                 setattr(self.ns, '%s-%s-loop' % (generator_name, voice_id), loop)
-                p = mp.Process(target=self._playGenerator, args=(generator_name, gen, voice_id, ctl))
+                p = mp.Process(target=self._playGenerator, args=(generator_name, gen, voice_id, ctl, grid_ctl))
                 p.start()
 
                 self.looping[generator_name][voice_id] = p
 
-    def _armGenerator(self, generator_name, gen, ctl, trigger, respawn):
+    def _armGenerator(self, generator_name, gen, ctl, trigger, respawn, grid_ctl):
         try:
             os.nice(-2)
         except OSError:
@@ -133,14 +150,16 @@ class IOManager:
         snd = gen.play(ctl)
 
         if self.ns.grid:
-            self.tick.wait()
+            div = grid_ctl.geti(self.divcc, low=0, high=4, default=0)
+            div = self.divs[div]
+            self.ticks[div].wait()
 
         out.write(snd)
 
         del out
 
 
-    def _playGenerator(self, generator_name, gen, voice_id, ctl):
+    def _playGenerator(self, generator_name, gen, voice_id, ctl, grid_ctl):
         try:
             os.nice(-2)
         except OSError:
@@ -176,7 +195,9 @@ class IOManager:
                 render_process.start()
 
             if self.ns.grid:
-                self.tick.wait()
+                div = grid_ctl.geti(self.divcc, low=0, high=4, default=0)
+                div = self.divs[div]
+                self.ticks[div].wait()
 
             out.write(snd)
 
@@ -272,22 +293,31 @@ class IOManager:
             self.grid.terminate()
 
     def startGrid(self, bpm=120):
-        #out_device = 'LPD8 MIDI 1' # TODO set this in a config or via console cmd
-        #midi.register_midi_listener(out_device, self.ns)
-        #out_device = midi.MidiReader(out_device, self.ns)
-        out_device = None
+        ctl_device = 'MidiSport 2x2 MIDI 1' # TODO set this in a config or via console cmd
+        midi.register_midi_listener(ctl_device, self.ns)
+        ctl = midi.MidiReader(ctl_device, self.ns)
 
-        self.grid = mp.Process(name='grid', target=self.gridHandler, args=(self.tick, bpm, out_device))
+        self.grid = mp.Process(name='grid', target=self.gridHandler, args=(self.ticks, bpm, ctl))
         self.grid.start()
         self.ns.grid = True
 
-    def gridHandler(self, tick, bpm, ctl=None):
+    def gridHandler(self, divs, bpm, ctl=None):
         # TODO: send MIDI clock again, assign device via 
         # config file and/or console cmd. Also allow mapping 
         # MIDI control to grid tempo value without resetting
         os.nice(0)
 
         count = 0
+
+        """
+        divs = [
+            24, # Quarter note
+            12, # Eighth note
+            8,  # Eighth note triplets
+            6,  # Sixteenth note
+            3,  # 32nd note
+        ]
+        """
 
         out = mido.open_output('MidiSport 2x2 MIDI 1')
         start = mido.Message('start')
@@ -300,17 +330,33 @@ class IOManager:
             beat = dsp.bpm2frames(bpm) / 24
 
             out.send(clock)
-            
+
+            if count % 24 == 0:
+                divs[24].set()
+                divs[24].clear()
+
             if count % 12 == 0:
-                tick.set()
-                tick.clear()
+                divs[12].set()
+                divs[12].clear()
+
+            if count % 8 == 0:
+                divs[8].set()
+                divs[8].clear()
+
+            if count % 6 == 0:
+                divs[6].set()
+                divs[6].clear()
+
+            if count % 3 == 0:
+                divs[3].set()
+                divs[3].clear()
 
             dsp.delay(beat)
             count += 1
 
         out.send(stop)
 
-    def gridHandlerSeq(self, tick, bpm, ctl=None):
+    def gridHandlerSeq(self, bpm, ctl=None):
         # TODO: send MIDI clock again, assign device via 
         # config file and/or console cmd. Also allow mapping 
         # MIDI control to grid tempo value without resetting
@@ -328,9 +374,6 @@ class IOManager:
             div = divs[divi] # divisions of the beat
 
             beat = dsp.bpm2frames(bpm) / div
-
-            tick.set()
-            tick.clear()
 
             out.send(clock)
 
