@@ -50,3 +50,4 @@ def init():
         config = init_user_config()
 
     return config
+

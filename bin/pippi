@@ -28,7 +28,13 @@ class Pippi(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.config = config.init()
 
-        self.io = IOManager()
+        self.io = IOManager(
+            bpm=self.config['bpm'],
+            bpmrange=self.config.get('bpmrange', None),
+            bpmcc=self.config.get('bpmcc', None), 
+            divcc=self.config.get('divcc', None), 
+            default_midi_device=self.config.get('device', None),
+        )
         self.params = ParamManager(self.io.ns)
 
     def do_bpm(self, bpm):
