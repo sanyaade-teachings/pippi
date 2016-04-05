@@ -28,8 +28,6 @@ You may need to install the `libasound2-dev` package on debian systems with `apt
 
 If you're trying the experimental `pyaudio` support, you may need to install `portaudio` on your system first.
 
-To use optional MIDI support with the interactive features you will need to install `pygame` via `pip`.
-
 When you have the dependencies you selected installed, from the root of the pippi repository run:
     
     python setup.py install
