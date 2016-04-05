@@ -22,6 +22,10 @@ setup(name='pippi',
 
         keywords = 'music dsp',
 
+        install_requires = [
+            'mido',
+        ],
+
         packages=['pippi'],
         ext_modules=[ pippic ],
 
