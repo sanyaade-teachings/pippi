@@ -105,20 +105,23 @@ def rotate(items, start=0, vary=False):
     """
 
     if vary == True:
-        start = rand.randint(0, len(items) - 1)
+        start = rand.randint(0, len(items))
 
-    if start > len(items) - 1:
-        start = len(items) - 1
+    return items[-start % len(items):] + items[:-start % len(items)]
 
-    return items[start:] + items[:start]
-
-def eu(length, numpulses):
+def eu(length, numpulses, offset=0):
     """ A euclidian pattern generator
 
         ::
 
             >>> dsp.eu(12, 3)
             [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
+
+            >>> dsp.eu(6, 3)
+            [1, 0, 1, 0, 1, 0]
+
+            >>> dsp.eu(6, 3, 1)
+            [0, 1, 0, 1, 0, 1]
 
             >>> dsp.eu(12, 5)
             [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0]
@@ -135,6 +138,6 @@ def eu(length, numpulses):
         except ValueError:
             position = 0
 
-    return pulses
+    return rotate(pulses, offset+len(pulses))
 
 
