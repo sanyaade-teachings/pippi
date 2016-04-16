@@ -38,6 +38,8 @@ audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 dsp_grain = 64
 quiet = True 
 
+from pippi.timers import delay
+from pippi.timers import monotonic
 
 ##############
 # List helpers
@@ -868,7 +870,7 @@ def bpm2frames(bpm):
 # Misc
 ###########
 
-def delay(frames):
+def ddelay(frames):
     target = (frames / 44100.0) + time.time()
 
     time.sleep(fts(frames))
