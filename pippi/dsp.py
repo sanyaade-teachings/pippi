@@ -579,7 +579,10 @@ def cross(snds, length, maxlen=None):
         if i == 0:
             out = crosstwo(snds[i], snds[i+1], fadelen)
         elif i < len(snds) - 1:
-            out = crosstwo(out, snds[i+1], fadelen)
+            try:
+                out = crosstwo(out, snds[i+1], fadelen)
+            except IndexError:
+                return out
 
     return out
 
