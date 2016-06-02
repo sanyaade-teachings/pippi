@@ -8,8 +8,11 @@ import multiprocessing as mp
 import midi
 import mido
 from params import ParamManager
+import config
+import seq
+import tune
+import osc
 
-# Doing a fallback dance for playback support
 try:
     import alsaaudio
     audio_engine = 'alsa'
@@ -22,16 +25,17 @@ except ImportError:
         print 'Playback disabled. Please install alsaaudio (ALSA) or pyaudio (PortAudio)'
 
 class IOManager:
-    def __init__(self, bpm=None, bpmrange=None, divcc=None, bpmcc=None, default_midi_device=None):
-        self.manager    = mp.Manager()
-        self.ns         = self.manager.Namespace()
+    def __init__(self):
+        self.manager                = mp.Manager()
+        self.ns                     = self.manager.Namespace()
+        self.config                 = config.init()
+        self.default_midi_device    = self.config['device']
+        self.ns.device              = 'default'
+        self.ns.grid                = False
+        self.divcc                  = self.config['divcc']
+        self.bpmcc                  = self.config['bpmcc']
+        self.divs                   = [24, 12, 6, 8, 3] # Defines the order for MIDI control
 
-        self.default_midi_device = default_midi_device
-        self.ns.device  = 'default'
-        self.ns.grid    = False
-        self.divcc      = divcc
-        self.bpmcc      = bpmcc
-        self.divs       = [24, 12, 6, 8, 3] # Defines the order for MIDI control
         self.ticks = {
             24: mp.Event(), # Quarter note
             12: mp.Event(), # Eighth note
@@ -40,9 +44,16 @@ class IOManager:
             3: mp.Event(),  # 32nd note
         }
 
-        self.generators = self.findGenerators()
-        self.looping    = {}
-        self.armed      = []
+        self.generators             = self.findGenerators()
+        self.looping                = {}
+        self.armed                  = []
+        self.patterns               = {}
+        self.osc_servers            = {}
+
+    def startOscServer(self, port=None):
+        if port not in self.osc_servers:
+            self.osc_servers[port] = osc.Osc(port, self.ns)
+            self.osc_servers[port].start()
 
     def findGenerators(self):
         generators = []
@@ -78,6 +89,49 @@ class IOManager:
     def loadGridCtl(self):
         midi.register_midi_listener(self.default_midi_device, self.ns)
         return midi.MidiReader(self.default_midi_device, self.ns)
+
+    def _playPattern(self, pattern):
+        def _playNote(note, velocity, length, device):
+            velocity = int(round(velocity * 127))
+            note = int(note)
+            out = mido.open_output(device)
+            msg = mido.Message('note_on', note=note, velocity=velocity)
+            out.send(msg)
+
+            dsp.delay(length)
+
+            msg = mido.Message('note_off', note=note, velocity=0)
+            out.send(msg)
+
+        setattr(self.ns, 'pattern-%s' % pattern.id, True)
+        setattr(self.ns, 'pattern-play-%s' % pattern.id, True)
+
+        grid_ctl = self.loadGridCtl()
+        while getattr(self.ns, 'pattern-%s' % pattern.id):
+            # wait for tick
+            if self.ns.grid:
+                #div = grid_ctl.geti(self.divcc, low=0, high=4, default=0)
+                div = self.divs[pattern.div]
+                self.ticks[div].wait()
+
+            # freq, 0-1, frames
+            note, velocity, length = pattern.next()
+            note = tune.ftom(note)
+            device = self.default_midi_device
+
+            if velocity > 0 and getattr(self.ns, 'pattern-play-%s' % pattern.id):
+                n = mp.Process(target=_playNote, args=(note, velocity, length, device))
+                n.start()
+
+
+    def startPattern(self, length, pat, notes, div, patid):
+        pattern = seq.Pattern(length, pat, notes, div, patid, 0, self.ns)
+        p = mp.Process(target=self._playPattern, args=(pattern,))
+        p.start()
+
+        pattern.process = p
+
+        self.patterns[patid] = pattern
 
     def armGenerator(self, generator_name):
         generator_name = self.validateGenerator(generator_name)
@@ -175,6 +229,12 @@ class IOManager:
 
         out = self.openAudioDevice()
 
+        group = None
+        if hasattr(gen, 'groups'):
+            group = gen.groups[ voice_id % len(gen.groups) ]
+
+        ctl['group'] = group
+
         iterations = 0
         while True:
             ctl['count'] = iterations
@@ -209,8 +269,9 @@ class IOManager:
         except AttributeError:
             dsp.log('Could not remove buffer-%s-%s' % (generator_name, voice_id))
 
-    def setupCtl(self, gen):
+    def setupCtl(self, gen, voice_index=0):
         param_manager = ParamManager(self.ns)
+        osc_manager   = osc.OscManager(self.ns)
 
         midi_readers = None
         if hasattr(gen, 'midi'):
@@ -219,10 +280,6 @@ class IOManager:
                 mappings = gen.mappings
 
             midi_readers = midi.get_midi_readers(gen.midi, mappings, self.ns)
-
-        group = None
-        if hasattr(gen, 'groups'):
-            group = gen.groups[ voice_index % len(gen.groups) ]
 
         if hasattr(gen, 'samples'):
             samples = {}
@@ -233,8 +290,8 @@ class IOManager:
 
         ctl = {
             'param': param_manager,
+            'osc': osc_manager,
             'midi': midi_readers,
-            'group': group, 
             'samples': samples,
             'note': (None, None) # for armed voices, this will be populated with note/velocity info
         }
@@ -293,7 +350,7 @@ class IOManager:
             self.grid.terminate()
 
     def startGrid(self, bpm=120):
-        ctl_device = 'MidiSport 2x2 MIDI 1' # TODO set this in a config or via console cmd
+        ctl_device = self.default_midi_device
         midi.register_midi_listener(ctl_device, self.ns)
         ctl = midi.MidiReader(ctl_device, self.ns)
 
@@ -319,7 +376,7 @@ class IOManager:
         ]
         """
 
-        out = mido.open_output('MidiSport 2x2 MIDI 1')
+        out = mido.open_output(self.default_midi_device)
         start = mido.Message('start')
         stop = mido.Message('stop')
         clock = mido.Message('clock')
@@ -398,7 +455,6 @@ class IOManager:
 
         return out
 
-
     def open_pyaudio_pcm(self, device='default'):
         self.p = pyaudio.PyAudio()
 
@@ -410,4 +466,3 @@ class IOManager:
         )
 
         return out
-

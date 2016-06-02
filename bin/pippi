@@ -10,7 +10,7 @@ import glob
 import uuid
 import time
 
-from pippi import dsp, midi, config
+from pippi import dsp, midi, config, osc
 from pippi.io import IOManager
 from pippi.params import ParamManager
 
@@ -27,14 +27,9 @@ class Pippi(cmd.Cmd):
         dsp.log('starting', 'w')
         cmd.Cmd.__init__(self)
         self.config = config.init()
+        self.last_id = 0
 
-        self.io = IOManager(
-            bpm=self.config['bpm'],
-            bpmrange=self.config.get('bpmrange', None),
-            bpmcc=self.config.get('bpmcc', None), 
-            divcc=self.config.get('divcc', None), 
-            default_midi_device=self.config.get('device', None),
-        )
+        self.io = IOManager()
         self.params = ParamManager(self.io.ns)
 
     def do_bpm(self, bpm):
@@ -48,23 +43,81 @@ class Pippi(cmd.Cmd):
 
             self.io.set_bpm(float(bpm))
 
+    def do_p(self, cmd):
+        cmds = cmd.split(' ')
+
+        length = cmds[0].split('/')
+        try:
+            div = int(length[1])
+        except IndexError:
+            div = 1
+
+        length = int(length[0])
+
+        try:
+            pat = cmds[1]
+        except IndexError:
+            pat = 'x' * length
+
+        try:
+            notes = cmds[2]
+        except IndexError:
+            notes = '1'
+
+        self.last_id += 1
+
+        self.io.startPattern(length, pat, notes, div, self.last_id)
+
     def do_i(self, cmd):
         """
 List the number of voices for currently running instrument scripts.
         """
-        print 'Looping:'
-        for generator, process_list in self.io.looping.iteritems():
-            print generator, len(process_list)
-        print
+        print 'bpm: %s key: %s octave: %s' % (self.params.get('bpm', 100), self.params.get('key', 'c'), self.params.get('octave', 3))
+        
+        if len(self.io.looping) > 0:
+            print 'Looping:'
+            for generator, process_list in self.io.looping.iteritems():
+                print generator, len(process_list)
+            print
 
-        print 'Armed:'
-        for generator in self.io.getArmed():
-            print generator
-        print
+        armed = self.io.getArmed()
+        if len(armed) > 0:
+            print 'Armed:'
+            for generator in armed:
+                print generator
+            print
+
+        if len(self.io.patterns) > 0:
+            print 'Patterns:'
+            for i, pattern in self.io.patterns.iteritems():
+                muted = 'P' if getattr(self.io.ns, 'pattern-play-%s' % pattern.id) else 'M'
+                print '%02d' % i, muted, pattern
+            print
 
     def do_midi(self, cmd):
-        """ List available midi devices """
-        midi.print_devices()
+        """ List available midi devices or log input messages to pippi.log """
+
+        if cmd == 'log' or cmd == 'log on':
+            midi.input_log(self.io.ns, True)
+        elif cmd == 'log off':
+            midi.input_log(self.io.ns, False)
+        else:
+            midi.print_devices()
+
+    def do_osc(self, cmd):
+        if cmd == 'log' or cmd == 'log on':
+            osc.input_log(self.io.ns, True)
+        elif cmd == 'log off':
+            osc.input_log(self.io.ns, False)
+        elif cmd == '':
+            osc.print_ports()
+        else:
+
+            try:
+                self.io.startOscServer(int(cmd))
+            except Exception as e:
+                print str(e)
+
 
     def do_device(self, device):
         """
@@ -145,11 +198,11 @@ Usage:
         """
         self.params.set('tune', float(cmd) / 16.0, 'global')
 
-    def do_p(self, cmd):
-        """
-Shorthand for play
-        """
-        self.do_play(cmd)
+    def do_octave(self, cmd):
+        self.params.set('octave', int(cmd), 'global')
+
+    def do_channel(self, cmd):
+        self.params.set('channel', int(cmd), 'global')
 
     def do_arm(self, cmd):
         cmd = cmd.split(' ')
@@ -234,6 +287,19 @@ Examples:
             self.io.disarmAllGenerators()
         else:
             self.io.disarmGenerator(generator)
+
+    def do_s(self, pat_id):
+        pat_id = int(pat_id)
+        # stop flag in ns
+        setattr(self.io.ns, 'pattern-play-%s' % pat_id, False)
+        setattr(self.io.ns, 'pattern-%s' % pat_id, False)
+        # remove from array (pop)
+        del self.io.patterns[pat_id]
+
+    def do_m(self, pat_id):
+        pat_id = int(pat_id)
+        current = getattr(self.io.ns, 'pattern-play-%s' % pat_id)
+        setattr(self.io.ns, 'pattern-play-%s' % pat_id, not current)
 
     def do_stop(self, generator):
         if generator in ['', 'all']:
