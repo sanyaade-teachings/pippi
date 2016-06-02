@@ -1,5 +1,6 @@
 from pippi import dsp
 import re
+import math
 
 a0 = 27.5 
 a4 = a0 * 2**4
@@ -177,6 +178,53 @@ notes = {
         'g#': 11, 
         'ab': 11, 
         }
+
+midi_notes = {
+    'a': 21,
+    'a#': 22,
+    'bb': 22,
+    'b': 23, 
+    'c': 24, 
+    'c#': 25,
+    'db': 25,
+    'd': 26,
+    'd#': 27,
+    'eb': 27,
+    'e': 28, 
+    'f': 29, 
+    'f#': 30, 
+    'gb': 30, 
+    'g': 31, 
+    'g#': 32,
+    'ab': 32,
+}
+
+def mtof(midi_note):
+    return 2**((midi_note-69)/12.0) * 440
+
+def ftom(freq):
+    return math.log(freq / 440.0, 2) * 12 + 69
+
+def ftomi(freq):
+    return int(round(ftom(freq)))
+
+def extractPitchClass(pitch):
+    parsed = re.match('([a-zA-Z]#?b?)(\d+)', pitch)
+
+    try:
+        pitch_class = parsed.group(1)
+    except AttributeError:
+        return pitch
+
+    return pitch_class
+
+def ptom(pitch):
+    pitch_class = extractPitchClass(pitch.lower())
+    register = int(pitch[-1])
+    midi_note = midi_map[pitch_class]
+    midi_note += register * 12
+
+    return midi_note
 
 def edo(degree, divs=12):
     return 2**(degree/float(divs))
