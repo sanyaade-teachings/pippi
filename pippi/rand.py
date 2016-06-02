@@ -56,3 +56,52 @@ def randshuffle(input):
 def randbool():
     return randchoose([True, False])
 
+def markov(state, chain, values=None):
+    """ Pass a dict in this format: 
+
+        chain = {
+            'a': [0.1, 1, 0.5],
+            'b': [0, 0.2, 0.75],
+            'c': [0, 1],
+        }
+
+        Optionally pass a dict to return a 
+        preselected value or set of values:
+
+        values = {
+            'a': (1, 0.75),
+            'b': (0, 400),
+            'c': (20, 0.35)
+        }
+
+        Otherwise the state name will be returned.
+    """
+    
+    states = []
+    weights = []
+
+    for s, w in chain.iteritems():
+        states += [s]
+        weights += [w]
+
+    if state in states:
+        weight = chain[state]
+    else:
+        weight = chain[randchoose(states)]
+
+    choices = []
+
+    for i, s in enumerate(states):
+        try:
+            choices += [s] * int(weight[i] * 100)
+        except IndexError:
+            pass
+
+    state = randchoose(choices)
+ 
+    if values is not None and state in values:
+        value = values[state]
+    else:
+        value = state
+
+    return value
