@@ -20,9 +20,30 @@ def print_devices():
     for device in devices['output']:
         print '  ' + device
 
+def input_log(ns, active=True):
+    def log_listener():
+        device_names = mido.get_input_names()
+        devices = [ mido.open_input(device_name) for device_name in device_names ]
+        devices = mido.ports.MultiPort(devices)
+        for msg in devices:
+            if hasattr(ns, 'midi_log_active'):
+                dsp.log(msg)
+            else:
+                continue
+
+    if active:
+        if not hasattr(ns, 'midi_log_active'):
+            listener = mp.Process(target=log_listener)
+            listener.start()
+            setattr(ns, 'midi_log_active', True)
+    else:
+        delattr(ns, 'midi_log_active')
+
 def device_scribe(device_name, ns):
     with mido.open_input(device_name) as incoming:
         for msg in incoming:
+            msg_id = None
+            value = None
             if hasattr(msg, 'control'):
                 msg_id = msg.control
                 value = msg.value
@@ -39,10 +60,12 @@ def register_midi_listener(device_name, ns):
     # check to see if this device has a listener already
     # start one up if not
     if not hasattr(ns, '%s-listener' % device_name):
-        listener = mp.Process(target=device_scribe, args=(device_name, ns))
-        listener.start()
-
-        setattr(ns, '%s-listener' % device_name, listener.pid)
+        try:
+            listener = mp.Process(target=device_scribe, args=(device_name, ns))
+            listener.start()
+            setattr(ns, '%s-listener' % device_name, listener.pid)
+        except IOError:
+            dsp.log('Could not start listener for unknown MIDI device: %s' % device_name)
 
 def get_midi_readers(devices, mappings, ns):
     readers = {}
