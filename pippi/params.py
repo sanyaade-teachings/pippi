@@ -1,3 +1,5 @@
+import time
+
 class ParamManager:
     def __init__(self, ns):
         self.ns = ns
