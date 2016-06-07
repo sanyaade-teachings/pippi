@@ -8,6 +8,7 @@ Thanks!
 import ctypes
 import os
 import dsp
+import time
 
 class timespec(ctypes.Structure):
     _fields_ = [
@@ -15,17 +16,24 @@ class timespec(ctypes.Structure):
         ('tv_nsec', ctypes.c_long)
     ]
 
-librt = ctypes.CDLL('librt.so.1', use_errno=True)
-clock_gettime = librt.clock_gettime
-clock_gettime.argtypes = [ctypes.c_int, ctypes.POINTER(timespec)]
 
-def monotonic():
-    t = timespec()
-    if clock_gettime(4, ctypes.pointer(t)) != 0:
-        errno_ = ctypes.get_errno()
-        raise OSError(errno_, os.strerror(errno_))
+try:
+    librt = ctypes.CDLL('librt.so.1', use_errno=True)
+    clock_gettime = librt.clock_gettime
+    clock_gettime.argtypes = [ctypes.c_int, ctypes.POINTER(timespec)]
 
-    return t.tv_sec + t.tv_nsec * 1e-9
+    def monotonic():
+        t = timespec()
+        if clock_gettime(4, ctypes.pointer(t)) != 0:
+            errno_ = ctypes.get_errno()
+            raise OSError(errno_, os.strerror(errno_))
+
+        return t.tv_sec + t.tv_nsec * 1e-9
+
+except OSError:
+    dsp.log('Monotonic clock disabled')
+    def monotonic():
+        return time.time()
 
 def delay(length):
     """ Length in frames """
