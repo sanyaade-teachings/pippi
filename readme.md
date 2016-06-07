@@ -61,7 +61,8 @@ Here's a simple example generator based on the previous example:
     from pippi import dsp, tune
 
     def play(ctl):
-        freqs = tune.fromdegrees([1,3,5,8], octave=3, root='d')
+        key = ctl.get('param').get('key', 'c')
+        freqs = tune.fromdegrees([1,3,5,8], octave=3, root=key)
         freq = dsp.randchoose(freqs)
         length = dsp.stf(2, 5) # between 2 & 5 seconds
         waveshape = dsp.randchoose(['sine', 'tri', 'square'])
@@ -87,6 +88,11 @@ To stop all voices:
 To have pippi reload the script to allow you to alter the code and hear the changes as it plays, type:
 
     ^_- reload on
+
+To change the current key (which is just an arbitrary parameter set in the pippi console session) from C major to Eb major:
+
+    ^_- key eb
+
 
 More commands and help available by typing `help` at the console
 
