@@ -8,6 +8,12 @@ def list_devices():
         'output': mido.get_output_names(),
     }
 
+def validate_output_device(device):
+    return device in list_devices()['output']
+
+def validate_input_device(device):
+    return device in list_devices()['output']
+
 def print_devices():
     devices = list_devices()
 

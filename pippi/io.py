@@ -52,7 +52,7 @@ class IOManager:
 
     def startOscServer(self, port=None):
         if port not in self.osc_servers:
-            self.osc_servers[port] = osc.Osc(port, self.ns)
+            self.osc_servers[port] = osc.OscListener(port, self.ns)
             self.osc_servers[port].start()
 
     def findGenerators(self):
@@ -90,8 +90,19 @@ class IOManager:
         midi.register_midi_listener(self.default_midi_device, self.ns)
         return midi.MidiReader(self.default_midi_device, self.ns)
 
+    def _playOneshot(self, note, velocity, length, generator_name):
+        generator_name = self.validateGenerator(generator_name)
+
+        if generator_name is not None:
+            out = self.openAudioDevice()
+            gen = self.loadGenerator(generator_name)
+            ctl = self.setupCtl(gen)
+            ctl['note'] = (note, velocity, length)
+            snd = gen.play(ctl)
+            out.write(snd)
+
     def _playPattern(self, pattern):
-        def _playNote(note, velocity, length, device):
+        def _sendMidi(note, velocity, length, device):
             velocity = int(round(velocity * 127))
             note = int(note)
             out = mido.open_output(device)
@@ -103,6 +114,22 @@ class IOManager:
             msg = mido.Message('note_off', note=note, velocity=0)
             out.send(msg)
 
+        def _sendOsc():
+            pass
+
+        device = getattr(self.ns, 'selected-pattern-device', self.default_midi_device)
+
+        if self.validateGenerator(device):
+            handler = self._playOneshot
+        elif midi.validate_output_device(device):
+            handler = _sendMidi
+        elif osc.validateAddress(device):
+            handler = _sendOsc
+        else:
+            # Fallback to internal generator
+            handler = self._playOneshot
+            device = 'default'
+
         setattr(self.ns, 'pattern-%s' % pattern.id, True)
         setattr(self.ns, 'pattern-play-%s' % pattern.id, True)
 
@@ -110,19 +137,17 @@ class IOManager:
         while getattr(self.ns, 'pattern-%s' % pattern.id):
             # wait for tick
             if self.ns.grid:
-                #div = grid_ctl.geti(self.divcc, low=0, high=4, default=0)
-                div = self.divs[pattern.div]
+                div = getattr(self.ns, 'pattern-div-%s' % pattern.id)
+                div = self.divs[div]
                 self.ticks[div].wait()
 
             # freq, 0-1, frames
             note, velocity, length = pattern.next()
             note = tune.ftom(note)
-            device = self.default_midi_device
 
             if velocity > 0 and getattr(self.ns, 'pattern-play-%s' % pattern.id):
-                n = mp.Process(target=_playNote, args=(note, velocity, length, device))
+                n = mp.Process(target=handler, args=(note, velocity, length, device))
                 n.start()
-
 
     def startPattern(self, length, pat, notes, div, patid):
         pattern = seq.Pattern(length, pat, notes, div, patid, 0, self.ns)

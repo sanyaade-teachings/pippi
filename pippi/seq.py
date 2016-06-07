@@ -3,43 +3,61 @@ import dsp, tune
 from params import ParamManager
 
 class Pattern(object):
-    def __init__(self, length, pat=None, notes=None, div=1, id=0, pos=0, ns=None):
-        self.pos    = pos
-        self.pat    = pat
-        self.notes  = notes
-        self.degrees = [ int(d) for d in notes.split(',') ]
-        self.length = length
+    def __init__(self, length, pat=None, deg=None, div=1, id=0, pos=0, ns=None):
         self.id     = id
-        self.div    = div
         self.ns     = ns
         self.params = ParamManager(self.ns)
-        self.octave = self.params.get('octave') 
+
+        deg = [ int(d) for d in deg.split(',') ]
+        setattr(self.ns, 'pattern-deg-%s' % self.id, deg)
+        setattr(self.ns, 'pattern-pos-%s' % self.id, pos)
+        setattr(self.ns, 'pattern-pat-%s' % self.id, pat)
+        setattr(self.ns, 'pattern-len-%s' % self.id, length)
+        setattr(self.ns, 'pattern-div-%s' % self.id, div)
+        setattr(self.ns, 'pattern-oct-%s' % self.id, self.params.get('octave'))
 
         self.fill(length)
 
     def __str__(self):
-        return 'p%s: %s/%s o:%s %s %s' % (self.id, self.length, self.div, self.octave, self.pat, self.notes)
+        return 'p%s: %s/%s o:%s %s %s' % (
+                self.id, 
+                getattr(self.ns, 'pattern-len-%s' % self.id), 
+                getattr(self.ns, 'pattern-div-%s' % self.id), 
+                getattr(self.ns, 'pattern-oct-%s' % self.id), 
+                getattr(self.ns, 'pattern-pat-%s' % self.id), 
+                getattr(self.ns, 'pattern-deg-%s' % self.id) 
+            )
 
     def all(self):
-        return self.seq
+        return getattr(self.ns, 'pattern-seq-%s' % self.id, [])
 
     def reset(self):
-        self.pos = 0
+        setattr(self.ns, 'pattern-pos-%s' % self.id, 0)
 
     def next(self):
-        value = self.seq[self.pos % len(self.seq)]
+        pos = getattr(self.ns, 'pattern-pos-%s' % self.id)
+        seq = getattr(self.ns, 'pattern-seq-%s' % self.id)
+        deg = getattr(self.ns, 'pattern-deg-%s' % self.id)
+        octave = getattr(self.ns, 'pattern-oct-%s' % self.id)
 
-        note = self.degrees[self.pos % len(self.degrees)]
-        note = tune.fromdegrees([note], octave=self.octave, root=self.params.get('key', 'c'))[0]
+        value = seq[pos % len(seq)]
+
+        note = deg[pos % len(deg)]
+        note = tune.fromdegrees([note], octave=octave, root=self.params.get('key', 'c'))[0]
         
-        self.pos += 1
+        pos += 1
+
+        setattr(self.ns, 'pattern-pos-%s' % self.id, pos)
+
         length = dsp.mstf(40, 120)
         return (note, value, length)
 
+    def fill(self, length, pat=None):
+        if pat is None:
+            pat = getattr(self.ns, 'pattern-pat-%s' % self.id, [])
 
-    def fill(self, length):
-        if 'eu' in self.pat:
-            euparams = self.pat[2:]
+        if 'eu' in pat:
+            euparams = pat[2:]
             if ':' in euparams:
                 euparams = euparams.split(':')
                 numbeats = int(euparams[0])
@@ -48,10 +66,12 @@ class Pattern(object):
                 numbeats = int(euparams)
                 offset = 0
             
-            self.seq = dsp.eu(length, numbeats, offset)
+            seq = dsp.eu(length, numbeats, offset)
 
         else:
-            self.seq = self.unpack(length, self.pat)
+            seq = self.unpack(length, pat)
+
+        setattr(self.ns, 'pattern-seq-%s' % self.id, seq)
 
     def unpack(self, length, pat):
         rests = ('.', ' ', ',', '-', 0)
@@ -79,3 +99,4 @@ class Lfo(object):
 
     def fill(self, length, wt):
         self.seq = dsp.wavetable(wt, length)
+

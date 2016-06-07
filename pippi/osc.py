@@ -8,7 +8,11 @@ def input_log(ns, active=True):
     else:
         delattr(ns, 'osc_log_active')
 
-class Osc(liblo.ServerThread):
+def validate_address(address):
+    """ TODO: add address validation """
+    return False
+
+class OscListener(liblo.ServerThread):
     def __init__(self, port, ns):
         liblo.ServerThread.__init__(self, port)
         self.ns = ns
