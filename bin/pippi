@@ -43,6 +43,12 @@ class Pippi(cmd.Cmd):
 
             self.io.set_bpm(float(bpm))
 
+    def do_d(self, device):
+        if device == '':
+            print getattr(self.io.ns, 'selected-pattern-device', 'default')
+        else:
+            setattr(self.io.ns, 'selected-pattern-device', device)
+
     def do_p(self, cmd):
         cmds = cmd.split(' ')
 
@@ -222,7 +228,6 @@ Play or loop instrument voices
 
 Usage:
     play <instrument_name> <optional:number of voices> <optional:once|o>
-    p <instrument_name> <optional:number of voices> <optional:once|o>
 
 Examples:
     # Start looping one drone.py generator voice
@@ -232,21 +237,21 @@ Examples:
     play drone
 
     # Start looping five voices
-    p drone 5
+    play drone 5
 
     # Play one drone voice once without looping
-    p drone 1 once
+    play drone 1!
 
     # Play five drone voices once without looping
-    p drone 5 o
+    play drone 5!
 
-    # Or use alternate syntax to play generators without looping
-    # Play one drone voice once without looping
-    once drone
-
-    # Play five drone voices once without looping
-    o drone 5
         """
+        if '!' in cmd:
+            loop = False
+            cmd = cmd[:-1]
+        else:
+            loop = True
+
         cmd = cmd.split(' ')
 
         try:
@@ -259,11 +264,6 @@ Examples:
             num_voices = int(cmd[1])
         except IndexError:
             num_voices = 1
-
-        try:
-            loop = False if cmd[2] in ['once', 'o'] else True
-        except IndexError:
-            loop = True
 
         self.io.playGenerator(generator_name, num_voices, loop=loop)
 
