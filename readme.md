@@ -52,5 +52,43 @@ Here's a slightly more interesting example:
     >>> dsp.write(out, 'helloagain')
     'helloagain.wav'
 
+### Interactive example
+
+Pippi can use scripts as "generators" for interactive playback and performance.
+
+Here's a simple example generator based on the previous example:
+
+    from pippi import dsp, tune
+
+    def play(ctl):
+        freqs = tune.fromdegrees([1,3,5,8], octave=3, root='d')
+        freq = dsp.randchoose(freqs)
+        length = dsp.stf(2, 5) # between 2 & 5 seconds
+        waveshape = dsp.randchoose(['sine', 'tri', 'square'])
+        amp = dsp.rand(0.1, 0.2)
+
+        out = dsp.tone(length, freq, waveshape, amp)
+        out = dsp.env(out, 'phasor')
+        out = dsp.taper(out, 20)
+
+        return out
+
+
+Save it as example.py and from the same directory type `pippi` to enter the interactive console.
+
+To play three voices of your example.py generator type:
+
+    ^_- play example 3
+
+To stop all voices:
+
+    ^_- stop
+
+To have pippi reload the script to allow you to alter the code and hear the changes as it plays, type:
+
+    ^_- reload on
+
+More commands and help available by typing `help` at the console
+
 [More documentation at Read The Docs.](http://pippi.readthedocs.org)
 
