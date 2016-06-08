@@ -9,6 +9,7 @@ import ctypes
 import os
 import dsp
 import time
+import utils
 
 class timespec(ctypes.Structure):
     _fields_ = [
@@ -31,7 +32,7 @@ try:
         return t.tv_sec + t.tv_nsec * 1e-9
 
 except OSError:
-    dsp.log('Monotonic clock disabled')
+    utils.log('Monotonic clock disabled')
     def monotonic():
         return time.time()
 
