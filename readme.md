@@ -6,17 +6,23 @@ This is pre-release software. I am working toward a stable 1.0 and would very mu
 
 > Note: pippi is currently only compatible with Python 2.x
 
-In order to build the C extensions that pippi uses for most DSP, you will need to install the Python development headers.
+Pippi was built to run on Linux, OSX and Windows. Linux is fully supported. OSX support is pretty good 
+and getting better. Windows is almost completely untested -- seeking beta testers!
+
+### MIDI Support
+
+To enable MIDI support, install the `portmidi` package on your system. (Available via homebrew on OSX)
+
+### C extension support
+
+In order to build the C extensions that pippi uses for most DSP, you will need to install the Python 
+development headers. On some systems (like arch linux) this will already be installed.
 
 On debian (including ubuntu & raspbian) systems:
 
     apt-get install python-dev
 
-On arch linux the headers are already installed along with the main `python2` package.
-
-### To install last published version from pip:
-
-    pip install pippi
+On OSX you may need to install xcode to build the C extensions: http://docs.python-guide.org/en/latest/starting/install/osx/
 
 ### To install latest version from source:
 
@@ -33,7 +39,7 @@ When you have the dependencies you selected installed, from the root of the pipp
     python setup.py install
 
 
-### Now What?
+## Now What?
 
 Here's a simple 'Hello World!' style example you can try at the python console:
 
