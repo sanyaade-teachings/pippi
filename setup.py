@@ -24,6 +24,7 @@ setup(name='pippi',
 
         install_requires = [
             'mido',
+            'pyliblo',
         ],
 
         packages=['pippi'],
