@@ -283,7 +283,7 @@ static PyObject * pippic_curve(PyObject *self, PyObject *args) {
     double period = 1.0;
 
     int cIndexWavetable;
-    double indexWavetable, fracWavetable, valWavetable, valNextWavetable = 0;
+    double indexWavetable = 0, fracWavetable = 0, valWavetable = 0, valNextWavetable = 0;
 
     if(!PyArg_ParseTuple(args, "ii|dddd", &type, &length, &period, &amp, &phase, &offset)) {
         return NULL; 
@@ -375,7 +375,7 @@ static PyObject * pippic_env(PyObject *self, PyObject *args) {
     double mult   = 1.0;
 
     int cIndexWavetable;
-    double indexWavetable, fracWavetable, valWavetable, valNextWavetable = 0;
+    double indexWavetable = 0, fracWavetable = 0, valWavetable = 0, valNextWavetable = 0;
 
     if(!PyArg_ParseTuple(args, "s#i|dddd", &input, &input_length, &type, &amp, &phase, &offset, &mult)) {
         return NULL; 
@@ -466,7 +466,6 @@ static PyObject * pippic_synth(PyObject *self, PyObject *args) {
     double cycle[cycle_length / chunk];
     wavetable(type, cycle, cycle_length / chunk, amp, phase, offset, period * oversample);
 
-    int left, right;
     short value;
 
     for(i=0; i < length; i += chunk) {
@@ -615,7 +614,7 @@ static PyObject * pippic_invert(PyObject *self, PyObject *args) {
     signed char *data;
 
     signed char *snd;
-    int value, length, inverted;
+    int value, length;
 
     int i;
     int size = getsize();
@@ -652,8 +651,8 @@ static PyObject * pippic_tone(PyObject *self, PyObject *args) {
     int length;
 
     double valWaveform, valNextWaveform, freq, amp;
-    int lenWaveform, cIndexWaveform = 0;
-    double indexWaveform, fracWaveform = 0;
+    int lenWaveform = 0, cIndexWaveform = 0;
+    double indexWaveform = 0, fracWaveform = 0;
 
     if(!PyArg_ParseTuple(args, "diOd", &freq, &length, &waveformIn, &amp)) {
         return NULL;
@@ -713,14 +712,14 @@ static PyObject * pippic_fold(PyObject *self, PyObject *args) {
     int length;
 
     double valWaveform, valNextWaveform, freq, factFreq, amp;
-    int lenWaveform, cIndexWaveform = 0;
+    int lenWaveform = 0, cIndexWaveform = 0;
     double fracWaveform = 0;
 
     double valFactors, valNextFactors;
-    int lenFactors, cIndexFactors = 0;
+    int lenFactors = 0, cIndexFactors = 0;
     double fracFactors = 0;
 
-    double indexWaveform, indexFactors = 0;
+    double indexWaveform = 0, indexFactors = 0;
 
     if(!PyArg_ParseTuple(args, "ddiOOd", &freq, &factFreq, &length, &waveformIn, &factorsIn, &amp)) {
         return NULL;
@@ -823,14 +822,14 @@ static PyObject * pippic_pulsar(PyObject *self, PyObject *args) {
     double valWaveform, valNextWaveform, valWindow, valNextWindow, valMod, valNextMod, freq, pulsewidth;
     int length;
 
-    int lenWaveform, cIndexWaveform, paddingWaveform = 0;
-    double indexWaveform, fracWaveform = 0;
+    int lenWaveform = 0, cIndexWaveform = 0, paddingWaveform = 0;
+    double indexWaveform = 0, fracWaveform = 0;
 
-    int lenWindow, cIndexWindow, paddingWindow = 0;
-    double indexWindow, fracWindow = 0;
+    int lenWindow = 0, cIndexWindow = 0, paddingWindow = 0;
+    double indexWindow = 0, fracWindow = 0;
 
-    int lenMod, cIndexMod = 0;
-    double indexMod, fracMod, modRange, freqMod, amp = 0;
+    int lenMod = 0, cIndexMod = 0;
+    double indexMod = 0, fracMod = 0, modRange = 0, freqMod = 0, amp = 0;
 
     if(!PyArg_ParseTuple(args, "didOOOddd", &freq, &length, &pulsewidth, &waveformIn, &windowIn, &modIn, &modRange, &freqMod, &amp)) {
         return NULL;
@@ -1030,7 +1029,7 @@ static PyObject * pippic_mix(PyObject *self, PyObject *args) {
     PyObject *right_align;
     double factor;
 
-    int i, f, summed_data, tmp_data = 0;
+    int i = 0, f = 0, summed_data = 0, tmp_data = 0;
     int size = getsize();
 
     if(!PyArg_ParseTuple(args, "O!|Od:mix", &PyList_Type, &sounds, &right_align, &factor)) {
