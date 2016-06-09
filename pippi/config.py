@@ -6,9 +6,6 @@ default_path = os.path.dirname(os.path.abspath(__file__)) + '/default.config'
 keys = [
     'device', 
     'bpm', 
-    'bpmcc', 
-    'divcc', 
-    'divs', 
     'key', 
     'ratios', 
     'a4'

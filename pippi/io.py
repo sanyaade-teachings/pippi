@@ -33,7 +33,6 @@ class IOManager:
         self.ns.device              = 'default'
         self.ns.grid                = False
         self.divcc                  = self.config['divcc']
-        self.bpmcc                  = self.config['bpmcc']
         self.divs                   = [24, 12, 6, 8, 3] # Defines the order for MIDI control
 
         self.ticks = {
