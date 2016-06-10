@@ -29,10 +29,10 @@ class IOManager:
         self.manager                = mp.Manager()
         self.ns                     = self.manager.Namespace()
         self.config                 = config.init()
-        self.default_midi_device    = self.config['device']
+        self.default_midi_device    = self.config.get('device', None)
         self.ns.device              = 'default'
         self.ns.grid                = False
-        self.divcc                  = self.config['divcc']
+        self.divcc                  = self.config.get('divcc', None)
         self.divs                   = [24, 12, 6, 8, 3] # Defines the order for MIDI control
 
         self.ticks = {
