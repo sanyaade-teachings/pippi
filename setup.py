@@ -30,5 +30,9 @@ setup(name='pippi',
         packages=['pippi'],
         ext_modules=[ pippic ],
 
+        data_files=[
+            ('pippi', ['pippi/default.config'])
+        ],
+
         zip_safe=False
     )
