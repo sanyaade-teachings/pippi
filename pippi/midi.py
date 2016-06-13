@@ -8,9 +8,11 @@ def list_devices():
         'output': mido.get_output_names(),
     }
 
-def validate_output_device_by_id(device_id):
+def validate_output_device_by_id(device_id, devices=None):
     device_id = int(device_id[1:])
-    devices = list_devices()['output']
+
+    if devices is None:
+        devices = list_devices()['output']
 
     try:
         return devices[device_id]

@@ -118,11 +118,13 @@ class IOManager:
             pass
 
         device = getattr(self.ns, 'selected-pattern-device', self.default_midi_device)
+        devices = midi.list_devices()['output']
+        dsp.log(devices)
 
         if self.validateGenerator(device):
             handler = self._playOneshot
-        elif midi.validate_output_device_by_id(device):
-            device = midi.validate_output_device_by_id(device) # FIXME dummy
+        elif midi.validate_output_device_by_id(device, devices):
+            device = midi.validate_output_device_by_id(device, devices) # FIXME dummy
             handler = _sendMidi
         elif osc.validateAddress(device):
             handler = _sendOsc
