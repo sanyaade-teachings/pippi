@@ -38,6 +38,29 @@ When you have the dependencies you selected installed, from the root of the pipp
     
     python setup.py install
 
+## Linux Installation
+
+## Debian / Ubuntu Installation
+
+## Raspian Installation
+
+## Arch Linux Installation
+
+## Windows Installation
+
+- Install git
+- Install python 2.7
+- install cgywin and these packages:
+    - autoconf
+    - make
+    - libtool
+    - libportmidi-devel
+    - python-pyportmidi
+    - libportaudio-devel
+    - gcc-g++
+- run `python -m ensurepip` to install pip and setuptools
+- clone pippi & checkout master branch
+- From pippi directory run `python setup.py install`
 
 ## Now What?
 
