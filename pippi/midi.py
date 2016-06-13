@@ -45,14 +45,17 @@ def print_devices():
 
 def input_log(ns, active=True):
     def log_listener():
-        device_names = mido.get_input_names()
-        devices = [ mido.open_input(device_name) for device_name in device_names ]
-        devices = mido.ports.MultiPort(devices)
-        for msg in devices:
-            if hasattr(ns, 'midi_log_active'):
-                dsp.log(msg)
-            else:
-                continue
+        try:
+            device_names = mido.get_input_names()
+            devices = [ mido.open_input(device_name) for device_name in device_names ]
+            devices = mido.ports.MultiPort(devices)
+            for msg in devices:
+                if hasattr(ns, 'midi_log_active'):
+                    dsp.log(msg)
+                else:
+                    continue
+        except IOError:
+            dsp.log('Could not open MIDI devices for logging %s' % str(device_names))
 
     if active:
         if not hasattr(ns, 'midi_log_active'):
@@ -63,21 +66,24 @@ def input_log(ns, active=True):
         delattr(ns, 'midi_log_active')
 
 def device_scribe(device_name, ns):
-    with mido.open_input(device_name) as incoming:
-        for msg in incoming:
-            msg_id = None
-            value = None
-            if hasattr(msg, 'control'):
-                msg_id = msg.control
-                value = msg.value
+    try:
+        with mido.open_input(device_name) as incoming:
+            for msg in incoming:
+                msg_id = None
+                value = None
+                if hasattr(msg, 'control'):
+                    msg_id = msg.control
+                    value = msg.value
 
-            if hasattr(msg, 'note'):
-                msg_id = msg.note
-                value = msg.velocity
-                
-            setattr(ns, '%s-%s-%s' % (device_name, msg.type, msg_id), value)
+                if hasattr(msg, 'note'):
+                    msg_id = msg.note
+                    value = msg.velocity
+                    
+                setattr(ns, '%s-%s-%s' % (device_name, msg.type, msg_id), value)
 
-    delattr(ns, '%s-listener' % device_name)
+        delattr(ns, '%s-listener' % device_name)
+    except IOError:
+        dsp.log('Could not open MIDI device %s' % device_name)
 
 def register_midi_listener(device_name, ns):
     # check to see if this device has a listener already
@@ -104,10 +110,13 @@ class MidiTrigger:
         self.notes = notes
 
     def wait(self):
-        with mido.open_input(self.device_name) as incoming:
-            for msg in incoming:
-                if msg.type == 'note_on' and msg.note in self.notes:
-                    return (msg.note, msg.velocity)
+        try:
+            with mido.open_input(self.device_name) as incoming:
+                for msg in incoming:
+                    if msg.type == 'note_on' and msg.note in self.notes:
+                        return (msg.note, msg.velocity)
+            except IOError:
+                dsp.log('Could not arm MIDI device %s' % self.device_name)
 
         return (None, None)
 
