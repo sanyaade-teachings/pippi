@@ -23,6 +23,7 @@ setup(name='pippi',
         keywords = 'music dsp',
 
         install_requires = [
+            'pyaudio',
             'mido',
         ],
 
