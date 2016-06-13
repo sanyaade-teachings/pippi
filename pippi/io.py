@@ -11,7 +11,11 @@ from params import ParamManager
 import config
 import seq
 import tune
-import osc
+
+try:
+    import osc
+except ImportError:
+    pass
 
 try:
     import alsaaudio
