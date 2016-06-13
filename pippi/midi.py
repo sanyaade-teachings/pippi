@@ -115,8 +115,8 @@ class MidiTrigger:
                 for msg in incoming:
                     if msg.type == 'note_on' and msg.note in self.notes:
                         return (msg.note, msg.velocity)
-            except IOError:
-                dsp.log('Could not arm MIDI device %s' % self.device_name)
+        except IOError:
+            dsp.log('Could not arm MIDI device %s' % self.device_name)
 
         return (None, None)
 

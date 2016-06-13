@@ -43,6 +43,12 @@ class Pippi(cmd.Cmd):
 
             self.io.set_bpm(float(bpm))
 
+    def do_clock(self, cmd):
+        if cmd == '':
+            print self.params.get('clock', 'off')
+        else:
+            self.params.set('clock', cmd)
+
     def do_d(self, device):
         if device == '':
             print getattr(self.io.ns, 'selected-pattern-device', 'default')
@@ -50,6 +56,11 @@ class Pippi(cmd.Cmd):
             setattr(self.io.ns, 'selected-pattern-device', device)
 
     def do_p(self, cmd):
+        # Start the tempo grid if not already started
+        if self.io.ns.grid == False:
+            bpm = self.params.get('bpm', 120)
+            self.io.startGrid(bpm)
+
         cmds = cmd.split(' ')
 
         length = cmds[0].split('/')
@@ -78,7 +89,7 @@ class Pippi(cmd.Cmd):
         """
 List the number of voices for currently running instrument scripts.
         """
-        print 'bpm: %s key: %s octave: %s' % (self.params.get('bpm', 100), self.params.get('key', 'c'), self.params.get('octave', 3))
+        print 'bpm: %s clock: %s \nkey: %s octave: %s' % (self.params.get('bpm', 100), self.params.get('clock', 'off'), self.params.get('key', 'c'), self.params.get('octave', 3))
         
         if len(self.io.looping) > 0:
             print 'Looping:'

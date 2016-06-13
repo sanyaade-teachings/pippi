@@ -34,6 +34,7 @@ class IOManager:
         self.ns.grid                = False
         self.divcc                  = self.config.get('divcc', None)
         self.divs                   = [24, 12, 6, 8, 3] # Defines the order for MIDI control
+        self.params                 = ParamManager(self.ns)
 
         self.ticks = {
             24: mp.Event(), # Quarter note
@@ -394,27 +395,18 @@ class IOManager:
 
         count = 0
 
-        """
-        divs = [
-            24, # Quarter note
-            12, # Eighth note
-            8,  # Eighth note triplets
-            6,  # Sixteenth note
-            3,  # 32nd note
-        ]
-        """
-
-        out = mido.open_output(self.default_midi_device)
-        start = mido.Message('start')
-        stop = mido.Message('stop')
-        clock = mido.Message('clock')
-
-        out.send(start)
+        if self.params.get('clock', 'off') == 'on':
+            out = mido.open_output(self.default_midi_device)
+            start = mido.Message('start')
+            stop = mido.Message('stop')
+            clock = mido.Message('clock')
+            out.send(start)
 
         while getattr(self.ns, 'grid', True):
             beat = dsp.bpm2frames(bpm) / 24
 
-            out.send(clock)
+            if self.params.get('clock', 'off') == 'on':
+                out.send(clock)
 
             if count % 24 == 0:
                 divs[24].set()
@@ -439,31 +431,8 @@ class IOManager:
             dsp.delay(beat)
             count += 1
 
-        out.send(stop)
-
-    def gridHandlerSeq(self, bpm, ctl=None):
-        # TODO: send MIDI clock again, assign device via 
-        # config file and/or console cmd. Also allow mapping 
-        # MIDI control to grid tempo value without resetting
-        os.nice(0)
-
-        count = 0
-
-        divs = [1, 2, 4, 3, 8, 16]
-
-        out = mido.open_output('MidiSport 2x2 MIDI 1')
-        clock = mido.Message('clock')
-
-        while getattr(self.ns, 'grid', True):
-            divi = ctl.geti(5, low=0, high=len(divs)-1, default=0)
-            div = divs[divi] # divisions of the beat
-
-            beat = dsp.bpm2frames(bpm) / div
-
-            out.send(clock)
-
-            dsp.delay(beat)
-            count += 1
+        if self.params.get('clock', 'off') == 'on':
+            out.send(stop)
 
     def set_bpm(self, bpm):
         self.grid.terminate()
