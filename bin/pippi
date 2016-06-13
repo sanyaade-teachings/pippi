@@ -10,13 +10,7 @@ import glob
 import uuid
 import time
 
-from pippi import dsp, midi, config
-
-try:
-    from pippi import osc
-except ImportError:
-    print 'OSC support disabled, please install liblo'
-
+from pippi import dsp, midi, config, osc
 from pippi.io import IOManager
 from pippi.params import ParamManager
 

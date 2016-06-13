@@ -1,4 +1,8 @@
-import liblo
+try:
+    import liblo
+except ImportError:
+    print 'OSC support disabled, please install liblo'
+
 from pippi import dsp
 
 def input_log(ns, active=True):
