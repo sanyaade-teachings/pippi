@@ -1,9 +1,22 @@
+from pippi import dsp
+
 try:
     import liblo
+
+    class OscListener(liblo.ServerThread):
+        def __init__(self, port, ns):
+            liblo.ServerThread.__init__(self, port)
+            self.ns = ns
+
+        @liblo.make_method(None, None)
+        def handler(self, path, args):
+            if hasattr(self.ns, 'osc_log_active'):
+                dsp.log('%s %s %s' % (self.port, path, args))
+
+            setattr(self.ns, '%s%s' % (self.port, path), args)
+     
 except ImportError:
     print 'OSC support disabled, please install liblo'
-
-from pippi import dsp
 
 def input_log(ns, active=True):
     if active:
@@ -16,18 +29,6 @@ def validate_address(address):
     """ TODO: add address validation """
     return False
 
-class OscListener(liblo.ServerThread):
-    def __init__(self, port, ns):
-        liblo.ServerThread.__init__(self, port)
-        self.ns = ns
-
-    @liblo.make_method(None, None)
-    def handler(self, path, args):
-        if hasattr(self.ns, 'osc_log_active'):
-            dsp.log('%s %s %s' % (self.port, path, args))
-
-        setattr(self.ns, '%s%s' % (self.port, path), args)
-        
 class OscManager(object):
     def __init__(self, ns, port=None):
         self.ns = ns
