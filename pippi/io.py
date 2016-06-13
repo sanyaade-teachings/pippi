@@ -79,7 +79,7 @@ class IOManager:
     def validateGenerator(self, generator_name):
         if generator_name in self.generators:
             return generator_name
-        return None
+        return False
 
     def loadGenerator(self, generator_name):
         sys.path.insert(0, os.getcwd())
@@ -104,6 +104,7 @@ class IOManager:
         def _sendMidi(note, velocity, length, device):
             velocity = int(round(velocity * 127))
             note = int(note)
+            dsp.log(device)
             out = mido.open_output(device)
             msg = mido.Message('note_on', note=note, velocity=velocity)
             out.send(msg)
@@ -120,7 +121,8 @@ class IOManager:
 
         if self.validateGenerator(device):
             handler = self._playOneshot
-        elif midi.validate_output_device(device):
+        elif midi.validate_output_device_by_id(device):
+            device = midi.validate_output_device_by_id(device) # FIXME dummy
             handler = _sendMidi
         elif osc.validateAddress(device):
             handler = _sendOsc

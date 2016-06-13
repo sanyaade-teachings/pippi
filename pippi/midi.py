@@ -8,23 +8,32 @@ def list_devices():
         'output': mido.get_output_names(),
     }
 
+def validate_output_device_by_id(device_id):
+    device_id = int(device_id[1:])
+    devices = list_devices()['output']
+
+    try:
+        return devices[device_id]
+    except IndexError:
+        return False
+
 def validate_output_device(device):
     return device in list_devices()['output']
 
 def validate_input_device(device):
-    return device in list_devices()['output']
+    return device in list_devices()['input']
 
 def print_devices():
     devices = list_devices()
 
     print 'Input devices:'
-    for device in devices['input']:
-        print '  ' + device
+    for i, device in enumerate(devices['input']):
+        print '  m%s %s' % (i, device)
 
     print
     print 'Output devices:'
-    for device in devices['output']:
-        print '  ' + device
+    for i, device in enumerate(devices['output']):
+        print '  m%s %s' % (i, device)
 
 def input_log(ns, active=True):
     def log_listener():
