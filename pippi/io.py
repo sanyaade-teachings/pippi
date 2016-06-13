@@ -118,7 +118,7 @@ class IOManager:
             pass
 
         device = getattr(self.ns, 'selected-pattern-device', self.default_midi_device)
-        devices = midi.list_devices()['output']
+        devices = midi.list_output_devices()
         dsp.log(devices)
 
         if self.validateGenerator(device):

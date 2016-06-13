@@ -2,10 +2,16 @@ import mido
 import multiprocessing as mp
 import dsp
 
+def list_output_devices():
+    return mido.get_output_names()
+
+def list_input_devices():
+    return mido.get_input_names()
+
 def list_devices():
     return {
-        'input': mido.get_input_names(),
-        'output': mido.get_output_names(),
+        'input': list_input_devices(),
+        'output': list_output_devices(),
     }
 
 def validate_output_device_by_id(device_id, devices=None):
@@ -20,10 +26,10 @@ def validate_output_device_by_id(device_id, devices=None):
         return False
 
 def validate_output_device(device):
-    return device in list_devices()['output']
+    return device in list_output_devices()
 
 def validate_input_device(device):
-    return device in list_devices()['input']
+    return device in list_input_devices()
 
 def print_devices():
     devices = list_devices()
