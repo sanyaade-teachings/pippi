@@ -75,7 +75,7 @@ class IOManager:
 
         dsp.log('No generators found')
 
-        return False
+        return generators
 
     def validateGenerator(self, generator_name):
         if generator_name in self.generators:
