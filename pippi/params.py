@@ -1,4 +1,26 @@
 import time
+import re
+
+patterns = {
+    'instrument': r'^(\w+)\s?',
+    'steps': r'^\w+\s+(\d+)[/\s]?',
+    'division': r'^\w+\s+\d+/(\d+)\s?',
+    'sequence': r'\s?([x.]+)\s?', 
+    'scale': r'\s?(\d+[,\d]+)\s?',
+    'oneshot': r'(!)',
+}
+
+def find(target, cmd):
+    try:
+        pattern = patterns[target]
+    except KeyError:
+        pattern = patterns['instrument']
+
+    try:
+        value = re.findall(pattern, cmd)[0]
+    except IndexError:
+        value = None
+    return value
 
 class ParamManager:
     def __init__(self, ns):

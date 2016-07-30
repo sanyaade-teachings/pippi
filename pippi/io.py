@@ -44,10 +44,8 @@ class IOManager:
             3: mp.Event(),  # 32nd note
         }
 
-        self.generators             = self.findGenerators()
-        self.looping                = {}
-        self.armed                  = []
-        self.patterns               = {}
+        self.instruments             = self.findInstruments()
+        self.playing                = {}
         self.osc_servers            = {}
 
     def startOscServer(self, port=None):
@@ -55,274 +53,171 @@ class IOManager:
             self.osc_servers[port] = osc.OscListener(port, self.ns)
             self.osc_servers[port].start()
 
-    def findGenerators(self):
-        generators = []
+    def findInstruments(self):
+        instruments = []
 
         try:
             gens = glob.glob("*.py")
             for filename in gens:
                 # Get base filename and strip .py extension
                 filename = os.path.basename(filename)[:-3]
-                generators += [ filename ]
+                instruments += [ filename ]
 
-            if len(generators) > 0:
-                return generators
+            if len(instruments) > 0:
+                return instruments
 
-            dsp.log('Discovered %s available generator scripts' % len(generators))
+            dsp.log('Discovered %s available instrument scripts' % len(instruments))
 
         except OSError:
             pass
 
-        dsp.log('No generators found')
+        dsp.log('No instruments found')
 
-        return generators
+        return instruments
 
-    def validateGenerator(self, generator_name):
-        if generator_name in self.generators:
-            return generator_name
+    def validateInstrument(self, instrument_name):
+        if instrument_name in self.instruments:
+            return instrument_name
         return False
 
-    def loadGenerator(self, generator_name):
+    def loadInstrument(self, instrument_name):
         sys.path.insert(0, os.getcwd())
-        return __import__(generator_name)
+        return __import__(instrument_name)
 
     def loadGridCtl(self):
         midi.register_midi_listener(self.default_midi_device, self.ns)
         return midi.MidiReader(self.default_midi_device, self.ns)
 
-    def _playOneshot(self, note, velocity, length, generator_name):
-        generator_name = self.validateGenerator(generator_name)
-
-        if generator_name is not None:
-            out = self.openAudioDevice()
-            gen = self.loadGenerator(generator_name)
-            ctl = self.setupCtl(gen)
-            ctl['note'] = (note, velocity, length)
-            snd = gen.play(ctl)
-            out.write(snd)
-
-    def _playPattern(self, pattern):
-        def _sendMidi(note, velocity, length, device):
-            velocity = int(round(velocity * 127))
-            note = int(note)
-            dsp.log(device)
-            out = mido.open_output(device)
-            msg = mido.Message('note_on', note=note, velocity=velocity)
-            out.send(msg)
-
-            dsp.delay(length)
-
-            msg = mido.Message('note_off', note=note, velocity=0)
-            out.send(msg)
-
-        def _sendOsc():
-            pass
-
-        device = getattr(self.ns, 'selected-pattern-device', self.default_midi_device)
-        dsp.log(device)
-
-        if self.validateGenerator(device):
-            handler = self._playOneshot
-        elif midi.validate_output_device_by_id(device):
-            device = midi.validate_output_device_by_id(device) # FIXME dummy
-            dsp.log(device)
-            handler = _sendMidi
-        elif osc.validateAddress(device):
-            handler = _sendOsc
-        else:
-            # Fallback to internal generator
-            handler = self._playOneshot
-            device = 'default'
-
-        setattr(self.ns, 'pattern-%s' % pattern.id, True)
-        setattr(self.ns, 'pattern-play-%s' % pattern.id, True)
-
-        grid_ctl = self.loadGridCtl()
-        while getattr(self.ns, 'pattern-%s' % pattern.id):
-            # wait for tick
-            if self.ns.grid:
-                div = getattr(self.ns, 'pattern-div-%s' % pattern.id)
-                div = self.divs[div]
-                self.ticks[div].wait()
-
-            # freq, 0-1, frames
-            note, velocity, length = pattern.next()
-            note = tune.ftom(note)
-
-            if velocity > 0 and getattr(self.ns, 'pattern-play-%s' % pattern.id):
-                n = mp.Process(target=handler, args=(note, velocity, length, device))
-                n.start()
-
-    def startPattern(self, length, pat, notes, div, patid):
-        pattern = seq.Pattern(length, pat, notes, div, patid, 0, self.ns)
-        p = mp.Process(target=self._playPattern, args=(pattern,))
-        p.start()
-
-        pattern.process = p
-
-        self.patterns[patid] = pattern
-
-    def armGenerator(self, generator_name):
-        generator_name = self.validateGenerator(generator_name)
-
-        armed = getattr(self.ns, 'armed', [])
-
-        if generator_name is not None and generator_name not in armed:
-            dsp.log('arming %s...' % generator_name)
-            armed += [ generator_name ]
-            setattr(self.ns, 'armed', armed)
-
-            gen = self.loadGenerator(generator_name)
-            ctl = self.setupCtl(gen)
-            grid_ctl = self.loadGridCtl()
-            trigger = midi.MidiTrigger(gen.trigger['device'], gen.trigger['notes'])
-
-            respawn = mp.Event()
-
-            p = mp.Process(target=self._armGenerator, args=(generator_name, gen, ctl, trigger, respawn, grid_ctl))
-            p.start()
-
-            while generator_name in armed:
-                respawn.wait()
-                respawn.clear()
-                p = mp.Process(target=self._armGenerator, args=(generator_name, gen, ctl, trigger, respawn, grid_ctl))
-                p.start()
-                armed = getattr(self.ns, 'armed', [])
-
-
-    def playGenerator(self, generator_name, num_voices=1, loop=True):
-        generator_name = self.validateGenerator(generator_name)
-
-        
-        if generator_name is not None:
-            grid_ctl = self.loadGridCtl()
-
-            if generator_name not in self.looping:
-                self.looping[generator_name] = {}
-
-            gen = self.loadGenerator(generator_name)
-            ctl = self.setupCtl(gen)
-
-            for _ in range(num_voices):
-                voice_id = len(self.looping[generator_name]) + 1
-
-                setattr(self.ns, '%s-%s-loop' % (generator_name, voice_id), loop)
-                p = mp.Process(target=self._playGenerator, args=(generator_name, gen, voice_id, ctl, grid_ctl))
-                p.start()
-
-                self.looping[generator_name][voice_id] = p
-
-    def _armGenerator(self, generator_name, gen, ctl, trigger, respawn, grid_ctl):
+    def _stream(self, snd):
         try:
             os.nice(-2)
         except OSError:
             os.nice(0)
 
-        voice_id = os.getpid()
         out = self.openAudioDevice()
-        ctl['count'] = 1
-
-        if getattr(self.ns, 'reload', False) == True:
-            reload(gen)
-
-        note_info = trigger.wait()
-        ctl['note'] = note_info
-
-        respawn.set()
-
-        snd = gen.play(ctl)
-
-        if self.ns.grid:
-            div = grid_ctl.geti(self.divcc, low=0, high=4, default=0)
-            div = self.divs[div]
-            self.ticks[div].wait()
-
         out.write(snd)
 
-        del out
+    def play(self, instrument_name, voice_id, loop=False):
+        # register info / id for `i` cmd
+        self.playing[voice_id] = instrument_name
+        p = mp.Process(target=self._play, args=(instrument_name, voice_id, loop))
+        p.start()
 
+    def _play(self, instrument_name, voice_id, loop):
+        # Load instrument module
+        inst = self.loadInstrument(instrument_name)
 
-    def _playGenerator(self, generator_name, gen, voice_id, ctl, grid_ctl):
-        try:
-            os.nice(-2)
-        except OSError:
-            os.nice(0)
+        # Set up ctl data
+        ctl = self.setupCtl(inst)
+        grid_ctl = self.loadGridCtl()
 
-        if not hasattr(self.ns, 'reload'):
-            setattr(self.ns, 'reload', False)
+        count = 0
+        delay = None
+        msg = None
+        step = True
+        once = True
 
-        render_process = None
-        def render_again(gen, ctl, generator_name, voice_id, ns):
-            snd = gen.play(ctl)
-            setattr(ns, 'buffer-%s-%s' % (generator_name, voice_id), snd)
+        self.params.set('%s-loop' % voice_id, loop)
 
-        out = self.openAudioDevice()
+        if hasattr(inst, 'quantize'):
+            self.params.set('%s-quantize' % voice_id, inst.quantize)
+
+        if hasattr(inst, 'trigger') and inst.trigger:
+            # TODO: add support for OSC triggers and maybe GPIO triggers? what else?
+            trigger = midi.MidiTrigger(
+                    inst.trigger.get('device'), 
+                    inst.trigger.get('notes', None), 
+                    inst.trigger.get('cc', None)
+                )
 
         group = None
-        if hasattr(gen, 'groups'):
-            group = gen.groups[ voice_id % len(gen.groups) ]
-
+        if hasattr(inst, 'groups'):
+            group = inst.groups[ voice_id % len(inst.groups) ]
         ctl['group'] = group
 
-        iterations = 0
-        while True:
-            ctl['count'] = iterations
-            iterations += 1
+        if hasattr(inst, 'once'):
+            ctl['once'] = inst.once(ctl)
 
-            if getattr(self.ns, 'reload') == True:
-                reload(gen)
+        dsp.log('Playing voice %s' % voice_id)
+        while self.params.get('%s-loop' % voice_id, True) or once:
+            ctl['count'] = count
 
-            if hasattr(self.ns, 'buffer-%s-%s' % (generator_name, voice_id)):
-                snd = getattr(self.ns, 'buffer-%s-%s' % (generator_name, voice_id))
-            else:
-                # First play render
-                snd = gen.play(ctl)
+            if getattr(self.ns, 'reload', False) == True:
+                reload(inst)
 
-            if render_process is None or not render_process.is_alive():
-                # async start render of next buffer
-                render_process = mp.Process(name='render-%s-%s' % (generator_name, voice_id), target=render_again, args=(gen, ctl, generator_name, voice_id, self.ns))
-                render_process.start()
+            try:
+                note_info = trigger.wait()
+                ctl['note'] = note_info
 
-            if self.ns.grid:
+            except NameError:
+                pass
+
+            if self.params.get('%s-quantize' % voice_id, False):
+                if not self.ns.grid:
+                    bpm = self.params.get('bpm', 120)
+                    self.startGrid(bpm)
+
                 div = grid_ctl.geti(self.divcc, low=0, high=4, default=0)
                 div = self.divs[div]
                 self.ticks[div].wait()
 
-            out.write(snd)
+            try:
+                # Sequenced play
+                step, delay, msg = inst.sequence(ctl)
 
-            if getattr(self.ns, '%s-%s-loop' % (generator_name, voice_id)) == False:
-                break
+                if step:
+                    ctl['step'] = (step, delay, msg)
 
-        try:
-            delattr(self.ns, 'buffer-%s-%s' % (generator_name, voice_id))
-        except AttributeError:
-            dsp.log('Could not remove buffer-%s-%s' % (generator_name, voice_id))
+                    snd = inst.play(ctl)
+                   
+                    p = mp.Process(target=self._stream, args=(snd,))
+                    p.start()
 
-    def setupCtl(self, gen, voice_index=0):
+                if delay:
+                    dsp.delay(delay)
+
+            except AttributeError:
+                # End-to-end loop play
+                if not hasattr(self.ns, '%s-buffer' % voice_id):
+                    snd = inst.play(ctl)
+                else:
+                    snd = getattr(self.ns, '%s-buffer' % voice_id)
+
+                # spawn re-render
+                def _render(inst, ctl, ns, voice_id):
+                    snd = inst.play(ctl)
+                    setattr(ns, '%s-buffer' % voice_id, snd)
+
+                p = mp.Process(target=_render, args=(inst, ctl, self.ns, voice_id))
+                p.start()
+
+                self._stream(snd)
+
+            count += 1
+            once = False
+
+        dsp.log('Stopping voice %s' % voice_id)
+
+    def setupCtl(self, inst, voice_index=0):
         param_manager = ParamManager(self.ns)
         osc_manager   = osc.OscManager(self.ns)
 
         midi_readers = None
-        if hasattr(gen, 'midi'):
+        if hasattr(inst, 'midi'):
             mappings = None
-            if hasattr(gen, 'mappings'):
-                mappings = gen.mappings
+            if hasattr(inst, 'mappings'):
+                mappings = inst.mappings
 
-            midi_readers = midi.get_midi_readers(gen.midi, mappings, self.ns)
-
-        if hasattr(gen, 'samples'):
-            samples = {}
-            for snd in gen.samples:
-                samples[snd[0]] = dsp.read(snd[1]).data
-        else:
-            samples = None
+            midi_readers = midi.get_midi_readers(inst.midi, mappings, self.ns)
 
         ctl = {
-            'param': param_manager,
-            'osc': osc_manager,
-            'midi': midi_readers,
-            'samples': samples,
-            'note': (None, None) # for armed voices, this will be populated with note/velocity info
+            'param': param_manager, # interface to session params set at the console
+            'osc': osc_manager,     # osc i/o for param control
+            'midi': midi_readers,   # midi i/o for param control
+            'note': (None, None),   # for armed/triggered voices, this will be populated with note/velocity info
+            'step': (None, None, None),
+            'once': None,
+            'count': 0,
         }
 
         return ctl
@@ -344,34 +239,23 @@ class IOManager:
 
         return out
 
-    def stopAllGenerators(self, kill=False):
-        for generator_name in self.looping.keys():
-            self.stopGenerator(generator_name, kill)
+    def stopAllInstruments(self, kill=False):
+        for instrument_name in self.looping.keys():
+            self.stopInstrument(instrument_name, kill)
 
-    def stopGenerator(self, generator_name, kill=False):
-        if generator_name in self.looping:
-            for voice_id, process in self.looping[generator_name].iteritems():
-                setattr(self.ns, '%s-%s-loop' % (generator_name, voice_id), False)
+    def stopInstrument(self, instrument_name, kill=False):
+        if instrument_name in self.looping:
+            for voice_id, process in self.looping[instrument_name].iteritems():
+                setattr(self.ns, '%s-%s-loop' % (instrument_name, voice_id), False)
 
                 if kill:
                     process.terminate()
 
-            del self.looping[generator_name]
+            del self.looping[instrument_name]
             return True
         
-        dsp.log('Could not stop %s generators: none currently playing' % generator_name)
+        dsp.log('Could not stop %s instruments: none currently playing' % instrument_name)
         return False
-
-    def getArmed(self):
-        return getattr(self.ns, 'armed', [])
-
-    def disarmAllGenerators(self):
-        setattr(self.ns, 'armed', [])
-
-    def disarmGenerator(self, generator_name):
-        armed = getattr(self.ns, 'armed', [])
-        armed.remove(generator_name)
-        setattr(self.ns, 'armed', armed)
 
     def stopGrid(self):
         self.ns.grid = False

@@ -9,6 +9,7 @@ import subprocess
 import glob
 import uuid
 import time
+from pippi import params
 
 from pippi import dsp, midi, config, osc
 from pippi.io import IOManager
@@ -49,66 +50,37 @@ class Pippi(cmd.Cmd):
         else:
             self.params.set('clock', cmd)
 
-    def do_d(self, device):
-        if device == '':
-            print getattr(self.io.ns, 'selected-pattern-device', 'default')
-        else:
-            setattr(self.io.ns, 'selected-pattern-device', device)
-
     def do_p(self, cmd):
-        # Start the tempo grid if not already started
-        if self.io.ns.grid == False:
-            bpm = self.params.get('bpm', 120)
-            self.io.startGrid(bpm)
+        instrument_name = params.find('instrument', cmd)
+        oneshot = params.find('oneshot', cmd)
+        loop = False if oneshot else True
 
-        cmds = cmd.split(' ')
+        if self.io.validateInstrument(instrument_name):
+            self.last_id += 1
+            self.io.play(instrument_name, self.last_id, loop)
 
-        length = cmds[0].split('/')
-        try:
-            div = int(length[1])
-        except IndexError:
-            div = 1
+        else:
+            print 'Could not find an instrument script named %s.py' % instrument_name
 
-        length = int(length[0])
-
-        try:
-            pat = cmds[1]
-        except IndexError:
-            pat = 'x' * length
-
-        try:
-            notes = cmds[2]
-        except IndexError:
-            notes = '1'
-
-        self.last_id += 1
-
-        self.io.startPattern(length, pat, notes, div, self.last_id)
+    def do_q(self, voice_id):
+        q = self.params.get('%s-quantize' % voice_id, False)
+        self.params.set('%s-quantize' % voice_id, not q)
 
     def do_i(self, cmd):
         """
 List the number of voices for currently running instrument scripts.
         """
-        print 'bpm: %s clock: %s \nkey: %s octave: %s' % (self.params.get('bpm', 100), self.params.get('clock', 'off'), self.params.get('key', 'c'), self.params.get('octave', 3))
+        print 'bpm: %s clock: %s \nkey: %s octave: %s' % (
+                self.params.get('bpm', 100), 
+                self.params.get('clock', 'off'), 
+                self.params.get('key', 'c'), 
+                self.params.get('octave', 3)
+            )
         
-        if len(self.io.looping) > 0:
-            print 'Looping:'
-            for generator, process_list in self.io.looping.iteritems():
-                print generator, len(process_list)
-            print
-
-        armed = self.io.getArmed()
-        if len(armed) > 0:
-            print 'Armed:'
-            for generator in armed:
-                print generator
-            print
-
-        if len(self.io.patterns) > 0:
-            print 'Patterns:'
-            for i, pattern in self.io.patterns.iteritems():
-                muted = 'P' if getattr(self.io.ns, 'pattern-play-%s' % pattern.id) else 'M'
-                print '%02d' % i, muted, pattern
+        if len(self.io.playing) > 0:
+            print 'voices playing:'
+            for voice_id, instrument_name in self.io.playing.iteritems():
+                print '    {} - {}'.format(voice_id, instrument_name)
             print
 
     def do_midi(self, cmd):
@@ -136,67 +108,6 @@ List the number of voices for currently running instrument scripts.
                 print str(e)
 
 
-    def do_device(self, device):
-        """
-Calling device with no arguments will print the current audio device.
-Calling device with a device name (eg 'default') will select that audio device for playback.
-
-Usage:
-    device <device-name>
-
-Examples:
-    device
-    device default
-        """
-        if device == '':
-            print self.io.ns.device
-        else:
-            self.io.ns.device = device
-
-    def do_set(self, cmd):
-        """
-Set a session variable within a namespace.
-
-Usage: 
-    set <namespace> <name> <value>
-
-Examples:
-    set global drift 0.5
-    set drone drift 0.5
-    set drone key c#
-        """
-        cmd = cmd.split(' ')
-
-        namespace = cmd[0]
-        param_name = cmd[1]
-        param_value = cmd[2]
-
-        self.params.set(param_name, param_value, namespace)
-
-    def do_get(self, cmd):
-        """
-Get the value of a session variable.
-
-Usage:
-    get <name>
-
-    (Returns all <name> values in any namespace)
-
-    get <namespace> <name>
-
-    (Returns <name> value for given namespace)
-
-Examples:
-    get drift
-    get drone key
-        """
-        cmd = cmd.split(' ')
-
-        if len(cmd) == 1:
-            print self.params.getAll(cmd[0])
-        elif len(cmd) == 2:
-            print self.params.get(cmd[1], cmd[0])
-
     def do_key(self, cmd):
         """
 Set default global key.
@@ -221,108 +132,11 @@ Usage:
     def do_channel(self, cmd):
         self.params.set('channel', int(cmd), 'global')
 
-    def do_arm(self, cmd):
-        cmd = cmd.split(' ')
-
-        try:
-            generator_name = cmd[0]
-        except IndexError:
-            print 'Please specify a generator name. Type "help play" for usage.'
-            return False
-
-        p = mp.Process(target=self.io.armGenerator, args=(generator_name,))
-        p.start()
-
-    def do_play(self, cmd):
-        """
-Play or loop instrument voices
-
-Usage:
-    play <instrument_name> <optional:number of voices> <optional:once|o>
-
-Examples:
-    # Start looping one drone.py generator voice
-    play drone 1
-
-    # Or: 
-    play drone
-
-    # Start looping five voices
-    play drone 5
-
-    # Play one drone voice once without looping
-    play drone 1!
-
-    # Play five drone voices once without looping
-    play drone 5!
-
-        """
-        if '!' in cmd:
-            loop = False
-            cmd = cmd[:-1]
-        else:
-            loop = True
-
-        cmd = cmd.split(' ')
-
-        try:
-            generator_name = cmd[0]
-        except IndexError:
-            print 'Please specify a generator name. Type "help play" for usage.'
-            return False
-
-        try:
-            num_voices = int(cmd[1])
-        except IndexError:
-            num_voices = 1
-
-        self.io.playGenerator(generator_name, num_voices, loop=loop)
-
-    def do_o(self, cmd):
-        self.do_once(cmd)
-
-    def do_once(self, cmd):
-        """ Shortcut for play <generator> <voices> once """
-        cmd = cmd.split(' ')
-        generator = cmd[0]
-
-        try:
-            num_voices = cmd[1]
-        except IndexError:
-            num_voices = 1
-
-        self.do_play('%s %s once' % (generator, num_voices))
-
-    def do_disarm(self, generator):
-        if generator in ['', 'all']:
-            self.io.disarmAllGenerators()
-        else:
-            self.io.disarmGenerator(generator)
-
-    def do_s(self, pat_id):
-        pat_id = int(pat_id)
+    def do_s(self, voice_id):
         # stop flag in ns
-        setattr(self.io.ns, 'pattern-play-%s' % pat_id, False)
-        setattr(self.io.ns, 'pattern-%s' % pat_id, False)
+        self.params.set('%s-loop' % voice_id, False)
         # remove from array (pop)
-        del self.io.patterns[pat_id]
-
-    def do_m(self, pat_id):
-        pat_id = int(pat_id)
-        current = getattr(self.io.ns, 'pattern-play-%s' % pat_id)
-        setattr(self.io.ns, 'pattern-play-%s' % pat_id, not current)
-
-    def do_stop(self, generator):
-        if generator in ['', 'all']:
-            self.io.stopAllGenerators()
-        else:
-            self.io.stopGenerator(generator)
-
-    def do_kill(self, generator):
-        if generator in ['', 'all']:
-            self.io.stopAllGenerators(kill=True)
-        else:
-            self.io.stopGenerator(generator, kill=True)
+        del self.io.playing[int(voice_id)]
 
     def do_reload(self, opt):
         if opt == 'on':

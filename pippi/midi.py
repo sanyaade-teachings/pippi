@@ -105,16 +105,22 @@ def get_midi_readers(devices, mappings, ns):
     return readers
 
 class MidiTrigger:
-    def __init__(self, device_name, notes):
+    def __init__(self, device_name, notes=None, cc=None):
         self.device_name = device_name
         self.notes = notes
+        self.cc = cc
 
     def wait(self):
         try:
             with mido.open_input(self.device_name) as incoming:
                 for msg in incoming:
-                    if msg.type == 'note_on' and msg.note in self.notes:
-                        return (msg.note, msg.velocity)
+                    if self.notes is not None:
+                        if msg.type == 'note_on' and msg.note in self.notes:
+                            return (msg.note, msg.velocity)
+
+                    if self.cc is not None:
+                        if msg.type == 'control_change' and msg.control in self.cc and msg.value > 0:
+                            return (msg.control, msg.value)
         except IOError:
             dsp.log('Could not arm MIDI device %s' % self.device_name)
 

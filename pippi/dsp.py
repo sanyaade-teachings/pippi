@@ -27,7 +27,7 @@ try:
     from _pippic import pulsar
     from _pippic import fold
     from _pippic import env as cenv
-    from _pippic import tone as ctone
+    from _pippic import tone as wtone
     from _pippic import cycle as ccycle
 
 except ImportError:
@@ -391,7 +391,7 @@ def vsplit(input, minsize, maxsize):
 
     return output
 
-def write(audio_string, filename, timestamp=False, cwd=True):
+def write(audio_string, filename, timestamp=False, cwd=True, channels=2):
     """ Write audio data to renders directory with the Python wave module """
     if timestamp == True:
         filename = filename + '-' + timestamp_filename() + '.wav' 
@@ -403,6 +403,7 @@ def write(audio_string, filename, timestamp=False, cwd=True):
 
     wavfile = wave.open(filename, "w")
     wavfile.setparams(audio_params)
+    wavfile.setnchannels(channels)
     wavfile.writeframes(audio_string)
     wavfile.close()
     return filename
