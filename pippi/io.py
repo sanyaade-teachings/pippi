@@ -193,6 +193,7 @@ class IOManager:
 
                 self._stream(snd)
 
+
             count += 1
             once = False
 

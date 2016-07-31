@@ -57,7 +57,7 @@ class ParamManager:
                 self.set('%s-last_updated' % param, time.time(), namespace='meta')
                 self.set(param, default, namespace)
 
-            return self.get(name, default, namespace)
+            return self.get(param, default, namespace)
 
         params = self.getAll(namespace)
 
