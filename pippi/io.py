@@ -111,6 +111,8 @@ class IOManager:
         ctl = self.setupCtl(inst)
         grid_ctl = self.loadGridCtl()
 
+        ctl['id'] = voice_id
+
         count = 0
         delay = None
         msg = None
@@ -161,7 +163,7 @@ class IOManager:
                 div = self.divs[div]
                 self.ticks[div].wait()
 
-            try:
+            if hasattr(inst, 'sequence'):
                 # Sequenced play
                 step, delay, msg = inst.sequence(ctl)
 
@@ -176,22 +178,44 @@ class IOManager:
                 if delay:
                     dsp.delay(delay)
 
-            except AttributeError:
-                # End-to-end loop play
-                if not hasattr(self.ns, '%s-buffer' % voice_id):
-                    snd = inst.play(ctl)
-                else:
-                    snd = getattr(self.ns, '%s-buffer' % voice_id)
-
+            else:
                 # spawn re-render
                 def _render(inst, ctl, ns, voice_id):
                     snd = inst.play(ctl)
                     setattr(ns, '%s-buffer' % voice_id, snd)
 
-                p = mp.Process(target=_render, args=(inst, ctl, self.ns, voice_id))
-                p.start()
+                if hasattr(inst, 'phrase'):
+                    phrase = inst.phrase(ctl)
+                    ctl['phrase'] = phrase
 
-                self._stream(snd)
+                    for phrase_index, delay_length in enumerate(phrase.get('lengths', [0])):
+                        ctl['phrase_index'] = phrase_index + 1
+
+                        if not getattr(self.ns, '%s-mute' % voice_id, False):
+                            if not hasattr(self.ns, '%s-buffer' % voice_id):
+                                snd = inst.play(ctl)
+                            else:
+                                snd = getattr(self.ns, '%s-buffer' % voice_id)
+
+                            p = mp.Process(target=_render, args=(inst, ctl, self.ns, voice_id))
+                            p.start()
+
+                            p = mp.Process(target=self._stream, args=(snd,))
+                            p.start()
+
+                        dsp.delay(delay_length)
+
+                else:
+                    # End-to-end loop play
+                    if not hasattr(self.ns, '%s-buffer' % voice_id):
+                        snd = inst.play(ctl)
+                    else:
+                        snd = getattr(self.ns, '%s-buffer' % voice_id)
+
+                    p = mp.Process(target=_render, args=(inst, ctl, self.ns, voice_id))
+                    p.start()
+
+                    self._stream(snd)
 
 
             count += 1

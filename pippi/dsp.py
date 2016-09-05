@@ -33,10 +33,18 @@ try:
 except ImportError:
     print 'Warning: could not import C dsp extensions'
 
+SAMPLING_RATE = 44100
+BIT_DEPTH = 16
+BIT_WIDTH = 2
+CHANNELS = 2
+WINDOW_SIZE = 64
+
+# Deprecated params
 bitdepth = 16
-audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 dsp_grain = 64
+audio_params = [2, 2, 44100, 0, "NONE", "not_compressed"]
 quiet = True 
+# End deprecated params
 
 from pippi.timers import delay
 from pippi.timers import monotonic
@@ -69,6 +77,21 @@ from pippi.utils import flatten
 
 
 ###############
+# Units
+###############
+
+from pippi.units import stf
+from pippi.units import mstf
+from pippi.units import ftms
+from pippi.units import fts
+from pippi.units import ftc
+from pippi.units import fth
+from pippi.units import htf
+from pippi.units import bpm2ms
+from pippi.units import bpm2frames
+
+
+###############
 # Random
 ###############
 
@@ -79,6 +102,14 @@ from pippi.rand import rand
 from pippi.rand import randchoose
 from pippi.rand import randbool
 from pippi.rand import randshuffle
+
+
+###############
+# FX
+###############
+
+from pippi.fx import stretch
+from pippi.fx import alias
 
 
 ###############
@@ -103,56 +134,25 @@ def bln(length, low=3000.0, high=7100.0, wform='sine2pi'):
     return cycles
 
 def reverse(snd):
-    return audioop.reverse(snd, audio_params[1])
+    return audioop.reverse(snd, BIT_WIDTH)
 
 def avg(snd):
-    return audioop.avg(snd, audio_params[1])
+    return audioop.avg(snd, BIT_WIDTH)
 
 def max(snd):
-    return audioop.max(snd, audio_params[1])
+    return audioop.max(snd, BIT_WIDTH)
 
-def transpose(snd, amount, chans=2):
+def transpose(snd, amount, chans=None):
     """ Change the speed of a sound.
         1.0 is unchanged, 0.5 is half speed, 2.0 is twice speed, etc.
         
         This is a wrapper for audioop.ratecv in the standard library."""
+    if chans is None:
+        chans = CHANNELS
+
     amount = 1.0 / float(amount)
-    rate = int(audio_params[2] * amount)
-    return audioop.ratecv(snd, audio_params[1], chans, audio_params[2], rate, None)[0]
-
-def stretch(snd, length=None, speed=None, grain_size=20):
-    """ Crude granular time stretching and pitch shifting """
-
-    original_length = flen(snd)
-
-    if speed is not None:
-        snd = transpose(snd, speed)
-
-    current_length = flen(snd)
-
-    if original_length != current_length or length is not None:
-        grain_size = mstf(grain_size)
-
-        numgrains = length / (grain_size / 2)
-        numgrains = numgrains if numgrains > 0 else 1
-
-        block_size = current_length / numgrains
-
-        grains = []
-        original_position = 0
-        count = 0
-
-        while count <= numgrains:
-            grain = cut(snd, original_position, grain_size)
-
-            grains += [ grain ]
-
-            original_position += block_size
-            count += 1
-
-        snd = cross(grains, ftms(grain_size / 2))
-
-    return snd
+    rate = int(SAMPLING_RATE * amount)
+    return audioop.ratecv(snd, BIT_WIDTH, chans, SAMPLING_RATE, rate, None)[0]
 
 def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0.0):
     """ 
@@ -196,40 +196,6 @@ def tone(length=44100, freq=440.0, wavetype='sine', amp=1.0, phase=0.0, offset=0
 
     return synth(wtype, float(freq), length, amp, phase, offset)
         
-def alias(snd, passthru=False, envelope='flat', split_size=0):
-    """
-        A simple time domain bitcrush-like effect.
-
-        The sound is cut into blocks between 1 and 64 frames in size if split_size is zero, 
-        otherwise split_size is the number of frames in each block.
-
-        Every other block is discarded, and each remaining block is repeated in place.
-
-        Set passthru to True to return the sound without processing. (Can be useful when processing grains in list comprehensions.)
-
-        By default, a random amplitude envelope is also applied to the final sound.
-    """
-    if passthru:
-        return snd
-
-    if envelope == 'flat':
-        envelope = False
-    elif envelope is None:
-        envelope = 'random'
-
-    if split_size == 0:
-        split_size = dsp_grain / randint(1, dsp_grain)
-
-    packets = split(snd, split_size)
-    packets = [p*2 for i, p in enumerate(packets) if i % 2]
-
-    out = ''.join(packets)
-
-    if envelope:
-        out = env(out, envelope)
-
-    return out 
-
 def noise(length):
     return ''.join([byte_string(randint(-32768, 32767)) for i in range(length * audio_params[0])])
 
@@ -525,7 +491,7 @@ def benv(sound, points):
     return ''.join([amp(s, points[i]) for i, s in enumerate(sounds)])
  
 def panenv(sound, ptype='line', etype='sine', panlow=0.0, panhigh=1.0, envlow=0.0, envhigh=1.0):
-    packets = split(sound, dsp_grain)
+    packets = split(sound, WINDOW_SIZE)
 
     ptable = wavetable(ptype, len(packets), panlow, panhigh)
     etable = wavetable(etype, len(packets), envlow, envhigh)
@@ -809,63 +775,6 @@ def logistic(r=3.8, x=0.5, numpoints=500):
 
 
 
-
-#################
-# Unit conversion
-#################
-
-def stf(s, r=None):
-    if r is not None:
-        s = rand(s, r)
-
-    ms = s * 1000.0
-    return mstf(ms)
-
-def mstf(ms, r=None):
-    if r is not None:
-        ms = rand(ms, r)
-
-    frames_in_ms = audio_params[2] / 1000.0
-    frames = ms * frames_in_ms
-
-    return int(frames)
-
-def ftms(frames):
-    ms = frames / float(audio_params[2]) 
-    return ms * 1000
-
-def fts(frames):
-    s = frames / float(audio_params[2])
-    return s
-
-def ftc(frames):
-    frames = int(frames)
-    frames *= audio_params[1] # byte width
-    frames *= audio_params[0] # num chans
-
-    return frames
-
-def fth(frames):
-    """ frames to hz """
-    if frames > 0:
-        return (1.0 / frames) * audio_params[2]
-
-    return 0
-
-def htf(hz):
-    """ hz to frames """
-    if hz > 0:
-        frames = audio_params[2] / float(hz)
-    else:
-        frames = 1 # 0hz is okay...
-
-    return int(frames)
-
-def bpm2ms(bpm):
-    return 60000.0 / float(bpm)
-
-def bpm2frames(bpm):
-    return int((bpm2ms(bpm) / 1000.0) * audio_params[2]) 
 
 
 
