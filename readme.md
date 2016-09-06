@@ -106,13 +106,19 @@ Here's a simple example generator based on the previous example:
 
 Save it as example.py and from the same directory type `pippi` to enter the interactive console.
 
-To play three voices of your example.py generator type:
+To play the example.py generator type:
 
-    ^_- play example 3
+    ^_- p example
 
-To stop all voices:
+To find the playing voice ID:
 
-    ^_- stop
+    ^_- i
+
+    1 example
+
+To stop voice ID 1:
+
+    ^_- s 1
 
 To have pippi reload the script to allow you to alter the code and hear the changes as it plays, type:
 
@@ -121,6 +127,83 @@ To have pippi reload the script to allow you to alter the code and hear the chan
 To change the current key (which is just an arbitrary parameter set in the pippi console session) from C major to Eb major:
 
     ^_- key eb
+
+The above example instrument script uses looping playback, which will rerender and play the output of `play()` until stopped.
+
+To sequence a polyphonic phrase within the instrument script, add a `sequence()` function:
+
+    from pippi import dsp, tune
+
+    def sequence(ctl):
+        # on every step, generate a random step length
+        # The first item in the tuple will mute the voice 
+        # (play a rest) if False, and play a note if True.
+        # The last item in the tuple is an optional message
+        # that will be passed to the play() function
+        return (True, dsp.mstf(100, 500), None)
+
+    def play(ctl):
+        key = ctl.get('param').get('key', 'c')
+        freqs = tune.fromdegrees([1,3,5,8], octave=3, root=key)
+        freq = dsp.randchoose(freqs)
+        length = dsp.stf(2, 5) # between 2 & 5 seconds
+        waveshape = dsp.randchoose(['sine', 'tri', 'square'])
+        amp = dsp.rand(0.1, 0.2)
+
+        out = dsp.tone(length, freq, waveshape, amp)
+        out = dsp.env(out, 'phasor')
+        out = dsp.taper(out, 20)
+
+        return out
+
+And start playback in the same way:
+
+    ^_- p example
+
+The `sequence()` function is called every time a note is played, 
+so you may want to generate random sequences once when the voice begins
+to play by adding a `once()` function:
+
+    from pippi import dsp, tune
+
+    def once(ctl):
+        numsteps = 12
+        steps = []
+
+        lengths = [
+            dsp.mstf(100), 
+            dsp.mstf(300), 
+            dsp.mstf(150), 
+        ]
+
+        for _ in range(numsteps):
+            steps += [ (True, dsp.randchoose(lengths), None) ]
+
+        return steps
+
+    def sequence(ctl):
+        # count increments as each note plays
+        count = ctl.get('count', 0)
+
+        # get our fixed sequence from once
+        steps = ctl.get('once', [])
+
+        # loop over the steps with the play count
+        return steps[ count % len(steps) ]
+
+    def play(ctl):
+        key = ctl.get('param').get('key', 'c')
+        freqs = tune.fromdegrees([1,3,5,8], octave=3, root=key)
+        freq = dsp.randchoose(freqs)
+        length = dsp.stf(2, 5) # between 2 & 5 seconds
+        waveshape = dsp.randchoose(['sine', 'tri', 'square'])
+        amp = dsp.rand(0.1, 0.2)
+
+        out = dsp.tone(length, freq, waveshape, amp)
+        out = dsp.env(out, 'phasor')
+        out = dsp.taper(out, 20)
+
+        return out
 
 
 More commands and help available by typing `help` at the console
