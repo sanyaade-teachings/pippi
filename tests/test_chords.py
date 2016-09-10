@@ -30,6 +30,7 @@ def test_addIntervals():
 
 def test_getChord():
     assert tune.chord('I7', key='a', octave=4, ratios=tune.just) == [440.0, 550.0, 660.0, 792.0] 
+    assert tune.chord('I7', key='a', octave=3, ratios=tune.just) == [220.0, 275.0, 330.0, 396.0] 
 
 
 def test_getRatiofromInterval():

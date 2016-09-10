@@ -319,6 +319,7 @@ def getscale(degrees, root=261.63, ratios=None, scale=None):
     return [ root * m for m in multipliers ]
 
 def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None):
+    #major = (0, 2, 4, 5, 7, 9, 11)
     if scale_degrees is None:
         scale_degrees = [1,3,5]
 
@@ -329,12 +330,16 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
         scale = major
 
     freqs = []
-    root = ntf(root, octave, edoRatios(12))
+    root = ntf(root, octave)
 
     for index, degree in enumerate(scale_degrees):
+        # strings are okay
         degree = int(degree)
+
+        # register offset 0+
         register = degree / (len(scale) + 1)
-        chromatic_degree = scale[degree % len(scale) - 1]
+
+        chromatic_degree = scale[(degree - 1) % len(scale)]
         ratio = ratios[chromatic_degree]
         freqs += [ root * (ratio[0] / ratio[1]) * 2**register ]
 
