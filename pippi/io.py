@@ -44,8 +44,9 @@ class IOManager:
             3: mp.Event(),  # 32nd note
         }
 
-        self.instruments             = self.findInstruments()
-        self.playing                = {}
+        self.instruments            = self.findInstruments()
+        self.playing                = self.manager.Namespace()
+        self.playing.voices         = {}
         self.osc_servers            = {}
 
     def startOscServer(self, port=None):
@@ -97,9 +98,29 @@ class IOManager:
         out = self.openAudioDevice()
         out.write(snd)
 
+    def register_voice_start(self, voice_id, instrument_name):
+        voice_id = str(voice_id)
+        if not hasattr(self.playing, voice_id):
+            voices = self.playing.voices
+            voices[voice_id] = instrument_name
+            self.playing.voices = voices
+            setattr(self.playing, voice_id, instrument_name)
+
+    def register_voice_stop(self, voice_id):
+        voice_id = str(voice_id)
+        if hasattr(self.playing, voice_id):
+            voices = self.playing.voices
+            del voices[voice_id]
+            self.playing.voices = voices
+            delattr(self.playing, voice_id)
+
+    def get_voice_info(self):
+        return self.playing.voices
+
     def play(self, instrument_name, voice_id, loop=False):
         # register info / id for `i` cmd
-        self.playing[voice_id] = instrument_name
+        self.register_voice_start(voice_id, instrument_name)
+
         p = mp.Process(target=self._play, args=(instrument_name, voice_id, loop))
         p.start()
 
@@ -146,7 +167,7 @@ class IOManager:
 
             if getattr(self.ns, 'reload', False) == True:
                 reload(inst)
-
+            
             try:
                 note_info = trigger.wait()
                 ctl['note'] = note_info
@@ -222,6 +243,7 @@ class IOManager:
             once = False
 
         dsp.log('Stopping voice %s' % voice_id)
+        self.register_voice_stop(voice_id)
 
     def setupCtl(self, inst, voice_index=0):
         param_manager = ParamManager(self.ns)
