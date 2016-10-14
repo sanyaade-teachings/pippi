@@ -11,7 +11,7 @@ import uuid
 import time
 from pippi import params
 
-from pippi import dsp, midi, config, osc
+from pippi import dsp, midi, config, osc, project
 from pippi.io import IOManager
 from pippi.params import ParamManager
 
@@ -157,11 +157,12 @@ Usage:
         pass
 
 if __name__ == '__main__':
-    console = Pippi()
-
-    # Start looping command prompt
-    try:
-        console.cmdloop()
-    except KeyboardInterrupt:
-        exit()
+    if len(sys.argv) > 2 and sys.argv[1] == 'init':
+        project.init(sys.argv[2])                
+    else:
+        try:
+            console = Pippi()
+            console.cmdloop()
+        except KeyboardInterrupt:
+            exit()
 
