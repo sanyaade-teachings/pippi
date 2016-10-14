@@ -6,7 +6,6 @@ import time
 import __main__
 import multiprocessing as mp
 import midi
-import mido
 from params import ParamManager
 import config
 import seq
@@ -327,17 +326,14 @@ class IOManager:
         count = 0
 
         if self.params.get('clock', 'off') == 'on':
-            out = mido.open_output(self.default_midi_device)
-            start = mido.Message('start')
-            stop = mido.Message('stop')
-            clock = mido.Message('clock')
-            out.send(start)
+            clock = midi.MidiClock(self.default_midi_device)
+            clock.start()
 
         while getattr(self.ns, 'grid', True):
             beat = dsp.bpm2frames(bpm) / 24
 
             if self.params.get('clock', 'off') == 'on':
-                out.send(clock)
+                clock.tick()
 
             if count % 24 == 0:
                 divs[24].set()
@@ -363,7 +359,7 @@ class IOManager:
             count += 1
 
         if self.params.get('clock', 'off') == 'on':
-            out.send(stop)
+            clock.stop()
 
     def set_bpm(self, bpm):
         self.grid.terminate()

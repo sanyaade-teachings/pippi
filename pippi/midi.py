@@ -25,6 +25,7 @@ def validate_output_device_by_id(device_id, devices=None):
     except IndexError:
         return False
 
+
 def validate_output_device(device):
     return device in list_output_devices()
 
@@ -185,3 +186,21 @@ class MidiReader:
                 velocity = default
 
         return velocity
+
+class MidiClock:
+    def __init__(self, device):
+        self.out = mido.open_output(device)
+        self.startmsg = mido.Message('start')
+        self.stopmsg = mido.Message('stop')
+        self.clockmsg = mido.Message('clock')
+
+    def start(self):
+        self.out.send(self.startmsg)
+
+    def stop(self):
+        self.out.send(self.stopmsg)
+
+    def tick(self):
+        self.out.send(self.clockmsg)
+
+
