@@ -1,3 +1,6 @@
+""" FIXME: this is a dumb way to do config
+"""
+
 import os
 import shutil
 

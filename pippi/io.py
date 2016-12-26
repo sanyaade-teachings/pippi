@@ -167,14 +167,23 @@ class IOManager:
             if getattr(self.ns, 'reload', False) == True:
                 reload(inst)
             
+            ####################################
+            # Wait for trigger if trigger is set
+            ####################################
+            triggered = False
             try:
+                dsp.log('Voice %s waiting for trigger...' % voice_id)
                 note_info = trigger.wait()
                 ctl['note'] = note_info
+                triggered = True
 
             except NameError:
                 pass
 
-            if self.params.get('%s-quantize' % voice_id, False):
+            ##############################################
+            # Wait for master clock tick if quantize is on
+            ##############################################
+            if hasattr(inst, 'QUANTIZE') and inst.QUANTIZE:
                 if not self.ns.grid:
                     bpm = self.params.get('bpm', 120)
                     self.startGrid(bpm)
@@ -183,6 +192,9 @@ class IOManager:
                 div = self.divs[div]
                 self.ticks[div].wait()
 
+            #####################
+            # sequence() playback
+            #####################
             if hasattr(inst, 'sequence'):
                 # Sequenced play
                 step, delay, msg = inst.sequence(ctl)
@@ -198,12 +210,18 @@ class IOManager:
                 if delay:
                     dsp.delay(delay)
 
-            else:
+            #####################
+            # play() playback
+            #####################
+            elif hasattr(inst, 'play'):
                 # spawn re-render
                 def _render(inst, ctl, ns, voice_id):
                     snd = inst.play(ctl)
                     setattr(ns, '%s-buffer' % voice_id, snd)
-
+                
+                ########################
+                # play() phrase playback
+                ########################
                 if hasattr(inst, 'phrase'):
                     phrase = inst.phrase(ctl)
                     ctl['phrase'] = phrase
@@ -225,6 +243,9 @@ class IOManager:
 
                         dsp.delay(delay_length)
 
+                #########################
+                # play() oneshot playback
+                #########################
                 else:
                     # End-to-end loop play
                     if not hasattr(self.ns, '%s-buffer' % voice_id):
@@ -235,8 +256,27 @@ class IOManager:
                     p = mp.Process(target=_render, args=(inst, ctl, self.ns, voice_id))
                     p.start()
 
-                    self._stream(snd)
+                    if triggered:
+                        dsp.log('Voice %s playback triggered' % voice_id)
+                        # We don't want playback to block the main loop when triggering with MIDI/OSC
+                        p = mp.Process(target=self._stream, args=(snd,))
+                        p.start()
+                    else:
+                        # Blocking playback will restart the loop when playback is done
+                        self._stream(snd)
 
+            #####################
+            # send() playback
+            #####################
+            elif hasattr(inst, 'send'):
+                print 'playing'
+                notes = inst.send(ctl)
+                midi_out = midi.get_output_device(inst.midiout)
+                print notes
+                for note in notes:
+                    print 'bout to play'
+                    midi.play_note(midi_out, note.length, note.note, note.velocity)
+                    print 'play note'
 
             count += 1
             once = False
@@ -362,7 +402,9 @@ class IOManager:
             clock.stop()
 
     def set_bpm(self, bpm):
-        self.grid.terminate()
+        if self.ns.grid:
+            self.grid.terminate()
+
         self.startGrid(bpm)
  
     def open_alsa_pcm(self, device='default'):
