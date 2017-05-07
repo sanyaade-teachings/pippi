@@ -5,7 +5,7 @@ pippic = Extension('_pippic',
         )
 
 setup(name='pippi',
-        version='1.0b2',
+        version='1.0',
         description='Computer music with python',
         url='http://hecanjog.github.com/pippi',
 
@@ -14,7 +14,6 @@ setup(name='pippi',
         license='Public Domain',
 
         classifiers = [
-            'Development Status :: 4 - Beta',
             'Programming Language :: Python :: 2.7',  
         ],
 
