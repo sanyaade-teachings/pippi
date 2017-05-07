@@ -33,32 +33,29 @@ class SoundBuffer:
         """
         return self._channels
 
-    @property
-    def frames(self):
-        return self._frames
 
     def __init__(self, filename=None, length=None, channels=None, frames=None):
         self._samplerate = DEFAULT_SAMPLERATE
         self._channels = DEFAULT_CHANNELS
-        self._frames = None
+        self.frames = None
 
         if channels is not None:
             self._channels = channels
 
         if filename is not None:
-            self._frames, self._samplerate = self.read(filename)
+            self.frames, self._samplerate = self.read(filename)
 
         if frames is not None:
-            self._frames = frames
+            self.frames = frames
 
         if length is not None:
-            if self._frames is not None:
+            if self.frames is not None:
                 self.fill(length)
             else:
                 self.clear(length)
 
     def __len__(self):
-        return 0 if self._frames is None else len(self._frames)
+        return 0 if self.frames is None else len(self.frames)
 
     def __getitem__(self, position):
         return SoundBuffer(frames=self.frames[position])
@@ -100,11 +97,9 @@ class SoundBuffer:
             of the given length in frames.
         """
         if length is None:
-            self._frames = None
+            self.frames = None
         else:
-            self._frames = np.zeros((length, self.channels))
-
-        return self
+            self.frames = np.zeros((length, self.channels))
 
     def write(self, filename=None, timestamp=False):
         """ Write the contents of this buffer to disk 
@@ -136,7 +131,7 @@ class SoundBuffer:
 
             framesread += grainlength
 
-    def win(self, window_type=None, values=None):
+    def win(self, window_type=None, values=None, wavetable=None, amp=1.0):
         """ TODO apply an amplitude envelope or 
             window to the sound of the given envelope 
             type -- or if a list of `values` is provided, 
@@ -146,12 +141,21 @@ class SoundBuffer:
             window_type = 'sine'
 
         if window_type in ('sin', 'sine', 'sinewave'):
-            self._frames = np.sin(self._frames)
+            wavetable = np.linspace(-np.pi/2, np.pi/2, len(self), dtype='d')
+            wavetable = np.sin(wavetable) 
 
         if window_type in ('tri', 'triangle'):
-            self._frames = np.sin(self._frames)
+            pass
 
-        return self
+        if window_type in ('saw', 'sawtooth', 'ramp', 'line'):
+            wavetable = np.linspace(0, 1, len(self), dtype='d')
+
+        if wavetable is not None:
+            wavetable = np.stack(( wavetable for _ in range(self.channels)))
+            wavetable = wavetable.reshape((len(self), self.channels))
+
+            self.frames = self.frames * wavetable * amp
+
 
     def fill(self, length):
         """ Truncate the buffer to the given length or 
@@ -161,31 +165,30 @@ class SoundBuffer:
         mult = 0 if length <= 0 or len(self) == 0 else length / len(self)
 
         if mult < 1:
-            self._frames = self._frames[:length]
+            self.frames = self.frames[:length]
         elif mult > 1:
             if int(mult) > 1:
-                self._frames = np.tile(self._frames, (int(mult), 1))
-            self._frames = np.concatenate((self._frames, self._frames[:length - len(self._frames)]))
+                self.frames = np.tile(self.frames, (int(mult), 1))
+            self.frames = np.concatenate((self.frames, self.frames[:length - len(self.frames)]))
         elif mult <= 0:
             self.clear()
 
-        return self
 
     def speed(self, speed):
         """ TODO Change the pitch and the length of the sound
         """
-        return self
+        pass
 
     def transpose(self, factor):
         """ TODO Change the pitch of the sound without changing 
             the length.
             Should accept: from/to hz, notes, midi notes, intervals
         """
-        return self
+        pass
 
     def stretch(self, length):
         """ TODO Change the length of the sound without changing 
             the pitch.
         """
-        return self
+        pass
 
