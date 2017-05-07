@@ -34,19 +34,13 @@ class SoundBuffer:
         return self._channels
 
 
-    def __init__(self, filename=None, length=None, channels=None, frames=None):
-        self._samplerate = DEFAULT_SAMPLERATE
-        self._channels = DEFAULT_CHANNELS
-        self.frames = None
-
-        if channels is not None:
-            self._channels = channels
+    def __init__(self, filename=None, length=None, channels=None, samplerate=None, frames=None):
+        self._samplerate = samplerate or DEFAULT_SAMPLERATE
+        self._channels = channels or DEFAULT_CHANNELS
+        self.frames = frames
 
         if filename is not None:
             self.frames, self._samplerate = self.read(filename)
-
-        if frames is not None:
-            self.frames = frames
 
         if length is not None:
             if self.frames is not None:
@@ -58,10 +52,13 @@ class SoundBuffer:
         return 0 if self.frames is None else len(self.frames)
 
     def __getitem__(self, position):
+        if isinstance(position, int):
+            return tuple(self.frames[position])
+
         return SoundBuffer(frames=self.frames[position])
 
     def __repr__(self):
-        return 'SoundBuffer({})'.format(self)
+        return 'SoundBuffer(samplerate={}, channels={}, frames={})'.format(self.samplerate, self.channels, self.frames)
 
     def __iter__(self):
         return self.grains(1)
@@ -131,7 +128,7 @@ class SoundBuffer:
 
             framesread += grainlength
 
-    def win(self, window_type=None, values=None, wavetable=None, amp=1.0):
+    def env(self, window_type=None, values=None, wavetable=None, amp=1.0):
         """ TODO apply an amplitude envelope or 
             window to the sound of the given envelope 
             type -- or if a list of `values` is provided, 
@@ -141,7 +138,7 @@ class SoundBuffer:
             window_type = 'sine'
 
         if window_type in ('sin', 'sine', 'sinewave'):
-            wavetable = np.linspace(-np.pi/2, np.pi/2, len(self), dtype='d')
+            wavetable = np.linspace(0, np.pi, len(self), dtype='d')
             wavetable = np.sin(wavetable) 
 
         if window_type in ('tri', 'triangle'):
@@ -151,10 +148,11 @@ class SoundBuffer:
             wavetable = np.linspace(0, 1, len(self), dtype='d')
 
         if wavetable is not None:
-            wavetable = np.stack(( wavetable for _ in range(self.channels)))
-            wavetable = wavetable.reshape((len(self), self.channels))
+            wavetable = wavetable.reshape((len(self), 1))
+            wavetable = np.repeat(wavetable, self.channels, axis=1)
+            return SoundBuffer(frames=self.frames * wavetable)
 
-            self.frames = self.frames * wavetable * amp
+        return self
 
 
     def fill(self, length):

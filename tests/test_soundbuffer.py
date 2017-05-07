@@ -81,3 +81,50 @@ class TestSoundBuffer(TestCase):
         # Check that all the grains add up
         self.assertEqual(sum(lengths), len(sound))
 
+    def test_window(self):
+        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        for window_type in ('sine', 'saw'):
+            sound = sound.env(window_type)
+            self.assertEqual(sound[0], (0,0))
+
+    def test_slice_frame(self):
+        """ A SoundBuffer should return a single frame 
+            when sliced into one-dimensionally like:
+
+                frame = sound[frame_index]
+
+            A frame is a tuple of floats, one value 
+            for each channel of sound.
+        """
+        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+
+        indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
+
+        for frame_index in indices:
+            frame = sound[frame_index]
+            self.assertTrue(isinstance(frame, tuple))
+            self.assertEqual(len(frame), sound.channels)
+            self.assertTrue(isinstance(frame[0], float))
+
+    def test_slice_sample(self):
+        """ Slicing into the second dimension of a SoundBuffer
+            will return a single sample at the given channel index.
+
+                sample = sound[frame_index][channel_index]
+
+            Note: A sample is a float, usually between -1.0 and 1.0 
+            but pippi will only clip overflow when you ask it to, or 
+            when writing a SoundBuffer back to a file. 
+            So, numbers can exceed that range during processing and 
+            be normalized or clipped as desired later on.
+        """
+
+        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+
+        indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
+
+        for frame_index in indices:
+            for channel_index in range(sound.channels):
+                sample = sound[frame_index][channel_index]
+                self.assertTrue(isinstance(sample, float))
+
