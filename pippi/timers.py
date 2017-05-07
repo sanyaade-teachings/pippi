@@ -17,7 +17,6 @@ class timespec(ctypes.Structure):
         ('tv_nsec', ctypes.c_long)
     ]
 
-
 try:
     librt = ctypes.CDLL('librt.so.1', use_errno=True)
     clock_gettime = librt.clock_gettime
@@ -36,7 +35,6 @@ except OSError:
     def monotonic():
         return time.time()
 
-
 def get_delay_seconds(length):
     seconds = dsp.fts(length)
     busy_time = 0.02 # Final 0 - 20ms should be busy
@@ -45,7 +43,6 @@ def get_delay_seconds(length):
         return seconds - busy_time, busy_time
     else:
         return 0, seconds
-
 
 def delay(length):
     sleep_seconds, busy_seconds = get_delay_seconds(length)
