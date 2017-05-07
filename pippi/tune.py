@@ -1,6 +1,6 @@
-from pippi import dsp
 import re
 import math
+import random
 
 a0 = 27.5 
 a4 = a0 * 2**4
@@ -419,7 +419,7 @@ def getRatioFromInterval(interval, ratios):
 
 def nextChord(name):
     name = stripChord(name)
-    return dsp.randchoose(progressions[name])
+    return random.choice(progressions[name])
 
 def chord(name, key=None, octave=3, ratios=None):
     if key is None:
