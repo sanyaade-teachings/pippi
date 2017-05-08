@@ -4,6 +4,8 @@ import random
 import reprlib
 import soundfile
 
+from . import wavetables
+
 DEFAULT_SAMPLERATE = 44100
 DEFAULT_CHANNELS = 2
 DEFAULT_SOUNDFILE = 'wav'
@@ -128,32 +130,21 @@ class SoundBuffer:
 
             framesread += grainlength
 
-    def env(self, window_type=None, values=None, wavetable=None, amp=1.0):
-        """ TODO apply an amplitude envelope or 
+    def env(self, window_type=None, values=None, amp=1.0):
+        """ Apply an amplitude envelope or 
             window to the sound of the given envelope 
             type -- or if a list of `values` is provided, 
             use it as an interpolated amplitude wavetable.
         """
-        if window_type is None:
-            window_type = 'sine'
+        wavetable = wavetables.window(
+                        window_type=window_type, 
+                        values=values, 
+                        length=len(self)
+                    )
+        wavetable = wavetable.reshape((len(self), 1))
+        wavetable = np.repeat(wavetable, self.channels, axis=1)
 
-        if window_type in ('sin', 'sine', 'sinewave'):
-            wavetable = np.linspace(0, np.pi, len(self), dtype='d')
-            wavetable = np.sin(wavetable) 
-
-        if window_type in ('tri', 'triangle'):
-            pass
-
-        if window_type in ('saw', 'sawtooth', 'ramp', 'line'):
-            wavetable = np.linspace(0, 1, len(self), dtype='d')
-
-        if wavetable is not None:
-            wavetable = wavetable.reshape((len(self), 1))
-            wavetable = np.repeat(wavetable, self.channels, axis=1)
-            return SoundBuffer(frames=self.frames * wavetable)
-
-        return self
-
+        return SoundBuffer(frames=self.frames * wavetable * amp)
 
     def fill(self, length):
         """ Truncate the buffer to the given length or 

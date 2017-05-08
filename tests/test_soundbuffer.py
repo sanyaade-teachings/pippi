@@ -83,7 +83,7 @@ class TestSoundBuffer(TestCase):
 
     def test_window(self):
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
-        for window_type in ('sine', 'saw'):
+        for window_type in ('sine', 'saw', 'tri'):
             sound = sound.env(window_type)
             self.assertEqual(sound[0], (0,0))
 
