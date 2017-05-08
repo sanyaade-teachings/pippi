@@ -1,6 +1,21 @@
 # Pippi: Computer music with python
+## v1.0.0
 
-This is pre-release software. I am working toward a stable 1.0 and would very much appreciate bug reports, feedback and pull requests!
+I've decided to rewrite pippi mostly from the ground up. Version 1.0.0 is just a snapshot of where I 
+gave up on the old ways, basically. To make a long story short, pippi 1 is based around python bytestrings (like the 
+standard library's audioop module) and offloads heavier DSP work to C extensions. Those are things that 
+made pippi more annoying to port to python 3, and I think more confusing than need be for new users.
+
+Pippi 2 takes the python object model to heart, and embraces numpy as an internal data type instead 
+of spreading 16bit sounds across 8bit strings. This makes some cool things possible. For example, instead 
+of passing bytestrings through functions everywhere, you will be able to mix, multiply and slice directly 
+into sounds in a much more expressive way. Of course there are tons of tools available in numpy and 
+folks who are already familiar with it can just whack at the internal ndarray in pippi's `SoundBuffer` 
+abstraction if they like. Plus, using multidimensional arrays makes supporting multichannel sound pretty 
+straightforward!
+
+So. It's early days, but pippi 2 is currently under development in the `v2.0.0` branch and I hope to be more 
+or less on par with features from pippi 1 soon. (Because I want to use it!)
 
 ## Installation
 
