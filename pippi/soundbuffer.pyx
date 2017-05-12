@@ -185,12 +185,12 @@ class SoundBuffer:
     def __bool__(self):
         return bool(len(self))
 
-    def pad(self, start=None, end=None):
-        if start is not None and start > 0:
+    def pad(self, int start=0, int end=0):
+        if start > 0:
             silence = np.zeros((start, self.channels))
             self.frames = np.concatenate((silence, self.frames))
 
-        if end is not None and end > 0:
+        if end > 0:
             silence = np.zeros((end, self.channels))
             self.frames = np.concatenate((self.frames, silence))
 
@@ -204,7 +204,7 @@ class SoundBuffer:
             except TypeError as e:
                 raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for mixing') from e
 
-    def dub(self, sounds, pos=0):
+    def dub(self, sounds, int pos=0):
         if isinstance(sounds, SoundBuffer):
             if pos > 0:
                 sounds.pad(pos) 

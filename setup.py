@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from distutils.core import setup
+from Cython.Build import cythonize
 
 setup(
     name='pippi',
@@ -9,4 +10,5 @@ setup(
     author_email='erik@hecanjog.com',
     url='https://github.com/hecanjog/pippi',
     packages=['pippi'],
+    ext_modules=cythonize(['pippi/soundbuffer.pyx', 'pippi/wavetables.pyx']), 
 )
