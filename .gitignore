@@ -7,3 +7,8 @@
 /*.egg-info/
 
 docs/build/
+
+examples/simple_grains.wav
+
+venv
+.cache

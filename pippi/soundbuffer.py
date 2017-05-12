@@ -85,9 +85,19 @@ class SoundBuffer:
         if isinstance(value, SoundBuffer):
             return SoundBuffer(self.frames * value.frames)
         elif isinstance(value, numbers.Real):
-            return SoundBuffer(np.tile(self.frames, (int(value), 1)))
+            return SoundBuffer(self.frames * float(value))
         else:
             return NotImplemented
+
+    def __imul__(self, value):
+        if isinstance(value, SoundBuffer):
+            self.frames = self.frames * value.frames
+        elif isinstance(value, numbers.Real):
+            self.frames = self.frames * float(value)
+        else:
+            return NotImplemented
+
+        return self
 
     def __rmul__(self, value):
         return self * value

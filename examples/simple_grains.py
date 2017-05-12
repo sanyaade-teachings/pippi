@@ -15,7 +15,7 @@ out = dsp.silence()
 num_passes = random.randint(3, 6)
 
 for _ in range(num_passes):
-    # Split the sound into fixed sizes grains 
+    # Split the sound into fixed sized grains 
     # between 400 and 4000 frames long and 
     # loop over them to process and dub into 
     # the output buffer
@@ -25,7 +25,8 @@ for _ in range(num_passes):
     for grain in snd.grains(fixed_length):
         # Apply a sine window to the grain and attenuate 
         # by multiplying the buffer with a random amplitude
-        grain = grain.env('sine')
+        amp = random.triangular(0.1, 1)
+        grain = grain.env('sine') * amp
 
         # Dub the grain into the current recordhead postion
         out.dub(grain, pos=recordhead)
