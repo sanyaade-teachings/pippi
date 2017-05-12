@@ -2,12 +2,6 @@
 *.swo
 *.pyc
 
-_pippic.so
-
-sounds/*.wav
-sounds/*.aif
-renders/*
-
 /build/
 /dist/
 /*.egg-info/
