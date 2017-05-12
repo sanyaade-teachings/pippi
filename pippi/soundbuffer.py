@@ -92,6 +92,33 @@ class SoundBuffer:
     def __rmul__(self, value):
         return self * value
 
+    def __and__(self, value):
+        if isinstance(value, SoundBuffer):
+            if len(self.frames) > len(value.frames):
+                value.frames.resize(self.frames.shape)
+            elif len(value.frames) > len(self.frames):
+                self.frames.resize(value.frames.shape)
+
+            return SoundBuffer(self.frames + value.frames)
+        else:
+            return NotImplemented
+
+    def __iand__(self, value):
+        if isinstance(value, SoundBuffer):
+            if len(self.frames) > len(value.frames):
+                value.frames.resize(self.frames.shape)
+            elif len(value.frames) > len(self.frames):
+                self.frames.resize(value.frames.shape)
+
+            self.frames = self.frames + value.frames
+        else:
+            return NotImplemented
+
+        return self
+
+    def __rand__(self, value):
+        return self & value
+
     def __add__(self, value):
         if isinstance(value, SoundBuffer):
             return SoundBuffer(np.concatenate((self.frames, value.frames)))
@@ -144,6 +171,12 @@ class SoundBuffer:
 
     def __bool__(self):
         return bool(len(self))
+
+    def mix(self, *sounds):
+        for sound in tuple(*sounds):
+            self &= sound 
+
+        return self
 
     def clear(self, length=None):
         """ Replace the buffer with a new empty buffer
