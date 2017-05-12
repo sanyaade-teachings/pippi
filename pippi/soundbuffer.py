@@ -83,9 +83,9 @@ class SoundBuffer:
 
     def __mul__(self, value):
         if isinstance(value, SoundBuffer):
-            return SoundBuffer(frames=self.frames * value.frames)
+            return SoundBuffer(self.frames * value.frames)
         elif isinstance(value, numbers.Real):
-            return SoundBuffer(frames=np.tile(self.frames, (int(value), 1)))
+            return SoundBuffer(np.tile(self.frames, (int(value), 1)))
         else:
             return NotImplemented
 
@@ -93,19 +93,54 @@ class SoundBuffer:
         return self * value
 
     def __add__(self, value):
-        if len(self) == 0:
-            return value
-        elif len(value) == 0:
-            return self
-
         if isinstance(value, SoundBuffer):
-            return SoundBuffer(frames=np.concatenate((self.frames, value.frames)))
-        elif isinstance(value, int):
-            # What do we do here?
-            pass
+            return SoundBuffer(np.concatenate((self.frames, value.frames)))
+        elif isinstance(value, numbers.Real):
+            return SoundBuffer(self.frames + value)
+        else:
+            try:
+                return SoundBuffer(np.concatenate((self.frames, value)))
+            except TypeError:
+                return NotImplemented
+
+    def __iadd__(self, value):
+        if isinstance(value, SoundBuffer):
+            self.frames = np.concatenate((self.frames, value.frames))
+        elif isinstance(value, numbers.Real):
+            self.frames = self.frames + value
+        else:
+            try:
+                self.frames = np.concatenate((self.frames, value))
+            except TypeError:
+                return NotImplemented
+
+        return self
 
     def __radd__(self, value):
         return self + value
+
+    def __sub__(self, value):
+        if isinstance(value, SoundBuffer):
+            return SoundBuffer(self.frames - value.frames)
+        else:
+            try:
+                return SoundBuffer(self.frames - value)
+            except TypeError:
+                return NotImplemented
+
+    def __isub__(self, value):
+        if isinstance(value, SoundBuffer):
+            self.frames = self.frames - value.frames
+        else:
+            try:
+                self.frames = self.frames - value
+            except TypeError:
+                return NotImplemented
+
+        return self
+
+    def __rsub__(self, value):
+        return self - value
 
     def __bool__(self):
         return bool(len(self))
