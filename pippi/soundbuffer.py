@@ -1,7 +1,8 @@
-from array import array
-import numpy as np
+import numbers
 import random
 import reprlib
+
+import numpy as np
 import soundfile
 
 from . import wavetables
@@ -36,13 +37,28 @@ class SoundBuffer:
         return self._channels
 
 
-    def __init__(self, filename=None, length=None, channels=None, samplerate=None, frames=None):
+    def __init__(self, frames=None, length=None, channels=None, samplerate=None):
         self._samplerate = samplerate or DEFAULT_SAMPLERATE
         self._channels = channels or DEFAULT_CHANNELS
-        self.frames = frames
 
-        if filename is not None:
-            self.frames, self._samplerate = self.read(filename)
+        if isinstance(frames, SoundBuffer):
+            self.frames = np.ndarray(frames.frames, dtype='d')
+            self._channels = frames.channels
+            self._samplerate = frames.samplerate
+        elif isinstance(frames, str):
+            self.frames, self._samplerate = self.read(frames)
+            self._channels = self.frames.shape[1]
+        elif isinstance(frames, np.ndarray):
+            self.frames = np.copy(frames)
+            self._channels = self.frames.shape[1]
+        elif frames is not None:
+            try:
+                self.frames = np.fromiter(frames, dtype='d')
+                self.frames = np.stack((self.frames for _ in range(self.channels)), 1)
+            except TypeError as e:
+                raise ValueError('Frames should be an iterable, numpy array, SoundBuffer instance or a filename to read from.') from e
+        else:
+            self.frames = None
 
         if length is not None:
             if self.frames is not None:
@@ -68,7 +84,10 @@ class SoundBuffer:
     def __mul__(self, value):
         if isinstance(value, SoundBuffer):
             return SoundBuffer(frames=self.frames * value.frames)
-        return SoundBuffer(frames=np.tile(self.frames, (int(value), 1)))
+        elif isinstance(value, numbers.Real):
+            return SoundBuffer(frames=np.tile(self.frames, (int(value), 1)))
+        else:
+            return NotImplemented
 
     def __rmul__(self, value):
         return self * value
