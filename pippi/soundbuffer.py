@@ -105,12 +105,15 @@ class SoundBuffer:
 
     def __iand__(self, value):
         if isinstance(value, SoundBuffer):
-            if len(self.frames) > len(value.frames):
-                value.frames.resize(self.frames.shape)
-            elif len(value.frames) > len(self.frames):
-                self.frames.resize(value.frames.shape)
+            if self.frames is None:
+                self.frames = value.frames
+            else:
+                if len(self.frames) > len(value.frames):
+                    value.frames.resize(self.frames.shape)
+                elif len(value.frames) > len(self.frames):
+                    self.frames.resize(value.frames.shape)
 
-            self.frames = self.frames + value.frames
+                self.frames = self.frames + value.frames
         else:
             return NotImplemented
 
@@ -172,11 +175,39 @@ class SoundBuffer:
     def __bool__(self):
         return bool(len(self))
 
-    def mix(self, *sounds):
-        for sound in tuple(*sounds):
-            self &= sound 
+    def pad(self, start=None, end=None):
+        if start is not None and start > 0:
+            silence = np.zeros((start, self.channels))
+            self.frames = np.concatenate((silence, self.frames))
 
-        return self
+        if end is not None and end > 0:
+            silence = np.zeros((end, self.channels))
+            self.frames = np.concatenate((self.frames, silence))
+
+    def mix(self, sounds):
+        if isinstance(sounds, SoundBuffer):
+            self &= sounds
+        else:
+            try:
+                for sound in sounds:
+                    self &= sound 
+            except TypeError as e:
+                raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for mixing') from e
+
+    def dub(self, sounds, pos=0):
+        if isinstance(sounds, SoundBuffer):
+            if pos > 0:
+                sounds.pad(pos) 
+            self &= sounds
+        else:
+            try:
+                for sound in sounds:
+                    if pos > 0:
+                        sound.pad(pos)
+                    self &= sound
+
+            except TypeError as e:
+                raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
 
     def clear(self, length=None):
         """ Replace the buffer with a new empty buffer

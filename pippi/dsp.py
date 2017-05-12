@@ -22,7 +22,7 @@ def cat(*sounds):
 def silence(length=None, channels=None, samplerate=None):
     return SoundBuffer(length=length, channels=channels, samplerate=samplerate)
 
-def load(frames, channels=None, samplerate=None):
+def read(frames, channels=None, samplerate=None):
     return SoundBuffer(frames, channels=channels, samplerate=samplerate)
 
 def find(pattern, channels=None, samplerate=None):

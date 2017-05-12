@@ -128,3 +128,40 @@ class TestSoundBuffer(TestCase):
                 sample = sound[frame_index][channel_index]
                 self.assertTrue(isinstance(sample, float))
 
+    def test_pad_sound_with_silence(self):
+        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+
+        # Pad start
+        original_length = len(sound)
+        silence_length = random.randint(100, 44100)
+        sound.pad(silence_length)
+
+        self.assertEqual(len(sound), silence_length + original_length)
+        self.assertEqual(sound[0], (0,0))
+
+        # Pad end
+        original_length = len(sound)
+        silence_length = random.randint(100, 44100)
+        sound.pad(end=silence_length)
+
+        self.assertEqual(len(sound), silence_length + original_length)
+        self.assertEqual(sound[-1], (0,0))
+
+
+
+    def test_dub_into_empty_sound(self):
+        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        original_length = len(sound)
+
+        out = SoundBuffer(channels=sound.channels, samplerate=sound.samplerate)
+        self.assertEqual(len(out), 0)
+        self.assertEqual(len(sound), 44100)
+
+        position = random.randint(100, 1000)
+
+        out.dub(sound, pos=position)
+
+        self.assertEqual(len(out), original_length + position)
+
+        self.assertEqual(sound.channels, out.channels)
+
