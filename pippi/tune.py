@@ -391,7 +391,7 @@ def addIntervals(a, b):
     a = intervals[a]
     b = intervals[b]
     c = a + b
-    for interval, index in intervals.iteritems():
+    for interval, index in intervals.items():
         if c == index:
             c = interval
 
