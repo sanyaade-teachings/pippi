@@ -16,11 +16,11 @@ num_passes = random.randint(3, 6)
 
 for _ in range(num_passes):
     # Split the sound into fixed sized grains 
-    # between 400 and 4000 frames long and 
+    # between 100 and 400 frames long and 
     # loop over them to process and dub into 
     # the output buffer
 
-    fixed_length = random.randint(400, 4000)
+    fixed_length = random.randint(100, 400)
     recordhead = 0
     for grain in snd.grains(fixed_length):
         # Apply a sine window to the grain and attenuate 
@@ -32,8 +32,8 @@ for _ in range(num_passes):
         out.dub(grain, pos=recordhead)
 
         # Move the recordhead to a random position between 
-        # 10 and 10,000 frames later than the last position
-        recordhead += random.randint(10, 10000)
+        # 0 and 1,000 frames later than the last position
+        recordhead += random.randint(0, 1000)
 
 # Write the output buffer to a WAV file
 out.write('simple_grains.wav')
