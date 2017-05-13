@@ -1,4 +1,5 @@
 import numbers
+import math
 import random
 import reprlib
 
@@ -35,7 +36,6 @@ class SoundBuffer:
             with different numbers of channels.
         """
         return self._channels
-
 
     def __init__(self, frames=None, length=None, channels=None, samplerate=None):
         self._samplerate = samplerate or DEFAULT_SAMPLERATE
@@ -257,6 +257,49 @@ class SoundBuffer:
                 yield self[framesread:]
 
             framesread += grainlength
+
+    def copy(self):
+        return SoundBuffer(self.frames, channels=self.channels, samplerate=self.samplerate)
+
+    def pan(self, pos=0.5, method=None):
+        """ Pan a stereo sound from pos=0 (hard left) 
+            to pos=1 (hard right)
+
+            Different panning strategies can be chosen 
+            by passing a value to the `method` param.
+
+            method='constant'
+                Constant (square) power panning.
+                This is the default.
+
+            method='linear'
+                Simple linear panning.
+
+            method='sine'
+                Variation on constant power panning 
+                using sin() and cos() to shape the pan.
+                Taken from the floss manuals csound manual.
+
+            method='gogins'
+                Also taken from the csound manual -- 
+                Michael Gogins' variation on the above 
+                which uses a different part of the sinewave.
+        """
+        if method is None:
+            method = 'constant'
+
+        if method == 'constant':
+            self.frames[:,1] *= math.sqrt(pos)
+            self.frames[:,0] *= math.sqrt(1 - pos)
+        elif method == 'linear':
+            self.frames[:,1] *= pos
+            self.frames[:,0] *= 1 - pos
+        elif method == 'sine':
+            self.frames[:,1] *= math.sin(pos * (np.pi / 2))
+            self.frames[:,0] *= math.cos(pos * (np.pi / 2))
+        elif method == 'gogins':
+            self.frames[:,1] *= math.sin((pos + 0.5) * (np.pi / 2))
+            self.frames[:,0] *= math.cos((pos + 0.5) * (np.pi / 2))
 
     def env(self, window_type=None, values=None, amp=1.0):
         """ Apply an amplitude envelope or 

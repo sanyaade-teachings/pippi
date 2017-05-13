@@ -5,6 +5,7 @@ import tempfile
 from unittest import TestCase
 
 from pippi.soundbuffer import SoundBuffer
+from pippi import dsp
 
 class TestSoundBuffer(TestCase):
     def setUp(self):
@@ -86,6 +87,18 @@ class TestSoundBuffer(TestCase):
         for window_type in ('sine', 'saw', 'tri'):
             sound = sound.env(window_type)
             self.assertEqual(sound[0], (0,0))
+
+    def test_pan(self):
+        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        for pan_method in ('constant', 'linear'):
+            # Hard pan smoke test
+            pan_left = sound.copy()
+            pan_left.pan(0, method=pan_method)
+            self.assertEqual(pan_left[random.randint(0, len(pan_left))][1], 0)
+
+            pan_right = sound.copy()
+            pan_right.pan(1, method=pan_method)
+            self.assertEqual(pan_right[random.randint(0, len(pan_right))][0], 0)
 
     def test_slice_frame(self):
         """ A SoundBuffer should return a single frame 

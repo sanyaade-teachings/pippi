@@ -5,16 +5,16 @@ import glob
 
 from .soundbuffer import SoundBuffer
 
-def mix(*sounds):
+def mix(sounds):
     out = SoundBuffer()
-    for sound in tuple(*sounds):
+    for sound in sounds:
         out &= sound
 
     return out
 
-def cat(*sounds):
-    out = SoundBuffer()
-    for sound in tuple(*sounds):
+def join(sounds):
+    out = SoundBuffer(length=1, channels=2, samplerate=44100)
+    for sound in sounds:
         out += sound
 
     return out
