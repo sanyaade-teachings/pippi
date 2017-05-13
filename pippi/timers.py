@@ -7,9 +7,7 @@ Thanks!
 
 import ctypes
 import os
-import dsp
 import time
-import utils
 
 class timespec(ctypes.Structure):
     _fields_ = [
@@ -31,12 +29,11 @@ try:
         return t.tv_sec + t.tv_nsec * 1e-9
 
 except OSError:
-    utils.log('Monotonic clock disabled')
     def monotonic():
         return time.time()
 
-def get_delay_seconds(length):
-    seconds = dsp.fts(length)
+def get_delay_seconds(length, samplerate=44100):
+    seconds = length / samplerate
     busy_time = 0.02 # Final 0 - 20ms should be busy
 
     if seconds > busy_time:
