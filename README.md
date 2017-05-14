@@ -6,8 +6,8 @@ v2.0.0 - Alpha 1
 
 Pippi requires python 3.5+
 
-Pippi uses `numpy` and [pysndfile][psf]. `pysndfile` wraps [libsoundfile][lsf].
-There are many ways to install numpy, and 
+Pippi uses `numpy` and [pysndfile][psf]. `pysndfile` wraps [libsndfile][lsf]. (Both 
+`pysndfile` and `libsndfile` need to be installed.) There are many ways to install numpy, and 
 it may be as easy as `pip install numpy` on your platform. 
  
 More docs forthcoming as the deps for version 2 settle (especially 
