@@ -309,7 +309,6 @@ class SoundBuffer:
         """
         wavetable = wavetables.window(
                         window_type=window_type, 
-                        values=values, 
                         length=len(self)
                     )
         wavetable = wavetable.reshape((len(self), 1))
