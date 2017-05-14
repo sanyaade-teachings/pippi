@@ -6,8 +6,10 @@ v2.0.0 - Alpha 1
 
 Pippi requires python 3.5+
 
-Pippi uses `numpy` and `pysoundfile` which in turn rely on some 
-C libraries you may need to manually install on your platform. 
+Pippi uses `numpy` and [psf][pysndfile]. `pysndfile` wraps [lsf][libsoundfile].
+There are many ways to install numpy, and 
+it may be as easy as `pip install numpy` on your platform. 
+ 
 More docs forthcoming as the deps for version 2 settle (especially 
 as the interactive console comes together again.)
 
@@ -72,3 +74,5 @@ stuff like using pippi instruments as generators to feed into sound streams, whi
 hopefully overcome some awkwardness of treating pippi 1 instruments like streams.
 
 
+[psf]: https://forge.ircam.fr/p/pysndfile/
+[lsf]: http://www.mega-nerd.com/libsndfile/
