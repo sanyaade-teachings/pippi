@@ -336,18 +336,17 @@ class SoundBuffer:
     def speed(self, speed):
         """ TODO Change the pitch and the length of the sound
         """
-        pass
+        return NotImplemented
 
     def transpose(self, factor):
         """ TODO Change the pitch of the sound without changing 
             the length.
             Should accept: from/to hz, notes, midi notes, intervals
         """
-        pass
+        return NotImplemented
 
     def stretch(self, length):
         """ TODO Change the length of the sound without changing 
             the pitch.
         """
-        pass
-
+        return NotImplemented

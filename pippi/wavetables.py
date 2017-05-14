@@ -52,4 +52,32 @@ def wavetable(wavetable_type=None, length=None):
 
     return wavetable
 
+def interp(data, length, freq=None, phase=0, channels=2, samplerate=44100):
+    out = np.zeros((length, channels))
 
+    if freq is None:
+        freq = samplerate / length
+
+    readindex = 0
+    inputlength = len(data)
+
+    for i in range(length):
+        readindex = int(phase) % inputlength
+
+        val = data[readindex]
+
+        try:
+            nextval = data[readindex + 1]
+        except IndexError:
+            nextval = data[0]
+
+        frac = phase - int(phase)
+
+        val = (1.0 - frac) * val + frac * nextval
+
+        for channel in range(channels):
+            out[i][channel] = val
+
+        phase += freq * inputlength * (1.0 / samplerate)
+
+    return out, phase
