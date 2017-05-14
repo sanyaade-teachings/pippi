@@ -3,8 +3,13 @@ import numpy as np
 SINEWAVE_NAMES  = ('sin', 'sine', 'sinewave')
 COSINE_NAMES  = ('cos', 'cosine')
 TRIANGLE_NAMES  = ('tri', 'triangle')
-SAWTOOTH_NAMES  = ('saw', 'sawtooth', 'ramp', 'line')
+SAWTOOTH_NAMES  = ('saw', 'sawtooth', 'ramp', 'line', 'lin')
 RSAWTOOTH_NAMES = ('isaw', 'rsaw', 'isawtooth', 'rsawtooth', 'reversesaw', 'phasor')
+HANNING_NAMES = ('hanning', 'hann', 'han')
+HAMMING_NAMES = ('hamming', 'hamm', 'ham')
+BLACKMAN_NAMES = ('blackman', 'black', 'bla')
+BARTLETT_NAMES = ('bartlett', 'bar')
+KAISER_NAMES = ('kaiser', 'kai')
 
 def window(window_type=None, length=None):
     if window_type is None:
@@ -23,6 +28,21 @@ def window(window_type=None, length=None):
 
     if window_type in RSAWTOOTH_NAMES:
         wavetable = np.linspace(1, 0, length, dtype='d')
+
+    if window_type in HANNING_NAMES:
+        wavetable = np.hanning(length)
+
+    if window_type in HAMMING_NAMES:
+        wavetable = np.hamming(length)
+
+    if window_type in BARTLETT_NAMES:
+        wavetable = np.bartlett(length)
+
+    if window_type in BLACKMAN_NAMES:
+        wavetable = np.blackman(length)
+
+    if window_type in KAISER_NAMES:
+        wavetable = np.kaiser(length, 0)
 
     return wavetable
 
