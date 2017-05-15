@@ -88,6 +88,12 @@ class TestSoundBuffer(TestCase):
             sound = sound.env(window_type)
             self.assertEqual(sound[0], (0,0))
 
+    def test_speed(self):
+        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        speed = random.random()
+        out = sound.speed(speed)
+        self.assertEqual(len(out), round(len(sound) * (1/speed)))
+
     def test_pan(self):
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
         for pan_method in ('constant', 'linear'):

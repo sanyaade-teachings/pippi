@@ -334,9 +334,15 @@ class SoundBuffer:
 
 
     def speed(self, speed):
-        """ TODO Change the pitch and the length of the sound
+        """ Change the speed of the sound --
+            stolen from github.com/Zulko/pianoputer
+            Thanks!
         """
-        return NotImplemented
+        speed = speed if speed > 0 else 0.001
+        indices = np.round(np.arange(0, len(self.frames), speed))
+        indices = indices[indices < len(self.frames)].astype(int)
+        return SoundBuffer(frames=self.frames[indices])
+
 
     def transpose(self, factor):
         """ TODO Change the pitch of the sound without changing 
