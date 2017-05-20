@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 SINEWAVE_NAMES  = ('sin', 'sine', 'sinewave')
@@ -11,9 +12,31 @@ BLACKMAN_NAMES = ('blackman', 'black', 'bla')
 BARTLETT_NAMES = ('bartlett', 'bar')
 KAISER_NAMES = ('kaiser', 'kai')
 
+ALL_WINDOWS = (
+    SINEWAVE_NAMES[0],
+    TRIANGLE_NAMES[0], 
+    SAWTOOTH_NAMES[0], 
+    RSAWTOOTH_NAMES[0], 
+    HANNING_NAMES[0], 
+    HAMMING_NAMES[0], 
+    BLACKMAN_NAMES[0], 
+    BARTLETT_NAMES[0], 
+    KAISER_NAMES[0], 
+)
+
+ALL_WAVTABLES = (
+    SINEWAVE_NAMES[0],
+    COSINE_NAMES[0],
+    TRIANGLE_NAMES[0], 
+    SAWTOOTH_NAMES[0], 
+    RSAWTOOTH_NAMES[0], 
+)
+
 def window(window_type=None, length=None):
     if window_type is None:
         window_type = 'sine'
+    elif window_type == 'random':
+        window_type = random.choice(ALL_WINDOWS)
 
     if window_type in SINEWAVE_NAMES:
         wavetable = np.linspace(0, np.pi, length, dtype='d')
@@ -50,6 +73,8 @@ def window(window_type=None, length=None):
 def wavetable(wavetable_type=None, length=None):
     if wavetable_type is None:
         wavetable_type = 'sine'
+    elif wavetable_type == 'random':
+        wavetable_type = random.choice(ALL_WAVETABLES)
 
     if wavetable_type in SINEWAVE_NAMES:
         wavetable = np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False)
@@ -72,14 +97,12 @@ def wavetable(wavetable_type=None, length=None):
 
     return wavetable
 
-def interp(data, length, freq=None, phase=0, channels=2, samplerate=44100):
-    out = np.zeros((length, channels))
-
-    if freq is None:
-        freq = samplerate / length
+def interp(data, length):
+    out = []
 
     readindex = 0
     inputlength = len(data)
+    phase = 0
 
     for i in range(length):
         readindex = int(phase) % inputlength
@@ -95,9 +118,8 @@ def interp(data, length, freq=None, phase=0, channels=2, samplerate=44100):
 
         val = (1.0 - frac) * val + frac * nextval
 
-        for channel in range(channels):
-            out[i][channel] = val
+        out += [ val ]
 
-        phase += freq * inputlength * (1.0 / samplerate)
+        phase += inputlength * (1.0 / length)
 
-    return out, phase
+    return out

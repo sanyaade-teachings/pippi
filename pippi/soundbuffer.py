@@ -19,15 +19,6 @@ class SoundBuffer:
 
     @property
     def samplerate(self):
-        """ TODO The samplerate of the buffer will be used when 
-            combining buffers (mixing, concatenating, etc) 
-            in a way that produces a new buffer. The resulting 
-            buffer will be at the higher of the two rates, 
-            with the lower up-sampled if needed.
-
-            Or just provide conversation functions & require that 
-            sr between samples matches?
-        """
         return self._samplerate
 
     @property
@@ -219,6 +210,26 @@ class SoundBuffer:
             except TypeError as e:
                 raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
 
+    def repeat(self, reps=2):
+        if reps <= 1:
+            return SoundBuffer(self.frames)
+
+        out = SoundBuffer(self.frames)
+        for _ in range(reps-1):
+            out += self
+
+        return out
+
+    def cut(self, start=0, length=44100):
+        return SoundBuffer(self.frames[start:start+length])
+
+    def rcut(self, length=44100):
+        maxlen = len(self) - length
+        if maxlen <= 0:
+            return self
+        start = random.randint(0, maxlen)
+        return self.cut(start, length)
+
     def clear(self, length=None):
         """ Replace the buffer with a new empty buffer
             of the given length in frames.
@@ -288,18 +299,22 @@ class SoundBuffer:
         if method is None:
             method = 'constant'
 
+        out = SoundBuffer(self.frames)
+
         if method == 'constant':
-            self.frames[:,1] *= math.sqrt(pos)
-            self.frames[:,0] *= math.sqrt(1 - pos)
+            out.frames[:,1] *= math.sqrt(pos)
+            out.frames[:,0] *= math.sqrt(1 - pos)
         elif method == 'linear':
-            self.frames[:,1] *= pos
-            self.frames[:,0] *= 1 - pos
+            out.frames[:,1] *= pos
+            out.frames[:,0] *= 1 - pos
         elif method == 'sine':
-            self.frames[:,1] *= math.sin(pos * (np.pi / 2))
-            self.frames[:,0] *= math.cos(pos * (np.pi / 2))
+            out.frames[:,1] *= math.sin(pos * (np.pi / 2))
+            out.frames[:,0] *= math.cos(pos * (np.pi / 2))
         elif method == 'gogins':
-            self.frames[:,1] *= math.sin((pos + 0.5) * (np.pi / 2))
-            self.frames[:,0] *= math.cos((pos + 0.5) * (np.pi / 2))
+            out.frames[:,1] *= math.sin((pos + 0.5) * (np.pi / 2))
+            out.frames[:,0] *= math.cos((pos + 0.5) * (np.pi / 2))
+
+        return out
 
     def env(self, window_type=None, values=None, amp=1.0):
         """ Apply an amplitude envelope or 
@@ -307,10 +322,14 @@ class SoundBuffer:
             type -- or if a list of `values` is provided, 
             use it as an interpolated amplitude wavetable.
         """
-        wavetable = wavetables.window(
-                        window_type=window_type, 
-                        length=len(self)
-                    )
+        if values is not None:
+            wavetable = wavetables.interp(values, len(self))
+            wavetable = np.array(wavetable)
+        else:
+            wavetable = wavetables.window(
+                            window_type=window_type, 
+                            length=len(self)
+                        )
         wavetable = wavetable.reshape((len(self), 1))
         wavetable = np.repeat(wavetable, self.channels, axis=1)
 
