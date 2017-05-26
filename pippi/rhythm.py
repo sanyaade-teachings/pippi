@@ -26,12 +26,13 @@ def grid(numbeats, beatlength, offset=0, stride=None, reps=None):
 
     return onsets
 
-def curve(numbeats=16, wintype=None, div=None, reverse=False):
+def curve(numbeats=16, wintype=None, div=None, mult=None, reverse=False):
     """ Bouncy balls
         Div sets the min division size
     """
     wintype = wintype or 'random'
     div = div or (44100//16)
+    mult = mult or 100
 
     if reverse:
         win = wavetables.window(wintype, numbeats * 2)[numbeats:]
@@ -40,7 +41,7 @@ def curve(numbeats=16, wintype=None, div=None, reverse=False):
 
     assert len(win) == numbeats
 
-    return [ int(div * w) for w in win ]
+    return [ div * int(mult * w) for w in win ]
 
 def rotate(pattern, offset=0):
     """ Rotate a list of onsets by a given offset

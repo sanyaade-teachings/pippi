@@ -1,14 +1,13 @@
 from pippi import dsp, rhythm
 import random
 
-out = dsp.silence()
+out = dsp.buffer()
 
 snare = dsp.read('sounds/snare.wav')
 
-numbeats = 128
-pattern = rhythm.curve(numbeats, 'sine', div=44100//32)
+pattern = rhythm.curve(numbeats=32, wintype='sine', div=44100//32, mult=100)
 
 for onset in pattern:
-    out.dub(snare * random.random())
+    out.dub(snare * random.random(), onset)
 
 out.write('beat_example.wav')
