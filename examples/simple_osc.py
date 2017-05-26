@@ -1,7 +1,19 @@
+import random
+
 from pippi.oscs import Osc
 
-# Sine wavetable osc
-osc = Osc(freq=440, wavetable='sine')
+waveform_types = [
+    'square', 
+    'sine', 
+    'triangle', 
+    'saw', 
+    'rsaw', 
+    'cosine'
+]
+
+# Create a wavetable osc with a randomly 
+# selected waveform type
+osc = Osc(freq=440, wavetable=random.choice(waveform_types))
 
 # Length in frames
 length = 44100

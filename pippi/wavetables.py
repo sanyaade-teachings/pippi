@@ -11,6 +11,7 @@ HAMMING_NAMES = ('hamming', 'hamm', 'ham')
 BLACKMAN_NAMES = ('blackman', 'black', 'bla')
 BARTLETT_NAMES = ('bartlett', 'bar')
 KAISER_NAMES = ('kaiser', 'kai')
+SQUARE_NAMES = ('square', 'sq')
 
 ALL_WINDOWS = (
     SINEWAVE_NAMES[0],
@@ -24,12 +25,13 @@ ALL_WINDOWS = (
     KAISER_NAMES[0], 
 )
 
-ALL_WAVTABLES = (
+ALL_WAVETABLES = (
     SINEWAVE_NAMES[0],
     COSINE_NAMES[0],
     TRIANGLE_NAMES[0], 
     SAWTOOTH_NAMES[0], 
     RSAWTOOTH_NAMES[0], 
+    SQUARE_NAMES[0], 
 )
 
 def window(window_type=None, length=None):
@@ -70,7 +72,7 @@ def window(window_type=None, length=None):
     return wavetable
 
 
-def wavetable(wavetable_type=None, length=None):
+def wavetable(wavetable_type=None, length=None, duty=0.5):
     if wavetable_type is None:
         wavetable_type = 'sine'
     elif wavetable_type == 'random':
@@ -94,6 +96,12 @@ def wavetable(wavetable_type=None, length=None):
 
     if wavetable_type in RSAWTOOTH_NAMES:
         wavetable = np.linspace(1, -1, length, dtype='d', endpoint=False)
+
+    if wavetable_type in SQUARE_NAMES:
+        wavetable = np.zeros(length)
+        duty = int(length * duty)
+        wavetable[:duty] = 1
+        wavetable[duty:] = -1
 
     return wavetable
 

@@ -19,7 +19,7 @@ class Osc:
         else:
             self.wavetable = wavetable
 
-    def play(self, length, channels=2, samplerate=44100):
+    def play(self, length, channels=2, samplerate=44100, amp=1):
         out = np.zeros((length, channels))
 
         wtindex = 0
@@ -40,7 +40,7 @@ class Osc:
             val = (1.0 - frac) * val + frac * nextval
 
             for channel in range(channels):
-                out[i][channel] = val
+                out[i][channel] = val * amp
 
             self.phase += self.freq * wtlength * (1.0 / 44100.0)
 
