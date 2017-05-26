@@ -63,8 +63,7 @@ class SoundBuffer:
     def __getitem__(self, position):
         if isinstance(position, int):
             return tuple(self.frames[position])
-
-        return SoundBuffer(frames=self.frames[position])
+        return SoundBuffer(frames=np.copy(self.frames[position]))
 
     def __repr__(self):
         return 'SoundBuffer(samplerate={}, channels={}, frames={})'.format(self.samplerate, self.channels, self.frames)
@@ -95,26 +94,29 @@ class SoundBuffer:
 
     def __and__(self, value):
         if isinstance(value, SoundBuffer):
-            if len(self.frames) > len(value.frames):
-                value.frames.resize(self.frames.shape)
-            elif len(value.frames) > len(self.frames):
-                self.frames.resize(value.frames.shape)
+            frames = np.copy(self.frames)
+            mixframes = np.copy(value.frames)
+            if len(frames) > len(mixframes):
+                mixframes.resize(frames.shape)
+            elif len(mixframes) > len(frames):
+                frames.resize(mixframes.shape)
 
-            return SoundBuffer(self.frames + value.frames)
+            return SoundBuffer(frames + mixframes)
         else:
             return NotImplemented
 
     def __iand__(self, value):
         if isinstance(value, SoundBuffer):
             if self.frames is None:
-                self.frames = value.frames
+                self.frames = np.copy(value.frames)
             else:
-                if len(self.frames) > len(value.frames):
-                    value.frames.resize(self.frames.shape)
-                elif len(value.frames) > len(self.frames):
-                    self.frames.resize(value.frames.shape)
+                mixframes = np.copy(value.frames)
+                if len(self.frames) > len(mixframes):
+                    mixframes.resize(self.frames.shape)
+                elif len(mixframes) > len(self.frames):
+                    self.frames.resize(mixframes.shape)
 
-                self.frames = self.frames + value.frames
+                self.frames += mixframes
         else:
             return NotImplemented
 
@@ -270,7 +272,7 @@ class SoundBuffer:
             framesread += grainlength
 
     def copy(self):
-        return SoundBuffer(self.frames, channels=self.channels, samplerate=self.samplerate)
+        return SoundBuffer(np.copy(self.frames), channels=self.channels, samplerate=self.samplerate)
 
     def pan(self, pos=0.5, method=None):
         """ Pan a stereo sound from pos=0 (hard left) 
