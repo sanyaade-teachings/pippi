@@ -89,6 +89,8 @@ class TestSoundBuffer(TestCase):
             self.assertEqual(sound[0], (0,0))
 
     def test_speed(self):
+        """ FIXME: slower speeds (~<0.3) alter snd length
+        """
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
         speed = random.random()
         out = sound.speed(speed)
@@ -99,11 +101,11 @@ class TestSoundBuffer(TestCase):
         for pan_method in ('constant', 'linear'):
             # Hard pan smoke test
             pan_left = sound.copy()
-            pan_left.pan(0, method=pan_method)
+            pan_left = pan_left.pan(0, method=pan_method)
             self.assertEqual(pan_left[random.randint(0, len(pan_left))][1], 0)
 
             pan_right = sound.copy()
-            pan_right.pan(1, method=pan_method)
+            pan_right = pan_right.pan(1, method=pan_method)
             self.assertEqual(pan_right[random.randint(0, len(pan_right))][0], 0)
 
     def test_slice_frame(self):

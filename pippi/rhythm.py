@@ -1,7 +1,7 @@
 """ Some helpers for building and transforming onset lists
 """
 
-from .wavetables import window
+from . import wavetables
 
 def grid(numbeats, beatlength, offset=0, stride=None, reps=None):
     """ Create a grid of onset times, to use as dubbing positions
@@ -34,9 +34,9 @@ def curve(numbeats=16, wintype=None, div=None, reverse=False):
     div = div or (44100//16)
 
     if reverse:
-        win = window(wintype, numbeats * 2)[numbeats:]
+        win = wavetables.window(wintype, numbeats * 2)[numbeats:]
     else:
-        win = window(wintype, numbeats * 2)[:numbeats]
+        win = wavetables.window(wintype, numbeats * 2)[:numbeats]
 
     assert len(win) == numbeats
 

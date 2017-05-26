@@ -20,32 +20,28 @@ class Osc:
             self.wavetable = wavetable
 
     def play(self, length, channels=2, samplerate=44100):
-        out, self.phase = wavetables.interp(self.wavetable, length, self.freq, self.phase, channels, samplerate)
         out = np.zeros((length, channels))
 
-        if freq is None:
-            freq = samplerate / length
-
-        readindex = 0
-        inputlength = len(data)
+        wtindex = 0
+        wtlength = len(self.wavetable)
 
         for i in range(length):
-            readindex = int(phase) % inputlength
+            wtindex = int(self.phase) % wtlength
 
-            val = self.wavetable[readindex]
+            val = self.wavetable[wtindex]
 
             try:
-                nextval = self.wavetable[readindex + 1]
+                nextval = self.wavetable[wtindex + 1]
             except IndexError:
-                nextval = data[0]
+                nextval = self.wavetable[0]
 
-            frac = phase - int(phase)
+            frac = self.phase - int(self.phase)
 
             val = (1.0 - frac) * val + frac * nextval
 
-            for channel in range(self.channels):
+            for channel in range(channels):
                 out[i][channel] = val
 
-            phase += freq * inputlength * (1.0 / self.samplerate)
+            self.phase += self.freq * wtlength * (1.0 / 44100.0)
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)
