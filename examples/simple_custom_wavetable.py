@@ -1,5 +1,5 @@
 import random
-from pippi import dsp, wavetables, oscs
+from pippi import dsp, oscs
 
 # Create a list of random values, padded 
 # with zeros on either end to use as the 
