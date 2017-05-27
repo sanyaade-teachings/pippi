@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Alpha 1
+v2.0.0 - Alpha 2
 
 ## Install dependencies
 
@@ -34,6 +34,16 @@ Which will produce a WAV file named `simple_grains.wav` in the examples director
     make test
 
 ## Release Notes
+
+### 2.0.0 - Alpha 2
+
+This release includes a few missing pieces to core functionality including:
+
+- A crude squarewave wavetype for the wavetable osc!
+- A simple non-interpolating `speed` method on `SoundBuffer` for pitch shifting sounds
+- A set of rhythm helpers in the `rhythm` module useful for constructing onset / timing lists.
+    - `rhythm.curve` which lets you map any of the window types to a list of onsets -- check out 
+    the `simple_snare_bounce.py` example in the examples directory.
 
 ### 2.0.0 - Alpha 1
 
