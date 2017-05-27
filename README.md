@@ -22,12 +22,12 @@ out and have trouble installing it!
 
     python setup.py install
 
-## Run the simple grains example
+## Run the multi snare bounce example
 
     cd examples
-    python simple_grains.py
+    python multi_snare_bounce.py
 
-Which will produce a WAV file named `simple_grains.wav` in the examples directory.
+Which will produce a WAV file named `multi_snare_bounce_example.wav` in the examples directory.
 
 ## To run tests
 
@@ -40,6 +40,8 @@ Which will produce a WAV file named `simple_grains.wav` in the examples director
 This release includes a few missing pieces to core functionality including:
 
 - A crude squarewave wavetype for the wavetable osc!
+- Custom wavetables for the wavetable osc and window/wavetable generators! 
+  See the `simple_custom_wavetable.py` example for use with the wavetable osc.
 - A simple non-interpolating `speed` method on `SoundBuffer` for pitch shifting sounds
 - A set of rhythm helpers in the `rhythm` module useful for constructing onset / timing lists.
     - `rhythm.curve` which lets you map any of the window types to a list of onsets -- check out 

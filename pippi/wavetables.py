@@ -1,3 +1,4 @@
+import collections
 import random
 import numpy as np
 
@@ -34,7 +35,10 @@ ALL_WAVETABLES = (
     SQUARE_NAMES[0], 
 )
 
-def window(window_type=None, length=None):
+def window(window_type=None, length=None, data=None):
+    if data is not None:
+        return interp(data, length)
+
     if window_type is None:
         window_type = 'sine'
     elif window_type == 'random':
@@ -72,7 +76,10 @@ def window(window_type=None, length=None):
     return wavetable
 
 
-def wavetable(wavetable_type=None, length=None, duty=0.5):
+def wavetable(wavetable_type=None, length=None, duty=0.5, data=None):
+    if data is not None:
+        return interp(data, length)
+
     if wavetable_type is None:
         wavetable_type = 'sine'
     elif wavetable_type == 'random':
