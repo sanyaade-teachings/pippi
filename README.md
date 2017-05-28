@@ -48,6 +48,7 @@ This release includes a few missing pieces to core functionality including:
     the `simple_snare_bounce.py` example in the examples directory.
 - Some more example scripts including:
     - `simple_snare_bounce.py` Demoing the `rhythm.curve` helper
+    - `multi_snare_bounce.py` A more interesting variation on the snare bounce example
     - `simple_custom_wavetable.py` Showing a user-defined wavetable used with `Osc`
     - `synth_chords.py` Using the `tune` module with `Osc` to create a simple chord progression
 
