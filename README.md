@@ -46,6 +46,10 @@ This release includes a few missing pieces to core functionality including:
 - A set of rhythm helpers in the `rhythm` module useful for constructing onset / timing lists.
     - `rhythm.curve` which lets you map any of the window types to a list of onsets -- check out 
     the `simple_snare_bounce.py` example in the examples directory.
+- Some more example scripts including:
+    - `simple_snare_bounce.py` Demoing the `rhythm.curve` helper
+    - `simple_custom_wavetable.py` Showing a user-defined wavetable used with `Osc`
+    - `synth_chords.py` Using the `tune` module with `Osc` to create a simple chord progression
 
 ### 2.0.0 - Alpha 1
 
