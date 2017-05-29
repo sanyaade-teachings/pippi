@@ -1,6 +1,7 @@
 appdirs==1.4.3
 argh==0.26.2
 cffi==1.10.0
+Cython==0.25.2
 numpy==1.12.1
 packaging==16.8
 pathtools==0.1.2

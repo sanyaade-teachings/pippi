@@ -5,11 +5,11 @@ from . import wavetables
 class Osc:
     """ Wavetable-based oscilator 
     """
-    def __init__(self, freq=440, offset=0, amp=1, wavetable=None):
+    def __init__(self, double freq=440, int offset=0, double amp=1, wavetable=None, double phase=0):
         self.freq = freq
         self.offset = offset
         self.amp = amp
-        self.phase = 0
+        self.phase = phase
 
         if wavetable is None:
             wavetable = 'sine'
@@ -19,11 +19,13 @@ class Osc:
         else:
             self.wavetable = wavetable
 
-    def play(self, length, channels=2, samplerate=44100, amp=1):
+    def play(self, int length, int channels=2, int samplerate=44100, double amp=1):
         out = np.zeros((length, channels))
 
-        wtindex = 0
-        wtlength = len(self.wavetable)
+        cdef int i = 0
+        cdef int wtindex = 0
+        cdef int wtlength = len(self.wavetable)
+        cdef double val, nextval, frac
 
         for i in range(length):
             wtindex = int(self.phase) % wtlength

@@ -1,6 +1,7 @@
 import collections
 import random
 import numpy as np
+from . import interpolation
 
 SINEWAVE_NAMES  = ('sin', 'sine', 'sinewave')
 COSINE_NAMES  = ('cos', 'cosine')
@@ -37,7 +38,7 @@ ALL_WAVETABLES = (
 
 def window(window_type=None, length=None, data=None):
     if data is not None:
-        return interp(data, length)
+        return interpolation.linear(data, length)
 
     if window_type is None:
         window_type = 'sine'
@@ -78,7 +79,7 @@ def window(window_type=None, length=None, data=None):
 
 def wavetable(wavetable_type=None, length=None, duty=0.5, data=None):
     if data is not None:
-        return interp(data, length)
+        return interpolation.linear(data, length)
 
     if wavetable_type is None:
         wavetable_type = 'sine'
@@ -112,29 +113,4 @@ def wavetable(wavetable_type=None, length=None, duty=0.5, data=None):
 
     return wavetable
 
-def interp(data, length):
-    out = []
 
-    readindex = 0
-    inputlength = len(data)
-    phase = 0
-
-    for i in range(length):
-        readindex = int(phase) % inputlength
-
-        val = data[readindex]
-
-        try:
-            nextval = data[readindex + 1]
-        except IndexError:
-            nextval = data[0]
-
-        frac = phase - int(phase)
-
-        val = (1.0 - frac) * val + frac * nextval
-
-        out += [ val ]
-
-        phase += inputlength * (1.0 / length)
-
-    return out
