@@ -325,7 +325,7 @@ class SoundBuffer:
             use it as an interpolated amplitude wavetable.
         """
         if values is not None:
-            wavetable = wavetables.interp(values, len(self))
+            wavetable = interpolation.linear(values, len(self))
             wavetable = np.array(wavetable)
         else:
             wavetable = wavetables.window(
@@ -334,8 +334,13 @@ class SoundBuffer:
                         )
         wavetable = wavetable.reshape((len(self), 1))
         wavetable = np.repeat(wavetable, self.channels, axis=1)
+        wavetable *= amp
 
-        return SoundBuffer(frames=self.frames * wavetable * amp)
+        frames = np.copy(self.frames)
+        frames[:,1] *= wavetable
+        frames[:,0] *= wavetable
+
+        return SoundBuffer(frames=frames)
 
     def fill(self, length):
         """ Truncate the buffer to the given length or 
