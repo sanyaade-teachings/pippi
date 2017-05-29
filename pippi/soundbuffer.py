@@ -332,15 +332,13 @@ class SoundBuffer:
                             window_type=window_type, 
                             length=len(self)
                         )
-        wavetable = wavetable.reshape((len(self), 1))
-        wavetable = np.repeat(wavetable, self.channels, axis=1)
         wavetable *= amp
 
         frames = np.copy(self.frames)
-        frames[:,1] *= wavetable
-        frames[:,0] *= wavetable
+        for channel in range(self.channels):
+            frames[:,channel] *= wavetable
 
-        return SoundBuffer(frames=frames)
+        return SoundBuffer(frames=frames, channels=self.channels, samplerate=self.samplerate)
 
     def fill(self, length):
         """ Truncate the buffer to the given length or 
