@@ -16,26 +16,15 @@ BARTLETT_NAMES = set(('bartlett', 'bar'))
 KAISER_NAMES = set(('kaiser', 'kai'))
 SQUARE_NAMES = set(('square', 'sq'))
 
-ALL_WINDOWS = set((
-    SINEWAVE_NAMES[0],
-    TRIANGLE_NAMES[0], 
-    SAWTOOTH_NAMES[0], 
-    RSAWTOOTH_NAMES[0], 
-    HANNING_NAMES[0], 
-    HAMMING_NAMES[0], 
-    BLACKMAN_NAMES[0], 
-    BARTLETT_NAMES[0], 
-    KAISER_NAMES[0], 
-))
+ALL_WINDOWS = SINEWAVE_NAMES | TRIANGLE_NAMES | \
+              SAWTOOTH_NAMES | RSAWTOOTH_NAMES | \
+              HANNING_NAMES | HAMMING_NAMES | \
+              BLACKMAN_NAMES | BARTLETT_NAMES | \
+              KAISER_NAMES
 
-ALL_WAVETABLES = set((
-    SINEWAVE_NAMES[0],
-    COSINE_NAMES[0],
-    TRIANGLE_NAMES[0], 
-    SAWTOOTH_NAMES[0], 
-    RSAWTOOTH_NAMES[0], 
-    SQUARE_NAMES[0], 
-))
+ALL_WAVETABLES = SINEWAVE_NAMES | COSINE_NAMES | \
+                 TRIANGLE_NAMES | SAWTOOTH_NAMES | \
+                 RSAWTOOTH_NAMES | SQUARE_NAMES
 
 def window(window_type=None, length=None, data=None):
     if data is not None:
