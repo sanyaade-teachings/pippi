@@ -3,19 +3,20 @@ import random
 import numpy as np
 from . import interpolation
 
-SINEWAVE_NAMES  = ('sin', 'sine', 'sinewave')
-COSINE_NAMES  = ('cos', 'cosine')
-TRIANGLE_NAMES  = ('tri', 'triangle')
-SAWTOOTH_NAMES  = ('saw', 'sawtooth', 'ramp', 'line', 'lin')
-RSAWTOOTH_NAMES = ('isaw', 'rsaw', 'isawtooth', 'rsawtooth', 'reversesaw', 'phasor')
-HANNING_NAMES = ('hanning', 'hann', 'han')
-HAMMING_NAMES = ('hamming', 'hamm', 'ham')
-BLACKMAN_NAMES = ('blackman', 'black', 'bla')
-BARTLETT_NAMES = ('bartlett', 'bar')
-KAISER_NAMES = ('kaiser', 'kai')
-SQUARE_NAMES = ('square', 'sq')
 
-ALL_WINDOWS = (
+SINEWAVE_NAMES  = set(('sin', 'sine', 'sinewave'))
+COSINE_NAMES  = set(('cos', 'cosine'))
+TRIANGLE_NAMES  = set(('tri', 'triangle'))
+SAWTOOTH_NAMES  = set(('saw', 'sawtooth', 'ramp', 'line', 'lin'))
+RSAWTOOTH_NAMES = set(('isaw', 'rsaw', 'isawtooth', 'rsawtooth', 'reversesaw', 'phasor'))
+HANNING_NAMES = set(('hanning', 'hann', 'han'))
+HAMMING_NAMES = set(('hamming', 'hamm', 'ham'))
+BLACKMAN_NAMES = set(('blackman', 'black', 'bla'))
+BARTLETT_NAMES = set(('bartlett', 'bar'))
+KAISER_NAMES = set(('kaiser', 'kai'))
+SQUARE_NAMES = set(('square', 'sq'))
+
+ALL_WINDOWS = set((
     SINEWAVE_NAMES[0],
     TRIANGLE_NAMES[0], 
     SAWTOOTH_NAMES[0], 
@@ -25,16 +26,16 @@ ALL_WINDOWS = (
     BLACKMAN_NAMES[0], 
     BARTLETT_NAMES[0], 
     KAISER_NAMES[0], 
-)
+))
 
-ALL_WAVETABLES = (
+ALL_WAVETABLES = set((
     SINEWAVE_NAMES[0],
     COSINE_NAMES[0],
     TRIANGLE_NAMES[0], 
     SAWTOOTH_NAMES[0], 
     RSAWTOOTH_NAMES[0], 
     SQUARE_NAMES[0], 
-)
+))
 
 def window(window_type=None, length=None, data=None):
     if data is not None:
