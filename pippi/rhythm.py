@@ -3,63 +3,63 @@
 
 from . import wavetables
 
-def grid(numbeats, beatlength, offset=0, stride=None, reps=None):
-    """ Create a grid of onset times, to use as dubbing positions
-        into a buffer.
+HIT_SYMBOLS = set((1, '1', 'X', 'x', True))
 
-        TODO: document options
+def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
+    """ TODO: Pattern creation helper
     """
-    onsets = [ beatlength * i for i in range(numbeats) ]
-    onsets = onsets[offset:] + onsets[:offset]
-    if stride is not None:
-        subset = onsets[0:-1:stride]
-        onsets = []
-        for i in range(numbeats):
-            onsets += [ subset[i % len(subset)] ]
+    pass
 
-    if reps is not None:
-        out = []
-        for rep in range(reps):
-            for onset in onsets:
-                out += [ onset * (rep + 1) ]
-        onsets = out
+def eu(numbeats, length, offset=0, reps=None, reverse=False):
+    """ TODO: euclidean pattern generation
+    """
+    pass
 
-    return onsets
+def onsets(pattern, beatlength=4410, offset=0, reps=None, reverse=False, playhead=0):
+    """ TODO: convert ascii and last patterns into onset lists
+    """
+    out = []
+    for beat in pattern:
+        if beat in HIT_SYMBOLS:
+            out += [ playhead ]
 
-def curve(numbeats=16, wintype=None, div=None, mult=None, reverse=False):
+        playhead += beatlength
+
+    if reverse:
+        out = reversed(out)
+
+    return out
+
+def curve(numbeats=16, wintype=None, length=44100, reverse=False):
     """ Bouncy balls
-        Div sets the min division size
     """
     wintype = wintype or 'random'
-    div = div or (44100//16)
-    mult = mult or 100
 
     if reverse:
         win = wavetables.window(wintype, numbeats * 2)[numbeats:]
     else:
         win = wavetables.window(wintype, numbeats * 2)[:numbeats]
 
-    assert len(win) == numbeats
+    return [ int(onset * length) for onset in win ]
 
-    return [ div * int(mult * w) for w in win ]
 
 def rotate(pattern, offset=0):
-    """ Rotate a list of onsets by a given offset
+    """ Rotate a pattern list by a given offset
     """
     return pattern[offset:] + pattern[:offset]
 
-def scale(pattern, factor):
+def scale(onsets, factor):
     """ Scale a list of onsets by a given factor
     """
-    return [ int(p * factor) for p in pattern ]
+    return [ int(onset * factor) for onset in onsets ]
 
-def repeat(pattern, reps):
+def repeat(onsets, reps):
     """ Repeat a sequence of onsets a given number of times
     """
     out = []
+    total = sum(pattern)
     for rep in range(reps):
-        for p in pattern:
-            out += [ p * (rep + 1) ]
+        out += [ onset + (rep * total) for onset in onsets ]
 
     return out
 
