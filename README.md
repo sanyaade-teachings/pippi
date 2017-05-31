@@ -6,19 +6,66 @@ v2.0.0 - Alpha 2
 
 Pippi requires python 3.5+
 
-Pippi uses `numpy` and [pysndfile][psf]. `pysndfile` wraps [libsndfile][lsf]. (Both 
-`pysndfile` and `libsndfile` need to be installed.) There are many ways to install numpy, and 
-it may be as easy as `pip install numpy` on your platform. 
- 
-More docs forthcoming as the deps for version 2 settle (especially 
-as the interactive console comes together again.)
+You might be lucky and already have it installed! Otherwise, 
+the python.org website has installation instructions for your platform: 
 
-In the meantime, please do open a bug on github if you try this 
-out and have trouble installing it!
+    https://www.python.org/downloads/
+
+Right now, `3.6.1` is the version to get.
+
+I recommend you install pippi and work from a python virtualenv, which 
+is built into the standard library in recent versions of python.
+
+Create a virtualenv in a directory called `venv` with python 3.6:
+
+    python3 -m venv venv
+
+Activate the virtualenv:
+
+    source venv/bin/activate
+
+And install the libraries that pippi uses into the virtualenv:
 
     pip install -r requirements.txt
 
+Pippi uses `numpy`, [pysndfile][psf], and Cython which all 
+may create installation roadbumps depending on your platform.
+
+If you're lucky, the above command ran without errors and you're 
+good to go!
+
+Otherwise, if there was a problem installing `numpy` please check out 
+this page for more information about how to install it on your platform:
+
+    https://www.scipy.org/scipylib/download.html
+
+If there was a problem installing `pysndfile` you likely just need to install 
+the library it wraps, `libsndfile`. 
+
+On linux, you should be able to find `libsndfile` in your distro's package manager.
+
+If you're on a mac, it looks like it can be installed with homebrew:
+
+    http://brewformulas.org/Libsndfile
+
+On windows, Erik de Castro Lopo provides an installer on the libsndfile page:
+
+    http://www.mega-nerd.com/libsndfile/#Download
+
+ 
+If you have trouble compiling the Cython parts of pippi, you may need to install 
+the python development headers, and/or build tools for your system. More here:
+
+    http://docs.cython.org/en/latest/src/quickstart/install.html
+
+Please let me know if you run into problems!
+
+More docs forthcoming as the deps for version 2 settle (especially 
+as the interactive console comes together again.)
+
 ## Install from source
+
+From inside your virtualenv, in the pippi source directory:
 
     python setup.py install
 
