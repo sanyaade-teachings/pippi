@@ -82,6 +82,14 @@ Which will produce a WAV file named `multi_snare_bounce_example.wav` in the exam
 
 ## Release Notes
 
+### 2.0.0 - Alpha 3 (In Development)
+
+Optimizations and improvements in this release:
+
+- Much better performance for wavetable and granular synthesis
+- Improvements and additions to the `rhythm` modules
+    - Better handling of `rhythm.curve` which now takes a length param instead of an obscure combination of multipliers
+
 ### 2.0.0 - Alpha 2
 
 This release includes a few missing pieces to core functionality including:
