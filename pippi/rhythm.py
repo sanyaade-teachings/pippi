@@ -10,10 +10,54 @@ def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
     """
     pass
 
-def eu(numbeats, length, offset=0, reps=None, reverse=False):
-    """ TODO: euclidean pattern generation
+def eu(length, numbeats, offset=0, reps=None, reverse=False):
+    """ A euclidian pattern generator
+
+        Length 12, numbeats 3
+
+        >>> rhythm.eu(12, 3)
+        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
+
+        Length 6, numbeats 3
+
+        >>> rhythm.eu(6, 3)
+        [1, 0, 1, 0, 1, 0]
+
+        Length 6, numbeats 3, offset 1
+        >>> rhythm.eu(6, 3, 1)
+        [0, 1, 0, 1, 0, 1]
+
+        Length 6, numbeats 3, offset 1, reps 2
+        >>> rhythm.eu(6, 3, 1)
+        [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
+
+        Length 6, numbeats 3, offset 1, reps 2, reverse True
+        >>> rhythm.eu(6, 3, 1)
+        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+
     """
-    pass
+    pulses = [ 1 for pulse in range(numbeats) ]
+    pauses = [ 0 for pause in range(length - numbeats) ]
+
+    position = 0
+    while len(pauses) > 0:
+        try:
+            index = pulses.index(1, position)
+            pulses.insert(index + 1, pauses.pop(0))
+            position = index + 1
+        except ValueError:
+            position = 0
+
+    pattern = rotate(pulses, offset+len(pulses))
+
+    if reps:
+        pattern *= reps
+
+    if reverse:
+        pattern = reversed(pattern)
+
+    return pattern
+
 
 def onsets(pattern, beatlength=4410, offset=0, reps=None, reverse=False, playhead=0):
     """ TODO: convert ascii and last patterns into onset lists
