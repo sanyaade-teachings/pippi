@@ -90,12 +90,16 @@ Optimizations and improvements in this release:
 - Improvements and additions to the `rhythm` modules
     - Better handling of `rhythm.curve` which now takes a length param instead of an obscure combination of multipliers
     - TODO `rhythm.curve` can be provided a custom wavetable
+    - TODO MPC swing on onset lists
     - TODO Euclidean rhythm generator `rhythm.eu`
     - TODO Pattern generation helper `rhythm.pattern`
     - TODO Pattern-to-onsets (and onsets-to-pattern?) helpers
         - Patterns are the same as pippi 1 (I may even just port some code) and can be in a few forms:
             - String literals with ascii notation eg: 'xx x- x' which is the same as 'xx.x-.x'
             - Lists of 'truthy' and 'falsey' values eg: ['1', True, 0, False] which is the same as 'xx..'
+- Misc bugfixes:
+    - Fix `random` param for `wavetable.window` and `wavetable.window`
+    - Fix bad params for `wavetable.window` and `wavetable.window` -- falls back to sine in both cases
 
 ### 2.0.0 - Alpha 2
 
