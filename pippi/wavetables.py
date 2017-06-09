@@ -33,7 +33,7 @@ def window(window_type=None, length=None, data=None):
     wt = None
 
     if window_type == 'random':
-        window_type = random.choice(ALL_WINDOWS)
+        window_type = random.choice(list(ALL_WINDOWS))
 
     if window_type in SINEWAVE_NAMES:
         wt = np.linspace(0, np.pi, length, dtype='d')
@@ -79,7 +79,7 @@ def wavetable(wavetable_type=None, length=None, duty=0.5, data=None):
     if wavetable_type is None:
         wavetable_type = 'sine'
     elif wavetable_type == 'random':
-        wavetable_type = random.choice(ALL_WAVETABLES)
+        wavetable_type = random.choice(list(ALL_WAVETABLES))
 
     if wavetable_type in SINEWAVE_NAMES:
         wt = np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False)
