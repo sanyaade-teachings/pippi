@@ -90,7 +90,7 @@ Optimizations and improvements in this release:
 - Improvements and additions to the `rhythm` modules
     - Better handling of `rhythm.curve` which now takes a length param instead of an obscure combination of multipliers
     - TODO `rhythm.curve` can be provided a custom wavetable
-    - TODO MPC swing on onset lists
+    - MPC swing on onset lists
     - Euclidean rhythm generator `rhythm.eu`
     - Pattern generation helper `rhythm.pattern`
     - Pattern-to-onset and string-to-pattern helpers
