@@ -87,9 +87,11 @@ Which will produce a WAV file named `multi_snare_bounce_example.wav` in the exam
 New in alpha 4:
 
 - TODO: Linear interpolation option for pitch shifting!
-- TODO: Sampler class and helpers
+- TODO: Pulsar synthesis with `Osc`!
+- TODO: `SoundBuffer.fill` returns a copy of the sound instead of altering it in place
+- TODO: `Sampler` class and helpers
     - Takes a single sound or a sound bank
-    - Plays well with the rhythm modules
+    - Plays well with the `rhythm` modules
 
 ### 2.0.0 - Alpha 3
 
