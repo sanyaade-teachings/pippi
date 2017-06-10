@@ -2,6 +2,7 @@
 """
 
 from . import wavetables
+from . import interpolation
 
 REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
 
@@ -98,15 +99,20 @@ def swing(onsets, amount, beat, mpc=True):
 
     return onsets
 
-def curve(numbeats=16, wintype=None, length=44100, reverse=False):
+def curve(numbeats=16, wintype=None, length=44100, reverse=False, wavetable=None):
     """ Bouncy balls
     """
     wintype = wintype or 'random'
 
-    if reverse:
-        win = wavetables.window(wintype, numbeats * 2)[numbeats:]
+    if wavetable is None:
+        win = wavetables.window(wintype, numbeats * 2)
     else:
-        win = wavetables.window(wintype, numbeats * 2)[:numbeats]
+        win = interpolation.linear(wavetable, numbeats)
+
+    if reverse:
+        win = win[numbeats:]
+    else:
+        win = win[:numbeats]
 
     return [ int(onset * length) for onset in win ]
 

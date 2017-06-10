@@ -23,11 +23,14 @@ for _ in range(numpasses):
     reverse = random.choice([True, False])
 
     # Randomly choose a window function for `rhythm.curve`
-    wintype = random.choice(['sine', 'tri', 'kaiser', 'hann', 'blackman'])
+    wintype = random.choice(['sine', 'tri', 'kaiser', 'hann', 'blackman', None])
+
+    # If wintype is None, generate a random list of values to use as a wavetable
+    wavetable = None if wintype is not None else [ random.random() for _ in range(random.randint(3, 10)) ]
 
     # Create a list of onset times for the above params, which we'll use as positions 
     # to dub the snare sound into the output buffer.
-    pattern = rhythm.curve(numbeats=numbeats, wintype=wintype, length=length, reverse=reverse)
+    pattern = rhythm.curve(numbeats=numbeats, wintype=wintype, length=length, reverse=reverse, wavetable=wavetable)
 
     # Set the base speed for the sound -- the snare will be pitch shifted by this amount + some jitter
     minspeed = random.triangular(0.15, 2)
