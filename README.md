@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Alpha 2
+v2.0.0 - Alpha 3
 
 ## Install dependencies
 
@@ -82,7 +82,16 @@ Which will produce a WAV file named `multi_snare_bounce_example.wav` in the exam
 
 ## Release Notes
 
-### 2.0.0 - Alpha 3 (In Development)
+### 2.0.0 - Alpha 4 (In Development)
+
+New in alpha 4:
+
+- TODO: Linear interpolation option for pitch shifting!
+- Sampler class and helpers
+    - Takes a single sound or a sound bank
+    - Plays well with the rhythm modules
+
+### 2.0.0 - Alpha 3
 
 Optimizations and improvements in this release:
 
