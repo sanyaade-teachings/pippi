@@ -3,8 +3,7 @@
 
 from . import wavetables
 
-HIT_SYMBOLS = set((1, '1', 'X', 'x', True))
-REST_SYMBOLS = set(('0', '.', ' ', '-'))
+REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
 
 def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
     """ Pattern creation helper
@@ -23,11 +22,25 @@ def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
 
     return pat
 
-def topattern(pat, reverse=False):
-    pat = [ 0 if tick in REST_SYMBOLS or not tick else 1 for tick in pat ]
+def topattern(pattern, reverse=False):
+    pattern = [ 0 if tick in REST_SYMBOLS or not tick else 1 for tick in pattern ]
     if reverse:
-        pat = [ p for p in reversed(pat) ]
-    return pat
+        pattern = [ p for p in reversed(pattern) ]
+    return pattern
+
+def onsets(pattern, beat=4410, length=None, start=0):
+    length = length or len(pattern)
+    grid = [ beat * i + start for i in range(length) ]
+    pattern = [ pattern[i % len(pattern)] for i in range(length) ]
+
+    out = []
+
+    for i, tick in enumerate(pattern):
+        if tick not in REST_SYMBOLS:
+            pos = grid[i % len(grid)]
+            out += [ pos ]
+        
+    return out
 
 def eu(length, numbeats, offset=0, reps=None, reverse=False):
     """ A euclidian pattern generator

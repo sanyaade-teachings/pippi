@@ -30,6 +30,13 @@ test_topatterns = [
     ('X..1*!', [1,0,0,1,1,1]), 
 ]
 
+test_onsets = [
+    ([1,1,0,0], 100, 6, 0, [0, 100, 400, 500]), 
+    ([0,1,0], 100, 8, 0, [100, 400, 700]), 
+    ([0,1,0], 100, 8, 50, [150, 450, 750]), 
+    ([0,1,0], 100, None, 50, [150]), 
+]
+
 class TestRhythm(TestCase):
     def test_basic_patterns(self):
         for pattern_args, result in test_patterns:
@@ -40,4 +47,9 @@ class TestRhythm(TestCase):
         for pattern, result in test_topatterns:
             pattern = rhythm.topattern(pattern)
             self.assertEqual(pattern, result)
+
+    def test_onsets(self):
+        for pattern, beat, length, start, result in test_onsets:
+            onsets = rhythm.onsets(pattern, beat, length, start)
+            self.assertEqual(onsets, result)
 
