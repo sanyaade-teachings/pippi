@@ -4,15 +4,7 @@ import random
 from unittest import TestCase
 from pippi import wavetables
 
-class TestSoundBuffer(TestCase):
-    def setUp(self):
-        pass
-        #self.soundfiles = tempfile.mkdtemp()
-
-    def tearDown(self):
-        pass
-        #shutil.rmtree(self.soundfiles)
-
+class TestWavetables(TestCase):
     def test_random_window(self):
         length = random.randint(1, 1000)
         win = wavetables.window('random', length)

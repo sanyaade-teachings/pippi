@@ -6,9 +6,21 @@ from . import wavetables
 HIT_SYMBOLS = set((1, '1', 'X', 'x', True))
 
 def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
-    """ TODO: Pattern creation helper
+    """ Pattern creation helper
     """
-    pass
+    pat = [ 1 if tick == 0 else 0 for tick in range(div) ]
+    pat = [ pat[i % len(pat)] for i in range(numbeats) ]
+
+    if offset > 0:
+        pat = [ 0 for _ in range(offset) ] + pat[:-offset]
+
+    if reps is not None:
+        pat *= reps
+
+    if reverse:
+        pat = [ p for p in reversed(pat) ]
+
+    return pat
 
 def eu(length, numbeats, offset=0, reps=None, reverse=False):
     """ A euclidian pattern generator
@@ -90,7 +102,7 @@ def curve(numbeats=16, wintype=None, length=44100, reverse=False):
 def rotate(pattern, offset=0):
     """ Rotate a pattern list by a given offset
     """
-    return pattern[offset:] + pattern[:offset]
+    return pattern[-offset % len(pattern):] + pattern[:-offset % len(pattern)]
 
 def scale(onsets, factor):
     """ Scale a list of onsets by a given factor
