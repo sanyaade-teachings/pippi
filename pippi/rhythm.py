@@ -4,6 +4,7 @@
 from . import wavetables
 
 HIT_SYMBOLS = set((1, '1', 'X', 'x', True))
+REST_SYMBOLS = set(('0', '.', ' ', '-'))
 
 def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
     """ Pattern creation helper
@@ -20,6 +21,12 @@ def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
     if reverse:
         pat = [ p for p in reversed(pat) ]
 
+    return pat
+
+def topattern(pat, reverse=False):
+    pat = [ 0 if tick in REST_SYMBOLS or not tick else 1 for tick in pat ]
+    if reverse:
+        pat = [ p for p in reversed(pat) ]
     return pat
 
 def eu(length, numbeats, offset=0, reps=None, reverse=False):

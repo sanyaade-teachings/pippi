@@ -22,10 +22,22 @@ test_patterns = [
     ((8, 3, 0, 2, False), [1,0,0,1,0,0,1,0, 1,0,0,1,0,0,1,0]), 
 ]
 
+test_topatterns = [
+    ('xx  ', [1,1,0,0]), 
+    ('xx- ', [1,1,0,0]), 
+    ('xx. ', [1,1,0,0]), 
+    ('-x..', [0,1,0,0]), 
+    ('X..1*!', [1,0,0,1,1,1]), 
+]
+
 class TestRhythm(TestCase):
     def test_basic_patterns(self):
         for pattern_args, result in test_patterns:
             pattern = rhythm.pattern(*pattern_args)
             self.assertEqual(pattern, result)
 
+    def test_basic_topatterns(self):
+        for pattern, result in test_topatterns:
+            pattern = rhythm.topattern(pattern)
+            self.assertEqual(pattern, result)
 
