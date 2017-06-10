@@ -75,6 +75,29 @@ def eu(length, numbeats, offset=0, reps=None, reverse=False):
 
     return pattern
 
+def swing(onsets, amount, beat, mpc=True):
+    """ Add MPC-style swing to a list of onsets.
+        Amount is a value between 0 and 1, which 
+        maps to a swing amount between 0% and 75%.
+        Every odd onset will be delayed by
+            
+            beat length * swing amount
+
+        This will only really work like MPC swing 
+        when there are a run of notes, as rests 
+        are not represented in onset lists (and 
+        MPC swing just delays the upbeats).
+    """
+    if amount <= 0:
+        return onsets
+
+    delay_amount = int(beat * amount * 0.75)
+    for i, onset in enumerate(onsets):
+        if i % 2 == 1:
+            onsets[i] += delay_amount
+
+    return onsets
+
 def curve(numbeats=16, wintype=None, length=44100, reverse=False):
     """ Bouncy balls
     """
