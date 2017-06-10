@@ -22,6 +22,14 @@ test_patterns = [
     ((8, 3, 0, 2, False), [1,0,0,1,0,0,1,0, 1,0,0,1,0,0,1,0]), 
 ]
 
+test_eu_patterns = [
+    ((6, 3, 0, None, False), [1,0,1,0,1,0]), 
+    ((6, 3, 0, 2, False), [1,0,1,0,1,0]*2), 
+    ((6, 3, 1, 2, False), [0,1,0,1,0,1,0,1,0,1,0,1]),
+    ((6, 3, 1, 2, True), [1,0,1,0,1,0,1,0,1,0,1,0]),
+    ((12, 3, 0, None, False), [1,0,0,0,1,0,0,0,1,0,0,0]), 
+]
+
 test_topatterns = [
     ('xx  ', [1,1,0,0]), 
     ('xx- ', [1,1,0,0]), 
@@ -52,4 +60,10 @@ class TestRhythm(TestCase):
         for pattern, beat, length, start, result in test_onsets:
             onsets = rhythm.onsets(pattern, beat, length, start)
             self.assertEqual(onsets, result)
+
+    def test_eu(self):
+        for args, result in test_eu_patterns:
+            pattern = rhythm.eu(*args)
+            self.assertEqual(pattern, result)
+
 

@@ -91,7 +91,7 @@ Optimizations and improvements in this release:
     - Better handling of `rhythm.curve` which now takes a length param instead of an obscure combination of multipliers
     - TODO `rhythm.curve` can be provided a custom wavetable
     - TODO MPC swing on onset lists
-    - TODO Euclidean rhythm generator `rhythm.eu`
+    - Euclidean rhythm generator `rhythm.eu`
     - Pattern generation helper `rhythm.pattern`
     - Pattern-to-onset and string-to-pattern helpers
         - Patterns are the same as pippi 1 (I may even just port some code) and can be in a few forms:

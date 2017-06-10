@@ -45,28 +45,13 @@ def onsets(pattern, beat=4410, length=None, start=0):
 def eu(length, numbeats, offset=0, reps=None, reverse=False):
     """ A euclidian pattern generator
 
-        Length 12, numbeats 3
-
-        >>> rhythm.eu(12, 3)
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]
-
         Length 6, numbeats 3
-
         >>> rhythm.eu(6, 3)
         [1, 0, 1, 0, 1, 0]
 
         Length 6, numbeats 3, offset 1
         >>> rhythm.eu(6, 3, 1)
         [0, 1, 0, 1, 0, 1]
-
-        Length 6, numbeats 3, offset 1, reps 2
-        >>> rhythm.eu(6, 3, 1)
-        [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
-
-        Length 6, numbeats 3, offset 1, reps 2, reverse True
-        >>> rhythm.eu(6, 3, 1)
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
-
     """
     pulses = [ 1 for pulse in range(numbeats) ]
     pauses = [ 0 for pause in range(length - numbeats) ]
@@ -86,7 +71,7 @@ def eu(length, numbeats, offset=0, reps=None, reverse=False):
         pattern *= reps
 
     if reverse:
-        pattern = reversed(pattern)
+        pattern = [ p for p in reversed(pattern) ]
 
     return pattern
 
