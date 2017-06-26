@@ -361,9 +361,7 @@ class SoundBuffer:
 
 
     def speed(self, speed):
-        """ Change the speed of the sound --
-            stolen from github.com/Zulko/pianoputer
-            Thanks!
+        """ Change the speed of the sound
         """
         speed = speed if speed > 0 else 0.001
         length = int(len(self) * (1.0 / speed))
