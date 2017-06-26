@@ -199,12 +199,14 @@ class SoundBuffer:
 
     def dub(self, sounds, pos=0):
         if isinstance(sounds, SoundBuffer):
+            sound = sounds.copy()
             if pos > 0:
-                sounds.pad(pos) 
-            self &= sounds
+                sound.pad(pos) 
+            self &= sound
         else:
             try:
                 for sound in sounds:
+                    sound = sound.copy()
                     if pos > 0:
                         sound.pad(pos)
                     self &= sound
