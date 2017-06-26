@@ -7,6 +7,7 @@ import numpy as np
 import soundfile
 
 from . import wavetables
+from . import interpolation
 
 DEFAULT_SAMPLERATE = 44100
 DEFAULT_CHANNELS = 2
@@ -365,10 +366,13 @@ class SoundBuffer:
             Thanks!
         """
         speed = speed if speed > 0 else 0.001
-        indices = np.round(np.arange(0, len(self.frames), speed))
-        indices = indices[indices < len(self.frames)].astype(int)
-        return SoundBuffer(frames=self.frames[indices])
+        length = int(len(self) * (1.0 / speed))
+        frames = np.zeros((length, self.channels))
 
+        for channel in range(self.channels):
+            frames[:,channel] = interpolation.linear(self.frames[:,channel], length)
+
+        return SoundBuffer(frames)
 
     def transpose(self, factor):
         """ TODO Change the pitch of the sound without changing 
