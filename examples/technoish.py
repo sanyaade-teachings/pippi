@@ -7,8 +7,9 @@ kick = dsp.read('sounds/909kick.wav')
 hat = dsp.read('sounds/hat.wav')
 snare = dsp.read('sounds/606snare.wav')
 
-numbars = 64
+numbars = 64 * 4
 chords = 'ii ii ii V9'.split(' ')
+chords2 = 'i i6 IV IV'.split(' ')
 
 def rush(snd):
     out = dsp.buffer()
@@ -35,10 +36,11 @@ for i in range(numbars):
 
     numlayers = random.randint(3, 6)
     beat = int(((60000 / 109)/1000) * 44100) // 4
-    chord = chords[i%len(chords)]
 
     if i//4 % 3 == 0:
-        chord = 'i'
+        chord = chords2[i%len(chords2)]
+    else:
+        chord = chords[i%len(chords)]
 
     freqs = tune.chord(chord, octave=3, key='d')
 
