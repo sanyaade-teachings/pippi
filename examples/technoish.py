@@ -84,7 +84,7 @@ for i in range(numbars):
             h = h.env('phasor').speed(random.triangular(1, 1.25))
             bar.dub(h * random.triangular(0.25, 0.3), onset)
 
-    kick_onsets = rhythm.onsets([1] * 4, beat * 4)
+    kick_onsets = rhythm.onsets([1, 0, 0, 0], beat * 4)
     for onset in kick_onsets:
         k = kick.copy()
         k.fill(441*random.randint(10, 60))
