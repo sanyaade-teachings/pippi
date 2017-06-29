@@ -128,23 +128,23 @@ class SoundBuffer:
 
     def __add__(self, value):
         if isinstance(value, SoundBuffer):
-            return SoundBuffer(np.concatenate((self.frames, value.frames)))
+            return SoundBuffer(np.vstack((self.frames, value.frames)))
         elif isinstance(value, numbers.Real):
             return SoundBuffer(self.frames + value)
         else:
             try:
-                return SoundBuffer(np.concatenate((self.frames, value)))
+                return SoundBuffer(np.vstack((self.frames, value)))
             except TypeError:
                 return NotImplemented
 
     def __iadd__(self, value):
         if isinstance(value, SoundBuffer):
-            self.frames = np.concatenate((self.frames, value.frames))
+            self.frames = np.vstack((self.frames, value.frames))
         elif isinstance(value, numbers.Real):
             self.frames = self.frames + value
         else:
             try:
-                self.frames = np.concatenate((self.frames, value))
+                self.frames = np.vstack((self.frames, value))
             except TypeError:
                 return NotImplemented
 
@@ -182,11 +182,11 @@ class SoundBuffer:
     def pad(self, start=0, end=0):
         if start > 0:
             silence = np.zeros((start, self.channels))
-            self.frames = np.concatenate((silence, self.frames))
+            self.frames = np.vstack((silence, self.frames))
 
         if end > 0:
             silence = np.zeros((end, self.channels))
-            self.frames = np.concatenate((self.frames, silence))
+            self.frames = np.vstack((self.frames, silence))
 
     def mix(self, sounds):
         if isinstance(sounds, SoundBuffer):
@@ -200,20 +200,34 @@ class SoundBuffer:
 
     def dub(self, sounds, pos=0):
         if isinstance(sounds, SoundBuffer):
-            sound = sounds.copy()
-            if pos > 0:
-                sound.pad(pos) 
-            self &= sound
-        else:
-            try:
-                for sound in sounds:
-                    sound = sound.copy()
-                    if pos > 0:
-                        sound.pad(pos)
-                    self &= sound
+            sounds = [ sounds ]
 
-            except TypeError as e:
-                raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
+        try:
+            for sound in sounds:
+                if len(sound) > len(self):
+                    dubframes = sound.copy()
+                    if self.frames is not None:
+                        if pos + len(self) > len(dubframes):
+                            silence_length = (len(self) + pos) - len(dubframes)
+                            silence = np.zeros((silence_length, dubframes.channels))
+                            dubframes.frames = np.vstack((dubframes.frames, silence))
+
+                        dubframes.frames[pos:pos+len(self)] += self.frames
+                    else:
+                        silence = np.zeros((pos, self.channels))
+                        dubframes.frames = np.vstack((dubframes.frames, silence))
+
+                    self.frames = dubframes.frames
+                else:
+                    if len(sound) + pos > len(self):
+                        silence_length = (len(sound) + pos) - len(self)
+                        silence = np.zeros((silence_length, self.channels))
+                        self.frames = np.vstack((self.frames, silence))
+
+                    self.frames[pos:pos+len(sound)] += sound.frames
+
+        except TypeError as e:
+            raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
 
     def repeat(self, reps=2):
         if reps <= 1:
@@ -355,7 +369,7 @@ class SoundBuffer:
         elif mult > 1:
             if int(mult) > 1:
                 self.frames = np.tile(self.frames, (int(mult), 1))
-            self.frames = np.concatenate((self.frames, self.frames[:length - len(self.frames)]))
+            self.frames = np.vstack((self.frames, self.frames[:length - len(self.frames)]))
         elif mult <= 0:
             self.clear()
 

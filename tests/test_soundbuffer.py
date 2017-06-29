@@ -94,7 +94,7 @@ class TestSoundBuffer(TestCase):
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
         speed = random.random()
         out = sound.speed(speed)
-        #self.assertEqual(len(out), round(len(sound) * (1/speed)))
+        self.assertEqual(len(out), round(len(sound) * (1/speed)))
 
     def test_pan(self):
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
@@ -168,8 +168,6 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), silence_length + original_length)
         self.assertEqual(sound[-1], (0,0))
 
-
-
     def test_dub_into_empty_sound(self):
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
         original_length = len(sound)
@@ -183,6 +181,5 @@ class TestSoundBuffer(TestCase):
         out.dub(sound, pos=position)
 
         self.assertEqual(len(out), original_length + position)
-
         self.assertEqual(sound.channels, out.channels)
 
