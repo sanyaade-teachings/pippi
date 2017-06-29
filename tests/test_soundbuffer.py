@@ -89,12 +89,10 @@ class TestSoundBuffer(TestCase):
             self.assertEqual(sound[0], (0,0))
 
     def test_speed(self):
-        """ FIXME: slower speeds (~<0.3) alter snd length
-        """
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
         speed = random.random()
         out = sound.speed(speed)
-        self.assertEqual(len(out), round(len(sound) * (1/speed)))
+        self.assertEqual(len(out), int(len(sound) * (1/speed)))
 
     def test_pan(self):
         sound = SoundBuffer('tests/sounds/guitar1s.wav')
