@@ -44,6 +44,6 @@ class Osc:
             for channel in range(channels):
                 out[i][channel] = val * amp
 
-            self.phase += self.freq * wtlength * (1.0 / 44100.0)
+            self.phase += self.freq * wtlength * (1.0 / samplerate)
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)

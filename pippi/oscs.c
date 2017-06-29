@@ -1844,7 +1844,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(CYTHON_UNUSED PyObject *__pyx_
  *             for channel in range(channels):
  *                 out[i][channel] = val * amp             # <<<<<<<<<<<<<<
  * 
- *             self.phase += self.freq * wtlength * (1.0 / 44100.0)
+ *             self.phase += self.freq * wtlength * (1.0 / samplerate)
  */
       __pyx_t_1 = PyFloat_FromDouble((__pyx_v_val * __pyx_v_amp)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
@@ -1858,7 +1858,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(CYTHON_UNUSED PyObject *__pyx_
     /* "pippi/oscs.pyx":47
  *                 out[i][channel] = val * amp
  * 
- *             self.phase += self.freq * wtlength * (1.0 / 44100.0)             # <<<<<<<<<<<<<<
+ *             self.phase += self.freq * wtlength * (1.0 / samplerate)             # <<<<<<<<<<<<<<
  * 
  *         return SoundBuffer(out, channels=channels, samplerate=samplerate)
  */
@@ -1872,7 +1872,11 @@ static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(CYTHON_UNUSED PyObject *__pyx_
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyFloat_FromDouble((1.0 / 44100.0)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
+    if (unlikely(__pyx_v_samplerate == 0)) {
+      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+      __PYX_ERR(0, 47, __pyx_L1_error)
+    }
+    __pyx_t_3 = PyFloat_FromDouble((1.0 / __pyx_v_samplerate)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_2 = PyNumber_Multiply(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -1887,7 +1891,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(CYTHON_UNUSED PyObject *__pyx_
   }
 
   /* "pippi/oscs.pyx":49
- *             self.phase += self.freq * wtlength * (1.0 / 44100.0)
+ *             self.phase += self.freq * wtlength * (1.0 / samplerate)
  * 
  *         return SoundBuffer(out, channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
  */
