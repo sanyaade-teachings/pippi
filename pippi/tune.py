@@ -337,7 +337,7 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
         degree = int(degree)
 
         # register offset 0+
-        register = degree / (len(scale) + 1)
+        register = degree // (len(scale) + 1)
 
         chromatic_degree = scale[(degree - 1) % len(scale)]
         ratio = ratios[chromatic_degree]

@@ -49,14 +49,15 @@ for i in range(numbars):
             pattern = rhythm.pattern(16, random.randint(2,6), random.randint(0, 3))
             onsets = rhythm.onsets(pattern, beat)
             for onset in onsets:
-                osc.freq = random.choice(freqs)
-                osc.wavetable = [0] + [ random.triangular(-1, 1) for _ in range(random.randint(3, 10)) ] + [0]
-                osc.amp = 0.5
-                snd = osc.play(random.randint(441, 44100))
-                snd = snd.env('phasor')
-                snd = snd.pan(random.random()) * random.triangular(0.1, 0.25)
+                if random.random() > 0.5:
+                    osc.freq = random.choice(freqs)
+                    osc.wavetable = [0] + [ random.triangular(-1, 1) for _ in range(random.randint(3, 10)) ] + [0]
+                    osc.amp = 0.5
+                    snd = osc.play(random.randint(441, 44100))
+                    snd = snd.env('phasor')
+                    snd = snd.pan(random.random()) * random.triangular(0.1, 0.25)
 
-                bar.dub(snd, onset)
+                    bar.dub(snd, onset)
 
         snare_onsets = rhythm.onsets('.x.x', beat * 4)
         for onset in snare_onsets:
