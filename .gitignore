@@ -8,7 +8,12 @@
 
 docs/build/
 
-examples/simple_grains.wav
+pippi/*.so
+
+examples/*.wav
+examples/*.mp3
+
+pippi.log
 
 venv
 .cache
