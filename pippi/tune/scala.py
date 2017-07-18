@@ -18,9 +18,13 @@ def parse_ratio(tuning):
         return None
 
 def import_file(filename):
+    if '.scl' not in filename:
+        raise ValueError('This doesn\'t look like a Scala file')
+
     with open(filename) as tuning_file:
         description = None
-        tunings = [1]
+        scale_length = None
+        tunings = []
         for line in tuning_file:
             if line[0] == '!':
                 continue
@@ -28,6 +32,11 @@ def import_file(filename):
             if description is None:
                 description = line.strip()
                 continue
+            elif scale_length is None:
+                try:
+                    scale_length = int(line.strip())
+                except (TypeError, ValueError) as e:
+                    raise ValueError('Invalid value for scale length') from e
 
             tuning = line.strip().split(' ')[0]
             if '.' in tuning:
@@ -40,5 +49,5 @@ def import_file(filename):
 
             tunings += [ tuning ]
 
-    return tunings
+    return [1] + tunings[:scale_length]
 
