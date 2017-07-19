@@ -75,6 +75,8 @@ class Osc:
             winpadding = int(winlength * (1.0 / self.pulsewidth)) - winlength + 1
             win_silence = np.zeros(winpadding)
             window = np.concatenate((self.window, win_silence))
+        else:
+            window = None
 
         for i in range(length):
             wtindex = int(self.phase) % wtlength
