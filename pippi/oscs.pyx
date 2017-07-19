@@ -71,12 +71,11 @@ class Osc:
         else:
             wavetable = self.wavetable
 
-        if self.pulsewidth < 1 and self.window is not None:
+        if self.window is not None:
             winpadding = int(winlength * (1.0 / self.pulsewidth)) - winlength + 1
             win_silence = np.zeros(winpadding)
+            print(len(win_silence))
             window = np.concatenate((self.window, win_silence))
-        else:
-            window = None
 
         for i in range(length):
             wtindex = int(self.phase) % wtlength
