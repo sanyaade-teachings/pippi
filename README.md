@@ -88,6 +88,8 @@ New in alpha 4:
 
 - Linear interpolation option for pitch shifting!
 - Pulsar synthesis with `Osc`!
+- Support for importing Scala `.scl` tuning files (Mapping file support coming later...)
+- Waveform visualization with `graph.waveform`
 - TODO: `SoundBuffer.fill` returns a copy of the sound instead of altering it in place
 - TODO: `Sampler` class and helpers
     - Takes a single sound or a sound bank
