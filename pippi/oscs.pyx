@@ -74,7 +74,6 @@ class Osc:
         if self.window is not None:
             winpadding = int(winlength * (1.0 / self.pulsewidth)) - winlength + 1
             win_silence = np.zeros(winpadding)
-            print(len(win_silence))
             window = np.concatenate((self.window, win_silence))
 
         for i in range(length):
