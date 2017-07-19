@@ -86,8 +86,8 @@ Which will produce a WAV file named `multi_snare_bounce_example.wav` in the exam
 
 New in alpha 4:
 
-- Linear interpolation option for pitch shifting!
-- Pulsar synthesis with `Osc`!
+- Linear interpolation option for pitch shifting
+- Pulsar synthesis with `Osc`
 - Support for importing Scala `.scl` tuning files (Mapping file support coming later...)
 - Waveform visualization with `graph.waveform`
 - TODO: `SoundBuffer.fill` returns a copy of the sound instead of altering it in place

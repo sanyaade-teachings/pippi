@@ -54,7 +54,7 @@ class SoundBuffer:
 
         if length is not None:
             if self.frames is not None:
-                self.fill(length)
+                self = self.fill(length)
             else:
                 self.clear(length)
 
@@ -363,16 +363,16 @@ class SoundBuffer:
             given length in frames.
         """
         mult = 0 if length <= 0 or len(self) == 0 else length / len(self)
+        frames = np.copy(self.frames)
 
         if mult < 1:
-            self.frames = self.frames[:length]
+            self.frames = frames[:length]
         elif mult > 1:
             if int(mult) > 1:
-                self.frames = np.tile(self.frames, (int(mult), 1))
-            self.frames = np.vstack((self.frames, self.frames[:length - len(self.frames)]))
+                frames = np.tile(frames, (int(mult), 1))
+            self.frames = np.vstack((frames, frames[:length - len(frames)]))
         elif mult <= 0:
             self.clear()
-
 
     def speed(self, speed):
         """ Change the speed of the sound
