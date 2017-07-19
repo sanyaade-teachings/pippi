@@ -2,6 +2,7 @@
 import numpy as np
 from .soundbuffer import SoundBuffer
 from . import wavetables
+from . import interpolation
 
 cdef inline MIN_PULSEWIDTH = 0.0001
 
@@ -26,9 +27,9 @@ cdef class Osc:
             double freq=440, 
             int offset=0, 
             double amp=1, 
-            wavetable=None, 
-            window=None, 
-            mod=None, 
+            object wavetable=None, 
+            object window=None, 
+            object mod=None, 
             double mod_range=0.02, 
             double mod_freq=0.1, 
             double phase=0, 
@@ -68,52 +69,31 @@ cdef class Osc:
 
         cdef int i = 0
         cdef int wtindex = 0
-        cdef int winindex = 0
         cdef int modindex = 0
         cdef int wtlength = len(self.wavetable)
-        cdef int winlength = 1 if self.window is None else len(self.window)
         cdef int modlength = 1 if self.mod is None else len(self.mod)
-        cdef double val, val_win, val_mod, nextval, nextval_win, nextval_mod, frac, frac_win, frac_mod
+        cdef double val, val_mod, nextval, nextval_mod, frac, frac_mod
 
+        wavetable = self.wavetable
+        if self.window is not None:
+            window = interpolation.linear(self.window, wtlength)
+            wavetable = np.multiply(wavetable, window)
 
         if self.pulsewidth < 1:
-            wtpadding = int(wtlength * (1.0 / self.pulsewidth)) - wtlength + 1
-            wt_silence = np.zeros(wtpadding)
-            wavetable = np.concatenate((self.wavetable, wt_silence))
-        else:
-            wavetable = self.wavetable
-
-        if self.window is not None:
-            winpadding = int(winlength * (1.0 / self.pulsewidth)) - winlength + 1
-            win_silence = np.zeros(winpadding)
-            window = np.concatenate((self.window, win_silence))
-        else:
-            window = None
+            silence_length = int((wtlength / self.pulsewidth) - wtlength)
+            wavetable = np.concatenate((wavetable, np.zeros(silence_length)))
 
         for i in range(length):
             wtindex = int(self.phase) % wtlength
-            winindex = int(self.win_phase) % winlength
             modindex = int(self.mod_phase) % modlength
 
             val = wavetable[wtindex]
-            val_win = 1
             val_mod = 1
 
             try:
                 nextval = wavetable[wtindex + 1]
             except IndexError:
                 nextval = wavetable[0]
-
-            if window is not None:
-                try:
-                    nextval_win = window[winindex + 1]
-                except IndexError:
-                    nextval_win = window[0]
-
-                frac_win = self.win_phase - int(self.win_phase)
-                val_win = window[winindex]
-                val_win = (1.0 - frac_win) * val_win + frac_win * nextval_win
-                self.win_phase += self.freq * val_mod  * winlength * (1.0 / samplerate)
 
             if self.mod is not None:
                 try:
@@ -132,7 +112,7 @@ cdef class Osc:
             self.phase += self.freq * val_mod * wtlength * (1.0 / samplerate)
 
             for channel in range(channels):
-                out[i][channel] = val * val_win * self.amp
+                out[i][channel] = val * self.amp
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)
 
