@@ -5,9 +5,22 @@ from . import wavetables
 
 cdef inline MIN_PULSEWIDTH = 0.0001
 
-class Osc:
+cdef class Osc:
     """ Wavetable-based oscilator with some extras
     """
+    cdef public double freq
+    cdef public int offset
+    cdef public double amp
+    cdef public object wavetable
+    cdef public object window
+    cdef public object mod
+    cdef public double mod_range
+    cdef public double mod_freq
+    cdef public double pulsewidth
+    cdef double phase
+    cdef double win_phase
+    cdef double mod_phase
+
     def __init__(
             self, 
             double freq=440, 
@@ -50,8 +63,7 @@ class Osc:
         else:
             self.mod = mod
 
-
-    def play(self, int length, int channels=2, int samplerate=44100):
+    cpdef object play(self, int length, int channels=2, int samplerate=44100):
         out = np.zeros((length, channels))
 
         cdef int i = 0
