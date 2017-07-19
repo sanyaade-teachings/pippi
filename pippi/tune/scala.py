@@ -1,3 +1,6 @@
+import glob
+import os
+
 def parse_cents(tuning):
     try:
         return 2**(float(tuning) / 1200)
@@ -21,7 +24,7 @@ def import_file(filename):
     if '.scl' not in filename:
         raise ValueError('This doesn\'t look like a Scala file')
 
-    with open(filename) as tuning_file:
+    with open(filename, encoding='latin-1') as tuning_file:
         description = None
         scale_length = None
         tunings = []
@@ -35,10 +38,12 @@ def import_file(filename):
             elif scale_length is None:
                 try:
                     scale_length = int(line.strip())
+                    continue
                 except (TypeError, ValueError) as e:
                     raise ValueError('Invalid value for scale length') from e
 
             tuning = line.strip().split(' ')[0]
+
             if '.' in tuning:
                 tuning = parse_cents(tuning)
             else:
@@ -49,5 +54,25 @@ def import_file(filename):
 
             tunings += [ tuning ]
 
-    return [1] + tunings[:scale_length]
+    return {
+        'filename': filename, 
+        'description': description, 
+        'scale': [1] + tunings[:scale_length], 
+    }
 
+
+def import_directory(directory):
+    scales = []
+    for filename in glob.glob(os.path.join(directory, '*.scl')):
+        try:
+            scale = import_file(filename)
+            scales += [ scale ]
+        except Exception as e:
+            print(e)
+            continue
+
+    return scales
+
+if __name__ == '__main__':
+    scales = import_directory('./scl/')
+    print(len(scales))
