@@ -3,34 +3,33 @@ import random
 import numpy as np
 from . import interpolation
 
+cdef inline set SINEWAVE_NAMES  = set(('sin', 'sine', 'sinewave'))
+cdef inline set COSINE_NAMES  = set(('cos', 'cosine'))
+cdef inline set TRIANGLE_NAMES  = set(('tri', 'triangle'))
+cdef inline set SAWTOOTH_NAMES  = set(('saw', 'sawtooth', 'ramp', 'line', 'lin'))
+cdef inline set RSAWTOOTH_NAMES = set(('isaw', 'rsaw', 'isawtooth', 'rsawtooth', 'reversesaw', 'phasor'))
+cdef inline set HANNING_NAMES = set(('hanning', 'hann', 'han'))
+cdef inline set HAMMING_NAMES = set(('hamming', 'hamm', 'ham'))
+cdef inline set BLACKMAN_NAMES = set(('blackman', 'black', 'bla'))
+cdef inline set BARTLETT_NAMES = set(('bartlett', 'bar'))
+cdef inline set KAISER_NAMES = set(('kaiser', 'kai'))
+cdef inline set SQUARE_NAMES = set(('square', 'sq'))
 
-SINEWAVE_NAMES  = set(('sin', 'sine', 'sinewave'))
-COSINE_NAMES  = set(('cos', 'cosine'))
-TRIANGLE_NAMES  = set(('tri', 'triangle'))
-SAWTOOTH_NAMES  = set(('saw', 'sawtooth', 'ramp', 'line', 'lin'))
-RSAWTOOTH_NAMES = set(('isaw', 'rsaw', 'isawtooth', 'rsawtooth', 'reversesaw', 'phasor'))
-HANNING_NAMES = set(('hanning', 'hann', 'han'))
-HAMMING_NAMES = set(('hamming', 'hamm', 'ham'))
-BLACKMAN_NAMES = set(('blackman', 'black', 'bla'))
-BARTLETT_NAMES = set(('bartlett', 'bar'))
-KAISER_NAMES = set(('kaiser', 'kai'))
-SQUARE_NAMES = set(('square', 'sq'))
-
-ALL_WINDOWS = SINEWAVE_NAMES | TRIANGLE_NAMES | \
+cdef inline set ALL_WINDOWS = SINEWAVE_NAMES | TRIANGLE_NAMES | \
               SAWTOOTH_NAMES | RSAWTOOTH_NAMES | \
               HANNING_NAMES | HAMMING_NAMES | \
               BLACKMAN_NAMES | BARTLETT_NAMES | \
               KAISER_NAMES
 
-ALL_WAVETABLES = SINEWAVE_NAMES | COSINE_NAMES | \
+cdef inline set ALL_WAVETABLES = SINEWAVE_NAMES | COSINE_NAMES | \
                  TRIANGLE_NAMES | SAWTOOTH_NAMES | \
                  RSAWTOOTH_NAMES | SQUARE_NAMES
 
-def window(window_type=None, length=None, data=None):
+def window(str window_type, int length, object data=None):
     if data is not None:
         return interpolation.linear(data, length)
 
-    wt = None
+    cdef object wt = None
 
     if window_type == 'random':
         window_type = random.choice(list(ALL_WINDOWS))
@@ -70,15 +69,13 @@ def window(window_type=None, length=None, data=None):
     return wt
 
 
-def wavetable(wavetable_type=None, length=None, duty=0.5, data=None):
+def wavetable(str wavetable_type, int length, double duty=0.5, object data=None):
     if data is not None:
         return interpolation.linear(data, length)
 
-    wt = None
+    cdef object wt = None
 
-    if wavetable_type is None:
-        wavetable_type = 'sine'
-    elif wavetable_type == 'random':
+    if wavetable_type == 'random':
         wavetable_type = random.choice(list(ALL_WAVETABLES))
 
     if wavetable_type in SINEWAVE_NAMES:

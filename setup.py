@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 from setuptools import setup
 from Cython.Build import cythonize
+#from Cython.Compiler.Options import get_directive_defaults
+
+#directive_defaults = get_directive_defaults()
+#directive_defaults['linetrace'] = True
+#directive_defaults['binding'] = True
 
 setup(
     name='pippi',
@@ -10,5 +15,9 @@ setup(
     author_email='erik@hecanjog.com',
     url='https://github.com/hecanjog/pippi',
     packages=['pippi'],
-    ext_modules=cythonize(['pippi/oscs.pyx', 'pippi/interpolation.pyx']), 
+    ext_modules=cythonize([
+        'pippi/oscs.pyx', 
+        'pippi/interpolation.pyx',
+        'pippi/wavetables.pyx'
+    ]), 
 )

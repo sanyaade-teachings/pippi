@@ -7,9 +7,11 @@ start_time = time.time()
 out = dsp.buffer()
 freqs = tune.fromdegrees([2,5,8,9], octave=1, root='d')
 
-for _ in range(50):
+for _ in range(100):
     pos = random.randint(0, 44100 * 30)
-    length = random.randint(1, 44100 * 8)
+    pos = 0
+    #length = random.randint(1, 44100 * 8)
+    length = 44100 * 60 * 18
 
     # Pulsar wavetable constructed from a random set of linearly interpolated points & a randomly selected window
     # Frequency modulated between 1% and 300% with a randomly generated wavetable LFO between 0.01hz and 30hz
@@ -23,6 +25,10 @@ for _ in range(50):
     osc.mod_freq = random.triangular(0.01, 30)
     osc.mod_range = random.triangular(0, random.choice([0.03, 0.02, 0.01, 3]))
     osc.amp = random.triangular(0.05, 0.2)
+    osc.amp = random.triangular(0.005, 0.02)
+
+    if osc.mod_range > 1:
+        osc.amp *= 0.5
 
     note = osc.play(length)
     note = note.env(random.choice(['sine', 'phasor', 'line']))

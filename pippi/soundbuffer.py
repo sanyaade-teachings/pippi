@@ -357,6 +357,17 @@ class SoundBuffer:
 
         return SoundBuffer(frames=frames, channels=self.channels, samplerate=self.samplerate)
 
+    def taper(self, length):
+        fadein = wavetables.window('line', length)
+        fadeout = wavetables.window('phasor', length)
+
+        frames = np.copy(self.frames)
+        for channel in range(self.channels):
+            frames[:length,channel] *= fadein 
+            frames[:-length,channel] *= fadeout
+
+        return SoundBuffer(frames=frames, channels=self.channels, samplerate=self.samplerate)
+
     def fill(self, length):
         """ Truncate the buffer to the given length or 
             loop the contents of the buffer up to the 

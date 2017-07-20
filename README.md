@@ -86,12 +86,13 @@ Which will produce a WAV file named `multi_snare_bounce_example.wav` in the exam
 
 New in alpha 4:
 
+- More speed improvements!
 - Linear interpolation option for pitch shifting
 - Pulsar synthesis with `Osc`
 - Support for importing Scala `.scl` tuning files (Mapping file support coming later...)
 - Waveform visualization with `graph.waveform`
 - `SoundBuffer.fill` returns a copy of the sound instead of altering it in place
-- TODO: `Sampler` class and helpers
+- `Sampler` abstraction for `Osc`-like treatment of samples and banks of samples
     - Takes a single sound or a sound bank
     - Plays well with the `rhythm` modules
 

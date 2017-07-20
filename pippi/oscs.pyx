@@ -1,10 +1,9 @@
-# cython: profile=True
 import numpy as np
 from .soundbuffer import SoundBuffer
 from . import wavetables
 from . import interpolation
 
-cdef inline MIN_PULSEWIDTH = 0.0001
+cdef inline double MIN_PULSEWIDTH = 0.0001
 
 cdef class Osc:
     """ Wavetable-based oscilator with some extras
@@ -64,7 +63,10 @@ cdef class Osc:
         else:
             self.mod = mod
 
-    cpdef object play(self, int length, int channels=2, int samplerate=44100):
+    def play(self, int length, int channels=2, int samplerate=44100):
+        return self._play(length, channels, samplerate)
+
+    cdef object _play(self, int length, int channels=2, int samplerate=44100):
         out = np.zeros((length, channels))
 
         cdef int i = 0

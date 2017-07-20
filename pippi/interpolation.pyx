@@ -1,5 +1,7 @@
-def linear(data, int length):
-    out = []
+import numpy as np
+
+cdef object linear(object data, int length):
+    out = np.zeros(length) 
 
     cdef int i = 0
     cdef int readindex = 0
@@ -21,7 +23,7 @@ def linear(data, int length):
 
         val = (1.0 - frac) * val + frac * nextval
 
-        out += [ val ]
+        out[i] = val
 
         phase += inputlength * (1.0 / length)
 
