@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Alpha 3
+v2.0.0 - Alpha 4
 
 ## Install dependencies
 
@@ -82,7 +82,7 @@ Which will produce a WAV file named `multi_snare_bounce_example.wav` in the exam
 
 ## Release Notes
 
-### 2.0.0 - Alpha 4 (In Development)
+### 2.0.0 - Alpha 4
 
 New in alpha 4:
 
@@ -93,8 +93,6 @@ New in alpha 4:
 - Waveform visualization with `graph.waveform`
 - `SoundBuffer.fill` returns a copy of the sound instead of altering it in place
 - `Sampler` abstraction for `Osc`-like treatment of samples and banks of samples
-    - Takes a single sound or a sound bank
-    - Plays well with the `rhythm` modules
 
 ### 2.0.0 - Alpha 3
 
