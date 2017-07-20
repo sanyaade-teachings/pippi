@@ -1,6 +1,6 @@
 import numpy as np
 
-cdef object linear(object data, int length):
+cdef public object _linear(object data, int length):
     out = np.zeros(length) 
 
     cdef int i = 0
@@ -28,3 +28,7 @@ cdef object linear(object data, int length):
         phase += inputlength * (1.0 / length)
 
     return out
+
+def linear(object data, int length):
+    _linear(data, length)
+

@@ -82,6 +82,15 @@ Which will produce a WAV file named `multi_snare_bounce_example.wav` in the exam
 
 ## Release Notes
 
+### 2.0.0 - Alpha 5
+
+Last alpha release before the first beta, and the final round of features for v2.0. 
+(See `astrid` for development of the GUI/console for using pippi scripts as instruments.)
+
+- Unit conversion helpers for time
+- Soundpipe butterworth lowpass and highpass filters!
+
+
 ### 2.0.0 - Alpha 4
 
 New in alpha 4:
