@@ -8,7 +8,7 @@ hat = dsp.read('sounds/hat.wav')
 snare = dsp.read('sounds/606snare.wav')
 
 numbars = 64 * 4
-chords = 'ii ii ii V9'.split(' ')
+chords = 'ii ii ii ii7'.split(' ')
 chords2 = 'i i6 IV IV'.split(' ')
 
 def rush(snd):
@@ -16,7 +16,7 @@ def rush(snd):
     length = random.randint(4410, 44100 * 3)
     numbeats = random.randint(16, 64)
     reverse = random.choice([True, False])
-    wintype = random.choice(['sine', 'tri', 'kaiser', 'hann', 'blackman', None])
+    wintype = random.choice(['sine', 'tri', 'kaiser', 'hann', 'blackman'])
     wavetable = None if wintype is not None else [ random.random() for _ in range(random.randint(3, 10)) ]
     pattern = rhythm.curve(numbeats=numbeats, wintype=wintype, length=length, reverse=reverse, wavetable=wavetable)
     minspeed = random.triangular(0.15, 2)
@@ -35,7 +35,7 @@ for i in range(numbars):
     bar = dsp.buffer()
 
     numlayers = random.randint(3, 6)
-    beat = int(((60000 / 109)/1000) * 44100) // 4
+    beat = int(((60000 / 131)/1000) * 44100) // 4
 
     if i//4 % 3 == 0:
         chord = chords2[i%len(chords2)]
@@ -81,14 +81,14 @@ for i in range(numbars):
         hat_onsets = rhythm.onsets([1,1,0,0] * 4, beat)
         for onset in hat_onsets:
             h = hat.copy()
-            h.fill(441*random.randint(10, 30))
+            h = h.fill(441*random.randint(10, 30))
             h = h.env('phasor').speed(random.triangular(1, 1.25))
             bar.dub(h * random.triangular(0.25, 0.3), onset)
 
     kick_onsets = rhythm.onsets([1, 0, 0, 0], beat * 4)
     for onset in kick_onsets:
         k = kick.copy()
-        k.fill(441*random.randint(10, 60))
+        k = k.fill(441*random.randint(10, 60))
         k = k.env('phasor').speed(random.triangular(1.4, 1.6))
         bar.dub(k * random.triangular(0.25, 0.35), onset)
 
@@ -103,7 +103,7 @@ for i in range(numbars):
         bass = osc.play(beat * random.randint(2,5)).env('phasor') * 0.35
         bar.dub(bass, onset)
         
-    bar.fill(beat * 16)
+    bar = bar.fill(beat * 16)
     out += bar
 
 out.write('technoish.wav')

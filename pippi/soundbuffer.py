@@ -377,13 +377,15 @@ class SoundBuffer:
         frames = np.copy(self.frames)
 
         if mult < 1:
-            self.frames = frames[:length]
+            frames = frames[:length]
         elif mult > 1:
             if int(mult) > 1:
                 frames = np.tile(frames, (int(mult), 1))
-            self.frames = np.vstack((frames, frames[:length - len(frames)]))
+            frames = np.vstack((frames, frames[:length - len(frames)]))
         elif mult <= 0:
-            self.clear()
+            return SoundBuffer(channels=self.channels, samplerate=self.samplerate)
+
+        return SoundBuffer(frames, channels=self.channels, samplerate=self.samplerate)
 
     def speed(self, speed):
         """ Change the speed of the sound
@@ -395,7 +397,7 @@ class SoundBuffer:
         for channel in range(self.channels):
             frames[:,channel] = interpolation.linear(self.frames[:,channel], length)
 
-        return SoundBuffer(frames)
+        return SoundBuffer(frames, channels=self.channels, samplerate=self.samplerate)
 
     def transpose(self, factor):
         """ TODO Change the pitch of the sound without changing 
