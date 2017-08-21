@@ -1,22 +1,19 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Alpha 5
+v2.0.0 - Alpha 8
 
 ## Install dependencies
 
-Pippi requires python 3.5+
-
-You might be lucky and already have it installed! Otherwise, 
-the python.org website has installation instructions for your platform: 
+Pippi requires python 3 which can be found here:
 
     https://www.python.org/downloads/
 
-Right now, `3.6.1` is the version to get.
+I'm just testing against the latest stable version (currently 3.6.2) at the moment.
 
 I recommend you install pippi and work from a python virtualenv, which 
 is built into the standard library in recent versions of python.
 
-Create a virtualenv in a directory called `venv` with python 3.6:
+Create a virtualenv in a directory called `venv` with python 3.6+:
 
     python3 -m venv venv
 
@@ -24,9 +21,20 @@ Activate the virtualenv:
 
     source venv/bin/activate
 
-And install the libraries that pippi uses into the virtualenv:
+### Install from pip
 
-    pip install -r requirements.txt
+To use the most recent release from pip, just:
+
+    pip install pippi
+
+...from inside your virtualenv.
+
+### Install from source
+
+Or to install the most recent development version, clone this repo 
+and install with the `-e` / 'editable' option. (Also note the `.` pointing to the current working directory.)
+
+    pip install -e .
 
 Pippi uses `numpy`, [pysndfile][psf], and Cython which all 
 may create installation roadbumps depending on your platform.
@@ -52,22 +60,12 @@ On windows, Erik de Castro Lopo provides an installer on the libsndfile page:
 
     http://www.mega-nerd.com/libsndfile/#Download
 
- 
 If you have trouble compiling the Cython parts of pippi, you may need to install 
 the python development headers, and/or build tools for your system. More here:
 
     http://docs.cython.org/en/latest/src/quickstart/install.html
 
 Please let me know if you run into problems!
-
-More docs forthcoming as the deps for version 2 settle (especially 
-as the interactive console comes together again.)
-
-## Install from source
-
-From inside your virtualenv, in the pippi source directory:
-
-    python setup.py install
 
 ## Run the multi snare bounce example
 
@@ -76,16 +74,31 @@ From inside your virtualenv, in the pippi source directory:
 
 Which will produce a WAV file named `multi_snare_bounce_example.wav` in the examples directory.
 
+There are more examples, give em a whirl.
+
 ## To run tests
 
     make test
 
 ## Release Notes
 
-### 2.0.0 - Alpha 6 (In Development)
+### 2.0.0 - Alpha 9 (in development)
 
-Last alpha release before the first beta, and the final round of features for v2.0. 
-(See `astrid` for development of the GUI/console for using pippi scripts as instruments.)
+Feature release, mostly:
+
+- more interpolation modes
+- support pysndfile extra options for reading chunks / offsets from disk
+- unit conversion helpers for time
+
+### 2.0.0 - Alpha 6-8
+
+This was meant to be a feature-only release, to add the final round of features 
+before going into beta / bugfix mode. Instead I switched from using numpy arrays directly 
+to a first pass of a more general typed memoryview approach, and moved some more things into 
+cython.
+
+Also, hoo boy was `pip install pippi` ever *broken*.
+It should be working now.
 
 ### 2.0.0 - Alpha 5
 
