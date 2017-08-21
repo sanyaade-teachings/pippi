@@ -2,7 +2,7 @@
 
 v2.0.0 - Alpha 8
 
-## Install dependencies
+## Installation and setup
 
 Pippi requires python 3 which can be found here:
 
@@ -74,7 +74,10 @@ Please let me know if you run into problems!
 
 Which will produce a WAV file named `multi_snare_bounce_example.wav` in the examples directory.
 
-There are more examples, give em a whirl.
+## Now what?
+
+There are more examples, give em a whirl, and try your own. 
+(And let me know when things break please!)
 
 ## To run tests
 
