@@ -25,22 +25,20 @@ cdef inline set ALL_WAVETABLES = SINEWAVE_NAMES | COSINE_NAMES | \
                  TRIANGLE_NAMES | SAWTOOTH_NAMES | \
                  RSAWTOOTH_NAMES | SQUARE_NAMES
 
-def window(str window_type, int length, object data=None):
+def window(unicode window_type, int length, double[:] data=None):
     if data is not None:
         return interpolation.linear(data, length)
 
-    cdef object wt = None
+    cdef double[:] wt = None
 
-    if window_type == 'random':
+    if window_type == u'random':
         window_type = random.choice(list(ALL_WINDOWS))
 
     if window_type in SINEWAVE_NAMES:
-        wt = np.linspace(0, np.pi, length, dtype='d')
-        wt = np.sin(wt) 
+        wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
 
     if window_type in TRIANGLE_NAMES:
-        wt = np.linspace(0, 2, length, dtype='d')
-        wt = np.abs(np.abs(wt - 1) - 1)
+        wt = np.abs(np.abs(np.linspace(0, 2, length, dtype='d') - 1) - 1)
 
     if window_type in SAWTOOTH_NAMES:
         wt = np.linspace(0, 1, length, dtype='d')
@@ -64,32 +62,30 @@ def window(str window_type, int length, object data=None):
         wt = np.kaiser(length, 0)
 
     if wt is None:
-        return window('sine', length)
+        return window(u'sine', length)
 
     return wt
 
 
-def wavetable(str wavetable_type, int length, double duty=0.5, object data=None):
+def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):
     if data is not None:
         return interpolation.linear(data, length)
 
-    cdef object wt = None
+    cdef double[:] wt = None
 
-    if wavetable_type == 'random':
+    if wavetable_type == u'random':
         wavetable_type = random.choice(list(ALL_WAVETABLES))
 
     if wavetable_type in SINEWAVE_NAMES:
-        wt = np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False)
-        wt = np.sin(wt) 
+        wt = np.sin(np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False))
 
     if wavetable_type in COSINE_NAMES:
-        wt = np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False)
-        wt = np.cos(wt) 
+        wt = np.cos(np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False))
 
     if wavetable_type in TRIANGLE_NAMES:
-        wt = np.linspace(-1, 1, length, dtype='d', endpoint=False)
-        wt = np.abs(wt)
-        wt = (wt - wt.mean()) * 2
+        tmp = np.abs(np.linspace(-1, 1, length, dtype='d', endpoint=False))
+        tmp = np.abs(tmp)
+        wt = (tmp - tmp.mean()) * 2
 
     if wavetable_type in SAWTOOTH_NAMES:
         wt = np.linspace(-1, 1, length, dtype='d', endpoint=False)
@@ -98,13 +94,14 @@ def wavetable(str wavetable_type, int length, double duty=0.5, object data=None)
         wt = np.linspace(1, -1, length, dtype='d', endpoint=False)
 
     if wavetable_type in SQUARE_NAMES:
-        wt = np.zeros(length)
+        tmp = np.zeros(length)
         duty = int(length * duty)
-        wt[:duty] = 1
-        wt[duty:] = -1
+        tmp[:duty] = 1
+        tmp[duty:] = -1
+        wt = tmp
 
     if wt is None:
-        return wavetable('sine', length)
+        return wavetable(u'sine', length)
 
     return wt
 

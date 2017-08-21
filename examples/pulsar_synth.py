@@ -7,11 +7,12 @@ start_time = time.time()
 out = dsp.buffer()
 freqs = tune.fromdegrees([2,5,8,9], octave=1, root='d')
 
-for _ in range(100):
+for _ in range(10):
     pos = random.randint(0, 44100 * 30)
     pos = 0
     #length = random.randint(1, 44100 * 8)
-    length = 44100 * 60 * 18
+    length = 44100 * 10
+    #length = 44100 * 60 * 18
 
     # Pulsar wavetable constructed from a random set of linearly interpolated points & a randomly selected window
     # Frequency modulated between 1% and 300% with a randomly generated wavetable LFO between 0.01hz and 30hz

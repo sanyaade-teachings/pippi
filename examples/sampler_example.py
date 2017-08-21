@@ -1,6 +1,8 @@
 import random
+import time
 from pippi import dsp, sampler, tune, rhythm
 
+start_time = time.time()
 samp = sampler.Sampler('sounds/harpc2.wav', 'c2')
 
 out = dsp.buffer()
@@ -23,7 +25,7 @@ def arp(i):
     return cluster
 
 pos = 0
-for i in range(20):
+for i in range(32):
     for _ in range(random.randint(1,3)):
         cluster = arp(i)
         out.dub(cluster, pos)
@@ -31,3 +33,6 @@ for i in range(20):
     pos += 44100
 
 out.write('sampler_example.wav')
+elapsed_time = time.time() - start_time
+print('Render time: %s seconds' % round(elapsed_time, 2))
+print('Output length: %s seconds' % round(len(out)/44100, 2))

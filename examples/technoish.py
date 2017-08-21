@@ -1,5 +1,11 @@
+""" Note: this is pretty dumb sounding, but here's one approach to loopy / beaty type stuff
+    (the snare rushes can be fun though :))
+"""
 from pippi import dsp, oscs, tune, rhythm, wavetables
+import time
 import random
+
+start_time = time.time()
 
 osc = oscs.Osc()
 out = dsp.buffer(1)
@@ -7,7 +13,7 @@ kick = dsp.read('sounds/909kick.wav')
 hat = dsp.read('sounds/hat.wav')
 snare = dsp.read('sounds/606snare.wav')
 
-numbars = 64 * 4
+numbars = 64
 chords = 'ii ii ii ii7'.split(' ')
 chords2 = 'i i6 IV IV'.split(' ')
 
@@ -77,15 +83,29 @@ for i in range(numbars):
                 else:
                     print(len(s), onset)
 
-    if i//4 % 3 == 0:
-        hat_onsets = rhythm.onsets([1,1,0,0] * 4, beat)
+    if random.random() > 0.5:
+        numbeats = random.randint(1, 16)
+        div = random.choice([1,2,3,4])
+        offset = random.randint(0, 3)
+        reps = random.randint(1,3)
+        reverse = random.choice([True, False])
+
+        pat = rhythm.pattern(numbeats, div, offset, reps, reverse)
+        hat_onsets = rhythm.onsets(pat, beat)
         for onset in hat_onsets:
             h = hat.copy()
             h = h.fill(441*random.randint(10, 30))
             h = h.env('phasor').speed(random.triangular(1, 1.25))
             bar.dub(h * random.triangular(0.25, 0.3), onset)
 
-    kick_onsets = rhythm.onsets([1, 0, 0, 0], beat * 4)
+    numbeats = random.randint(1, 16)
+    div = random.choice([1,2,3,4])
+    offset = random.randint(0, 1)
+    reps = random.randint(1,3)
+    reverse = random.choice([True, False])
+    pat = rhythm.pattern(numbeats, div, offset, reps, reverse)
+
+    kick_onsets = rhythm.onsets(pat, beat * random.randint(1, 4))
     for onset in kick_onsets:
         k = kick.copy()
         k = k.fill(441*random.randint(10, 60))
@@ -107,3 +127,6 @@ for i in range(numbars):
     out += bar
 
 out.write('technoish.wav')
+elapsed_time = time.time() - start_time
+print('Render time: %s seconds' % round(elapsed_time, 2))
+print('Output length: %s seconds' % round(len(out)/44100, 2))

@@ -17,6 +17,7 @@ setup(
     packages=['pippi'],
     ext_modules=cythonize([
         'pippi/oscs.pyx', 
+        'pippi/soundbuffer.pyx', 
         'pippi/interpolation.pyx',
         'pippi/wavetables.pyx'
     ]), 

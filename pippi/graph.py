@@ -19,10 +19,13 @@ def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mul
         points = [ sound[i][channel] for i in range(len(sound)) ]
         points = interpolation.linear(points, width*upsample_x)
 
+        mapped_points = []
         for pos, point in zip(x, points):
             y = int(((point + 1) / 2) * (height - (stroke * 2)) + stroke)
             pos /= upsample_x
-            draw.ellipse((pos-stroke, y-stroke, pos+stroke, y+stroke), fill=color)
+            mapped_points += [ (pos, y) ]
+            #draw.ellipse((pos-stroke, y-stroke, pos+stroke, y+stroke), fill=color)
+        draw.line(mapped_points, fill=color, width=stroke)
 
     img.thumbnail((width//upsample_mult, height//upsample_mult))
     img.save(filename)

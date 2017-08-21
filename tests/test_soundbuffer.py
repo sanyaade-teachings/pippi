@@ -24,16 +24,10 @@ class TestSoundBuffer(TestCase):
         self.assertTrue(sound)
 
     def test_create_buffer_from_soundfile(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
-        self.assertTrue(len(sound) > 0)
+        self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
-
-    def test_create_and_resize_buffer_from_soundfile(self):
-        length = random.randint(1, 44100)
-        sound = SoundBuffer('tests/sounds/guitar1s.wav', length)
-
-        self.assertEqual(len(sound), length)
 
     def test_save_buffer_to_soundfile(self):
         filename = path.join(self.soundfiles, 'test_save_buffer_to_soundfile.{}')
@@ -49,7 +43,7 @@ class TestSoundBuffer(TestCase):
         self.assertTrue(path.isfile(filename.format('ogg')))
 
     def test_split_buffer(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
         length = random.randint(1, len(sound)) 
         lengths = []
@@ -70,7 +64,7 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(sum(lengths), len(sound))
 
     def test_random_split_buffer(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
         lengths = []
         for grain in sound.grains(1, len(sound)):
@@ -83,28 +77,27 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(sum(lengths), len(sound))
 
     def test_window(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        print('FROM PY', len(sound))
         for window_type in ('sine', 'saw', 'tri', 'hamm', 'hann', 'bar', 'kai', 'black'):
             sound = sound.env(window_type)
             self.assertEqual(sound[0], (0,0))
 
     def test_speed(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         speed = random.random()
         out = sound.speed(speed)
         self.assertEqual(len(out), int(len(sound) * (1/speed)))
 
     def test_pan(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
-        for pan_method in ('constant', 'linear'):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        for pan_method in ('linear', 'constant', 'linear'):
             # Hard pan smoke test
-            pan_left = sound.copy()
-            pan_left = pan_left.pan(0, method=pan_method)
-            self.assertEqual(pan_left[random.randint(0, len(pan_left))][1], 0)
+            pan_left = sound.pan(0, method=pan_method)
+            self.assertEqual(pan_left[random.randint(0, len(pan_left))][0], 0)
 
-            pan_right = sound.copy()
-            pan_right = pan_right.pan(1, method=pan_method)
-            self.assertEqual(pan_right[random.randint(0, len(pan_right))][0], 0)
+            pan_right = sound.pan(1, method=pan_method)
+            self.assertEqual(pan_right[random.randint(0, len(pan_right))][1], 0)
 
     def test_slice_frame(self):
         """ A SoundBuffer should return a single frame 
@@ -115,7 +108,7 @@ class TestSoundBuffer(TestCase):
             A frame is a tuple of floats, one value 
             for each channel of sound.
         """
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
         indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
 
@@ -138,7 +131,7 @@ class TestSoundBuffer(TestCase):
             be normalized or clipped as desired later on.
         """
 
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
         indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
 
@@ -148,12 +141,12 @@ class TestSoundBuffer(TestCase):
                 self.assertTrue(isinstance(sample, float))
 
     def test_pad_sound_with_silence(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
         # Pad start
         original_length = len(sound)
         silence_length = random.randint(100, 44100)
-        sound.pad(silence_length)
+        sound = sound.pad(silence_length)
 
         self.assertEqual(len(sound), silence_length + original_length)
         self.assertEqual(sound[0], (0,0))
@@ -161,13 +154,13 @@ class TestSoundBuffer(TestCase):
         # Pad end
         original_length = len(sound)
         silence_length = random.randint(100, 44100)
-        sound.pad(end=silence_length)
+        sound = sound.pad(end=silence_length)
 
         self.assertEqual(len(sound), silence_length + original_length)
         self.assertEqual(sound[-1], (0,0))
 
     def test_dub_into_empty_sound(self):
-        sound = SoundBuffer('tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         original_length = len(sound)
 
         out = SoundBuffer(channels=sound.channels, samplerate=sound.samplerate)
