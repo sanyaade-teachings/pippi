@@ -3,14 +3,14 @@ from setuptools import setup
 
 try:
     from Cython.Build import cythonize
-except ImportError:
     ext_modules = cythonize([
         'pippi/oscs.pyx', 
         'pippi/soundbuffer.pyx', 
         'pippi/interpolation.pyx',
         'pippi/wavetables.pyx'
     ]) 
-else:
+
+except ImportError:
     from setuptools.extension import Extension
     ext_modules = [
         Extension('pippi.oscs', ['pippi/oscs.c']), 

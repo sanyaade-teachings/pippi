@@ -159,18 +159,4 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), silence_length + original_length)
         self.assertEqual(sound[-1], (0,0))
 
-    def test_dub_into_empty_sound(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        original_length = len(sound)
-
-        out = SoundBuffer(channels=sound.channels, samplerate=sound.samplerate)
-        self.assertEqual(len(out), 0)
-        self.assertEqual(len(sound), 44100)
-
-        position = random.randint(100, 1000)
-
-        out.dub(sound, pos=position)
-
-        self.assertEqual(len(out), original_length + position)
-        self.assertEqual(sound.channels, out.channels)
 

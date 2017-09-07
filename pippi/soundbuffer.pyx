@@ -5,6 +5,7 @@ import reprlib
 
 import soundfile
 import numpy as np
+from cython import auto_pickle
 
 from . import wavetables
 from . import interpolation
@@ -40,6 +41,9 @@ cdef class SoundBuffer:
             self.frames = np.zeros((length, self.channels))
         else:
             self.frames = None
+
+    def __reduce__(self):
+        return (rebuild_buffer, (np.asarray(self.frames), self.channels, self.samplerate))
 
     def _fill(self, double[:,:] frames):
         """ Fill current w/frames
@@ -311,7 +315,10 @@ cdef class SoundBuffer:
 
         if len(self) < dublength:
             if self.frames is not None:
-                self.frames = np.vstack((self.frames, np.zeros((dublength, self.channels))))
+                self.frames = np.vstack((
+                        self.frames.copy(), 
+                        np.zeros((dublength - len(self), self.channels))
+                    ))
             else:
                 self.frames = np.zeros((dublength, self.channels))
 
@@ -495,3 +502,8 @@ cdef class SoundBuffer:
             the pitch.
         """
         return NotImplemented
+
+cpdef object rebuild_buffer(double[:,:] frames, int channels, int samplerate):
+    return SoundBuffer(frames, channels=channels, samplerate=samplerate)
+
+
