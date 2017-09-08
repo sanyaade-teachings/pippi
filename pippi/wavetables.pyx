@@ -25,6 +25,12 @@ cdef inline set ALL_WAVETABLES = SINEWAVE_NAMES | COSINE_NAMES | \
                  TRIANGLE_NAMES | SAWTOOTH_NAMES | \
                  RSAWTOOTH_NAMES | SQUARE_NAMES
 
+def random_wavetable():
+    return random.choice(list(ALL_WAVETABLES))
+
+def random_window():
+    return random.choice(list(ALL_WINDOWS))
+
 def window(unicode window_type, int length, double[:] data=None):
     if data is not None:
         return interpolation.linear(data, length)
@@ -104,5 +110,6 @@ def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] dat
         return wavetable(u'sine', length)
 
     return wt
+
 
 

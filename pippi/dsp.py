@@ -2,6 +2,7 @@
     which make live coding suck less, hopefully.
 """
 import glob
+import multiprocessing as mp
 
 from .soundbuffer import SoundBuffer
 
@@ -49,3 +50,10 @@ def find(pattern, channels=2, samplerate=44100):
     for filename in glob.iglob(pattern, recursive=True):
         yield SoundBuffer(filename, channels=channels, samplerate=samplerate)
 
+def pool(callback, params, processes=4):
+    out = []
+    with mp.Pool(processes=processes) as process_pool:
+        for result in [ process_pool.apply_async(callback, p) for p in params ]:
+            out += [ result.get() ]
+
+    return out

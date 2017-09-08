@@ -23,7 +23,7 @@ cdef class SoundBuffer:
     cdef public int channels
     cdef public double[:,:] frames
 
-    def __cinit__(self, double[:,:] frames=None, int length=-1, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE, unicode filename=None, int start=-1):
+    def __cinit__(self, object frames=None, int length=-1, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE, unicode filename=None, int start=-1, double[:,:] buf=None):
         """ Only ever run once -- python __init__ may run more than once or not at all.
             Creates initial buffer from inputs and sets channels, samplerate
         """
@@ -34,9 +34,17 @@ cdef class SoundBuffer:
             #self.frames, self.samplerate = soundfile.read(filename, frames=length, start=start, dtype='float64')
             self.frames, self.samplerate = soundfile.read(filename, dtype='float64')
             self.channels = self.frames.shape[1]
+        elif buf is not None:
+            # Skip checks beyond this point if data
+            # is already well-formed...
+            self.frames = buf
+            self.channels = self.frames.shape[1]
         elif frames is not None:
-            self.frames = frames
-            self.channels = frames.shape[1]
+            if isinstance(frames, list):
+                self.frames = np.column_stack([ frames for _ in range(self.channels) ])
+            else:
+                self.frames = np.array(frames, dtype='d')
+                self.channels = self.frames.shape[1]
         elif length > 0:
             self.frames = np.zeros((length, self.channels))
         else:
