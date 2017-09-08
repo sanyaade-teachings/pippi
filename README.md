@@ -89,9 +89,13 @@ There are more examples, give em a whirl, and try your own.
 
 Feature release, mostly:
 
-- more interpolation modes
-- support pysndfile extra options for reading chunks / offsets from disk
-- unit conversion helpers for time
+- Added a helper for async rendering with `multiprocessing.Pool`
+- `SoundBuffer`s can now be pickled (enables passing them between processes)
+- `SoundBuffer` can be initialized (and spread across channels) from a normal python list
+- More interpolation modes (in progress)
+- Support pysndfile extra options for reading chunks / offsets from disk (todo)
+- Unit conversion helpers for time (todo)
+
 
 ### 2.0.0 - Alpha 6-8
 
