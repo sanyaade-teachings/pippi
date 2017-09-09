@@ -2,7 +2,7 @@ import random
 from PIL import Image, ImageDraw
 from . import interpolation
 
-def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mult=5, upsample_x=20):
+def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mult=5, upsample_x=20, show_axis=True):
     width *= upsample_mult
     height *= upsample_mult
 
@@ -26,6 +26,9 @@ def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mul
             mapped_points += [ (pos, y) ]
             #draw.ellipse((pos-stroke, y-stroke, pos+stroke, y+stroke), fill=color)
         draw.line(mapped_points, fill=color, width=stroke)
+
+    if show_axis:
+        draw.line((0, height/2, width, height/2), fill=(0,0,0,255), width=stroke//4)
 
     img.thumbnail((width//upsample_mult, height//upsample_mult))
     img.save(filename)

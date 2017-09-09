@@ -112,4 +112,8 @@ def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] dat
     return wt
 
 
+def list_all_wavetables():
+    return list(ALL_WAVETABLES)
 
+def list_all_windows():
+    return list(ALL_WINDOWS)

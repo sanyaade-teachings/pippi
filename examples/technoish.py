@@ -1,5 +1,4 @@
-""" Note: this is pretty dumb sounding, but here's one approach to loopy / beaty type stuff
-    (the snare rushes can be fun though :))
+""" Note: here's one approach to loopy / beaty type stuff
 """
 from pippi import dsp, oscs, tune, rhythm, wavetables
 import time
