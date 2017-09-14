@@ -40,7 +40,7 @@ cdef class SoundBuffer:
             self.frames = buf
             self.channels = self.frames.shape[1]
         elif frames is not None:
-            if isinstance(frames, list):
+            if isinstance(frames, list) or len(frames.shape) == 1:
                 self.frames = np.column_stack([ frames for _ in range(self.channels) ])
             else:
                 self.frames = np.array(frames, dtype='d')
@@ -422,6 +422,9 @@ cdef class SoundBuffer:
                 Michael Gogins' variation on the above 
                 which uses a different part of the sinewave.
         """
+        if self.channels != 2:
+            raise NotImplemented('Only stereo panning schemes are currently supported')
+
         if method is None:
             method = u'constant'
 

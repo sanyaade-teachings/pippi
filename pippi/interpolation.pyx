@@ -21,10 +21,25 @@ cdef public double[:] _hermite(double[:] data, int length):
 
     for fi in range(length):
         x = length / <double>(fi + 1) 
-        y0 = data[fi - 1]
-        y1 = data[fi]
-        y2 = data[fi + 1]
-        y3 = data[fi + 2]
+        try:
+            y0 = data[fi - 1]
+        except IndexError:
+            y0 = 0
+
+        try:
+            y1 = data[fi]
+        except IndexError:
+            y1 = 0
+
+        try:
+            y2 = data[fi + 1]
+        except IndexError:
+            y2 = 0
+
+        try:
+            y3 = data[fi + 2]
+        except IndexError:
+            y3 = 0
 
         out[fi] = get_sample(x, y0, y1, y2, y3)
 
@@ -43,7 +58,7 @@ cdef public double[:] _linear(double[:] data, int length):
         return out
 
     for i in range(length):
-        readindex = int(phase) % inputlength
+        readindex = <int>phase % inputlength
 
         val = data[readindex]
 
@@ -52,9 +67,9 @@ cdef public double[:] _linear(double[:] data, int length):
         except IndexError:
             nextval = data[0]
 
-        frac = phase - int(phase)
+        frac = phase - <int>phase
 
-        val = (1.0 - frac) * val + frac * nextval
+        val = (1.0 - frac) * val + (frac * nextval)
 
         out[i] = val
 
@@ -74,16 +89,3 @@ def hermite(data, int length):
         data = np.asarray(data, dtype='d')
     return _hermite(data, length)
 
-def interp2d(wavetables, pos, int length):
-    cdef double[:] out = np.zeros(length)
-    cdef double[:] values
-    cdef int i = 0
-    cdef int posi = 0
-    cdef double val = 0
-    for i in range(length):
-        values = linear([ w[i] for w in wavetables ], length)
-        posi = int(pos[i] * (len(values) -1))
-        val = values[posi]
-        out[i] = val
- 
-    return out

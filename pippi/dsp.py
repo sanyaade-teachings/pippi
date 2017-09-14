@@ -2,7 +2,9 @@
     which make live coding suck less, hopefully.
 """
 import glob
+import math
 import multiprocessing as mp
+import numpy as np
 
 from .soundbuffer import SoundBuffer
 
@@ -29,10 +31,10 @@ def silence(length=-1, channels=2, samplerate=44100):
     """
     return SoundBuffer(length=length, channels=channels, samplerate=samplerate)
 
-def buffer(length=-1, channels=2, samplerate=44100):
+def buffer(frames=None, length=-1, channels=2, samplerate=44100):
     """ Identical to `silence` -- creates an empty buffer of a given length
     """
-    return SoundBuffer(length=length, channels=channels, samplerate=samplerate)
+    return SoundBuffer(frames=frames, length=length, channels=channels, samplerate=samplerate)
 
 def read(frames, channels=2, samplerate=44100):
     """ Read a soundfile from disk and return a `SoundBuffer` with its contents
@@ -57,3 +59,12 @@ def pool(callback, params, processes=4):
             out += [ result.get() ]
 
     return out
+
+def fill(data, length):
+    reps = math.ceil(length / len(data))
+    if reps < 2:
+        return data
+
+    data = np.hstack([ data for _ in range(reps) ])
+    return data[:length]
+

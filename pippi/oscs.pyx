@@ -120,6 +120,102 @@ cdef class Osc:
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)
 
+cdef class Osc2d:
+    """ 2d wavetable oscilator
+    """
+    cdef public object wavetables
+    cdef public object lfo
+    cdef public double freq
+    cdef public double lfo_freq
+    cdef public double amp
+    cdef public int wtsize
+
+    def __init__(
+            self, 
+            object wtables=None, 
+            object lfo=None, 
+            double freq=440, 
+            double lfo_freq=0.2, 
+            double amp=1, 
+            int wtsize=4096,
+        ):
+
+        self.freq = freq
+        self.amp = amp
+        self.wtsize = wtsize
+        self.lfo_freq = lfo_freq
+
+        if wtables is None:
+            wtables = ['sine', 'square']
+
+        for i, wavetable in enumerate(wtables):
+            if isinstance(wavetable, str):
+                wtables[i] = wavetables.wavetable(wavetable, self.wtsize)
+            else:
+                if len(wavetable) != wtsize:
+                    wavetable = interpolation.linear(wavetable, self.wtsize)
+                wtables[i] = wavetable
+
+        self.wavetables = wtables
+
+        if isinstance(lfo, str):
+            self.lfo = wavetables.window(lfo, self.wtsize)
+        else:
+            self.lfo = lfo
+
+    def play(self, int length, int channels=2, int samplerate=44100):
+        return self._play(length, channels, samplerate)
+
+    cdef object _play(self, int length, int channels=2, int samplerate=44100):
+        cdef double[:,:] out = np.zeros((length, channels))
+        cdef double[:,:] stack = np.column_stack(self.wavetables)
+        cdef int stack_depth = len(self.wavetables)
+
+        cdef double lfo_phase_inc = self.lfo_freq * self.wtsize * (1.0 / samplerate)
+        cdef double phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
+        cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
+
+        cdef double lfo_phase, lfo_frac, lfo_y0, lfo_y1, lfo_pos
+        cdef double stack_frac, stack0_y0, stack0_y1, stack1_y0, stack1_y1, stack_phase
+        cdef double phase, frac, y0, y1, val
+
+        cdef int i, lfo_x, stack_x, channel
+
+        for i in range(length):
+            # Interpolate LFO position within wavetable stack
+            lfo_phase = i * lfo_phase_inc
+            lfo_x = <int>lfo_phase
+            lfo_frac = lfo_phase - lfo_x
+            lfo_y0 = self.lfo[lfo_x % len(self.lfo)]
+            lfo_y1 = self.lfo[(lfo_x + 1) % len(self.lfo)]
+
+            lfo_pos = (1.0 - lfo_frac) * lfo_y0 + (lfo_frac * lfo_y1)
+
+            # interpolate wavetable y0 & y1 from lfo_pos and list of wavetables
+            stack_phase = lfo_pos * stack_depth
+            stack_x = <int>stack_phase
+            wt_phase = i * wt_phase_inc
+            wt_x = <int>wt_phase
+            stack_frac = stack_phase - stack_x
+
+            stack0_y0 = self.wavetables[stack_x % stack_depth][wt_x % self.wtsize]
+            stack0_y1 = self.wavetables[stack_x % stack_depth][(wt_x + 1) % self.wtsize]
+            y0 = (1.0 - stack_frac) * stack0_y0 + (stack_frac * stack0_y1)
+
+            stack1_y0 = self.wavetables[(stack_x + 1) % stack_depth][wt_x % self.wtsize]
+            stack1_y1 = self.wavetables[(stack_x + 1) % stack_depth][(wt_x + 1) % self.wtsize]
+            y1 = (1.0 - stack_frac) * stack1_y0 + (stack_frac * stack1_y1)
+
+            # Interpolate final value betwen interpolated wavetable y0 and y1
+            phase = i * phase_inc
+            frac = phase - <int>phase
+            val = (1.0 - frac) * y0 + (frac * y1)
+
+            for channel in range(channels):
+                out[i][channel] = val * self.amp
+
+        return SoundBuffer(out, channels=channels, samplerate=samplerate)
+
 """
 static char pippic_fold_docstring[] = "Wave folding synthesis.";
 static PyObject * pippic_fold(PyObject *self, PyObject *args) {
