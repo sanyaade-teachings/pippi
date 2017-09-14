@@ -142,7 +142,7 @@ cdef class Osc2d:
 
         self.freq = freq
         self.amp = amp
-        self.wtsize = wtsize
+        self.wtsize = wtsize * 4 # oversampling is cheap
         self.lfo_freq = lfo_freq
 
         if wtables is None:

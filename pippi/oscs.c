@@ -5322,7 +5322,7 @@ static int __pyx_pf_5pippi_4oscs_5Osc2d___init__(struct __pyx_obj_5pippi_4oscs_O
  * 
  *         self.freq = freq             # <<<<<<<<<<<<<<
  *         self.amp = amp
- *         self.wtsize = wtsize
+ *         self.wtsize = wtsize * 4 # oversampling is cheap
  */
   __pyx_v_self->freq = __pyx_v_freq;
 
@@ -5330,7 +5330,7 @@ static int __pyx_pf_5pippi_4oscs_5Osc2d___init__(struct __pyx_obj_5pippi_4oscs_O
  * 
  *         self.freq = freq
  *         self.amp = amp             # <<<<<<<<<<<<<<
- *         self.wtsize = wtsize
+ *         self.wtsize = wtsize * 4 # oversampling is cheap
  *         self.lfo_freq = lfo_freq
  */
   __pyx_v_self->amp = __pyx_v_amp;
@@ -5338,15 +5338,15 @@ static int __pyx_pf_5pippi_4oscs_5Osc2d___init__(struct __pyx_obj_5pippi_4oscs_O
   /* "pippi/oscs.pyx":145
  *         self.freq = freq
  *         self.amp = amp
- *         self.wtsize = wtsize             # <<<<<<<<<<<<<<
+ *         self.wtsize = wtsize * 4 # oversampling is cheap             # <<<<<<<<<<<<<<
  *         self.lfo_freq = lfo_freq
  * 
  */
-  __pyx_v_self->wtsize = __pyx_v_wtsize;
+  __pyx_v_self->wtsize = (__pyx_v_wtsize * 4);
 
   /* "pippi/oscs.pyx":146
  *         self.amp = amp
- *         self.wtsize = wtsize
+ *         self.wtsize = wtsize * 4 # oversampling is cheap
  *         self.lfo_freq = lfo_freq             # <<<<<<<<<<<<<<
  * 
  *         if wtables is None:
