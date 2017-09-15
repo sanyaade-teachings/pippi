@@ -171,7 +171,7 @@ cdef class Osc2d:
         cdef double[:,:] stack = np.column_stack(self.wavetables)
         cdef int stack_depth = len(self.wavetables)
 
-        cdef double lfo_phase_inc = self.lfo_freq * self.wtsize * (1.0 / samplerate)
+        cdef double lfo_phase_inc = len(self.lfo) * (1.0 / length)
         cdef double phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
 
@@ -182,7 +182,6 @@ cdef class Osc2d:
         cdef int i, lfo_x, stack_x, channel
 
         for i in range(length):
-            # Interpolate LFO position within wavetable stack
             lfo_phase = i * lfo_phase_inc
             lfo_x = <int>lfo_phase
             lfo_frac = lfo_phase - lfo_x
@@ -191,30 +190,23 @@ cdef class Osc2d:
 
             lfo_pos = (1.0 - lfo_frac) * lfo_y0 + (lfo_frac * lfo_y1)
 
-            # interpolate wavetable y0 & y1 from lfo_pos and list of wavetables
             stack_phase = lfo_pos * stack_depth
             stack_x = <int>stack_phase
             wt_phase = i * wt_phase_inc
             wt_x = <int>wt_phase
             stack_frac = stack_phase - stack_x
 
-            stack0_y0 = self.wavetables[stack_x % stack_depth][wt_x % self.wtsize]
-            stack0_y1 = self.wavetables[stack_x % stack_depth][(wt_x + 1) % self.wtsize]
-            y0 = (1.0 - stack_frac) * stack0_y0 + (stack_frac * stack0_y1)
-
-            stack1_y0 = self.wavetables[(stack_x + 1) % stack_depth][wt_x % self.wtsize]
-            stack1_y1 = self.wavetables[(stack_x + 1) % stack_depth][(wt_x + 1) % self.wtsize]
-            y1 = (1.0 - stack_frac) * stack1_y0 + (stack_frac * stack1_y1)
-
-            # Interpolate final value betwen interpolated wavetable y0 and y1
-            phase = i * phase_inc
-            frac = phase - <int>phase
-            val = (1.0 - frac) * y0 + (frac * y1)
+            y0 = self.wavetables[stack_x % stack_depth][wt_x % self.wtsize]
+            y1 = self.wavetables[(stack_x + 1) % stack_depth][wt_x % self.wtsize]
+            val = (1.0 - stack_frac) * y0 + (stack_frac * y1)
 
             for channel in range(channels):
                 out[i][channel] = val * self.amp
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)
+
+    cdef _interp(self, frac, y0, y1):
+        return (1.0 - frac) * y0 + (frac * y1)
 
 """
 static char pippic_fold_docstring[] = "Wave folding synthesis.";
