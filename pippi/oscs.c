@@ -799,37 +799,9 @@ struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
-struct __pyx_opt_args_5pippi_4oscs_3Osc__play;
-struct __pyx_opt_args_5pippi_4oscs_3Osc__play2d;
 struct __pyx_opt_args_5pippi_4oscs_4Fold__play;
 
-/* "pippi/oscs.pyx":116
- *             return self._play(length, channels, samplerate)
- * 
- *     cdef object _play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         cdef double[:, :] out = np.zeros((length, channels))
- * 
- */
-struct __pyx_opt_args_5pippi_4oscs_3Osc__play {
-  int __pyx_n;
-  int channels;
-  int samplerate;
-};
-
-/* "pippi/oscs.pyx":168
- *         return SoundBuffer(out, channels=channels, samplerate=samplerate)
- * 
- *     cdef object _play2d(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         cdef double[:,:] out = np.zeros((length, channels))
- *         cdef double[:,:] stack = np.column_stack(self.wavetables)
- */
-struct __pyx_opt_args_5pippi_4oscs_3Osc__play2d {
-  int __pyx_n;
-  int channels;
-  int samplerate;
-};
-
-/* "pippi/oscs.pyx":244
+/* "pippi/oscs.pyx":267
  *         return self._play(length, channels, samplerate)
  * 
  *     cdef object _play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
@@ -872,7 +844,7 @@ struct __pyx_obj_5pippi_4oscs_Osc {
 };
 
 
-/* "pippi/oscs.pyx":208
+/* "pippi/oscs.pyx":231
  * 
  * 
  * cdef class Fold:             # <<<<<<<<<<<<<<
@@ -977,13 +949,13 @@ struct __pyx_memoryviewslice_obj {
  */
 
 struct __pyx_vtabstruct_5pippi_4oscs_Osc {
-  PyObject *(*_play)(struct __pyx_obj_5pippi_4oscs_Osc *, int, struct __pyx_opt_args_5pippi_4oscs_3Osc__play *__pyx_optional_args);
-  PyObject *(*_play2d)(struct __pyx_obj_5pippi_4oscs_Osc *, int, struct __pyx_opt_args_5pippi_4oscs_3Osc__play2d *__pyx_optional_args);
+  PyObject *(*_play)(struct __pyx_obj_5pippi_4oscs_Osc *, int);
+  PyObject *(*_play2d)(struct __pyx_obj_5pippi_4oscs_Osc *, int);
 };
 static struct __pyx_vtabstruct_5pippi_4oscs_Osc *__pyx_vtabptr_5pippi_4oscs_Osc;
 
 
-/* "pippi/oscs.pyx":208
+/* "pippi/oscs.pyx":231
  * 
  * 
  * cdef class Fold:             # <<<<<<<<<<<<<<
@@ -1714,8 +1686,8 @@ static PyTypeObject *__Pyx_ImportType(const char *module_name, const char *class
 /* InitStrings.proto */
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
-static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, struct __pyx_opt_args_5pippi_4oscs_3Osc__play *__pyx_optional_args); /* proto*/
-static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, struct __pyx_opt_args_5pippi_4oscs_3Osc__play2d *__pyx_optional_args); /* proto*/
+static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length); /* proto*/
+static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length); /* proto*/
 static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_Fold *__pyx_v_self, int __pyx_v_length, struct __pyx_opt_args_5pippi_4oscs_4Fold__play *__pyx_optional_args); /* proto*/
 static PyObject *__pyx_array_get_memview(struct __pyx_array_obj *__pyx_v_self); /* proto*/
 static char *__pyx_memoryview_get_item_pointer(struct __pyx_memoryview_obj *__pyx_v_self, PyObject *__pyx_v_index); /* proto*/
@@ -2052,7 +2024,7 @@ static PyObject *__pyx_n_s_window;
 static PyObject *__pyx_n_s_wtsize;
 static PyObject *__pyx_n_s_zeros;
 static int __pyx_pf_5pippi_4oscs_3Osc___init__(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, PyObject *__pyx_v_wavetable, double __pyx_v_freq, double __pyx_v_amp, double __pyx_v_pulsewidth, double __pyx_v_phase, PyObject *__pyx_v_window, double __pyx_v_win_phase, PyObject *__pyx_v_mod, double __pyx_v_mod_freq, double __pyx_v_mod_range, double __pyx_v_mod_phase, PyObject *__pyx_v_lfo, double __pyx_v_lfo_freq, int __pyx_v_wtsize, int __pyx_v_channels, int __pyx_v_samplerate); /* proto */
-static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, int __pyx_v_channels, int __pyx_v_samplerate); /* proto */
+static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, double __pyx_v_freq, double __pyx_v_amp, double __pyx_v_pulsewidth, double __pyx_v_mod_freq, double __pyx_v_mod_range); /* proto */
 static PyObject *__pyx_pf_5pippi_4oscs_3Osc_4freq___get__(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self); /* proto */
 static int __pyx_pf_5pippi_4oscs_3Osc_4freq_2__set__(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_4oscs_3Osc_3amp___get__(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self); /* proto */
@@ -3426,7 +3398,7 @@ static int __pyx_pf_5pippi_4oscs_3Osc___init__(struct __pyx_obj_5pippi_4oscs_Osc
  *         else:
  *             self.lfo = lfo             # <<<<<<<<<<<<<<
  * 
- *     def play(self, int length, int channels=2, int samplerate=44100):
+ *     def play(self,
  */
   /*else*/ {
     __Pyx_INCREF(__pyx_v_lfo);
@@ -3468,27 +3440,36 @@ static int __pyx_pf_5pippi_4oscs_3Osc___init__(struct __pyx_obj_5pippi_4oscs_Osc
 /* "pippi/oscs.pyx":110
  *             self.lfo = lfo
  * 
- *     def play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         if self.wavetables is not None:
- *             return self._play2d(length, channels, samplerate)
+ *     def play(self,             # <<<<<<<<<<<<<<
+ *              int length,
+ *              double freq=-1,
  */
 
 /* Python wrapper */
 static PyObject *__pyx_pw_5pippi_4oscs_3Osc_3play(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_5pippi_4oscs_3Osc_3play(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   int __pyx_v_length;
-  int __pyx_v_channels;
-  int __pyx_v_samplerate;
+  double __pyx_v_freq;
+  double __pyx_v_amp;
+  double __pyx_v_pulsewidth;
+  double __pyx_v_mod_freq;
+  double __pyx_v_mod_range;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("play (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_length,&__pyx_n_s_channels,&__pyx_n_s_samplerate,0};
-    PyObject* values[3] = {0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_length,&__pyx_n_s_freq,&__pyx_n_s_amp,&__pyx_n_s_pulsewidth,&__pyx_n_s_mod_freq,&__pyx_n_s_mod_range,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -3506,14 +3487,32 @@ static PyObject *__pyx_pw_5pippi_4oscs_3Osc_3play(PyObject *__pyx_v_self, PyObje
         CYTHON_FALLTHROUGH;
         case  1:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_channels);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_freq);
           if (value) { values[1] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_samplerate);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_amp);
           if (value) { values[2] = value; kw_args--; }
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pulsewidth);
+          if (value) { values[3] = value; kw_args--; }
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mod_freq);
+          if (value) { values[4] = value; kw_args--; }
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mod_range);
+          if (value) { values[5] = value; kw_args--; }
         }
       }
       if (unlikely(kw_args > 0)) {
@@ -3521,6 +3520,12 @@ static PyObject *__pyx_pw_5pippi_4oscs_3Osc_3play(PyObject *__pyx_v_self, PyObje
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -3530,93 +3535,240 @@ static PyObject *__pyx_pw_5pippi_4oscs_3Osc_3play(PyObject *__pyx_v_self, PyObje
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_length = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L3_error)
+    __pyx_v_length = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 111, __pyx_L3_error)
     if (values[1]) {
-      __pyx_v_channels = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_channels == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L3_error)
+      __pyx_v_freq = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_freq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 112, __pyx_L3_error)
     } else {
-      __pyx_v_channels = ((int)2);
+      __pyx_v_freq = ((double)-1.0);
     }
     if (values[2]) {
-      __pyx_v_samplerate = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_samplerate == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L3_error)
+      __pyx_v_amp = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_amp == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 113, __pyx_L3_error)
     } else {
-      __pyx_v_samplerate = ((int)0xAC44);
+      __pyx_v_amp = ((double)-1.0);
+    }
+    if (values[3]) {
+      __pyx_v_pulsewidth = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_pulsewidth == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 114, __pyx_L3_error)
+    } else {
+      __pyx_v_pulsewidth = ((double)-1.0);
+    }
+    if (values[4]) {
+      __pyx_v_mod_freq = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_mod_freq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 115, __pyx_L3_error)
+    } else {
+      __pyx_v_mod_freq = ((double)-1.0);
+    }
+    if (values[5]) {
+      __pyx_v_mod_range = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_mod_range == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 116, __pyx_L3_error)
+    } else {
+      __pyx_v_mod_range = ((double)-1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("play", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 110, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("play", 0, 1, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 110, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.oscs.Osc.play", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_4oscs_3Osc_2play(((struct __pyx_obj_5pippi_4oscs_Osc *)__pyx_v_self), __pyx_v_length, __pyx_v_channels, __pyx_v_samplerate);
+  __pyx_r = __pyx_pf_5pippi_4oscs_3Osc_2play(((struct __pyx_obj_5pippi_4oscs_Osc *)__pyx_v_self), __pyx_v_length, __pyx_v_freq, __pyx_v_amp, __pyx_v_pulsewidth, __pyx_v_mod_freq, __pyx_v_mod_range);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, int __pyx_v_channels, int __pyx_v_samplerate) {
+static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, double __pyx_v_freq, double __pyx_v_amp, double __pyx_v_pulsewidth, double __pyx_v_mod_freq, double __pyx_v_mod_range) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   int __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
-  struct __pyx_opt_args_5pippi_4oscs_3Osc__play2d __pyx_t_4;
-  struct __pyx_opt_args_5pippi_4oscs_3Osc__play __pyx_t_5;
   __Pyx_RefNannySetupContext("play", 0);
 
-  /* "pippi/oscs.pyx":111
+  /* "pippi/oscs.pyx":119
+ *         ):
  * 
- *     def play(self, int length, int channels=2, int samplerate=44100):
+ *         if freq > 0:             # <<<<<<<<<<<<<<
+ *             self.freq = freq
+ * 
+ */
+  __pyx_t_1 = ((__pyx_v_freq > 0.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "pippi/oscs.pyx":120
+ * 
+ *         if freq > 0:
+ *             self.freq = freq             # <<<<<<<<<<<<<<
+ * 
+ *         if amp >= 0:
+ */
+    __pyx_v_self->freq = __pyx_v_freq;
+
+    /* "pippi/oscs.pyx":119
+ *         ):
+ * 
+ *         if freq > 0:             # <<<<<<<<<<<<<<
+ *             self.freq = freq
+ * 
+ */
+  }
+
+  /* "pippi/oscs.pyx":122
+ *             self.freq = freq
+ * 
+ *         if amp >= 0:             # <<<<<<<<<<<<<<
+ *             self.amp = amp
+ * 
+ */
+  __pyx_t_1 = ((__pyx_v_amp >= 0.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "pippi/oscs.pyx":123
+ * 
+ *         if amp >= 0:
+ *             self.amp = amp             # <<<<<<<<<<<<<<
+ * 
+ *         if pulsewidth > 0:
+ */
+    __pyx_v_self->amp = __pyx_v_amp;
+
+    /* "pippi/oscs.pyx":122
+ *             self.freq = freq
+ * 
+ *         if amp >= 0:             # <<<<<<<<<<<<<<
+ *             self.amp = amp
+ * 
+ */
+  }
+
+  /* "pippi/oscs.pyx":125
+ *             self.amp = amp
+ * 
+ *         if pulsewidth > 0:             # <<<<<<<<<<<<<<
+ *             self.pulsewidth = pulsewidth
+ * 
+ */
+  __pyx_t_1 = ((__pyx_v_pulsewidth > 0.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "pippi/oscs.pyx":126
+ * 
+ *         if pulsewidth > 0:
+ *             self.pulsewidth = pulsewidth             # <<<<<<<<<<<<<<
+ * 
+ *         if mod_freq > 0:
+ */
+    __pyx_v_self->pulsewidth = __pyx_v_pulsewidth;
+
+    /* "pippi/oscs.pyx":125
+ *             self.amp = amp
+ * 
+ *         if pulsewidth > 0:             # <<<<<<<<<<<<<<
+ *             self.pulsewidth = pulsewidth
+ * 
+ */
+  }
+
+  /* "pippi/oscs.pyx":128
+ *             self.pulsewidth = pulsewidth
+ * 
+ *         if mod_freq > 0:             # <<<<<<<<<<<<<<
+ *             self.mod_freq = mod_freq
+ * 
+ */
+  __pyx_t_1 = ((__pyx_v_mod_freq > 0.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "pippi/oscs.pyx":129
+ * 
+ *         if mod_freq > 0:
+ *             self.mod_freq = mod_freq             # <<<<<<<<<<<<<<
+ * 
+ *         if mod_range >= 0:
+ */
+    __pyx_v_self->mod_freq = __pyx_v_mod_freq;
+
+    /* "pippi/oscs.pyx":128
+ *             self.pulsewidth = pulsewidth
+ * 
+ *         if mod_freq > 0:             # <<<<<<<<<<<<<<
+ *             self.mod_freq = mod_freq
+ * 
+ */
+  }
+
+  /* "pippi/oscs.pyx":131
+ *             self.mod_freq = mod_freq
+ * 
+ *         if mod_range >= 0:             # <<<<<<<<<<<<<<
+ *             self.mod_range = mod_range
+ * 
+ */
+  __pyx_t_1 = ((__pyx_v_mod_range >= 0.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "pippi/oscs.pyx":132
+ * 
+ *         if mod_range >= 0:
+ *             self.mod_range = mod_range             # <<<<<<<<<<<<<<
+ * 
+ *         if self.wavetables is not None:
+ */
+    __pyx_v_self->mod_range = __pyx_v_mod_range;
+
+    /* "pippi/oscs.pyx":131
+ *             self.mod_freq = mod_freq
+ * 
+ *         if mod_range >= 0:             # <<<<<<<<<<<<<<
+ *             self.mod_range = mod_range
+ * 
+ */
+  }
+
+  /* "pippi/oscs.pyx":134
+ *             self.mod_range = mod_range
+ * 
  *         if self.wavetables is not None:             # <<<<<<<<<<<<<<
- *             return self._play2d(length, channels, samplerate)
+ *             return self._play2d(length)
  *         else:
  */
   __pyx_t_1 = (__pyx_v_self->wavetables != Py_None);
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "pippi/oscs.pyx":112
- *     def play(self, int length, int channels=2, int samplerate=44100):
+    /* "pippi/oscs.pyx":135
+ * 
  *         if self.wavetables is not None:
- *             return self._play2d(length, channels, samplerate)             # <<<<<<<<<<<<<<
+ *             return self._play2d(length)             # <<<<<<<<<<<<<<
  *         else:
- *             return self._play(length, channels, samplerate)
+ *             return self._play(length)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4.__pyx_n = 2;
-    __pyx_t_4.channels = __pyx_v_channels;
-    __pyx_t_4.samplerate = __pyx_v_samplerate;
-    __pyx_t_3 = ((struct __pyx_vtabstruct_5pippi_4oscs_Osc *)__pyx_v_self->__pyx_vtab)->_play2d(__pyx_v_self, __pyx_v_length, &__pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 112, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_5pippi_4oscs_Osc *)__pyx_v_self->__pyx_vtab)->_play2d(__pyx_v_self, __pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "pippi/oscs.pyx":111
+    /* "pippi/oscs.pyx":134
+ *             self.mod_range = mod_range
  * 
- *     def play(self, int length, int channels=2, int samplerate=44100):
  *         if self.wavetables is not None:             # <<<<<<<<<<<<<<
- *             return self._play2d(length, channels, samplerate)
+ *             return self._play2d(length)
  *         else:
  */
   }
 
-  /* "pippi/oscs.pyx":114
- *             return self._play2d(length, channels, samplerate)
+  /* "pippi/oscs.pyx":137
+ *             return self._play2d(length)
  *         else:
- *             return self._play(length, channels, samplerate)             # <<<<<<<<<<<<<<
+ *             return self._play(length)             # <<<<<<<<<<<<<<
  * 
- *     cdef object _play(self, int length, int channels=2, int samplerate=44100):
+ *     cdef object _play(self, int length):
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_5.__pyx_n = 2;
-    __pyx_t_5.channels = __pyx_v_channels;
-    __pyx_t_5.samplerate = __pyx_v_samplerate;
-    __pyx_t_3 = ((struct __pyx_vtabstruct_5pippi_4oscs_Osc *)__pyx_v_self->__pyx_vtab)->_play(__pyx_v_self, __pyx_v_length, &__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_3 = ((struct __pyx_vtabstruct_5pippi_4oscs_Osc *)__pyx_v_self->__pyx_vtab)->_play(__pyx_v_self, __pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
@@ -3626,9 +3778,9 @@ static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(struct __pyx_obj_5pippi_4oscs_
   /* "pippi/oscs.pyx":110
  *             self.lfo = lfo
  * 
- *     def play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         if self.wavetables is not None:
- *             return self._play2d(length, channels, samplerate)
+ *     def play(self,             # <<<<<<<<<<<<<<
+ *              int length,
+ *              double freq=-1,
  */
 
   /* function exit code */
@@ -3642,17 +3794,15 @@ static PyObject *__pyx_pf_5pippi_4oscs_3Osc_2play(struct __pyx_obj_5pippi_4oscs_
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":116
- *             return self._play(length, channels, samplerate)
+/* "pippi/oscs.pyx":139
+ *             return self._play(length)
  * 
- *     cdef object _play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         cdef double[:, :] out = np.zeros((length, channels))
+ *     cdef object _play(self, int length):             # <<<<<<<<<<<<<<
+ *         cdef double[:, :] out = np.zeros((length, self.channels))
  * 
  */
 
-static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, struct __pyx_opt_args_5pippi_4oscs_3Osc__play *__pyx_optional_args) {
-  int __pyx_v_channels = ((int)2);
-  int __pyx_v_samplerate = ((int)0xAC44);
+static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length) {
   __Pyx_memviewslice __pyx_v_out = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_i;
   int __pyx_v_wtindex;
@@ -3695,32 +3845,24 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
   Py_ssize_t __pyx_t_22;
   int __pyx_t_23;
   __Pyx_RefNannySetupContext("_play", 0);
-  if (__pyx_optional_args) {
-    if (__pyx_optional_args->__pyx_n > 0) {
-      __pyx_v_channels = __pyx_optional_args->channels;
-      if (__pyx_optional_args->__pyx_n > 1) {
-        __pyx_v_samplerate = __pyx_optional_args->samplerate;
-      }
-    }
-  }
 
-  /* "pippi/oscs.pyx":117
+  /* "pippi/oscs.pyx":140
  * 
- *     cdef object _play(self, int length, int channels=2, int samplerate=44100):
- *         cdef double[:, :] out = np.zeros((length, channels))             # <<<<<<<<<<<<<<
+ *     cdef object _play(self, int length):
+ *         cdef double[:, :] out = np.zeros((length, self.channels))             # <<<<<<<<<<<<<<
  * 
  *         cdef int i = 0
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 117, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
@@ -3739,14 +3881,14 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -3755,34 +3897,34 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_1);
-  if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 117, __pyx_L1_error)
+  if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_out = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "pippi/oscs.pyx":119
- *         cdef double[:, :] out = np.zeros((length, channels))
+  /* "pippi/oscs.pyx":142
+ *         cdef double[:, :] out = np.zeros((length, self.channels))
  * 
  *         cdef int i = 0             # <<<<<<<<<<<<<<
  *         cdef int wtindex = 0
@@ -3790,7 +3932,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
   __pyx_v_i = 0;
 
-  /* "pippi/oscs.pyx":120
+  /* "pippi/oscs.pyx":143
  * 
  *         cdef int i = 0
  *         cdef int wtindex = 0             # <<<<<<<<<<<<<<
@@ -3799,7 +3941,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
   __pyx_v_wtindex = 0;
 
-  /* "pippi/oscs.pyx":121
+  /* "pippi/oscs.pyx":144
  *         cdef int i = 0
  *         cdef int wtindex = 0
  *         cdef int modindex = 0             # <<<<<<<<<<<<<<
@@ -3808,7 +3950,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
   __pyx_v_modindex = 0;
 
-  /* "pippi/oscs.pyx":122
+  /* "pippi/oscs.pyx":145
  *         cdef int wtindex = 0
  *         cdef int modindex = 0
  *         cdef int wtlength = len(self.wavetable)             # <<<<<<<<<<<<<<
@@ -3817,11 +3959,11 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
   __pyx_t_1 = __pyx_v_self->wavetable;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 122, __pyx_L1_error)
+  __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_wtlength = __pyx_t_7;
 
-  /* "pippi/oscs.pyx":123
+  /* "pippi/oscs.pyx":146
  *         cdef int modindex = 0
  *         cdef int wtlength = len(self.wavetable)
  *         cdef int modlength = 1 if self.mod is None else len(self.mod)             # <<<<<<<<<<<<<<
@@ -3834,13 +3976,13 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
   } else {
     __pyx_t_1 = __pyx_v_self->mod;
     __Pyx_INCREF(__pyx_t_1);
-    __pyx_t_9 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 123, __pyx_L1_error)
+    __pyx_t_9 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_9 == -1)) __PYX_ERR(0, 146, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_7 = __pyx_t_9;
   }
   __pyx_v_modlength = __pyx_t_7;
 
-  /* "pippi/oscs.pyx":126
+  /* "pippi/oscs.pyx":149
  *         cdef double val, val_mod, nextval, nextval_mod, frac, frac_mod
  * 
  *         wavetable = self.wavetable             # <<<<<<<<<<<<<<
@@ -3852,7 +3994,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
   __pyx_v_wavetable = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "pippi/oscs.pyx":127
+  /* "pippi/oscs.pyx":150
  * 
  *         wavetable = self.wavetable
  *         if self.window is not None:             # <<<<<<<<<<<<<<
@@ -3863,19 +4005,19 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
   __pyx_t_10 = (__pyx_t_8 != 0);
   if (__pyx_t_10) {
 
-    /* "pippi/oscs.pyx":128
+    /* "pippi/oscs.pyx":151
  *         wavetable = self.wavetable
  *         if self.window is not None:
  *             window = interpolation.linear(self.window, wtlength)             # <<<<<<<<<<<<<<
  *             wavetable = np.multiply(wavetable, window)
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_interpolation); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_interpolation); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 151, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_linear); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_linear); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 151, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_wtlength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_wtlength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 151, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_5 = NULL;
     __pyx_t_11 = 0;
@@ -3892,7 +4034,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_self->window, __pyx_t_3};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -3901,14 +4043,14 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_self->window, __pyx_t_3};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else
     #endif
     {
-      __pyx_t_4 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 151, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       if (__pyx_t_5) {
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -3919,7 +4061,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       __Pyx_GIVEREF(__pyx_t_3);
       PyTuple_SET_ITEM(__pyx_t_4, 1+__pyx_t_11, __pyx_t_3);
       __pyx_t_3 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 151, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -3927,16 +4069,16 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     __pyx_v_window = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "pippi/oscs.pyx":129
+    /* "pippi/oscs.pyx":152
  *         if self.window is not None:
  *             window = interpolation.linear(self.window, wtlength)
  *             wavetable = np.multiply(wavetable, window)             # <<<<<<<<<<<<<<
  * 
  *         if self.pulsewidth < 1:
  */
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 129, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_multiply); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 129, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_multiply); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 152, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_2 = NULL;
@@ -3954,7 +4096,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[3] = {__pyx_t_2, __pyx_v_wavetable, __pyx_v_window};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 152, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
@@ -3962,13 +4104,13 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[3] = {__pyx_t_2, __pyx_v_wavetable, __pyx_v_window};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_11, 2+__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 152, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
     #endif
     {
-      __pyx_t_3 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 129, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(2+__pyx_t_11); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 152, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       if (__pyx_t_2) {
         __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2); __pyx_t_2 = NULL;
@@ -3979,7 +4121,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       __Pyx_INCREF(__pyx_v_window);
       __Pyx_GIVEREF(__pyx_v_window);
       PyTuple_SET_ITEM(__pyx_t_3, 1+__pyx_t_11, __pyx_v_window);
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 152, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
@@ -3987,7 +4129,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     __Pyx_DECREF_SET(__pyx_v_wavetable, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "pippi/oscs.pyx":127
+    /* "pippi/oscs.pyx":150
  * 
  *         wavetable = self.wavetable
  *         if self.window is not None:             # <<<<<<<<<<<<<<
@@ -3996,7 +4138,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
   }
 
-  /* "pippi/oscs.pyx":131
+  /* "pippi/oscs.pyx":154
  *             wavetable = np.multiply(wavetable, window)
  * 
  *         if self.pulsewidth < 1:             # <<<<<<<<<<<<<<
@@ -4006,7 +4148,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
   __pyx_t_10 = ((__pyx_v_self->pulsewidth < 1.0) != 0);
   if (__pyx_t_10) {
 
-    /* "pippi/oscs.pyx":132
+    /* "pippi/oscs.pyx":155
  * 
  *         if self.pulsewidth < 1:
  *             silence_length = int((wtlength / self.pulsewidth) - wtlength)             # <<<<<<<<<<<<<<
@@ -4015,28 +4157,28 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
     if (unlikely(__pyx_v_self->pulsewidth == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 132, __pyx_L1_error)
+      __PYX_ERR(0, 155, __pyx_L1_error)
     }
-    __pyx_t_1 = __Pyx_PyInt_FromDouble(((__pyx_v_wtlength / __pyx_v_self->pulsewidth) - __pyx_v_wtlength)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 132, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_FromDouble(((__pyx_v_wtlength / __pyx_v_self->pulsewidth) - __pyx_v_wtlength)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 155, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_v_silence_length = __pyx_t_1;
     __pyx_t_1 = 0;
 
-    /* "pippi/oscs.pyx":133
+    /* "pippi/oscs.pyx":156
  *         if self.pulsewidth < 1:
  *             silence_length = int((wtlength / self.pulsewidth) - wtlength)
  *             wavetable = np.concatenate((wavetable, np.zeros(silence_length)))             # <<<<<<<<<<<<<<
  * 
  *         for i in range(length):
  */
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_concatenate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_concatenate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 156, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 156, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 156, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_2 = NULL;
@@ -4050,13 +4192,13 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       }
     }
     if (!__pyx_t_2) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_silence_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 133, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_silence_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_silence_length};
-        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_4);
       } else
@@ -4064,25 +4206,25 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_silence_length};
-        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_4);
       } else
       #endif
       {
-        __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_12);
         __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_2); __pyx_t_2 = NULL;
         __Pyx_INCREF(__pyx_v_silence_length);
         __Pyx_GIVEREF(__pyx_v_silence_length);
         PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_v_silence_length);
-        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_12, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
       }
     }
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 156, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_v_wavetable);
     __Pyx_GIVEREF(__pyx_v_wavetable);
@@ -4101,14 +4243,14 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       }
     }
     if (!__pyx_t_4) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -4117,20 +4259,20 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       } else
       #endif
       {
-        __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_12 = PyTuple_New(1+1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_12);
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_4); __pyx_t_4 = NULL;
         __Pyx_GIVEREF(__pyx_t_5);
         PyTuple_SET_ITEM(__pyx_t_12, 0+1, __pyx_t_5);
         __pyx_t_5 = 0;
-        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_12, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 133, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_12, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 156, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
       }
@@ -4139,7 +4281,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     __Pyx_DECREF_SET(__pyx_v_wavetable, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "pippi/oscs.pyx":131
+    /* "pippi/oscs.pyx":154
  *             wavetable = np.multiply(wavetable, window)
  * 
  *         if self.pulsewidth < 1:             # <<<<<<<<<<<<<<
@@ -4148,7 +4290,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
   }
 
-  /* "pippi/oscs.pyx":135
+  /* "pippi/oscs.pyx":158
  *             wavetable = np.concatenate((wavetable, np.zeros(silence_length)))
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
@@ -4159,58 +4301,58 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
   for (__pyx_t_13 = 0; __pyx_t_13 < __pyx_t_11; __pyx_t_13+=1) {
     __pyx_v_i = __pyx_t_13;
 
-    /* "pippi/oscs.pyx":136
+    /* "pippi/oscs.pyx":159
  * 
  *         for i in range(length):
  *             wtindex = int(self.phase) % wtlength             # <<<<<<<<<<<<<<
  *             modindex = int(self.mod_phase) % modlength
  * 
  */
-    __pyx_t_1 = __Pyx_PyInt_FromDouble(__pyx_v_self->phase); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_FromDouble(__pyx_v_self->phase); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_wtlength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 136, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_wtlength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_12 = PyNumber_Remainder(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 136, __pyx_L1_error)
+    __pyx_t_12 = PyNumber_Remainder(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 159, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 136, __pyx_L1_error)
+    __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_12); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     __pyx_v_wtindex = __pyx_t_14;
 
-    /* "pippi/oscs.pyx":137
+    /* "pippi/oscs.pyx":160
  *         for i in range(length):
  *             wtindex = int(self.phase) % wtlength
  *             modindex = int(self.mod_phase) % modlength             # <<<<<<<<<<<<<<
  * 
  *             val = wavetable[wtindex]
  */
-    __pyx_t_12 = __Pyx_PyInt_FromDouble(__pyx_v_self->mod_phase); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 137, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_PyInt_FromDouble(__pyx_v_self->mod_phase); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 160, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_modlength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_modlength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 160, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyNumber_Remainder(__pyx_t_12, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 137, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Remainder(__pyx_t_12, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 137, __pyx_L1_error)
+    __pyx_t_14 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_14 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 160, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_modindex = __pyx_t_14;
 
-    /* "pippi/oscs.pyx":139
+    /* "pippi/oscs.pyx":162
  *             modindex = int(self.mod_phase) % modlength
  * 
  *             val = wavetable[wtindex]             # <<<<<<<<<<<<<<
  *             val_mod = 1
  * 
  */
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_wavetable, __pyx_v_wtindex, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 139, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_wavetable, __pyx_v_wtindex, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 139, __pyx_L1_error)
+    __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 162, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_val = __pyx_t_15;
 
-    /* "pippi/oscs.pyx":140
+    /* "pippi/oscs.pyx":163
  * 
  *             val = wavetable[wtindex]
  *             val_mod = 1             # <<<<<<<<<<<<<<
@@ -4219,7 +4361,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
     __pyx_v_val_mod = 1.0;
 
-    /* "pippi/oscs.pyx":142
+    /* "pippi/oscs.pyx":165
  *             val_mod = 1
  * 
  *             try:             # <<<<<<<<<<<<<<
@@ -4235,7 +4377,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       __Pyx_XGOTREF(__pyx_t_18);
       /*try:*/ {
 
-        /* "pippi/oscs.pyx":143
+        /* "pippi/oscs.pyx":166
  * 
  *             try:
  *                 nextval = wavetable[wtindex + 1]             # <<<<<<<<<<<<<<
@@ -4243,13 +4385,13 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  *                 nextval = wavetable[0]
  */
         __pyx_t_19 = (__pyx_v_wtindex + 1);
-        __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_wavetable, __pyx_t_19, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 143, __pyx_L7_error)
+        __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_wavetable, __pyx_t_19, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 166, __pyx_L7_error)
         __Pyx_GOTREF(__pyx_t_1);
-        __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 143, __pyx_L7_error)
+        __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 166, __pyx_L7_error)
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
         __pyx_v_nextval = __pyx_t_15;
 
-        /* "pippi/oscs.pyx":142
+        /* "pippi/oscs.pyx":165
  *             val_mod = 1
  * 
  *             try:             # <<<<<<<<<<<<<<
@@ -4271,7 +4413,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
 
-      /* "pippi/oscs.pyx":144
+      /* "pippi/oscs.pyx":167
  *             try:
  *                 nextval = wavetable[wtindex + 1]
  *             except IndexError:             # <<<<<<<<<<<<<<
@@ -4281,21 +4423,21 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       __pyx_t_14 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_IndexError);
       if (__pyx_t_14) {
         __Pyx_AddTraceback("pippi.oscs.Osc._play", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_3, &__pyx_t_12) < 0) __PYX_ERR(0, 144, __pyx_L9_except_error)
+        if (__Pyx_GetException(&__pyx_t_1, &__pyx_t_3, &__pyx_t_12) < 0) __PYX_ERR(0, 167, __pyx_L9_except_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_GOTREF(__pyx_t_3);
         __Pyx_GOTREF(__pyx_t_12);
 
-        /* "pippi/oscs.pyx":145
+        /* "pippi/oscs.pyx":168
  *                 nextval = wavetable[wtindex + 1]
  *             except IndexError:
  *                 nextval = wavetable[0]             # <<<<<<<<<<<<<<
  * 
  *             if self.mod is not None:
  */
-        __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_wavetable, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 145, __pyx_L9_except_error)
+        __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_wavetable, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 168, __pyx_L9_except_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 145, __pyx_L9_except_error)
+        __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 168, __pyx_L9_except_error)
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         __pyx_v_nextval = __pyx_t_15;
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -4306,7 +4448,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       goto __pyx_L9_except_error;
       __pyx_L9_except_error:;
 
-      /* "pippi/oscs.pyx":142
+      /* "pippi/oscs.pyx":165
  *             val_mod = 1
  * 
  *             try:             # <<<<<<<<<<<<<<
@@ -4328,7 +4470,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       __pyx_L14_try_end:;
     }
 
-    /* "pippi/oscs.pyx":147
+    /* "pippi/oscs.pyx":170
  *                 nextval = wavetable[0]
  * 
  *             if self.mod is not None:             # <<<<<<<<<<<<<<
@@ -4339,7 +4481,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     __pyx_t_8 = (__pyx_t_10 != 0);
     if (__pyx_t_8) {
 
-      /* "pippi/oscs.pyx":148
+      /* "pippi/oscs.pyx":171
  * 
  *             if self.mod is not None:
  *                 try:             # <<<<<<<<<<<<<<
@@ -4355,7 +4497,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
         __Pyx_XGOTREF(__pyx_t_16);
         /*try:*/ {
 
-          /* "pippi/oscs.pyx":149
+          /* "pippi/oscs.pyx":172
  *             if self.mod is not None:
  *                 try:
  *                     nextval_mod = self.mod[modindex + 1]             # <<<<<<<<<<<<<<
@@ -4363,13 +4505,13 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  *                     nextval_mod = self.mod[0]
  */
           __pyx_t_19 = (__pyx_v_modindex + 1);
-          __pyx_t_12 = __Pyx_GetItemInt(__pyx_v_self->mod, __pyx_t_19, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 149, __pyx_L18_error)
+          __pyx_t_12 = __Pyx_GetItemInt(__pyx_v_self->mod, __pyx_t_19, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 172, __pyx_L18_error)
           __Pyx_GOTREF(__pyx_t_12);
-          __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_12); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 149, __pyx_L18_error)
+          __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_12); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 172, __pyx_L18_error)
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
           __pyx_v_nextval_mod = __pyx_t_15;
 
-          /* "pippi/oscs.pyx":148
+          /* "pippi/oscs.pyx":171
  * 
  *             if self.mod is not None:
  *                 try:             # <<<<<<<<<<<<<<
@@ -4391,7 +4533,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
         __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
         __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
 
-        /* "pippi/oscs.pyx":150
+        /* "pippi/oscs.pyx":173
  *                 try:
  *                     nextval_mod = self.mod[modindex + 1]
  *                 except IndexError:             # <<<<<<<<<<<<<<
@@ -4401,21 +4543,21 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
         __pyx_t_14 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_IndexError);
         if (__pyx_t_14) {
           __Pyx_AddTraceback("pippi.oscs.Osc._play", __pyx_clineno, __pyx_lineno, __pyx_filename);
-          if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_3, &__pyx_t_1) < 0) __PYX_ERR(0, 150, __pyx_L20_except_error)
+          if (__Pyx_GetException(&__pyx_t_12, &__pyx_t_3, &__pyx_t_1) < 0) __PYX_ERR(0, 173, __pyx_L20_except_error)
           __Pyx_GOTREF(__pyx_t_12);
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_GOTREF(__pyx_t_1);
 
-          /* "pippi/oscs.pyx":151
+          /* "pippi/oscs.pyx":174
  *                     nextval_mod = self.mod[modindex + 1]
  *                 except IndexError:
  *                     nextval_mod = self.mod[0]             # <<<<<<<<<<<<<<
  * 
  *                 frac_mod = self.mod_phase - int(self.mod_phase)
  */
-          __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_self->mod, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 151, __pyx_L20_except_error)
+          __pyx_t_5 = __Pyx_GetItemInt(__pyx_v_self->mod, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 174, __pyx_L20_except_error)
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 151, __pyx_L20_except_error)
+          __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 174, __pyx_L20_except_error)
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __pyx_v_nextval_mod = __pyx_t_15;
           __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
@@ -4426,7 +4568,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
         goto __pyx_L20_except_error;
         __pyx_L20_except_error:;
 
-        /* "pippi/oscs.pyx":148
+        /* "pippi/oscs.pyx":171
  * 
  *             if self.mod is not None:
  *                 try:             # <<<<<<<<<<<<<<
@@ -4448,70 +4590,70 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
         __pyx_L25_try_end:;
       }
 
-      /* "pippi/oscs.pyx":153
+      /* "pippi/oscs.pyx":176
  *                     nextval_mod = self.mod[0]
  * 
  *                 frac_mod = self.mod_phase - int(self.mod_phase)             # <<<<<<<<<<<<<<
  *                 val_mod = self.mod[modindex]
  *                 val_mod = (1.0 - frac_mod) * val_mod + frac_mod * nextval_mod
  */
-      __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->mod_phase); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 153, __pyx_L1_error)
+      __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->mod_phase); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 176, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyInt_FromDouble(__pyx_v_self->mod_phase); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 153, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_FromDouble(__pyx_v_self->mod_phase); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_12 = PyNumber_Subtract(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 153, __pyx_L1_error)
+      __pyx_t_12 = PyNumber_Subtract(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 176, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_12);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_12); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L1_error)
+      __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_12); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 176, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
       __pyx_v_frac_mod = __pyx_t_15;
 
-      /* "pippi/oscs.pyx":154
+      /* "pippi/oscs.pyx":177
  * 
  *                 frac_mod = self.mod_phase - int(self.mod_phase)
  *                 val_mod = self.mod[modindex]             # <<<<<<<<<<<<<<
  *                 val_mod = (1.0 - frac_mod) * val_mod + frac_mod * nextval_mod
  *                 val_mod = 1.0 + (val_mod * self.mod_range)
  */
-      __pyx_t_12 = __Pyx_GetItemInt(__pyx_v_self->mod, __pyx_v_modindex, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 154, __pyx_L1_error)
+      __pyx_t_12 = __Pyx_GetItemInt(__pyx_v_self->mod, __pyx_v_modindex, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_12);
-      __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_12); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L1_error)
+      __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_12); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
       __pyx_v_val_mod = __pyx_t_15;
 
-      /* "pippi/oscs.pyx":155
+      /* "pippi/oscs.pyx":178
  *                 frac_mod = self.mod_phase - int(self.mod_phase)
  *                 val_mod = self.mod[modindex]
  *                 val_mod = (1.0 - frac_mod) * val_mod + frac_mod * nextval_mod             # <<<<<<<<<<<<<<
  *                 val_mod = 1.0 + (val_mod * self.mod_range)
- *                 self.mod_phase += self.mod_freq * modlength * (1.0 / samplerate)
+ *                 self.mod_phase += self.mod_freq * modlength * (1.0 / self.samplerate)
  */
       __pyx_v_val_mod = (((1.0 - __pyx_v_frac_mod) * __pyx_v_val_mod) + (__pyx_v_frac_mod * __pyx_v_nextval_mod));
 
-      /* "pippi/oscs.pyx":156
+      /* "pippi/oscs.pyx":179
  *                 val_mod = self.mod[modindex]
  *                 val_mod = (1.0 - frac_mod) * val_mod + frac_mod * nextval_mod
  *                 val_mod = 1.0 + (val_mod * self.mod_range)             # <<<<<<<<<<<<<<
- *                 self.mod_phase += self.mod_freq * modlength * (1.0 / samplerate)
+ *                 self.mod_phase += self.mod_freq * modlength * (1.0 / self.samplerate)
  * 
  */
       __pyx_v_val_mod = (1.0 + (__pyx_v_val_mod * __pyx_v_self->mod_range));
 
-      /* "pippi/oscs.pyx":157
+      /* "pippi/oscs.pyx":180
  *                 val_mod = (1.0 - frac_mod) * val_mod + frac_mod * nextval_mod
  *                 val_mod = 1.0 + (val_mod * self.mod_range)
- *                 self.mod_phase += self.mod_freq * modlength * (1.0 / samplerate)             # <<<<<<<<<<<<<<
+ *                 self.mod_phase += self.mod_freq * modlength * (1.0 / self.samplerate)             # <<<<<<<<<<<<<<
  * 
  *             frac = self.phase - int(self.phase)
  */
-      if (unlikely(__pyx_v_samplerate == 0)) {
+      if (unlikely(__pyx_v_self->samplerate == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 157, __pyx_L1_error)
+        __PYX_ERR(0, 180, __pyx_L1_error)
       }
-      __pyx_v_self->mod_phase = (__pyx_v_self->mod_phase + ((__pyx_v_self->mod_freq * __pyx_v_modlength) * (1.0 / __pyx_v_samplerate)));
+      __pyx_v_self->mod_phase = (__pyx_v_self->mod_phase + ((__pyx_v_self->mod_freq * __pyx_v_modlength) * (1.0 / __pyx_v_self->samplerate)));
 
-      /* "pippi/oscs.pyx":147
+      /* "pippi/oscs.pyx":170
  *                 nextval = wavetable[0]
  * 
  *             if self.mod is not None:             # <<<<<<<<<<<<<<
@@ -4520,64 +4662,64 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  */
     }
 
-    /* "pippi/oscs.pyx":159
- *                 self.mod_phase += self.mod_freq * modlength * (1.0 / samplerate)
+    /* "pippi/oscs.pyx":182
+ *                 self.mod_phase += self.mod_freq * modlength * (1.0 / self.samplerate)
  * 
  *             frac = self.phase - int(self.phase)             # <<<<<<<<<<<<<<
  *             val = (1.0 - frac) * val + frac * nextval
- *             self.phase += self.freq * val_mod * wtlength * (1.0 / samplerate)
+ *             self.phase += self.freq * val_mod * wtlength * (1.0 / self.samplerate)
  */
-    __pyx_t_12 = PyFloat_FromDouble(__pyx_v_self->phase); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 159, __pyx_L1_error)
+    __pyx_t_12 = PyFloat_FromDouble(__pyx_v_self->phase); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 182, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_12);
-    __pyx_t_3 = __Pyx_PyInt_FromDouble(__pyx_v_self->phase); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 159, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_FromDouble(__pyx_v_self->phase); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 182, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyNumber_Subtract(__pyx_t_12, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 159, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Subtract(__pyx_t_12, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 182, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 159, __pyx_L1_error)
+    __pyx_t_15 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_15 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 182, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_frac = __pyx_t_15;
 
-    /* "pippi/oscs.pyx":160
+    /* "pippi/oscs.pyx":183
  * 
  *             frac = self.phase - int(self.phase)
  *             val = (1.0 - frac) * val + frac * nextval             # <<<<<<<<<<<<<<
- *             self.phase += self.freq * val_mod * wtlength * (1.0 / samplerate)
+ *             self.phase += self.freq * val_mod * wtlength * (1.0 / self.samplerate)
  * 
  */
     __pyx_v_val = (((1.0 - __pyx_v_frac) * __pyx_v_val) + (__pyx_v_frac * __pyx_v_nextval));
 
-    /* "pippi/oscs.pyx":161
+    /* "pippi/oscs.pyx":184
  *             frac = self.phase - int(self.phase)
  *             val = (1.0 - frac) * val + frac * nextval
- *             self.phase += self.freq * val_mod * wtlength * (1.0 / samplerate)             # <<<<<<<<<<<<<<
+ *             self.phase += self.freq * val_mod * wtlength * (1.0 / self.samplerate)             # <<<<<<<<<<<<<<
  * 
- *             for channel in range(channels):
+ *             for channel in range(self.channels):
  */
-    if (unlikely(__pyx_v_samplerate == 0)) {
+    if (unlikely(__pyx_v_self->samplerate == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 161, __pyx_L1_error)
+      __PYX_ERR(0, 184, __pyx_L1_error)
     }
-    __pyx_v_self->phase = (__pyx_v_self->phase + (((__pyx_v_self->freq * __pyx_v_val_mod) * __pyx_v_wtlength) * (1.0 / __pyx_v_samplerate)));
+    __pyx_v_self->phase = (__pyx_v_self->phase + (((__pyx_v_self->freq * __pyx_v_val_mod) * __pyx_v_wtlength) * (1.0 / __pyx_v_self->samplerate)));
 
-    /* "pippi/oscs.pyx":163
- *             self.phase += self.freq * val_mod * wtlength * (1.0 / samplerate)
+    /* "pippi/oscs.pyx":186
+ *             self.phase += self.freq * val_mod * wtlength * (1.0 / self.samplerate)
  * 
- *             for channel in range(channels):             # <<<<<<<<<<<<<<
+ *             for channel in range(self.channels):             # <<<<<<<<<<<<<<
  *                 out[i][channel] = val * self.amp
  * 
  */
-    __pyx_t_14 = __pyx_v_channels;
+    __pyx_t_14 = __pyx_v_self->channels;
     for (__pyx_t_20 = 0; __pyx_t_20 < __pyx_t_14; __pyx_t_20+=1) {
       __pyx_v_channel = __pyx_t_20;
 
-      /* "pippi/oscs.pyx":164
+      /* "pippi/oscs.pyx":187
  * 
- *             for channel in range(channels):
+ *             for channel in range(self.channels):
  *                 out[i][channel] = val * self.amp             # <<<<<<<<<<<<<<
  * 
- *         return SoundBuffer(out, channels=channels, samplerate=samplerate)
+ *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
  */
       __pyx_t_21.data = __pyx_v_out.data;
       __pyx_t_21.memview = __pyx_v_out.memview;
@@ -4590,7 +4732,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
         __pyx_tmp_idx += __pyx_tmp_shape;
     if (1 && (__pyx_tmp_idx < 0 || __pyx_tmp_idx >= __pyx_tmp_shape)) {
         PyErr_SetString(PyExc_IndexError, "Index out of bounds (axis 0)");
-        __PYX_ERR(0, 164, __pyx_L1_error)
+        __PYX_ERR(0, 187, __pyx_L1_error)
     }
         __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
 }
@@ -4607,7 +4749,7 @@ __pyx_t_22 = __pyx_v_channel;
       } else if (unlikely(__pyx_t_22 >= __pyx_t_21.shape[0])) __pyx_t_23 = 0;
       if (unlikely(__pyx_t_23 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_23);
-        __PYX_ERR(0, 164, __pyx_L1_error)
+        __PYX_ERR(0, 187, __pyx_L1_error)
       }
       *((double *) ( /* dim=0 */ (__pyx_t_21.data + __pyx_t_22 * __pyx_t_21.strides[0]) )) = (__pyx_v_val * __pyx_v_self->amp);
       __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
@@ -4616,34 +4758,34 @@ __pyx_t_22 = __pyx_v_channel;
     }
   }
 
-  /* "pippi/oscs.pyx":166
+  /* "pippi/oscs.pyx":189
  *                 out[i][channel] = val * self.amp
  * 
- *         return SoundBuffer(out, channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
+ *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
- *     cdef object _play2d(self, int length, int channels=2, int samplerate=44100):
+ *     cdef object _play2d(self, int length):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_SoundBuffer); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_SoundBuffer); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_12 = PyTuple_New(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_12 = PyTuple_New(1); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_12, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_channels, __pyx_t_5) < 0) __PYX_ERR(0, 166, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_channels, __pyx_t_5) < 0) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_samplerate, __pyx_t_5) < 0) __PYX_ERR(0, 166, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_samplerate, __pyx_t_5) < 0) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_12, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_12, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
@@ -4652,11 +4794,11 @@ __pyx_t_22 = __pyx_v_channel;
   __pyx_t_5 = 0;
   goto __pyx_L0;
 
-  /* "pippi/oscs.pyx":116
- *             return self._play(length, channels, samplerate)
+  /* "pippi/oscs.pyx":139
+ *             return self._play(length)
  * 
- *     cdef object _play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         cdef double[:, :] out = np.zeros((length, channels))
+ *     cdef object _play(self, int length):             # <<<<<<<<<<<<<<
+ *         cdef double[:, :] out = np.zeros((length, self.channels))
  * 
  */
 
@@ -4682,17 +4824,15 @@ __pyx_t_22 = __pyx_v_channel;
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":168
- *         return SoundBuffer(out, channels=channels, samplerate=samplerate)
+/* "pippi/oscs.pyx":191
+ *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
  * 
- *     cdef object _play2d(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         cdef double[:,:] out = np.zeros((length, channels))
+ *     cdef object _play2d(self, int length):             # <<<<<<<<<<<<<<
+ *         cdef double[:,:] out = np.zeros((length, self.channels))
  *         cdef double[:,:] stack = np.column_stack(self.wavetables)
  */
 
-static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length, struct __pyx_opt_args_5pippi_4oscs_3Osc__play2d *__pyx_optional_args) {
-  int __pyx_v_channels = ((int)2);
-  int __pyx_v_samplerate = ((int)0xAC44);
+static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs_Osc *__pyx_v_self, int __pyx_v_length) {
   __Pyx_memviewslice __pyx_v_out = { 0, 0, { 0 }, { 0 }, { 0 } };
   CYTHON_UNUSED __Pyx_memviewslice __pyx_v_stack = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_stack_depth;
@@ -4736,32 +4876,24 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
   Py_ssize_t __pyx_t_17;
   int __pyx_t_18;
   __Pyx_RefNannySetupContext("_play2d", 0);
-  if (__pyx_optional_args) {
-    if (__pyx_optional_args->__pyx_n > 0) {
-      __pyx_v_channels = __pyx_optional_args->channels;
-      if (__pyx_optional_args->__pyx_n > 1) {
-        __pyx_v_samplerate = __pyx_optional_args->samplerate;
-      }
-    }
-  }
 
-  /* "pippi/oscs.pyx":169
+  /* "pippi/oscs.pyx":192
  * 
- *     cdef object _play2d(self, int length, int channels=2, int samplerate=44100):
- *         cdef double[:,:] out = np.zeros((length, channels))             # <<<<<<<<<<<<<<
+ *     cdef object _play2d(self, int length):
+ *         cdef double[:,:] out = np.zeros((length, self.channels))             # <<<<<<<<<<<<<<
  *         cdef double[:,:] stack = np.column_stack(self.wavetables)
  *         cdef int stack_depth = len(self.wavetables)
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
@@ -4780,14 +4912,14 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 192, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -4796,42 +4928,42 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 169, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_1);
-  if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 169, __pyx_L1_error)
+  if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_out = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "pippi/oscs.pyx":170
- *     cdef object _play2d(self, int length, int channels=2, int samplerate=44100):
- *         cdef double[:,:] out = np.zeros((length, channels))
+  /* "pippi/oscs.pyx":193
+ *     cdef object _play2d(self, int length):
+ *         cdef double[:,:] out = np.zeros((length, self.channels))
  *         cdef double[:,:] stack = np.column_stack(self.wavetables)             # <<<<<<<<<<<<<<
  *         cdef int stack_depth = len(self.wavetables)
  * 
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_column_stack); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_column_stack); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -4845,13 +4977,13 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
     }
   }
   if (!__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_self->wavetables); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_self->wavetables); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_v_self->wavetables};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
@@ -4859,33 +4991,33 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_v_self->wavetables};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 170, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 193, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3); __pyx_t_3 = NULL;
       __Pyx_INCREF(__pyx_v_self->wavetables);
       __Pyx_GIVEREF(__pyx_v_self->wavetables);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_v_self->wavetables);
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_1);
-  if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 170, __pyx_L1_error)
+  if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 193, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_stack = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "pippi/oscs.pyx":171
- *         cdef double[:,:] out = np.zeros((length, channels))
+  /* "pippi/oscs.pyx":194
+ *         cdef double[:,:] out = np.zeros((length, self.channels))
  *         cdef double[:,:] stack = np.column_stack(self.wavetables)
  *         cdef int stack_depth = len(self.wavetables)             # <<<<<<<<<<<<<<
  * 
@@ -4893,54 +5025,54 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
   __pyx_t_1 = __pyx_v_self->wavetables;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 171, __pyx_L1_error)
+  __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 194, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_stack_depth = __pyx_t_7;
 
-  /* "pippi/oscs.pyx":173
+  /* "pippi/oscs.pyx":196
  *         cdef int stack_depth = len(self.wavetables)
  * 
  *         cdef double wt_lfo_phase_inc = len(self.lfo) * (1.0 / length)             # <<<<<<<<<<<<<<
- *         cdef double phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
- *         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
+ *         cdef double phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
+ *         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
  */
   __pyx_t_1 = __pyx_v_self->lfo;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 173, __pyx_L1_error)
+  __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (unlikely(__pyx_v_length == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 173, __pyx_L1_error)
+    __PYX_ERR(0, 196, __pyx_L1_error)
   }
   __pyx_v_wt_lfo_phase_inc = (__pyx_t_7 * (1.0 / __pyx_v_length));
 
-  /* "pippi/oscs.pyx":174
+  /* "pippi/oscs.pyx":197
  * 
  *         cdef double wt_lfo_phase_inc = len(self.lfo) * (1.0 / length)
- *         cdef double phase_inc = self.freq * self.wtsize * (1.0 / samplerate)             # <<<<<<<<<<<<<<
- *         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
+ *         cdef double phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)             # <<<<<<<<<<<<<<
+ *         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
  * 
  */
-  if (unlikely(__pyx_v_samplerate == 0)) {
+  if (unlikely(__pyx_v_self->samplerate == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 174, __pyx_L1_error)
+    __PYX_ERR(0, 197, __pyx_L1_error)
   }
-  __pyx_v_phase_inc = ((__pyx_v_self->freq * __pyx_v_self->wtsize) * (1.0 / __pyx_v_samplerate));
+  __pyx_v_phase_inc = ((__pyx_v_self->freq * __pyx_v_self->wtsize) * (1.0 / __pyx_v_self->samplerate));
 
-  /* "pippi/oscs.pyx":175
+  /* "pippi/oscs.pyx":198
  *         cdef double wt_lfo_phase_inc = len(self.lfo) * (1.0 / length)
- *         cdef double phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
- *         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / samplerate)             # <<<<<<<<<<<<<<
+ *         cdef double phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
+ *         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)             # <<<<<<<<<<<<<<
  * 
  *         cdef double wt_lfo_phase, wt_lfo_frac, wt_lfo_y0, wt_lfo_y1, wt_lfo_pos
  */
-  if (unlikely(__pyx_v_samplerate == 0)) {
+  if (unlikely(__pyx_v_self->samplerate == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 175, __pyx_L1_error)
+    __PYX_ERR(0, 198, __pyx_L1_error)
   }
-  __pyx_v_wt_phase_inc = ((__pyx_v_self->freq * __pyx_v_self->wtsize) * (1.0 / __pyx_v_samplerate));
+  __pyx_v_wt_phase_inc = ((__pyx_v_self->freq * __pyx_v_self->wtsize) * (1.0 / __pyx_v_self->samplerate));
 
-  /* "pippi/oscs.pyx":183
+  /* "pippi/oscs.pyx":206
  *         cdef int i, wt_lfo_x, stack_x, channel
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
@@ -4951,7 +5083,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "pippi/oscs.pyx":184
+    /* "pippi/oscs.pyx":207
  * 
  *         for i in range(length):
  *             wt_lfo_phase = i * wt_lfo_phase_inc             # <<<<<<<<<<<<<<
@@ -4960,7 +5092,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_wt_lfo_phase = (__pyx_v_i * __pyx_v_wt_lfo_phase_inc);
 
-    /* "pippi/oscs.pyx":185
+    /* "pippi/oscs.pyx":208
  *         for i in range(length):
  *             wt_lfo_phase = i * wt_lfo_phase_inc
  *             wt_lfo_x = <int>wt_lfo_phase             # <<<<<<<<<<<<<<
@@ -4969,7 +5101,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_wt_lfo_x = ((int)__pyx_v_wt_lfo_phase);
 
-    /* "pippi/oscs.pyx":186
+    /* "pippi/oscs.pyx":209
  *             wt_lfo_phase = i * wt_lfo_phase_inc
  *             wt_lfo_x = <int>wt_lfo_phase
  *             wt_lfo_frac = wt_lfo_phase - wt_lfo_x             # <<<<<<<<<<<<<<
@@ -4978,7 +5110,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_wt_lfo_frac = (__pyx_v_wt_lfo_phase - __pyx_v_wt_lfo_x);
 
-    /* "pippi/oscs.pyx":187
+    /* "pippi/oscs.pyx":210
  *             wt_lfo_x = <int>wt_lfo_phase
  *             wt_lfo_frac = wt_lfo_phase - wt_lfo_x
  *             wt_lfo_y0 = self.lfo[wt_lfo_x % len(self.lfo)]             # <<<<<<<<<<<<<<
@@ -4987,20 +5119,20 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_t_1 = __pyx_v_self->lfo;
     __Pyx_INCREF(__pyx_t_1);
-    __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 187, __pyx_L1_error)
+    __pyx_t_7 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_7 == -1)) __PYX_ERR(0, 210, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (unlikely(__pyx_t_7 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 187, __pyx_L1_error)
+      __PYX_ERR(0, 210, __pyx_L1_error)
     }
     __pyx_t_10 = __Pyx_mod_Py_ssize_t(__pyx_v_wt_lfo_x, __pyx_t_7);
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->lfo, __pyx_t_10, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 187, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->lfo, __pyx_t_10, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 210, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 187, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 210, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_wt_lfo_y0 = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":188
+    /* "pippi/oscs.pyx":211
  *             wt_lfo_frac = wt_lfo_phase - wt_lfo_x
  *             wt_lfo_y0 = self.lfo[wt_lfo_x % len(self.lfo)]
  *             wt_lfo_y1 = self.lfo[(wt_lfo_x + 1) % len(self.lfo)]             # <<<<<<<<<<<<<<
@@ -5010,20 +5142,20 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
     __pyx_t_12 = (__pyx_v_wt_lfo_x + 1);
     __pyx_t_1 = __pyx_v_self->lfo;
     __Pyx_INCREF(__pyx_t_1);
-    __pyx_t_10 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_10 == -1)) __PYX_ERR(0, 188, __pyx_L1_error)
+    __pyx_t_10 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_10 == -1)) __PYX_ERR(0, 211, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     if (unlikely(__pyx_t_10 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 188, __pyx_L1_error)
+      __PYX_ERR(0, 211, __pyx_L1_error)
     }
     __pyx_t_7 = __Pyx_mod_Py_ssize_t(__pyx_t_12, __pyx_t_10);
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->lfo, __pyx_t_7, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 188, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->lfo, __pyx_t_7, Py_ssize_t, 1, PyInt_FromSsize_t, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 188, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 211, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_wt_lfo_y1 = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":190
+    /* "pippi/oscs.pyx":213
  *             wt_lfo_y1 = self.lfo[(wt_lfo_x + 1) % len(self.lfo)]
  * 
  *             wt_lfo_pos = (1.0 - wt_lfo_frac) * wt_lfo_y0 + (wt_lfo_frac * wt_lfo_y1)             # <<<<<<<<<<<<<<
@@ -5032,7 +5164,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_wt_lfo_pos = (((1.0 - __pyx_v_wt_lfo_frac) * __pyx_v_wt_lfo_y0) + (__pyx_v_wt_lfo_frac * __pyx_v_wt_lfo_y1));
 
-    /* "pippi/oscs.pyx":192
+    /* "pippi/oscs.pyx":215
  *             wt_lfo_pos = (1.0 - wt_lfo_frac) * wt_lfo_y0 + (wt_lfo_frac * wt_lfo_y1)
  * 
  *             stack_phase = wt_lfo_pos * stack_depth             # <<<<<<<<<<<<<<
@@ -5041,7 +5173,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_stack_phase = (__pyx_v_wt_lfo_pos * __pyx_v_stack_depth);
 
-    /* "pippi/oscs.pyx":193
+    /* "pippi/oscs.pyx":216
  * 
  *             stack_phase = wt_lfo_pos * stack_depth
  *             stack_x = <int>stack_phase             # <<<<<<<<<<<<<<
@@ -5050,7 +5182,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_stack_x = ((int)__pyx_v_stack_phase);
 
-    /* "pippi/oscs.pyx":194
+    /* "pippi/oscs.pyx":217
  *             stack_phase = wt_lfo_pos * stack_depth
  *             stack_x = <int>stack_phase
  *             wt_phase = i * wt_phase_inc             # <<<<<<<<<<<<<<
@@ -5059,19 +5191,19 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_wt_phase = (__pyx_v_i * __pyx_v_wt_phase_inc);
 
-    /* "pippi/oscs.pyx":195
+    /* "pippi/oscs.pyx":218
  *             stack_x = <int>stack_phase
  *             wt_phase = i * wt_phase_inc
  *             wt_x = <int>wt_phase             # <<<<<<<<<<<<<<
  *             stack_frac = stack_phase - stack_x
  * 
  */
-    __pyx_t_1 = __Pyx_PyInt_From_int(((int)__pyx_v_wt_phase)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int(((int)__pyx_v_wt_phase)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 218, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_XDECREF_SET(__pyx_v_wt_x, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "pippi/oscs.pyx":196
+    /* "pippi/oscs.pyx":219
  *             wt_phase = i * wt_phase_inc
  *             wt_x = <int>wt_phase
  *             stack_frac = stack_phase - stack_x             # <<<<<<<<<<<<<<
@@ -5080,7 +5212,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     __pyx_v_stack_frac = (__pyx_v_stack_phase - __pyx_v_stack_x);
 
-    /* "pippi/oscs.pyx":198
+    /* "pippi/oscs.pyx":221
  *             stack_frac = stack_phase - stack_x
  * 
  *             y0 = self.wavetables[stack_x % stack_depth][wt_x % self.wtsize]             # <<<<<<<<<<<<<<
@@ -5089,25 +5221,25 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
  */
     if (unlikely(__pyx_v_stack_depth == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 198, __pyx_L1_error)
+      __PYX_ERR(0, 221, __pyx_L1_error)
     }
     __pyx_t_13 = __Pyx_mod_int(__pyx_v_stack_x, __pyx_v_stack_depth);
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->wavetables, __pyx_t_13, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->wavetables, __pyx_t_13, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 221, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->wtsize); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->wtsize); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 221, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = PyNumber_Remainder(__pyx_v_wt_x, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Remainder(__pyx_v_wt_x, __pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 221, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyObject_GetItem(__pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_2 = PyObject_GetItem(__pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 221, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 221, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_v_y0 = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":199
+    /* "pippi/oscs.pyx":222
  * 
  *             y0 = self.wavetables[stack_x % stack_depth][wt_x % self.wtsize]
  *             y1 = self.wavetables[(stack_x + 1) % stack_depth][wt_x % self.wtsize]             # <<<<<<<<<<<<<<
@@ -5117,50 +5249,50 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
     __pyx_t_12 = (__pyx_v_stack_x + 1);
     if (unlikely(__pyx_v_stack_depth == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 199, __pyx_L1_error)
+      __PYX_ERR(0, 222, __pyx_L1_error)
     }
     __pyx_t_14 = __Pyx_mod_long(__pyx_t_12, __pyx_v_stack_depth);
-    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_self->wavetables, __pyx_t_14, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 199, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetItemInt(__pyx_v_self->wavetables, __pyx_t_14, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->wtsize); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 199, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->wtsize); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_1 = PyNumber_Remainder(__pyx_v_wt_x, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 199, __pyx_L1_error)
+    __pyx_t_1 = PyNumber_Remainder(__pyx_v_wt_x, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = PyObject_GetItem(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 199, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetItem(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 199, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 222, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_v_y1 = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":200
+    /* "pippi/oscs.pyx":223
  *             y0 = self.wavetables[stack_x % stack_depth][wt_x % self.wtsize]
  *             y1 = self.wavetables[(stack_x + 1) % stack_depth][wt_x % self.wtsize]
  *             val = (1.0 - stack_frac) * y0 + (stack_frac * y1)             # <<<<<<<<<<<<<<
  * 
- *             for channel in range(channels):
+ *             for channel in range(self.channels):
  */
     __pyx_v_val = (((1.0 - __pyx_v_stack_frac) * __pyx_v_y0) + (__pyx_v_stack_frac * __pyx_v_y1));
 
-    /* "pippi/oscs.pyx":202
+    /* "pippi/oscs.pyx":225
  *             val = (1.0 - stack_frac) * y0 + (stack_frac * y1)
  * 
- *             for channel in range(channels):             # <<<<<<<<<<<<<<
+ *             for channel in range(self.channels):             # <<<<<<<<<<<<<<
  *                 out[i][channel] = val * self.amp
  * 
  */
-    __pyx_t_13 = __pyx_v_channels;
+    __pyx_t_13 = __pyx_v_self->channels;
     for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_13; __pyx_t_15+=1) {
       __pyx_v_channel = __pyx_t_15;
 
-      /* "pippi/oscs.pyx":203
+      /* "pippi/oscs.pyx":226
  * 
- *             for channel in range(channels):
+ *             for channel in range(self.channels):
  *                 out[i][channel] = val * self.amp             # <<<<<<<<<<<<<<
  * 
- *         return SoundBuffer(out, channels=channels, samplerate=samplerate)
+ *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
  */
       __pyx_t_16.data = __pyx_v_out.data;
       __pyx_t_16.memview = __pyx_v_out.memview;
@@ -5173,7 +5305,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play2d(struct __pyx_obj_5pippi_4oscs
         __pyx_tmp_idx += __pyx_tmp_shape;
     if (1 && (__pyx_tmp_idx < 0 || __pyx_tmp_idx >= __pyx_tmp_shape)) {
         PyErr_SetString(PyExc_IndexError, "Index out of bounds (axis 0)");
-        __PYX_ERR(0, 203, __pyx_L1_error)
+        __PYX_ERR(0, 226, __pyx_L1_error)
     }
         __pyx_t_16.data += __pyx_tmp_idx * __pyx_tmp_stride;
 }
@@ -5190,7 +5322,7 @@ __pyx_t_17 = __pyx_v_channel;
       } else if (unlikely(__pyx_t_17 >= __pyx_t_16.shape[0])) __pyx_t_18 = 0;
       if (unlikely(__pyx_t_18 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_18);
-        __PYX_ERR(0, 203, __pyx_L1_error)
+        __PYX_ERR(0, 226, __pyx_L1_error)
       }
       *((double *) ( /* dim=0 */ (__pyx_t_16.data + __pyx_t_17 * __pyx_t_16.strides[0]) )) = (__pyx_v_val * __pyx_v_self->amp);
       __PYX_XDEC_MEMVIEW(&__pyx_t_16, 1);
@@ -5199,34 +5331,34 @@ __pyx_t_17 = __pyx_v_channel;
     }
   }
 
-  /* "pippi/oscs.pyx":205
+  /* "pippi/oscs.pyx":228
  *                 out[i][channel] = val * self.amp
  * 
- *         return SoundBuffer(out, channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
+ *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_SoundBuffer); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_SoundBuffer); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 205, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 205, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 228, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5235,11 +5367,11 @@ __pyx_t_17 = __pyx_v_channel;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "pippi/oscs.pyx":168
- *         return SoundBuffer(out, channels=channels, samplerate=samplerate)
+  /* "pippi/oscs.pyx":191
+ *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
  * 
- *     cdef object _play2d(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *         cdef double[:,:] out = np.zeros((length, channels))
+ *     cdef object _play2d(self, int length):             # <<<<<<<<<<<<<<
+ *         cdef double[:,:] out = np.zeros((length, self.channels))
  *         cdef double[:,:] stack = np.column_stack(self.wavetables)
  */
 
@@ -6833,7 +6965,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_3Osc_6__setstate_cython__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":217
+/* "pippi/oscs.pyx":240
  *     cdef public double amp
  * 
  *     def __init__(             # <<<<<<<<<<<<<<
@@ -6856,7 +6988,7 @@ static int __pyx_pw_5pippi_4oscs_4Fold_1__init__(PyObject *__pyx_v_self, PyObjec
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_wavetable,&__pyx_n_s_factors,&__pyx_n_s_freq,&__pyx_n_s_factFreq,&__pyx_n_s_amp,0};
     PyObject* values[5] = {0,0,0,0,0};
 
-    /* "pippi/oscs.pyx":219
+    /* "pippi/oscs.pyx":242
  *     def __init__(
  *             self,
  *             object wavetable=None,             # <<<<<<<<<<<<<<
@@ -6865,7 +6997,7 @@ static int __pyx_pw_5pippi_4oscs_4Fold_1__init__(PyObject *__pyx_v_self, PyObjec
  */
     values[0] = ((PyObject *)Py_None);
 
-    /* "pippi/oscs.pyx":220
+    /* "pippi/oscs.pyx":243
  *             self,
  *             object wavetable=None,
  *             object factors=None,             # <<<<<<<<<<<<<<
@@ -6923,7 +7055,7 @@ static int __pyx_pw_5pippi_4oscs_4Fold_1__init__(PyObject *__pyx_v_self, PyObjec
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 217, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 240, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -6944,24 +7076,24 @@ static int __pyx_pw_5pippi_4oscs_4Fold_1__init__(PyObject *__pyx_v_self, PyObjec
     __pyx_v_wavetable = values[0];
     __pyx_v_factors = values[1];
     if (values[2]) {
-      __pyx_v_freq = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_freq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 221, __pyx_L3_error)
+      __pyx_v_freq = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_freq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 244, __pyx_L3_error)
     } else {
       __pyx_v_freq = ((double)440.0);
     }
     if (values[3]) {
-      __pyx_v_factFreq = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_factFreq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 222, __pyx_L3_error)
+      __pyx_v_factFreq = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_factFreq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 245, __pyx_L3_error)
     } else {
       __pyx_v_factFreq = ((double)1.0);
     }
     if (values[4]) {
-      __pyx_v_amp = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_amp == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L3_error)
+      __pyx_v_amp = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_amp == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 246, __pyx_L3_error)
     } else {
       __pyx_v_amp = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 217, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 240, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.oscs.Fold.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6969,7 +7101,7 @@ static int __pyx_pw_5pippi_4oscs_4Fold_1__init__(PyObject *__pyx_v_self, PyObjec
   __pyx_L4_argument_unpacking_done:;
   __pyx_r = __pyx_pf_5pippi_4oscs_4Fold___init__(((struct __pyx_obj_5pippi_4oscs_Fold *)__pyx_v_self), __pyx_v_wavetable, __pyx_v_factors, __pyx_v_freq, __pyx_v_factFreq, __pyx_v_amp);
 
-  /* "pippi/oscs.pyx":217
+  /* "pippi/oscs.pyx":240
  *     cdef public double amp
  * 
  *     def __init__(             # <<<<<<<<<<<<<<
@@ -6994,7 +7126,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "pippi/oscs.pyx":226
+  /* "pippi/oscs.pyx":249
  *         ):
  * 
  *         self.freq = freq             # <<<<<<<<<<<<<<
@@ -7003,7 +7135,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
  */
   __pyx_v_self->freq = __pyx_v_freq;
 
-  /* "pippi/oscs.pyx":227
+  /* "pippi/oscs.pyx":250
  * 
  *         self.freq = freq
  *         self.factFreq = factFreq             # <<<<<<<<<<<<<<
@@ -7012,7 +7144,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
  */
   __pyx_v_self->factFreq = __pyx_v_factFreq;
 
-  /* "pippi/oscs.pyx":228
+  /* "pippi/oscs.pyx":251
  *         self.freq = freq
  *         self.factFreq = factFreq
  *         self.amp = amp             # <<<<<<<<<<<<<<
@@ -7021,7 +7153,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
  */
   __pyx_v_self->amp = __pyx_v_amp;
 
-  /* "pippi/oscs.pyx":230
+  /* "pippi/oscs.pyx":253
  *         self.amp = amp
  * 
  *         if isinstance(wavetable, str):             # <<<<<<<<<<<<<<
@@ -7032,16 +7164,16 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "pippi/oscs.pyx":231
+    /* "pippi/oscs.pyx":254
  * 
  *         if isinstance(wavetable, str):
  *             self.wavetable = wavetables.wavetable(wavetable, 4096)             # <<<<<<<<<<<<<<
  *         else:
  *             self.wavetable = wavetable
  */
-    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_wavetables); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_wavetables); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 254, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_wavetable); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 231, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_wavetable); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 254, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -7059,7 +7191,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_wavetable, __pyx_int_4096};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 231, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 254, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else
@@ -7067,13 +7199,13 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_wavetable, __pyx_int_4096};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 231, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 254, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else
     #endif
     {
-      __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 231, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 254, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       if (__pyx_t_4) {
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -7084,7 +7216,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
       __Pyx_INCREF(__pyx_int_4096);
       __Pyx_GIVEREF(__pyx_int_4096);
       PyTuple_SET_ITEM(__pyx_t_7, 1+__pyx_t_6, __pyx_int_4096);
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 231, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 254, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -7095,7 +7227,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     __pyx_v_self->wavetable = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "pippi/oscs.pyx":230
+    /* "pippi/oscs.pyx":253
  *         self.amp = amp
  * 
  *         if isinstance(wavetable, str):             # <<<<<<<<<<<<<<
@@ -7105,7 +7237,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     goto __pyx_L3;
   }
 
-  /* "pippi/oscs.pyx":233
+  /* "pippi/oscs.pyx":256
  *             self.wavetable = wavetables.wavetable(wavetable, 4096)
  *         else:
  *             self.wavetable = wavetable             # <<<<<<<<<<<<<<
@@ -7121,7 +7253,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
   }
   __pyx_L3:;
 
-  /* "pippi/oscs.pyx":235
+  /* "pippi/oscs.pyx":258
  *             self.wavetable = wavetable
  * 
  *         if isinstance(factors, str):             # <<<<<<<<<<<<<<
@@ -7132,16 +7264,16 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
   __pyx_t_1 = (__pyx_t_2 != 0);
   if (__pyx_t_1) {
 
-    /* "pippi/oscs.pyx":236
+    /* "pippi/oscs.pyx":259
  * 
  *         if isinstance(factors, str):
  *             self.factors = wavetables.window(factors, 4096)             # <<<<<<<<<<<<<<
  *         else:
  *             self.factors = factors
  */
-    __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_wavetables); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_wavetables); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 259, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_window); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 236, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_window); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 259, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_5 = NULL;
@@ -7159,7 +7291,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_factors, __pyx_int_4096};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 259, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else
@@ -7167,13 +7299,13 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[3] = {__pyx_t_5, __pyx_v_factors, __pyx_int_4096};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_6, 2+__pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 259, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else
     #endif
     {
-      __pyx_t_4 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(2+__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 259, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       if (__pyx_t_5) {
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5); __pyx_t_5 = NULL;
@@ -7184,7 +7316,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
       __Pyx_INCREF(__pyx_int_4096);
       __Pyx_GIVEREF(__pyx_int_4096);
       PyTuple_SET_ITEM(__pyx_t_4, 1+__pyx_t_6, __pyx_int_4096);
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 259, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -7195,7 +7327,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     __pyx_v_self->factors = __pyx_t_3;
     __pyx_t_3 = 0;
 
-    /* "pippi/oscs.pyx":235
+    /* "pippi/oscs.pyx":258
  *             self.wavetable = wavetable
  * 
  *         if isinstance(factors, str):             # <<<<<<<<<<<<<<
@@ -7205,7 +7337,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
     goto __pyx_L4;
   }
 
-  /* "pippi/oscs.pyx":238
+  /* "pippi/oscs.pyx":261
  *             self.factors = wavetables.window(factors, 4096)
  *         else:
  *             self.factors = factors             # <<<<<<<<<<<<<<
@@ -7221,7 +7353,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
   }
   __pyx_L4:;
 
-  /* "pippi/oscs.pyx":217
+  /* "pippi/oscs.pyx":240
  *     cdef public double amp
  * 
  *     def __init__(             # <<<<<<<<<<<<<<
@@ -7244,7 +7376,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold___init__(struct __pyx_obj_5pippi_4oscs_Fo
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":241
+/* "pippi/oscs.pyx":264
  * 
  * 
  *     def play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
@@ -7296,7 +7428,7 @@ static PyObject *__pyx_pw_5pippi_4oscs_4Fold_3play(PyObject *__pyx_v_self, PyObj
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "play") < 0)) __PYX_ERR(0, 241, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "play") < 0)) __PYX_ERR(0, 264, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -7309,21 +7441,21 @@ static PyObject *__pyx_pw_5pippi_4oscs_4Fold_3play(PyObject *__pyx_v_self, PyObj
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_length = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 241, __pyx_L3_error)
+    __pyx_v_length = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 264, __pyx_L3_error)
     if (values[1]) {
-      __pyx_v_channels = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_channels == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 241, __pyx_L3_error)
+      __pyx_v_channels = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_channels == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 264, __pyx_L3_error)
     } else {
       __pyx_v_channels = ((int)2);
     }
     if (values[2]) {
-      __pyx_v_samplerate = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_samplerate == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 241, __pyx_L3_error)
+      __pyx_v_samplerate = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_samplerate == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 264, __pyx_L3_error)
     } else {
       __pyx_v_samplerate = ((int)0xAC44);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("play", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 241, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("play", 0, 1, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 264, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.oscs.Fold.play", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -7343,7 +7475,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_4Fold_2play(struct __pyx_obj_5pippi_4oscs
   struct __pyx_opt_args_5pippi_4oscs_4Fold__play __pyx_t_2;
   __Pyx_RefNannySetupContext("play", 0);
 
-  /* "pippi/oscs.pyx":242
+  /* "pippi/oscs.pyx":265
  * 
  *     def play(self, int length, int channels=2, int samplerate=44100):
  *         return self._play(length, channels, samplerate)             # <<<<<<<<<<<<<<
@@ -7354,13 +7486,13 @@ static PyObject *__pyx_pf_5pippi_4oscs_4Fold_2play(struct __pyx_obj_5pippi_4oscs
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.channels = __pyx_v_channels;
   __pyx_t_2.samplerate = __pyx_v_samplerate;
-  __pyx_t_1 = ((struct __pyx_vtabstruct_5pippi_4oscs_Fold *)__pyx_v_self->__pyx_vtab)->_play(__pyx_v_self, __pyx_v_length, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_t_1 = ((struct __pyx_vtabstruct_5pippi_4oscs_Fold *)__pyx_v_self->__pyx_vtab)->_play(__pyx_v_self, __pyx_v_length, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "pippi/oscs.pyx":241
+  /* "pippi/oscs.pyx":264
  * 
  * 
  *     def play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
@@ -7379,7 +7511,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_4Fold_2play(struct __pyx_obj_5pippi_4oscs
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":244
+/* "pippi/oscs.pyx":267
  *         return self._play(length, channels, samplerate)
  * 
  *     cdef object _play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
@@ -7440,7 +7572,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     }
   }
 
-  /* "pippi/oscs.pyx":248
+  /* "pippi/oscs.pyx":271
  * 
  *         cdef double valWaveform, valNextWaveform, freq, factFreq
  *         cdef int cIndexWaveform = 0             # <<<<<<<<<<<<<<
@@ -7449,7 +7581,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_cIndexWaveform = 0;
 
-  /* "pippi/oscs.pyx":249
+  /* "pippi/oscs.pyx":272
  *         cdef double valWaveform, valNextWaveform, freq, factFreq
  *         cdef int cIndexWaveform = 0
  *         cdef double fracWaveform = 0             # <<<<<<<<<<<<<<
@@ -7458,7 +7590,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_fracWaveform = 0.0;
 
-  /* "pippi/oscs.pyx":252
+  /* "pippi/oscs.pyx":275
  * 
  *         cdef double valFactors, valNextFactors
  *         cdef int cIndexFactors = 0             # <<<<<<<<<<<<<<
@@ -7467,7 +7599,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_cIndexFactors = 0;
 
-  /* "pippi/oscs.pyx":253
+  /* "pippi/oscs.pyx":276
  *         cdef double valFactors, valNextFactors
  *         cdef int cIndexFactors = 0
  *         cdef double fracFactors = 0             # <<<<<<<<<<<<<<
@@ -7476,7 +7608,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_fracFactors = 0.0;
 
-  /* "pippi/oscs.pyx":255
+  /* "pippi/oscs.pyx":278
  *         cdef double fracFactors = 0
  * 
  *         cdef double indexWaveform = 0             # <<<<<<<<<<<<<<
@@ -7485,7 +7617,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_indexWaveform = 0.0;
 
-  /* "pippi/oscs.pyx":256
+  /* "pippi/oscs.pyx":279
  * 
  *         cdef double indexWaveform = 0
  *         cdef double indexFactors = 0             # <<<<<<<<<<<<<<
@@ -7494,7 +7626,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_indexFactors = 0.0;
 
-  /* "pippi/oscs.pyx":258
+  /* "pippi/oscs.pyx":281
  *         cdef double indexFactors = 0
  * 
  *         cdef int lenWaveform = len(self.wavetable)             # <<<<<<<<<<<<<<
@@ -7503,11 +7635,11 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_t_1 = __pyx_v_self->wavetable;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(0, 258, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(0, 281, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_lenWaveform = __pyx_t_2;
 
-  /* "pippi/oscs.pyx":259
+  /* "pippi/oscs.pyx":282
  * 
  *         cdef int lenWaveform = len(self.wavetable)
  *         cdef int lenFactors = len(self.factors)             # <<<<<<<<<<<<<<
@@ -7516,11 +7648,11 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_t_1 = __pyx_v_self->factors;
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(0, 259, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(0, 282, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_lenFactors = __pyx_t_2;
 
-  /* "pippi/oscs.pyx":261
+  /* "pippi/oscs.pyx":284
  *         cdef int lenFactors = len(self.factors)
  * 
  *         cdef double fold_out = 0             # <<<<<<<<<<<<<<
@@ -7529,7 +7661,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_fold_out = 0.0;
 
-  /* "pippi/oscs.pyx":262
+  /* "pippi/oscs.pyx":285
  * 
  *         cdef double fold_out = 0
  *         cdef double last_value = 0             # <<<<<<<<<<<<<<
@@ -7538,7 +7670,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_last_value = 0.0;
 
-  /* "pippi/oscs.pyx":263
+  /* "pippi/oscs.pyx":286
  *         cdef double fold_out = 0
  *         cdef double last_value = 0
  *         cdef int pos_thresh = 1             # <<<<<<<<<<<<<<
@@ -7547,7 +7679,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_pos_thresh = 1;
 
-  /* "pippi/oscs.pyx":264
+  /* "pippi/oscs.pyx":287
  *         cdef double last_value = 0
  *         cdef int pos_thresh = 1
  *         cdef int neg_thresh = -1             # <<<<<<<<<<<<<<
@@ -7556,7 +7688,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_neg_thresh = -1;
 
-  /* "pippi/oscs.pyx":265
+  /* "pippi/oscs.pyx":288
  *         cdef int pos_thresh = 1
  *         cdef int neg_thresh = -1
  *         cdef int state = 1             # <<<<<<<<<<<<<<
@@ -7565,7 +7697,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_state = 1;
 
-  /* "pippi/oscs.pyx":266
+  /* "pippi/oscs.pyx":289
  *         cdef int neg_thresh = -1
  *         cdef int state = 1
  *         cdef double difference = 0             # <<<<<<<<<<<<<<
@@ -7574,23 +7706,23 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
   __pyx_v_difference = 0.0;
 
-  /* "pippi/oscs.pyx":268
+  /* "pippi/oscs.pyx":291
  *         cdef double difference = 0
  * 
  *         cdef double[:,:] out = np.zeros((length, channels))             # <<<<<<<<<<<<<<
  * 
  *         for i in range(length):
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3);
@@ -7609,14 +7741,14 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     }
   }
   if (!__pyx_t_5) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 291, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_6};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7625,33 +7757,33 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_6};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     } else
     #endif
     {
-      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 268, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5); __pyx_t_5 = NULL;
       __Pyx_GIVEREF(__pyx_t_6);
       PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_6);
       __pyx_t_6 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_1);
-  if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 268, __pyx_L1_error)
+  if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 291, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_out = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/oscs.pyx":270
+  /* "pippi/oscs.pyx":293
  *         cdef double[:,:] out = np.zeros((length, channels))
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
@@ -7662,7 +7794,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
   for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
     __pyx_v_i = __pyx_t_9;
 
-    /* "pippi/oscs.pyx":272
+    /* "pippi/oscs.pyx":295
  *         for i in range(length):
  *             # Interp waveform wavetable
  *             cIndexWaveform = <int>indexWaveform % (lenWaveform - 1)             # <<<<<<<<<<<<<<
@@ -7672,24 +7804,24 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     __pyx_t_10 = (__pyx_v_lenWaveform - 1);
     if (unlikely(__pyx_t_10 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 272, __pyx_L1_error)
+      __PYX_ERR(0, 295, __pyx_L1_error)
     }
     __pyx_v_cIndexWaveform = __Pyx_mod_long(((int)__pyx_v_indexWaveform), __pyx_t_10);
 
-    /* "pippi/oscs.pyx":273
+    /* "pippi/oscs.pyx":296
  *             # Interp waveform wavetable
  *             cIndexWaveform = <int>indexWaveform % (lenWaveform - 1)
  *             valWaveform = self.wavetable[cIndexWaveform]             # <<<<<<<<<<<<<<
  *             valNextWaveform = self.wavetable[cIndexWaveform + 1]
  *             fracWaveform = indexWaveform - <int>indexWaveform
  */
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->wavetable, __pyx_v_cIndexWaveform, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 273, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->wavetable, __pyx_v_cIndexWaveform, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 296, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 296, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_valWaveform = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":274
+    /* "pippi/oscs.pyx":297
  *             cIndexWaveform = <int>indexWaveform % (lenWaveform - 1)
  *             valWaveform = self.wavetable[cIndexWaveform]
  *             valNextWaveform = self.wavetable[cIndexWaveform + 1]             # <<<<<<<<<<<<<<
@@ -7697,13 +7829,13 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  *             valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform
  */
     __pyx_t_10 = (__pyx_v_cIndexWaveform + 1);
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->wavetable, __pyx_t_10, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 274, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->wavetable, __pyx_t_10, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 297, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 274, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 297, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_valNextWaveform = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":275
+    /* "pippi/oscs.pyx":298
  *             valWaveform = self.wavetable[cIndexWaveform]
  *             valNextWaveform = self.wavetable[cIndexWaveform + 1]
  *             fracWaveform = indexWaveform - <int>indexWaveform             # <<<<<<<<<<<<<<
@@ -7712,7 +7844,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
     __pyx_v_fracWaveform = (__pyx_v_indexWaveform - ((int)__pyx_v_indexWaveform));
 
-    /* "pippi/oscs.pyx":276
+    /* "pippi/oscs.pyx":299
  *             valNextWaveform = self.wavetable[cIndexWaveform + 1]
  *             fracWaveform = indexWaveform - <int>indexWaveform
  *             valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform             # <<<<<<<<<<<<<<
@@ -7721,7 +7853,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
     __pyx_v_valWaveform = (((1.0 - __pyx_v_fracWaveform) * __pyx_v_valWaveform) + (__pyx_v_fracWaveform * __pyx_v_valNextWaveform));
 
-    /* "pippi/oscs.pyx":279
+    /* "pippi/oscs.pyx":302
  * 
  *             # Interp factors wavetable
  *             cIndexFactors = <int>indexFactors % (lenFactors - 1)             # <<<<<<<<<<<<<<
@@ -7731,24 +7863,24 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     __pyx_t_10 = (__pyx_v_lenFactors - 1);
     if (unlikely(__pyx_t_10 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 279, __pyx_L1_error)
+      __PYX_ERR(0, 302, __pyx_L1_error)
     }
     __pyx_v_cIndexFactors = __Pyx_mod_long(((int)__pyx_v_indexFactors), __pyx_t_10);
 
-    /* "pippi/oscs.pyx":280
+    /* "pippi/oscs.pyx":303
  *             # Interp factors wavetable
  *             cIndexFactors = <int>indexFactors % (lenFactors - 1)
  *             valFactors = self.factors[cIndexFactors]             # <<<<<<<<<<<<<<
  *             valNextFactors = self.factors[cIndexFactors + 1]
  *             fracFactors = indexFactors - <int>indexFactors
  */
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->factors, __pyx_v_cIndexFactors, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 280, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->factors, __pyx_v_cIndexFactors, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 303, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 280, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 303, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_valFactors = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":281
+    /* "pippi/oscs.pyx":304
  *             cIndexFactors = <int>indexFactors % (lenFactors - 1)
  *             valFactors = self.factors[cIndexFactors]
  *             valNextFactors = self.factors[cIndexFactors + 1]             # <<<<<<<<<<<<<<
@@ -7756,13 +7888,13 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  *             valFactors = (1.0 - fracFactors) * valFactors + fracFactors * valNextFactors
  */
     __pyx_t_10 = (__pyx_v_cIndexFactors + 1);
-    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->factors, __pyx_t_10, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 281, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_GetItemInt(__pyx_v_self->factors, __pyx_t_10, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 304, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 281, __pyx_L1_error)
+    __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_11 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 304, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_v_valNextFactors = __pyx_t_11;
 
-    /* "pippi/oscs.pyx":282
+    /* "pippi/oscs.pyx":305
  *             valFactors = self.factors[cIndexFactors]
  *             valNextFactors = self.factors[cIndexFactors + 1]
  *             fracFactors = indexFactors - <int>indexFactors             # <<<<<<<<<<<<<<
@@ -7771,7 +7903,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
     __pyx_v_fracFactors = (__pyx_v_indexFactors - ((int)__pyx_v_indexFactors));
 
-    /* "pippi/oscs.pyx":283
+    /* "pippi/oscs.pyx":306
  *             valNextFactors = self.factors[cIndexFactors + 1]
  *             fracFactors = indexFactors - <int>indexFactors
  *             valFactors = (1.0 - fracFactors) * valFactors + fracFactors * valNextFactors             # <<<<<<<<<<<<<<
@@ -7780,7 +7912,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
     __pyx_v_valFactors = (((1.0 - __pyx_v_fracFactors) * __pyx_v_valFactors) + (__pyx_v_fracFactors * __pyx_v_valNextFactors));
 
-    /* "pippi/oscs.pyx":284
+    /* "pippi/oscs.pyx":307
  *             fracFactors = indexFactors - <int>indexFactors
  *             valFactors = (1.0 - fracFactors) * valFactors + fracFactors * valNextFactors
  *             valWaveform *= valFactors             # <<<<<<<<<<<<<<
@@ -7789,7 +7921,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
     __pyx_v_valWaveform = (__pyx_v_valWaveform * __pyx_v_valFactors);
 
-    /* "pippi/oscs.pyx":289
+    /* "pippi/oscs.pyx":312
  *             # the magic is ripped from guest's posts on muffwiggler:
  *             # http://www.muffwiggler.com/forum/viewtopic.php?p=1586526#1586526
  *             difference = valWaveform - last_value             # <<<<<<<<<<<<<<
@@ -7798,7 +7930,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
     __pyx_v_difference = (__pyx_v_valWaveform - __pyx_v_last_value);
 
-    /* "pippi/oscs.pyx":290
+    /* "pippi/oscs.pyx":313
  *             # http://www.muffwiggler.com/forum/viewtopic.php?p=1586526#1586526
  *             difference = valWaveform - last_value
  *             last_value = valWaveform             # <<<<<<<<<<<<<<
@@ -7807,7 +7939,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
     __pyx_v_last_value = __pyx_v_valWaveform;
 
-    /* "pippi/oscs.pyx":291
+    /* "pippi/oscs.pyx":314
  *             difference = valWaveform - last_value
  *             last_value = valWaveform
  *             if state == 1:             # <<<<<<<<<<<<<<
@@ -7817,7 +7949,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     __pyx_t_12 = ((__pyx_v_state == 1) != 0);
     if (__pyx_t_12) {
 
-      /* "pippi/oscs.pyx":292
+      /* "pippi/oscs.pyx":315
  *             last_value = valWaveform
  *             if state == 1:
  *                 fold_out -= difference             # <<<<<<<<<<<<<<
@@ -7826,7 +7958,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
       __pyx_v_fold_out = (__pyx_v_fold_out - __pyx_v_difference);
 
-      /* "pippi/oscs.pyx":291
+      /* "pippi/oscs.pyx":314
  *             difference = valWaveform - last_value
  *             last_value = valWaveform
  *             if state == 1:             # <<<<<<<<<<<<<<
@@ -7836,7 +7968,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
       goto __pyx_L5;
     }
 
-    /* "pippi/oscs.pyx":294
+    /* "pippi/oscs.pyx":317
  *                 fold_out -= difference
  *             else:
  *                 fold_out += difference             # <<<<<<<<<<<<<<
@@ -7848,7 +7980,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     }
     __pyx_L5:;
 
-    /* "pippi/oscs.pyx":296
+    /* "pippi/oscs.pyx":319
  *                 fold_out += difference
  * 
  *             if fold_out >= pos_thresh:             # <<<<<<<<<<<<<<
@@ -7858,7 +7990,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     __pyx_t_12 = ((__pyx_v_fold_out >= __pyx_v_pos_thresh) != 0);
     if (__pyx_t_12) {
 
-      /* "pippi/oscs.pyx":297
+      /* "pippi/oscs.pyx":320
  * 
  *             if fold_out >= pos_thresh:
  *                 state ^= 1             # <<<<<<<<<<<<<<
@@ -7867,7 +7999,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
       __pyx_v_state = (__pyx_v_state ^ 1);
 
-      /* "pippi/oscs.pyx":298
+      /* "pippi/oscs.pyx":321
  *             if fold_out >= pos_thresh:
  *                 state ^= 1
  *                 fold_out = pos_thresh - (fold_out - pos_thresh)             # <<<<<<<<<<<<<<
@@ -7876,7 +8008,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
       __pyx_v_fold_out = (__pyx_v_pos_thresh - (__pyx_v_fold_out - __pyx_v_pos_thresh));
 
-      /* "pippi/oscs.pyx":296
+      /* "pippi/oscs.pyx":319
  *                 fold_out += difference
  * 
  *             if fold_out >= pos_thresh:             # <<<<<<<<<<<<<<
@@ -7886,7 +8018,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
       goto __pyx_L6;
     }
 
-    /* "pippi/oscs.pyx":299
+    /* "pippi/oscs.pyx":322
  *                 state ^= 1
  *                 fold_out = pos_thresh - (fold_out - pos_thresh)
  *             elif fold_out <= neg_thresh:             # <<<<<<<<<<<<<<
@@ -7896,7 +8028,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     __pyx_t_12 = ((__pyx_v_fold_out <= __pyx_v_neg_thresh) != 0);
     if (__pyx_t_12) {
 
-      /* "pippi/oscs.pyx":300
+      /* "pippi/oscs.pyx":323
  *                 fold_out = pos_thresh - (fold_out - pos_thresh)
  *             elif fold_out <= neg_thresh:
  *                 state ^= 1             # <<<<<<<<<<<<<<
@@ -7905,7 +8037,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
       __pyx_v_state = (__pyx_v_state ^ 1);
 
-      /* "pippi/oscs.pyx":301
+      /* "pippi/oscs.pyx":324
  *             elif fold_out <= neg_thresh:
  *                 state ^= 1
  *                 fold_out = neg_thresh - (fold_out - neg_thresh)             # <<<<<<<<<<<<<<
@@ -7914,7 +8046,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
  */
       __pyx_v_fold_out = (__pyx_v_neg_thresh - (__pyx_v_fold_out - __pyx_v_neg_thresh));
 
-      /* "pippi/oscs.pyx":299
+      /* "pippi/oscs.pyx":322
  *                 state ^= 1
  *                 fold_out = pos_thresh - (fold_out - pos_thresh)
  *             elif fold_out <= neg_thresh:             # <<<<<<<<<<<<<<
@@ -7924,7 +8056,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     }
     __pyx_L6:;
 
-    /* "pippi/oscs.pyx":303
+    /* "pippi/oscs.pyx":326
  *                 fold_out = neg_thresh - (fold_out - neg_thresh)
  * 
  *             for channel in range(channels):             # <<<<<<<<<<<<<<
@@ -7935,7 +8067,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
     for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
       __pyx_v_channel = __pyx_t_14;
 
-      /* "pippi/oscs.pyx":304
+      /* "pippi/oscs.pyx":327
  * 
  *             for channel in range(channels):
  *                 out[i][channel] = self.amp * fold_out             # <<<<<<<<<<<<<<
@@ -7953,7 +8085,7 @@ static PyObject *__pyx_f_5pippi_4oscs_4Fold__play(struct __pyx_obj_5pippi_4oscs_
         __pyx_tmp_idx += __pyx_tmp_shape;
     if (1 && (__pyx_tmp_idx < 0 || __pyx_tmp_idx >= __pyx_tmp_shape)) {
         PyErr_SetString(PyExc_IndexError, "Index out of bounds (axis 0)");
-        __PYX_ERR(0, 304, __pyx_L1_error)
+        __PYX_ERR(0, 327, __pyx_L1_error)
     }
         __pyx_t_15.data += __pyx_tmp_idx * __pyx_tmp_stride;
 }
@@ -7970,7 +8102,7 @@ __pyx_t_16 = __pyx_v_channel;
       } else if (unlikely(__pyx_t_16 >= __pyx_t_15.shape[0])) __pyx_t_17 = 0;
       if (unlikely(__pyx_t_17 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_17);
-        __PYX_ERR(0, 304, __pyx_L1_error)
+        __PYX_ERR(0, 327, __pyx_L1_error)
       }
       *((double *) ( /* dim=0 */ (__pyx_t_15.data + __pyx_t_16 * __pyx_t_15.strides[0]) )) = (__pyx_v_self->amp * __pyx_v_fold_out);
       __PYX_XDEC_MEMVIEW(&__pyx_t_15, 1);
@@ -7978,7 +8110,7 @@ __pyx_t_16 = __pyx_v_channel;
       __pyx_t_15.data = NULL;
     }
 
-    /* "pippi/oscs.pyx":306
+    /* "pippi/oscs.pyx":329
  *                 out[i][channel] = self.amp * fold_out
  * 
  *             indexWaveform += self.freq * lenWaveform * (1.0 / samplerate)             # <<<<<<<<<<<<<<
@@ -7987,11 +8119,11 @@ __pyx_t_16 = __pyx_v_channel;
  */
     if (unlikely(__pyx_v_samplerate == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 306, __pyx_L1_error)
+      __PYX_ERR(0, 329, __pyx_L1_error)
     }
     __pyx_v_indexWaveform = (__pyx_v_indexWaveform + ((__pyx_v_self->freq * __pyx_v_lenWaveform) * (1.0 / __pyx_v_samplerate)));
 
-    /* "pippi/oscs.pyx":307
+    /* "pippi/oscs.pyx":330
  * 
  *             indexWaveform += self.freq * lenWaveform * (1.0 / samplerate)
  *             indexFactors += self.factFreq * lenFactors * (1.0 / samplerate)             # <<<<<<<<<<<<<<
@@ -8000,12 +8132,12 @@ __pyx_t_16 = __pyx_v_channel;
  */
     if (unlikely(__pyx_v_samplerate == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 307, __pyx_L1_error)
+      __PYX_ERR(0, 330, __pyx_L1_error)
     }
     __pyx_v_indexFactors = (__pyx_v_indexFactors + ((__pyx_v_self->factFreq * __pyx_v_lenFactors) * (1.0 / __pyx_v_samplerate)));
   }
 
-  /* "pippi/oscs.pyx":309
+  /* "pippi/oscs.pyx":332
  *             indexFactors += self.factFreq * lenFactors * (1.0 / samplerate)
  * 
  *         return SoundBuffer(out, channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
@@ -8013,26 +8145,26 @@ __pyx_t_16 = __pyx_v_channel;
  * """
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_SoundBuffer); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_SoundBuffer); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) < 0) __PYX_ERR(0, 309, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) < 0) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) < 0) __PYX_ERR(0, 309, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) < 0) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 309, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 332, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8041,7 +8173,7 @@ __pyx_t_16 = __pyx_v_channel;
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "pippi/oscs.pyx":244
+  /* "pippi/oscs.pyx":267
  *         return self._play(length, channels, samplerate)
  * 
  *     cdef object _play(self, int length, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
@@ -8067,7 +8199,7 @@ __pyx_t_16 = __pyx_v_channel;
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":211
+/* "pippi/oscs.pyx":234
  *     """ Folding wavetable oscilator
  *     """
  *     cdef public object wavetable             # <<<<<<<<<<<<<<
@@ -8162,7 +8294,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold_9wavetable_4__del__(struct __pyx_obj_5pip
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":212
+/* "pippi/oscs.pyx":235
  *     """
  *     cdef public object wavetable
  *     cdef public object factors             # <<<<<<<<<<<<<<
@@ -8257,7 +8389,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold_7factors_4__del__(struct __pyx_obj_5pippi
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":213
+/* "pippi/oscs.pyx":236
  *     cdef public object wavetable
  *     cdef public object factors
  *     cdef public double factFreq             # <<<<<<<<<<<<<<
@@ -8284,7 +8416,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_4Fold_8factFreq___get__(struct __pyx_obj_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->factFreq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->factFreq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -8319,7 +8451,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold_8factFreq_2__set__(struct __pyx_obj_5pipp
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 213, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 236, __pyx_L1_error)
   __pyx_v_self->factFreq = __pyx_t_1;
 
   /* function exit code */
@@ -8333,7 +8465,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold_8factFreq_2__set__(struct __pyx_obj_5pipp
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":214
+/* "pippi/oscs.pyx":237
  *     cdef public object factors
  *     cdef public double factFreq
  *     cdef public double freq             # <<<<<<<<<<<<<<
@@ -8360,7 +8492,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_4Fold_4freq___get__(struct __pyx_obj_5pip
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->freq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->freq); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -8395,7 +8527,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold_4freq_2__set__(struct __pyx_obj_5pippi_4o
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 237, __pyx_L1_error)
   __pyx_v_self->freq = __pyx_t_1;
 
   /* function exit code */
@@ -8409,7 +8541,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold_4freq_2__set__(struct __pyx_obj_5pippi_4o
   return __pyx_r;
 }
 
-/* "pippi/oscs.pyx":215
+/* "pippi/oscs.pyx":238
  *     cdef public double factFreq
  *     cdef public double freq
  *     cdef public double amp             # <<<<<<<<<<<<<<
@@ -8436,7 +8568,7 @@ static PyObject *__pyx_pf_5pippi_4oscs_4Fold_3amp___get__(struct __pyx_obj_5pipp
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->amp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 215, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->amp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 238, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -8471,7 +8603,7 @@ static int __pyx_pf_5pippi_4oscs_4Fold_3amp_2__set__(struct __pyx_obj_5pippi_4os
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 238, __pyx_L1_error)
   __pyx_v_self->amp = __pyx_t_1;
 
   /* function exit code */
@@ -24664,8 +24796,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 };
 static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 76, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 135, __pyx_L1_error)
-  __pyx_builtin_IndexError = __Pyx_GetBuiltinName(__pyx_n_s_IndexError); if (!__pyx_builtin_IndexError) __PYX_ERR(0, 144, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 158, __pyx_L1_error)
+  __pyx_builtin_IndexError = __Pyx_GetBuiltinName(__pyx_n_s_IndexError); if (!__pyx_builtin_IndexError) __PYX_ERR(0, 167, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 109, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 131, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
@@ -25075,8 +25207,8 @@ PyMODINIT_FUNC PyInit_oscs(void)
   /*--- Function export code ---*/
   /*--- Type init code ---*/
   __pyx_vtabptr_5pippi_4oscs_Osc = &__pyx_vtable_5pippi_4oscs_Osc;
-  __pyx_vtable_5pippi_4oscs_Osc._play = (PyObject *(*)(struct __pyx_obj_5pippi_4oscs_Osc *, int, struct __pyx_opt_args_5pippi_4oscs_3Osc__play *__pyx_optional_args))__pyx_f_5pippi_4oscs_3Osc__play;
-  __pyx_vtable_5pippi_4oscs_Osc._play2d = (PyObject *(*)(struct __pyx_obj_5pippi_4oscs_Osc *, int, struct __pyx_opt_args_5pippi_4oscs_3Osc__play2d *__pyx_optional_args))__pyx_f_5pippi_4oscs_3Osc__play2d;
+  __pyx_vtable_5pippi_4oscs_Osc._play = (PyObject *(*)(struct __pyx_obj_5pippi_4oscs_Osc *, int))__pyx_f_5pippi_4oscs_3Osc__play;
+  __pyx_vtable_5pippi_4oscs_Osc._play2d = (PyObject *(*)(struct __pyx_obj_5pippi_4oscs_Osc *, int))__pyx_f_5pippi_4oscs_3Osc__play2d;
   if (PyType_Ready(&__pyx_type_5pippi_4oscs_Osc) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
   __pyx_type_5pippi_4oscs_Osc.tp_print = 0;
   if (__Pyx_SetVtable(__pyx_type_5pippi_4oscs_Osc.tp_dict, __pyx_vtabptr_5pippi_4oscs_Osc) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
@@ -25085,11 +25217,11 @@ PyMODINIT_FUNC PyInit_oscs(void)
   __pyx_ptype_5pippi_4oscs_Osc = &__pyx_type_5pippi_4oscs_Osc;
   __pyx_vtabptr_5pippi_4oscs_Fold = &__pyx_vtable_5pippi_4oscs_Fold;
   __pyx_vtable_5pippi_4oscs_Fold._play = (PyObject *(*)(struct __pyx_obj_5pippi_4oscs_Fold *, int, struct __pyx_opt_args_5pippi_4oscs_4Fold__play *__pyx_optional_args))__pyx_f_5pippi_4oscs_4Fold__play;
-  if (PyType_Ready(&__pyx_type_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 208, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 231, __pyx_L1_error)
   __pyx_type_5pippi_4oscs_Fold.tp_print = 0;
-  if (__Pyx_SetVtable(__pyx_type_5pippi_4oscs_Fold.tp_dict, __pyx_vtabptr_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 208, __pyx_L1_error)
-  if (PyObject_SetAttrString(__pyx_m, "Fold", (PyObject *)&__pyx_type_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 208, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 208, __pyx_L1_error)
+  if (__Pyx_SetVtable(__pyx_type_5pippi_4oscs_Fold.tp_dict, __pyx_vtabptr_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 231, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "Fold", (PyObject *)&__pyx_type_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 231, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5pippi_4oscs_Fold) < 0) __PYX_ERR(0, 231, __pyx_L1_error)
   __pyx_ptype_5pippi_4oscs_Fold = &__pyx_type_5pippi_4oscs_Fold;
   __pyx_vtabptr_array = &__pyx_vtable_array;
   __pyx_vtable_array.get_memview = (PyObject *(*)(struct __pyx_array_obj *))__pyx_array_get_memview;

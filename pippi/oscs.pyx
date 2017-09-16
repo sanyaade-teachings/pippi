@@ -107,14 +107,37 @@ cdef class Osc:
         else:
             self.lfo = lfo
 
-    def play(self, int length, int channels=2, int samplerate=44100):
-        if self.wavetables is not None:
-            return self._play2d(length, channels, samplerate)
-        else:
-            return self._play(length, channels, samplerate)
+    def play(self, 
+             int length, 
+             double freq=-1, 
+             double amp=-1, 
+             double pulsewidth=-1,
+             double mod_freq=-1,
+             double mod_range=-1,
+        ):
 
-    cdef object _play(self, int length, int channels=2, int samplerate=44100):
-        cdef double[:, :] out = np.zeros((length, channels))
+        if freq > 0:
+            self.freq = freq
+
+        if amp >= 0:
+            self.amp = amp 
+
+        if pulsewidth > 0:
+            self.pulsewidth = pulsewidth 
+
+        if mod_freq > 0:
+            self.mod_freq = mod_freq 
+
+        if mod_range >= 0:
+            self.mod_range = mod_range 
+
+        if self.wavetables is not None:
+            return self._play2d(length)
+        else:
+            return self._play(length)
+
+    cdef object _play(self, int length):
+        cdef double[:, :] out = np.zeros((length, self.channels))
 
         cdef int i = 0
         cdef int wtindex = 0
@@ -154,25 +177,25 @@ cdef class Osc:
                 val_mod = self.mod[modindex]
                 val_mod = (1.0 - frac_mod) * val_mod + frac_mod * nextval_mod
                 val_mod = 1.0 + (val_mod * self.mod_range)
-                self.mod_phase += self.mod_freq * modlength * (1.0 / samplerate)
+                self.mod_phase += self.mod_freq * modlength * (1.0 / self.samplerate)
 
             frac = self.phase - int(self.phase)
             val = (1.0 - frac) * val + frac * nextval
-            self.phase += self.freq * val_mod * wtlength * (1.0 / samplerate)
+            self.phase += self.freq * val_mod * wtlength * (1.0 / self.samplerate)
 
-            for channel in range(channels):
+            for channel in range(self.channels):
                 out[i][channel] = val * self.amp
 
-        return SoundBuffer(out, channels=channels, samplerate=samplerate)
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-    cdef object _play2d(self, int length, int channels=2, int samplerate=44100):
-        cdef double[:,:] out = np.zeros((length, channels))
+    cdef object _play2d(self, int length):
+        cdef double[:,:] out = np.zeros((length, self.channels))
         cdef double[:,:] stack = np.column_stack(self.wavetables)
         cdef int stack_depth = len(self.wavetables)
 
         cdef double wt_lfo_phase_inc = len(self.lfo) * (1.0 / length)
-        cdef double phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
-        cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
+        cdef double phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
+        cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
 
         cdef double wt_lfo_phase, wt_lfo_frac, wt_lfo_y0, wt_lfo_y1, wt_lfo_pos
         cdef double stack_frac, stack_phase
@@ -199,10 +222,10 @@ cdef class Osc:
             y1 = self.wavetables[(stack_x + 1) % stack_depth][wt_x % self.wtsize]
             val = (1.0 - stack_frac) * y0 + (stack_frac * y1)
 
-            for channel in range(channels):
+            for channel in range(self.channels):
                 out[i][channel] = val * self.amp
 
-        return SoundBuffer(out, channels=channels, samplerate=samplerate)
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
 
 cdef class Fold:

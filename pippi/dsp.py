@@ -11,7 +11,7 @@ from .soundbuffer import SoundBuffer
 def mix(sounds):
     """ Mix a list of sounds into a new sound
     """
-    out = SoundBuffer()
+    out = SoundBuffer(length=1)
     for sound in sounds:
         out &= sound
 
