@@ -1612,6 +1612,7 @@ static const char __pyx_k_kaiser[] = "kaiser";
 static const char __pyx_k_length[] = "length";
 static const char __pyx_k_linear[] = "linear";
 static const char __pyx_k_name_2[] = "__name__";
+static const char __pyx_k_period[] = "period";
 static const char __pyx_k_phasor[] = "phasor";
 static const char __pyx_k_pickle[] = "pickle";
 static const char __pyx_k_random[] = "random";
@@ -1779,6 +1780,7 @@ static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_n_s_obj;
 static PyObject *__pyx_n_s_pack;
+static PyObject *__pyx_n_s_period;
 static PyObject *__pyx_n_s_phasor;
 static PyObject *__pyx_n_s_pi;
 static PyObject *__pyx_n_s_pickle;
@@ -1837,7 +1839,7 @@ static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_5pippi_10wavetables_random_wavetable(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_2random_window(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_4window(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_window_type, int __pyx_v_length, __Pyx_memviewslice __pyx_v_data); /* proto */
-static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wavetable_type, int __pyx_v_length, double __pyx_v_duty, __Pyx_memviewslice __pyx_v_data); /* proto */
+static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wavetable_type, int __pyx_v_length, double __pyx_v_duty, __Pyx_memviewslice __pyx_v_data, CYTHON_UNUSED PyObject *__pyx_v_period); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_8list_all_wavetables(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_10list_all_windows(CYTHON_UNUSED PyObject *__pyx_self); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -3444,7 +3446,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_4window(CYTHON_UNUSED PyObject *__
 /* "pippi/wavetables.pyx":76
  * 
  * 
- * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):             # <<<<<<<<<<<<<<
+ * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):             # <<<<<<<<<<<<<<
  *     if data is not None:
  *         return interpolation.linear(data, length)
  */
@@ -3457,16 +3459,20 @@ static PyObject *__pyx_pw_5pippi_10wavetables_7wavetable(PyObject *__pyx_self, P
   int __pyx_v_length;
   double __pyx_v_duty;
   __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
+  CYTHON_UNUSED PyObject *__pyx_v_period = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("wavetable (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_wavetable_type,&__pyx_n_s_length,&__pyx_n_s_duty,&__pyx_n_s_data,0};
-    PyObject* values[4] = {0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_wavetable_type,&__pyx_n_s_length,&__pyx_n_s_duty,&__pyx_n_s_data,&__pyx_n_s_period,0};
+    PyObject* values[5] = {0,0,0,0,0};
+    values[4] = ((PyObject *)__pyx_int_1);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -3487,7 +3493,7 @@ static PyObject *__pyx_pw_5pippi_10wavetables_7wavetable(PyObject *__pyx_self, P
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_length)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("wavetable", 0, 2, 4, 1); __PYX_ERR(0, 76, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("wavetable", 0, 2, 5, 1); __PYX_ERR(0, 76, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -3501,12 +3507,20 @@ static PyObject *__pyx_pw_5pippi_10wavetables_7wavetable(PyObject *__pyx_self, P
           PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_data);
           if (value) { values[3] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_period);
+          if (value) { values[4] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "wavetable") < 0)) __PYX_ERR(0, 76, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -3530,17 +3544,18 @@ static PyObject *__pyx_pw_5pippi_10wavetables_7wavetable(PyObject *__pyx_self, P
       __pyx_v_data = __pyx_k__2;
       __PYX_INC_MEMVIEW(&__pyx_v_data, 1);
     }
+    __pyx_v_period = values[4];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("wavetable", 0, 2, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 76, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("wavetable", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 76, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.wavetables.wavetable", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_wavetable_type), (&PyUnicode_Type), 1, "wavetable_type", 1))) __PYX_ERR(0, 76, __pyx_L1_error)
-  __pyx_r = __pyx_pf_5pippi_10wavetables_6wavetable(__pyx_self, __pyx_v_wavetable_type, __pyx_v_length, __pyx_v_duty, __pyx_v_data);
+  __pyx_r = __pyx_pf_5pippi_10wavetables_6wavetable(__pyx_self, __pyx_v_wavetable_type, __pyx_v_length, __pyx_v_duty, __pyx_v_data, __pyx_v_period);
 
   /* function exit code */
   goto __pyx_L0;
@@ -3551,7 +3566,7 @@ static PyObject *__pyx_pw_5pippi_10wavetables_7wavetable(PyObject *__pyx_self, P
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wavetable_type, int __pyx_v_length, double __pyx_v_duty, __Pyx_memviewslice __pyx_v_data) {
+static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wavetable_type, int __pyx_v_length, double __pyx_v_duty, __Pyx_memviewslice __pyx_v_data, CYTHON_UNUSED PyObject *__pyx_v_period) {
   __Pyx_memviewslice __pyx_v_wt = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyObject *__pyx_v_tmp = NULL;
   PyObject *__pyx_r = NULL;
@@ -3573,7 +3588,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject 
 
   /* "pippi/wavetables.pyx":77
  * 
- * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):
+ * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):
  *     if data is not None:             # <<<<<<<<<<<<<<
  *         return interpolation.linear(data, length)
  * 
@@ -3582,7 +3597,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject 
   if (__pyx_t_1) {
 
     /* "pippi/wavetables.pyx":78
- * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):
+ * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):
  *     if data is not None:
  *         return interpolation.linear(data, length)             # <<<<<<<<<<<<<<
  * 
@@ -3653,7 +3668,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject 
 
     /* "pippi/wavetables.pyx":77
  * 
- * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):
+ * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):
  *     if data is not None:             # <<<<<<<<<<<<<<
  *         return interpolation.linear(data, length)
  * 
@@ -4564,7 +4579,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_6wavetable(CYTHON_UNUSED PyObject 
   /* "pippi/wavetables.pyx":76
  * 
  * 
- * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):             # <<<<<<<<<<<<<<
+ * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):             # <<<<<<<<<<<<<<
  *     if data is not None:
  *         return interpolation.linear(data, length)
  */
@@ -18238,6 +18253,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_n_s_obj, __pyx_k_obj, sizeof(__pyx_k_obj), 0, 0, 1, 1},
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
+  {&__pyx_n_s_period, __pyx_k_period, sizeof(__pyx_k_period), 0, 0, 1, 1},
   {&__pyx_n_s_phasor, __pyx_k_phasor, sizeof(__pyx_k_phasor), 0, 0, 1, 1},
   {&__pyx_n_s_pi, __pyx_k_pi, sizeof(__pyx_k_pi), 0, 0, 1, 1},
   {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
@@ -18549,14 +18565,14 @@ static int __Pyx_InitCachedConstants(void) {
   /* "pippi/wavetables.pyx":76
  * 
  * 
- * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):             # <<<<<<<<<<<<<<
+ * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):             # <<<<<<<<<<<<<<
  *     if data is not None:
  *         return interpolation.linear(data, length)
  */
-  __pyx_tuple__27 = PyTuple_Pack(6, __pyx_n_s_wavetable_type, __pyx_n_s_length, __pyx_n_s_duty, __pyx_n_s_data, __pyx_n_s_wt, __pyx_n_s_tmp); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __pyx_tuple__27 = PyTuple_Pack(7, __pyx_n_s_wavetable_type, __pyx_n_s_length, __pyx_n_s_duty, __pyx_n_s_data, __pyx_n_s_period, __pyx_n_s_wt, __pyx_n_s_tmp); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__27);
   __Pyx_GIVEREF(__pyx_tuple__27);
-  __pyx_codeobj__28 = (PyObject*)__Pyx_PyCode_New(4, 0, 6, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__27, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pippi_wavetables_pyx, __pyx_n_s_wavetable, 76, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__28)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __pyx_codeobj__28 = (PyObject*)__Pyx_PyCode_New(5, 0, 7, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__27, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pippi_wavetables_pyx, __pyx_n_s_wavetable, 76, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__28)) __PYX_ERR(0, 76, __pyx_L1_error)
 
   /* "pippi/wavetables.pyx":115
  * 
@@ -19200,7 +19216,7 @@ PyMODINIT_FUNC PyInit_wavetables(void)
   /* "pippi/wavetables.pyx":76
  * 
  * 
- * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):             # <<<<<<<<<<<<<<
+ * def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):             # <<<<<<<<<<<<<<
  *     if data is not None:
  *         return interpolation.linear(data, length)
  */

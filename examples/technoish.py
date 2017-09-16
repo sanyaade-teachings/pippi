@@ -7,7 +7,7 @@ import random
 start_time = time.time()
 
 osc = oscs.Osc()
-out = dsp.buffer(1)
+out = dsp.buffer()
 kick = dsp.read('sounds/909kick.wav')
 hat = dsp.read('sounds/hat.wav')
 snare = dsp.read('sounds/606snare.wav')

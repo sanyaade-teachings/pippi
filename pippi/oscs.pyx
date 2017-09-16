@@ -1,3 +1,4 @@
+import numbers
 import numpy as np
 from .soundbuffer import SoundBuffer
 from . import wavetables
@@ -5,68 +6,112 @@ from . import interpolation
 
 from cpython.array cimport array, clone
 
+cdef inline int DEFAULT_SAMPLERATE = 44100
+cdef inline int DEFAULT_CHANNELS = 2
 cdef inline double MIN_PULSEWIDTH = 0.0001
 
 cdef class Osc:
-    """ Wavetable-based oscilator with some extras
+    """ 1d or 2d wavetable osc
     """
     cdef public double freq
-    cdef public int offset
     cdef public double amp
+
     cdef public object wavetable
+    cdef public object wavetables
+    cdef public double lfo_freq
+    cdef public object lfo
+
     cdef public object window
+    cdef public double pulsewidth
+
     cdef public object mod
     cdef public double mod_range
     cdef public double mod_freq
-    cdef public double pulsewidth
+
     cdef double phase
     cdef double win_phase
     cdef double mod_phase
 
+    cdef public int channels
+    cdef public int samplerate
+    cdef public int wtsize
+
     def __init__(
             self, 
-            double freq=440, 
-            int offset=0, 
-            double amp=1, 
             object wavetable=None, 
-            object window=None, 
-            object mod=None, 
-            double mod_range=0.02, 
-            double mod_freq=0.1, 
+            double freq=440, 
+            double amp=1, 
+            double pulsewidth=1,
             double phase=0, 
-            double pulsewidth=1
+
+            object window=None, 
+            double win_phase=0, 
+
+            object mod=None, 
+            double mod_freq=0.2, 
+            double mod_range=0, 
+            double mod_phase=0, 
+
+            object lfo=None, 
+            double lfo_freq=0.2, 
+
+            int wtsize=4096,
+            int channels=DEFAULT_CHANNELS,
+            int samplerate=DEFAULT_SAMPLERATE,
         ):
 
         self.freq = freq
-        self.offset = offset
         self.amp = amp
         self.phase = phase
-        self.win_phase = phase
-        self.mod_phase = phase
-        self.mod_range = mod_range 
-        self.mod_freq = mod_freq
+
+        self.channels = channels
+        self.samplerate = samplerate
+        self.wtsize = wtsize
+
         self.pulsewidth = pulsewidth if pulsewidth >= MIN_PULSEWIDTH else MIN_PULSEWIDTH
 
-        if wavetable is None:
-            wavetable = 'sine'
-
-        if isinstance(wavetable, str):
-            self.wavetable = wavetables.wavetable(wavetable, 1024)
+        if isinstance(wavetable, list) and not isinstance(wavetable[0], numbers.Real):
+            self.wavetable = None
+            self.wavetables = []
+            for i, wt in enumerate(wavetable):
+                if isinstance(wt, str):
+                    self.wavetables += [ wavetables.wavetable(wt, self.wtsize) ]
+                else:
+                    if len(wt) != self.wtsize:
+                        wt = interpolation.linear(wt, self.wtsize)
+                    self.wavetables += [ wt ]
         else:
-            self.wavetable = wavetable
+            self.wavetables = None
+            if isinstance(wavetable, str):
+                self.wavetable = wavetables.wavetable(wavetable, self.wtsize)
+            else:
+                self.wavetable = wavetable
 
+        self.win_phase = win_phase
         if isinstance(window, str):
-            self.window = wavetables.window(window, 1024)
+            self.window = wavetables.window(window, self.wtsize)
         else:
             self.window = window
 
+        self.mod_range = mod_range
+        self.mod_phase = mod_phase
+        self.mod_freq = mod_freq
         if isinstance(mod, str):
-            self.mod = wavetables.window(mod, 1024)
+            self.mod = wavetables.window(mod, self.wtsize)
         else:
             self.mod = mod
 
+        self.lfo_freq = lfo_freq
+        if isinstance(lfo, str):
+            self.lfo = wavetables.window(lfo, self.wtsize)
+        else:
+            self.lfo = lfo
+
     def play(self, int length, int channels=2, int samplerate=44100):
-        return self._play(length, channels, samplerate)
+        if self.wavetables is not None:
+            return self._play2d(length, channels, samplerate)
+        else:
+            return self._play(length, channels, samplerate)
 
     cdef object _play(self, int length, int channels=2, int samplerate=44100):
         cdef double[:, :] out = np.zeros((length, channels))
@@ -120,77 +165,31 @@ cdef class Osc:
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)
 
-cdef class Osc2d:
-    """ 2d wavetable oscilator
-    """
-    cdef public object wavetables
-    cdef public object lfo
-    cdef public double freq
-    cdef public double lfo_freq
-    cdef public double amp
-    cdef public int wtsize
-
-    def __init__(
-            self, 
-            object wtables=None, 
-            object lfo=None, 
-            double freq=440, 
-            double lfo_freq=0.2, 
-            double amp=1, 
-            int wtsize=4096,
-        ):
-
-        self.freq = freq
-        self.amp = amp
-        self.wtsize = wtsize * 4 # oversampling is cheap
-        self.lfo_freq = lfo_freq
-
-        if wtables is None:
-            wtables = ['sine', 'square']
-
-        for i, wavetable in enumerate(wtables):
-            if isinstance(wavetable, str):
-                wtables[i] = wavetables.wavetable(wavetable, self.wtsize)
-            else:
-                if len(wavetable) != wtsize:
-                    wavetable = interpolation.linear(wavetable, self.wtsize)
-                wtables[i] = wavetable
-
-        self.wavetables = wtables
-
-        if isinstance(lfo, str):
-            self.lfo = wavetables.window(lfo, self.wtsize)
-        else:
-            self.lfo = lfo
-
-    def play(self, int length, int channels=2, int samplerate=44100):
-        return self._play(length, channels, samplerate)
-
-    cdef object _play(self, int length, int channels=2, int samplerate=44100):
+    cdef object _play2d(self, int length, int channels=2, int samplerate=44100):
         cdef double[:,:] out = np.zeros((length, channels))
         cdef double[:,:] stack = np.column_stack(self.wavetables)
         cdef int stack_depth = len(self.wavetables)
 
-        cdef double lfo_phase_inc = len(self.lfo) * (1.0 / length)
+        cdef double wt_lfo_phase_inc = len(self.lfo) * (1.0 / length)
         cdef double phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
         cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / samplerate)
 
-        cdef double lfo_phase, lfo_frac, lfo_y0, lfo_y1, lfo_pos
-        cdef double stack_frac, stack0_y0, stack0_y1, stack1_y0, stack1_y1, stack_phase
+        cdef double wt_lfo_phase, wt_lfo_frac, wt_lfo_y0, wt_lfo_y1, wt_lfo_pos
+        cdef double stack_frac, stack_phase
         cdef double phase, frac, y0, y1, val
 
-        cdef int i, lfo_x, stack_x, channel
+        cdef int i, wt_lfo_x, stack_x, channel
 
         for i in range(length):
-            lfo_phase = i * lfo_phase_inc
-            lfo_x = <int>lfo_phase
-            lfo_frac = lfo_phase - lfo_x
-            lfo_y0 = self.lfo[lfo_x % len(self.lfo)]
-            lfo_y1 = self.lfo[(lfo_x + 1) % len(self.lfo)]
+            wt_lfo_phase = i * wt_lfo_phase_inc
+            wt_lfo_x = <int>wt_lfo_phase
+            wt_lfo_frac = wt_lfo_phase - wt_lfo_x
+            wt_lfo_y0 = self.lfo[wt_lfo_x % len(self.lfo)]
+            wt_lfo_y1 = self.lfo[(wt_lfo_x + 1) % len(self.lfo)]
 
-            lfo_pos = (1.0 - lfo_frac) * lfo_y0 + (lfo_frac * lfo_y1)
+            wt_lfo_pos = (1.0 - wt_lfo_frac) * wt_lfo_y0 + (wt_lfo_frac * wt_lfo_y1)
 
-            stack_phase = lfo_pos * stack_depth
+            stack_phase = wt_lfo_pos * stack_depth
             stack_x = <int>stack_phase
             wt_phase = i * wt_phase_inc
             wt_x = <int>wt_phase
@@ -205,215 +204,216 @@ cdef class Osc2d:
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)
 
-    cdef _interp(self, frac, y0, y1):
-        return (1.0 - frac) * y0 + (frac * y1)
+
+cdef class Fold:
+    """ Folding wavetable oscilator
+    """
+    cdef public object wavetable
+    cdef public object factors
+    cdef public double factFreq
+    cdef public double freq
+    cdef public double amp
+
+    def __init__(
+            self, 
+            object wavetable=None, 
+            object factors=None, 
+            double freq=440, 
+            double factFreq=1,
+            double amp=1, 
+        ):
+
+        self.freq = freq
+        self.factFreq = factFreq
+        self.amp = amp
+
+        if isinstance(wavetable, str):
+            self.wavetable = wavetables.wavetable(wavetable, 4096)
+        else:
+            self.wavetable = wavetable
+
+        if isinstance(factors, str):
+            self.factors = wavetables.window(factors, 4096)
+        else:
+            self.factors = factors
+
+
+    def play(self, int length, int channels=2, int samplerate=44100):
+        return self._play(length, channels, samplerate)
+
+    cdef object _play(self, int length, int channels=2, int samplerate=44100):
+        cdef int i
+
+        cdef double valWaveform, valNextWaveform, freq, factFreq
+        cdef int cIndexWaveform = 0
+        cdef double fracWaveform = 0
+
+        cdef double valFactors, valNextFactors
+        cdef int cIndexFactors = 0
+        cdef double fracFactors = 0
+
+        cdef double indexWaveform = 0
+        cdef double indexFactors = 0
+
+        cdef int lenWaveform = len(self.wavetable)
+        cdef int lenFactors = len(self.factors)
+
+        cdef double fold_out = 0
+        cdef double last_value = 0 
+        cdef int pos_thresh = 1 
+        cdef int neg_thresh = -1 
+        cdef int state = 1
+        cdef double difference = 0
+
+        cdef double[:,:] out = np.zeros((length, channels))
+
+        for i in range(length):
+            # Interp waveform wavetable
+            cIndexWaveform = <int>indexWaveform % (lenWaveform - 1)
+            valWaveform = self.wavetable[cIndexWaveform]
+            valNextWaveform = self.wavetable[cIndexWaveform + 1]
+            fracWaveform = indexWaveform - <int>indexWaveform
+            valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform
+
+            # Interp factors wavetable
+            cIndexFactors = <int>indexFactors % (lenFactors - 1)
+            valFactors = self.factors[cIndexFactors]
+            valNextFactors = self.factors[cIndexFactors + 1]
+            fracFactors = indexFactors - <int>indexFactors
+            valFactors = (1.0 - fracFactors) * valFactors + fracFactors * valNextFactors
+            valWaveform *= valFactors
+
+            # Do the folding 
+            # the magic is ripped from guest's posts on muffwiggler: 
+            # http://www.muffwiggler.com/forum/viewtopic.php?p=1586526#1586526
+            difference = valWaveform - last_value
+            last_value = valWaveform
+            if state == 1:
+                fold_out -= difference
+            else:
+                fold_out += difference
+
+            if fold_out >= pos_thresh:
+                state ^= 1
+                fold_out = pos_thresh - (fold_out - pos_thresh)
+            elif fold_out <= neg_thresh:
+                state ^= 1
+                fold_out = neg_thresh - (fold_out - neg_thresh)
+
+            for channel in range(channels):
+                out[i][channel] = self.amp * fold_out
+
+            indexWaveform += self.freq * lenWaveform * (1.0 / samplerate)
+            indexFactors += self.factFreq * lenFactors * (1.0 / samplerate)
+
+        return SoundBuffer(out, channels=channels, samplerate=samplerate)
 
 """
-static char pippic_fold_docstring[] = "Wave folding synthesis.";
-static PyObject * pippic_fold(PyObject *self, PyObject *args) {
-    PyObject *output;
+cdef class Scrub:
+    # Granular scrubbing thingy 
+    #
+    cdef public SoundBuffer snd
+    cdef public object wavetable
+    cdef public object factors
+    cdef public double factFreq
+    cdef public double freq
+    cdef public double amp
 
-    PyObject *waveformIn;
-    PyObject *waveform;
+    def __init__(
+            self, 
+            SoundBuffer snd=None, 
+            object scrub=None, 
+            object window=None, 
+            double freq=440, 
+            double factFreq=1,
+            double amp=1, 
+        ):
 
-    PyObject *factorsIn;
-    PyObject *factors;
+        self.freq = freq
+        self.factFreq = factFreq
+        self.amp = amp
 
-    signed char *data;
+        if isinstance(wavetable, str):
+            self.wavetable = wavetables.wavetable(wavetable, 4096)
+        else:
+            self.wavetable = wavetable
 
-    int i;
-    int size = getsize();
-    int channels = 2;
-    int chunk = size + channels;
-    int length;
-
-    double valWaveform, valNextWaveform, freq, factFreq, amp;
-    int lenWaveform = 0, cIndexWaveform = 0;
-    double fracWaveform = 0;
-
-    double valFactors, valNextFactors;
-    int lenFactors = 0, cIndexFactors = 0;
-    double fracFactors = 0;
-
-    double indexWaveform = 0, indexFactors = 0;
-
-    if(!PyArg_ParseTuple(args, "ddiOOd", &freq, &factFreq, &length, &waveformIn, &factorsIn, &amp)) {
-        return NULL;
-    }
-
-    length *= chunk;
-
-    waveform = PySequence_Fast(waveformIn, "Could not read waveform wavetable.");
-    lenWaveform = PySequence_Size(waveformIn);
-
-    double wfrm[lenWaveform];
-    for(i=0; i < lenWaveform; i++) {
-        wfrm[i] = PyFloat_AsDouble(PyList_GET_ITEM(waveform, i));
-    }
-
-    factors = PySequence_Fast(factorsIn, "Could not read factors wavetable.");
-    lenFactors = PySequence_Size(factorsIn);
-
-    double facts[lenFactors];
-    for(i=0; i < lenFactors; i++) {
-        facts[i] = PyFloat_AsDouble(PyList_GET_ITEM(factors, i));
-    }
-
-    int fold_out = 0; 
-    int last_value = 0; 
-    int pos_thresh = 1; 
-    int neg_thresh = -1; 
-    int state = 1; 
-
-    output = PyString_FromStringAndSize(NULL, length);
-    data = (signed char*)PyString_AsString(output);
-
-    for(i=0; i < length; i += chunk) {
-        // Interp waveform wavetable
-        cIndexWaveform = (int)indexWaveform % (lenWaveform - 1);
-        valWaveform = wfrm[cIndexWaveform];
-        valNextWaveform = wfrm[cIndexWaveform + 1];
-        fracWaveform = indexWaveform - (int)indexWaveform;
-        valWaveform = (1.0 - fracWaveform) * valWaveform + fracWaveform * valNextWaveform;
-
-        // Interp factors wavetable
-        cIndexFactors = (int)indexFactors % (lenFactors - 1);
-        valFactors = facts[cIndexFactors];
-        valNextFactors = facts[cIndexFactors + 1];
-        fracFactors = indexFactors - (int)indexFactors;
-        valFactors = (1.0 - fracFactors) * valFactors + fracFactors * valNextFactors;
-        valWaveform *= valFactors;
-
-        // Do the folding 
-        // the magic is ripped from guest's posts on muffwiggler: 
-        // http://www.muffwiggler.com/forum/viewtopic.php?p=1586526#1586526
-        int difference = valWaveform - last_value; 
-        last_value = valWaveform; 
-        if(state == 1) { 
-            fold_out -= difference; 
-        } else { 
-            fold_out += difference; 
-        } 
-
-        if (fold_out >= pos_thresh) { 
-            state ^= 1; 
-            fold_out = pos_thresh - (fold_out - pos_thresh); 
-        } else if (fold_out <= neg_thresh) { 
-            state ^= 1; 
-            fold_out = neg_thresh - (fold_out - neg_thresh); 
-        } 
-
-        *BUFFER(data, i) = saturate(amp * fold_out * (MAXVAL - 1));
-        *BUFFER(data, i + size) = saturate(amp * fold_out * (MAXVAL - 1));
-
-        indexWaveform += freq * lenWaveform * (1.0 / 44100.0);
-        indexFactors += factFreq * lenFactors * (1.0 / 44100.0);
-    }
-
-    Py_DECREF(waveform);
-    Py_DECREF(factors);
-
-    return output;
-}
+        if isinstance(factors, str):
+            self.factors = wavetables.window(factors, 4096)
+        else:
+            self.factors = factors
 
 
+    def play(self, int length, int channels=2, int samplerate=44100):
+        return self._play(length, channels, samplerate)
 
+    cdef object _play(self, int length, int channels=2, int samplerate=44100):
+        cdef int cycle_length, input_length, cycle_start
+        cdef int window_type = 0 # HANN
+        cdef int scrub_type = 1 # SAW
+        cdef double window_period = M_PI * 2.0
+        cdef double scrub_period = 1.0
 
+        cdef int size = 2
+        cdef int channels = 2
+        cdef int chunk = size + channels
 
-static char pippic_pine_docstring[] = "Just your average pinecone.";
-static PyObject * pippic_pine(PyObject *self, PyObject *args) {
-    PyObject *output;
-    signed char *data, *input;
+        cdef double playhead, frequency
+        cdef int i, f
 
-    int output_length, cycle_length, input_length, cycle_start;
+        # Calculate the length of one cycle at the given frequency. 
+        # This is a lossy calculation and introduces slight tuning errors
+        # that become more extreme as the frequency increases. Deal with it.
+        cycle_length = <int>(samplingrate / frequency) * chunk
 
-    int window_type = HANN;
-    int scrub_type = SAW;
-    double window_period = M_PI * 2.0;
-    double scrub_period = 1.0;
+        # Calculate the number of cycles needed to generate for the 
+        # desired output length.
+        cdef int num_cycles = length / cycle_length
 
+        # Prefer overflows of length to underflows, so check for 
+        # a reminder when calculating and tack an extra cycle up in there.
+        if length % cycle_length > 0:
+            num_cycles += 1
 
-    int size = getsize();
-    int channels = 2;
-    int chunk = size + channels;
+        # Generate a scrub position trajectory. The scrub position is 
+        # just the position of the playhead at the start of each cycle.
+        # 
+        # The length of this array is equal to the number of cycles calculated 
+        # earlier. 
+        # 
+        # Positions will range from 0 to the length of the input minus the length 
+        # of a single cycle. 
+        # 
+        # These lengths should both be measured in frames. So: length / chunk.
+        cdef int scrub_positions[num_cycles]
+        cdef int max_position = (input_length / chunk) - (cycle_length / chunk)
 
-    double playhead, frequency;
-    int i, f;
+        cdef double pos_curve[num_cycles]
+        wavetable(scrub_type, pos_curve, num_cycles, 1.0, 0.0, 0.0, scrub_period)
+        pos_curve = wavetables.wavetable(wavetable, num_cycles)
 
-    if(!PyArg_ParseTuple(args, "s#id|idid", &input, &input_length, &output_length, &frequency, &window_type, &window_period, &scrub_type, &scrub_period)) {
-        return NULL;
-    }
+        for i in range(num_cycles):
+            playhead = pos_curve[i]
 
-    output_length *= chunk;
+            # Store the actual position in the buffer, not the frame count.
+            scrub_positions[i] = <int>(playhead * max_position) * chunk
 
-    /* Calculate the length of one cycle at the given frequency. 
-     * This is a lossy calculation and introduces slight tuning errors
-     * that become more extreme as the frequency increases. Deal with it.
-     */
-    cycle_length = (int)(44100.0 / frequency) * chunk;
+        # Generate each cycle of the stream by looping through the scrub array
+        # and writing into the output buffer. For each cycle, read from the 
+        # current scrub position forward cycle_length frames, and apply an 
+        # amplitude envelope to each cycle as the buffer is filled.
+        cdef double[:,:] out = np.zeros((length, channels))
 
-    /* Calculate the number of cycles needed to generate for the 
-     * desired output length.
-     */
-    int num_cycles = output_length / cycle_length;
+        cdef double cycle[cycle_length / chunk]
+        wavetable(window_type, cycle, cycle_length / chunk, 1.0, 0.0, 0.0, window_period);
 
-    /* Prefer overflows of length to underflows, so check for 
-     * a reminder when calculating and tack an extra cycle up in there.
-     */
-    if(output_length % cycle_length > 0) {
-        num_cycles += 1;
-    }
+        for i in range(num_cycles):
+            cycle_start = scrub_positions[i]
 
-    /* Generate a scrub position trajectory. The scrub position is 
-     * just the position of the playhead at the start of each cycle.
-     *
-     * The length of this array is equal to the number of cycles calculated 
-     * earlier. 
-     *
-     * Positions will range from 0 to the length of the input minus the length 
-     * of a single cycle. 
-     *
-     * These lengths should both be measured in frames. So: length / chunk.
-     */
-    int scrub_positions[num_cycles];
-    int max_position = (input_length / chunk) - (cycle_length / chunk);
+            for f in range(cycle_length):
+                for channel in range(channels):
+                    out[i * cycle_length + f] = (cycle_start + f) * cycle[f / chunk]
 
-    double pos_curve[num_cycles];
-    wavetable(scrub_type, pos_curve, num_cycles, 1.0, 0.0, 0.0, scrub_period);
-
-    for(i=0; i < num_cycles; i++) {
-        playhead = pos_curve[i];
-
-        /* Store the actual position in the buffer, not the frame count. */
-        scrub_positions[i] = (int)(playhead * max_position) * chunk;
-    }
-
-    /* Generate each cycle of the stream by looping through the scrub array
-     * and writing into the output buffer. For each cycle, read from the 
-     * current scrub position forward cycle_length frames, and apply an 
-     * amplitude envelope to each cycle as the buffer is filled.
-     */
-    output = PyString_FromStringAndSize(NULL, output_length);
-    data = (signed char*)PyString_AsString(output);
-
-    double cycle[cycle_length / chunk];
-    wavetable(window_type, cycle, cycle_length / chunk, 1.0, 0.0, 0.0, window_period);
-
-    int left, right;
-
-    for(i=0; i < num_cycles - 1; i++) {
-        cycle_start = scrub_positions[i];
-
-        for(f=0; f < cycle_length; f += chunk) {
-            left = *BUFFER(input, cycle_start + f);
-            *BUFFER(data, i * cycle_length + f) = saturate(left * cycle[f / chunk]);
-
-            right = *BUFFER(input, cycle_start + f + size);
-            *BUFFER(data, i * cycle_length + f + size) = saturate(right * cycle[f / chunk]);
-        }
-    }
-
-    return output;
-}
-
+        return out
 """
+

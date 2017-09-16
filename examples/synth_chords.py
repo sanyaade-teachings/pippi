@@ -1,8 +1,11 @@
 import random
+import time
 from pippi import dsp, oscs, tune
 
+start_time = time.time()
+
 def make_wavetable():
-    wtsize = random.randint(20, 100)
+    wtsize = random.randint(2, random.randint(10, 100))
     wavetable = [0] + [ random.triangular(-1, 1) for _ in range(wtsize-2) ] + [0]
     return wavetable
 
@@ -34,3 +37,6 @@ for chord in chords.split(' '):
     dubhead += chordlength
 
 out.write('synth_chords.wav')
+elapsed_time = time.time() - start_time
+print('Render time: %s seconds' % round(elapsed_time, 2))
+print('Output length: %s seconds' % round(len(out)/44100, 2))

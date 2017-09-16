@@ -73,7 +73,7 @@ def window(unicode window_type, int length, double[:] data=None):
     return wt
 
 
-def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None):
+def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):
     if data is not None:
         return interpolation.linear(data, length)
 

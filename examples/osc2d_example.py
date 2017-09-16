@@ -4,10 +4,10 @@ from pippi import dsp, oscs, tune
 
 start_time = time.time()
 
-tlength = 44100 * 150
+tlength = 44100 * 30
 out = dsp.buffer()
 pos = 0
-beat = 5000
+beat = 10000
 count = 0
 
 def make_note(freq, lfo_freq, amp, length):
@@ -16,9 +16,8 @@ def make_note(freq, lfo_freq, amp, length):
     lfo = random.choice(['sine', 'line', 'tri', 'phasor'])
     wavetables = [ random.choice(['sine', 'square', 'tri', 'saw']) for _ in range(numtables) ]
 
-    osc = oscs.Osc2d(wavetables, lfo)
+    osc = oscs.Osc(wavetables, lfo=lfo)
 
-    print('Note, freq: %s, lfo_freq: %s, amp: %s, length: %s' % (freq, lfo_freq, amp, round(length / 44100, 2)))
     osc.freq = freq * random.choice([0.5, 1])
     osc.lfo_freq = lfo_freq
     osc.amp = amp
@@ -29,7 +28,7 @@ def make_note(freq, lfo_freq, amp, length):
 
 def get_freqs(count):
     chords = ['II', 'V9', 'vii*', 'IV7']
-    return tune.chord(chords[count % len(chords)]) * 2
+    return tune.chord(chords[count % len(chords)])
 
 freqs = get_freqs(0)
 
@@ -37,7 +36,7 @@ while len(out) < tlength:
     print('Swell %s, pos %s' % (count, round(pos/44100, 2)))
 
     length = random.randint(44100, 44100 * 2)
-    freqs = get_freqs(count // 10)
+    freqs = get_freqs(count // 4)
     params = []
 
     for freq in freqs:
