@@ -19,25 +19,24 @@ cdef public double[:] _hermite(double[:] data, int length):
     cdef double[:] out = np.zeros(length)
     cdef get_sample_t get_sample = hermite_get_sample
 
+    cdef int datalen = len(data)
+
     for fi in range(length):
-        x = length / <double>(fi + 1) 
+        pos = <int>((fi / float(length)) * datalen)
         try:
-            y0 = data[fi - 1]
+            y0 = data[pos - 1]
         except IndexError:
             y0 = 0
 
-        try:
-            y1 = data[fi]
-        except IndexError:
-            y1 = 0
+        y1 = data[pos]
 
         try:
-            y2 = data[fi + 1]
+            y2 = data[pos + 1]
         except IndexError:
             y2 = 0
 
         try:
-            y3 = data[fi + 2]
+            y3 = data[pos + 2]
         except IndexError:
             y3 = 0
 
