@@ -90,6 +90,7 @@ There are more examples, give em a whirl, and try your own.
 Feature release, mostly:
 
 - Added 2d wavetable synthesis (similar to max/msp `2d.wave~`) to `Osc` plus example script
+- Read wavetables from 1 channel sound files with `wavetables.fromfile`
 - Added a helper for async rendering with `multiprocessing.Pool`
 - `SoundBuffer`s can now be pickled (enables passing them between processes)
 - `SoundBuffer` can be initialized (and spread across channels) from a normal python list

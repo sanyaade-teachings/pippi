@@ -1,6 +1,9 @@
 import collections
 import random
+
+import soundfile
 import numpy as np
+
 from . import interpolation
 
 cdef inline set SINEWAVE_NAMES  = set(('sin', 'sine', 'sinewave'))
@@ -72,12 +75,18 @@ def window(unicode window_type, int length, double[:] data=None):
 
     return wt
 
+def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, bint fromfile=False):
+    cdef double[:] wt = None
 
-def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, period=1):
     if data is not None:
         return interpolation.linear(data, length)
 
-    cdef double[:] wt = None
+    if fromfile:
+        wt, _ = soundfile.read(wavetable_type, dtype='float64')
+        if len(wt) == length:
+            return wt
+
+        return interpolation.linear(wt, length)
 
     if wavetable_type == u'random':
         wavetable_type = random.choice(list(ALL_WAVETABLES))
@@ -111,6 +120,8 @@ def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] dat
 
     return wt
 
+def fromfile(unicode filename, int length, double duty=0.5):
+    return wavetable(filename, length, fromfile=True)
 
 def list_all_wavetables():
     return list(ALL_WAVETABLES)
