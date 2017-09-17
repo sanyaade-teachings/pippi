@@ -6,6 +6,9 @@ ctypedef double (*get_sample_t)(double x, double y0, double y1, double y2, doubl
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef double hermite_get_sample(double x, double y0, double y1, double y2, double y3):
+    """ Taken from version #2 by James McCartney 
+        http://musicdsp.org/showone.php?id=93
+    """
     cdef double c0 = y1
     cdef double c1 = 0.5 * (y2 - y0)
     cdef double c3 = 1.5 * (y1 - y2) + 0.5 * (y3 - y0)
