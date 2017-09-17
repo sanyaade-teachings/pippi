@@ -4,7 +4,7 @@ import random
 import soundfile
 import numpy as np
 
-from . import interpolation
+from . cimport interpolation
 
 cdef inline set SINEWAVE_NAMES  = set(('sin', 'sine', 'sinewave'))
 cdef inline set COSINE_NAMES  = set(('cos', 'cosine'))
@@ -28,16 +28,15 @@ cdef inline set ALL_WAVETABLES = SINEWAVE_NAMES | COSINE_NAMES | \
                  TRIANGLE_NAMES | SAWTOOTH_NAMES | \
                  RSAWTOOTH_NAMES | SQUARE_NAMES
 
+cdef inline double SQUARE_DUTY = 0.5
+
 def random_wavetable():
     return random.choice(list(ALL_WAVETABLES))
 
 def random_window():
     return random.choice(list(ALL_WINDOWS))
 
-def window(unicode window_type, int length, double[:] data=None):
-    if data is not None:
-        return interpolation.linear(data, length)
-
+cdef double[:] _window(unicode window_type, int length):
     cdef double[:] wt = None
 
     if window_type == u'random':
@@ -75,18 +74,14 @@ def window(unicode window_type, int length, double[:] data=None):
 
     return wt
 
-def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] data=None, bint fromfile=False):
-    cdef double[:] wt = None
-
+def window(unicode window_type, int length, double[:] data=None):
     if data is not None:
-        return interpolation.linear(data, length)
+        return interpolation._linear(data, length)
 
-    if fromfile:
-        wt, _ = soundfile.read(wavetable_type, dtype='float64')
-        if len(wt) == length:
-            return wt
+    return _window(window_type, length)
 
-        return interpolation.linear(wt, length)
+cdef double[:] _wavetable(unicode wavetable_type, int length):
+    cdef double[:] wt = None
 
     if wavetable_type == u'random':
         wavetable_type = random.choice(list(ALL_WAVETABLES))
@@ -110,21 +105,31 @@ def wavetable(unicode wavetable_type, int length, double duty=0.5, double[:] dat
 
     if wavetable_type in SQUARE_NAMES:
         tmp = np.zeros(length)
-        duty = int(length * duty)
+        duty = int(length * SQUARE_DUTY)
         tmp[:duty] = 1
         tmp[duty:] = -1
         wt = tmp
 
     if wt is None:
-        return wavetable(u'sine', length)
+        return _wavetable(u'sine', length)
 
     return wt
 
-def fromfile(unicode filename, int length, double duty=0.5):
-    return wavetable(filename, length, fromfile=True)
+cpdef double[:] wavetable(unicode wavetable_type, int length, double[:] data=None):
+    if data is not None:
+        return interpolation._linear(data, length)
 
-def list_all_wavetables():
+    return _wavetable(wavetable_type, length)
+
+cpdef double[:] fromfile(unicode filename, int length):
+    wt, _ = soundfile.read(filename, dtype='d')
+    if len(wt) == length:
+        return wt
+
+    return interpolation._linear(wt, length)
+
+cpdef list list_all_wavetables():
     return list(ALL_WAVETABLES)
 
-def list_all_windows():
+cpdef list list_all_windows():
     return list(ALL_WINDOWS)

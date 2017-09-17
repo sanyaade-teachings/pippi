@@ -1,10 +1,15 @@
 import numbers
 import numpy as np
 from .soundbuffer import SoundBuffer
-from . import wavetables
-from . import interpolation
+from . cimport wavetables
+from . cimport interpolation
 
+cimport cython
 from cpython.array cimport array, clone
+
+ctypedef fused duration:
+    cython.int
+    cython.double
 
 cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
@@ -13,28 +18,28 @@ cdef inline double MIN_PULSEWIDTH = 0.0001
 cdef class Osc:
     """ 1d or 2d wavetable osc
     """
-    cdef public double freq
-    cdef public double amp
+    cdef double freq
+    cdef double amp
 
-    cdef public object wavetable
-    cdef public object wavetables
-    cdef public double lfo_freq
-    cdef public object lfo
+    cdef double[:] wavetable
+    cdef list wavetables
+    cdef double lfo_freq
+    cdef object lfo
 
-    cdef public object window
-    cdef public double pulsewidth
+    cdef double[:] window
+    cdef double pulsewidth
 
-    cdef public object mod
-    cdef public double mod_range
-    cdef public double mod_freq
+    cdef double[:] mod
+    cdef double mod_range
+    cdef double mod_freq
 
     cdef double phase
     cdef double win_phase
     cdef double mod_phase
 
-    cdef public int channels
-    cdef public int samplerate
-    cdef public int wtsize
+    cdef int channels
+    cdef int samplerate
+    cdef int wtsize
 
     def __init__(
             self, 
@@ -75,46 +80,58 @@ cdef class Osc:
             self.wavetables = []
             for i, wt in enumerate(wavetable):
                 if isinstance(wt, str):
-                    self.wavetables += [ wavetables.wavetable(wt, self.wtsize) ]
+                    self.wavetables += [ wavetables._wavetable(wt, self.wtsize) ]
                 else:
                     if len(wt) != self.wtsize:
-                        wt = interpolation.linear(wt, self.wtsize)
+                        wt = interpolation._linear(wt, self.wtsize)
                     self.wavetables += [ wt ]
         else:
             self.wavetables = None
+            if wavetable is None:
+                wavetable = 'sine'
+
             if isinstance(wavetable, str):
-                self.wavetable = wavetables.wavetable(wavetable, self.wtsize)
+                self.wavetable = wavetables._wavetable(wavetable, self.wtsize)
             else:
-                self.wavetable = wavetable
+                self.wavetable = np.array(wavetable, dtype='d')
 
         self.win_phase = win_phase
         if isinstance(window, str):
-            self.window = wavetables.window(window, self.wtsize)
+            self.window = wavetables._window(window, self.wtsize)
+        elif window is not None:
+            self.window = np.array(window, dtype='d')
         else:
-            self.window = window
+            self.window = None
 
         self.mod_range = mod_range
         self.mod_phase = mod_phase
         self.mod_freq = mod_freq
         if isinstance(mod, str):
-            self.mod = wavetables.window(mod, self.wtsize)
+            self.mod = wavetables._window(mod, self.wtsize)
+        elif mod is not None:
+            self.mod = np.array(mod, dtype='d')
         else:
-            self.mod = mod
+            self.mod = None
 
         self.lfo_freq = lfo_freq
         if isinstance(lfo, str):
-            self.lfo = wavetables.window(lfo, self.wtsize)
+            self.lfo = wavetables._window(lfo, self.wtsize)
+        elif lfo is not None:
+            self.lfo = np.array(lfo, dtype='d')
         else:
-            self.lfo = lfo
+            self.lfo = None
 
-    def play(self, 
-             int length, 
+    cpdef object play(self, 
+             duration length, 
              double freq=-1, 
              double amp=-1, 
              double pulsewidth=-1,
              double mod_freq=-1,
              double mod_range=-1,
         ):
+
+        if duration is double:
+            length = <int>(length * self.samplerate)
 
         if freq > 0:
             self.freq = freq
@@ -132,56 +149,63 @@ cdef class Osc:
             self.mod_range = mod_range 
 
         if self.wavetables is not None:
-            return self._play2d(length)
+            return self._play2d(<int>length)
         else:
-            return self._play(length)
+            return self._play(<int>length)
 
     cdef object _play(self, int length):
-        cdef double[:, :] out = np.zeros((length, self.channels))
+        cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
         cdef int i = 0
         cdef int wtindex = 0
         cdef int modindex = 0
         cdef int wtlength = len(self.wavetable)
+        cdef int wtboundry = wtlength - 1
         cdef int modlength = 1 if self.mod is None else len(self.mod)
+        cdef int modboundry = modlength - 1
         cdef double val, val_mod, nextval, nextval_mod, frac, frac_mod
+        cdef int silence_length
 
-        wavetable = self.wavetable
+        cdef double[:] wavetable = self.wavetable
+        cdef double[:] window
+
         if self.window is not None:
-            window = interpolation.linear(self.window, wtlength)
+            window = interpolation._linear(self.window, wtlength)
             wavetable = np.multiply(wavetable, window)
 
         if self.pulsewidth < 1:
-            silence_length = int((wtlength / self.pulsewidth) - wtlength)
-            wavetable = np.concatenate((wavetable, np.zeros(silence_length)))
+            silence_length = <int>((wtlength / self.pulsewidth) - wtlength)
+            wavetable = np.concatenate((wavetable, np.zeros(silence_length, dtype='d')))
+
+        cdef double isamplerate = 1.0 / self.samplerate
 
         for i in range(length):
-            wtindex = int(self.phase) % wtlength
-            modindex = int(self.mod_phase) % modlength
+            wtindex = <int>self.phase % wtlength
+            modindex = <int>self.mod_phase % modlength
 
             val = wavetable[wtindex]
             val_mod = 1
 
-            try:
+            if wtindex < wtboundry:
                 nextval = wavetable[wtindex + 1]
-            except IndexError:
+            else:
                 nextval = wavetable[0]
 
             if self.mod is not None:
-                try:
+                if modindex < modboundry:
                     nextval_mod = self.mod[modindex + 1]
-                except IndexError:
+                else:
                     nextval_mod = self.mod[0]
 
-                frac_mod = self.mod_phase - int(self.mod_phase)
+                frac_mod = self.mod_phase - <int>self.mod_phase
                 val_mod = self.mod[modindex]
                 val_mod = (1.0 - frac_mod) * val_mod + frac_mod * nextval_mod
                 val_mod = 1.0 + (val_mod * self.mod_range)
-                self.mod_phase += self.mod_freq * modlength * (1.0 / self.samplerate)
+                self.mod_phase += self.mod_freq * modlength * isamplerate
 
-            frac = self.phase - int(self.phase)
+            frac = self.phase - <int>self.phase
             val = (1.0 - frac) * val + frac * nextval
-            self.phase += self.freq * val_mod * wtlength * (1.0 / self.samplerate)
+            self.phase += self.freq * val_mod * wtlength * isamplerate
 
             for channel in range(self.channels):
                 out[i][channel] = val * self.amp
@@ -189,7 +213,7 @@ cdef class Osc:
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     cdef object _play2d(self, int length):
-        cdef double[:,:] out = np.zeros((length, self.channels))
+        cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
         cdef double[:,:] stack = np.column_stack(self.wavetables)
         cdef int stack_depth = len(self.wavetables)
 
@@ -251,12 +275,12 @@ cdef class Fold:
         self.amp = amp
 
         if isinstance(wavetable, str):
-            self.wavetable = wavetables.wavetable(wavetable, 4096)
+            self.wavetable = wavetables._wavetable(wavetable, 4096)
         else:
             self.wavetable = wavetable
 
         if isinstance(factors, str):
-            self.factors = wavetables.window(factors, 4096)
+            self.factors = wavetables._window(factors, 4096)
         else:
             self.factors = factors
 
@@ -288,7 +312,7 @@ cdef class Fold:
         cdef int state = 1
         cdef double difference = 0
 
-        cdef double[:,:] out = np.zeros((length, channels))
+        cdef double[:,:] out = np.zeros((length, channels), dtype='d')
 
         for i in range(length):
             # Interp waveform wavetable
@@ -357,12 +381,12 @@ cdef class Scrub:
         self.amp = amp
 
         if isinstance(wavetable, str):
-            self.wavetable = wavetables.wavetable(wavetable, 4096)
+            self.wavetable = wavetables._wavetable(wavetable, 4096)
         else:
             self.wavetable = wavetable
 
         if isinstance(factors, str):
-            self.factors = wavetables.window(factors, 4096)
+            self.factors = wavetables._window(factors, 4096)
         else:
             self.factors = factors
 
@@ -413,7 +437,7 @@ cdef class Scrub:
 
         cdef double pos_curve[num_cycles]
         wavetable(scrub_type, pos_curve, num_cycles, 1.0, 0.0, 0.0, scrub_period)
-        pos_curve = wavetables.wavetable(wavetable, num_cycles)
+        pos_curve = wavetables._wavetable(wavetable, num_cycles)
 
         for i in range(num_cycles):
             playhead = pos_curve[i]

@@ -17,17 +17,17 @@ for _ in range(50):
     wavetable = [0] + [ random.triangular(-1, 1) for _ in range(random.randint(3, 20)) ] + [0]
     mod = [ random.triangular(0, 1) for _ in range(random.randint(3, 20)) ]
     osc = oscs.Osc(wavetable, window='random', mod=mod)
-    osc.pulsewidth = random.random()
+    pulsewidth = random.random()
 
-    osc.freq = random.choice(freqs) * 2**random.randint(0, 3)
-    osc.mod_freq = random.triangular(0.01, 30)
-    osc.mod_range = random.triangular(0, random.choice([0.03, 0.02, 0.01, 3]))
-    osc.amp = random.triangular(0.05, 0.2)
+    freq = random.choice(freqs) * 2**random.randint(0, 3)
+    mod_freq = random.triangular(0.01, 30)
+    mod_range = random.triangular(0, random.choice([0.03, 0.02, 0.01, 3]))
+    amp = random.triangular(0.05, 0.2)
 
-    if osc.mod_range > 1:
-        osc.amp *= 0.5
+    if mod_range > 1:
+        amp *= 0.5
 
-    note = osc.play(length)
+    note = osc.play(length, freq, amp, pulsewidth, mod_freq=mod_freq, mod_range=mod_range)
     note = note.env(random.choice(['sine', 'phasor', 'line']))
     note = note.env('random')
     note = note.pan(random.random())

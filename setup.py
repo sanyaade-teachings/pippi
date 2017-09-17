@@ -3,12 +3,13 @@ from setuptools import setup
 
 try:
     from Cython.Build import cythonize
+    import numpy as np
     ext_modules = cythonize([
         'pippi/oscs.pyx', 
         'pippi/soundbuffer.pyx', 
         'pippi/interpolation.pyx',
         'pippi/wavetables.pyx'
-    ]) 
+    ], include_path=[np.get_include()]) 
 
 except ImportError:
     from setuptools.extension import Extension
