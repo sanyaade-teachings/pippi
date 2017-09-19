@@ -204,11 +204,11 @@ cdef class Osc:
                 self.mod_phase += self.mod_freq * modlength * isamplerate
 
             frac = self.phase - <int>self.phase
-            val = (1.0 - frac) * val + frac * nextval
+            val = ((1.0 - frac) * val + frac * nextval) * self.amp
             self.phase += self.freq * val_mod * wtlength * isamplerate
 
             for channel in range(self.channels):
-                out[i][channel] = val * self.amp
+                out[i][channel] = val
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 

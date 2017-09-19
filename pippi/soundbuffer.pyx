@@ -1,14 +1,14 @@
 import numbers
-import math
 import random
 import reprlib
 
 import soundfile
 import numpy as np
-from cython import auto_pickle
+cimport cython
+from libc cimport math
 
 from . import wavetables
-from . import interpolation
+from . cimport interpolation
 
 cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
@@ -53,13 +53,16 @@ cdef class SoundBuffer:
     def __reduce__(self):
         return (rebuild_buffer, (np.asarray(self.frames), self.channels, self.samplerate))
 
-    def _fill(self, double[:,:] frames):
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    cdef void _fill(self, double[:,:] frames):
         """ Fill current w/frames
         """
         cdef int frame_index, sample_index = 0
-        for frame_index, frame in enumerate(frames):
-            for sample_index, sample in enumerate(frame):
-                self.frames[frame_index][sample_index] = sample
+        cdef int framelen = len(frames)
+        for frame_index in range(framelen):
+            for sample_index in range(self.channels):
+                self.frames[frame_index][sample_index] = frames[frame_index][sample_index]
 
     def copy(self):
         if self.frames is None:
@@ -141,7 +144,7 @@ cdef class SoundBuffer:
 
         else:
             try:
-                wavetable = interpolation.linear(value, length)
+                wavetable = interpolation._linear(value, length)
                 out = np.multiply(self.frames, wavetable[:,None])
                 return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
             except TypeError as e:
@@ -160,7 +163,7 @@ cdef class SoundBuffer:
 
         else:
             try:
-                value = interpolation.linear(value, length)
+                value = interpolation._linear(value, length)
                 self.frames = np.multiply(self.frames, value[:,None])
             except TypeError as e:
                 raise NotImplemented('Cannot multiply SoundBuffer with %s' % type(value)) from e
@@ -309,16 +312,20 @@ cdef class SoundBuffer:
     def mix(self, sounds):
         """ Mix this sound in place with a sound or iterable of sounds
         """
+        cdef SoundBuffer sound
+        cdef int numsounds
+        cdef int sound_index
         if isinstance(sounds, SoundBuffer):
             self &= sounds
         else:
+            numsounds = len(sounds)
             try:
-                for sound in sounds:
-                    self &= sound 
+                for sound_index in range(numsounds):
+                    self &= sounds[sound_index] 
             except TypeError as e:
                 raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for mixing') from e
 
-    def _dub(self, SoundBuffer sound, int pos):
+    cdef void _dub(self, SoundBuffer sound, int pos):
         cdef int dublength = len(sound) + pos
 
         if len(self) < dublength:
@@ -335,12 +342,16 @@ cdef class SoundBuffer:
     def dub(self, sounds, int pos=0):
         """ Dub a sound or iterable of sounds into this soundbuffer
         """
+        cdef int numsounds
+        cdef int sound_index
+
         if isinstance(sounds, SoundBuffer):
             self._dub(sounds, pos)
         else:
+            numsounds = len(sounds)
             try:
-                for sound in sounds:
-                    self._dub(sound, pos)
+                for sound_index in range(numsounds):
+                    self._dub(sounds[sound_index], pos)
 
             except TypeError as e:
                 raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
@@ -455,7 +466,7 @@ cdef class SoundBuffer:
         cdef int length = len(self)
         cdef double[:] wavetable = None
         if values is not None:
-            wavetable = interpolation.linear(values, length)
+            wavetable = interpolation._linear(values, length)
         else:
             wavetable = wavetables.window(
                             window_type=window_type, 
@@ -486,20 +497,21 @@ cdef class SoundBuffer:
 
         return out[:length]
 
+    cdef double[:,:] _speed(self, double speed):
+        speed = speed if speed > 0 else 0.001
+        cdef int length = <int>(len(self) * (1.0 / speed))
+        cdef double[:,:] out = np.zeros((length, self.channels))
+        cdef int channel
+
+        for channel in range(self.channels):
+            out[:,channel] = interpolation._linear(np.asarray(self.frames[:,channel]), length)
+
+        return out
+
     def speed(self, double speed):
         """ Change the speed of the sound
         """
-        speed = speed if speed > 0 else 0.001
-        cdef int length = int(len(self) * (1.0 / speed))
-        out_o = np.zeros((length, self.channels))
-
-        cdef int channel
-        for channel in range(self.channels):
-            out_o[:,channel] = interpolation.linear(np.asarray(self.frames[:,channel]), length)
-
-        cdef double[:,:] out = out_o
-
-        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+        return SoundBuffer(self._speed(speed), channels=self.channels, samplerate=self.samplerate)
 
     def transpose(self, factor):
         """ TODO Change the pitch of the sound without changing 

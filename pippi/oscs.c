@@ -5898,7 +5898,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  *                 self.mod_phase += self.mod_freq * modlength * isamplerate
  * 
  *             frac = self.phase - <int>self.phase             # <<<<<<<<<<<<<<
- *             val = (1.0 - frac) * val + frac * nextval
+ *             val = ((1.0 - frac) * val + frac * nextval) * self.amp
  *             self.phase += self.freq * val_mod * wtlength * isamplerate
  */
     __pyx_v_frac = (__pyx_v_self->phase - ((int)__pyx_v_self->phase));
@@ -5906,15 +5906,15 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
     /* "pippi/oscs.pyx":207
  * 
  *             frac = self.phase - <int>self.phase
- *             val = (1.0 - frac) * val + frac * nextval             # <<<<<<<<<<<<<<
+ *             val = ((1.0 - frac) * val + frac * nextval) * self.amp             # <<<<<<<<<<<<<<
  *             self.phase += self.freq * val_mod * wtlength * isamplerate
  * 
  */
-    __pyx_v_val = (((1.0 - __pyx_v_frac) * __pyx_v_val) + (__pyx_v_frac * __pyx_v_nextval));
+    __pyx_v_val = ((((1.0 - __pyx_v_frac) * __pyx_v_val) + (__pyx_v_frac * __pyx_v_nextval)) * __pyx_v_self->amp);
 
     /* "pippi/oscs.pyx":208
  *             frac = self.phase - <int>self.phase
- *             val = (1.0 - frac) * val + frac * nextval
+ *             val = ((1.0 - frac) * val + frac * nextval) * self.amp
  *             self.phase += self.freq * val_mod * wtlength * isamplerate             # <<<<<<<<<<<<<<
  * 
  *             for channel in range(self.channels):
@@ -5925,7 +5925,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
  *             self.phase += self.freq * val_mod * wtlength * isamplerate
  * 
  *             for channel in range(self.channels):             # <<<<<<<<<<<<<<
- *                 out[i][channel] = val * self.amp
+ *                 out[i][channel] = val
  * 
  */
     __pyx_t_16 = __pyx_v_self->channels;
@@ -5935,7 +5935,7 @@ static PyObject *__pyx_f_5pippi_4oscs_3Osc__play(struct __pyx_obj_5pippi_4oscs_O
       /* "pippi/oscs.pyx":211
  * 
  *             for channel in range(self.channels):
- *                 out[i][channel] = val * self.amp             # <<<<<<<<<<<<<<
+ *                 out[i][channel] = val             # <<<<<<<<<<<<<<
  * 
  *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
  */
@@ -5969,7 +5969,7 @@ __pyx_t_23 = __pyx_v_channel;
         __Pyx_RaiseBufferIndexError(__pyx_t_24);
         __PYX_ERR(0, 211, __pyx_L1_error)
       }
-      *((double *) ( /* dim=0 */ (__pyx_t_8.data + __pyx_t_23 * __pyx_t_8.strides[0]) )) = (__pyx_v_val * __pyx_v_self->amp);
+      *((double *) ( /* dim=0 */ (__pyx_t_8.data + __pyx_t_23 * __pyx_t_8.strides[0]) )) = __pyx_v_val;
       __PYX_XDEC_MEMVIEW(&__pyx_t_8, 1);
       __pyx_t_8.memview = NULL;
       __pyx_t_8.data = NULL;
@@ -5977,7 +5977,7 @@ __pyx_t_23 = __pyx_v_channel;
   }
 
   /* "pippi/oscs.pyx":213
- *                 out[i][channel] = val * self.amp
+ *                 out[i][channel] = val
  * 
  *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 

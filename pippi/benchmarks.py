@@ -43,35 +43,35 @@ if __name__ == '__main__':
 
     run_times = [
         (1, 44100 * 10), 
-        (10, 44100), 
-        (100, 44100 * 2), 
+        (10, 44100 * 10), 
+        (100, 44100 * 10), 
     ]
 
     print('')
     print('basic')
     for nruns, length in run_times:
         print('%s %s second renders w/default settings...' % (nruns, round(length / 44100, 2)))
-        basic_time = timeit.timeit(stmt=basic.format(length=44100), number=nruns)
+        basic_time = timeit.timeit(stmt=basic.format(length=length), number=nruns)
         t = round(basic_time, 2)
-        print('total time %s\n%s %s\n%s' % (t, round(t/nruns, 2), 'avg per run', basic.format(length=44100)))
+        print('total time %s\n%s %s\n%s seconds' % (t, round(t/nruns, 2), 'avg per run', basic.format(length=length)))
         print('')
 
     print('')
     print('pulsewidth w/sine window')
     for nruns, length in run_times:
         print('%s %s second renders pulsewidth w/sine window...' % (nruns, round(length / 44100, 2)))
-        pwsine_time = timeit.timeit(stmt=pwsine.format(length=44100, wtsize=wtsize), number=nruns)
+        pwsine_time = timeit.timeit(stmt=pwsine.format(length=length, wtsize=wtsize), number=nruns)
         t = round(pwsine_time, 2)
-        print('total time %s\n%s %s\n%s' % (t, round(t/nruns, 2), 'avg per run', pwsine.format(length=44100, wtsize=wtsize)))
+        print('total time %s\n%s %s\n%s seconds' % (t, round(t/nruns, 2), 'avg per run', pwsine.format(length=length, wtsize=wtsize)))
         print('')
 
     print('')
     print('pulsewidth w/sine window & mod')
     for nruns, length in run_times:
         print('%s %s second renders pulsewidth w/sine window & mod...' % (nruns, round(length / 44100, 2)))
-        pwsinemod_time = timeit.timeit(stmt=pwsinemod.format(length=44100, wtsize=wtsize), number=nruns)
+        pwsinemod_time = timeit.timeit(stmt=pwsinemod.format(length=length, wtsize=wtsize), number=nruns)
         t = round(pwsinemod_time, 2)
-        print('total time %s\n%s %s\n%s' % (t, round(t/nruns, 2), 'avg per run', pwsinemod.format(length=44100, wtsize=wtsize)))
+        print('total time %s\n%s %s\n%s seconds' % (t, round(t/nruns, 2), 'avg per run', pwsinemod.format(length=length, wtsize=wtsize)))
         print('')
     print('')
 

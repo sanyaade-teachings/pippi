@@ -1,5 +1,6 @@
 import numpy as np
 cimport cython
+from libc cimport math
 
 ctypedef double (*get_sample_t)(double x, double y0, double y1, double y2, double y3)
 
