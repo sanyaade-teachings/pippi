@@ -6,7 +6,78 @@ from . import interpolation
 
 REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
 
-def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
+def pattern(
+    p,              # Unicode pattern, 1 beat unit per char
+    meter=None,     # String rep like 9/8, 4/4 etc
+    beats=None,     # Number of beats to return (measured in smallest unit of meter)
+    offset=None,    # Beat offset start point in pattern, counting from 0
+    bpm=None,       # Tempo in beats per minute
+    hz=None,        # Or tempo in hz (overrides bpm)
+    swing=0,        # MPC swing amount 0-1
+    reverse=False,  # Reverse the pattern
+    lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
+    lfo_tempo=None, # Lfo frequency in BPM string or Hz
+    lfo_depth=None, # Fractional multiplier from original tempo
+    delay=0         # Fixed delay in fractional seconds added to each onset
+):
+    """ Onsets from ascii
+    """
+    p = normalize_pattern(p, reverse, offset)
+
+    try:
+        numbeats, div = tuple(map(meter.split('/'), int))
+    except ValueError:
+        numbeats, div = (4, 4)
+
+    beats = beats if beats is not None else len(p)
+
+    if bpm is not None:
+        bpm = bpm if bpm > 0 else np.nextafter(0, 1)
+        beat = 60 / bpm
+    elif hz is not None:
+        hz = hz if hz > 0 else np.nextafter(0, 1)
+        beat = 1 / hz  
+    else:
+        beat = 0.25
+
+    onsets = []
+    # Todo apply LFO scaling during calc
+    for i in range(beats):
+        e = p[i % len(p)]
+        if e > 0:
+            t = i * beat
+            t += delay
+            onsets += [ t ]
+
+    onsets = onsetswing(onsets, swing, beat)
+
+    return onsets
+
+def onsetswing(onsets, amount, beat):
+    """ Add MPC-style swing to a list of onsets.
+        Amount is a value between 0 and 1, which 
+        maps to a swing amount between 0% and 75%.
+        Every odd onset will be delayed by
+            
+            beat length * swing amount
+
+        This will only really work like MPC swing 
+        when there is a run of notes, as rests 
+        are not represented in onset lists (and 
+        MPC swing just delays the upbeats).
+    """
+    if amount <= 0:
+        return onsets
+
+    delay_amount = int(beat * amount * 0.75)
+    for i, onset in enumerate(onsets):
+        if i % 2 == 1:
+            onsets[i] += delay_amount
+
+    return onsets
+
+
+def pgen(numbeats, div=1, offset=0, reps=None, reverse=False):
     """ Pattern creation helper
     """
     pat = [ 1 if tick == 0 else 0 for tick in range(div) ]
@@ -23,10 +94,14 @@ def pattern(numbeats, div=1, offset=0, reps=None, reverse=False):
 
     return pat
 
-def topattern(pattern, reverse=False):
+def normalize_pattern(pattern, reverse=False, rotate=None):
     pattern = [ 0 if tick in REST_SYMBOLS or not tick else 1 for tick in pattern ]
     if reverse:
         pattern = [ p for p in reversed(pattern) ]
+
+    if rotate:
+        pattern = [ 0 for _ in range(rotate) ] + pattern[:-rotate]
+
     return pattern
 
 def onsets(pattern, beat=4410, length=None, start=0):
@@ -75,29 +150,6 @@ def eu(length, numbeats, offset=0, reps=None, reverse=False):
         pattern = [ p for p in reversed(pattern) ]
 
     return pattern
-
-def swing(onsets, amount, beat, mpc=True):
-    """ Add MPC-style swing to a list of onsets.
-        Amount is a value between 0 and 1, which 
-        maps to a swing amount between 0% and 75%.
-        Every odd onset will be delayed by
-            
-            beat length * swing amount
-
-        This will only really work like MPC swing 
-        when there are a run of notes, as rests 
-        are not represented in onset lists (and 
-        MPC swing just delays the upbeats).
-    """
-    if amount <= 0:
-        return onsets
-
-    delay_amount = int(beat * amount * 0.75)
-    for i, onset in enumerate(onsets):
-        if i % 2 == 1:
-            onsets[i] += delay_amount
-
-    return onsets
 
 def curve(numbeats=16, wintype=None, length=44100, reverse=False, wavetable=None):
     """ Bouncy balls
