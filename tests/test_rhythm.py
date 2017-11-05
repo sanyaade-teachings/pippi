@@ -48,12 +48,12 @@ test_onsets = [
 class TestRhythm(TestCase):
     def test_basic_patterns(self):
         for pattern_args, result in test_patterns:
-            pattern = rhythm.pattern(*pattern_args)
+            pattern = rhythm.pgen(*pattern_args)
             self.assertEqual(pattern, result)
 
     def test_basic_topatterns(self):
         for pattern, result in test_topatterns:
-            pattern = rhythm.topattern(pattern)
+            pattern = rhythm.normalize_pattern(pattern)
             self.assertEqual(pattern, result)
 
     def test_onsets(self):

@@ -25,7 +25,7 @@ def pattern(
     p = normalize_pattern(p, reverse, offset)
 
     try:
-        numbeats, div = tuple(map(meter.split('/'), int))
+        numbeats, div = tuple(map(int, meter.split('/')))
     except ValueError:
         numbeats, div = (4, 4)
 

@@ -67,8 +67,6 @@ cdef public double[:] _linear(double[:] data, int length):
 
         phase += inputlength * (1.0 / length)
 
-    assert len(out) == length
-
     return out
 
 def linear(data, int length):

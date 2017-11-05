@@ -14,6 +14,81 @@ cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
 cdef inline unicode DEFAULT_SOUNDFILE = u'wav'
 
+cdef class RingBuffer:
+    """ Simple fixed-length ring buffer, lacking 
+        the transformations and operator 
+        overloading found in SoundBuffer but 
+        useful for loopers, delay lines, etc.
+    """
+    cdef public int length
+    cdef public int samplerate
+    cdef public int channels
+    cdef public int write_head
+    cdef public double[:,:] frames
+    cdef double[:,:] copyout
+
+    def __cinit__(self, int length, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE, double[:,:] frames=None):
+        self.samplerate = samplerate
+        self.channels = channels
+        self.length = length
+
+        if frames is not None:
+            self.frames = frames
+        else:
+            self.frames = np.zeros((length, channels))
+
+        self.copyout = np.zeros((length, channels))
+        self.write_head = 0
+
+    def __reduce__(self):
+        return (rebuild_ringbuffer, (self.length, self.channels, self.samplerate, self.frames))
+
+    def __len__(self):
+        return self.length
+
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    cdef double[:,:] _read(self, int length):
+        """ Read a length of frames from the buffer
+            where length is at maximum the length of 
+            the buffer, always returning most recently 
+            written frames.
+        """
+        cdef int i = 0
+        cdef int read_head = 0
+
+        if length > self.length:
+            length = self.length
+
+        read_head = (self.write_head - length) % self.length
+        for i in range(length):
+            self.copyout[i] = self.frames[read_head]
+            read_head = (read_head + 1) % self.length
+
+        return self.copyout[:length]
+
+    cpdef double[:,:] read(self, int length):
+        return self._read(length)
+
+    @cython.boundscheck(False)
+    @cython.wraparound(False)
+    cdef void _write(self, double[:,:] frames):
+        """ Write given frames into the buffer, advancing 
+            the write head and wrapping as needed.
+        """
+        cdef int i = 0
+        cdef int inputlength = len(frames)
+        
+        # write forward in the buffer, from the current
+        # write head position, until all frames are written
+        # wrapping the write head at the boundry of the buffer
+        for i in range(inputlength):
+            self.frames[self.write_head] = frames[i]
+            self.write_head = (self.write_head + 1) % self.length
+
+    cpdef void write(self, double[:,:] frames):
+        self._write(frames)
+
 cdef class SoundBuffer:
     """ A sequence of audio frames 
         representing a buffer of sound.
@@ -528,5 +603,8 @@ cdef class SoundBuffer:
 
 cpdef object rebuild_buffer(double[:,:] frames, int channels, int samplerate):
     return SoundBuffer(frames, channels=channels, samplerate=samplerate)
+
+cpdef object rebuild_ringbuffer(int length, int channels, int samplerate, double[:,:] frames):
+    return RingBuffer(length, channels=channels, samplerate=samplerate, frames=frames)
 
 
