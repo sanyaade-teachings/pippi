@@ -15,19 +15,19 @@ out = osc.play({length})
 """
 
 pwsine = """\
-from pippi import oscs, wavetables
-wavetable = wavetables.wavetable('sine', {wtsize})
-window = wavetables.window('sine', {wtsize})
+from pippi import oscs, wavetables, dsp
+wavetable = wavetables.wavetable(dsp.SINE, {wtsize})
+window = wavetables.window(dsp.SINE, {wtsize})
 pulsewidth = 0.95
 osc = oscs.Osc(wavetable, window=window, pulsewidth=pulsewidth)
 out = osc.play({length})
 """
 
 pwsinemod = """\
-from pippi import oscs, wavetables
-wavetable = wavetables.wavetable('sine', {wtsize})
-window = wavetables.window('sine', {wtsize})
-mod = wavetables.window('sine', {wtsize})
+from pippi import oscs, wavetables, dsp
+wavetable = wavetables.wavetable(dsp.SINE, {wtsize})
+window = wavetables.window(dsp.SINE, {wtsize})
+mod = wavetables.window(dsp.SINE, {wtsize})
 pulsewidth = 0.95
 osc = oscs.Osc(wavetable, window=window, mod=mod, pulsewidth=pulsewidth)
 out = osc.play({length})
@@ -35,7 +35,7 @@ out = osc.play({length})
 
 
 if __name__ == '__main__':
-    wtsize = 1024
+    wtsize = 4096
 
     init_time = timeit.timeit(stmt=init, number=1000)
     print('init 1000x...')

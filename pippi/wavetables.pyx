@@ -3,119 +3,158 @@ import random
 
 import soundfile
 import numpy as np
+cimport numpy as np
+np.import_array()
+
+from libc.stdlib cimport malloc, realloc, calloc, free
+from libc.stdlib cimport rand
+from libc cimport math
 
 from . cimport interpolation
+from .soundbuffer cimport SoundBuffer
 
-cdef inline set SINEWAVE_NAMES  = set(('sin', 'sine', 'sinewave'))
-cdef inline set COSINE_NAMES  = set(('cos', 'cosine'))
-cdef inline set TRIANGLE_NAMES  = set(('tri', 'triangle'))
-cdef inline set SAWTOOTH_NAMES  = set(('saw', 'sawtooth', 'ramp', 'line', 'lin'))
-cdef inline set RSAWTOOTH_NAMES = set(('isaw', 'rsaw', 'isawtooth', 'rsawtooth', 'reversesaw', 'phasor'))
-cdef inline set HANNING_NAMES = set(('hanning', 'hann', 'han'))
-cdef inline set HAMMING_NAMES = set(('hamming', 'hamm', 'ham'))
-cdef inline set BLACKMAN_NAMES = set(('blackman', 'black', 'bla'))
-cdef inline set BARTLETT_NAMES = set(('bartlett', 'bar'))
-cdef inline set KAISER_NAMES = set(('kaiser', 'kai'))
-cdef inline set SQUARE_NAMES = set(('square', 'sq'))
+cdef int SINE = 0
+cdef int COS = 1
+cdef int TRI = 2
+cdef int SAW = 3
+cdef int PHASOR = SAW
+cdef int RSAW = 4
+cdef int HANN = 5
+cdef int HAMM = 6
+cdef int BLACK = 7
+cdef int BLACKMAN = 7
+cdef int BART = 8
+cdef int BARTLETT = 8
+cdef int KAISER = 9
+cdef int SQUARE = 10
+cdef int RND = 11
 
-cdef inline set ALL_WINDOWS = SINEWAVE_NAMES | TRIANGLE_NAMES | \
-              SAWTOOTH_NAMES | RSAWTOOTH_NAMES | \
-              HANNING_NAMES | HAMMING_NAMES | \
-              BLACKMAN_NAMES | BARTLETT_NAMES | \
-              KAISER_NAMES
+cdef int LEN_WINDOWS = 9
+cdef int *ALL_WINDOWS = [
+            SINE, 
+            TRI, 
+            SAW,
+            RSAW,
+            HANN,
+            HAMM,
+            BLACK,
+            BART,
+            KAISER
+        ]
 
-cdef inline set ALL_WAVETABLES = SINEWAVE_NAMES | COSINE_NAMES | \
-                 TRIANGLE_NAMES | SAWTOOTH_NAMES | \
-                 RSAWTOOTH_NAMES | SQUARE_NAMES
+cdef int LEN_WAVETABLES = 6
+cdef int *ALL_WAVETABLES = [
+            SINE, 
+            COS,
+            TRI,
+            SAW,
+            RSAW,
+            SQUARE
+        ]
 
-cdef inline double SQUARE_DUTY = 0.5
+cdef double SQUARE_DUTY = 0.5
 
-def random_wavetable():
-    return random.choice(list(ALL_WAVETABLES))
+cdef class Wavetable:
+    cdef double* data
+    def __cinit__(self, int length):
+        self.data = <double*>calloc(length, sizeof(double))
 
-def random_window():
-    return random.choice(list(ALL_WINDOWS))
+    cdef void resize(self, int length):
+        self.data = <double*>realloc(self.data, length * sizeof(double))
 
-cdef double[:] _window(unicode window_type, int length):
-    cdef double[:] wt = None
+    def __dealloc__(self):
+        free(self.data)
 
-    if window_type == u'random':
-        window_type = random.choice(list(ALL_WINDOWS))
-
-    if window_type in SINEWAVE_NAMES:
-        wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
-
-    if window_type in TRIANGLE_NAMES:
-        wt = np.abs(np.abs(np.linspace(0, 2, length, dtype='d') - 1) - 1)
-
-    if window_type in SAWTOOTH_NAMES:
-        wt = np.linspace(0, 1, length, dtype='d')
-
-    if window_type in RSAWTOOTH_NAMES:
-        wt = np.linspace(1, 0, length, dtype='d')
-
-    if window_type in HANNING_NAMES:
-        wt = np.hanning(length)
-
-    if window_type in HAMMING_NAMES:
-        wt = np.hamming(length)
-
-    if window_type in BARTLETT_NAMES:
-        wt = np.bartlett(length)
-
-    if window_type in BLACKMAN_NAMES:
-        wt = np.blackman(length)
-
-    if window_type in KAISER_NAMES:
-        wt = np.kaiser(length, 0)
-
-    if wt is None:
-        return window(u'sine', length)
+cdef Wavetable _window2(int window_type, int length):
+    cdef Wavetable wt = Wavetable(length)
+    cdef int i = 0
+    for i in range(length):
+        wt.data[i] = i / length
 
     return wt
 
-def window(unicode window_type, int length, double[:] data=None):
+cdef double[:] _window(int window_type, int length):
+    cdef double[:] wt
+
+    if window_type == RND:
+        window_type = ALL_WINDOWS[rand() % LEN_WINDOWS]
+        wt = _window(window_type, length)
+
+    elif window_type == SINE:
+        wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
+
+    elif window_type == TRI:
+        wt = np.abs(np.abs(np.linspace(0, 2, length, dtype='d') - 1) - 1)
+
+    elif window_type == SAW:
+        wt = np.linspace(0, 1, length, dtype='d')
+
+    elif window_type == RSAW:
+        wt = np.linspace(1, 0, length, dtype='d')
+
+    elif window_type == HANN:
+        wt = np.hanning(length)
+
+    elif window_type == HAMM:
+        wt = np.hamming(length)
+
+    elif window_type == BART:
+        wt = np.bartlett(length)
+
+    elif window_type == BLACK:
+        wt = np.blackman(length)
+
+    elif window_type == KAISER:
+        wt = np.kaiser(length, 0)
+
+    else:
+        wt = window(SINE, length)
+
+    return wt
+
+def window(int window_type, int length, double[:] data=None):
     if data is not None:
         return interpolation._linear(data, length)
 
     return _window(window_type, length)
 
-cdef double[:] _wavetable(unicode wavetable_type, int length):
-    cdef double[:] wt = None
+cdef double[:] _wavetable(int wavetable_type, int length):
+    cdef double[:] wt
 
-    if wavetable_type == u'random':
-        wavetable_type = random.choice(list(ALL_WAVETABLES))
+    if wavetable_type == RND:
+        wavetable_type = ALL_WAVETABLES[rand() % LEN_WAVETABLES]
+        wt = _wavetable(wavetable_type, length)
 
-    if wavetable_type in SINEWAVE_NAMES:
+    elif wavetable_type == SINE:
         wt = np.sin(np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False))
 
-    if wavetable_type in COSINE_NAMES:
+    elif wavetable_type == COS:
         wt = np.cos(np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False))
 
-    if wavetable_type in TRIANGLE_NAMES:
+    elif wavetable_type == TRI:
         tmp = np.abs(np.linspace(-1, 1, length, dtype='d', endpoint=False))
         tmp = np.abs(tmp)
         wt = (tmp - tmp.mean()) * 2
 
-    if wavetable_type in SAWTOOTH_NAMES:
+    elif wavetable_type == SAW:
         wt = np.linspace(-1, 1, length, dtype='d', endpoint=False)
 
-    if wavetable_type in RSAWTOOTH_NAMES:
+    elif wavetable_type == RSAW:
         wt = np.linspace(1, -1, length, dtype='d', endpoint=False)
 
-    if wavetable_type in SQUARE_NAMES:
-        tmp = np.zeros(length)
+    elif wavetable_type == SQUARE:
+        tmp = np.zeros(length, dtype='d')
         duty = int(length * SQUARE_DUTY)
         tmp[:duty] = 1
         tmp[duty:] = -1
         wt = tmp
 
-    if wt is None:
-        return _wavetable(u'sine', length)
+    else:
+        wt = _wavetable(SINE, length)
 
     return wt
 
-cpdef double[:] wavetable(unicode wavetable_type, int length, double[:] data=None):
+cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=None):
     if data is not None:
         return interpolation._linear(data, length)
 
@@ -128,8 +167,4 @@ cpdef double[:] fromfile(unicode filename, int length):
 
     return interpolation._linear(wt, length)
 
-cpdef list list_all_wavetables():
-    return list(ALL_WAVETABLES)
 
-cpdef list list_all_windows():
-    return list(ALL_WINDOWS)

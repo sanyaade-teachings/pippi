@@ -19,7 +19,7 @@ class TestSoundBuffer(TestCase):
         self.assertTrue(len(sound) == 0)
         self.assertTrue(not sound)
 
-        sound = SoundBuffer(length=44100)
+        sound = SoundBuffer(length=1)
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound)
 
@@ -31,7 +31,7 @@ class TestSoundBuffer(TestCase):
 
     def test_save_buffer_to_soundfile(self):
         filename = path.join(self.soundfiles, 'test_save_buffer_to_soundfile.{}')
-        sound = SoundBuffer(length=44100)
+        sound = SoundBuffer(length=1)
 
         sound.write(filename.format('wav'))
         self.assertTrue(path.isfile(filename.format('wav')))
@@ -45,41 +45,42 @@ class TestSoundBuffer(TestCase):
     def test_split_buffer(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
-        length = random.randint(1, len(sound)) 
-        lengths = []
+        length = random.triangular(0.1, sound.dur) 
+        framelength = int(length * sound.samplerate)
+        durations = []
         for grain in sound.grains(length):
-            lengths += [ len(grain) ]
+            durations += [ grain.dur ]
 
         # The final grain isn't padded with silence, 
         # so it should only be the grain length if 
         # it can be divided equally into the total 
         # length.
-        for grain_length in lengths[:-1]:
-            self.assertEqual(grain_length, length)
+        for grain_length in durations[:-1]:
+            self.assertEqual(int(grain_length * sound.samplerate), framelength)
 
         # Check that the remainder grain is the correct length
-        self.assertEqual(lengths[-1], len(sound) - sum(lengths[:-1]))
+        remainderframes = int((sound.dur - sum(durations[:-1])) * sound.samplerate)
+        self.assertEqual(int(durations[-1] * sound.samplerate), remainderframes)
 
         # Check that all the grains add up
-        self.assertEqual(sum(lengths), len(sound))
+        self.assertEqual(sum(durations), sound.dur)
 
     def test_random_split_buffer(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
-        lengths = []
-        for grain in sound.grains(1, len(sound)):
-            lengths += [ len(grain) ]
+        durations = []
+        for grain in sound.grains(0.001, sound.dur):
+            durations += [ grain.dur ]
 
         # Check that the remainder grain is not 0
-        self.assertNotEqual(lengths[-1], 0)
+        self.assertNotEqual(durations[-1], 0)
 
         # Check that all the grains add up
-        self.assertEqual(sum(lengths), len(sound))
+        self.assertEqual(sum(durations), sound.dur)
 
     def test_window(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        print('FROM PY', len(sound))
-        for window_type in ('sine', 'saw', 'tri', 'hamm', 'hann', 'bar', 'kai', 'black'):
+        for window_type in (dsp.SINE, dsp.SAW, dsp.TRI, dsp.HAMM, dsp.HANN, dsp.BART, dsp.KAISER, dsp.BLACK):
             sound = sound.env(window_type)
             self.assertEqual(sound[0], (0,0))
 
@@ -88,6 +89,18 @@ class TestSoundBuffer(TestCase):
         speed = random.random()
         out = sound.speed(speed)
         self.assertEqual(len(out), int(len(sound) * (1/speed)))
+
+    def test_transpose(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+
+        speed = random.triangular(1, 10)
+        out = sound.transpose(speed)
+        self.assertEqual(len(out), len(sound))
+
+        speed = random.triangular(0, 1)
+        out = sound.transpose(speed)
+        self.assertEqual(len(out), len(sound))
+
 
     def test_pan(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -145,18 +158,18 @@ class TestSoundBuffer(TestCase):
 
         # Pad start
         original_length = len(sound)
-        silence_length = random.randint(100, 44100)
+        silence_length = random.triangular(0.001, 1)
         sound = sound.pad(silence_length)
 
-        self.assertEqual(len(sound), silence_length + original_length)
+        self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
         self.assertEqual(sound[0], (0,0))
 
         # Pad end
         original_length = len(sound)
-        silence_length = random.randint(100, 44100)
+        silence_length = random.triangular(0.001, 1)
         sound = sound.pad(end=silence_length)
 
-        self.assertEqual(len(sound), silence_length + original_length)
+        self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
         self.assertEqual(sound[-1], (0,0))
 
 

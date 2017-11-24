@@ -1,15 +1,17 @@
 import numbers
 import numpy as np
-from .soundbuffer import SoundBuffer
+cimport numpy as np
+np.import_array()
+from .soundbuffer cimport SoundBuffer
 from . cimport wavetables
 from . cimport interpolation
 
 cimport cython
 from cpython.array cimport array, clone
 
-ctypedef fused duration:
-    cython.int
-    cython.double
+#ctypedef fused duration:
+#    cython.int
+#    cython.double
 
 cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
@@ -75,54 +77,56 @@ cdef class Osc:
 
         self.pulsewidth = pulsewidth if pulsewidth >= MIN_PULSEWIDTH else MIN_PULSEWIDTH
 
-        if isinstance(wavetable, list) and not isinstance(wavetable[0], numbers.Real):
+        if isinstance(wavetable, int):
+            # Create wavetable type if wavetable is an integer flag
+            self.wavetable = wavetables._wavetable(wavetable, self.wtsize)
+
+        elif isinstance(wavetable, tuple):
+            # Create wavetable stack if wavetable is a tuple of wavetables
             self.wavetable = None
             self.wavetables = []
             for i, wt in enumerate(wavetable):
-                if isinstance(wt, str):
+                if isinstance(wt, int):
                     self.wavetables += [ wavetables._wavetable(wt, self.wtsize) ]
                 else:
                     if len(wt) != self.wtsize:
                         wt = interpolation._linear(wt, self.wtsize)
                     self.wavetables += [ wt ]
-        else:
-            self.wavetables = None
-            if wavetable is None:
-                wavetable = 'sine'
 
-            if isinstance(wavetable, str):
-                self.wavetable = wavetables._wavetable(wavetable, self.wtsize)
-            else:
-                self.wavetable = np.array(wavetable, dtype='d')
+        elif isinstance(wavetable, list):
+            # Convert lists to memoryview of a numpy array
+            self.wavetable = array('d', wavetable)
+
+        else:
+            # Fallback to SINE wavetable
+            self.wavetable = wavetables._wavetable(wavetables.SINE, self.wtsize)
 
         self.win_phase = win_phase
-        if isinstance(window, str):
+        if isinstance(window, int):
             self.window = wavetables._window(window, self.wtsize)
-        elif window is not None:
-            self.window = np.array(window, dtype='d')
         else:
-            self.window = None
+            self.window = window
 
         self.mod_range = mod_range
         self.mod_phase = mod_phase
         self.mod_freq = mod_freq
-        if isinstance(mod, str):
+        if isinstance(mod, int):
             self.mod = wavetables._window(mod, self.wtsize)
         elif mod is not None:
-            self.mod = np.array(mod, dtype='d')
+            self.mod = array('d', mod)
         else:
             self.mod = None
 
         self.lfo_freq = lfo_freq
-        if isinstance(lfo, str):
+        if isinstance(lfo, int):
             self.lfo = wavetables._window(lfo, self.wtsize)
         elif lfo is not None:
-            self.lfo = np.array(lfo, dtype='d')
+            self.lfo = array('d', lfo)
         else:
             self.lfo = None
 
     cpdef object play(self, 
-             duration length, 
+             double length, 
              double freq=-1, 
              double amp=-1, 
              double pulsewidth=-1,
@@ -130,8 +134,7 @@ cdef class Osc:
              double mod_range=-1,
         ):
 
-        if duration is double:
-            length = <int>(length * self.samplerate)
+        framelength = <int>(length * self.samplerate)
 
         if freq > 0:
             self.freq = freq
@@ -149,9 +152,9 @@ cdef class Osc:
             self.mod_range = mod_range 
 
         if self.wavetables is not None:
-            return self._play2d(<int>length)
+            return self._play2d(framelength)
         else:
-            return self._play(<int>length)
+            return self._play(framelength)
 
     cdef object _play(self, int length):
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
@@ -169,9 +172,12 @@ cdef class Osc:
         cdef double[:] wavetable = self.wavetable
         cdef double[:] window
 
+        cdef unsigned int j = 0
+
         if self.window is not None:
             window = interpolation._linear(self.window, wtlength)
-            wavetable = np.multiply(wavetable, window)
+            for j in range(wtlength):
+                wavetable[j] *= window[j]
 
         if self.pulsewidth < 1:
             silence_length = <int>((wtlength / self.pulsewidth) - wtlength)

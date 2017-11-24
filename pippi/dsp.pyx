@@ -7,6 +7,35 @@ import multiprocessing as mp
 import numpy as np
 
 from .soundbuffer import SoundBuffer
+from . cimport grains
+cimport wavetables as wts
+
+# Expose some C flags / constants to python
+# FIXME might be faster to use newish cpdef enum defs? donno
+SINE = wts.SINE
+COS = wts.COS
+TRI = wts.TRI
+SAW = wts.SAW
+PHASOR = wts.PHASOR
+RSAW = wts.RSAW
+HANN = wts.HANN
+HAMM = wts.HAMM
+BLACK = wts.BLACK
+BLACKMAN = wts.BLACK
+BART = wts.BART
+BARTLETT = wts.BARTLETT
+KAISER = wts.KAISER
+SQUARE = wts.SQUARE
+RND = wts.RND
+
+# Just a shorthand for MS in scripts. 
+# For example:
+#
+# >>> snd.cut(0.75, 32*dsp.MS)
+#
+# Which cuts, starting from 0.75 seconds in, 
+# a 32 millisecond section from the SoundBuffer `snd`.
+MS = 0.001
 
 def mix(sounds):
     """ Mix a list of sounds into a new sound
@@ -51,6 +80,9 @@ def find(pattern, channels=2, samplerate=44100):
     """
     for filename in glob.iglob(pattern, recursive=True):
         yield SoundBuffer(filename, channels=channels, samplerate=samplerate)
+
+def cloud(snd, *args, **kwargs):
+    return grains.GrainCloud(snd, *args, **kwargs)
 
 def pool(callback, params, processes=4):
     out = []
