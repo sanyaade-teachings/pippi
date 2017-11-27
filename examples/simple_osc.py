@@ -1,22 +1,14 @@
 import random
 
+from pippi import dsp
 from pippi.oscs import Osc
-
-waveform_types = [
-    'square', 
-    'sine', 
-    'triangle', 
-    'saw', 
-    'rsaw', 
-    'cosine'
-]
 
 # Create a wavetable osc with a randomly 
 # selected waveform type
-osc = Osc(freq=440, wavetable=random.choice(waveform_types))
+osc = Osc(freq=440, wavetable=dsp.RND)
 
-# Length in frames
-length = 44100
+# Length in seconds
+length = 1
 
 # Fill a SoundBuffer with output from the osc
 out = osc.play(length) * 0.5

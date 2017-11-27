@@ -433,11 +433,13 @@ cdef class SoundBuffer:
                     np.zeros((total_length - source_length, self.channels), dtype='float64')
                 ))
 
-        cdef int i = 0
-        cdef int c = 0
-        for i in range(dubsnd_length):
-            for c in range(self.channels):
-                self.frames[framepos+i][c] += sound[i][c]
+        #cdef int i = 0
+        #cdef int c = 0
+        #for i in range(dubsnd_length):
+        #    for c in range(self.channels):
+        #        self.frames[framepos+i][c] += sound[i][c]
+
+        self.frames.base[framepos:total_length] += sound.frames
 
     def dub(self, sounds, double pos=-1, int framepos=0):
         """ Dub a sound or iterable of sounds into this soundbuffer
@@ -651,10 +653,11 @@ cdef class SoundBuffer:
         """
         return grains.GrainCloud(self).play(length)
 
-    def taper(self, int length):
+    def taper(self, double length):
+        cdef int framelength = <int>(length * self.samplerate)
         out = SoundBuffer(frames=self.frames[:,:], channels=self.channels, samplerate=self.samplerate)
-        out[:length] *= wavetables._window(wavetables.SAW, length)
-        out[:-length] *= wavetables._window(wavetables.RSAW, length)
+        out[:framelength] *= wavetables._window(wavetables.SAW, framelength)
+        out[:-framelength] *= wavetables._window(wavetables.RSAW, framelength)
         return out
 
     def transpose(self, double factor, double grainlength=40):

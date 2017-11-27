@@ -52,7 +52,8 @@ for _ in range(numpasses):
         hit = hit.pan(pan)
 
         # Finally, actually dub the snare into the output buffer at the desired location
-        out.dub(hit, onset)
+        pos = onset / out.samplerate # convert frames to seconds
+        out.dub(hit, pos)
 
 # Write the sound to disk
 out.write('multi_snare_bounce_example.wav')

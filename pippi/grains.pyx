@@ -105,10 +105,11 @@ cdef class GrainCloud:
         elif density_lfo_wt is not None:
             self.density_lfo = density_lfo_wt
         else:
-            self.density_lfo = wavetables._window(wavetables.PHASOR, density_lfo_length)
+            self.density_lfo = None
 
         self.density_lfo_speed = density_lfo_speed
-        self.density_lfo_length = len(self.density_lfo)
+        if self.density_lfo is not None:
+            self.density_lfo_length = len(self.density_lfo)
 
         if grainlength_lfo > -1:
             self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)
@@ -219,7 +220,7 @@ cdef class GrainCloud:
                 speed_phase += speed_phase_inc
 
             # Density LFO
-            if self.density <= 0:
+            if self.density_lfo is not None:
                 density_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.density_lfo_length * self.density_lfo_speed
                 density_index = <int>density_phase
                 density_frac = density_phase - density_index

@@ -5,9 +5,9 @@ out = dsp.buffer()
 
 snare = dsp.read('sounds/snare.wav')
 
-pattern = rhythm.curve(numbeats=64, wintype='sine', length=44100 * 4)
+pattern = rhythm.curve(numbeats=64, wintype=dsp.SINE, length=44100 * 4)
 
 for onset in pattern:
-    out.dub(snare * random.random(), onset)
+    out.dub(snare * random.random(), onset/out.samplerate)
 
-out.write('beat_example.wav')
+out.write('simple_snare_bounce.wav')

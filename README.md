@@ -87,16 +87,29 @@ There are more examples, give em a whirl, and try your own.
 
 ### 2.0.0 - Alpha 9 (in development)
 
-Feature release, mostly:
+Final (probably) feature releases / big api changes before going to beta.
 
+- Breaking API changes:
+    - Durations for most APIs are now given in seconds (floats) rather than 
+      integer frames. `len(SoundBuffer)` still returns a length in frames per
+      python convention, and slicing into a `SoundBuffer` is also still done by frame
+      (and channel) but there is a new `SoundBuffer.dur` property to get duration 
+      in seconds as well.
+    - Wavetables are no longer specified with string names, instead built-in 
+      flags which are available on both the `wavetable` and `dsp` modules are 
+      used. Eg to apply a sinewave envelop: `sound.env(dsp.SINE)` instead of `sound.env('sine')`. 
+      The wavetypes available are `SINE`, `COS`, `TRI`, `SAW` (which is also aliased to 
+      `PHASOR`), `RSAW` (reverse sawtooth), `HANN`, `HAMM`, `BLACK` or `BLACKMAN`, 
+      `BART` or `BARTLETT`, `KAISER`, `SQUARE`, and the `RND` flag to select one at random.
+- New `GrainCloud` wavetable-driven granulator. See the `examples/simple_graincloud.py` example for more.
+- `GrainCloud`-driven pitch shift without time change (`sound.transpose(speed)`) 
+   and time stretch without pitch shift (`sound.stretch(length)`) methods for `SoundBuffer`.
+- `dsp.cloud(SoundBuffer, *args, **kwargs)` shortcut for `GrainCloud` creation.
 - Added 2d wavetable synthesis (similar to max/msp `2d.wave~`) to `Osc` plus example script
 - Read wavetables from 1 channel sound files with `wavetables.fromfile`
 - Added a helper for async rendering with `multiprocessing.Pool`
 - `SoundBuffer`s can now be pickled (enables passing them between processes)
 - `SoundBuffer` can be initialized (and spread across channels) from a normal python list
-- More interpolation modes (in progress)
-- Support pysndfile extra options for reading chunks / offsets from disk (todo)
-- Unit conversion helpers for time (todo)
 
 
 ### 2.0.0 - Alpha 6-8

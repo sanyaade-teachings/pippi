@@ -3,6 +3,7 @@
 
 from . import wavetables
 from . import interpolation
+from . import dsp
 
 REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
 
@@ -152,9 +153,9 @@ def eu(length, numbeats, offset=0, reps=None, reverse=False):
     return pattern
 
 def curve(numbeats=16, wintype=None, length=44100, reverse=False, wavetable=None):
-    """ Bouncy balls
+    """ FIXME -- use seconds, rework api
     """
-    wintype = wintype or 'random'
+    wintype = wintype or dsp.RND
 
     if wavetable is None:
         win = wavetables.window(wintype, numbeats * 2)

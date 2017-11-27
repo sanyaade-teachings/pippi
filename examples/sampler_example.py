@@ -5,14 +5,14 @@ from pippi import dsp, sampler, tune, rhythm
 start_time = time.time()
 samp = sampler.Sampler('sounds/harpc2.wav', 'c2')
 
-out = dsp.buffer()
+out = dsp.buffer(length=32)
 chords = ['iii', 'vi', 'ii', 'V']
 
 def arp(i):
     cluster = dsp.buffer()
     length = random.randint(44100, 44100 + 22050)
     numnotes = random.randint(3, 12)
-    onsets = rhythm.curve(numnotes, 'random', length)
+    onsets = rhythm.curve(numnotes, dsp.RND, length)
     chord = chords[i % len(chords)]
     freqs = tune.chord(chord, octave=random.randint(1, 3))
     for i, onset in enumerate(onsets): 
@@ -20,7 +20,7 @@ def arp(i):
         note = samp.play(freq)
         note = note.pan(random.random())
         note *= random.triangular(0, 0.125)
-        cluster.dub(note, onset)        
+        cluster.dub(note, onset/cluster.samplerate)        
 
     return cluster
 
@@ -30,7 +30,7 @@ for i in range(32):
         cluster = arp(i)
         out.dub(cluster, pos)
 
-    pos += 44100
+    pos += 1
 
 out.write('sampler_example.wav')
 elapsed_time = time.time() - start_time

@@ -25,21 +25,21 @@ for i in range(num_passes):
     # 400 frames long and loop over them to 
     # process and dub into the output buffer
 
-    num_frames = 400
+    grain_size = 0.02
     recordhead = 0
-    for grain in snd.grains(num_frames):
+    for grain in snd.grains(grain_size):
         # Apply a sine window to the grain and attenuate 
         # to 25% of original amplitude
-        grain = grain.env('sine') * 0.25
+        grain = grain.env(dsp.SINE) * 0.25
 
         # Dub the grain into the current recordhead postion
         out.dub(grain, pos=recordhead)
 
         # Move the recordhead forward
-        recordhead += i * 100 + 100
+        recordhead += i * 0.01 + 0.01
 
 # Write the output buffer to a WAV file
 out.write('simple_grains.wav')
 elapsed_time = time.time() - start_time
 print('Render time: %s seconds' % round(elapsed_time, 2))
-print('Output length: %s seconds' % round(len(out)/44100, 2))
+print('Output length: %s seconds' % round(out.dur, 2))
