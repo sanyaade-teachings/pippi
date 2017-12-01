@@ -4,8 +4,8 @@ from pippi import dsp, oscs, tune
 
 start_time = time.time()
 
-out = dsp.buffer()
-tlength = out.samplerate * 30
+tlength = 30
+out = dsp.buffer(length=tlength)
 pos = 0
 beat = 0.2
 count = 0
@@ -13,16 +13,14 @@ count = 0
 def make_note(freq, lfo_freq, amp, length):
     length = random.triangular(length, length * 2)
     numtables = random.randint(1, random.randint(3, 12))
-    lfo = random.choice(['sine', 'line', 'tri', 'phasor'])
-    wavetables = [ random.choice(['sine', 'square', 'tri', 'saw']) for _ in range(numtables) ]
+    lfo = random.choice([dsp.SINE, dsp.RSAW, dsp.TRI, dsp.PHASOR])
+    wavetables = [ random.choice([dsp.SINE, dsp.SQUARE, dsp.TRI, dsp.SAW]) for _ in range(numtables) ]
 
     osc = oscs.Osc(wavetables, lfo=lfo)
 
-    osc.freq = freq * random.choice([0.5, 1])
-    osc.lfo_freq = lfo_freq
-    osc.amp = amp
-    note = osc.play(length)
-    note = note.env('random').env('phasor').pan(random.random())
+    freq = freq * random.choice([0.5, 1])
+    note = osc.play(length=length, freq=freq, amp=amp, mod_freq=lfo_freq)
+    note = note.env(dsp.RND).env(dsp.PHASOR).pan(random.random())
 
     return note
 
@@ -32,7 +30,7 @@ def get_freqs(count):
 
 freqs = get_freqs(0)
 
-while len(out) < tlength:
+while pos < tlength:
     print('Swell %s, pos %s' % (count, round(pos/44100, 2)))
 
     length = random.triangular(1, 2)
