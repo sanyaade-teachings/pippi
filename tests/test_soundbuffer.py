@@ -101,6 +101,10 @@ class TestSoundBuffer(TestCase):
         out = sound.transpose(speed)
         self.assertEqual(len(out), len(sound))
 
+        speed = random.triangular(10, 100)
+        out = sound.transpose(speed)
+        self.assertEqual(len(out), len(sound))
+
 
     def test_pan(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')

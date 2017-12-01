@@ -647,7 +647,7 @@ cdef class SoundBuffer:
         """
         return SoundBuffer(self._speed(speed), channels=self.channels, samplerate=self.samplerate)
 
-    def stretch(self, double length, double grainlength=40):
+    def stretch(self, double length, double grainlength=60):
         """ Change the length of the sound without changing the pitch.
             Granular-only implementation at the moment.
         """
@@ -660,7 +660,7 @@ cdef class SoundBuffer:
         out[:-framelength] *= wavetables._window(wavetables.RSAW, framelength)
         return out
 
-    def transpose(self, double factor, double grainlength=40):
+    def transpose(self, double factor, double grainlength=60):
         """ Change the pitch of the sound without changing the length.
             `factor` param is just speed at the moment.
             Granular-only implementation at the moment.

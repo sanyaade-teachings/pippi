@@ -4,9 +4,10 @@ from . cimport interpolation
 from libc.stdlib cimport rand, RAND_MAX
 
 DEF MIN_DENSITY = 0.000001
+DEF MIN_SPEED = 0.000001
 DEF MIN_GRAIN_FRAMELENGTH = 8
 DEF DEFAULT_WTSIZE = 4096
-DEF DEFAULT_GRAINLENGTH = 40
+DEF DEFAULT_GRAINLENGTH = 60
 DEF DEFAULT_MAXGRAINLENGTH = 80
 DEF DEFAULT_SPEED = 1
 DEF DEFAULT_MAXSPEED = 2
@@ -95,6 +96,15 @@ cdef class GrainCloud:
         if self.speed_lfo is not None:
             self.speed_lfo_length = len(self.speed_lfo)
 
+        if speed <= 0:
+            speed = MIN_SPEED
+
+        if minspeed <= 0:
+            minspeed = MIN_SPEED
+
+        if maxspeed <= 0:
+            maxspeed = MIN_SPEED
+
         self.speed = speed
         self.minspeed = minspeed
         self.maxspeed = maxspeed
@@ -178,10 +188,20 @@ cdef class GrainCloud:
         cdef int grainlength_pos = 0              # frame position in output buffer for writing
         cdef int grainlength_index = 0
         cdef int grainlength = <int>(<double>self.samplerate * self.grainlength * 0.001)
+        cdef int adjusted_grainlength = 0
 
-        cdef int max_read_pos = input_length - (grainlength*2)
+        cdef int max_read_pos = input_length - grainlength
 
         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
+
+        cdef double maxspeed = <double>(input_length/4) / <double>min(self.grainlength, self.minlength)
+        if self.maxspeed > maxspeed:
+            # re-cap maxspeed based on grainlength
+            self.maxspeed = maxspeed
+
+        if self.speed > maxspeed:
+            # re-cap maxspeed based on grainlength
+            self.speed = maxspeed
 
         cdef int count = 0
         while write_pos < framelength - grainlength:
@@ -199,6 +219,7 @@ cdef class GrainCloud:
                     grainlength_frac_pos = grainlength_frac_pos * ((rand()/<double>RAND_MAX) * self.jitter + 1)
 
                 grainlength = <int>(((grainlength_frac_pos * (self.maxlength - self.minlength)) + self.minlength) * (self.samplerate / 1000.0))
+                max_read_pos = input_length - grainlength
 
             # Read LFO
             read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
@@ -236,20 +257,20 @@ cdef class GrainCloud:
             if density < MIN_DENSITY:
                 density = MIN_DENSITY
 
-            start = <int>(read_frac_pos * (max_read_pos + grainlength))
-
             if self.speed_lfo is not None:
                 self.speed = speed_frac_pos * (self.maxspeed - self.minspeed) + self.minspeed
 
             if self.speed != 1:
-                grainlength = <int>(grainlength * (1.0/self.speed))
-                if grainlength > MIN_GRAIN_FRAMELENGTH:
-                    grain = self.buf[start:start+grainlength] 
+                adjusted_grainlength = <int>(grainlength * self.speed)
+                if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:
+                    start = <int>(read_frac_pos * (input_length-adjusted_grainlength))
+                    grain = self.buf[start:start+adjusted_grainlength] 
                     grain = grain.speed(self.speed)
                 else:
                     write_pos += MIN_GRAIN_FRAMELENGTH
                     continue
             else:
+                start = <int>(read_frac_pos * max_read_pos)
                 grain = self.buf[start:start+grainlength] 
 
             grain = grain * self.win
@@ -261,7 +282,7 @@ cdef class GrainCloud:
             if write_pos + len(grain) < len(out):
                 out._dub(grain, write_pos)
 
-            self.grains_per_sec = <double>self.samplerate / (len(grain) / 2.0)
+            self.grains_per_sec = <double>self.samplerate / (<double>len(grain) / 2.0)
             self.grains_per_sec *= density
 
             write_pos += <int>(<double>self.samplerate / self.grains_per_sec)

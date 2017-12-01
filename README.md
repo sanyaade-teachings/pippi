@@ -101,7 +101,7 @@ Final (probably) feature releases / big api changes before going to beta.
       The wavetypes available are `SINE`, `COS`, `TRI`, `SAW` (which is also aliased to 
       `PHASOR`), `RSAW` (reverse sawtooth), `HANN`, `HAMM`, `BLACK` or `BLACKMAN`, 
       `BART` or `BARTLETT`, `KAISER`, `SQUARE`, and the `RND` flag to select one at random.
-- New `GrainCloud` wavetable-driven granulator. See the `examples/simple_graincloud.py` example for more.
+- New `GrainCloud` wavetable-driven granulator. See the `examples/swarmy_graincloud.py` example for more.
 - `GrainCloud`-driven pitch shift without time change (`sound.transpose(speed)`) 
    and time stretch without pitch shift (`sound.stretch(length)`) methods for `SoundBuffer`.
 - `dsp.cloud(SoundBuffer, *args, **kwargs)` shortcut for `GrainCloud` creation.

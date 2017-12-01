@@ -12784,7 +12784,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_65speed(struct __py
  *         """
  *         return SoundBuffer(self._speed(speed), channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
- *     def stretch(self, double length, double grainlength=40):
+ *     def stretch(self, double length, double grainlength=60):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_1 = ((struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *)__pyx_v_self->__pyx_vtab)->_speed(__pyx_v_self, __pyx_v_speed); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 648, __pyx_L1_error)
@@ -12841,7 +12841,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_65speed(struct __py
 /* "pippi/soundbuffer.pyx":650
  *         return SoundBuffer(self._speed(speed), channels=self.channels, samplerate=self.samplerate)
  * 
- *     def stretch(self, double length, double grainlength=40):             # <<<<<<<<<<<<<<
+ *     def stretch(self, double length, double grainlength=60):             # <<<<<<<<<<<<<<
  *         """ Change the length of the sound without changing the pitch.
  *             Granular-only implementation at the moment.
  */
@@ -12897,7 +12897,7 @@ static PyObject *__pyx_pw_5pippi_11soundbuffer_11SoundBuffer_68stretch(PyObject 
     if (values[1]) {
       __pyx_v_grainlength = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_grainlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 650, __pyx_L3_error)
     } else {
-      __pyx_v_grainlength = ((double)40.0);
+      __pyx_v_grainlength = ((double)60.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
@@ -12999,7 +12999,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_67stretch(struct __
   /* "pippi/soundbuffer.pyx":650
  *         return SoundBuffer(self._speed(speed), channels=self.channels, samplerate=self.samplerate)
  * 
- *     def stretch(self, double length, double grainlength=40):             # <<<<<<<<<<<<<<
+ *     def stretch(self, double length, double grainlength=60):             # <<<<<<<<<<<<<<
  *         """ Change the length of the sound without changing the pitch.
  *             Granular-only implementation at the moment.
  */
@@ -13160,7 +13160,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_69taper(struct __py
  *         out[:-framelength] *= wavetables._window(wavetables.RSAW, framelength)
  *         return out             # <<<<<<<<<<<<<<
  * 
- *     def transpose(self, double factor, double grainlength=40):
+ *     def transpose(self, double factor, double grainlength=60):
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(((PyObject *)__pyx_v_out));
@@ -13194,7 +13194,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_69taper(struct __py
 /* "pippi/soundbuffer.pyx":663
  *         return out
  * 
- *     def transpose(self, double factor, double grainlength=40):             # <<<<<<<<<<<<<<
+ *     def transpose(self, double factor, double grainlength=60):             # <<<<<<<<<<<<<<
  *         """ Change the pitch of the sound without changing the length.
  *             `factor` param is just speed at the moment.
  */
@@ -13250,7 +13250,7 @@ static PyObject *__pyx_pw_5pippi_11soundbuffer_11SoundBuffer_72transpose(PyObjec
     if (values[1]) {
       __pyx_v_grainlength = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_grainlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 663, __pyx_L3_error)
     } else {
-      __pyx_v_grainlength = ((double)40.0);
+      __pyx_v_grainlength = ((double)60.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
@@ -13403,7 +13403,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_71transpose(struct 
   /* "pippi/soundbuffer.pyx":663
  *         return out
  * 
- *     def transpose(self, double factor, double grainlength=40):             # <<<<<<<<<<<<<<
+ *     def transpose(self, double factor, double grainlength=60):             # <<<<<<<<<<<<<<
  *         """ Change the pitch of the sound without changing the length.
  *             `factor` param is just speed at the moment.
  */
