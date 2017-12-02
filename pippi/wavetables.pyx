@@ -3,8 +3,6 @@ import random
 
 import soundfile
 import numpy as np
-cimport numpy as np
-np.import_array()
 
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc.stdlib cimport rand
