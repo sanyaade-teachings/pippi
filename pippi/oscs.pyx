@@ -1,7 +1,5 @@
 import numbers
 import numpy as np
-cimport numpy as np
-np.import_array()
 from .soundbuffer cimport SoundBuffer
 from . cimport wavetables
 from . cimport interpolation
