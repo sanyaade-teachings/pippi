@@ -12,6 +12,44 @@ from . cimport interpolation
 from . cimport grains
 from .defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
 
+cdef double[:,:] _remix(double[:,:] values, int framelength, int channels):
+    if len(values) == framelength and values.shape[1] == channels:
+        return values
+
+    cdef double[:,:] out = None
+    cdef int i = 0
+    cdef int channel = 0
+
+    if values.shape[1] == channels:
+        for channel in range(channels):
+            out[:,channel] = interpolation._linear(values[:,channel], framelength)
+        return out
+
+    elif channels <= 1:
+        return np.sum(values[i], 1)
+
+    else:
+        out = np.zeros((framelength, channels))
+        for i in range(framelength):
+            out[i] = interpolation._linear(values[i], channels)
+        return out
+
+cdef double[:,:] _mul2d(double[:,:] output, double[:,:] values):
+    return np.multiply(output, _remix(values, len(output), output.shape[1]))
+
+cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
+    cdef int channel = 0
+    cdef int channels = output.shape[1]
+    cdef int framelength = len(output)
+
+    if len(values) != framelength:
+        values = interpolation._linear(values, framelength)
+
+    for channel in range(channels):
+        output.base[:,channel] *= values
+
+    return output
+
 cdef class SoundBuffer:
     """ A sequence of audio frames 
         representing a buffer of sound.
@@ -151,6 +189,33 @@ cdef class SoundBuffer:
         return self + value
 
 
+    cdef SoundBuffer _adsr(self, double attack, double decay, double sustain, double release):
+        cdef int framelength = len(self)
+        cdef int attack_breakpoint = <int>(<double>self.samplerate * attack)
+        cdef int decay_breakpoint = <int>(<double>self.samplerate * decay) + attack_breakpoint
+        cdef int sustain_breakpoint = framelength - <int>(release * <double>self.samplerate)
+        cdef int decay_framelength = decay_breakpoint - attack_breakpoint
+        cdef int release_framelength = framelength - sustain_breakpoint
+
+        for i in range(framelength):
+            if i <= attack_breakpoint and attack_breakpoint > 0:
+                self.frames.base[i] = self.frames.base[i] * (i / <double>attack_breakpoint)
+
+            elif i <= decay_breakpoint and decay_breakpoint > 0:
+                self.frames.base[i] = self.frames.base[i] * ((1 - ((i - attack_breakpoint) / <double>decay_framelength)) * (1 - sustain) + sustain)
+        
+            elif i <= sustain_breakpoint:
+                self.frames.base[i] = self.frames.base[i] * sustain
+
+            else:
+                self.frames.base[i] = self.frames.base[i] * ((1 - ((i - sustain_breakpoint) / <double>release_framelength)) * sustain)
+
+        return self
+
+    def adsr(self, double a=0, double d=0, double s=1, double r=0):
+        return self._adsr(a, d, s, r)
+
+
     ########################
     # (&) Mix operator (&) #
     ########################
@@ -260,42 +325,49 @@ cdef class SoundBuffer:
 
         """
         cdef int length = len(self.frames)
-        cdef double[:, :] out
+        cdef double[:,:] out
         cdef double[:] wavetable
 
         if isinstance(value, numbers.Real):
             out = np.multiply(self.frames, value)
 
         elif isinstance(value, SoundBuffer):
-            value = value.speed(len(value.frames)/<double>length)
-            out = np.multiply(self.frames, value.frames)
+            out = _mul2d(self.frames, value.frames)
+
+        elif isinstance(value, list):
+            out = _mul1d(self.frames, np.array(value))
 
         else:
             try:
-                wavetable = interpolation._linear(value, length)
-                out = np.multiply(self.frames, wavetable[:,None])
-            except TypeError as e:
-                raise NotImplemented('Cannot multiply SoundBuffer with %s' % type(value)) from e
+                if len(value.shape) == 1:
+                    out = _mul1d(self.frames, value)
+                else:
+                    out = _mul2d(self.frames, value)
+            except TypeError:
+                return NotImplemented
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     def __imul__(self, value):
         """ Multiply a SoundBuffer in place by a number, iterable or SoundBuffer
         """
-        cdef int length = len(self.frames)
         if isinstance(value, numbers.Real):
             self.frames = np.multiply(self.frames, value)
 
         elif isinstance(value, SoundBuffer):
-            value = value.speed(len(value.frames)/<double>length)
-            self.frames = np.multiply(self.frames, value.frames)
+            self.frames = _mul2d(self.frames, value.frames)
+
+        elif isinstance(value, list):
+            self.frames = _mul1d(self.frames, np.array(value))
 
         else:
             try:
-                value = interpolation._linear(value, length)
-                self.frames = np.multiply(self.frames, value[:,None])
-            except TypeError as e:
-                raise NotImplemented('Cannot multiply SoundBuffer with %s' % type(value)) from e
+                if len(value.shape) == 1:
+                    self.frames = _mul1d(self.frames, value)
+                else:
+                    self.frames = _mul2d(self.frames, value)
+            except TypeError:
+                return NotImplemented
 
         return self
 
@@ -367,6 +439,13 @@ cdef class SoundBuffer:
             self.frames = None
         else:
             self.frames = np.zeros((length, self.channels))
+
+    def cloud(self, double length=-1, *args, **kwargs):
+        """ Create a new GrainCloud from this SoundBuffer
+        """
+        if length <= 0:
+            length = self.dur
+        return grains.GrainCloud(self, *args, **kwargs).play(length)
 
     def copy(self):
         """ Return a new copy of this SoundBuffer.
@@ -567,7 +646,7 @@ cdef class SoundBuffer:
  
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-    def pan(self, double pos=0.5, unicode method=None):
+    def pan(self, double pos=0.5, unicode method=None, int start=0):
         """ Pan a stereo sound from pos=0 (hard left) 
             to pos=1 (hard right)
 
@@ -591,29 +670,45 @@ cdef class SoundBuffer:
                 Michael Gogins' variation on the above 
                 which uses a different part of the sinewave.
         """
-        if self.channels != 2:
-            raise NotImplemented('Only stereo panning schemes are currently supported')
-
         if method is None:
             method = u'constant'
 
         cdef double[:,:] out = self.frames
         cdef int length = len(self)
+        cdef int channel = 0
 
         if method == 'constant':
-            out.base[:,0] *= math.sqrt(pos)
-            out.base[:,1] *= math.sqrt(1 - pos)
+            for channel in range(self.channels):
+                if channel % 2 == 0:
+                    out.base[:,channel] *= math.sqrt(pos)
+                else:
+                    out.base[:,channel] *= math.sqrt(1 - pos)
+
         elif method == 'linear':
-            out.base[:,0] *= pos
-            out.base[:,1] *= 1 - pos
+            for channel in range(self.channels):
+                if channel % 2 == 0:
+                    out.base[:,channel] *= pos
+                else:
+                    out.base[:,channel] *= 1 - pos
+
         elif method == 'sine':
-            out.base[:,0] *= math.sin(pos * (math.pi / 2))
-            out.base[:,1] *= math.cos(pos * (math.pi / 2))
+            for channel in range(self.channels):
+                if channel % 2 == 0:
+                    out.base[:,channel] *= math.sin(pos * (math.pi / 2))
+                else:
+                    out.base[:,channel] *= math.cos(pos * (math.pi / 2))
+
         elif method == 'gogins':
-            out.base[:,0] *= math.sin((pos + 0.5) * (math.pi / 2))
-            out.base[:,1] *= math.cos((pos + 0.5) * (math.pi / 2))
+            for channel in range(self.channels):
+                if channel % 2 == 0:
+                    out.base[:,channel] *= math.sin((pos + 0.5) * (math.pi / 2))
+                else:
+                    out.base[:,channel] *= math.cos((pos + 0.5) * (math.pi / 2))
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+
+    def remix(self, int channels):
+        return SoundBuffer(_remix(self.frames, len(self.frames), channels), self.samplerate, channels)
 
     def repeat(self, int reps=2):
         if reps <= 1:
@@ -651,23 +746,20 @@ cdef class SoundBuffer:
         """ Change the length of the sound without changing the pitch.
             Granular-only implementation at the moment.
         """
-        return grains.GrainCloud(self).play(length)
+        return grains.GrainCloud(self, grainlength=grainlength).play(length)
 
     def taper(self, double length):
-        cdef int framelength = <int>(length * self.samplerate)
-        out = SoundBuffer(frames=self.frames[:,:], channels=self.channels, samplerate=self.samplerate)
-        out[:framelength] *= wavetables._window(wavetables.SAW, framelength)
-        out[:-framelength] *= wavetables._window(wavetables.RSAW, framelength)
-        return out
+        return self * wavetables._adsr(len(self), length, 0, 1, length, self.samplerate)
 
-    def transpose(self, double factor, double grainlength=60):
+    def transpose(self, double speed, double grainlength=60):
         """ Change the pitch of the sound without changing the length.
-            `factor` param is just speed at the moment.
-            Granular-only implementation at the moment.
+            This is just a wrapper for `GrainCloud` with `speed` and `grainlength` 
+            settings exposed, returning a cloud equal in length to the source sound.
+
             TODO accept: from/to hz, notes, midi notes, intervals
         """
         return grains.GrainCloud(self, 
-                speed=factor, 
+                speed=speed, 
                 grainlength=grainlength, 
             ).play(self.dur)
 
@@ -687,13 +779,6 @@ cdef class RingBuffer:
         than time units expressed in seconds.
         It's mostly just for the astrid input sampler right now.
     """
-    cdef public int length
-    cdef public int samplerate
-    cdef public int channels
-    cdef public int write_head
-    cdef public double[:,:] frames
-    cdef double[:,:] copyout
-
     def __cinit__(self, int length, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE, double[:,:] frames=None):
         self.samplerate = samplerate
         self.channels = channels
@@ -715,7 +800,7 @@ cdef class RingBuffer:
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cdef double[:,:] _read(self, int length):
+    cdef double[:,:] _read(self, int length, int offset):
         """ Read a length of frames from the buffer
             where length is at maximum the length of 
             the buffer, always returning most recently 
@@ -727,15 +812,15 @@ cdef class RingBuffer:
         if length > self.length:
             length = self.length
 
-        read_head = (self.write_head - length) % self.length
+        read_head = (self.write_head - length + offset) % self.length
         for i in range(length):
             self.copyout[i] = self.frames[read_head]
             read_head = (read_head + 1) % self.length
 
         return self.copyout[:length]
 
-    cpdef double[:,:] read(self, int length):
-        return self._read(length)
+    def read(self, int length, int offset=0):
+        return self._read(length, offset)
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
@@ -753,7 +838,7 @@ cdef class RingBuffer:
             self.frames[self.write_head] = frames[i]
             self.write_head = (self.write_head + 1) % self.length
 
-    cpdef void write(self, double[:,:] frames):
+    def write(self, double[:,:] frames):
         self._write(frames)
 
 

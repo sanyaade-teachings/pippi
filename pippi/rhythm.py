@@ -105,7 +105,7 @@ def normalize_pattern(pattern, reverse=False, rotate=None):
 
     return pattern
 
-def onsets(pattern, beat=4410, length=None, start=0):
+def onsets(pattern, beat=0.2, length=None, start=0):
     length = length or len(pattern)
     grid = [ beat * i + start for i in range(length) ]
     pattern = [ pattern[i % len(pattern)] for i in range(length) ]

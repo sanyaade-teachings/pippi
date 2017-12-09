@@ -29,6 +29,7 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
 
+
     def test_save_buffer_to_soundfile(self):
         filename = path.join(self.soundfiles, 'test_save_buffer_to_soundfile.{}')
         sound = SoundBuffer(length=1)
@@ -175,5 +176,17 @@ class TestSoundBuffer(TestCase):
 
         self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
         self.assertEqual(sound[-1], (0,0))
+
+    def test_taper(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound = sound.taper(0)
+        sound = sound.taper(0.001)
+        sound = sound.taper(0.01)
+        sound = sound.taper(0.1)
+        sound = sound.taper(1)
+        sound = sound.taper(10)
+
+        self.assertEqual(len(sound), 44100)
+        self.assertTrue(sound.samplerate == 44100)
 
 

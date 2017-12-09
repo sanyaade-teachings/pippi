@@ -1,5 +1,6 @@
 cdef double[:] _wavetable(int, int)
 cdef double[:] _window(int, int)
+cdef double[:] _adsr(int framelength, double attack, double decay, double sustain, double release, int samplerate)
 
 cdef int SINE
 cdef int COS

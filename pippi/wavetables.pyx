@@ -110,6 +110,29 @@ cdef double[:] _window(int window_type, int length):
 
     return wt
 
+cdef double[:] _adsr(int framelength, double attack, double decay, double sustain, double release, int samplerate):
+    cdef int attack_breakpoint = <int>(<double>samplerate * attack)
+    cdef int decay_breakpoint = <int>(<double>samplerate * decay) + attack_breakpoint
+    cdef int sustain_breakpoint = framelength - <int>(release * <double>samplerate)
+    cdef int decay_framelength = decay_breakpoint - attack_breakpoint
+    cdef int release_framelength = framelength - sustain_breakpoint
+    cdef double[:] out = np.zeros(framelength, dtype='d')
+
+    for i in range(framelength):
+        if i <= attack_breakpoint and attack_breakpoint > 0:
+            out[i] = i / <double>attack_breakpoint
+
+        elif i <= decay_breakpoint and decay_breakpoint > 0:
+            out[i] = (1 - ((i - attack_breakpoint) / <double>decay_framelength)) * (1 - sustain) + sustain
+    
+        elif i <= sustain_breakpoint:
+            out[i] = sustain
+
+        else:
+            out[i] = (1 - ((i - sustain_breakpoint) / <double>release_framelength)) * sustain
+
+    return out
+
 def window(int window_type, int length, double[:] data=None):
     if data is not None:
         return interpolation._linear(data, length)

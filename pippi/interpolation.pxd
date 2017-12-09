@@ -1,2 +1,2 @@
-cdef double[:] _linear(double[:], int)
-cdef double[:] _hermite(double[:], int)
+cdef public double[:] _linear(double[:] data, int length)
+cdef public double[:] _hermite(double[:] data, int length)

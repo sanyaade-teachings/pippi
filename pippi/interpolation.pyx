@@ -18,22 +18,22 @@ cdef double hermite_get_sample(double x, double y0, double y1, double y2, double
     return ((c3 * x + c2) * x + c1) * x + c0
 
 cdef public double[:] _hermite(double[:] data, int length):
-    cdef double x, y0, y1, y2, y3 = 0
     cdef int fi = 0
     cdef double[:] out = np.zeros(length)
     cdef get_sample_t get_sample = hermite_get_sample
     cdef int datalen = len(data)
+    cdef int i0, i1, i2 = 0
+    cdef int pos = 0
 
     for fi in range(length):
         x = fi / float(length)
         pos = <int>(x * datalen)
 
-        y0 = data[(pos - 1) % datalen]
-        y1 = data[pos]
-        y2 = data[(pos + 1) % datalen]
-        y3 = data[(pos + 2) % datalen]
+        i0 = (pos - 1) % datalen
+        i1 = (pos + 1) % datalen
+        i2 = (pos + 2) % datalen
 
-        out[fi] = get_sample(x, y0, y1, y2, y3)
+        out[fi] = get_sample(x, data[i0], data[pos], data[i1], data[i2])
 
     return out
 
