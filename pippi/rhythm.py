@@ -178,7 +178,7 @@ def repeat(onsets, reps):
     """ Repeat a sequence of onsets a given number of times
     """
     out = []
-    total = sum(pattern)
+    total = sum(onsets)
     for rep in range(reps):
         out += [ onset + (rep * total) for onset in onsets ]
 

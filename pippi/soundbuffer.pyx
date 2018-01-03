@@ -454,6 +454,9 @@ cdef class SoundBuffer:
             return SoundBuffer(channels=self.channels, samplerate=self.samplerate)
         return SoundBuffer(np.array(self.frames, copy=True), self.channels, self.samplerate)
 
+    def clip(self, minval=-1, maxval=1):
+        return SoundBuffer(np.clip(self.frames, minval, maxval), self.channels, self.samplerate)
+        
     def cut(self, double start=0, double length=1):
         """ Copy a portion of this soundbuffer, returning 
             a new soundbuffer with the selected slice.
@@ -493,7 +496,7 @@ cdef class SoundBuffer:
             to preserve the length param if an invalid or overflowing offset 
             position is given.
         """
-        cdef double maxlen = len(self) - length
+        cdef double maxlen = self.dur - length
         if maxlen <= 0:
             return self
         cdef double start = random.triangular(0, maxlen)
@@ -611,6 +614,9 @@ cdef class SoundBuffer:
 
             framesread += grainlength
 
+    def max(self):
+        return np.amax(self.frames)
+ 
     def mix(self, sounds):
         """ Mix this sound in place with a sound or iterable of sounds
         """

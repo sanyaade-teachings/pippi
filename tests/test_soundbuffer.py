@@ -29,6 +29,14 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
 
+    def test_clip_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+
+        sound = sound.clip(-0.1, 0.1)
+
+        self.assertEqual(len(sound), 44100)
+        self.assertTrue(sound.samplerate == 44100)
+        self.assertTrue(sound.max() <= 0.1)
 
     def test_save_buffer_to_soundfile(self):
         filename = path.join(self.soundfiles, 'test_save_buffer_to_soundfile.{}')
