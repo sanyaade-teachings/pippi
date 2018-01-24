@@ -3,6 +3,7 @@ import random
 
 import soundfile
 import numpy as np
+import re
 
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc.stdlib cimport rand
@@ -26,6 +27,23 @@ cdef int BARTLETT = 8
 cdef int KAISER = 9
 cdef int SQUARE = 10
 cdef int RND = 11
+
+cdef dict wtype_flags = {
+    'sine': SINE, 
+    'cos': COS, 
+    'tri': TRI, 
+    'saw': SAW, 
+    'phasor': PHASOR, 
+    'rsaw': RSAW, 
+    'hann': HANN, 
+    'hamm': HAMM, 
+    'black': BLACK, 
+    'blackman': BLACKMAN, 
+    'bart': BART, 
+    'bartlett': BARTLETT, 
+    'kaiser': KAISER, 
+    'rnd': RND, 
+}
 
 cdef int LEN_WINDOWS = 9
 cdef int *ALL_WINDOWS = [
@@ -52,24 +70,64 @@ cdef int *ALL_WAVETABLES = [
 
 cdef double SQUARE_DUTY = 0.5
 
-cdef class Wavetable:
-    cdef double* data
-    def __cinit__(self, int length):
-        self.data = <double*>calloc(length, sizeof(double))
+SEGMENT_RE = re.compile(r'((?P<length>\.?\d+),)?(?P<wtype>\w+)(,(?P<start>\.?\d+)-(?P<end>\.?\d+))?')
 
-    cdef void resize(self, int length):
-        self.data = <double*>realloc(self.data, length * sizeof(double))
+cdef int wtypentf(str wtype_name):
+    return wtype_flags[wtype_name]
 
-    def __dealloc__(self):
-        free(self.data)
+cpdef double[:] polyseg(str score, int length, int wtlength=4096):
+    """ score = '1,tri .5,sine,0-.5 sine!.25 tri,.1-.2!.5'
+    """    
+    cdef list segments = [] 
+    cdef str segment
+    cdef str param
+    cdef int count = 0
+    cdef int segment_wtype
+    cdef double segment_slew = 0
+    cdef double segment_start = 0
+    cdef double segment_end = 1
+    cdef int segment_length = wtlength
+    cdef int total_segment_length = 0
 
-cdef Wavetable _window2(int window_type, int length):
-    cdef Wavetable wt = Wavetable(length)
-    cdef int i = 0
-    for i in range(length):
-        wt.data[i] = i / length
+    for segment in score.split(' '):
+        segment_start = 0
+        segment_end = 1
+        segment_slew = 0
+        segment_wtype = SINE
 
-    return wt
+        for count, param in enumerate(segment.split(',')):
+            match = SEGMENT_RE.match(param)
+            
+            length = match.group('length')
+            if length is not None:
+                segment_length = <int>(wtlength * float(length))
+
+            wtype = match.group('wtype')
+            if wtype is not None:
+                segment_wtype = wtypentf(param)
+
+            start = match.group('start')
+            if start is not None:
+                segment_start = float(start)
+
+            end = match.group('end')
+            if end is not None:
+                segment_end = float(end)
+
+        segments += (segment_length, segment_wtype, segment_start, segment_end)
+        total_segment_length += segment_length
+
+    for segment_length, segment_wtype, segment_start, segment_end in segments:
+        pass
+
+    cdef double[:] out = np.zeros(length, dtype='d')
+
+    return out
+
+
+cpdef double[:] randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
+    points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
+    return interpolation._linear(points, wtsize)
 
 cdef double[:] _window(int window_type, int length):
     cdef double[:] wt
@@ -110,20 +168,19 @@ cdef double[:] _window(int window_type, int length):
 
     return wt
 
-cdef double[:] _adsr(int framelength, double attack, double decay, double sustain, double release, int samplerate):
-    cdef int attack_breakpoint = <int>(<double>samplerate * attack)
-    cdef int decay_breakpoint = <int>(<double>samplerate * decay) + attack_breakpoint
-    cdef int sustain_breakpoint = framelength - <int>(release * <double>samplerate)
-    cdef int decay_framelength = decay_breakpoint - attack_breakpoint
+cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release):
+    cdef int decay_breakpoint = decay + attack
+    cdef int sustain_breakpoint = framelength - release
+    cdef int decay_framelength = decay_breakpoint - attack
     cdef int release_framelength = framelength - sustain_breakpoint
     cdef double[:] out = np.zeros(framelength, dtype='d')
 
     for i in range(framelength):
-        if i <= attack_breakpoint and attack_breakpoint > 0:
-            out[i] = i / <double>attack_breakpoint
+        if i <= attack and attack > 0:
+            out[i] = i / <double>attack
 
         elif i <= decay_breakpoint and decay_breakpoint > 0:
-            out[i] = (1 - ((i - attack_breakpoint) / <double>decay_framelength)) * (1 - sustain) + sustain
+            out[i] = (1 - ((i - attack) / <double>decay_framelength)) * (1 - sustain) + sustain
     
         elif i <= sustain_breakpoint:
             out[i] = sustain
@@ -132,6 +189,9 @@ cdef double[:] _adsr(int framelength, double attack, double decay, double sustai
             out[i] = (1 - ((i - sustain_breakpoint) / <double>release_framelength)) * sustain
 
     return out
+
+cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release):
+    return _adsr(length, attack, decay, sustain, release)
 
 def window(int window_type, int length, double[:] data=None):
     if data is not None:

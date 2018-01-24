@@ -755,7 +755,8 @@ cdef class SoundBuffer:
         return grains.GrainCloud(self, grainlength=grainlength).play(length)
 
     def taper(self, double length):
-        return self * wavetables._adsr(len(self), length, 0, 1, length, self.samplerate)
+        cdef int framelength = <int>(self.samplerate * length)
+        return self * wavetables._adsr(len(self), framelength, 0, 1, framelength)
 
     def transpose(self, double speed, double grainlength=60):
         """ Change the pitch of the sound without changing the length.

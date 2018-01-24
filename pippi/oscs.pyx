@@ -259,41 +259,46 @@ cdef class Osc:
 cdef class Fold:
     """ Folding wavetable oscilator
     """
-    cdef public object wavetable
-    cdef public object factors
+    cdef public double[:] wavetable
+    cdef public double[:] factors
     cdef public double factFreq
     cdef public double freq
     cdef public double amp
+    cdef int channels
+    cdef int samplerate
+    cdef int wtsize
+
 
     def __init__(
             self, 
-            object wavetable=None, 
-            object factors=None, 
+            double[:] wavetable=None, 
+            double[:] factors=None, 
             double freq=440, 
             double factFreq=1,
             double amp=1, 
+            int wtsize=4096,
+            int channels=DEFAULT_CHANNELS,
+            int samplerate=DEFAULT_SAMPLERATE,
         ):
 
         self.freq = freq
         self.factFreq = factFreq
         self.amp = amp
 
-        if isinstance(wavetable, str):
-            self.wavetable = wavetables._wavetable(wavetable, 4096)
-        else:
-            self.wavetable = wavetable
+        self.channels = channels
+        self.samplerate = samplerate
+        self.wtsize = wtsize
 
-        if isinstance(factors, str):
-            self.factors = wavetables._window(factors, 4096)
-        else:
-            self.factors = factors
+        self.wavetable = wavetable
+        self.factors = factors
 
+    def play(self, double length):
+        return self._play(length)
 
-    def play(self, int length, int channels=2, int samplerate=44100):
-        return self._play(length, channels, samplerate)
-
-    cdef object _play(self, int length, int channels=2, int samplerate=44100):
+    cdef SoundBuffer _play(self, double length):
+        cdef int framelength = <int>(length * self.samplerate)
         cdef int i
+        cdef int channel = 0
 
         cdef double valWaveform, valNextWaveform, freq, factFreq
         cdef int cIndexWaveform = 0
@@ -316,9 +321,9 @@ cdef class Fold:
         cdef int state = 1
         cdef double difference = 0
 
-        cdef double[:,:] out = np.zeros((length, channels), dtype='d')
+        cdef double[:,:] out = np.zeros((framelength, self.channels), dtype='d')
 
-        for i in range(length):
+        for i in range(framelength):
             # Interp waveform wavetable
             cIndexWaveform = <int>indexWaveform % (lenWaveform - 1)
             valWaveform = self.wavetable[cIndexWaveform]
@@ -351,120 +356,11 @@ cdef class Fold:
                 state ^= 1
                 fold_out = neg_thresh - (fold_out - neg_thresh)
 
-            for channel in range(channels):
+            for channel in range(self.channels):
                 out[i][channel] = self.amp * fold_out
 
-            indexWaveform += self.freq * lenWaveform * (1.0 / samplerate)
-            indexFactors += self.factFreq * lenFactors * (1.0 / samplerate)
+            indexWaveform += self.freq * lenWaveform * (1.0 / self.samplerate)
+            indexFactors += self.factFreq * lenFactors * (1.0 / self.samplerate)
 
-        return SoundBuffer(out, channels=channels, samplerate=samplerate)
-
-"""
-cdef class Scrub:
-    # Granular scrubbing thingy 
-    #
-    cdef public SoundBuffer snd
-    cdef public object wavetable
-    cdef public object factors
-    cdef public double factFreq
-    cdef public double freq
-    cdef public double amp
-
-    def __init__(
-            self, 
-            SoundBuffer snd=None, 
-            object scrub=None, 
-            object window=None, 
-            double freq=440, 
-            double factFreq=1,
-            double amp=1, 
-        ):
-
-        self.freq = freq
-        self.factFreq = factFreq
-        self.amp = amp
-
-        if isinstance(wavetable, str):
-            self.wavetable = wavetables._wavetable(wavetable, 4096)
-        else:
-            self.wavetable = wavetable
-
-        if isinstance(factors, str):
-            self.factors = wavetables._window(factors, 4096)
-        else:
-            self.factors = factors
-
-
-    def play(self, int length, int channels=2, int samplerate=44100):
-        return self._play(length, channels, samplerate)
-
-    cdef object _play(self, int length, int channels=2, int samplerate=44100):
-        cdef int cycle_length, input_length, cycle_start
-        cdef int window_type = 0 # HANN
-        cdef int scrub_type = 1 # SAW
-        cdef double window_period = M_PI * 2.0
-        cdef double scrub_period = 1.0
-
-        cdef int size = 2
-        cdef int channels = 2
-        cdef int chunk = size + channels
-
-        cdef double playhead, frequency
-        cdef int i, f
-
-        # Calculate the length of one cycle at the given frequency. 
-        # This is a lossy calculation and introduces slight tuning errors
-        # that become more extreme as the frequency increases. Deal with it.
-        cycle_length = <int>(samplingrate / frequency) * chunk
-
-        # Calculate the number of cycles needed to generate for the 
-        # desired output length.
-        cdef int num_cycles = length / cycle_length
-
-        # Prefer overflows of length to underflows, so check for 
-        # a reminder when calculating and tack an extra cycle up in there.
-        if length % cycle_length > 0:
-            num_cycles += 1
-
-        # Generate a scrub position trajectory. The scrub position is 
-        # just the position of the playhead at the start of each cycle.
-        # 
-        # The length of this array is equal to the number of cycles calculated 
-        # earlier. 
-        # 
-        # Positions will range from 0 to the length of the input minus the length 
-        # of a single cycle. 
-        # 
-        # These lengths should both be measured in frames. So: length / chunk.
-        cdef int scrub_positions[num_cycles]
-        cdef int max_position = (input_length / chunk) - (cycle_length / chunk)
-
-        cdef double pos_curve[num_cycles]
-        wavetable(scrub_type, pos_curve, num_cycles, 1.0, 0.0, 0.0, scrub_period)
-        pos_curve = wavetables._wavetable(wavetable, num_cycles)
-
-        for i in range(num_cycles):
-            playhead = pos_curve[i]
-
-            # Store the actual position in the buffer, not the frame count.
-            scrub_positions[i] = <int>(playhead * max_position) * chunk
-
-        # Generate each cycle of the stream by looping through the scrub array
-        # and writing into the output buffer. For each cycle, read from the 
-        # current scrub position forward cycle_length frames, and apply an 
-        # amplitude envelope to each cycle as the buffer is filled.
-        cdef double[:,:] out = np.zeros((length, channels))
-
-        cdef double cycle[cycle_length / chunk]
-        wavetable(window_type, cycle, cycle_length / chunk, 1.0, 0.0, 0.0, window_period);
-
-        for i in range(num_cycles):
-            cycle_start = scrub_positions[i]
-
-            for f in range(cycle_length):
-                for channel in range(channels):
-                    out[i * cycle_length + f] = (cycle_start + f) * cycle[f / chunk]
-
-        return out
-"""
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 

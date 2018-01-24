@@ -2,6 +2,7 @@ from .soundbuffer cimport SoundBuffer
 from . cimport wavetables
 from . cimport interpolation
 from libc.stdlib cimport rand, RAND_MAX
+import numpy as np
 
 DEF MIN_DENSITY = 0.000001
 DEF MIN_SPEED = 0.000001
@@ -11,6 +12,9 @@ DEF DEFAULT_GRAINLENGTH = 60
 DEF DEFAULT_MAXGRAINLENGTH = 80
 DEF DEFAULT_SPEED = 1
 DEF DEFAULT_MAXSPEED = 2
+DEF DEFAULT_DENSITY = 1
+DEF DEFAULT_MINDENSITY = 0.5
+DEF DEFAULT_MAXDENSITY = 1.5
 
 cdef class GrainCloud:
     def __init__(self, 
@@ -20,8 +24,9 @@ cdef class GrainCloud:
             double[:] win_wt=None,
             int win_length=DEFAULT_WTSIZE,
 
+            double freeze=-1, 
             int read_lfo=-1,
-            double[:] read_lfo_wt=None,
+            object read_lfo_wt=None,
             double read_lfo_speed=1,
             int read_lfo_length=DEFAULT_WTSIZE,
 
@@ -32,11 +37,13 @@ cdef class GrainCloud:
             double minspeed=DEFAULT_SPEED, 
             double maxspeed=DEFAULT_MAXSPEED, 
 
-            double density=1, 
             int density_lfo=-1,
             double[:] density_lfo_wt=None,
             int density_lfo_length=DEFAULT_WTSIZE,
             double density_lfo_speed=1,
+            double density=DEFAULT_DENSITY, 
+            double mindensity=DEFAULT_MINDENSITY, 
+            double maxdensity=DEFAULT_MAXDENSITY, 
 
             double grainlength=DEFAULT_GRAINLENGTH, 
             int grainlength_lfo=-1,
@@ -60,6 +67,7 @@ cdef class GrainCloud:
         self.samplerate = buf.samplerate
         self.spread = spread
         self.jitter = jitter
+        self.freeze = freeze
     
         # Window is always a wavetable, defaults to Hann
         if win > -1:
@@ -71,18 +79,22 @@ cdef class GrainCloud:
         self.win_length = len(self.win)
 
         # Read lfo is always a wavetable, defaults to phasor
-        if read_lfo > -1:
+        if self.freeze > -1:
+            self.read_lfo = None
+        elif read_lfo > -1:
             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
         elif read_lfo_wt is not None:
-            self.read_lfo = read_lfo_wt
+            #self.read_lfo = read_lfo_wt
+            self.read_lfo = interpolation._linear(np.asarray(read_lfo_wt, dtype='d'), read_lfo_length)
         else:
             self.read_lfo = wavetables._window(wavetables.PHASOR, read_lfo_length)
 
         # 0 lfo speed freezes position
-        if read_lfo_speed <= 0:
-            read_lfo_speed = 0
-        self.read_lfo_speed = read_lfo_speed
-        self.read_lfo_length = len(self.read_lfo)
+        if self.read_lfo is not None:
+            if read_lfo_speed <= 0:
+                read_lfo_speed = 0
+            self.read_lfo_speed = read_lfo_speed
+            self.read_lfo_length = len(self.read_lfo)
 
         # If speed_lfo < 0 and speed_lfo_wt is None, then use fixed speed
         # No transposition is done if speed == 1
@@ -110,6 +122,8 @@ cdef class GrainCloud:
         self.maxspeed = maxspeed
 
         self.density = density
+        self.mindensity = mindensity
+        self.maxdensity = maxdensity
         if density_lfo > -1:
             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
         elif density_lfo_wt is not None:
@@ -222,13 +236,20 @@ cdef class GrainCloud:
                 max_read_pos = input_length - grainlength
 
             # Read LFO
-            read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
-            read_index = <int>read_phase
-            read_frac = read_phase - read_index
-            read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
-            read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
-            read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
-            read_phase += read_phase_inc
+            if self.read_lfo is None:
+                if self.freeze < 0:
+                    self.freeze = 0
+                read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
+                if read_frac_pos > 1:
+                    read_frac_pos = 1
+            else:
+                read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
+                read_index = <int>read_phase
+                read_frac = read_phase - read_index
+                read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
+                read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
+                read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
+                read_phase += read_phase_inc
 
             # Speed LFO
             if self.speed_lfo is not None:
@@ -248,7 +269,7 @@ cdef class GrainCloud:
                 density_frac_pos = self.density_lfo[density_index % self.density_lfo_length]
                 density_frac_pos_next = self.density_lfo[(density_index+1) % self.density_lfo_length]
                 density_frac_pos = (1.0 - density_frac) * density_frac_pos + density_frac * density_frac_pos_next
-                density = (density_frac_pos + 1) * self.density
+                density = (density_frac_pos * (self.maxdensity - self.mindensity)) + self.mindensity
                 density_phase += density_phase_inc
 
             else:
@@ -272,6 +293,7 @@ cdef class GrainCloud:
             else:
                 start = <int>(read_frac_pos * max_read_pos)
                 grain = self.buf[start:start+grainlength] 
+
 
             grain = grain * self.win
 

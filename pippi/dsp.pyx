@@ -5,8 +5,12 @@ import glob
 import math
 import multiprocessing as mp
 import numpy as np
+import random
+
+cimport cython
 
 from .soundbuffer import SoundBuffer
+from .soundbuffer cimport SoundBuffer
 from . cimport grains
 cimport wavetables as wts
 
@@ -46,6 +50,30 @@ def mix(sounds):
 
     return out
 
+cpdef SoundBuffer stack(list sounds):
+    cdef int channels = 0
+    cdef int copied_channels = 0
+    cdef int samplerate = sounds[0].samplerate
+    cdef double length = 0
+    cdef SoundBuffer sound
+
+    for sound in sounds:
+        channels += sound.channels
+        if sound.dur > length:
+            length = sound.dur
+
+    cdef SoundBuffer out = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
+
+    cdef int channel_to_copy = 0
+    cdef int current_sound_index = 0
+    cdef int source_channel_to_copy = 0
+
+    while copied_channels < channels:
+        out.frames.base[:,channel_to_copy] = sounds[current_sound_index].frames.base[:,source_channel_to_copy]    
+
+
+    return out
+
 def join(sounds, channels=2, samplerate=44100):
     """ Concatenate a list of sounds into a new sound
     """
@@ -73,6 +101,15 @@ def read(frames, channels=2, samplerate=44100):
         return SoundBuffer(filename=frames, channels=channels, samplerate=samplerate)
 
     return SoundBuffer(frames, channels=channels, samplerate=samplerate)
+
+cpdef double rand(object lowvalue, object highvalue):
+    if isinstance(lowvalue, tuple):
+        lowvalue = rand(lowvalue[0], lowvalue[1])
+
+    if isinstance(highvalue, tuple):
+        highvalue = rand(highvalue[0], highvalue[1])
+
+    return <double>random.triangular(lowvalue, highvalue)
 
 def find(pattern, channels=2, samplerate=44100):
     """ Glob for files matching a given pattern and return a generator 

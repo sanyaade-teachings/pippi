@@ -924,6 +924,7 @@ struct __pyx_obj_5pippi_6grains_GrainCloud {
   int samplerate;
   __Pyx_memviewslice win;
   int win_length;
+  double freeze;
   __Pyx_memviewslice read_lfo;
   int read_lfo_length;
   double read_lfo_speed;
@@ -936,6 +937,8 @@ struct __pyx_obj_5pippi_6grains_GrainCloud {
   double spread;
   double jitter;
   double density;
+  double mindensity;
+  double maxdensity;
   double grains_per_sec;
   __Pyx_memviewslice density_lfo;
   int density_lfo_length;
@@ -1213,6 +1216,28 @@ static void __Pyx_RaiseArgtupleInvalid(const char* func_name, int exact,
         __Pyx__ArgTypeTest(obj, type, name, exact))
 static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *name, int exact);
 
+/* PyObjectGetAttrStr.proto */
+#if CYTHON_USE_TYPE_SLOTS
+static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject* attr_name) {
+    PyTypeObject* tp = Py_TYPE(obj);
+    if (likely(tp->tp_getattro))
+        return tp->tp_getattro(obj, attr_name);
+#if PY_MAJOR_VERSION < 3
+    if (likely(tp->tp_getattr))
+        return tp->tp_getattr(obj, PyString_AS_STRING(attr_name));
+#endif
+    return PyObject_GetAttr(obj, attr_name);
+}
+#else
+#define __Pyx_PyObject_GetAttrStr(o,n) PyObject_GetAttr(o,n)
+#endif
+
+/* GetBuiltinName.proto */
+static PyObject *__Pyx_GetBuiltinName(PyObject *name);
+
+/* GetModuleGlobalName.proto */
+static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name);
+
 /* PyObjectCall.proto */
 #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw);
@@ -1237,22 +1262,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(
         PyObject* obj, Py_ssize_t cstart, Py_ssize_t cstop,
         PyObject** py_start, PyObject** py_stop, PyObject** py_slice,
         int has_cstart, int has_cstop, int wraparound);
-
-/* PyObjectGetAttrStr.proto */
-#if CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetAttrStr(PyObject* obj, PyObject* attr_name) {
-    PyTypeObject* tp = Py_TYPE(obj);
-    if (likely(tp->tp_getattro))
-        return tp->tp_getattro(obj, attr_name);
-#if PY_MAJOR_VERSION < 3
-    if (likely(tp->tp_getattr))
-        return tp->tp_getattr(obj, PyString_AS_STRING(attr_name));
-#endif
-    return PyObject_GetAttr(obj, attr_name);
-}
-#else
-#define __Pyx_PyObject_GetAttrStr(o,n) PyObject_GetAttr(o,n)
-#endif
 
 /* PyCFunctionFastCall.proto */
 #if CYTHON_FAST_PYCCALL
@@ -1332,12 +1341,6 @@ static CYTHON_INLINE PyObject *__Pyx_GetAttr(PyObject *, PyObject *);
 
 /* GetAttr3.proto */
 static CYTHON_INLINE PyObject *__Pyx_GetAttr3(PyObject *, PyObject *, PyObject *);
-
-/* GetBuiltinName.proto */
-static PyObject *__Pyx_GetBuiltinName(PyObject *name);
-
-/* GetModuleGlobalName.proto */
-static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name);
 
 /* Import.proto */
 static PyObject *__Pyx_Import(PyObject *name, PyObject *from_list, int level);
@@ -1807,7 +1810,9 @@ static PyObject *__pyx_builtin_id;
 static PyObject *__pyx_builtin_IndexError;
 static const char __pyx_k_O[] = "O";
 static const char __pyx_k_c[] = "c";
+static const char __pyx_k_d[] = "d";
 static const char __pyx_k_id[] = "id";
+static const char __pyx_k_np[] = "np";
 static const char __pyx_k_buf[] = "buf";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
@@ -1826,14 +1831,17 @@ static const char __pyx_k_stop[] = "stop";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_ASCII[] = "ASCII";
 static const char __pyx_k_class[] = "__class__";
+static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_error[] = "error";
 static const char __pyx_k_flags[] = "flags";
+static const char __pyx_k_numpy[] = "numpy";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_speed[] = "speed";
 static const char __pyx_k_start[] = "start";
 static const char __pyx_k_encode[] = "encode";
 static const char __pyx_k_format[] = "format";
+static const char __pyx_k_freeze[] = "freeze";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_jitter[] = "jitter";
 static const char __pyx_k_length[] = "length";
@@ -1845,6 +1853,7 @@ static const char __pyx_k_struct[] = "struct";
 static const char __pyx_k_unpack[] = "unpack";
 static const char __pyx_k_update[] = "update";
 static const char __pyx_k_win_wt[] = "win_wt";
+static const char __pyx_k_asarray[] = "asarray";
 static const char __pyx_k_density[] = "density";
 static const char __pyx_k_fortran[] = "fortran";
 static const char __pyx_k_memview[] = "memview";
@@ -1866,6 +1875,8 @@ static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
 static const char __pyx_k_speed_lfo[] = "speed_lfo";
 static const char __pyx_k_IndexError[] = "IndexError";
 static const char __pyx_k_ValueError[] = "ValueError";
+static const char __pyx_k_maxdensity[] = "maxdensity";
+static const char __pyx_k_mindensity[] = "mindensity";
 static const char __pyx_k_pyx_result[] = "__pyx_result";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_samplerate[] = "samplerate";
@@ -1913,7 +1924,7 @@ static const char __pyx_k_strided_and_direct_or_indirect[] = "<strided and direc
 static const char __pyx_k_Buffer_view_does_not_expose_stri[] = "Buffer view does not expose strides";
 static const char __pyx_k_Can_only_create_a_buffer_that_is[] = "Can only create a buffer that is contiguous in memory.";
 static const char __pyx_k_Empty_shape_tuple_for_cython_arr[] = "Empty shape tuple for cython.array";
-static const char __pyx_k_Incompatible_checksums_s_vs_0x0c[] = "Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))";
+static const char __pyx_k_Incompatible_checksums_s_vs_0x94[] = "Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))";
 static const char __pyx_k_Incompatible_checksums_s_vs_0xb0[] = "Incompatible checksums (%s vs 0xb068931 = (name))";
 static const char __pyx_k_Indirect_dimensions_not_supporte[] = "Indirect dimensions not supported";
 static const char __pyx_k_Invalid_mode_expected_c_or_fortr[] = "Invalid mode, expected 'c' or 'fortran', got %s";
@@ -1928,7 +1939,7 @@ static PyObject *__pyx_kp_s_Can_only_create_a_buffer_that_is;
 static PyObject *__pyx_kp_s_Cannot_index_with_type_s;
 static PyObject *__pyx_n_s_Ellipsis;
 static PyObject *__pyx_kp_s_Empty_shape_tuple_for_cython_arr;
-static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0x0c;
+static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0x94;
 static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0xb0;
 static PyObject *__pyx_n_s_IndexError;
 static PyObject *__pyx_kp_s_Indirect_dimensions_not_supporte;
@@ -1945,6 +1956,7 @@ static PyObject *__pyx_kp_s_Unable_to_convert_item_to_object;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_n_s_View_MemoryView;
 static PyObject *__pyx_n_s_allocate_buffer;
+static PyObject *__pyx_n_s_asarray;
 static PyObject *__pyx_n_s_base;
 static PyObject *__pyx_n_s_buf;
 static PyObject *__pyx_n_s_c;
@@ -1954,12 +1966,14 @@ static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
+static PyObject *__pyx_n_s_d;
 static PyObject *__pyx_n_s_density;
 static PyObject *__pyx_n_s_density_lfo;
 static PyObject *__pyx_n_s_density_lfo_length;
 static PyObject *__pyx_n_s_density_lfo_speed;
 static PyObject *__pyx_n_s_density_lfo_wt;
 static PyObject *__pyx_n_s_dict;
+static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_dtype_is_object;
 static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_enumerate;
@@ -1968,6 +1982,7 @@ static PyObject *__pyx_n_s_flags;
 static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fortran;
 static PyObject *__pyx_n_u_fortran;
+static PyObject *__pyx_n_s_freeze;
 static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
 static PyObject *__pyx_n_s_grainlength;
@@ -1982,9 +1997,11 @@ static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_jitter;
 static PyObject *__pyx_n_s_length;
 static PyObject *__pyx_n_s_main;
+static PyObject *__pyx_n_s_maxdensity;
 static PyObject *__pyx_n_s_maxlength;
 static PyObject *__pyx_n_s_maxspeed;
 static PyObject *__pyx_n_s_memview;
+static PyObject *__pyx_n_s_mindensity;
 static PyObject *__pyx_n_s_minlength;
 static PyObject *__pyx_n_s_minspeed;
 static PyObject *__pyx_n_s_mode;
@@ -1993,6 +2010,8 @@ static PyObject *__pyx_n_s_name_2;
 static PyObject *__pyx_n_s_ndim;
 static PyObject *__pyx_n_s_new;
 static PyObject *__pyx_kp_s_no_default___reduce___due_to_non;
+static PyObject *__pyx_n_s_np;
+static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_n_s_obj;
 static PyObject *__pyx_n_s_pack;
 static PyObject *__pyx_n_s_pan;
@@ -2041,7 +2060,7 @@ static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_win;
 static PyObject *__pyx_n_s_win_length;
 static PyObject *__pyx_n_s_win_wt;
-static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_v_buf, int __pyx_v_win, __Pyx_memviewslice __pyx_v_win_wt, int __pyx_v_win_length, int __pyx_v_read_lfo, __Pyx_memviewslice __pyx_v_read_lfo_wt, double __pyx_v_read_lfo_speed, int __pyx_v_read_lfo_length, int __pyx_v_speed_lfo, __Pyx_memviewslice __pyx_v_speed_lfo_wt, int __pyx_v_speed_lfo_length, double __pyx_v_speed, double __pyx_v_minspeed, double __pyx_v_maxspeed, double __pyx_v_density, int __pyx_v_density_lfo, __Pyx_memviewslice __pyx_v_density_lfo_wt, int __pyx_v_density_lfo_length, double __pyx_v_density_lfo_speed, double __pyx_v_grainlength, int __pyx_v_grainlength_lfo, __Pyx_memviewslice __pyx_v_grainlength_lfo_wt, int __pyx_v_grainlength_lfo_length, double __pyx_v_grainlength_lfo_speed, double __pyx_v_minlength, double __pyx_v_maxlength, double __pyx_v_spread, double __pyx_v_jitter); /* proto */
+static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_v_buf, int __pyx_v_win, __Pyx_memviewslice __pyx_v_win_wt, int __pyx_v_win_length, double __pyx_v_freeze, int __pyx_v_read_lfo, PyObject *__pyx_v_read_lfo_wt, double __pyx_v_read_lfo_speed, int __pyx_v_read_lfo_length, int __pyx_v_speed_lfo, __Pyx_memviewslice __pyx_v_speed_lfo_wt, int __pyx_v_speed_lfo_length, double __pyx_v_speed, double __pyx_v_minspeed, double __pyx_v_maxspeed, int __pyx_v_density_lfo, __Pyx_memviewslice __pyx_v_density_lfo_wt, int __pyx_v_density_lfo_length, double __pyx_v_density_lfo_speed, double __pyx_v_density, double __pyx_v_mindensity, double __pyx_v_maxdensity, double __pyx_v_grainlength, int __pyx_v_grainlength_lfo, __Pyx_memviewslice __pyx_v_grainlength_lfo_wt, int __pyx_v_grainlength_lfo_length, double __pyx_v_grainlength_lfo_speed, double __pyx_v_minlength, double __pyx_v_maxlength, double __pyx_v_spread, double __pyx_v_jitter); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_length); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_3buf___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
 static int __pyx_pf_5pippi_6grains_10GrainCloud_3buf_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
@@ -2054,6 +2073,8 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_3win___get__(struct __pyx_
 static int __pyx_pf_5pippi_6grains_10GrainCloud_3win_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_10win_length___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
 static int __pyx_pf_5pippi_6grains_10GrainCloud_10win_length_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6freeze___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
+static int __pyx_pf_5pippi_6grains_10GrainCloud_6freeze_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_8read_lfo___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
 static int __pyx_pf_5pippi_6grains_10GrainCloud_8read_lfo_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_15read_lfo_length___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
@@ -2078,6 +2099,10 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6jitter___get__(struct __p
 static int __pyx_pf_5pippi_6grains_10GrainCloud_6jitter_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_7density___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
 static int __pyx_pf_5pippi_6grains_10GrainCloud_7density_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_10mindensity___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
+static int __pyx_pf_5pippi_6grains_10GrainCloud_10mindensity_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
+static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_10maxdensity___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
+static int __pyx_pf_5pippi_6grains_10GrainCloud_10maxdensity_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_14grains_per_sec___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
 static int __pyx_pf_5pippi_6grains_10GrainCloud_14grains_per_sec_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_11density_lfo___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self); /* proto */
@@ -2153,21 +2178,21 @@ static PyObject *__pyx_tp_new__memoryviewslice(PyTypeObject *t, PyObject *a, PyO
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_10;
-static PyObject *__pyx_int_12795603;
+static PyObject *__pyx_int_155201045;
 static PyObject *__pyx_int_184977713;
 static PyObject *__pyx_int_neg_1;
 static __Pyx_memviewslice __pyx_k_;
 static __Pyx_memviewslice __pyx_k__2;
 static __Pyx_memviewslice __pyx_k__3;
 static __Pyx_memviewslice __pyx_k__4;
-static __Pyx_memviewslice __pyx_k__5;
+static PyObject *__pyx_tuple__5;
 static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
 static PyObject *__pyx_tuple__8;
 static PyObject *__pyx_tuple__9;
+static PyObject *__pyx_slice__18;
 static PyObject *__pyx_slice__19;
 static PyObject *__pyx_slice__20;
-static PyObject *__pyx_slice__21;
 static PyObject *__pyx_tuple__10;
 static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_tuple__12;
@@ -2176,21 +2201,20 @@ static PyObject *__pyx_tuple__14;
 static PyObject *__pyx_tuple__15;
 static PyObject *__pyx_tuple__16;
 static PyObject *__pyx_tuple__17;
-static PyObject *__pyx_tuple__18;
+static PyObject *__pyx_tuple__21;
 static PyObject *__pyx_tuple__22;
 static PyObject *__pyx_tuple__23;
 static PyObject *__pyx_tuple__24;
-static PyObject *__pyx_tuple__25;
+static PyObject *__pyx_tuple__26;
 static PyObject *__pyx_tuple__27;
 static PyObject *__pyx_tuple__28;
 static PyObject *__pyx_tuple__29;
 static PyObject *__pyx_tuple__30;
 static PyObject *__pyx_tuple__31;
-static PyObject *__pyx_tuple__32;
-static PyObject *__pyx_codeobj__26;
-static PyObject *__pyx_codeobj__33;
+static PyObject *__pyx_codeobj__25;
+static PyObject *__pyx_codeobj__32;
 
-/* "pippi/grains.pyx":16
+/* "pippi/grains.pyx":20
  * 
  * cdef class GrainCloud:
  *     def __init__(self,             # <<<<<<<<<<<<<<
@@ -2205,8 +2229,9 @@ static int __pyx_pw_5pippi_6grains_10GrainCloud_1__init__(PyObject *__pyx_v_self
   int __pyx_v_win;
   __Pyx_memviewslice __pyx_v_win_wt = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_win_length;
+  double __pyx_v_freeze;
   int __pyx_v_read_lfo;
-  __Pyx_memviewslice __pyx_v_read_lfo_wt = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_v_read_lfo_wt = 0;
   double __pyx_v_read_lfo_speed;
   int __pyx_v_read_lfo_length;
   int __pyx_v_speed_lfo;
@@ -2215,11 +2240,13 @@ static int __pyx_pw_5pippi_6grains_10GrainCloud_1__init__(PyObject *__pyx_v_self
   double __pyx_v_speed;
   double __pyx_v_minspeed;
   double __pyx_v_maxspeed;
-  double __pyx_v_density;
   int __pyx_v_density_lfo;
   __Pyx_memviewslice __pyx_v_density_lfo_wt = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_v_density_lfo_length;
   double __pyx_v_density_lfo_speed;
+  double __pyx_v_density;
+  double __pyx_v_mindensity;
+  double __pyx_v_maxdensity;
   double __pyx_v_grainlength;
   int __pyx_v_grainlength_lfo;
   __Pyx_memviewslice __pyx_v_grainlength_lfo_wt = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -2233,12 +2260,27 @@ static int __pyx_pw_5pippi_6grains_10GrainCloud_1__init__(PyObject *__pyx_v_self
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_buf,&__pyx_n_s_win,&__pyx_n_s_win_wt,&__pyx_n_s_win_length,&__pyx_n_s_read_lfo,&__pyx_n_s_read_lfo_wt,&__pyx_n_s_read_lfo_speed,&__pyx_n_s_read_lfo_length,&__pyx_n_s_speed_lfo,&__pyx_n_s_speed_lfo_wt,&__pyx_n_s_speed_lfo_length,&__pyx_n_s_speed,&__pyx_n_s_minspeed,&__pyx_n_s_maxspeed,&__pyx_n_s_density,&__pyx_n_s_density_lfo,&__pyx_n_s_density_lfo_wt,&__pyx_n_s_density_lfo_length,&__pyx_n_s_density_lfo_speed,&__pyx_n_s_grainlength,&__pyx_n_s_grainlength_lfo,&__pyx_n_s_grainlength_lfo_wt,&__pyx_n_s_grainlength_lfo_length,&__pyx_n_s_grainlength_lfo_speed,&__pyx_n_s_minlength,&__pyx_n_s_maxlength,&__pyx_n_s_spread,&__pyx_n_s_jitter,0};
-    PyObject* values[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_buf,&__pyx_n_s_win,&__pyx_n_s_win_wt,&__pyx_n_s_win_length,&__pyx_n_s_freeze,&__pyx_n_s_read_lfo,&__pyx_n_s_read_lfo_wt,&__pyx_n_s_read_lfo_speed,&__pyx_n_s_read_lfo_length,&__pyx_n_s_speed_lfo,&__pyx_n_s_speed_lfo_wt,&__pyx_n_s_speed_lfo_length,&__pyx_n_s_speed,&__pyx_n_s_minspeed,&__pyx_n_s_maxspeed,&__pyx_n_s_density_lfo,&__pyx_n_s_density_lfo_wt,&__pyx_n_s_density_lfo_length,&__pyx_n_s_density_lfo_speed,&__pyx_n_s_density,&__pyx_n_s_mindensity,&__pyx_n_s_maxdensity,&__pyx_n_s_grainlength,&__pyx_n_s_grainlength_lfo,&__pyx_n_s_grainlength_lfo_wt,&__pyx_n_s_grainlength_lfo_length,&__pyx_n_s_grainlength_lfo_speed,&__pyx_n_s_minlength,&__pyx_n_s_maxlength,&__pyx_n_s_spread,&__pyx_n_s_jitter,0};
+    PyObject* values[31] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+    /* "pippi/grains.pyx":29
+ *             double freeze=-1,
+ *             int read_lfo=-1,
+ *             object read_lfo_wt=None,             # <<<<<<<<<<<<<<
+ *             double read_lfo_speed=1,
+ *             int read_lfo_length=DEFAULT_WTSIZE,
+ */
+    values[6] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case 31: values[30] = PyTuple_GET_ITEM(__pyx_args, 30);
+        CYTHON_FALLTHROUGH;
+        case 30: values[29] = PyTuple_GET_ITEM(__pyx_args, 29);
+        CYTHON_FALLTHROUGH;
+        case 29: values[28] = PyTuple_GET_ITEM(__pyx_args, 28);
+        CYTHON_FALLTHROUGH;
         case 28: values[27] = PyTuple_GET_ITEM(__pyx_args, 27);
         CYTHON_FALLTHROUGH;
         case 27: values[26] = PyTuple_GET_ITEM(__pyx_args, 26);
@@ -2324,67 +2366,67 @@ static int __pyx_pw_5pippi_6grains_10GrainCloud_1__init__(PyObject *__pyx_v_self
         CYTHON_FALLTHROUGH;
         case  4:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_freeze);
           if (value) { values[4] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo_wt);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo);
           if (value) { values[5] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  6:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo_speed);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo_wt);
           if (value) { values[6] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  7:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo_length);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo_speed);
           if (value) { values[7] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  8:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed_lfo);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_read_lfo_length);
           if (value) { values[8] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  9:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed_lfo_wt);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed_lfo);
           if (value) { values[9] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 10:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed_lfo_length);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed_lfo_wt);
           if (value) { values[10] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 11:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed_lfo_length);
           if (value) { values[11] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 12:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_minspeed);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_speed);
           if (value) { values[12] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 13:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_maxspeed);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_minspeed);
           if (value) { values[13] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 14:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_density);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_maxspeed);
           if (value) { values[14] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
@@ -2414,63 +2456,87 @@ static int __pyx_pw_5pippi_6grains_10GrainCloud_1__init__(PyObject *__pyx_v_self
         CYTHON_FALLTHROUGH;
         case 19:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_density);
           if (value) { values[19] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 20:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mindensity);
           if (value) { values[20] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 21:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo_wt);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_maxdensity);
           if (value) { values[21] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 22:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo_length);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength);
           if (value) { values[22] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 23:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo_speed);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo);
           if (value) { values[23] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 24:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_minlength);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo_wt);
           if (value) { values[24] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 25:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_maxlength);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo_length);
           if (value) { values[25] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 26:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_spread);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_grainlength_lfo_speed);
           if (value) { values[26] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case 27:
         if (kw_args > 0) {
-          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_jitter);
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_minlength);
           if (value) { values[27] = value; kw_args--; }
+        }
+        CYTHON_FALLTHROUGH;
+        case 28:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_maxlength);
+          if (value) { values[28] = value; kw_args--; }
+        }
+        CYTHON_FALLTHROUGH;
+        case 29:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_spread);
+          if (value) { values[29] = value; kw_args--; }
+        }
+        CYTHON_FALLTHROUGH;
+        case 30:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_jitter);
+          if (value) { values[30] = value; kw_args--; }
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 16, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 20, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case 31: values[30] = PyTuple_GET_ITEM(__pyx_args, 30);
+        CYTHON_FALLTHROUGH;
+        case 30: values[29] = PyTuple_GET_ITEM(__pyx_args, 29);
+        CYTHON_FALLTHROUGH;
+        case 29: values[28] = PyTuple_GET_ITEM(__pyx_args, 28);
+        CYTHON_FALLTHROUGH;
         case 28: values[27] = PyTuple_GET_ITEM(__pyx_args, 27);
         CYTHON_FALLTHROUGH;
         case 27: values[26] = PyTuple_GET_ITEM(__pyx_args, 26);
@@ -2532,156 +2598,174 @@ static int __pyx_pw_5pippi_6grains_10GrainCloud_1__init__(PyObject *__pyx_v_self
     }
     __pyx_v_buf = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)values[0]);
     if (values[1]) {
-      __pyx_v_win = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_win == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L3_error)
+      __pyx_v_win = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_win == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L3_error)
     } else {
       __pyx_v_win = ((int)-1);
     }
     if (values[2]) {
-      __pyx_v_win_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2]); if (unlikely(!__pyx_v_win_wt.memview)) __PYX_ERR(0, 20, __pyx_L3_error)
+      __pyx_v_win_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2]); if (unlikely(!__pyx_v_win_wt.memview)) __PYX_ERR(0, 24, __pyx_L3_error)
     } else {
       __pyx_v_win_wt = __pyx_k_;
       __PYX_INC_MEMVIEW(&__pyx_v_win_wt, 1);
     }
     if (values[3]) {
-      __pyx_v_win_length = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_win_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L3_error)
+      __pyx_v_win_length = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_win_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L3_error)
     } else {
       __pyx_v_win_length = ((int)0x1000);
     }
     if (values[4]) {
-      __pyx_v_read_lfo = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_read_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L3_error)
+      __pyx_v_freeze = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_freeze == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L3_error)
+    } else {
+      __pyx_v_freeze = ((double)-1.0);
+    }
+    if (values[5]) {
+      __pyx_v_read_lfo = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_read_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 28, __pyx_L3_error)
     } else {
       __pyx_v_read_lfo = ((int)-1);
     }
-    if (values[5]) {
-      __pyx_v_read_lfo_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[5]); if (unlikely(!__pyx_v_read_lfo_wt.memview)) __PYX_ERR(0, 24, __pyx_L3_error)
-    } else {
-      __pyx_v_read_lfo_wt = __pyx_k__2;
-      __PYX_INC_MEMVIEW(&__pyx_v_read_lfo_wt, 1);
-    }
-    if (values[6]) {
-      __pyx_v_read_lfo_speed = __pyx_PyFloat_AsDouble(values[6]); if (unlikely((__pyx_v_read_lfo_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L3_error)
+    __pyx_v_read_lfo_wt = values[6];
+    if (values[7]) {
+      __pyx_v_read_lfo_speed = __pyx_PyFloat_AsDouble(values[7]); if (unlikely((__pyx_v_read_lfo_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
     } else {
       __pyx_v_read_lfo_speed = ((double)1.0);
     }
-    if (values[7]) {
-      __pyx_v_read_lfo_length = __Pyx_PyInt_As_int(values[7]); if (unlikely((__pyx_v_read_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 26, __pyx_L3_error)
+    if (values[8]) {
+      __pyx_v_read_lfo_length = __Pyx_PyInt_As_int(values[8]); if (unlikely((__pyx_v_read_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
     } else {
       __pyx_v_read_lfo_length = ((int)0x1000);
     }
-    if (values[8]) {
-      __pyx_v_speed_lfo = __Pyx_PyInt_As_int(values[8]); if (unlikely((__pyx_v_speed_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 28, __pyx_L3_error)
+    if (values[9]) {
+      __pyx_v_speed_lfo = __Pyx_PyInt_As_int(values[9]); if (unlikely((__pyx_v_speed_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
     } else {
       __pyx_v_speed_lfo = ((int)-1);
     }
-    if (values[9]) {
-      __pyx_v_speed_lfo_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[9]); if (unlikely(!__pyx_v_speed_lfo_wt.memview)) __PYX_ERR(0, 29, __pyx_L3_error)
+    if (values[10]) {
+      __pyx_v_speed_lfo_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[10]); if (unlikely(!__pyx_v_speed_lfo_wt.memview)) __PYX_ERR(0, 34, __pyx_L3_error)
     } else {
-      __pyx_v_speed_lfo_wt = __pyx_k__3;
+      __pyx_v_speed_lfo_wt = __pyx_k__2;
       __PYX_INC_MEMVIEW(&__pyx_v_speed_lfo_wt, 1);
     }
-    if (values[10]) {
-      __pyx_v_speed_lfo_length = __Pyx_PyInt_As_int(values[10]); if (unlikely((__pyx_v_speed_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L3_error)
+    if (values[11]) {
+      __pyx_v_speed_lfo_length = __Pyx_PyInt_As_int(values[11]); if (unlikely((__pyx_v_speed_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 35, __pyx_L3_error)
     } else {
       __pyx_v_speed_lfo_length = ((int)0x1000);
     }
-    if (values[11]) {
-      __pyx_v_speed = __pyx_PyFloat_AsDouble(values[11]); if (unlikely((__pyx_v_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
+    if (values[12]) {
+      __pyx_v_speed = __pyx_PyFloat_AsDouble(values[12]); if (unlikely((__pyx_v_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L3_error)
     } else {
       __pyx_v_speed = ((double)1.0);
     }
-    if (values[12]) {
-      __pyx_v_minspeed = __pyx_PyFloat_AsDouble(values[12]); if (unlikely((__pyx_v_minspeed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L3_error)
+    if (values[13]) {
+      __pyx_v_minspeed = __pyx_PyFloat_AsDouble(values[13]); if (unlikely((__pyx_v_minspeed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 37, __pyx_L3_error)
     } else {
       __pyx_v_minspeed = ((double)1.0);
     }
-    if (values[13]) {
-      __pyx_v_maxspeed = __pyx_PyFloat_AsDouble(values[13]); if (unlikely((__pyx_v_maxspeed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
+    if (values[14]) {
+      __pyx_v_maxspeed = __pyx_PyFloat_AsDouble(values[14]); if (unlikely((__pyx_v_maxspeed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
     } else {
       __pyx_v_maxspeed = ((double)2.0);
     }
-    if (values[14]) {
-      __pyx_v_density = __pyx_PyFloat_AsDouble(values[14]); if (unlikely((__pyx_v_density == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 35, __pyx_L3_error)
-    } else {
-      __pyx_v_density = ((double)1.0);
-    }
     if (values[15]) {
-      __pyx_v_density_lfo = __Pyx_PyInt_As_int(values[15]); if (unlikely((__pyx_v_density_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L3_error)
+      __pyx_v_density_lfo = __Pyx_PyInt_As_int(values[15]); if (unlikely((__pyx_v_density_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L3_error)
     } else {
       __pyx_v_density_lfo = ((int)-1);
     }
     if (values[16]) {
-      __pyx_v_density_lfo_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[16]); if (unlikely(!__pyx_v_density_lfo_wt.memview)) __PYX_ERR(0, 37, __pyx_L3_error)
+      __pyx_v_density_lfo_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[16]); if (unlikely(!__pyx_v_density_lfo_wt.memview)) __PYX_ERR(0, 41, __pyx_L3_error)
     } else {
-      __pyx_v_density_lfo_wt = __pyx_k__4;
+      __pyx_v_density_lfo_wt = __pyx_k__3;
       __PYX_INC_MEMVIEW(&__pyx_v_density_lfo_wt, 1);
     }
     if (values[17]) {
-      __pyx_v_density_lfo_length = __Pyx_PyInt_As_int(values[17]); if (unlikely((__pyx_v_density_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L3_error)
+      __pyx_v_density_lfo_length = __Pyx_PyInt_As_int(values[17]); if (unlikely((__pyx_v_density_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 42, __pyx_L3_error)
     } else {
       __pyx_v_density_lfo_length = ((int)0x1000);
     }
     if (values[18]) {
-      __pyx_v_density_lfo_speed = __pyx_PyFloat_AsDouble(values[18]); if (unlikely((__pyx_v_density_lfo_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 39, __pyx_L3_error)
+      __pyx_v_density_lfo_speed = __pyx_PyFloat_AsDouble(values[18]); if (unlikely((__pyx_v_density_lfo_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L3_error)
     } else {
       __pyx_v_density_lfo_speed = ((double)1.0);
     }
     if (values[19]) {
-      __pyx_v_grainlength = __pyx_PyFloat_AsDouble(values[19]); if (unlikely((__pyx_v_grainlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 41, __pyx_L3_error)
+      __pyx_v_density = __pyx_PyFloat_AsDouble(values[19]); if (unlikely((__pyx_v_density == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 44, __pyx_L3_error)
+    } else {
+      __pyx_v_density = ((double)1.0);
+    }
+    if (values[20]) {
+      __pyx_v_mindensity = __pyx_PyFloat_AsDouble(values[20]); if (unlikely((__pyx_v_mindensity == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 45, __pyx_L3_error)
+    } else {
+      __pyx_v_mindensity = ((double)0.5);
+    }
+    if (values[21]) {
+      __pyx_v_maxdensity = __pyx_PyFloat_AsDouble(values[21]); if (unlikely((__pyx_v_maxdensity == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L3_error)
+    } else {
+      __pyx_v_maxdensity = ((double)1.5);
+    }
+    if (values[22]) {
+      __pyx_v_grainlength = __pyx_PyFloat_AsDouble(values[22]); if (unlikely((__pyx_v_grainlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L3_error)
     } else {
       __pyx_v_grainlength = ((double)60.0);
     }
-    if (values[20]) {
-      __pyx_v_grainlength_lfo = __Pyx_PyInt_As_int(values[20]); if (unlikely((__pyx_v_grainlength_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 42, __pyx_L3_error)
+    if (values[23]) {
+      __pyx_v_grainlength_lfo = __Pyx_PyInt_As_int(values[23]); if (unlikely((__pyx_v_grainlength_lfo == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L3_error)
     } else {
       __pyx_v_grainlength_lfo = ((int)-1);
     }
-    if (values[21]) {
-      __pyx_v_grainlength_lfo_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[21]); if (unlikely(!__pyx_v_grainlength_lfo_wt.memview)) __PYX_ERR(0, 43, __pyx_L3_error)
+    if (values[24]) {
+      __pyx_v_grainlength_lfo_wt = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[24]); if (unlikely(!__pyx_v_grainlength_lfo_wt.memview)) __PYX_ERR(0, 50, __pyx_L3_error)
     } else {
-      __pyx_v_grainlength_lfo_wt = __pyx_k__5;
+      __pyx_v_grainlength_lfo_wt = __pyx_k__4;
       __PYX_INC_MEMVIEW(&__pyx_v_grainlength_lfo_wt, 1);
     }
-    if (values[22]) {
-      __pyx_v_grainlength_lfo_length = __Pyx_PyInt_As_int(values[22]); if (unlikely((__pyx_v_grainlength_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 44, __pyx_L3_error)
+    if (values[25]) {
+      __pyx_v_grainlength_lfo_length = __Pyx_PyInt_As_int(values[25]); if (unlikely((__pyx_v_grainlength_lfo_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L3_error)
     } else {
       __pyx_v_grainlength_lfo_length = ((int)0x1000);
     }
-    if (values[23]) {
-      __pyx_v_grainlength_lfo_speed = __pyx_PyFloat_AsDouble(values[23]); if (unlikely((__pyx_v_grainlength_lfo_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 45, __pyx_L3_error)
+    if (values[26]) {
+      __pyx_v_grainlength_lfo_speed = __pyx_PyFloat_AsDouble(values[26]); if (unlikely((__pyx_v_grainlength_lfo_speed == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 52, __pyx_L3_error)
     } else {
       __pyx_v_grainlength_lfo_speed = ((double)1.0);
     }
-    if (values[24]) {
-      __pyx_v_minlength = __pyx_PyFloat_AsDouble(values[24]); if (unlikely((__pyx_v_minlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 47, __pyx_L3_error)
+    if (values[27]) {
+      __pyx_v_minlength = __pyx_PyFloat_AsDouble(values[27]); if (unlikely((__pyx_v_minlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 54, __pyx_L3_error)
     } else {
       __pyx_v_minlength = ((double)60.0);
     }
-    if (values[25]) {
-      __pyx_v_maxlength = __pyx_PyFloat_AsDouble(values[25]); if (unlikely((__pyx_v_maxlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L3_error)
+    if (values[28]) {
+      __pyx_v_maxlength = __pyx_PyFloat_AsDouble(values[28]); if (unlikely((__pyx_v_maxlength == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 55, __pyx_L3_error)
     } else {
       __pyx_v_maxlength = ((double)80.0);
     }
-    if (values[26]) {
-      __pyx_v_spread = __pyx_PyFloat_AsDouble(values[26]); if (unlikely((__pyx_v_spread == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L3_error)
+    if (values[29]) {
+      __pyx_v_spread = __pyx_PyFloat_AsDouble(values[29]); if (unlikely((__pyx_v_spread == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L3_error)
     } else {
       __pyx_v_spread = ((double)0.0);
     }
-    if (values[27]) {
-      __pyx_v_jitter = __pyx_PyFloat_AsDouble(values[27]); if (unlikely((__pyx_v_jitter == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 50, __pyx_L3_error)
+    if (values[30]) {
+      __pyx_v_jitter = __pyx_PyFloat_AsDouble(values[30]); if (unlikely((__pyx_v_jitter == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 57, __pyx_L3_error)
     } else {
       __pyx_v_jitter = ((double)0.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 28, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 16, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 31, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 20, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.grains.GrainCloud.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_buf), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "buf", 0))) __PYX_ERR(0, 17, __pyx_L1_error)
-  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud___init__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self), __pyx_v_buf, __pyx_v_win, __pyx_v_win_wt, __pyx_v_win_length, __pyx_v_read_lfo, __pyx_v_read_lfo_wt, __pyx_v_read_lfo_speed, __pyx_v_read_lfo_length, __pyx_v_speed_lfo, __pyx_v_speed_lfo_wt, __pyx_v_speed_lfo_length, __pyx_v_speed, __pyx_v_minspeed, __pyx_v_maxspeed, __pyx_v_density, __pyx_v_density_lfo, __pyx_v_density_lfo_wt, __pyx_v_density_lfo_length, __pyx_v_density_lfo_speed, __pyx_v_grainlength, __pyx_v_grainlength_lfo, __pyx_v_grainlength_lfo_wt, __pyx_v_grainlength_lfo_length, __pyx_v_grainlength_lfo_speed, __pyx_v_minlength, __pyx_v_maxlength, __pyx_v_spread, __pyx_v_jitter);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_buf), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "buf", 0))) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud___init__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self), __pyx_v_buf, __pyx_v_win, __pyx_v_win_wt, __pyx_v_win_length, __pyx_v_freeze, __pyx_v_read_lfo, __pyx_v_read_lfo_wt, __pyx_v_read_lfo_speed, __pyx_v_read_lfo_length, __pyx_v_speed_lfo, __pyx_v_speed_lfo_wt, __pyx_v_speed_lfo_length, __pyx_v_speed, __pyx_v_minspeed, __pyx_v_maxspeed, __pyx_v_density_lfo, __pyx_v_density_lfo_wt, __pyx_v_density_lfo_length, __pyx_v_density_lfo_speed, __pyx_v_density, __pyx_v_mindensity, __pyx_v_maxdensity, __pyx_v_grainlength, __pyx_v_grainlength_lfo, __pyx_v_grainlength_lfo_wt, __pyx_v_grainlength_lfo_length, __pyx_v_grainlength_lfo_speed, __pyx_v_minlength, __pyx_v_maxlength, __pyx_v_spread, __pyx_v_jitter);
+
+  /* "pippi/grains.pyx":20
+ * 
+ * cdef class GrainCloud:
+ *     def __init__(self,             # <<<<<<<<<<<<<<
+ *             SoundBuffer buf,
+ * 
+ */
 
   /* function exit code */
   goto __pyx_L0;
@@ -2692,16 +2776,22 @@ static int __pyx_pw_5pippi_6grains_10GrainCloud_1__init__(PyObject *__pyx_v_self
   return __pyx_r;
 }
 
-static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_v_buf, int __pyx_v_win, __Pyx_memviewslice __pyx_v_win_wt, int __pyx_v_win_length, int __pyx_v_read_lfo, __Pyx_memviewslice __pyx_v_read_lfo_wt, double __pyx_v_read_lfo_speed, int __pyx_v_read_lfo_length, int __pyx_v_speed_lfo, __Pyx_memviewslice __pyx_v_speed_lfo_wt, int __pyx_v_speed_lfo_length, double __pyx_v_speed, double __pyx_v_minspeed, double __pyx_v_maxspeed, double __pyx_v_density, int __pyx_v_density_lfo, __Pyx_memviewslice __pyx_v_density_lfo_wt, int __pyx_v_density_lfo_length, double __pyx_v_density_lfo_speed, double __pyx_v_grainlength, int __pyx_v_grainlength_lfo, __Pyx_memviewslice __pyx_v_grainlength_lfo_wt, int __pyx_v_grainlength_lfo_length, double __pyx_v_grainlength_lfo_speed, double __pyx_v_minlength, double __pyx_v_maxlength, double __pyx_v_spread, double __pyx_v_jitter) {
+static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_v_buf, int __pyx_v_win, __Pyx_memviewslice __pyx_v_win_wt, int __pyx_v_win_length, double __pyx_v_freeze, int __pyx_v_read_lfo, PyObject *__pyx_v_read_lfo_wt, double __pyx_v_read_lfo_speed, int __pyx_v_read_lfo_length, int __pyx_v_speed_lfo, __Pyx_memviewslice __pyx_v_speed_lfo_wt, int __pyx_v_speed_lfo_length, double __pyx_v_speed, double __pyx_v_minspeed, double __pyx_v_maxspeed, int __pyx_v_density_lfo, __Pyx_memviewslice __pyx_v_density_lfo_wt, int __pyx_v_density_lfo_length, double __pyx_v_density_lfo_speed, double __pyx_v_density, double __pyx_v_mindensity, double __pyx_v_maxdensity, double __pyx_v_grainlength, int __pyx_v_grainlength_lfo, __Pyx_memviewslice __pyx_v_grainlength_lfo_wt, int __pyx_v_grainlength_lfo_length, double __pyx_v_grainlength_lfo_speed, double __pyx_v_minlength, double __pyx_v_maxlength, double __pyx_v_spread, double __pyx_v_jitter) {
   int __pyx_r;
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   int __pyx_t_2;
   __Pyx_memviewslice __pyx_t_3 = { 0, 0, { 0 }, { 0 }, { 0 } };
   size_t __pyx_t_4;
+  int __pyx_t_5;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  PyObject *__pyx_t_8 = NULL;
+  PyObject *__pyx_t_9 = NULL;
+  __Pyx_memviewslice __pyx_t_10 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "pippi/grains.pyx":53
+  /* "pippi/grains.pyx":60
  *         ):
  * 
  *         if spread < 0:             # <<<<<<<<<<<<<<
@@ -2711,7 +2801,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   __pyx_t_1 = ((__pyx_v_spread < 0.0) != 0);
   if (__pyx_t_1) {
 
-    /* "pippi/grains.pyx":54
+    /* "pippi/grains.pyx":61
  * 
  *         if spread < 0:
  *             spread = 0             # <<<<<<<<<<<<<<
@@ -2720,7 +2810,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
     __pyx_v_spread = 0.0;
 
-    /* "pippi/grains.pyx":53
+    /* "pippi/grains.pyx":60
  *         ):
  * 
  *         if spread < 0:             # <<<<<<<<<<<<<<
@@ -2730,7 +2820,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
     goto __pyx_L3;
   }
 
-  /* "pippi/grains.pyx":55
+  /* "pippi/grains.pyx":62
  *         if spread < 0:
  *             spread = 0
  *         elif spread > 1:             # <<<<<<<<<<<<<<
@@ -2740,7 +2830,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   __pyx_t_1 = ((__pyx_v_spread > 1.0) != 0);
   if (__pyx_t_1) {
 
-    /* "pippi/grains.pyx":56
+    /* "pippi/grains.pyx":63
  *             spread = 0
  *         elif spread > 1:
  *             spread = 1             # <<<<<<<<<<<<<<
@@ -2749,7 +2839,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
     __pyx_v_spread = 1.0;
 
-    /* "pippi/grains.pyx":55
+    /* "pippi/grains.pyx":62
  *         if spread < 0:
  *             spread = 0
  *         elif spread > 1:             # <<<<<<<<<<<<<<
@@ -2759,7 +2849,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   }
   __pyx_L3:;
 
-  /* "pippi/grains.pyx":58
+  /* "pippi/grains.pyx":65
  *             spread = 1
  * 
  *         self.buf = buf             # <<<<<<<<<<<<<<
@@ -2772,7 +2862,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   __Pyx_DECREF(((PyObject *)__pyx_v_self->buf));
   __pyx_v_self->buf = __pyx_v_buf;
 
-  /* "pippi/grains.pyx":59
+  /* "pippi/grains.pyx":66
  * 
  *         self.buf = buf
  *         self.channels = buf.channels             # <<<<<<<<<<<<<<
@@ -2782,7 +2872,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   __pyx_t_2 = __pyx_v_buf->channels;
   __pyx_v_self->channels = __pyx_t_2;
 
-  /* "pippi/grains.pyx":60
+  /* "pippi/grains.pyx":67
  *         self.buf = buf
  *         self.channels = buf.channels
  *         self.samplerate = buf.samplerate             # <<<<<<<<<<<<<<
@@ -2792,25 +2882,34 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   __pyx_t_2 = __pyx_v_buf->samplerate;
   __pyx_v_self->samplerate = __pyx_t_2;
 
-  /* "pippi/grains.pyx":61
+  /* "pippi/grains.pyx":68
  *         self.channels = buf.channels
  *         self.samplerate = buf.samplerate
  *         self.spread = spread             # <<<<<<<<<<<<<<
  *         self.jitter = jitter
- * 
+ *         self.freeze = freeze
  */
   __pyx_v_self->spread = __pyx_v_spread;
 
-  /* "pippi/grains.pyx":62
+  /* "pippi/grains.pyx":69
  *         self.samplerate = buf.samplerate
  *         self.spread = spread
  *         self.jitter = jitter             # <<<<<<<<<<<<<<
+ *         self.freeze = freeze
  * 
- *         # Window is always a wavetable, defaults to Hann
  */
   __pyx_v_self->jitter = __pyx_v_jitter;
 
-  /* "pippi/grains.pyx":65
+  /* "pippi/grains.pyx":70
+ *         self.spread = spread
+ *         self.jitter = jitter
+ *         self.freeze = freeze             # <<<<<<<<<<<<<<
+ * 
+ *         # Window is always a wavetable, defaults to Hann
+ */
+  __pyx_v_self->freeze = __pyx_v_freeze;
+
+  /* "pippi/grains.pyx":73
  * 
  *         # Window is always a wavetable, defaults to Hann
  *         if win > -1:             # <<<<<<<<<<<<<<
@@ -2820,20 +2919,20 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   __pyx_t_1 = ((__pyx_v_win > -1L) != 0);
   if (__pyx_t_1) {
 
-    /* "pippi/grains.pyx":66
+    /* "pippi/grains.pyx":74
  *         # Window is always a wavetable, defaults to Hann
  *         if win > -1:
  *             self.win = wavetables._window(win, win_length)             # <<<<<<<<<<<<<<
  *         elif win_wt is not None:
  *             self.win = win_wt
  */
-    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_win, __pyx_v_win_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 66, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_win, __pyx_v_win_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 74, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->win, 0);
     __pyx_v_self->win = __pyx_t_3;
     __pyx_t_3.memview = NULL;
     __pyx_t_3.data = NULL;
 
-    /* "pippi/grains.pyx":65
+    /* "pippi/grains.pyx":73
  * 
  *         # Window is always a wavetable, defaults to Hann
  *         if win > -1:             # <<<<<<<<<<<<<<
@@ -2843,7 +2942,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
     goto __pyx_L4;
   }
 
-  /* "pippi/grains.pyx":67
+  /* "pippi/grains.pyx":75
  *         if win > -1:
  *             self.win = wavetables._window(win, win_length)
  *         elif win_wt is not None:             # <<<<<<<<<<<<<<
@@ -2853,7 +2952,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   __pyx_t_1 = ((((PyObject *) __pyx_v_win_wt.memview) != Py_None) != 0);
   if (__pyx_t_1) {
 
-    /* "pippi/grains.pyx":68
+    /* "pippi/grains.pyx":76
  *             self.win = wavetables._window(win, win_length)
  *         elif win_wt is not None:
  *             self.win = win_wt             # <<<<<<<<<<<<<<
@@ -2864,7 +2963,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
     __PYX_INC_MEMVIEW(&__pyx_v_win_wt, 0);
     __pyx_v_self->win = __pyx_v_win_wt;
 
-    /* "pippi/grains.pyx":67
+    /* "pippi/grains.pyx":75
  *         if win > -1:
  *             self.win = wavetables._window(win, win_length)
  *         elif win_wt is not None:             # <<<<<<<<<<<<<<
@@ -2874,7 +2973,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
     goto __pyx_L4;
   }
 
-  /* "pippi/grains.pyx":70
+  /* "pippi/grains.pyx":78
  *             self.win = win_wt
  *         else:
  *             self.win = wavetables._window(wavetables.HANN, win_length)             # <<<<<<<<<<<<<<
@@ -2882,7 +2981,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  * 
  */
   /*else*/ {
-    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_5pippi_10wavetables_HANN, __pyx_v_win_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_5pippi_10wavetables_HANN, __pyx_v_win_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 78, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->win, 0);
     __pyx_v_self->win = __pyx_t_3;
     __pyx_t_3.memview = NULL;
@@ -2890,189 +2989,270 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   }
   __pyx_L4:;
 
-  /* "pippi/grains.pyx":71
+  /* "pippi/grains.pyx":79
  *         else:
  *             self.win = wavetables._window(wavetables.HANN, win_length)
  *         self.win_length = len(self.win)             # <<<<<<<<<<<<<<
  * 
  *         # Read lfo is always a wavetable, defaults to phasor
  */
-  if (unlikely(!__pyx_v_self->win.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 71, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->win.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 79, __pyx_L1_error)}
   __pyx_t_4 = __Pyx_MemoryView_Len(__pyx_v_self->win); 
   __pyx_v_self->win_length = __pyx_t_4;
 
-  /* "pippi/grains.pyx":74
+  /* "pippi/grains.pyx":82
  * 
  *         # Read lfo is always a wavetable, defaults to phasor
- *         if read_lfo > -1:             # <<<<<<<<<<<<<<
+ *         if self.freeze > -1:             # <<<<<<<<<<<<<<
+ *             self.read_lfo = None
+ *         elif read_lfo > -1:
+ */
+  __pyx_t_1 = ((__pyx_v_self->freeze > -1.0) != 0);
+  if (__pyx_t_1) {
+
+    /* "pippi/grains.pyx":83
+ *         # Read lfo is always a wavetable, defaults to phasor
+ *         if self.freeze > -1:
+ *             self.read_lfo = None             # <<<<<<<<<<<<<<
+ *         elif read_lfo > -1:
+ *             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
+ */
+    __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+    if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 83, __pyx_L1_error)
+    __PYX_XDEC_MEMVIEW(&__pyx_v_self->read_lfo, 0);
+    __pyx_v_self->read_lfo = __pyx_t_3;
+    __pyx_t_3.memview = NULL;
+    __pyx_t_3.data = NULL;
+
+    /* "pippi/grains.pyx":82
+ * 
+ *         # Read lfo is always a wavetable, defaults to phasor
+ *         if self.freeze > -1:             # <<<<<<<<<<<<<<
+ *             self.read_lfo = None
+ *         elif read_lfo > -1:
+ */
+    goto __pyx_L5;
+  }
+
+  /* "pippi/grains.pyx":84
+ *         if self.freeze > -1:
+ *             self.read_lfo = None
+ *         elif read_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
  *         elif read_lfo_wt is not None:
  */
   __pyx_t_1 = ((__pyx_v_read_lfo > -1L) != 0);
   if (__pyx_t_1) {
 
-    /* "pippi/grains.pyx":75
- *         # Read lfo is always a wavetable, defaults to phasor
- *         if read_lfo > -1:
+    /* "pippi/grains.pyx":85
+ *             self.read_lfo = None
+ *         elif read_lfo > -1:
  *             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)             # <<<<<<<<<<<<<<
  *         elif read_lfo_wt is not None:
- *             self.read_lfo = read_lfo_wt
+ *             #self.read_lfo = read_lfo_wt
  */
-    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_read_lfo, __pyx_v_read_lfo_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 75, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_read_lfo, __pyx_v_read_lfo_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 85, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->read_lfo, 0);
     __pyx_v_self->read_lfo = __pyx_t_3;
     __pyx_t_3.memview = NULL;
     __pyx_t_3.data = NULL;
 
-    /* "pippi/grains.pyx":74
- * 
- *         # Read lfo is always a wavetable, defaults to phasor
- *         if read_lfo > -1:             # <<<<<<<<<<<<<<
+    /* "pippi/grains.pyx":84
+ *         if self.freeze > -1:
+ *             self.read_lfo = None
+ *         elif read_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
  *         elif read_lfo_wt is not None:
  */
     goto __pyx_L5;
   }
 
-  /* "pippi/grains.pyx":76
- *         if read_lfo > -1:
+  /* "pippi/grains.pyx":86
+ *         elif read_lfo > -1:
  *             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
  *         elif read_lfo_wt is not None:             # <<<<<<<<<<<<<<
- *             self.read_lfo = read_lfo_wt
- *         else:
+ *             #self.read_lfo = read_lfo_wt
+ *             self.read_lfo = interpolation._linear(np.asarray(read_lfo_wt, dtype='d'), read_lfo_length)
  */
-  __pyx_t_1 = ((((PyObject *) __pyx_v_read_lfo_wt.memview) != Py_None) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_1 = (__pyx_v_read_lfo_wt != Py_None);
+  __pyx_t_5 = (__pyx_t_1 != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":77
- *             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
+    /* "pippi/grains.pyx":88
  *         elif read_lfo_wt is not None:
- *             self.read_lfo = read_lfo_wt             # <<<<<<<<<<<<<<
+ *             #self.read_lfo = read_lfo_wt
+ *             self.read_lfo = interpolation._linear(np.asarray(read_lfo_wt, dtype='d'), read_lfo_length)             # <<<<<<<<<<<<<<
  *         else:
  *             self.read_lfo = wavetables._window(wavetables.PHASOR, read_lfo_length)
  */
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_asarray); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_INCREF(__pyx_v_read_lfo_wt);
+    __Pyx_GIVEREF(__pyx_v_read_lfo_wt);
+    PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_v_read_lfo_wt);
+    __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_8);
+    if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 88, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_6, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_9);
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+    __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_9);
+    if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+    __pyx_t_10 = __pyx_f_5pippi_13interpolation__linear(__pyx_t_3, __pyx_v_read_lfo_length); if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
+    __pyx_t_3.memview = NULL;
+    __pyx_t_3.data = NULL;
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->read_lfo, 0);
-    __PYX_INC_MEMVIEW(&__pyx_v_read_lfo_wt, 0);
-    __pyx_v_self->read_lfo = __pyx_v_read_lfo_wt;
+    __pyx_v_self->read_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
 
-    /* "pippi/grains.pyx":76
- *         if read_lfo > -1:
+    /* "pippi/grains.pyx":86
+ *         elif read_lfo > -1:
  *             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
  *         elif read_lfo_wt is not None:             # <<<<<<<<<<<<<<
- *             self.read_lfo = read_lfo_wt
- *         else:
+ *             #self.read_lfo = read_lfo_wt
+ *             self.read_lfo = interpolation._linear(np.asarray(read_lfo_wt, dtype='d'), read_lfo_length)
  */
     goto __pyx_L5;
   }
 
-  /* "pippi/grains.pyx":79
- *             self.read_lfo = read_lfo_wt
+  /* "pippi/grains.pyx":90
+ *             self.read_lfo = interpolation._linear(np.asarray(read_lfo_wt, dtype='d'), read_lfo_length)
  *         else:
  *             self.read_lfo = wavetables._window(wavetables.PHASOR, read_lfo_length)             # <<<<<<<<<<<<<<
  * 
  *         # 0 lfo speed freezes position
  */
   /*else*/ {
-    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_5pippi_10wavetables_PHASOR, __pyx_v_read_lfo_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 79, __pyx_L1_error)
+    __pyx_t_10 = __pyx_f_5pippi_10wavetables__window(__pyx_v_5pippi_10wavetables_PHASOR, __pyx_v_read_lfo_length); if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 90, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->read_lfo, 0);
-    __pyx_v_self->read_lfo = __pyx_t_3;
-    __pyx_t_3.memview = NULL;
-    __pyx_t_3.data = NULL;
+    __pyx_v_self->read_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
   }
   __pyx_L5:;
 
-  /* "pippi/grains.pyx":82
+  /* "pippi/grains.pyx":93
  * 
  *         # 0 lfo speed freezes position
- *         if read_lfo_speed <= 0:             # <<<<<<<<<<<<<<
- *             read_lfo_speed = 0
- *         self.read_lfo_speed = read_lfo_speed
+ *         if self.read_lfo is not None:             # <<<<<<<<<<<<<<
+ *             if read_lfo_speed <= 0:
+ *                 read_lfo_speed = 0
  */
-  __pyx_t_1 = ((__pyx_v_read_lfo_speed <= 0.0) != 0);
-  if (__pyx_t_1) {
+  if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 93, __pyx_L1_error)}
+  __pyx_t_5 = ((((PyObject *) __pyx_v_self->read_lfo.memview) != Py_None) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":83
+    /* "pippi/grains.pyx":94
  *         # 0 lfo speed freezes position
- *         if read_lfo_speed <= 0:
- *             read_lfo_speed = 0             # <<<<<<<<<<<<<<
- *         self.read_lfo_speed = read_lfo_speed
- *         self.read_lfo_length = len(self.read_lfo)
+ *         if self.read_lfo is not None:
+ *             if read_lfo_speed <= 0:             # <<<<<<<<<<<<<<
+ *                 read_lfo_speed = 0
+ *             self.read_lfo_speed = read_lfo_speed
  */
-    __pyx_v_read_lfo_speed = 0.0;
+    __pyx_t_5 = ((__pyx_v_read_lfo_speed <= 0.0) != 0);
+    if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":82
- * 
+      /* "pippi/grains.pyx":95
+ *         if self.read_lfo is not None:
+ *             if read_lfo_speed <= 0:
+ *                 read_lfo_speed = 0             # <<<<<<<<<<<<<<
+ *             self.read_lfo_speed = read_lfo_speed
+ *             self.read_lfo_length = len(self.read_lfo)
+ */
+      __pyx_v_read_lfo_speed = 0.0;
+
+      /* "pippi/grains.pyx":94
  *         # 0 lfo speed freezes position
- *         if read_lfo_speed <= 0:             # <<<<<<<<<<<<<<
- *             read_lfo_speed = 0
- *         self.read_lfo_speed = read_lfo_speed
+ *         if self.read_lfo is not None:
+ *             if read_lfo_speed <= 0:             # <<<<<<<<<<<<<<
+ *                 read_lfo_speed = 0
+ *             self.read_lfo_speed = read_lfo_speed
  */
-  }
+    }
 
-  /* "pippi/grains.pyx":84
- *         if read_lfo_speed <= 0:
- *             read_lfo_speed = 0
- *         self.read_lfo_speed = read_lfo_speed             # <<<<<<<<<<<<<<
- *         self.read_lfo_length = len(self.read_lfo)
+    /* "pippi/grains.pyx":96
+ *             if read_lfo_speed <= 0:
+ *                 read_lfo_speed = 0
+ *             self.read_lfo_speed = read_lfo_speed             # <<<<<<<<<<<<<<
+ *             self.read_lfo_length = len(self.read_lfo)
  * 
  */
-  __pyx_v_self->read_lfo_speed = __pyx_v_read_lfo_speed;
+    __pyx_v_self->read_lfo_speed = __pyx_v_read_lfo_speed;
 
-  /* "pippi/grains.pyx":85
- *             read_lfo_speed = 0
- *         self.read_lfo_speed = read_lfo_speed
- *         self.read_lfo_length = len(self.read_lfo)             # <<<<<<<<<<<<<<
+    /* "pippi/grains.pyx":97
+ *                 read_lfo_speed = 0
+ *             self.read_lfo_speed = read_lfo_speed
+ *             self.read_lfo_length = len(self.read_lfo)             # <<<<<<<<<<<<<<
  * 
  *         # If speed_lfo < 0 and speed_lfo_wt is None, then use fixed speed
  */
-  if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 85, __pyx_L1_error)}
-  __pyx_t_4 = __Pyx_MemoryView_Len(__pyx_v_self->read_lfo); 
-  __pyx_v_self->read_lfo_length = __pyx_t_4;
+    if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 97, __pyx_L1_error)}
+    __pyx_t_4 = __Pyx_MemoryView_Len(__pyx_v_self->read_lfo); 
+    __pyx_v_self->read_lfo_length = __pyx_t_4;
 
-  /* "pippi/grains.pyx":89
+    /* "pippi/grains.pyx":93
+ * 
+ *         # 0 lfo speed freezes position
+ *         if self.read_lfo is not None:             # <<<<<<<<<<<<<<
+ *             if read_lfo_speed <= 0:
+ *                 read_lfo_speed = 0
+ */
+  }
+
+  /* "pippi/grains.pyx":101
  *         # If speed_lfo < 0 and speed_lfo_wt is None, then use fixed speed
  *         # No transposition is done if speed == 1
  *         if speed_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.speed_lfo = wavetables._window(speed_lfo, speed_lfo_length)
  *         elif speed_lfo_wt is not None:
  */
-  __pyx_t_1 = ((__pyx_v_speed_lfo > -1L) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((__pyx_v_speed_lfo > -1L) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":90
+    /* "pippi/grains.pyx":102
  *         # No transposition is done if speed == 1
  *         if speed_lfo > -1:
  *             self.speed_lfo = wavetables._window(speed_lfo, speed_lfo_length)             # <<<<<<<<<<<<<<
  *         elif speed_lfo_wt is not None:
  *             self.speed_lfo = speed_lfo_wt
  */
-    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_speed_lfo, __pyx_v_speed_lfo_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 90, __pyx_L1_error)
+    __pyx_t_10 = __pyx_f_5pippi_10wavetables__window(__pyx_v_speed_lfo, __pyx_v_speed_lfo_length); if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 102, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->speed_lfo, 0);
-    __pyx_v_self->speed_lfo = __pyx_t_3;
-    __pyx_t_3.memview = NULL;
-    __pyx_t_3.data = NULL;
+    __pyx_v_self->speed_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
 
-    /* "pippi/grains.pyx":89
+    /* "pippi/grains.pyx":101
  *         # If speed_lfo < 0 and speed_lfo_wt is None, then use fixed speed
  *         # No transposition is done if speed == 1
  *         if speed_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.speed_lfo = wavetables._window(speed_lfo, speed_lfo_length)
  *         elif speed_lfo_wt is not None:
  */
-    goto __pyx_L7;
+    goto __pyx_L8;
   }
 
-  /* "pippi/grains.pyx":91
+  /* "pippi/grains.pyx":103
  *         if speed_lfo > -1:
  *             self.speed_lfo = wavetables._window(speed_lfo, speed_lfo_length)
  *         elif speed_lfo_wt is not None:             # <<<<<<<<<<<<<<
  *             self.speed_lfo = speed_lfo_wt
  *         else:
  */
-  __pyx_t_1 = ((((PyObject *) __pyx_v_speed_lfo_wt.memview) != Py_None) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((((PyObject *) __pyx_v_speed_lfo_wt.memview) != Py_None) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":92
+    /* "pippi/grains.pyx":104
  *             self.speed_lfo = wavetables._window(speed_lfo, speed_lfo_length)
  *         elif speed_lfo_wt is not None:
  *             self.speed_lfo = speed_lfo_wt             # <<<<<<<<<<<<<<
@@ -3083,17 +3263,17 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
     __PYX_INC_MEMVIEW(&__pyx_v_speed_lfo_wt, 0);
     __pyx_v_self->speed_lfo = __pyx_v_speed_lfo_wt;
 
-    /* "pippi/grains.pyx":91
+    /* "pippi/grains.pyx":103
  *         if speed_lfo > -1:
  *             self.speed_lfo = wavetables._window(speed_lfo, speed_lfo_length)
  *         elif speed_lfo_wt is not None:             # <<<<<<<<<<<<<<
  *             self.speed_lfo = speed_lfo_wt
  *         else:
  */
-    goto __pyx_L7;
+    goto __pyx_L8;
   }
 
-  /* "pippi/grains.pyx":94
+  /* "pippi/grains.pyx":106
  *             self.speed_lfo = speed_lfo_wt
  *         else:
  *             self.speed_lfo = None             # <<<<<<<<<<<<<<
@@ -3101,38 +3281,38 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  *         if self.speed_lfo is not None:
  */
   /*else*/ {
-    __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-    if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 94, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+    if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 106, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->speed_lfo, 0);
-    __pyx_v_self->speed_lfo = __pyx_t_3;
-    __pyx_t_3.memview = NULL;
-    __pyx_t_3.data = NULL;
+    __pyx_v_self->speed_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
   }
-  __pyx_L7:;
+  __pyx_L8:;
 
-  /* "pippi/grains.pyx":96
+  /* "pippi/grains.pyx":108
  *             self.speed_lfo = None
  * 
  *         if self.speed_lfo is not None:             # <<<<<<<<<<<<<<
  *             self.speed_lfo_length = len(self.speed_lfo)
  * 
  */
-  if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 96, __pyx_L1_error)}
-  __pyx_t_1 = ((((PyObject *) __pyx_v_self->speed_lfo.memview) != Py_None) != 0);
-  if (__pyx_t_1) {
+  if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 108, __pyx_L1_error)}
+  __pyx_t_5 = ((((PyObject *) __pyx_v_self->speed_lfo.memview) != Py_None) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":97
+    /* "pippi/grains.pyx":109
  * 
  *         if self.speed_lfo is not None:
  *             self.speed_lfo_length = len(self.speed_lfo)             # <<<<<<<<<<<<<<
  * 
  *         if speed <= 0:
  */
-    if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 97, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 109, __pyx_L1_error)}
     __pyx_t_4 = __Pyx_MemoryView_Len(__pyx_v_self->speed_lfo); 
     __pyx_v_self->speed_lfo_length = __pyx_t_4;
 
-    /* "pippi/grains.pyx":96
+    /* "pippi/grains.pyx":108
  *             self.speed_lfo = None
  * 
  *         if self.speed_lfo is not None:             # <<<<<<<<<<<<<<
@@ -3141,17 +3321,17 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/grains.pyx":99
+  /* "pippi/grains.pyx":111
  *             self.speed_lfo_length = len(self.speed_lfo)
  * 
  *         if speed <= 0:             # <<<<<<<<<<<<<<
  *             speed = MIN_SPEED
  * 
  */
-  __pyx_t_1 = ((__pyx_v_speed <= 0.0) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((__pyx_v_speed <= 0.0) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":100
+    /* "pippi/grains.pyx":112
  * 
  *         if speed <= 0:
  *             speed = MIN_SPEED             # <<<<<<<<<<<<<<
@@ -3160,7 +3340,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
     __pyx_v_speed = 1e-06;
 
-    /* "pippi/grains.pyx":99
+    /* "pippi/grains.pyx":111
  *             self.speed_lfo_length = len(self.speed_lfo)
  * 
  *         if speed <= 0:             # <<<<<<<<<<<<<<
@@ -3169,17 +3349,17 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/grains.pyx":102
+  /* "pippi/grains.pyx":114
  *             speed = MIN_SPEED
  * 
  *         if minspeed <= 0:             # <<<<<<<<<<<<<<
  *             minspeed = MIN_SPEED
  * 
  */
-  __pyx_t_1 = ((__pyx_v_minspeed <= 0.0) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((__pyx_v_minspeed <= 0.0) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":103
+    /* "pippi/grains.pyx":115
  * 
  *         if minspeed <= 0:
  *             minspeed = MIN_SPEED             # <<<<<<<<<<<<<<
@@ -3188,7 +3368,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
     __pyx_v_minspeed = 1e-06;
 
-    /* "pippi/grains.pyx":102
+    /* "pippi/grains.pyx":114
  *             speed = MIN_SPEED
  * 
  *         if minspeed <= 0:             # <<<<<<<<<<<<<<
@@ -3197,17 +3377,17 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/grains.pyx":105
+  /* "pippi/grains.pyx":117
  *             minspeed = MIN_SPEED
  * 
  *         if maxspeed <= 0:             # <<<<<<<<<<<<<<
  *             maxspeed = MIN_SPEED
  * 
  */
-  __pyx_t_1 = ((__pyx_v_maxspeed <= 0.0) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((__pyx_v_maxspeed <= 0.0) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":106
+    /* "pippi/grains.pyx":118
  * 
  *         if maxspeed <= 0:
  *             maxspeed = MIN_SPEED             # <<<<<<<<<<<<<<
@@ -3216,7 +3396,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
     __pyx_v_maxspeed = 1e-06;
 
-    /* "pippi/grains.pyx":105
+    /* "pippi/grains.pyx":117
  *             minspeed = MIN_SPEED
  * 
  *         if maxspeed <= 0:             # <<<<<<<<<<<<<<
@@ -3225,7 +3405,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/grains.pyx":108
+  /* "pippi/grains.pyx":120
  *             maxspeed = MIN_SPEED
  * 
  *         self.speed = speed             # <<<<<<<<<<<<<<
@@ -3234,7 +3414,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->speed = __pyx_v_speed;
 
-  /* "pippi/grains.pyx":109
+  /* "pippi/grains.pyx":121
  * 
  *         self.speed = speed
  *         self.minspeed = minspeed             # <<<<<<<<<<<<<<
@@ -3243,7 +3423,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->minspeed = __pyx_v_minspeed;
 
-  /* "pippi/grains.pyx":110
+  /* "pippi/grains.pyx":122
  *         self.speed = speed
  *         self.minspeed = minspeed
  *         self.maxspeed = maxspeed             # <<<<<<<<<<<<<<
@@ -3252,59 +3432,77 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->maxspeed = __pyx_v_maxspeed;
 
-  /* "pippi/grains.pyx":112
+  /* "pippi/grains.pyx":124
  *         self.maxspeed = maxspeed
  * 
  *         self.density = density             # <<<<<<<<<<<<<<
- *         if density_lfo > -1:
- *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
+ *         self.mindensity = mindensity
+ *         self.maxdensity = maxdensity
  */
   __pyx_v_self->density = __pyx_v_density;
 
-  /* "pippi/grains.pyx":113
+  /* "pippi/grains.pyx":125
  * 
  *         self.density = density
+ *         self.mindensity = mindensity             # <<<<<<<<<<<<<<
+ *         self.maxdensity = maxdensity
+ *         if density_lfo > -1:
+ */
+  __pyx_v_self->mindensity = __pyx_v_mindensity;
+
+  /* "pippi/grains.pyx":126
+ *         self.density = density
+ *         self.mindensity = mindensity
+ *         self.maxdensity = maxdensity             # <<<<<<<<<<<<<<
+ *         if density_lfo > -1:
+ *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
+ */
+  __pyx_v_self->maxdensity = __pyx_v_maxdensity;
+
+  /* "pippi/grains.pyx":127
+ *         self.mindensity = mindensity
+ *         self.maxdensity = maxdensity
  *         if density_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
  *         elif density_lfo_wt is not None:
  */
-  __pyx_t_1 = ((__pyx_v_density_lfo > -1L) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((__pyx_v_density_lfo > -1L) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":114
- *         self.density = density
+    /* "pippi/grains.pyx":128
+ *         self.maxdensity = maxdensity
  *         if density_lfo > -1:
  *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)             # <<<<<<<<<<<<<<
  *         elif density_lfo_wt is not None:
  *             self.density_lfo = density_lfo_wt
  */
-    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_density_lfo, __pyx_v_density_lfo_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_10 = __pyx_f_5pippi_10wavetables__window(__pyx_v_density_lfo, __pyx_v_density_lfo_length); if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 128, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->density_lfo, 0);
-    __pyx_v_self->density_lfo = __pyx_t_3;
-    __pyx_t_3.memview = NULL;
-    __pyx_t_3.data = NULL;
+    __pyx_v_self->density_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
 
-    /* "pippi/grains.pyx":113
- * 
- *         self.density = density
+    /* "pippi/grains.pyx":127
+ *         self.mindensity = mindensity
+ *         self.maxdensity = maxdensity
  *         if density_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
  *         elif density_lfo_wt is not None:
  */
-    goto __pyx_L12;
+    goto __pyx_L13;
   }
 
-  /* "pippi/grains.pyx":115
+  /* "pippi/grains.pyx":129
  *         if density_lfo > -1:
  *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
  *         elif density_lfo_wt is not None:             # <<<<<<<<<<<<<<
  *             self.density_lfo = density_lfo_wt
  *         else:
  */
-  __pyx_t_1 = ((((PyObject *) __pyx_v_density_lfo_wt.memview) != Py_None) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((((PyObject *) __pyx_v_density_lfo_wt.memview) != Py_None) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":116
+    /* "pippi/grains.pyx":130
  *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
  *         elif density_lfo_wt is not None:
  *             self.density_lfo = density_lfo_wt             # <<<<<<<<<<<<<<
@@ -3315,17 +3513,17 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
     __PYX_INC_MEMVIEW(&__pyx_v_density_lfo_wt, 0);
     __pyx_v_self->density_lfo = __pyx_v_density_lfo_wt;
 
-    /* "pippi/grains.pyx":115
+    /* "pippi/grains.pyx":129
  *         if density_lfo > -1:
  *             self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
  *         elif density_lfo_wt is not None:             # <<<<<<<<<<<<<<
  *             self.density_lfo = density_lfo_wt
  *         else:
  */
-    goto __pyx_L12;
+    goto __pyx_L13;
   }
 
-  /* "pippi/grains.pyx":118
+  /* "pippi/grains.pyx":132
  *             self.density_lfo = density_lfo_wt
  *         else:
  *             self.density_lfo = None             # <<<<<<<<<<<<<<
@@ -3333,16 +3531,16 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  *         self.density_lfo_speed = density_lfo_speed
  */
   /*else*/ {
-    __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-    if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+    if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 132, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->density_lfo, 0);
-    __pyx_v_self->density_lfo = __pyx_t_3;
-    __pyx_t_3.memview = NULL;
-    __pyx_t_3.data = NULL;
+    __pyx_v_self->density_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
   }
-  __pyx_L12:;
+  __pyx_L13:;
 
-  /* "pippi/grains.pyx":120
+  /* "pippi/grains.pyx":134
  *             self.density_lfo = None
  * 
  *         self.density_lfo_speed = density_lfo_speed             # <<<<<<<<<<<<<<
@@ -3351,29 +3549,29 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->density_lfo_speed = __pyx_v_density_lfo_speed;
 
-  /* "pippi/grains.pyx":121
+  /* "pippi/grains.pyx":135
  * 
  *         self.density_lfo_speed = density_lfo_speed
  *         if self.density_lfo is not None:             # <<<<<<<<<<<<<<
  *             self.density_lfo_length = len(self.density_lfo)
  * 
  */
-  if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 121, __pyx_L1_error)}
-  __pyx_t_1 = ((((PyObject *) __pyx_v_self->density_lfo.memview) != Py_None) != 0);
-  if (__pyx_t_1) {
+  if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 135, __pyx_L1_error)}
+  __pyx_t_5 = ((((PyObject *) __pyx_v_self->density_lfo.memview) != Py_None) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":122
+    /* "pippi/grains.pyx":136
  *         self.density_lfo_speed = density_lfo_speed
  *         if self.density_lfo is not None:
  *             self.density_lfo_length = len(self.density_lfo)             # <<<<<<<<<<<<<<
  * 
  *         if grainlength_lfo > -1:
  */
-    if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 122, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 136, __pyx_L1_error)}
     __pyx_t_4 = __Pyx_MemoryView_Len(__pyx_v_self->density_lfo); 
     __pyx_v_self->density_lfo_length = __pyx_t_4;
 
-    /* "pippi/grains.pyx":121
+    /* "pippi/grains.pyx":135
  * 
  *         self.density_lfo_speed = density_lfo_speed
  *         if self.density_lfo is not None:             # <<<<<<<<<<<<<<
@@ -3382,30 +3580,30 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/grains.pyx":124
+  /* "pippi/grains.pyx":138
  *             self.density_lfo_length = len(self.density_lfo)
  * 
  *         if grainlength_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)
  *             self.grainlength = -1
  */
-  __pyx_t_1 = ((__pyx_v_grainlength_lfo > -1L) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((__pyx_v_grainlength_lfo > -1L) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":125
+    /* "pippi/grains.pyx":139
  * 
  *         if grainlength_lfo > -1:
  *             self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)             # <<<<<<<<<<<<<<
  *             self.grainlength = -1
  *         elif grainlength_lfo_wt is not None:
  */
-    __pyx_t_3 = __pyx_f_5pippi_10wavetables__window(__pyx_v_grainlength_lfo, __pyx_v_grainlength_lfo_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_10 = __pyx_f_5pippi_10wavetables__window(__pyx_v_grainlength_lfo, __pyx_v_grainlength_lfo_length); if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 139, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->grainlength_lfo, 0);
-    __pyx_v_self->grainlength_lfo = __pyx_t_3;
-    __pyx_t_3.memview = NULL;
-    __pyx_t_3.data = NULL;
+    __pyx_v_self->grainlength_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
 
-    /* "pippi/grains.pyx":126
+    /* "pippi/grains.pyx":140
  *         if grainlength_lfo > -1:
  *             self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)
  *             self.grainlength = -1             # <<<<<<<<<<<<<<
@@ -3414,27 +3612,27 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
     __pyx_v_self->grainlength = -1.0;
 
-    /* "pippi/grains.pyx":124
+    /* "pippi/grains.pyx":138
  *             self.density_lfo_length = len(self.density_lfo)
  * 
  *         if grainlength_lfo > -1:             # <<<<<<<<<<<<<<
  *             self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)
  *             self.grainlength = -1
  */
-    goto __pyx_L14;
+    goto __pyx_L15;
   }
 
-  /* "pippi/grains.pyx":127
+  /* "pippi/grains.pyx":141
  *             self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)
  *             self.grainlength = -1
  *         elif grainlength_lfo_wt is not None:             # <<<<<<<<<<<<<<
  *             self.grainlength_lfo = grainlength_lfo_wt
  *         else:
  */
-  __pyx_t_1 = ((((PyObject *) __pyx_v_grainlength_lfo_wt.memview) != Py_None) != 0);
-  if (__pyx_t_1) {
+  __pyx_t_5 = ((((PyObject *) __pyx_v_grainlength_lfo_wt.memview) != Py_None) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":128
+    /* "pippi/grains.pyx":142
  *             self.grainlength = -1
  *         elif grainlength_lfo_wt is not None:
  *             self.grainlength_lfo = grainlength_lfo_wt             # <<<<<<<<<<<<<<
@@ -3445,17 +3643,17 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
     __PYX_INC_MEMVIEW(&__pyx_v_grainlength_lfo_wt, 0);
     __pyx_v_self->grainlength_lfo = __pyx_v_grainlength_lfo_wt;
 
-    /* "pippi/grains.pyx":127
+    /* "pippi/grains.pyx":141
  *             self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)
  *             self.grainlength = -1
  *         elif grainlength_lfo_wt is not None:             # <<<<<<<<<<<<<<
  *             self.grainlength_lfo = grainlength_lfo_wt
  *         else:
  */
-    goto __pyx_L14;
+    goto __pyx_L15;
   }
 
-  /* "pippi/grains.pyx":130
+  /* "pippi/grains.pyx":144
  *             self.grainlength_lfo = grainlength_lfo_wt
  *         else:
  *             self.grainlength_lfo = None             # <<<<<<<<<<<<<<
@@ -3463,16 +3661,16 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  *         self.grainlength = grainlength
  */
   /*else*/ {
-    __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-    if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 130, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+    if (unlikely(!__pyx_t_10.memview)) __PYX_ERR(0, 144, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->grainlength_lfo, 0);
-    __pyx_v_self->grainlength_lfo = __pyx_t_3;
-    __pyx_t_3.memview = NULL;
-    __pyx_t_3.data = NULL;
+    __pyx_v_self->grainlength_lfo = __pyx_t_10;
+    __pyx_t_10.memview = NULL;
+    __pyx_t_10.data = NULL;
   }
-  __pyx_L14:;
+  __pyx_L15:;
 
-  /* "pippi/grains.pyx":132
+  /* "pippi/grains.pyx":146
  *             self.grainlength_lfo = None
  * 
  *         self.grainlength = grainlength             # <<<<<<<<<<<<<<
@@ -3481,7 +3679,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->grainlength = __pyx_v_grainlength;
 
-  /* "pippi/grains.pyx":133
+  /* "pippi/grains.pyx":147
  * 
  *         self.grainlength = grainlength
  *         self.minlength = minlength             # <<<<<<<<<<<<<<
@@ -3490,7 +3688,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->minlength = __pyx_v_minlength;
 
-  /* "pippi/grains.pyx":134
+  /* "pippi/grains.pyx":148
  *         self.grainlength = grainlength
  *         self.minlength = minlength
  *         self.maxlength = maxlength             # <<<<<<<<<<<<<<
@@ -3499,7 +3697,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->maxlength = __pyx_v_maxlength;
 
-  /* "pippi/grains.pyx":135
+  /* "pippi/grains.pyx":149
  *         self.minlength = minlength
  *         self.maxlength = maxlength
  *         self.grainlength_lfo_speed = grainlength_lfo_speed             # <<<<<<<<<<<<<<
@@ -3508,29 +3706,29 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->grainlength_lfo_speed = __pyx_v_grainlength_lfo_speed;
 
-  /* "pippi/grains.pyx":136
+  /* "pippi/grains.pyx":150
  *         self.maxlength = maxlength
  *         self.grainlength_lfo_speed = grainlength_lfo_speed
  *         if self.grainlength_lfo is not None:             # <<<<<<<<<<<<<<
  *             self.grainlength_lfo_length = len(self.grainlength_lfo)
  * 
  */
-  if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 136, __pyx_L1_error)}
-  __pyx_t_1 = ((((PyObject *) __pyx_v_self->grainlength_lfo.memview) != Py_None) != 0);
-  if (__pyx_t_1) {
+  if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 150, __pyx_L1_error)}
+  __pyx_t_5 = ((((PyObject *) __pyx_v_self->grainlength_lfo.memview) != Py_None) != 0);
+  if (__pyx_t_5) {
 
-    /* "pippi/grains.pyx":137
+    /* "pippi/grains.pyx":151
  *         self.grainlength_lfo_speed = grainlength_lfo_speed
  *         if self.grainlength_lfo is not None:
  *             self.grainlength_lfo_length = len(self.grainlength_lfo)             # <<<<<<<<<<<<<<
  * 
  *     def play(self, length=10):
  */
-    if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 137, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 151, __pyx_L1_error)}
     __pyx_t_4 = __Pyx_MemoryView_Len(__pyx_v_self->grainlength_lfo); 
     __pyx_v_self->grainlength_lfo_length = __pyx_t_4;
 
-    /* "pippi/grains.pyx":136
+    /* "pippi/grains.pyx":150
  *         self.maxlength = maxlength
  *         self.grainlength_lfo_speed = grainlength_lfo_speed
  *         if self.grainlength_lfo is not None:             # <<<<<<<<<<<<<<
@@ -3539,7 +3737,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/grains.pyx":16
+  /* "pippi/grains.pyx":20
  * 
  * cdef class GrainCloud:
  *     def __init__(self,             # <<<<<<<<<<<<<<
@@ -3552,11 +3750,15 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   goto __pyx_L0;
   __pyx_L1_error:;
   __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_8);
+  __Pyx_XDECREF(__pyx_t_9);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_10, 1);
   __Pyx_AddTraceback("pippi.grains.GrainCloud.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v_win_wt, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_v_read_lfo_wt, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_speed_lfo_wt, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_density_lfo_wt, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_grainlength_lfo_wt, 1);
@@ -3564,7 +3766,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud___init__(struct __pyx_obj_5pippi
   return __pyx_r;
 }
 
-/* "pippi/grains.pyx":139
+/* "pippi/grains.pyx":153
  *             self.grainlength_lfo_length = len(self.grainlength_lfo)
  * 
  *     def play(self, length=10):             # <<<<<<<<<<<<<<
@@ -3601,7 +3803,7 @@ static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_3play(PyObject *__pyx_v_se
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "play") < 0)) __PYX_ERR(0, 139, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "play") < 0)) __PYX_ERR(0, 153, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3615,7 +3817,7 @@ static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_3play(PyObject *__pyx_v_se
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("play", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 139, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("play", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 153, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.grains.GrainCloud.play", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3697,23 +3899,23 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
   struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer__dub __pyx_t_23;
   __Pyx_RefNannySetupContext("play", 0);
 
-  /* "pippi/grains.pyx":140
+  /* "pippi/grains.pyx":154
  * 
  *     def play(self, length=10):
  *         cdef int framelength = <int>(self.samplerate * length)             # <<<<<<<<<<<<<<
  *         cdef int input_length = len(self.buf)
  * 
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyNumber_Multiply(__pyx_t_1, __pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(__pyx_t_1, __pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 140, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_framelength = ((int)__pyx_t_3);
 
-  /* "pippi/grains.pyx":141
+  /* "pippi/grains.pyx":155
  *     def play(self, length=10):
  *         cdef int framelength = <int>(self.samplerate * length)
  *         cdef int input_length = len(self.buf)             # <<<<<<<<<<<<<<
@@ -3722,11 +3924,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_t_2 = ((PyObject *)__pyx_v_self->buf);
   __Pyx_INCREF(__pyx_t_2);
-  __pyx_t_4 = PyObject_Length(__pyx_t_2); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_4 = PyObject_Length(__pyx_t_2); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 155, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_input_length = __pyx_t_4;
 
-  /* "pippi/grains.pyx":143
+  /* "pippi/grains.pyx":157
  *         cdef int input_length = len(self.buf)
  * 
  *         cdef int write_pos = 0              # frame position in output buffer for writing             # <<<<<<<<<<<<<<
@@ -3735,7 +3937,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_write_pos = 0;
 
-  /* "pippi/grains.pyx":144
+  /* "pippi/grains.pyx":158
  * 
  *         cdef int write_pos = 0              # frame position in output buffer for writing
  *         cdef int start = 0                  # grain start position in input buffer (frames)             # <<<<<<<<<<<<<<
@@ -3744,7 +3946,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_start = 0;
 
-  /* "pippi/grains.pyx":145
+  /* "pippi/grains.pyx":159
  *         cdef int write_pos = 0              # frame position in output buffer for writing
  *         cdef int start = 0                  # grain start position in input buffer (frames)
  *         cdef int end = 0                    # grain end position in input buffer (frames)             # <<<<<<<<<<<<<<
@@ -3753,7 +3955,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_end = 0;
 
-  /* "pippi/grains.pyx":146
+  /* "pippi/grains.pyx":160
  *         cdef int start = 0                  # grain start position in input buffer (frames)
  *         cdef int end = 0                    # grain end position in input buffer (frames)
  *         cdef double panpos = 0.5             # <<<<<<<<<<<<<<
@@ -3762,7 +3964,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_panpos = 0.5;
 
-  /* "pippi/grains.pyx":151
+  /* "pippi/grains.pyx":165
  *         # Read LFO
  *         ###########
  *         cdef double read_frac_pos = 0       # 0-1 pos in read buffer             # <<<<<<<<<<<<<<
@@ -3771,7 +3973,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_read_frac_pos = 0.0;
 
-  /* "pippi/grains.pyx":152
+  /* "pippi/grains.pyx":166
  *         ###########
  *         cdef double read_frac_pos = 0       # 0-1 pos in read buffer
  *         cdef double read_frac_pos_next = 0  # next value of 0-1 pos in read buffer for interpolation             # <<<<<<<<<<<<<<
@@ -3780,7 +3982,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_read_frac_pos_next = 0.0;
 
-  /* "pippi/grains.pyx":153
+  /* "pippi/grains.pyx":167
  *         cdef double read_frac_pos = 0       # 0-1 pos in read buffer
  *         cdef double read_frac_pos_next = 0  # next value of 0-1 pos in read buffer for interpolation
  *         cdef double read_frac = 0           # fractional index for interpolation             # <<<<<<<<<<<<<<
@@ -3789,7 +3991,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_read_frac = 0.0;
 
-  /* "pippi/grains.pyx":154
+  /* "pippi/grains.pyx":168
  *         cdef double read_frac_pos_next = 0  # next value of 0-1 pos in read buffer for interpolation
  *         cdef double read_frac = 0           # fractional index for interpolation
  *         cdef double read_phase = 0             # <<<<<<<<<<<<<<
@@ -3798,7 +4000,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_read_phase = 0.0;
 
-  /* "pippi/grains.pyx":155
+  /* "pippi/grains.pyx":169
  *         cdef double read_frac = 0           # fractional index for interpolation
  *         cdef double read_phase = 0
  *         cdef double read_phase_inc = (1.0 / framelength) * self.read_lfo_length             # <<<<<<<<<<<<<<
@@ -3807,11 +4009,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   if (unlikely(__pyx_v_framelength == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 155, __pyx_L1_error)
+    __PYX_ERR(0, 169, __pyx_L1_error)
   }
   __pyx_v_read_phase_inc = ((1.0 / __pyx_v_framelength) * __pyx_v_self->read_lfo_length);
 
-  /* "pippi/grains.pyx":156
+  /* "pippi/grains.pyx":170
  *         cdef double read_phase = 0
  *         cdef double read_phase_inc = (1.0 / framelength) * self.read_lfo_length
  *         cdef int read_pos = 0               # frame position in input buffer for reading             # <<<<<<<<<<<<<<
@@ -3820,7 +4022,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_read_pos = 0;
 
-  /* "pippi/grains.pyx":157
+  /* "pippi/grains.pyx":171
  *         cdef double read_phase_inc = (1.0 / framelength) * self.read_lfo_length
  *         cdef int read_pos = 0               # frame position in input buffer for reading
  *         cdef int read_index = 0             # <<<<<<<<<<<<<<
@@ -3829,7 +4031,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_read_index = 0;
 
-  /* "pippi/grains.pyx":162
+  /* "pippi/grains.pyx":176
  *         # Speed LFO
  *         ############
  *         cdef double speed_frac_pos = 0       # 0-1 pos in speed buffer             # <<<<<<<<<<<<<<
@@ -3838,7 +4040,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_speed_frac_pos = 0.0;
 
-  /* "pippi/grains.pyx":163
+  /* "pippi/grains.pyx":177
  *         ############
  *         cdef double speed_frac_pos = 0       # 0-1 pos in speed buffer
  *         cdef double speed_frac_pos_next = 0  # next value of 0-1 pos in speed buffer for interpolation             # <<<<<<<<<<<<<<
@@ -3847,7 +4049,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_speed_frac_pos_next = 0.0;
 
-  /* "pippi/grains.pyx":164
+  /* "pippi/grains.pyx":178
  *         cdef double speed_frac_pos = 0       # 0-1 pos in speed buffer
  *         cdef double speed_frac_pos_next = 0  # next value of 0-1 pos in speed buffer for interpolation
  *         cdef double speed_frac = 0           # fractional index for interpolation             # <<<<<<<<<<<<<<
@@ -3856,7 +4058,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_speed_frac = 0.0;
 
-  /* "pippi/grains.pyx":165
+  /* "pippi/grains.pyx":179
  *         cdef double speed_frac_pos_next = 0  # next value of 0-1 pos in speed buffer for interpolation
  *         cdef double speed_frac = 0           # fractional index for interpolation
  *         cdef double speed_phase = 0             # <<<<<<<<<<<<<<
@@ -3865,7 +4067,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_speed_phase = 0.0;
 
-  /* "pippi/grains.pyx":166
+  /* "pippi/grains.pyx":180
  *         cdef double speed_frac = 0           # fractional index for interpolation
  *         cdef double speed_phase = 0
  *         cdef double speed_phase_inc = (1.0 / framelength) * self.speed_lfo_length             # <<<<<<<<<<<<<<
@@ -3874,11 +4076,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   if (unlikely(__pyx_v_framelength == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 166, __pyx_L1_error)
+    __PYX_ERR(0, 180, __pyx_L1_error)
   }
   __pyx_v_speed_phase_inc = ((1.0 / __pyx_v_framelength) * __pyx_v_self->speed_lfo_length);
 
-  /* "pippi/grains.pyx":167
+  /* "pippi/grains.pyx":181
  *         cdef double speed_phase = 0
  *         cdef double speed_phase_inc = (1.0 / framelength) * self.speed_lfo_length
  *         cdef int speed_index = 0             # <<<<<<<<<<<<<<
@@ -3887,7 +4089,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_speed_index = 0;
 
-  /* "pippi/grains.pyx":172
+  /* "pippi/grains.pyx":186
  *         # Density LFO
  *         ##############
  *         cdef double density_frac_pos = 0       # 0-1 pos in density buffer             # <<<<<<<<<<<<<<
@@ -3896,7 +4098,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_density_frac_pos = 0.0;
 
-  /* "pippi/grains.pyx":173
+  /* "pippi/grains.pyx":187
  *         ##############
  *         cdef double density_frac_pos = 0       # 0-1 pos in density buffer
  *         cdef double density_frac_pos_next = 0  # next value of 0-1 pos in density buffer for interpolation             # <<<<<<<<<<<<<<
@@ -3905,7 +4107,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_density_frac_pos_next = 0.0;
 
-  /* "pippi/grains.pyx":174
+  /* "pippi/grains.pyx":188
  *         cdef double density_frac_pos = 0       # 0-1 pos in density buffer
  *         cdef double density_frac_pos_next = 0  # next value of 0-1 pos in density buffer for interpolation
  *         cdef double density_frac = 0           # fractional index for interpolation             # <<<<<<<<<<<<<<
@@ -3914,7 +4116,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_density_frac = 0.0;
 
-  /* "pippi/grains.pyx":175
+  /* "pippi/grains.pyx":189
  *         cdef double density_frac_pos_next = 0  # next value of 0-1 pos in density buffer for interpolation
  *         cdef double density_frac = 0           # fractional index for interpolation
  *         cdef double density_phase = 0             # <<<<<<<<<<<<<<
@@ -3923,7 +4125,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_density_phase = 0.0;
 
-  /* "pippi/grains.pyx":176
+  /* "pippi/grains.pyx":190
  *         cdef double density_frac = 0           # fractional index for interpolation
  *         cdef double density_phase = 0
  *         cdef double density_phase_inc = (1.0 / framelength) * self.density_lfo_length             # <<<<<<<<<<<<<<
@@ -3932,11 +4134,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   if (unlikely(__pyx_v_framelength == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 176, __pyx_L1_error)
+    __PYX_ERR(0, 190, __pyx_L1_error)
   }
   __pyx_v_density_phase_inc = ((1.0 / __pyx_v_framelength) * __pyx_v_self->density_lfo_length);
 
-  /* "pippi/grains.pyx":177
+  /* "pippi/grains.pyx":191
  *         cdef double density_phase = 0
  *         cdef double density_phase_inc = (1.0 / framelength) * self.density_lfo_length
  *         cdef int density_pos = 0              # frame position in output buffer for writing             # <<<<<<<<<<<<<<
@@ -3945,7 +4147,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_density_pos = 0;
 
-  /* "pippi/grains.pyx":178
+  /* "pippi/grains.pyx":192
  *         cdef double density_phase_inc = (1.0 / framelength) * self.density_lfo_length
  *         cdef int density_pos = 0              # frame position in output buffer for writing
  *         cdef int density_index = 0             # <<<<<<<<<<<<<<
@@ -3954,7 +4156,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_density_index = 0;
 
-  /* "pippi/grains.pyx":183
+  /* "pippi/grains.pyx":197
  *         # Grain Length LFO
  *         ###################
  *         cdef double grainlength_frac_pos = 0       # 0-1 pos in grainlength buffer             # <<<<<<<<<<<<<<
@@ -3963,7 +4165,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_grainlength_frac_pos = 0.0;
 
-  /* "pippi/grains.pyx":184
+  /* "pippi/grains.pyx":198
  *         ###################
  *         cdef double grainlength_frac_pos = 0       # 0-1 pos in grainlength buffer
  *         cdef double grainlength_frac_pos_next = 0  # next value of 0-1 pos in grainlength buffer for interpolation             # <<<<<<<<<<<<<<
@@ -3972,7 +4174,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_grainlength_frac_pos_next = 0.0;
 
-  /* "pippi/grains.pyx":185
+  /* "pippi/grains.pyx":199
  *         cdef double grainlength_frac_pos = 0       # 0-1 pos in grainlength buffer
  *         cdef double grainlength_frac_pos_next = 0  # next value of 0-1 pos in grainlength buffer for interpolation
  *         cdef double grainlength_frac = 0           # fractional index for interpolation             # <<<<<<<<<<<<<<
@@ -3981,7 +4183,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_grainlength_frac = 0.0;
 
-  /* "pippi/grains.pyx":186
+  /* "pippi/grains.pyx":200
  *         cdef double grainlength_frac_pos_next = 0  # next value of 0-1 pos in grainlength buffer for interpolation
  *         cdef double grainlength_frac = 0           # fractional index for interpolation
  *         cdef double grainlength_phase = 0             # <<<<<<<<<<<<<<
@@ -3990,7 +4192,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_grainlength_phase = 0.0;
 
-  /* "pippi/grains.pyx":187
+  /* "pippi/grains.pyx":201
  *         cdef double grainlength_frac = 0           # fractional index for interpolation
  *         cdef double grainlength_phase = 0
  *         cdef double grainlength_phase_inc = (1.0 / framelength) * self.grainlength_lfo_length             # <<<<<<<<<<<<<<
@@ -3999,11 +4201,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   if (unlikely(__pyx_v_framelength == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 187, __pyx_L1_error)
+    __PYX_ERR(0, 201, __pyx_L1_error)
   }
   __pyx_v_grainlength_phase_inc = ((1.0 / __pyx_v_framelength) * __pyx_v_self->grainlength_lfo_length);
 
-  /* "pippi/grains.pyx":188
+  /* "pippi/grains.pyx":202
  *         cdef double grainlength_phase = 0
  *         cdef double grainlength_phase_inc = (1.0 / framelength) * self.grainlength_lfo_length
  *         cdef int grainlength_pos = 0              # frame position in output buffer for writing             # <<<<<<<<<<<<<<
@@ -4012,7 +4214,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_grainlength_pos = 0;
 
-  /* "pippi/grains.pyx":189
+  /* "pippi/grains.pyx":203
  *         cdef double grainlength_phase_inc = (1.0 / framelength) * self.grainlength_lfo_length
  *         cdef int grainlength_pos = 0              # frame position in output buffer for writing
  *         cdef int grainlength_index = 0             # <<<<<<<<<<<<<<
@@ -4021,7 +4223,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_grainlength_index = 0;
 
-  /* "pippi/grains.pyx":190
+  /* "pippi/grains.pyx":204
  *         cdef int grainlength_pos = 0              # frame position in output buffer for writing
  *         cdef int grainlength_index = 0
  *         cdef int grainlength = <int>(<double>self.samplerate * self.grainlength * 0.001)             # <<<<<<<<<<<<<<
@@ -4030,7 +4232,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_grainlength = ((int)((((double)__pyx_v_self->samplerate) * __pyx_v_self->grainlength) * 0.001));
 
-  /* "pippi/grains.pyx":191
+  /* "pippi/grains.pyx":205
  *         cdef int grainlength_index = 0
  *         cdef int grainlength = <int>(<double>self.samplerate * self.grainlength * 0.001)
  *         cdef int adjusted_grainlength = 0             # <<<<<<<<<<<<<<
@@ -4039,7 +4241,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_adjusted_grainlength = 0;
 
-  /* "pippi/grains.pyx":193
+  /* "pippi/grains.pyx":207
  *         cdef int adjusted_grainlength = 0
  * 
  *         cdef int max_read_pos = input_length - grainlength             # <<<<<<<<<<<<<<
@@ -4048,31 +4250,31 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_max_read_pos = (__pyx_v_input_length - __pyx_v_grainlength);
 
-  /* "pippi/grains.pyx":195
+  /* "pippi/grains.pyx":209
  *         cdef int max_read_pos = input_length - grainlength
  * 
  *         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
  *         cdef double maxspeed = <double>(input_length/4) / <double>min(self.grainlength, self.minlength)
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_length, __pyx_v_length) < 0) __PYX_ERR(0, 195, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_length, __pyx_v_length) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_channels, __pyx_t_1) < 0) __PYX_ERR(0, 195, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_channels, __pyx_t_1) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_samplerate, __pyx_t_1) < 0) __PYX_ERR(0, 195, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_samplerate, __pyx_t_1) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_out = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pippi/grains.pyx":197
+  /* "pippi/grains.pyx":211
  *         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
  * 
  *         cdef double maxspeed = <double>(input_length/4) / <double>min(self.grainlength, self.minlength)             # <<<<<<<<<<<<<<
@@ -4090,11 +4292,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
   __pyx_t_6 = ((double)__pyx_t_8);
   if (unlikely(__pyx_t_6 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 197, __pyx_L1_error)
+    __PYX_ERR(0, 211, __pyx_L1_error)
   }
   __pyx_v_maxspeed = (__pyx_t_5 / __pyx_t_6);
 
-  /* "pippi/grains.pyx":198
+  /* "pippi/grains.pyx":212
  * 
  *         cdef double maxspeed = <double>(input_length/4) / <double>min(self.grainlength, self.minlength)
  *         if self.maxspeed > maxspeed:             # <<<<<<<<<<<<<<
@@ -4104,7 +4306,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
   __pyx_t_9 = ((__pyx_v_self->maxspeed > __pyx_v_maxspeed) != 0);
   if (__pyx_t_9) {
 
-    /* "pippi/grains.pyx":200
+    /* "pippi/grains.pyx":214
  *         if self.maxspeed > maxspeed:
  *             # re-cap maxspeed based on grainlength
  *             self.maxspeed = maxspeed             # <<<<<<<<<<<<<<
@@ -4113,7 +4315,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     __pyx_v_self->maxspeed = __pyx_v_maxspeed;
 
-    /* "pippi/grains.pyx":198
+    /* "pippi/grains.pyx":212
  * 
  *         cdef double maxspeed = <double>(input_length/4) / <double>min(self.grainlength, self.minlength)
  *         if self.maxspeed > maxspeed:             # <<<<<<<<<<<<<<
@@ -4122,7 +4324,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   }
 
-  /* "pippi/grains.pyx":202
+  /* "pippi/grains.pyx":216
  *             self.maxspeed = maxspeed
  * 
  *         if self.speed > maxspeed:             # <<<<<<<<<<<<<<
@@ -4132,7 +4334,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
   __pyx_t_9 = ((__pyx_v_self->speed > __pyx_v_maxspeed) != 0);
   if (__pyx_t_9) {
 
-    /* "pippi/grains.pyx":204
+    /* "pippi/grains.pyx":218
  *         if self.speed > maxspeed:
  *             # re-cap maxspeed based on grainlength
  *             self.speed = maxspeed             # <<<<<<<<<<<<<<
@@ -4141,7 +4343,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     __pyx_v_self->speed = __pyx_v_maxspeed;
 
-    /* "pippi/grains.pyx":202
+    /* "pippi/grains.pyx":216
  *             self.maxspeed = maxspeed
  * 
  *         if self.speed > maxspeed:             # <<<<<<<<<<<<<<
@@ -4150,7 +4352,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   }
 
-  /* "pippi/grains.pyx":206
+  /* "pippi/grains.pyx":220
  *             self.speed = maxspeed
  * 
  *         cdef int count = 0             # <<<<<<<<<<<<<<
@@ -4159,7 +4361,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
   __pyx_v_count = 0;
 
-  /* "pippi/grains.pyx":207
+  /* "pippi/grains.pyx":221
  * 
  *         cdef int count = 0
  *         while write_pos < framelength - grainlength:             # <<<<<<<<<<<<<<
@@ -4170,18 +4372,18 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
     __pyx_t_9 = ((__pyx_v_write_pos < (__pyx_v_framelength - __pyx_v_grainlength)) != 0);
     if (!__pyx_t_9) break;
 
-    /* "pippi/grains.pyx":209
+    /* "pippi/grains.pyx":223
  *         while write_pos < framelength - grainlength:
  *             # Grain length LFO
  *             if self.grainlength_lfo is not None:             # <<<<<<<<<<<<<<
  *                 grainlength_phase = (<double>write_pos / framelength) * <double>self.grainlength_lfo_length * self.grainlength_lfo_speed
  *                 grainlength_index = <int>grainlength_phase
  */
-    if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 209, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 223, __pyx_L1_error)}
     __pyx_t_9 = ((((PyObject *) __pyx_v_self->grainlength_lfo.memview) != Py_None) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":210
+      /* "pippi/grains.pyx":224
  *             # Grain length LFO
  *             if self.grainlength_lfo is not None:
  *                 grainlength_phase = (<double>write_pos / framelength) * <double>self.grainlength_lfo_length * self.grainlength_lfo_speed             # <<<<<<<<<<<<<<
@@ -4190,11 +4392,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       if (unlikely(__pyx_v_framelength == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 210, __pyx_L1_error)
+        __PYX_ERR(0, 224, __pyx_L1_error)
       }
       __pyx_v_grainlength_phase = (((((double)__pyx_v_write_pos) / __pyx_v_framelength) * ((double)__pyx_v_self->grainlength_lfo_length)) * __pyx_v_self->grainlength_lfo_speed);
 
-      /* "pippi/grains.pyx":211
+      /* "pippi/grains.pyx":225
  *             if self.grainlength_lfo is not None:
  *                 grainlength_phase = (<double>write_pos / framelength) * <double>self.grainlength_lfo_length * self.grainlength_lfo_speed
  *                 grainlength_index = <int>grainlength_phase             # <<<<<<<<<<<<<<
@@ -4203,7 +4405,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_grainlength_index = ((int)__pyx_v_grainlength_phase);
 
-      /* "pippi/grains.pyx":212
+      /* "pippi/grains.pyx":226
  *                 grainlength_phase = (<double>write_pos / framelength) * <double>self.grainlength_lfo_length * self.grainlength_lfo_speed
  *                 grainlength_index = <int>grainlength_phase
  *                 grainlength_frac = grainlength_phase - grainlength_index             # <<<<<<<<<<<<<<
@@ -4212,17 +4414,17 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_grainlength_frac = (__pyx_v_grainlength_phase - __pyx_v_grainlength_index);
 
-      /* "pippi/grains.pyx":213
+      /* "pippi/grains.pyx":227
  *                 grainlength_index = <int>grainlength_phase
  *                 grainlength_frac = grainlength_phase - grainlength_index
  *                 grainlength_frac_pos = self.grainlength_lfo[grainlength_index % self.grainlength_lfo_length]             # <<<<<<<<<<<<<<
  *                 grainlength_frac_pos_next = self.grainlength_lfo[(grainlength_index+1) % self.grainlength_lfo_length]
  *                 grainlength_frac_pos = (1.0 - grainlength_frac) * grainlength_frac_pos + grainlength_frac * grainlength_frac_pos_next
  */
-      if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 213, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 227, __pyx_L1_error)}
       if (unlikely(__pyx_v_self->grainlength_lfo_length == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 213, __pyx_L1_error)
+        __PYX_ERR(0, 227, __pyx_L1_error)
       }
       __pyx_t_10 = __Pyx_mod_int(__pyx_v_grainlength_index, __pyx_v_self->grainlength_lfo_length);
       __pyx_t_3 = -1;
@@ -4232,22 +4434,22 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       } else if (unlikely(__pyx_t_10 >= __pyx_v_self->grainlength_lfo.shape[0])) __pyx_t_3 = 0;
       if (unlikely(__pyx_t_3 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_3);
-        __PYX_ERR(0, 213, __pyx_L1_error)
+        __PYX_ERR(0, 227, __pyx_L1_error)
       }
       __pyx_v_grainlength_frac_pos = (*((double *) ( /* dim=0 */ (__pyx_v_self->grainlength_lfo.data + __pyx_t_10 * __pyx_v_self->grainlength_lfo.strides[0]) )));
 
-      /* "pippi/grains.pyx":214
+      /* "pippi/grains.pyx":228
  *                 grainlength_frac = grainlength_phase - grainlength_index
  *                 grainlength_frac_pos = self.grainlength_lfo[grainlength_index % self.grainlength_lfo_length]
  *                 grainlength_frac_pos_next = self.grainlength_lfo[(grainlength_index+1) % self.grainlength_lfo_length]             # <<<<<<<<<<<<<<
  *                 grainlength_frac_pos = (1.0 - grainlength_frac) * grainlength_frac_pos + grainlength_frac * grainlength_frac_pos_next
  *                 grainlength_phase += grainlength_phase_inc
  */
-      if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 214, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 228, __pyx_L1_error)}
       __pyx_t_11 = (__pyx_v_grainlength_index + 1);
       if (unlikely(__pyx_v_self->grainlength_lfo_length == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 214, __pyx_L1_error)
+        __PYX_ERR(0, 228, __pyx_L1_error)
       }
       __pyx_t_12 = __Pyx_mod_long(__pyx_t_11, __pyx_v_self->grainlength_lfo_length);
       __pyx_t_3 = -1;
@@ -4257,11 +4459,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       } else if (unlikely(__pyx_t_12 >= __pyx_v_self->grainlength_lfo.shape[0])) __pyx_t_3 = 0;
       if (unlikely(__pyx_t_3 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_3);
-        __PYX_ERR(0, 214, __pyx_L1_error)
+        __PYX_ERR(0, 228, __pyx_L1_error)
       }
       __pyx_v_grainlength_frac_pos_next = (*((double *) ( /* dim=0 */ (__pyx_v_self->grainlength_lfo.data + __pyx_t_12 * __pyx_v_self->grainlength_lfo.strides[0]) )));
 
-      /* "pippi/grains.pyx":215
+      /* "pippi/grains.pyx":229
  *                 grainlength_frac_pos = self.grainlength_lfo[grainlength_index % self.grainlength_lfo_length]
  *                 grainlength_frac_pos_next = self.grainlength_lfo[(grainlength_index+1) % self.grainlength_lfo_length]
  *                 grainlength_frac_pos = (1.0 - grainlength_frac) * grainlength_frac_pos + grainlength_frac * grainlength_frac_pos_next             # <<<<<<<<<<<<<<
@@ -4270,7 +4472,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_grainlength_frac_pos = (((1.0 - __pyx_v_grainlength_frac) * __pyx_v_grainlength_frac_pos) + (__pyx_v_grainlength_frac * __pyx_v_grainlength_frac_pos_next));
 
-      /* "pippi/grains.pyx":216
+      /* "pippi/grains.pyx":230
  *                 grainlength_frac_pos_next = self.grainlength_lfo[(grainlength_index+1) % self.grainlength_lfo_length]
  *                 grainlength_frac_pos = (1.0 - grainlength_frac) * grainlength_frac_pos + grainlength_frac * grainlength_frac_pos_next
  *                 grainlength_phase += grainlength_phase_inc             # <<<<<<<<<<<<<<
@@ -4279,7 +4481,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_grainlength_phase = (__pyx_v_grainlength_phase + __pyx_v_grainlength_phase_inc);
 
-      /* "pippi/grains.pyx":218
+      /* "pippi/grains.pyx":232
  *                 grainlength_phase += grainlength_phase_inc
  * 
  *                 if self.jitter > 0:             # <<<<<<<<<<<<<<
@@ -4289,7 +4491,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       __pyx_t_9 = ((__pyx_v_self->jitter > 0.0) != 0);
       if (__pyx_t_9) {
 
-        /* "pippi/grains.pyx":219
+        /* "pippi/grains.pyx":233
  * 
  *                 if self.jitter > 0:
  *                     grainlength_frac_pos = grainlength_frac_pos * ((rand()/<double>RAND_MAX) * self.jitter + 1)             # <<<<<<<<<<<<<<
@@ -4299,11 +4501,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
         __pyx_t_3 = rand();
         if (unlikely(((double)RAND_MAX) == 0)) {
           PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-          __PYX_ERR(0, 219, __pyx_L1_error)
+          __PYX_ERR(0, 233, __pyx_L1_error)
         }
         __pyx_v_grainlength_frac_pos = (__pyx_v_grainlength_frac_pos * (((__pyx_t_3 / ((double)RAND_MAX)) * __pyx_v_self->jitter) + 1.0));
 
-        /* "pippi/grains.pyx":218
+        /* "pippi/grains.pyx":232
  *                 grainlength_phase += grainlength_phase_inc
  * 
  *                 if self.jitter > 0:             # <<<<<<<<<<<<<<
@@ -4312,7 +4514,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       }
 
-      /* "pippi/grains.pyx":221
+      /* "pippi/grains.pyx":235
  *                     grainlength_frac_pos = grainlength_frac_pos * ((rand()/<double>RAND_MAX) * self.jitter + 1)
  * 
  *                 grainlength = <int>(((grainlength_frac_pos * (self.maxlength - self.minlength)) + self.minlength) * (self.samplerate / 1000.0))             # <<<<<<<<<<<<<<
@@ -4321,7 +4523,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_grainlength = ((int)(((__pyx_v_grainlength_frac_pos * (__pyx_v_self->maxlength - __pyx_v_self->minlength)) + __pyx_v_self->minlength) * (__pyx_v_self->samplerate / 1000.0)));
 
-      /* "pippi/grains.pyx":222
+      /* "pippi/grains.pyx":236
  * 
  *                 grainlength = <int>(((grainlength_frac_pos * (self.maxlength - self.minlength)) + self.minlength) * (self.samplerate / 1000.0))
  *                 max_read_pos = input_length - grainlength             # <<<<<<<<<<<<<<
@@ -4330,7 +4532,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_max_read_pos = (__pyx_v_input_length - __pyx_v_grainlength);
 
-      /* "pippi/grains.pyx":209
+      /* "pippi/grains.pyx":223
  *         while write_pos < framelength - grainlength:
  *             # Grain length LFO
  *             if self.grainlength_lfo is not None:             # <<<<<<<<<<<<<<
@@ -4339,117 +4541,211 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     }
 
-    /* "pippi/grains.pyx":225
+    /* "pippi/grains.pyx":239
  * 
  *             # Read LFO
- *             read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed             # <<<<<<<<<<<<<<
- *             read_index = <int>read_phase
- *             read_frac = read_phase - read_index
+ *             if self.read_lfo is None:             # <<<<<<<<<<<<<<
+ *                 if self.freeze < 0:
+ *                     self.freeze = 0
  */
-    __pyx_t_3 = (__pyx_v_framelength - __pyx_v_grainlength);
-    if (unlikely(__pyx_t_3 == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 225, __pyx_L1_error)
-    }
-    __pyx_v_read_phase = (((((double)__pyx_v_write_pos) / __pyx_t_3) * ((double)__pyx_v_self->read_lfo_length)) * __pyx_v_self->read_lfo_speed);
+    if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 239, __pyx_L1_error)}
+    __pyx_t_9 = ((((PyObject *) __pyx_v_self->read_lfo.memview) == Py_None) != 0);
+    if (__pyx_t_9) {
 
-    /* "pippi/grains.pyx":226
+      /* "pippi/grains.pyx":240
  *             # Read LFO
- *             read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
- *             read_index = <int>read_phase             # <<<<<<<<<<<<<<
- *             read_frac = read_phase - read_index
- *             read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
+ *             if self.read_lfo is None:
+ *                 if self.freeze < 0:             # <<<<<<<<<<<<<<
+ *                     self.freeze = 0
+ *                 read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
  */
-    __pyx_v_read_index = ((int)__pyx_v_read_phase);
+      __pyx_t_9 = ((__pyx_v_self->freeze < 0.0) != 0);
+      if (__pyx_t_9) {
 
-    /* "pippi/grains.pyx":227
- *             read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
- *             read_index = <int>read_phase
- *             read_frac = read_phase - read_index             # <<<<<<<<<<<<<<
- *             read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
- *             read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
+        /* "pippi/grains.pyx":241
+ *             if self.read_lfo is None:
+ *                 if self.freeze < 0:
+ *                     self.freeze = 0             # <<<<<<<<<<<<<<
+ *                 read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
+ *                 if read_frac_pos > 1:
  */
-    __pyx_v_read_frac = (__pyx_v_read_phase - __pyx_v_read_index);
+        __pyx_v_self->freeze = 0.0;
 
-    /* "pippi/grains.pyx":228
- *             read_index = <int>read_phase
- *             read_frac = read_phase - read_index
- *             read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]             # <<<<<<<<<<<<<<
- *             read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
- *             read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
+        /* "pippi/grains.pyx":240
+ *             # Read LFO
+ *             if self.read_lfo is None:
+ *                 if self.freeze < 0:             # <<<<<<<<<<<<<<
+ *                     self.freeze = 0
+ *                 read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
  */
-    if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 228, __pyx_L1_error)}
-    if (unlikely(__pyx_v_self->read_lfo_length == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 228, __pyx_L1_error)
-    }
-    __pyx_t_13 = __Pyx_mod_int(__pyx_v_read_index, __pyx_v_self->read_lfo_length);
-    __pyx_t_3 = -1;
-    if (__pyx_t_13 < 0) {
-      __pyx_t_13 += __pyx_v_self->read_lfo.shape[0];
-      if (unlikely(__pyx_t_13 < 0)) __pyx_t_3 = 0;
-    } else if (unlikely(__pyx_t_13 >= __pyx_v_self->read_lfo.shape[0])) __pyx_t_3 = 0;
-    if (unlikely(__pyx_t_3 != -1)) {
-      __Pyx_RaiseBufferIndexError(__pyx_t_3);
-      __PYX_ERR(0, 228, __pyx_L1_error)
-    }
-    __pyx_v_read_frac_pos = (*((double *) ( /* dim=0 */ (__pyx_v_self->read_lfo.data + __pyx_t_13 * __pyx_v_self->read_lfo.strides[0]) )));
+      }
 
-    /* "pippi/grains.pyx":229
- *             read_frac = read_phase - read_index
- *             read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
- *             read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]             # <<<<<<<<<<<<<<
- *             read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
- *             read_phase += read_phase_inc
+      /* "pippi/grains.pyx":242
+ *                 if self.freeze < 0:
+ *                     self.freeze = 0
+ *                 read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos             # <<<<<<<<<<<<<<
+ *                 if read_frac_pos > 1:
+ *                     read_frac_pos = 1
  */
-    if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 229, __pyx_L1_error)}
-    __pyx_t_11 = (__pyx_v_read_index + 1);
-    if (unlikely(__pyx_v_self->read_lfo_length == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 229, __pyx_L1_error)
-    }
-    __pyx_t_14 = __Pyx_mod_long(__pyx_t_11, __pyx_v_self->read_lfo_length);
-    __pyx_t_3 = -1;
-    if (__pyx_t_14 < 0) {
-      __pyx_t_14 += __pyx_v_self->read_lfo.shape[0];
-      if (unlikely(__pyx_t_14 < 0)) __pyx_t_3 = 0;
-    } else if (unlikely(__pyx_t_14 >= __pyx_v_self->read_lfo.shape[0])) __pyx_t_3 = 0;
-    if (unlikely(__pyx_t_3 != -1)) {
-      __Pyx_RaiseBufferIndexError(__pyx_t_3);
-      __PYX_ERR(0, 229, __pyx_L1_error)
-    }
-    __pyx_v_read_frac_pos_next = (*((double *) ( /* dim=0 */ (__pyx_v_self->read_lfo.data + __pyx_t_14 * __pyx_v_self->read_lfo.strides[0]) )));
+      __pyx_t_6 = (__pyx_v_self->samplerate * __pyx_v_self->freeze);
+      if (unlikely(((double)__pyx_v_max_read_pos) == 0)) {
+        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+        __PYX_ERR(0, 242, __pyx_L1_error)
+      }
+      __pyx_v_read_frac_pos = (__pyx_t_6 / ((double)__pyx_v_max_read_pos));
 
-    /* "pippi/grains.pyx":230
- *             read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
- *             read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
- *             read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next             # <<<<<<<<<<<<<<
- *             read_phase += read_phase_inc
+      /* "pippi/grains.pyx":243
+ *                     self.freeze = 0
+ *                 read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
+ *                 if read_frac_pos > 1:             # <<<<<<<<<<<<<<
+ *                     read_frac_pos = 1
+ *             else:
+ */
+      __pyx_t_9 = ((__pyx_v_read_frac_pos > 1.0) != 0);
+      if (__pyx_t_9) {
+
+        /* "pippi/grains.pyx":244
+ *                 read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
+ *                 if read_frac_pos > 1:
+ *                     read_frac_pos = 1             # <<<<<<<<<<<<<<
+ *             else:
+ *                 read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
+ */
+        __pyx_v_read_frac_pos = 1.0;
+
+        /* "pippi/grains.pyx":243
+ *                     self.freeze = 0
+ *                 read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
+ *                 if read_frac_pos > 1:             # <<<<<<<<<<<<<<
+ *                     read_frac_pos = 1
+ *             else:
+ */
+      }
+
+      /* "pippi/grains.pyx":239
+ * 
+ *             # Read LFO
+ *             if self.read_lfo is None:             # <<<<<<<<<<<<<<
+ *                 if self.freeze < 0:
+ *                     self.freeze = 0
+ */
+      goto __pyx_L9;
+    }
+
+    /* "pippi/grains.pyx":246
+ *                     read_frac_pos = 1
+ *             else:
+ *                 read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed             # <<<<<<<<<<<<<<
+ *                 read_index = <int>read_phase
+ *                 read_frac = read_phase - read_index
+ */
+    /*else*/ {
+      __pyx_t_3 = (__pyx_v_framelength - __pyx_v_grainlength);
+      if (unlikely(__pyx_t_3 == 0)) {
+        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+        __PYX_ERR(0, 246, __pyx_L1_error)
+      }
+      __pyx_v_read_phase = (((((double)__pyx_v_write_pos) / __pyx_t_3) * ((double)__pyx_v_self->read_lfo_length)) * __pyx_v_self->read_lfo_speed);
+
+      /* "pippi/grains.pyx":247
+ *             else:
+ *                 read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
+ *                 read_index = <int>read_phase             # <<<<<<<<<<<<<<
+ *                 read_frac = read_phase - read_index
+ *                 read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
+ */
+      __pyx_v_read_index = ((int)__pyx_v_read_phase);
+
+      /* "pippi/grains.pyx":248
+ *                 read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
+ *                 read_index = <int>read_phase
+ *                 read_frac = read_phase - read_index             # <<<<<<<<<<<<<<
+ *                 read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
+ *                 read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
+ */
+      __pyx_v_read_frac = (__pyx_v_read_phase - __pyx_v_read_index);
+
+      /* "pippi/grains.pyx":249
+ *                 read_index = <int>read_phase
+ *                 read_frac = read_phase - read_index
+ *                 read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]             # <<<<<<<<<<<<<<
+ *                 read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
+ *                 read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
+ */
+      if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 249, __pyx_L1_error)}
+      if (unlikely(__pyx_v_self->read_lfo_length == 0)) {
+        PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+        __PYX_ERR(0, 249, __pyx_L1_error)
+      }
+      __pyx_t_13 = __Pyx_mod_int(__pyx_v_read_index, __pyx_v_self->read_lfo_length);
+      __pyx_t_3 = -1;
+      if (__pyx_t_13 < 0) {
+        __pyx_t_13 += __pyx_v_self->read_lfo.shape[0];
+        if (unlikely(__pyx_t_13 < 0)) __pyx_t_3 = 0;
+      } else if (unlikely(__pyx_t_13 >= __pyx_v_self->read_lfo.shape[0])) __pyx_t_3 = 0;
+      if (unlikely(__pyx_t_3 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_3);
+        __PYX_ERR(0, 249, __pyx_L1_error)
+      }
+      __pyx_v_read_frac_pos = (*((double *) ( /* dim=0 */ (__pyx_v_self->read_lfo.data + __pyx_t_13 * __pyx_v_self->read_lfo.strides[0]) )));
+
+      /* "pippi/grains.pyx":250
+ *                 read_frac = read_phase - read_index
+ *                 read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
+ *                 read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]             # <<<<<<<<<<<<<<
+ *                 read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
+ *                 read_phase += read_phase_inc
+ */
+      if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 250, __pyx_L1_error)}
+      __pyx_t_11 = (__pyx_v_read_index + 1);
+      if (unlikely(__pyx_v_self->read_lfo_length == 0)) {
+        PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+        __PYX_ERR(0, 250, __pyx_L1_error)
+      }
+      __pyx_t_14 = __Pyx_mod_long(__pyx_t_11, __pyx_v_self->read_lfo_length);
+      __pyx_t_3 = -1;
+      if (__pyx_t_14 < 0) {
+        __pyx_t_14 += __pyx_v_self->read_lfo.shape[0];
+        if (unlikely(__pyx_t_14 < 0)) __pyx_t_3 = 0;
+      } else if (unlikely(__pyx_t_14 >= __pyx_v_self->read_lfo.shape[0])) __pyx_t_3 = 0;
+      if (unlikely(__pyx_t_3 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_3);
+        __PYX_ERR(0, 250, __pyx_L1_error)
+      }
+      __pyx_v_read_frac_pos_next = (*((double *) ( /* dim=0 */ (__pyx_v_self->read_lfo.data + __pyx_t_14 * __pyx_v_self->read_lfo.strides[0]) )));
+
+      /* "pippi/grains.pyx":251
+ *                 read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
+ *                 read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
+ *                 read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next             # <<<<<<<<<<<<<<
+ *                 read_phase += read_phase_inc
  * 
  */
-    __pyx_v_read_frac_pos = (((1.0 - __pyx_v_read_frac) * __pyx_v_read_frac_pos) + (__pyx_v_read_frac * __pyx_v_read_frac_pos_next));
+      __pyx_v_read_frac_pos = (((1.0 - __pyx_v_read_frac) * __pyx_v_read_frac_pos) + (__pyx_v_read_frac * __pyx_v_read_frac_pos_next));
 
-    /* "pippi/grains.pyx":231
- *             read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
- *             read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
- *             read_phase += read_phase_inc             # <<<<<<<<<<<<<<
+      /* "pippi/grains.pyx":252
+ *                 read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
+ *                 read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
+ *                 read_phase += read_phase_inc             # <<<<<<<<<<<<<<
  * 
  *             # Speed LFO
  */
-    __pyx_v_read_phase = (__pyx_v_read_phase + __pyx_v_read_phase_inc);
+      __pyx_v_read_phase = (__pyx_v_read_phase + __pyx_v_read_phase_inc);
+    }
+    __pyx_L9:;
 
-    /* "pippi/grains.pyx":234
+    /* "pippi/grains.pyx":255
  * 
  *             # Speed LFO
  *             if self.speed_lfo is not None:             # <<<<<<<<<<<<<<
  *                 speed_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.speed_lfo_length
  *                 speed_index = <int>speed_phase
  */
-    if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 234, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 255, __pyx_L1_error)}
     __pyx_t_9 = ((((PyObject *) __pyx_v_self->speed_lfo.memview) != Py_None) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":235
+      /* "pippi/grains.pyx":256
  *             # Speed LFO
  *             if self.speed_lfo is not None:
  *                 speed_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.speed_lfo_length             # <<<<<<<<<<<<<<
@@ -4459,11 +4755,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       __pyx_t_3 = (__pyx_v_framelength - __pyx_v_grainlength);
       if (unlikely(__pyx_t_3 == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 235, __pyx_L1_error)
+        __PYX_ERR(0, 256, __pyx_L1_error)
       }
       __pyx_v_speed_phase = ((((double)__pyx_v_write_pos) / __pyx_t_3) * ((double)__pyx_v_self->speed_lfo_length));
 
-      /* "pippi/grains.pyx":236
+      /* "pippi/grains.pyx":257
  *             if self.speed_lfo is not None:
  *                 speed_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.speed_lfo_length
  *                 speed_index = <int>speed_phase             # <<<<<<<<<<<<<<
@@ -4472,7 +4768,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_speed_index = ((int)__pyx_v_speed_phase);
 
-      /* "pippi/grains.pyx":237
+      /* "pippi/grains.pyx":258
  *                 speed_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.speed_lfo_length
  *                 speed_index = <int>speed_phase
  *                 speed_frac = speed_phase - speed_index             # <<<<<<<<<<<<<<
@@ -4481,17 +4777,17 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_speed_frac = (__pyx_v_speed_phase - __pyx_v_speed_index);
 
-      /* "pippi/grains.pyx":238
+      /* "pippi/grains.pyx":259
  *                 speed_index = <int>speed_phase
  *                 speed_frac = speed_phase - speed_index
  *                 speed_frac_pos = self.speed_lfo[speed_index % self.speed_lfo_length]             # <<<<<<<<<<<<<<
  *                 speed_frac_pos_next = self.speed_lfo[(speed_index+1) % self.speed_lfo_length]
  *                 speed_frac_pos = (1.0 - speed_frac) * speed_frac_pos + speed_frac * speed_frac_pos_next
  */
-      if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 238, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 259, __pyx_L1_error)}
       if (unlikely(__pyx_v_self->speed_lfo_length == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 238, __pyx_L1_error)
+        __PYX_ERR(0, 259, __pyx_L1_error)
       }
       __pyx_t_15 = __Pyx_mod_int(__pyx_v_speed_index, __pyx_v_self->speed_lfo_length);
       __pyx_t_3 = -1;
@@ -4501,22 +4797,22 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       } else if (unlikely(__pyx_t_15 >= __pyx_v_self->speed_lfo.shape[0])) __pyx_t_3 = 0;
       if (unlikely(__pyx_t_3 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_3);
-        __PYX_ERR(0, 238, __pyx_L1_error)
+        __PYX_ERR(0, 259, __pyx_L1_error)
       }
       __pyx_v_speed_frac_pos = (*((double *) ( /* dim=0 */ (__pyx_v_self->speed_lfo.data + __pyx_t_15 * __pyx_v_self->speed_lfo.strides[0]) )));
 
-      /* "pippi/grains.pyx":239
+      /* "pippi/grains.pyx":260
  *                 speed_frac = speed_phase - speed_index
  *                 speed_frac_pos = self.speed_lfo[speed_index % self.speed_lfo_length]
  *                 speed_frac_pos_next = self.speed_lfo[(speed_index+1) % self.speed_lfo_length]             # <<<<<<<<<<<<<<
  *                 speed_frac_pos = (1.0 - speed_frac) * speed_frac_pos + speed_frac * speed_frac_pos_next
  *                 speed_phase += speed_phase_inc
  */
-      if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 239, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 260, __pyx_L1_error)}
       __pyx_t_11 = (__pyx_v_speed_index + 1);
       if (unlikely(__pyx_v_self->speed_lfo_length == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 239, __pyx_L1_error)
+        __PYX_ERR(0, 260, __pyx_L1_error)
       }
       __pyx_t_16 = __Pyx_mod_long(__pyx_t_11, __pyx_v_self->speed_lfo_length);
       __pyx_t_3 = -1;
@@ -4526,11 +4822,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       } else if (unlikely(__pyx_t_16 >= __pyx_v_self->speed_lfo.shape[0])) __pyx_t_3 = 0;
       if (unlikely(__pyx_t_3 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_3);
-        __PYX_ERR(0, 239, __pyx_L1_error)
+        __PYX_ERR(0, 260, __pyx_L1_error)
       }
       __pyx_v_speed_frac_pos_next = (*((double *) ( /* dim=0 */ (__pyx_v_self->speed_lfo.data + __pyx_t_16 * __pyx_v_self->speed_lfo.strides[0]) )));
 
-      /* "pippi/grains.pyx":240
+      /* "pippi/grains.pyx":261
  *                 speed_frac_pos = self.speed_lfo[speed_index % self.speed_lfo_length]
  *                 speed_frac_pos_next = self.speed_lfo[(speed_index+1) % self.speed_lfo_length]
  *                 speed_frac_pos = (1.0 - speed_frac) * speed_frac_pos + speed_frac * speed_frac_pos_next             # <<<<<<<<<<<<<<
@@ -4539,7 +4835,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_speed_frac_pos = (((1.0 - __pyx_v_speed_frac) * __pyx_v_speed_frac_pos) + (__pyx_v_speed_frac * __pyx_v_speed_frac_pos_next));
 
-      /* "pippi/grains.pyx":241
+      /* "pippi/grains.pyx":262
  *                 speed_frac_pos_next = self.speed_lfo[(speed_index+1) % self.speed_lfo_length]
  *                 speed_frac_pos = (1.0 - speed_frac) * speed_frac_pos + speed_frac * speed_frac_pos_next
  *                 speed_phase += speed_phase_inc             # <<<<<<<<<<<<<<
@@ -4548,7 +4844,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_speed_phase = (__pyx_v_speed_phase + __pyx_v_speed_phase_inc);
 
-      /* "pippi/grains.pyx":234
+      /* "pippi/grains.pyx":255
  * 
  *             # Speed LFO
  *             if self.speed_lfo is not None:             # <<<<<<<<<<<<<<
@@ -4557,18 +4853,18 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     }
 
-    /* "pippi/grains.pyx":244
+    /* "pippi/grains.pyx":265
  * 
  *             # Density LFO
  *             if self.density_lfo is not None:             # <<<<<<<<<<<<<<
  *                 density_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.density_lfo_length * self.density_lfo_speed
  *                 density_index = <int>density_phase
  */
-    if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 244, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 265, __pyx_L1_error)}
     __pyx_t_9 = ((((PyObject *) __pyx_v_self->density_lfo.memview) != Py_None) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":245
+      /* "pippi/grains.pyx":266
  *             # Density LFO
  *             if self.density_lfo is not None:
  *                 density_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.density_lfo_length * self.density_lfo_speed             # <<<<<<<<<<<<<<
@@ -4578,11 +4874,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       __pyx_t_3 = (__pyx_v_framelength - __pyx_v_grainlength);
       if (unlikely(__pyx_t_3 == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 245, __pyx_L1_error)
+        __PYX_ERR(0, 266, __pyx_L1_error)
       }
       __pyx_v_density_phase = (((((double)__pyx_v_write_pos) / __pyx_t_3) * ((double)__pyx_v_self->density_lfo_length)) * __pyx_v_self->density_lfo_speed);
 
-      /* "pippi/grains.pyx":246
+      /* "pippi/grains.pyx":267
  *             if self.density_lfo is not None:
  *                 density_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.density_lfo_length * self.density_lfo_speed
  *                 density_index = <int>density_phase             # <<<<<<<<<<<<<<
@@ -4591,7 +4887,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_density_index = ((int)__pyx_v_density_phase);
 
-      /* "pippi/grains.pyx":247
+      /* "pippi/grains.pyx":268
  *                 density_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.density_lfo_length * self.density_lfo_speed
  *                 density_index = <int>density_phase
  *                 density_frac = density_phase - density_index             # <<<<<<<<<<<<<<
@@ -4600,17 +4896,17 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_density_frac = (__pyx_v_density_phase - __pyx_v_density_index);
 
-      /* "pippi/grains.pyx":248
+      /* "pippi/grains.pyx":269
  *                 density_index = <int>density_phase
  *                 density_frac = density_phase - density_index
  *                 density_frac_pos = self.density_lfo[density_index % self.density_lfo_length]             # <<<<<<<<<<<<<<
  *                 density_frac_pos_next = self.density_lfo[(density_index+1) % self.density_lfo_length]
  *                 density_frac_pos = (1.0 - density_frac) * density_frac_pos + density_frac * density_frac_pos_next
  */
-      if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 248, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 269, __pyx_L1_error)}
       if (unlikely(__pyx_v_self->density_lfo_length == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 248, __pyx_L1_error)
+        __PYX_ERR(0, 269, __pyx_L1_error)
       }
       __pyx_t_17 = __Pyx_mod_int(__pyx_v_density_index, __pyx_v_self->density_lfo_length);
       __pyx_t_3 = -1;
@@ -4620,22 +4916,22 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       } else if (unlikely(__pyx_t_17 >= __pyx_v_self->density_lfo.shape[0])) __pyx_t_3 = 0;
       if (unlikely(__pyx_t_3 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_3);
-        __PYX_ERR(0, 248, __pyx_L1_error)
+        __PYX_ERR(0, 269, __pyx_L1_error)
       }
       __pyx_v_density_frac_pos = (*((double *) ( /* dim=0 */ (__pyx_v_self->density_lfo.data + __pyx_t_17 * __pyx_v_self->density_lfo.strides[0]) )));
 
-      /* "pippi/grains.pyx":249
+      /* "pippi/grains.pyx":270
  *                 density_frac = density_phase - density_index
  *                 density_frac_pos = self.density_lfo[density_index % self.density_lfo_length]
  *                 density_frac_pos_next = self.density_lfo[(density_index+1) % self.density_lfo_length]             # <<<<<<<<<<<<<<
  *                 density_frac_pos = (1.0 - density_frac) * density_frac_pos + density_frac * density_frac_pos_next
- *                 density = (density_frac_pos + 1) * self.density
+ *                 density = (density_frac_pos * (self.maxdensity - self.mindensity)) + self.mindensity
  */
-      if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 249, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 270, __pyx_L1_error)}
       __pyx_t_11 = (__pyx_v_density_index + 1);
       if (unlikely(__pyx_v_self->density_lfo_length == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-        __PYX_ERR(0, 249, __pyx_L1_error)
+        __PYX_ERR(0, 270, __pyx_L1_error)
       }
       __pyx_t_18 = __Pyx_mod_long(__pyx_t_11, __pyx_v_self->density_lfo_length);
       __pyx_t_3 = -1;
@@ -4645,48 +4941,48 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       } else if (unlikely(__pyx_t_18 >= __pyx_v_self->density_lfo.shape[0])) __pyx_t_3 = 0;
       if (unlikely(__pyx_t_3 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_3);
-        __PYX_ERR(0, 249, __pyx_L1_error)
+        __PYX_ERR(0, 270, __pyx_L1_error)
       }
       __pyx_v_density_frac_pos_next = (*((double *) ( /* dim=0 */ (__pyx_v_self->density_lfo.data + __pyx_t_18 * __pyx_v_self->density_lfo.strides[0]) )));
 
-      /* "pippi/grains.pyx":250
+      /* "pippi/grains.pyx":271
  *                 density_frac_pos = self.density_lfo[density_index % self.density_lfo_length]
  *                 density_frac_pos_next = self.density_lfo[(density_index+1) % self.density_lfo_length]
  *                 density_frac_pos = (1.0 - density_frac) * density_frac_pos + density_frac * density_frac_pos_next             # <<<<<<<<<<<<<<
- *                 density = (density_frac_pos + 1) * self.density
+ *                 density = (density_frac_pos * (self.maxdensity - self.mindensity)) + self.mindensity
  *                 density_phase += density_phase_inc
  */
       __pyx_v_density_frac_pos = (((1.0 - __pyx_v_density_frac) * __pyx_v_density_frac_pos) + (__pyx_v_density_frac * __pyx_v_density_frac_pos_next));
 
-      /* "pippi/grains.pyx":251
+      /* "pippi/grains.pyx":272
  *                 density_frac_pos_next = self.density_lfo[(density_index+1) % self.density_lfo_length]
  *                 density_frac_pos = (1.0 - density_frac) * density_frac_pos + density_frac * density_frac_pos_next
- *                 density = (density_frac_pos + 1) * self.density             # <<<<<<<<<<<<<<
+ *                 density = (density_frac_pos * (self.maxdensity - self.mindensity)) + self.mindensity             # <<<<<<<<<<<<<<
  *                 density_phase += density_phase_inc
  * 
  */
-      __pyx_v_density = ((__pyx_v_density_frac_pos + 1.0) * __pyx_v_self->density);
+      __pyx_v_density = ((__pyx_v_density_frac_pos * (__pyx_v_self->maxdensity - __pyx_v_self->mindensity)) + __pyx_v_self->mindensity);
 
-      /* "pippi/grains.pyx":252
+      /* "pippi/grains.pyx":273
  *                 density_frac_pos = (1.0 - density_frac) * density_frac_pos + density_frac * density_frac_pos_next
- *                 density = (density_frac_pos + 1) * self.density
+ *                 density = (density_frac_pos * (self.maxdensity - self.mindensity)) + self.mindensity
  *                 density_phase += density_phase_inc             # <<<<<<<<<<<<<<
  * 
  *             else:
  */
       __pyx_v_density_phase = (__pyx_v_density_phase + __pyx_v_density_phase_inc);
 
-      /* "pippi/grains.pyx":244
+      /* "pippi/grains.pyx":265
  * 
  *             # Density LFO
  *             if self.density_lfo is not None:             # <<<<<<<<<<<<<<
  *                 density_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.density_lfo_length * self.density_lfo_speed
  *                 density_index = <int>density_phase
  */
-      goto __pyx_L10;
+      goto __pyx_L13;
     }
 
-    /* "pippi/grains.pyx":255
+    /* "pippi/grains.pyx":276
  * 
  *             else:
  *                 density = self.density             # <<<<<<<<<<<<<<
@@ -4697,9 +4993,9 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       __pyx_t_6 = __pyx_v_self->density;
       __pyx_v_density = __pyx_t_6;
     }
-    __pyx_L10:;
+    __pyx_L13:;
 
-    /* "pippi/grains.pyx":257
+    /* "pippi/grains.pyx":278
  *                 density = self.density
  * 
  *             if density < MIN_DENSITY:             # <<<<<<<<<<<<<<
@@ -4709,7 +5005,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
     __pyx_t_9 = ((__pyx_v_density < 1e-06) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":258
+      /* "pippi/grains.pyx":279
  * 
  *             if density < MIN_DENSITY:
  *                 density = MIN_DENSITY             # <<<<<<<<<<<<<<
@@ -4718,7 +5014,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_density = 1e-06;
 
-      /* "pippi/grains.pyx":257
+      /* "pippi/grains.pyx":278
  *                 density = self.density
  * 
  *             if density < MIN_DENSITY:             # <<<<<<<<<<<<<<
@@ -4727,18 +5023,18 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     }
 
-    /* "pippi/grains.pyx":260
+    /* "pippi/grains.pyx":281
  *                 density = MIN_DENSITY
  * 
  *             if self.speed_lfo is not None:             # <<<<<<<<<<<<<<
  *                 self.speed = speed_frac_pos * (self.maxspeed - self.minspeed) + self.minspeed
  * 
  */
-    if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 260, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 281, __pyx_L1_error)}
     __pyx_t_9 = ((((PyObject *) __pyx_v_self->speed_lfo.memview) != Py_None) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":261
+      /* "pippi/grains.pyx":282
  * 
  *             if self.speed_lfo is not None:
  *                 self.speed = speed_frac_pos * (self.maxspeed - self.minspeed) + self.minspeed             # <<<<<<<<<<<<<<
@@ -4747,7 +5043,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_self->speed = ((__pyx_v_speed_frac_pos * (__pyx_v_self->maxspeed - __pyx_v_self->minspeed)) + __pyx_v_self->minspeed);
 
-      /* "pippi/grains.pyx":260
+      /* "pippi/grains.pyx":281
  *                 density = MIN_DENSITY
  * 
  *             if self.speed_lfo is not None:             # <<<<<<<<<<<<<<
@@ -4756,7 +5052,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     }
 
-    /* "pippi/grains.pyx":263
+    /* "pippi/grains.pyx":284
  *                 self.speed = speed_frac_pos * (self.maxspeed - self.minspeed) + self.minspeed
  * 
  *             if self.speed != 1:             # <<<<<<<<<<<<<<
@@ -4766,7 +5062,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
     __pyx_t_9 = ((__pyx_v_self->speed != 1.0) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":264
+      /* "pippi/grains.pyx":285
  * 
  *             if self.speed != 1:
  *                 adjusted_grainlength = <int>(grainlength * self.speed)             # <<<<<<<<<<<<<<
@@ -4775,7 +5071,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
       __pyx_v_adjusted_grainlength = ((int)(__pyx_v_grainlength * __pyx_v_self->speed));
 
-      /* "pippi/grains.pyx":265
+      /* "pippi/grains.pyx":286
  *             if self.speed != 1:
  *                 adjusted_grainlength = <int>(grainlength * self.speed)
  *                 if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:             # <<<<<<<<<<<<<<
@@ -4785,7 +5081,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       __pyx_t_9 = ((__pyx_v_adjusted_grainlength > 8) != 0);
       if (__pyx_t_9) {
 
-        /* "pippi/grains.pyx":266
+        /* "pippi/grains.pyx":287
  *                 adjusted_grainlength = <int>(grainlength * self.speed)
  *                 if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:
  *                     start = <int>(read_frac_pos * (input_length-adjusted_grainlength))             # <<<<<<<<<<<<<<
@@ -4794,28 +5090,28 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
         __pyx_v_start = ((int)(__pyx_v_read_frac_pos * (__pyx_v_input_length - __pyx_v_adjusted_grainlength)));
 
-        /* "pippi/grains.pyx":267
+        /* "pippi/grains.pyx":288
  *                 if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:
  *                     start = <int>(read_frac_pos * (input_length-adjusted_grainlength))
  *                     grain = self.buf[start:start+adjusted_grainlength]             # <<<<<<<<<<<<<<
  *                     grain = grain.speed(self.speed)
  *                 else:
  */
-        __pyx_t_1 = __Pyx_PyObject_GetSlice(((PyObject *)__pyx_v_self->buf), __pyx_v_start, (__pyx_v_start + __pyx_v_adjusted_grainlength), NULL, NULL, NULL, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 267, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_GetSlice(((PyObject *)__pyx_v_self->buf), __pyx_v_start, (__pyx_v_start + __pyx_v_adjusted_grainlength), NULL, NULL, NULL, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 288, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_XDECREF_SET(__pyx_v_grain, __pyx_t_1);
         __pyx_t_1 = 0;
 
-        /* "pippi/grains.pyx":268
+        /* "pippi/grains.pyx":289
  *                     start = <int>(read_frac_pos * (input_length-adjusted_grainlength))
  *                     grain = self.buf[start:start+adjusted_grainlength]
  *                     grain = grain.speed(self.speed)             # <<<<<<<<<<<<<<
  *                 else:
  *                     write_pos += MIN_GRAIN_FRAMELENGTH
  */
-        __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_grain, __pyx_n_s_speed); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 268, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_grain, __pyx_n_s_speed); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 289, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_19 = PyFloat_FromDouble(__pyx_v_self->speed); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 268, __pyx_L1_error)
+        __pyx_t_19 = PyFloat_FromDouble(__pyx_v_self->speed); if (unlikely(!__pyx_t_19)) __PYX_ERR(0, 289, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_19);
         __pyx_t_20 = NULL;
         if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -4828,14 +5124,14 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
           }
         }
         if (!__pyx_t_20) {
-          __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_19); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+          __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_19); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 289, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
           __Pyx_GOTREF(__pyx_t_1);
         } else {
           #if CYTHON_FAST_PYCALL
           if (PyFunction_Check(__pyx_t_2)) {
             PyObject *__pyx_temp[2] = {__pyx_t_20, __pyx_t_19};
-            __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+            __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 289, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
@@ -4844,20 +5140,20 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
           #if CYTHON_FAST_PYCCALL
           if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
             PyObject *__pyx_temp[2] = {__pyx_t_20, __pyx_t_19};
-            __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+            __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 289, __pyx_L1_error)
             __Pyx_XDECREF(__pyx_t_20); __pyx_t_20 = 0;
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
           } else
           #endif
           {
-            __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 268, __pyx_L1_error)
+            __pyx_t_21 = PyTuple_New(1+1); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 289, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_21);
             __Pyx_GIVEREF(__pyx_t_20); PyTuple_SET_ITEM(__pyx_t_21, 0, __pyx_t_20); __pyx_t_20 = NULL;
             __Pyx_GIVEREF(__pyx_t_19);
             PyTuple_SET_ITEM(__pyx_t_21, 0+1, __pyx_t_19);
             __pyx_t_19 = 0;
-            __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_21, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 268, __pyx_L1_error)
+            __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_21, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 289, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_1);
             __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
           }
@@ -4866,17 +5162,17 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
         __Pyx_DECREF_SET(__pyx_v_grain, __pyx_t_1);
         __pyx_t_1 = 0;
 
-        /* "pippi/grains.pyx":265
+        /* "pippi/grains.pyx":286
  *             if self.speed != 1:
  *                 adjusted_grainlength = <int>(grainlength * self.speed)
  *                 if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:             # <<<<<<<<<<<<<<
  *                     start = <int>(read_frac_pos * (input_length-adjusted_grainlength))
  *                     grain = self.buf[start:start+adjusted_grainlength]
  */
-        goto __pyx_L14;
+        goto __pyx_L17;
       }
 
-      /* "pippi/grains.pyx":270
+      /* "pippi/grains.pyx":291
  *                     grain = grain.speed(self.speed)
  *                 else:
  *                     write_pos += MIN_GRAIN_FRAMELENGTH             # <<<<<<<<<<<<<<
@@ -4886,7 +5182,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       /*else*/ {
         __pyx_v_write_pos = (__pyx_v_write_pos + 8);
 
-        /* "pippi/grains.pyx":271
+        /* "pippi/grains.pyx":292
  *                 else:
  *                     write_pos += MIN_GRAIN_FRAMELENGTH
  *                     continue             # <<<<<<<<<<<<<<
@@ -4895,19 +5191,19 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
         goto __pyx_L5_continue;
       }
-      __pyx_L14:;
+      __pyx_L17:;
 
-      /* "pippi/grains.pyx":263
+      /* "pippi/grains.pyx":284
  *                 self.speed = speed_frac_pos * (self.maxspeed - self.minspeed) + self.minspeed
  * 
  *             if self.speed != 1:             # <<<<<<<<<<<<<<
  *                 adjusted_grainlength = <int>(grainlength * self.speed)
  *                 if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:
  */
-      goto __pyx_L13;
+      goto __pyx_L16;
     }
 
-    /* "pippi/grains.pyx":273
+    /* "pippi/grains.pyx":294
  *                     continue
  *             else:
  *                 start = <int>(read_frac_pos * max_read_pos)             # <<<<<<<<<<<<<<
@@ -4917,37 +5213,37 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
     /*else*/ {
       __pyx_v_start = ((int)(__pyx_v_read_frac_pos * __pyx_v_max_read_pos));
 
-      /* "pippi/grains.pyx":274
+      /* "pippi/grains.pyx":295
  *             else:
  *                 start = <int>(read_frac_pos * max_read_pos)
  *                 grain = self.buf[start:start+grainlength]             # <<<<<<<<<<<<<<
  * 
- *             grain = grain * self.win
+ * 
  */
-      __pyx_t_1 = __Pyx_PyObject_GetSlice(((PyObject *)__pyx_v_self->buf), __pyx_v_start, (__pyx_v_start + __pyx_v_grainlength), NULL, NULL, NULL, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 274, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetSlice(((PyObject *)__pyx_v_self->buf), __pyx_v_start, (__pyx_v_start + __pyx_v_grainlength), NULL, NULL, NULL, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 295, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_XDECREF_SET(__pyx_v_grain, __pyx_t_1);
       __pyx_t_1 = 0;
     }
-    __pyx_L13:;
+    __pyx_L16:;
 
-    /* "pippi/grains.pyx":276
- *                 grain = self.buf[start:start+grainlength]
+    /* "pippi/grains.pyx":298
+ * 
  * 
  *             grain = grain * self.win             # <<<<<<<<<<<<<<
  * 
  *             if self.spread > 0:
  */
-    if (unlikely(!__pyx_v_self->win.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 276, __pyx_L1_error)}
-    __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->win, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 276, __pyx_L1_error)
+    if (unlikely(!__pyx_v_self->win.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 298, __pyx_L1_error)}
+    __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->win, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 298, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyNumber_Multiply(__pyx_v_grain, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 276, __pyx_L1_error)
+    __pyx_t_2 = PyNumber_Multiply(__pyx_v_grain, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 298, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF_SET(__pyx_v_grain, __pyx_t_2);
     __pyx_t_2 = 0;
 
-    /* "pippi/grains.pyx":278
+    /* "pippi/grains.pyx":300
  *             grain = grain * self.win
  * 
  *             if self.spread > 0:             # <<<<<<<<<<<<<<
@@ -4957,7 +5253,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
     __pyx_t_9 = ((__pyx_v_self->spread > 0.0) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":279
+      /* "pippi/grains.pyx":301
  * 
  *             if self.spread > 0:
  *                 panpos = (rand()/<double>RAND_MAX) * self.spread + (0.5 - (self.spread * 0.5))             # <<<<<<<<<<<<<<
@@ -4967,20 +5263,20 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       __pyx_t_3 = rand();
       if (unlikely(((double)RAND_MAX) == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 279, __pyx_L1_error)
+        __PYX_ERR(0, 301, __pyx_L1_error)
       }
       __pyx_v_panpos = (((__pyx_t_3 / ((double)RAND_MAX)) * __pyx_v_self->spread) + (0.5 - (__pyx_v_self->spread * 0.5)));
 
-      /* "pippi/grains.pyx":280
+      /* "pippi/grains.pyx":302
  *             if self.spread > 0:
  *                 panpos = (rand()/<double>RAND_MAX) * self.spread + (0.5 - (self.spread * 0.5))
  *                 grain = grain.pan(panpos)             # <<<<<<<<<<<<<<
  * 
  *             if write_pos + len(grain) < len(out):
  */
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_grain, __pyx_n_s_pan); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 280, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_grain, __pyx_n_s_pan); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 302, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_21 = PyFloat_FromDouble(__pyx_v_panpos); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 280, __pyx_L1_error)
+      __pyx_t_21 = PyFloat_FromDouble(__pyx_v_panpos); if (unlikely(!__pyx_t_21)) __PYX_ERR(0, 302, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_21);
       __pyx_t_19 = NULL;
       if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -4993,14 +5289,14 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
         }
       }
       if (!__pyx_t_19) {
-        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_21); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 280, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_21); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 302, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
         __Pyx_GOTREF(__pyx_t_2);
       } else {
         #if CYTHON_FAST_PYCALL
         if (PyFunction_Check(__pyx_t_1)) {
           PyObject *__pyx_temp[2] = {__pyx_t_19, __pyx_t_21};
-          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 280, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 302, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
@@ -5009,20 +5305,20 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
         #if CYTHON_FAST_PYCCALL
         if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
           PyObject *__pyx_temp[2] = {__pyx_t_19, __pyx_t_21};
-          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 280, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 302, __pyx_L1_error)
           __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_21); __pyx_t_21 = 0;
         } else
         #endif
         {
-          __pyx_t_20 = PyTuple_New(1+1); if (unlikely(!__pyx_t_20)) __PYX_ERR(0, 280, __pyx_L1_error)
+          __pyx_t_20 = PyTuple_New(1+1); if (unlikely(!__pyx_t_20)) __PYX_ERR(0, 302, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_20);
           __Pyx_GIVEREF(__pyx_t_19); PyTuple_SET_ITEM(__pyx_t_20, 0, __pyx_t_19); __pyx_t_19 = NULL;
           __Pyx_GIVEREF(__pyx_t_21);
           PyTuple_SET_ITEM(__pyx_t_20, 0+1, __pyx_t_21);
           __pyx_t_21 = 0;
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_20, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 280, __pyx_L1_error)
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_20, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 302, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_20); __pyx_t_20 = 0;
         }
@@ -5031,7 +5327,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
       __Pyx_DECREF_SET(__pyx_v_grain, __pyx_t_2);
       __pyx_t_2 = 0;
 
-      /* "pippi/grains.pyx":278
+      /* "pippi/grains.pyx":300
  *             grain = grain * self.win
  * 
  *             if self.spread > 0:             # <<<<<<<<<<<<<<
@@ -5040,31 +5336,31 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     }
 
-    /* "pippi/grains.pyx":282
+    /* "pippi/grains.pyx":304
  *                 grain = grain.pan(panpos)
  * 
  *             if write_pos + len(grain) < len(out):             # <<<<<<<<<<<<<<
  *                 out._dub(grain, write_pos)
  * 
  */
-    __pyx_t_4 = PyObject_Length(__pyx_v_grain); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 282, __pyx_L1_error)
-    __pyx_t_22 = PyObject_Length(((PyObject *)__pyx_v_out)); if (unlikely(__pyx_t_22 == ((Py_ssize_t)-1))) __PYX_ERR(0, 282, __pyx_L1_error)
+    __pyx_t_4 = PyObject_Length(__pyx_v_grain); if (unlikely(__pyx_t_4 == ((Py_ssize_t)-1))) __PYX_ERR(0, 304, __pyx_L1_error)
+    __pyx_t_22 = PyObject_Length(((PyObject *)__pyx_v_out)); if (unlikely(__pyx_t_22 == ((Py_ssize_t)-1))) __PYX_ERR(0, 304, __pyx_L1_error)
     __pyx_t_9 = (((__pyx_v_write_pos + __pyx_t_4) < __pyx_t_22) != 0);
     if (__pyx_t_9) {
 
-      /* "pippi/grains.pyx":283
+      /* "pippi/grains.pyx":305
  * 
  *             if write_pos + len(grain) < len(out):
  *                 out._dub(grain, write_pos)             # <<<<<<<<<<<<<<
  * 
  *             self.grains_per_sec = <double>self.samplerate / (<double>len(grain) / 2.0)
  */
-      if (!(likely(((__pyx_v_grain) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_grain, __pyx_ptype_5pippi_11soundbuffer_SoundBuffer))))) __PYX_ERR(0, 283, __pyx_L1_error)
+      if (!(likely(((__pyx_v_grain) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_grain, __pyx_ptype_5pippi_11soundbuffer_SoundBuffer))))) __PYX_ERR(0, 305, __pyx_L1_error)
       __pyx_t_23.__pyx_n = 1;
       __pyx_t_23.framepos = __pyx_v_write_pos;
       ((struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *)__pyx_v_out->__pyx_vtab)->_dub(__pyx_v_out, ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)__pyx_v_grain), &__pyx_t_23); 
 
-      /* "pippi/grains.pyx":282
+      /* "pippi/grains.pyx":304
  *                 grain = grain.pan(panpos)
  * 
  *             if write_pos + len(grain) < len(out):             # <<<<<<<<<<<<<<
@@ -5073,22 +5369,22 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     }
 
-    /* "pippi/grains.pyx":285
+    /* "pippi/grains.pyx":307
  *                 out._dub(grain, write_pos)
  * 
  *             self.grains_per_sec = <double>self.samplerate / (<double>len(grain) / 2.0)             # <<<<<<<<<<<<<<
  *             self.grains_per_sec *= density
  * 
  */
-    __pyx_t_22 = PyObject_Length(__pyx_v_grain); if (unlikely(__pyx_t_22 == ((Py_ssize_t)-1))) __PYX_ERR(0, 285, __pyx_L1_error)
+    __pyx_t_22 = PyObject_Length(__pyx_v_grain); if (unlikely(__pyx_t_22 == ((Py_ssize_t)-1))) __PYX_ERR(0, 307, __pyx_L1_error)
     __pyx_t_6 = (((double)__pyx_t_22) / 2.0);
     if (unlikely(__pyx_t_6 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 285, __pyx_L1_error)
+      __PYX_ERR(0, 307, __pyx_L1_error)
     }
     __pyx_v_self->grains_per_sec = (((double)__pyx_v_self->samplerate) / __pyx_t_6);
 
-    /* "pippi/grains.pyx":286
+    /* "pippi/grains.pyx":308
  * 
  *             self.grains_per_sec = <double>self.samplerate / (<double>len(grain) / 2.0)
  *             self.grains_per_sec *= density             # <<<<<<<<<<<<<<
@@ -5097,7 +5393,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     __pyx_v_self->grains_per_sec = (__pyx_v_self->grains_per_sec * __pyx_v_density);
 
-    /* "pippi/grains.pyx":288
+    /* "pippi/grains.pyx":310
  *             self.grains_per_sec *= density
  * 
  *             write_pos += <int>(<double>self.samplerate / self.grains_per_sec)             # <<<<<<<<<<<<<<
@@ -5106,11 +5402,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
  */
     if (unlikely(__pyx_v_self->grains_per_sec == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 288, __pyx_L1_error)
+      __PYX_ERR(0, 310, __pyx_L1_error)
     }
     __pyx_v_write_pos = (__pyx_v_write_pos + ((int)(((double)__pyx_v_self->samplerate) / __pyx_v_self->grains_per_sec)));
 
-    /* "pippi/grains.pyx":289
+    /* "pippi/grains.pyx":311
  * 
  *             write_pos += <int>(<double>self.samplerate / self.grains_per_sec)
  *             count += 1             # <<<<<<<<<<<<<<
@@ -5121,7 +5417,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
     __pyx_L5_continue:;
   }
 
-  /* "pippi/grains.pyx":291
+  /* "pippi/grains.pyx":313
  *             count += 1
  * 
  *         return out             # <<<<<<<<<<<<<<
@@ -5133,7 +5429,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_2play(struct __pyx_obj_5pi
   __pyx_r = ((PyObject *)__pyx_v_out);
   goto __pyx_L0;
 
-  /* "pippi/grains.pyx":139
+  /* "pippi/grains.pyx":153
  *             self.grainlength_lfo_length = len(self.grainlength_lfo)
  * 
  *     def play(self, length=10):             # <<<<<<<<<<<<<<
@@ -5502,7 +5798,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_3win_2__set__(struct __pyx_obj_5
  *     cdef public double[:] win
  *     cdef public int win_length             # <<<<<<<<<<<<<<
  * 
- *     cdef public double[:] read_lfo
+ *     cdef public double freeze
  */
 
 /* Python wrapper */
@@ -5576,6 +5872,82 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_10win_length_2__set__(struct __p
 /* "pippi/grains.pxd":11
  *     cdef public int win_length
  * 
+ *     cdef public double freeze             # <<<<<<<<<<<<<<
+ *     cdef public double[:] read_lfo
+ *     cdef public int read_lfo_length
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_6freeze_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_6freeze_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud_6freeze___get__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6freeze___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->freeze); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 11, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pippi.grains.GrainCloud.freeze.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_5pippi_6grains_10GrainCloud_6freeze_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_5pippi_6grains_10GrainCloud_6freeze_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud_6freeze_2__set__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_5pippi_6grains_10GrainCloud_6freeze_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 11, __pyx_L1_error)
+  __pyx_v_self->freeze = __pyx_t_1;
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("pippi.grains.GrainCloud.freeze.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/grains.pxd":12
+ * 
+ *     cdef public double freeze
  *     cdef public double[:] read_lfo             # <<<<<<<<<<<<<<
  *     cdef public int read_lfo_length
  *     cdef public double read_lfo_speed
@@ -5600,8 +5972,8 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_8read_lfo___get__(struct _
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 11, __pyx_L1_error)}
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->read_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 11, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 12, __pyx_L1_error)}
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->read_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5637,7 +6009,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_8read_lfo_2__set__(struct __pyx_
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("__set__", 0);
   __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_value);
-  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 11, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 12, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->read_lfo, 0);
   __pyx_v_self->read_lfo = __pyx_t_1;
   __pyx_t_1.memview = NULL;
@@ -5655,8 +6027,8 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_8read_lfo_2__set__(struct __pyx_
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":12
- * 
+/* "pippi/grains.pxd":13
+ *     cdef public double freeze
  *     cdef public double[:] read_lfo
  *     cdef public int read_lfo_length             # <<<<<<<<<<<<<<
  *     cdef public double read_lfo_speed
@@ -5682,7 +6054,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_15read_lfo_length___get__(
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->read_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->read_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 13, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5717,7 +6089,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_15read_lfo_length_2__set__(struc
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 12, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 13, __pyx_L1_error)
   __pyx_v_self->read_lfo_length = __pyx_t_1;
 
   /* function exit code */
@@ -5731,7 +6103,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_15read_lfo_length_2__set__(struc
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":13
+/* "pippi/grains.pxd":14
  *     cdef public double[:] read_lfo
  *     cdef public int read_lfo_length
  *     cdef public double read_lfo_speed             # <<<<<<<<<<<<<<
@@ -5758,7 +6130,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_14read_lfo_speed___get__(s
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->read_lfo_speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 13, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->read_lfo_speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5793,7 +6165,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_14read_lfo_speed_2__set__(struct
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 13, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 14, __pyx_L1_error)
   __pyx_v_self->read_lfo_speed = __pyx_t_1;
 
   /* function exit code */
@@ -5807,7 +6179,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_14read_lfo_speed_2__set__(struct
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":14
+/* "pippi/grains.pxd":15
  *     cdef public int read_lfo_length
  *     cdef public double read_lfo_speed
  *     cdef public double read_jitter             # <<<<<<<<<<<<<<
@@ -5834,7 +6206,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_11read_jitter___get__(stru
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->read_jitter); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 14, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->read_jitter); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5869,7 +6241,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_11read_jitter_2__set__(struct __
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 14, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 15, __pyx_L1_error)
   __pyx_v_self->read_jitter = __pyx_t_1;
 
   /* function exit code */
@@ -5883,7 +6255,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_11read_jitter_2__set__(struct __
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":16
+/* "pippi/grains.pxd":17
  *     cdef public double read_jitter
  * 
  *     cdef public double[:] speed_lfo             # <<<<<<<<<<<<<<
@@ -5910,8 +6282,8 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_9speed_lfo___get__(struct 
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 16, __pyx_L1_error)}
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->speed_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 16, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 17, __pyx_L1_error)}
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->speed_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5947,7 +6319,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_9speed_lfo_2__set__(struct __pyx
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("__set__", 0);
   __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_value);
-  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 16, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 17, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->speed_lfo, 0);
   __pyx_v_self->speed_lfo = __pyx_t_1;
   __pyx_t_1.memview = NULL;
@@ -5965,7 +6337,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_9speed_lfo_2__set__(struct __pyx
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":17
+/* "pippi/grains.pxd":18
  * 
  *     cdef public double[:] speed_lfo
  *     cdef public int speed_lfo_length             # <<<<<<<<<<<<<<
@@ -5992,7 +6364,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_16speed_lfo_length___get__
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->speed_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 17, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->speed_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6027,7 +6399,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_16speed_lfo_length_2__set__(stru
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 17, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 18, __pyx_L1_error)
   __pyx_v_self->speed_lfo_length = __pyx_t_1;
 
   /* function exit code */
@@ -6041,7 +6413,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_16speed_lfo_length_2__set__(stru
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":18
+/* "pippi/grains.pxd":19
  *     cdef public double[:] speed_lfo
  *     cdef public int speed_lfo_length
  *     cdef public double speed             # <<<<<<<<<<<<<<
@@ -6068,7 +6440,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_5speed___get__(struct __py
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 18, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6103,7 +6475,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_5speed_2__set__(struct __pyx_obj
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 18, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 19, __pyx_L1_error)
   __pyx_v_self->speed = __pyx_t_1;
 
   /* function exit code */
@@ -6117,7 +6489,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_5speed_2__set__(struct __pyx_obj
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":19
+/* "pippi/grains.pxd":20
  *     cdef public int speed_lfo_length
  *     cdef public double speed
  *     cdef public double minspeed             # <<<<<<<<<<<<<<
@@ -6144,7 +6516,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_8minspeed___get__(struct _
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->minspeed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 19, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->minspeed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6179,7 +6551,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_8minspeed_2__set__(struct __pyx_
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 19, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 20, __pyx_L1_error)
   __pyx_v_self->minspeed = __pyx_t_1;
 
   /* function exit code */
@@ -6193,7 +6565,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_8minspeed_2__set__(struct __pyx_
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":20
+/* "pippi/grains.pxd":21
  *     cdef public double speed
  *     cdef public double minspeed
  *     cdef public double maxspeed             # <<<<<<<<<<<<<<
@@ -6220,7 +6592,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_8maxspeed___get__(struct _
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->maxspeed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 20, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->maxspeed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6255,7 +6627,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_8maxspeed_2__set__(struct __pyx_
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 20, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 21, __pyx_L1_error)
   __pyx_v_self->maxspeed = __pyx_t_1;
 
   /* function exit code */
@@ -6269,7 +6641,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_8maxspeed_2__set__(struct __pyx_
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":22
+/* "pippi/grains.pxd":23
  *     cdef public double maxspeed
  * 
  *     cdef public double spread             # <<<<<<<<<<<<<<
@@ -6296,7 +6668,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6spread___get__(struct __p
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->spread); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 22, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->spread); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 23, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6331,7 +6703,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_6spread_2__set__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 22, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 23, __pyx_L1_error)
   __pyx_v_self->spread = __pyx_t_1;
 
   /* function exit code */
@@ -6345,12 +6717,12 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_6spread_2__set__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":23
+/* "pippi/grains.pxd":24
  * 
  *     cdef public double spread
  *     cdef public double jitter             # <<<<<<<<<<<<<<
  *     cdef public double density
- *     cdef public double grains_per_sec
+ *     cdef public double mindensity
  */
 
 /* Python wrapper */
@@ -6372,7 +6744,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6jitter___get__(struct __p
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->jitter); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 23, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->jitter); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6407,7 +6779,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_6jitter_2__set__(struct __pyx_ob
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 23, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 24, __pyx_L1_error)
   __pyx_v_self->jitter = __pyx_t_1;
 
   /* function exit code */
@@ -6421,12 +6793,12 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_6jitter_2__set__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":24
+/* "pippi/grains.pxd":25
  *     cdef public double spread
  *     cdef public double jitter
  *     cdef public double density             # <<<<<<<<<<<<<<
- *     cdef public double grains_per_sec
- * 
+ *     cdef public double mindensity
+ *     cdef public double maxdensity
  */
 
 /* Python wrapper */
@@ -6448,7 +6820,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_7density___get__(struct __
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->density); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 24, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->density); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6483,7 +6855,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_7density_2__set__(struct __pyx_o
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 24, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 25, __pyx_L1_error)
   __pyx_v_self->density = __pyx_t_1;
 
   /* function exit code */
@@ -6497,9 +6869,161 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_7density_2__set__(struct __pyx_o
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":25
+/* "pippi/grains.pxd":26
  *     cdef public double jitter
  *     cdef public double density
+ *     cdef public double mindensity             # <<<<<<<<<<<<<<
+ *     cdef public double maxdensity
+ *     cdef public double grains_per_sec
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_10mindensity_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_10mindensity_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud_10mindensity___get__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_10mindensity___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->mindensity); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 26, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pippi.grains.GrainCloud.mindensity.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_5pippi_6grains_10GrainCloud_10mindensity_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_5pippi_6grains_10GrainCloud_10mindensity_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud_10mindensity_2__set__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_5pippi_6grains_10GrainCloud_10mindensity_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 26, __pyx_L1_error)
+  __pyx_v_self->mindensity = __pyx_t_1;
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("pippi.grains.GrainCloud.mindensity.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/grains.pxd":27
+ *     cdef public double density
+ *     cdef public double mindensity
+ *     cdef public double maxdensity             # <<<<<<<<<<<<<<
+ *     cdef public double grains_per_sec
+ * 
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_10maxdensity_1__get__(PyObject *__pyx_v_self); /*proto*/
+static PyObject *__pyx_pw_5pippi_6grains_10GrainCloud_10maxdensity_1__get__(PyObject *__pyx_v_self) {
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__get__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud_10maxdensity___get__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_10maxdensity___get__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("__get__", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->maxdensity); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 27, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pippi.grains.GrainCloud.maxdensity.__get__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static int __pyx_pw_5pippi_6grains_10GrainCloud_10maxdensity_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value); /*proto*/
+static int __pyx_pw_5pippi_6grains_10GrainCloud_10maxdensity_3__set__(PyObject *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("__set__ (wrapper)", 0);
+  __pyx_r = __pyx_pf_5pippi_6grains_10GrainCloud_10maxdensity_2__set__(((struct __pyx_obj_5pippi_6grains_GrainCloud *)__pyx_v_self), ((PyObject *)__pyx_v_value));
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static int __pyx_pf_5pippi_6grains_10GrainCloud_10maxdensity_2__set__(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v_self, PyObject *__pyx_v_value) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  __Pyx_RefNannySetupContext("__set__", 0);
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 27, __pyx_L1_error)
+  __pyx_v_self->maxdensity = __pyx_t_1;
+
+  /* function exit code */
+  __pyx_r = 0;
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_AddTraceback("pippi.grains.GrainCloud.maxdensity.__set__", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/grains.pxd":28
+ *     cdef public double mindensity
+ *     cdef public double maxdensity
  *     cdef public double grains_per_sec             # <<<<<<<<<<<<<<
  * 
  *     cdef public double[:] density_lfo
@@ -6524,7 +7048,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_14grains_per_sec___get__(s
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->grains_per_sec); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 25, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->grains_per_sec); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6559,7 +7083,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_14grains_per_sec_2__set__(struct
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 25, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 28, __pyx_L1_error)
   __pyx_v_self->grains_per_sec = __pyx_t_1;
 
   /* function exit code */
@@ -6573,7 +7097,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_14grains_per_sec_2__set__(struct
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":27
+/* "pippi/grains.pxd":30
  *     cdef public double grains_per_sec
  * 
  *     cdef public double[:] density_lfo             # <<<<<<<<<<<<<<
@@ -6600,8 +7124,8 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_11density_lfo___get__(stru
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 27, __pyx_L1_error)}
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->density_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 27, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->density_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 30, __pyx_L1_error)}
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->density_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6637,7 +7161,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_11density_lfo_2__set__(struct __
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("__set__", 0);
   __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_value);
-  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 27, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 30, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->density_lfo, 0);
   __pyx_v_self->density_lfo = __pyx_t_1;
   __pyx_t_1.memview = NULL;
@@ -6655,7 +7179,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_11density_lfo_2__set__(struct __
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":28
+/* "pippi/grains.pxd":31
  * 
  *     cdef public double[:] density_lfo
  *     cdef public int density_lfo_length             # <<<<<<<<<<<<<<
@@ -6682,7 +7206,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_18density_lfo_length___get
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->density_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->density_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6717,7 +7241,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_18density_lfo_length_2__set__(st
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 31, __pyx_L1_error)
   __pyx_v_self->density_lfo_length = __pyx_t_1;
 
   /* function exit code */
@@ -6731,7 +7255,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_18density_lfo_length_2__set__(st
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":29
+/* "pippi/grains.pxd":32
  *     cdef public double[:] density_lfo
  *     cdef public int density_lfo_length
  *     cdef public double density_lfo_speed             # <<<<<<<<<<<<<<
@@ -6758,7 +7282,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_17density_lfo_speed___get_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->density_lfo_speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 29, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->density_lfo_speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6793,7 +7317,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_17density_lfo_speed_2__set__(str
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 29, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 32, __pyx_L1_error)
   __pyx_v_self->density_lfo_speed = __pyx_t_1;
 
   /* function exit code */
@@ -6807,7 +7331,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_17density_lfo_speed_2__set__(str
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":30
+/* "pippi/grains.pxd":33
  *     cdef public int density_lfo_length
  *     cdef public double density_lfo_speed
  *     cdef public double density_jitter             # <<<<<<<<<<<<<<
@@ -6834,7 +7358,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_14density_jitter___get__(s
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->density_jitter); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 30, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->density_jitter); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 33, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6869,7 +7393,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_14density_jitter_2__set__(struct
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 30, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 33, __pyx_L1_error)
   __pyx_v_self->density_jitter = __pyx_t_1;
 
   /* function exit code */
@@ -6883,7 +7407,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_14density_jitter_2__set__(struct
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":32
+/* "pippi/grains.pxd":35
  *     cdef public double density_jitter
  * 
  *     cdef public double grainlength             # <<<<<<<<<<<<<<
@@ -6910,7 +7434,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_11grainlength___get__(stru
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->grainlength); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 32, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->grainlength); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 35, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6945,7 +7469,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_11grainlength_2__set__(struct __
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 32, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 35, __pyx_L1_error)
   __pyx_v_self->grainlength = __pyx_t_1;
 
   /* function exit code */
@@ -6959,7 +7483,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_11grainlength_2__set__(struct __
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":33
+/* "pippi/grains.pxd":36
  * 
  *     cdef public double grainlength
  *     cdef public double[:] grainlength_lfo             # <<<<<<<<<<<<<<
@@ -6986,8 +7510,8 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_15grainlength_lfo___get__(
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 33, __pyx_L1_error)}
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->grainlength_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 33, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(1, 36, __pyx_L1_error)}
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_self->grainlength_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 36, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -7023,7 +7547,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_15grainlength_lfo_2__set__(struc
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("__set__", 0);
   __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_value);
-  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 33, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(1, 36, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->grainlength_lfo, 0);
   __pyx_v_self->grainlength_lfo = __pyx_t_1;
   __pyx_t_1.memview = NULL;
@@ -7041,7 +7565,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_15grainlength_lfo_2__set__(struc
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":34
+/* "pippi/grains.pxd":37
  *     cdef public double grainlength
  *     cdef public double[:] grainlength_lfo
  *     cdef public int grainlength_lfo_length             # <<<<<<<<<<<<<<
@@ -7068,7 +7592,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_22grainlength_lfo_length__
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->grainlength_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 34, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->grainlength_lfo_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -7103,7 +7627,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_22grainlength_lfo_length_2__set_
   __Pyx_RefNannyDeclarations
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 34, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 37, __pyx_L1_error)
   __pyx_v_self->grainlength_lfo_length = __pyx_t_1;
 
   /* function exit code */
@@ -7117,7 +7641,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_22grainlength_lfo_length_2__set_
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":35
+/* "pippi/grains.pxd":38
  *     cdef public double[:] grainlength_lfo
  *     cdef public int grainlength_lfo_length
  *     cdef public double grainlength_lfo_speed             # <<<<<<<<<<<<<<
@@ -7144,7 +7668,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_21grainlength_lfo_speed___
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->grainlength_lfo_speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 35, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->grainlength_lfo_speed); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -7179,7 +7703,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_21grainlength_lfo_speed_2__set__
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 35, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 38, __pyx_L1_error)
   __pyx_v_self->grainlength_lfo_speed = __pyx_t_1;
 
   /* function exit code */
@@ -7193,7 +7717,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_21grainlength_lfo_speed_2__set__
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":36
+/* "pippi/grains.pxd":39
  *     cdef public int grainlength_lfo_length
  *     cdef public double grainlength_lfo_speed
  *     cdef public double minlength             # <<<<<<<<<<<<<<
@@ -7220,7 +7744,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_9minlength___get__(struct 
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->minlength); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 36, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->minlength); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 39, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -7255,7 +7779,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_9minlength_2__set__(struct __pyx
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 36, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 39, __pyx_L1_error)
   __pyx_v_self->minlength = __pyx_t_1;
 
   /* function exit code */
@@ -7269,7 +7793,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_9minlength_2__set__(struct __pyx
   return __pyx_r;
 }
 
-/* "pippi/grains.pxd":37
+/* "pippi/grains.pxd":40
  *     cdef public double grainlength_lfo_speed
  *     cdef public double minlength
  *     cdef public double maxlength             # <<<<<<<<<<<<<<
@@ -7295,7 +7819,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_9maxlength___get__(struct 
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->maxlength); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 37, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_self->maxlength); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 40, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -7330,7 +7854,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_9maxlength_2__set__(struct __pyx
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 37, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_value); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 40, __pyx_L1_error)
   __pyx_v_self->maxlength = __pyx_t_1;
 
   /* function exit code */
@@ -7347,7 +7871,7 @@ static int __pyx_pf_5pippi_6grains_10GrainCloud_9maxlength_2__set__(struct __pyx
 /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     cdef bint use_setstate
- *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxlength, self.maxspeed, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
+ *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.freeze, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxdensity, self.maxlength, self.maxspeed, self.mindensity, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
  */
 
 /* Python wrapper */
@@ -7397,14 +7921,17 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
   PyObject *__pyx_t_26 = NULL;
   PyObject *__pyx_t_27 = NULL;
   PyObject *__pyx_t_28 = NULL;
-  int __pyx_t_29;
-  int __pyx_t_30;
+  PyObject *__pyx_t_29 = NULL;
+  PyObject *__pyx_t_30 = NULL;
+  PyObject *__pyx_t_31 = NULL;
+  int __pyx_t_32;
+  int __pyx_t_33;
   __Pyx_RefNannySetupContext("__reduce_cython__", 0);
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
  *     cdef bint use_setstate
- *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxlength, self.maxspeed, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)             # <<<<<<<<<<<<<<
+ *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.freeze, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxdensity, self.maxlength, self.maxspeed, self.mindensity, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)             # <<<<<<<<<<<<<<
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:
  */
@@ -7421,111 +7948,123 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_6 = PyFloat_FromDouble(__pyx_v_self->density_lfo_speed); if (unlikely(!__pyx_t_6)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyFloat_FromDouble(__pyx_v_self->grainlength); if (unlikely(!__pyx_t_7)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(__pyx_v_self->freeze); if (unlikely(!__pyx_t_7)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
-  __pyx_t_8 = __pyx_memoryview_fromslice(__pyx_v_self->grainlength_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_8 = PyFloat_FromDouble(__pyx_v_self->grainlength); if (unlikely(!__pyx_t_8)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_self->grainlength_lfo_length); if (unlikely(!__pyx_t_9)) __PYX_ERR(2, 3, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->grainlength_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
+  __pyx_t_9 = __pyx_memoryview_fromslice(__pyx_v_self->grainlength_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_9)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_10 = PyFloat_FromDouble(__pyx_v_self->grainlength_lfo_speed); if (unlikely(!__pyx_t_10)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_From_int(__pyx_v_self->grainlength_lfo_length); if (unlikely(!__pyx_t_10)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_11 = PyFloat_FromDouble(__pyx_v_self->grains_per_sec); if (unlikely(!__pyx_t_11)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_11 = PyFloat_FromDouble(__pyx_v_self->grainlength_lfo_speed); if (unlikely(!__pyx_t_11)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
-  __pyx_t_12 = PyFloat_FromDouble(__pyx_v_self->jitter); if (unlikely(!__pyx_t_12)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_12 = PyFloat_FromDouble(__pyx_v_self->grains_per_sec); if (unlikely(!__pyx_t_12)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  __pyx_t_13 = PyFloat_FromDouble(__pyx_v_self->maxlength); if (unlikely(!__pyx_t_13)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_13 = PyFloat_FromDouble(__pyx_v_self->jitter); if (unlikely(!__pyx_t_13)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_13);
-  __pyx_t_14 = PyFloat_FromDouble(__pyx_v_self->maxspeed); if (unlikely(!__pyx_t_14)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_14 = PyFloat_FromDouble(__pyx_v_self->maxdensity); if (unlikely(!__pyx_t_14)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_14);
-  __pyx_t_15 = PyFloat_FromDouble(__pyx_v_self->minlength); if (unlikely(!__pyx_t_15)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_15 = PyFloat_FromDouble(__pyx_v_self->maxlength); if (unlikely(!__pyx_t_15)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_16 = PyFloat_FromDouble(__pyx_v_self->minspeed); if (unlikely(!__pyx_t_16)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_16 = PyFloat_FromDouble(__pyx_v_self->maxspeed); if (unlikely(!__pyx_t_16)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_16);
-  __pyx_t_17 = PyFloat_FromDouble(__pyx_v_self->read_jitter); if (unlikely(!__pyx_t_17)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_17 = PyFloat_FromDouble(__pyx_v_self->mindensity); if (unlikely(!__pyx_t_17)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_17);
-  if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
-  __pyx_t_18 = __pyx_memoryview_fromslice(__pyx_v_self->read_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_18)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_18 = PyFloat_FromDouble(__pyx_v_self->minlength); if (unlikely(!__pyx_t_18)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_18);
-  __pyx_t_19 = __Pyx_PyInt_From_int(__pyx_v_self->read_lfo_length); if (unlikely(!__pyx_t_19)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_19 = PyFloat_FromDouble(__pyx_v_self->minspeed); if (unlikely(!__pyx_t_19)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_19);
-  __pyx_t_20 = PyFloat_FromDouble(__pyx_v_self->read_lfo_speed); if (unlikely(!__pyx_t_20)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_20 = PyFloat_FromDouble(__pyx_v_self->read_jitter); if (unlikely(!__pyx_t_20)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_20);
-  __pyx_t_21 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_21)) __PYX_ERR(2, 3, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->read_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
+  __pyx_t_21 = __pyx_memoryview_fromslice(__pyx_v_self->read_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_21)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_21);
-  __pyx_t_22 = PyFloat_FromDouble(__pyx_v_self->speed); if (unlikely(!__pyx_t_22)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyInt_From_int(__pyx_v_self->read_lfo_length); if (unlikely(!__pyx_t_22)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_22);
-  if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
-  __pyx_t_23 = __pyx_memoryview_fromslice(__pyx_v_self->speed_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_23)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_23 = PyFloat_FromDouble(__pyx_v_self->read_lfo_speed); if (unlikely(!__pyx_t_23)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_23);
-  __pyx_t_24 = __Pyx_PyInt_From_int(__pyx_v_self->speed_lfo_length); if (unlikely(!__pyx_t_24)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_24 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_24)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_24);
-  __pyx_t_25 = PyFloat_FromDouble(__pyx_v_self->spread); if (unlikely(!__pyx_t_25)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_25 = PyFloat_FromDouble(__pyx_v_self->speed); if (unlikely(!__pyx_t_25)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_25);
-  if (unlikely(!__pyx_v_self->win.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
-  __pyx_t_26 = __pyx_memoryview_fromslice(__pyx_v_self->win, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_26)) __PYX_ERR(2, 3, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->speed_lfo.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
+  __pyx_t_26 = __pyx_memoryview_fromslice(__pyx_v_self->speed_lfo, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_26)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_26);
-  __pyx_t_27 = __Pyx_PyInt_From_int(__pyx_v_self->win_length); if (unlikely(!__pyx_t_27)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_27 = __Pyx_PyInt_From_int(__pyx_v_self->speed_lfo_length); if (unlikely(!__pyx_t_27)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_27);
-  __pyx_t_28 = PyTuple_New(28); if (unlikely(!__pyx_t_28)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __pyx_t_28 = PyFloat_FromDouble(__pyx_v_self->spread); if (unlikely(!__pyx_t_28)) __PYX_ERR(2, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_28);
+  if (unlikely(!__pyx_v_self->win.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(2, 3, __pyx_L1_error)}
+  __pyx_t_29 = __pyx_memoryview_fromslice(__pyx_v_self->win, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_29)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_29);
+  __pyx_t_30 = __Pyx_PyInt_From_int(__pyx_v_self->win_length); if (unlikely(!__pyx_t_30)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_30);
+  __pyx_t_31 = PyTuple_New(31); if (unlikely(!__pyx_t_31)) __PYX_ERR(2, 3, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_31);
   __Pyx_INCREF(((PyObject *)__pyx_v_self->buf));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_self->buf));
-  PyTuple_SET_ITEM(__pyx_t_28, 0, ((PyObject *)__pyx_v_self->buf));
+  PyTuple_SET_ITEM(__pyx_t_31, 0, ((PyObject *)__pyx_v_self->buf));
   __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_28, 1, __pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_31, 1, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_28, 2, __pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_31, 2, __pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_28, 3, __pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_31, 3, __pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_28, 4, __pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_31, 4, __pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_28, 5, __pyx_t_5);
+  PyTuple_SET_ITEM(__pyx_t_31, 5, __pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
-  PyTuple_SET_ITEM(__pyx_t_28, 6, __pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_31, 6, __pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_7);
-  PyTuple_SET_ITEM(__pyx_t_28, 7, __pyx_t_7);
+  PyTuple_SET_ITEM(__pyx_t_31, 7, __pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_8);
-  PyTuple_SET_ITEM(__pyx_t_28, 8, __pyx_t_8);
+  PyTuple_SET_ITEM(__pyx_t_31, 8, __pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_9);
-  PyTuple_SET_ITEM(__pyx_t_28, 9, __pyx_t_9);
+  PyTuple_SET_ITEM(__pyx_t_31, 9, __pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_10);
-  PyTuple_SET_ITEM(__pyx_t_28, 10, __pyx_t_10);
+  PyTuple_SET_ITEM(__pyx_t_31, 10, __pyx_t_10);
   __Pyx_GIVEREF(__pyx_t_11);
-  PyTuple_SET_ITEM(__pyx_t_28, 11, __pyx_t_11);
+  PyTuple_SET_ITEM(__pyx_t_31, 11, __pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_12);
-  PyTuple_SET_ITEM(__pyx_t_28, 12, __pyx_t_12);
+  PyTuple_SET_ITEM(__pyx_t_31, 12, __pyx_t_12);
   __Pyx_GIVEREF(__pyx_t_13);
-  PyTuple_SET_ITEM(__pyx_t_28, 13, __pyx_t_13);
+  PyTuple_SET_ITEM(__pyx_t_31, 13, __pyx_t_13);
   __Pyx_GIVEREF(__pyx_t_14);
-  PyTuple_SET_ITEM(__pyx_t_28, 14, __pyx_t_14);
+  PyTuple_SET_ITEM(__pyx_t_31, 14, __pyx_t_14);
   __Pyx_GIVEREF(__pyx_t_15);
-  PyTuple_SET_ITEM(__pyx_t_28, 15, __pyx_t_15);
+  PyTuple_SET_ITEM(__pyx_t_31, 15, __pyx_t_15);
   __Pyx_GIVEREF(__pyx_t_16);
-  PyTuple_SET_ITEM(__pyx_t_28, 16, __pyx_t_16);
+  PyTuple_SET_ITEM(__pyx_t_31, 16, __pyx_t_16);
   __Pyx_GIVEREF(__pyx_t_17);
-  PyTuple_SET_ITEM(__pyx_t_28, 17, __pyx_t_17);
+  PyTuple_SET_ITEM(__pyx_t_31, 17, __pyx_t_17);
   __Pyx_GIVEREF(__pyx_t_18);
-  PyTuple_SET_ITEM(__pyx_t_28, 18, __pyx_t_18);
+  PyTuple_SET_ITEM(__pyx_t_31, 18, __pyx_t_18);
   __Pyx_GIVEREF(__pyx_t_19);
-  PyTuple_SET_ITEM(__pyx_t_28, 19, __pyx_t_19);
+  PyTuple_SET_ITEM(__pyx_t_31, 19, __pyx_t_19);
   __Pyx_GIVEREF(__pyx_t_20);
-  PyTuple_SET_ITEM(__pyx_t_28, 20, __pyx_t_20);
+  PyTuple_SET_ITEM(__pyx_t_31, 20, __pyx_t_20);
   __Pyx_GIVEREF(__pyx_t_21);
-  PyTuple_SET_ITEM(__pyx_t_28, 21, __pyx_t_21);
+  PyTuple_SET_ITEM(__pyx_t_31, 21, __pyx_t_21);
   __Pyx_GIVEREF(__pyx_t_22);
-  PyTuple_SET_ITEM(__pyx_t_28, 22, __pyx_t_22);
+  PyTuple_SET_ITEM(__pyx_t_31, 22, __pyx_t_22);
   __Pyx_GIVEREF(__pyx_t_23);
-  PyTuple_SET_ITEM(__pyx_t_28, 23, __pyx_t_23);
+  PyTuple_SET_ITEM(__pyx_t_31, 23, __pyx_t_23);
   __Pyx_GIVEREF(__pyx_t_24);
-  PyTuple_SET_ITEM(__pyx_t_28, 24, __pyx_t_24);
+  PyTuple_SET_ITEM(__pyx_t_31, 24, __pyx_t_24);
   __Pyx_GIVEREF(__pyx_t_25);
-  PyTuple_SET_ITEM(__pyx_t_28, 25, __pyx_t_25);
+  PyTuple_SET_ITEM(__pyx_t_31, 25, __pyx_t_25);
   __Pyx_GIVEREF(__pyx_t_26);
-  PyTuple_SET_ITEM(__pyx_t_28, 26, __pyx_t_26);
+  PyTuple_SET_ITEM(__pyx_t_31, 26, __pyx_t_26);
   __Pyx_GIVEREF(__pyx_t_27);
-  PyTuple_SET_ITEM(__pyx_t_28, 27, __pyx_t_27);
+  PyTuple_SET_ITEM(__pyx_t_31, 27, __pyx_t_27);
+  __Pyx_GIVEREF(__pyx_t_28);
+  PyTuple_SET_ITEM(__pyx_t_31, 28, __pyx_t_28);
+  __Pyx_GIVEREF(__pyx_t_29);
+  PyTuple_SET_ITEM(__pyx_t_31, 29, __pyx_t_29);
+  __Pyx_GIVEREF(__pyx_t_30);
+  PyTuple_SET_ITEM(__pyx_t_31, 30, __pyx_t_30);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
   __pyx_t_3 = 0;
@@ -7553,31 +8092,34 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
   __pyx_t_25 = 0;
   __pyx_t_26 = 0;
   __pyx_t_27 = 0;
-  __pyx_v_state = ((PyObject*)__pyx_t_28);
   __pyx_t_28 = 0;
+  __pyx_t_29 = 0;
+  __pyx_t_30 = 0;
+  __pyx_v_state = ((PyObject*)__pyx_t_31);
+  __pyx_t_31 = 0;
 
   /* "(tree fragment)":4
  *     cdef bint use_setstate
- *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxlength, self.maxspeed, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
+ *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.freeze, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxdensity, self.maxlength, self.maxspeed, self.mindensity, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
  *     _dict = getattr(self, '__dict__', None)             # <<<<<<<<<<<<<<
  *     if _dict is not None:
  *         state += (_dict,)
  */
-  __pyx_t_28 = __Pyx_GetAttr3(((PyObject *)__pyx_v_self), __pyx_n_s_dict, Py_None); if (unlikely(!__pyx_t_28)) __PYX_ERR(2, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_28);
-  __pyx_v__dict = __pyx_t_28;
-  __pyx_t_28 = 0;
+  __pyx_t_31 = __Pyx_GetAttr3(((PyObject *)__pyx_v_self), __pyx_n_s_dict, Py_None); if (unlikely(!__pyx_t_31)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_31);
+  __pyx_v__dict = __pyx_t_31;
+  __pyx_t_31 = 0;
 
   /* "(tree fragment)":5
- *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxlength, self.maxspeed, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
+ *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.freeze, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxdensity, self.maxlength, self.maxspeed, self.mindensity, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
  *         use_setstate = True
  */
-  __pyx_t_29 = (__pyx_v__dict != Py_None);
-  __pyx_t_30 = (__pyx_t_29 != 0);
-  if (__pyx_t_30) {
+  __pyx_t_32 = (__pyx_v__dict != Py_None);
+  __pyx_t_33 = (__pyx_t_32 != 0);
+  if (__pyx_t_33) {
 
     /* "(tree fragment)":6
  *     _dict = getattr(self, '__dict__', None)
@@ -7586,16 +8128,16 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
  *         use_setstate = True
  *     else:
  */
-    __pyx_t_28 = PyTuple_New(1); if (unlikely(!__pyx_t_28)) __PYX_ERR(2, 6, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_28);
+    __pyx_t_31 = PyTuple_New(1); if (unlikely(!__pyx_t_31)) __PYX_ERR(2, 6, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_31);
     __Pyx_INCREF(__pyx_v__dict);
     __Pyx_GIVEREF(__pyx_v__dict);
-    PyTuple_SET_ITEM(__pyx_t_28, 0, __pyx_v__dict);
-    __pyx_t_27 = PyNumber_InPlaceAdd(__pyx_v_state, __pyx_t_28); if (unlikely(!__pyx_t_27)) __PYX_ERR(2, 6, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_27);
-    __Pyx_DECREF(__pyx_t_28); __pyx_t_28 = 0;
-    __Pyx_DECREF_SET(__pyx_v_state, ((PyObject*)__pyx_t_27));
-    __pyx_t_27 = 0;
+    PyTuple_SET_ITEM(__pyx_t_31, 0, __pyx_v__dict);
+    __pyx_t_30 = PyNumber_InPlaceAdd(__pyx_v_state, __pyx_t_31); if (unlikely(!__pyx_t_30)) __PYX_ERR(2, 6, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_30);
+    __Pyx_DECREF(__pyx_t_31); __pyx_t_31 = 0;
+    __Pyx_DECREF_SET(__pyx_v_state, ((PyObject*)__pyx_t_30));
+    __pyx_t_30 = 0;
 
     /* "(tree fragment)":7
  *     if _dict is not None:
@@ -7607,7 +8149,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
     __pyx_v_use_setstate = 1;
 
     /* "(tree fragment)":5
- *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxlength, self.maxspeed, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
+ *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.freeze, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxdensity, self.maxlength, self.maxspeed, self.mindensity, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
@@ -7621,11 +8163,11 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
  *     else:
  *         use_setstate = self.buf is not None             # <<<<<<<<<<<<<<
  *     if use_setstate:
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, None), state
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, None), state
  */
   /*else*/ {
-    __pyx_t_30 = (((PyObject *)__pyx_v_self->buf) != Py_None);
-    __pyx_v_use_setstate = __pyx_t_30;
+    __pyx_t_33 = (((PyObject *)__pyx_v_self->buf) != Py_None);
+    __pyx_v_use_setstate = __pyx_t_33;
   }
   __pyx_L3:;
 
@@ -7633,96 +8175,96 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
  *     else:
  *         use_setstate = self.buf is not None
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, None), state
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, None), state
  *     else:
  */
-  __pyx_t_30 = (__pyx_v_use_setstate != 0);
-  if (__pyx_t_30) {
+  __pyx_t_33 = (__pyx_v_use_setstate != 0);
+  if (__pyx_t_33) {
 
     /* "(tree fragment)":11
  *         use_setstate = self.buf is not None
  *     if use_setstate:
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, None), state             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, None), state             # <<<<<<<<<<<<<<
  *     else:
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, state)
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, state)
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_27 = __Pyx_GetModuleGlobalName(__pyx_n_s_pyx_unpickle_GrainCloud); if (unlikely(!__pyx_t_27)) __PYX_ERR(2, 11, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_27);
-    __pyx_t_28 = PyTuple_New(3); if (unlikely(!__pyx_t_28)) __PYX_ERR(2, 11, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_28);
+    __pyx_t_30 = __Pyx_GetModuleGlobalName(__pyx_n_s_pyx_unpickle_GrainCloud); if (unlikely(!__pyx_t_30)) __PYX_ERR(2, 11, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_30);
+    __pyx_t_31 = PyTuple_New(3); if (unlikely(!__pyx_t_31)) __PYX_ERR(2, 11, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_31);
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    PyTuple_SET_ITEM(__pyx_t_28, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    __Pyx_INCREF(__pyx_int_12795603);
-    __Pyx_GIVEREF(__pyx_int_12795603);
-    PyTuple_SET_ITEM(__pyx_t_28, 1, __pyx_int_12795603);
+    PyTuple_SET_ITEM(__pyx_t_31, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
+    __Pyx_INCREF(__pyx_int_155201045);
+    __Pyx_GIVEREF(__pyx_int_155201045);
+    PyTuple_SET_ITEM(__pyx_t_31, 1, __pyx_int_155201045);
     __Pyx_INCREF(Py_None);
     __Pyx_GIVEREF(Py_None);
-    PyTuple_SET_ITEM(__pyx_t_28, 2, Py_None);
-    __pyx_t_26 = PyTuple_New(3); if (unlikely(!__pyx_t_26)) __PYX_ERR(2, 11, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_26);
-    __Pyx_GIVEREF(__pyx_t_27);
-    PyTuple_SET_ITEM(__pyx_t_26, 0, __pyx_t_27);
-    __Pyx_GIVEREF(__pyx_t_28);
-    PyTuple_SET_ITEM(__pyx_t_26, 1, __pyx_t_28);
+    PyTuple_SET_ITEM(__pyx_t_31, 2, Py_None);
+    __pyx_t_29 = PyTuple_New(3); if (unlikely(!__pyx_t_29)) __PYX_ERR(2, 11, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_29);
+    __Pyx_GIVEREF(__pyx_t_30);
+    PyTuple_SET_ITEM(__pyx_t_29, 0, __pyx_t_30);
+    __Pyx_GIVEREF(__pyx_t_31);
+    PyTuple_SET_ITEM(__pyx_t_29, 1, __pyx_t_31);
     __Pyx_INCREF(__pyx_v_state);
     __Pyx_GIVEREF(__pyx_v_state);
-    PyTuple_SET_ITEM(__pyx_t_26, 2, __pyx_v_state);
-    __pyx_t_27 = 0;
-    __pyx_t_28 = 0;
-    __pyx_r = __pyx_t_26;
-    __pyx_t_26 = 0;
+    PyTuple_SET_ITEM(__pyx_t_29, 2, __pyx_v_state);
+    __pyx_t_30 = 0;
+    __pyx_t_31 = 0;
+    __pyx_r = __pyx_t_29;
+    __pyx_t_29 = 0;
     goto __pyx_L0;
 
     /* "(tree fragment)":10
  *     else:
  *         use_setstate = self.buf is not None
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, None), state
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, None), state
  *     else:
  */
   }
 
   /* "(tree fragment)":13
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, None), state
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, None), state
  *     else:
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, state)             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, state)             # <<<<<<<<<<<<<<
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_GrainCloud__set_state(self, __pyx_state)
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_26 = __Pyx_GetModuleGlobalName(__pyx_n_s_pyx_unpickle_GrainCloud); if (unlikely(!__pyx_t_26)) __PYX_ERR(2, 13, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_26);
-    __pyx_t_28 = PyTuple_New(3); if (unlikely(!__pyx_t_28)) __PYX_ERR(2, 13, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_28);
+    __pyx_t_29 = __Pyx_GetModuleGlobalName(__pyx_n_s_pyx_unpickle_GrainCloud); if (unlikely(!__pyx_t_29)) __PYX_ERR(2, 13, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_29);
+    __pyx_t_31 = PyTuple_New(3); if (unlikely(!__pyx_t_31)) __PYX_ERR(2, 13, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_31);
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    PyTuple_SET_ITEM(__pyx_t_28, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    __Pyx_INCREF(__pyx_int_12795603);
-    __Pyx_GIVEREF(__pyx_int_12795603);
-    PyTuple_SET_ITEM(__pyx_t_28, 1, __pyx_int_12795603);
+    PyTuple_SET_ITEM(__pyx_t_31, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
+    __Pyx_INCREF(__pyx_int_155201045);
+    __Pyx_GIVEREF(__pyx_int_155201045);
+    PyTuple_SET_ITEM(__pyx_t_31, 1, __pyx_int_155201045);
     __Pyx_INCREF(__pyx_v_state);
     __Pyx_GIVEREF(__pyx_v_state);
-    PyTuple_SET_ITEM(__pyx_t_28, 2, __pyx_v_state);
-    __pyx_t_27 = PyTuple_New(2); if (unlikely(!__pyx_t_27)) __PYX_ERR(2, 13, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_27);
-    __Pyx_GIVEREF(__pyx_t_26);
-    PyTuple_SET_ITEM(__pyx_t_27, 0, __pyx_t_26);
-    __Pyx_GIVEREF(__pyx_t_28);
-    PyTuple_SET_ITEM(__pyx_t_27, 1, __pyx_t_28);
-    __pyx_t_26 = 0;
-    __pyx_t_28 = 0;
-    __pyx_r = __pyx_t_27;
-    __pyx_t_27 = 0;
+    PyTuple_SET_ITEM(__pyx_t_31, 2, __pyx_v_state);
+    __pyx_t_30 = PyTuple_New(2); if (unlikely(!__pyx_t_30)) __PYX_ERR(2, 13, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_30);
+    __Pyx_GIVEREF(__pyx_t_29);
+    PyTuple_SET_ITEM(__pyx_t_30, 0, __pyx_t_29);
+    __Pyx_GIVEREF(__pyx_t_31);
+    PyTuple_SET_ITEM(__pyx_t_30, 1, __pyx_t_31);
+    __pyx_t_29 = 0;
+    __pyx_t_31 = 0;
+    __pyx_r = __pyx_t_30;
+    __pyx_t_30 = 0;
     goto __pyx_L0;
   }
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     cdef bint use_setstate
- *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxlength, self.maxspeed, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
+ *     state = (self.buf, self.channels, self.density, self.density_jitter, self.density_lfo, self.density_lfo_length, self.density_lfo_speed, self.freeze, self.grainlength, self.grainlength_lfo, self.grainlength_lfo_length, self.grainlength_lfo_speed, self.grains_per_sec, self.jitter, self.maxdensity, self.maxlength, self.maxspeed, self.mindensity, self.minlength, self.minspeed, self.read_jitter, self.read_lfo, self.read_lfo_length, self.read_lfo_speed, self.samplerate, self.speed, self.speed_lfo, self.speed_lfo_length, self.spread, self.win, self.win_length)
  */
 
   /* function exit code */
@@ -7755,6 +8297,9 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
   __Pyx_XDECREF(__pyx_t_26);
   __Pyx_XDECREF(__pyx_t_27);
   __Pyx_XDECREF(__pyx_t_28);
+  __Pyx_XDECREF(__pyx_t_29);
+  __Pyx_XDECREF(__pyx_t_30);
+  __Pyx_XDECREF(__pyx_t_31);
   __Pyx_AddTraceback("pippi.grains.GrainCloud.__reduce_cython__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -7767,7 +8312,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_4__reduce_cython__(struct 
 
 /* "(tree fragment)":14
  *     else:
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, state)
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_GrainCloud__set_state(self, __pyx_state)
  */
@@ -7792,7 +8337,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6__setstate_cython__(struc
   __Pyx_RefNannySetupContext("__setstate_cython__", 0);
 
   /* "(tree fragment)":15
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, state)
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, state)
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_GrainCloud__set_state(self, __pyx_state)             # <<<<<<<<<<<<<<
  */
@@ -7803,7 +8348,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6__setstate_cython__(struc
 
   /* "(tree fragment)":14
  *     else:
- *         return __pyx_unpickle_GrainCloud, (type(self), 0x0c33ed3, state)
+ *         return __pyx_unpickle_GrainCloud, (type(self), 0x9402e15, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_GrainCloud__set_state(self, __pyx_state)
  */
@@ -7823,7 +8368,7 @@ static PyObject *__pyx_pf_5pippi_6grains_10GrainCloud_6__setstate_cython__(struc
 
 /* "(tree fragment)":1
  * def __pyx_unpickle_GrainCloud(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
- *     if __pyx_checksum != 0x0c33ed3:
+ *     if __pyx_checksum != 0x9402e15:
  *         from pickle import PickleError as __pyx_PickleError
  */
 
@@ -7916,18 +8461,18 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
 
   /* "(tree fragment)":2
  * def __pyx_unpickle_GrainCloud(__pyx_type, long __pyx_checksum, __pyx_state):
- *     if __pyx_checksum != 0x0c33ed3:             # <<<<<<<<<<<<<<
+ *     if __pyx_checksum != 0x9402e15:             # <<<<<<<<<<<<<<
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
  */
-  __pyx_t_1 = ((__pyx_v___pyx_checksum != 0x0c33ed3) != 0);
+  __pyx_t_1 = ((__pyx_v___pyx_checksum != 0x9402e15) != 0);
   if (__pyx_t_1) {
 
     /* "(tree fragment)":3
  * def __pyx_unpickle_GrainCloud(__pyx_type, long __pyx_checksum, __pyx_state):
- *     if __pyx_checksum != 0x0c33ed3:
+ *     if __pyx_checksum != 0x9402e15:
  *         from pickle import PickleError as __pyx_PickleError             # <<<<<<<<<<<<<<
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
  *     __pyx_result = GrainCloud.__new__(__pyx_type)
  */
     __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 3, __pyx_L1_error)
@@ -7946,15 +8491,15 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "(tree fragment)":4
- *     if __pyx_checksum != 0x0c33ed3:
+ *     if __pyx_checksum != 0x9402e15:
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)             # <<<<<<<<<<<<<<
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)             # <<<<<<<<<<<<<<
  *     __pyx_result = GrainCloud.__new__(__pyx_type)
  *     if __pyx_state is not None:
  */
     __pyx_t_2 = __Pyx_PyInt_From_long(__pyx_v___pyx_checksum); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 4, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyString_Format(__pyx_kp_s_Incompatible_checksums_s_vs_0x0c, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 4, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyString_Format(__pyx_kp_s_Incompatible_checksums_s_vs_0x94, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 4, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_INCREF(__pyx_v___pyx_PickleError);
@@ -8010,15 +8555,15 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
 
     /* "(tree fragment)":2
  * def __pyx_unpickle_GrainCloud(__pyx_type, long __pyx_checksum, __pyx_state):
- *     if __pyx_checksum != 0x0c33ed3:             # <<<<<<<<<<<<<<
+ *     if __pyx_checksum != 0x9402e15:             # <<<<<<<<<<<<<<
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
  */
   }
 
   /* "(tree fragment)":5
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
  *     __pyx_result = GrainCloud.__new__(__pyx_type)             # <<<<<<<<<<<<<<
  *     if __pyx_state is not None:
  *         __pyx_unpickle_GrainCloud__set_state(<GrainCloud> __pyx_result, __pyx_state)
@@ -8072,7 +8617,7 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
   __pyx_t_3 = 0;
 
   /* "(tree fragment)":6
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
  *     __pyx_result = GrainCloud.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_GrainCloud__set_state(<GrainCloud> __pyx_result, __pyx_state)
@@ -8095,7 +8640,7 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "(tree fragment)":6
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x0c33ed3 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxlength, maxspeed, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0x9402e15 = (buf, channels, density, density_jitter, density_lfo, density_lfo_length, density_lfo_speed, freeze, grainlength, grainlength_lfo, grainlength_lfo_length, grainlength_lfo_speed, grains_per_sec, jitter, maxdensity, maxlength, maxspeed, mindensity, minlength, minspeed, read_jitter, read_lfo, read_lfo_length, read_lfo_speed, samplerate, speed, speed_lfo, speed_lfo_length, spread, win, win_length))" % __pyx_checksum)
  *     __pyx_result = GrainCloud.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_GrainCloud__set_state(<GrainCloud> __pyx_result, __pyx_state)
@@ -8108,7 +8653,7 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
  *         __pyx_unpickle_GrainCloud__set_state(<GrainCloud> __pyx_result, __pyx_state)
  *     return __pyx_result             # <<<<<<<<<<<<<<
  * cdef __pyx_unpickle_GrainCloud__set_state(GrainCloud __pyx_result, tuple __pyx_state):
- *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.grainlength = __pyx_state[7]; __pyx_result.grainlength_lfo = __pyx_state[8]; __pyx_result.grainlength_lfo_length = __pyx_state[9]; __pyx_result.grainlength_lfo_speed = __pyx_state[10]; __pyx_result.grains_per_sec = __pyx_state[11]; __pyx_result.jitter = __pyx_state[12]; __pyx_result.maxlength = __pyx_state[13]; __pyx_result.maxspeed = __pyx_state[14]; __pyx_result.minlength = __pyx_state[15]; __pyx_result.minspeed = __pyx_state[16]; __pyx_result.read_jitter = __pyx_state[17]; __pyx_result.read_lfo = __pyx_state[18]; __pyx_result.read_lfo_length = __pyx_state[19]; __pyx_result.read_lfo_speed = __pyx_state[20]; __pyx_result.samplerate = __pyx_state[21]; __pyx_result.speed = __pyx_state[22]; __pyx_result.speed_lfo = __pyx_state[23]; __pyx_result.speed_lfo_length = __pyx_state[24]; __pyx_result.spread = __pyx_state[25]; __pyx_result.win = __pyx_state[26]; __pyx_result.win_length = __pyx_state[27]
+ *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.freeze = __pyx_state[7]; __pyx_result.grainlength = __pyx_state[8]; __pyx_result.grainlength_lfo = __pyx_state[9]; __pyx_result.grainlength_lfo_length = __pyx_state[10]; __pyx_result.grainlength_lfo_speed = __pyx_state[11]; __pyx_result.grains_per_sec = __pyx_state[12]; __pyx_result.jitter = __pyx_state[13]; __pyx_result.maxdensity = __pyx_state[14]; __pyx_result.maxlength = __pyx_state[15]; __pyx_result.maxspeed = __pyx_state[16]; __pyx_result.mindensity = __pyx_state[17]; __pyx_result.minlength = __pyx_state[18]; __pyx_result.minspeed = __pyx_state[19]; __pyx_result.read_jitter = __pyx_state[20]; __pyx_result.read_lfo = __pyx_state[21]; __pyx_result.read_lfo_length = __pyx_state[22]; __pyx_result.read_lfo_speed = __pyx_state[23]; __pyx_result.samplerate = __pyx_state[24]; __pyx_result.speed = __pyx_state[25]; __pyx_result.speed_lfo = __pyx_state[26]; __pyx_result.speed_lfo_length = __pyx_state[27]; __pyx_result.spread = __pyx_state[28]; __pyx_result.win = __pyx_state[29]; __pyx_result.win_length = __pyx_state[30]
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v___pyx_result);
@@ -8117,7 +8662,7 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_GrainCloud(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
- *     if __pyx_checksum != 0x0c33ed3:
+ *     if __pyx_checksum != 0x9402e15:
  *         from pickle import PickleError as __pyx_PickleError
  */
 
@@ -8142,8 +8687,8 @@ static PyObject *__pyx_pf_5pippi_6grains___pyx_unpickle_GrainCloud(CYTHON_UNUSED
  *         __pyx_unpickle_GrainCloud__set_state(<GrainCloud> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_GrainCloud__set_state(GrainCloud __pyx_result, tuple __pyx_state):             # <<<<<<<<<<<<<<
- *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.grainlength = __pyx_state[7]; __pyx_result.grainlength_lfo = __pyx_state[8]; __pyx_result.grainlength_lfo_length = __pyx_state[9]; __pyx_result.grainlength_lfo_speed = __pyx_state[10]; __pyx_result.grains_per_sec = __pyx_state[11]; __pyx_result.jitter = __pyx_state[12]; __pyx_result.maxlength = __pyx_state[13]; __pyx_result.maxspeed = __pyx_state[14]; __pyx_result.minlength = __pyx_state[15]; __pyx_result.minspeed = __pyx_state[16]; __pyx_result.read_jitter = __pyx_state[17]; __pyx_result.read_lfo = __pyx_state[18]; __pyx_result.read_lfo_length = __pyx_state[19]; __pyx_result.read_lfo_speed = __pyx_state[20]; __pyx_result.samplerate = __pyx_state[21]; __pyx_result.speed = __pyx_state[22]; __pyx_result.speed_lfo = __pyx_state[23]; __pyx_result.speed_lfo_length = __pyx_state[24]; __pyx_result.spread = __pyx_state[25]; __pyx_result.win = __pyx_state[26]; __pyx_result.win_length = __pyx_state[27]
- *     if len(__pyx_state) > 28 and hasattr(__pyx_result, '__dict__'):
+ *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.freeze = __pyx_state[7]; __pyx_result.grainlength = __pyx_state[8]; __pyx_result.grainlength_lfo = __pyx_state[9]; __pyx_result.grainlength_lfo_length = __pyx_state[10]; __pyx_result.grainlength_lfo_speed = __pyx_state[11]; __pyx_result.grains_per_sec = __pyx_state[12]; __pyx_result.jitter = __pyx_state[13]; __pyx_result.maxdensity = __pyx_state[14]; __pyx_result.maxlength = __pyx_state[15]; __pyx_result.maxspeed = __pyx_state[16]; __pyx_result.mindensity = __pyx_state[17]; __pyx_result.minlength = __pyx_state[18]; __pyx_result.minspeed = __pyx_state[19]; __pyx_result.read_jitter = __pyx_state[20]; __pyx_result.read_lfo = __pyx_state[21]; __pyx_result.read_lfo_length = __pyx_state[22]; __pyx_result.read_lfo_speed = __pyx_state[23]; __pyx_result.samplerate = __pyx_state[24]; __pyx_result.speed = __pyx_state[25]; __pyx_result.speed_lfo = __pyx_state[26]; __pyx_result.speed_lfo_length = __pyx_state[27]; __pyx_result.spread = __pyx_state[28]; __pyx_result.win = __pyx_state[29]; __pyx_result.win_length = __pyx_state[30]
+ *     if len(__pyx_state) > 31 and hasattr(__pyx_result, '__dict__'):
  */
 
 static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(struct __pyx_obj_5pippi_6grains_GrainCloud *__pyx_v___pyx_result, PyObject *__pyx_v___pyx_state) {
@@ -8166,9 +8711,9 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
   /* "(tree fragment)":10
  *     return __pyx_result
  * cdef __pyx_unpickle_GrainCloud__set_state(GrainCloud __pyx_result, tuple __pyx_state):
- *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.grainlength = __pyx_state[7]; __pyx_result.grainlength_lfo = __pyx_state[8]; __pyx_result.grainlength_lfo_length = __pyx_state[9]; __pyx_result.grainlength_lfo_speed = __pyx_state[10]; __pyx_result.grains_per_sec = __pyx_state[11]; __pyx_result.jitter = __pyx_state[12]; __pyx_result.maxlength = __pyx_state[13]; __pyx_result.maxspeed = __pyx_state[14]; __pyx_result.minlength = __pyx_state[15]; __pyx_result.minspeed = __pyx_state[16]; __pyx_result.read_jitter = __pyx_state[17]; __pyx_result.read_lfo = __pyx_state[18]; __pyx_result.read_lfo_length = __pyx_state[19]; __pyx_result.read_lfo_speed = __pyx_state[20]; __pyx_result.samplerate = __pyx_state[21]; __pyx_result.speed = __pyx_state[22]; __pyx_result.speed_lfo = __pyx_state[23]; __pyx_result.speed_lfo_length = __pyx_state[24]; __pyx_result.spread = __pyx_state[25]; __pyx_result.win = __pyx_state[26]; __pyx_result.win_length = __pyx_state[27]             # <<<<<<<<<<<<<<
- *     if len(__pyx_state) > 28 and hasattr(__pyx_result, '__dict__'):
- *         __pyx_result.__dict__.update(__pyx_state[28])
+ *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.freeze = __pyx_state[7]; __pyx_result.grainlength = __pyx_state[8]; __pyx_result.grainlength_lfo = __pyx_state[9]; __pyx_result.grainlength_lfo_length = __pyx_state[10]; __pyx_result.grainlength_lfo_speed = __pyx_state[11]; __pyx_result.grains_per_sec = __pyx_state[12]; __pyx_result.jitter = __pyx_state[13]; __pyx_result.maxdensity = __pyx_state[14]; __pyx_result.maxlength = __pyx_state[15]; __pyx_result.maxspeed = __pyx_state[16]; __pyx_result.mindensity = __pyx_state[17]; __pyx_result.minlength = __pyx_state[18]; __pyx_result.minspeed = __pyx_state[19]; __pyx_result.read_jitter = __pyx_state[20]; __pyx_result.read_lfo = __pyx_state[21]; __pyx_result.read_lfo_length = __pyx_state[22]; __pyx_result.read_lfo_speed = __pyx_state[23]; __pyx_result.samplerate = __pyx_state[24]; __pyx_result.speed = __pyx_state[25]; __pyx_result.speed_lfo = __pyx_state[26]; __pyx_result.speed_lfo_length = __pyx_state[27]; __pyx_result.spread = __pyx_state[28]; __pyx_result.win = __pyx_state[29]; __pyx_result.win_length = __pyx_state[30]             # <<<<<<<<<<<<<<
+ *     if len(__pyx_state) > 31 and hasattr(__pyx_result, '__dict__'):
+ *         __pyx_result.__dict__.update(__pyx_state[31])
  */
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
@@ -8248,12 +8793,21 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v___pyx_result->grainlength = __pyx_t_3;
+  __pyx_v___pyx_result->freeze = __pyx_t_3;
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
   __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 8, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v___pyx_result->grainlength = __pyx_t_3;
+  if (unlikely(__pyx_v___pyx_state == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(2, 10, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 9, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1);
   if (unlikely(!__pyx_t_4.memview)) __PYX_ERR(2, 10, __pyx_L1_error)
@@ -8266,7 +8820,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 9, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 10, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8275,7 +8829,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 10, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 11, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8284,7 +8838,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 11, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 12, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8293,7 +8847,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 12, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 13, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8302,20 +8856,11 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 13, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v___pyx_result->maxlength = __pyx_t_3;
-  if (unlikely(__pyx_v___pyx_state == Py_None)) {
-    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(2, 10, __pyx_L1_error)
-  }
   __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 14, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v___pyx_result->maxspeed = __pyx_t_3;
+  __pyx_v___pyx_result->maxdensity = __pyx_t_3;
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
@@ -8324,7 +8869,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v___pyx_result->minlength = __pyx_t_3;
+  __pyx_v___pyx_result->maxlength = __pyx_t_3;
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
@@ -8333,7 +8878,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v___pyx_result->minspeed = __pyx_t_3;
+  __pyx_v___pyx_result->maxspeed = __pyx_t_3;
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
@@ -8342,12 +8887,39 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v___pyx_result->read_jitter = __pyx_t_3;
+  __pyx_v___pyx_result->mindensity = __pyx_t_3;
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
   __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 18, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v___pyx_result->minlength = __pyx_t_3;
+  if (unlikely(__pyx_v___pyx_state == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(2, 10, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 19, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v___pyx_result->minspeed = __pyx_t_3;
+  if (unlikely(__pyx_v___pyx_state == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(2, 10, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 20, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v___pyx_result->read_jitter = __pyx_t_3;
+  if (unlikely(__pyx_v___pyx_state == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(2, 10, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 21, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1);
   if (unlikely(!__pyx_t_4.memview)) __PYX_ERR(2, 10, __pyx_L1_error)
@@ -8360,7 +8932,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 19, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 22, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8369,7 +8941,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 20, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 23, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8378,7 +8950,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 21, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 24, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8387,7 +8959,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 22, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 25, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8396,7 +8968,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 23, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 26, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1);
   if (unlikely(!__pyx_t_4.memview)) __PYX_ERR(2, 10, __pyx_L1_error)
@@ -8409,7 +8981,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 24, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 27, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8418,7 +8990,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 25, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 28, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8427,7 +8999,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 26, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 29, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_4 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1);
   if (unlikely(!__pyx_t_4.memview)) __PYX_ERR(2, 10, __pyx_L1_error)
@@ -8440,7 +9012,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(2, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 27, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 30, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_2 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -8448,16 +9020,16 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
 
   /* "(tree fragment)":11
  * cdef __pyx_unpickle_GrainCloud__set_state(GrainCloud __pyx_result, tuple __pyx_state):
- *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.grainlength = __pyx_state[7]; __pyx_result.grainlength_lfo = __pyx_state[8]; __pyx_result.grainlength_lfo_length = __pyx_state[9]; __pyx_result.grainlength_lfo_speed = __pyx_state[10]; __pyx_result.grains_per_sec = __pyx_state[11]; __pyx_result.jitter = __pyx_state[12]; __pyx_result.maxlength = __pyx_state[13]; __pyx_result.maxspeed = __pyx_state[14]; __pyx_result.minlength = __pyx_state[15]; __pyx_result.minspeed = __pyx_state[16]; __pyx_result.read_jitter = __pyx_state[17]; __pyx_result.read_lfo = __pyx_state[18]; __pyx_result.read_lfo_length = __pyx_state[19]; __pyx_result.read_lfo_speed = __pyx_state[20]; __pyx_result.samplerate = __pyx_state[21]; __pyx_result.speed = __pyx_state[22]; __pyx_result.speed_lfo = __pyx_state[23]; __pyx_result.speed_lfo_length = __pyx_state[24]; __pyx_result.spread = __pyx_state[25]; __pyx_result.win = __pyx_state[26]; __pyx_result.win_length = __pyx_state[27]
- *     if len(__pyx_state) > 28 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
- *         __pyx_result.__dict__.update(__pyx_state[28])
+ *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.freeze = __pyx_state[7]; __pyx_result.grainlength = __pyx_state[8]; __pyx_result.grainlength_lfo = __pyx_state[9]; __pyx_result.grainlength_lfo_length = __pyx_state[10]; __pyx_result.grainlength_lfo_speed = __pyx_state[11]; __pyx_result.grains_per_sec = __pyx_state[12]; __pyx_result.jitter = __pyx_state[13]; __pyx_result.maxdensity = __pyx_state[14]; __pyx_result.maxlength = __pyx_state[15]; __pyx_result.maxspeed = __pyx_state[16]; __pyx_result.mindensity = __pyx_state[17]; __pyx_result.minlength = __pyx_state[18]; __pyx_result.minspeed = __pyx_state[19]; __pyx_result.read_jitter = __pyx_state[20]; __pyx_result.read_lfo = __pyx_state[21]; __pyx_result.read_lfo_length = __pyx_state[22]; __pyx_result.read_lfo_speed = __pyx_state[23]; __pyx_result.samplerate = __pyx_state[24]; __pyx_result.speed = __pyx_state[25]; __pyx_result.speed_lfo = __pyx_state[26]; __pyx_result.speed_lfo_length = __pyx_state[27]; __pyx_result.spread = __pyx_state[28]; __pyx_result.win = __pyx_state[29]; __pyx_result.win_length = __pyx_state[30]
+ *     if len(__pyx_state) > 31 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
+ *         __pyx_result.__dict__.update(__pyx_state[31])
  */
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
     __PYX_ERR(2, 11, __pyx_L1_error)
   }
   __pyx_t_6 = PyTuple_GET_SIZE(__pyx_v___pyx_state); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(2, 11, __pyx_L1_error)
-  __pyx_t_7 = ((__pyx_t_6 > 28) != 0);
+  __pyx_t_7 = ((__pyx_t_6 > 31) != 0);
   if (__pyx_t_7) {
   } else {
     __pyx_t_5 = __pyx_t_7;
@@ -8470,9 +9042,9 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
   if (__pyx_t_5) {
 
     /* "(tree fragment)":12
- *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.grainlength = __pyx_state[7]; __pyx_result.grainlength_lfo = __pyx_state[8]; __pyx_result.grainlength_lfo_length = __pyx_state[9]; __pyx_result.grainlength_lfo_speed = __pyx_state[10]; __pyx_result.grains_per_sec = __pyx_state[11]; __pyx_result.jitter = __pyx_state[12]; __pyx_result.maxlength = __pyx_state[13]; __pyx_result.maxspeed = __pyx_state[14]; __pyx_result.minlength = __pyx_state[15]; __pyx_result.minspeed = __pyx_state[16]; __pyx_result.read_jitter = __pyx_state[17]; __pyx_result.read_lfo = __pyx_state[18]; __pyx_result.read_lfo_length = __pyx_state[19]; __pyx_result.read_lfo_speed = __pyx_state[20]; __pyx_result.samplerate = __pyx_state[21]; __pyx_result.speed = __pyx_state[22]; __pyx_result.speed_lfo = __pyx_state[23]; __pyx_result.speed_lfo_length = __pyx_state[24]; __pyx_result.spread = __pyx_state[25]; __pyx_result.win = __pyx_state[26]; __pyx_result.win_length = __pyx_state[27]
- *     if len(__pyx_state) > 28 and hasattr(__pyx_result, '__dict__'):
- *         __pyx_result.__dict__.update(__pyx_state[28])             # <<<<<<<<<<<<<<
+ *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.freeze = __pyx_state[7]; __pyx_result.grainlength = __pyx_state[8]; __pyx_result.grainlength_lfo = __pyx_state[9]; __pyx_result.grainlength_lfo_length = __pyx_state[10]; __pyx_result.grainlength_lfo_speed = __pyx_state[11]; __pyx_result.grains_per_sec = __pyx_state[12]; __pyx_result.jitter = __pyx_state[13]; __pyx_result.maxdensity = __pyx_state[14]; __pyx_result.maxlength = __pyx_state[15]; __pyx_result.maxspeed = __pyx_state[16]; __pyx_result.mindensity = __pyx_state[17]; __pyx_result.minlength = __pyx_state[18]; __pyx_result.minspeed = __pyx_state[19]; __pyx_result.read_jitter = __pyx_state[20]; __pyx_result.read_lfo = __pyx_state[21]; __pyx_result.read_lfo_length = __pyx_state[22]; __pyx_result.read_lfo_speed = __pyx_state[23]; __pyx_result.samplerate = __pyx_state[24]; __pyx_result.speed = __pyx_state[25]; __pyx_result.speed_lfo = __pyx_state[26]; __pyx_result.speed_lfo_length = __pyx_state[27]; __pyx_result.spread = __pyx_state[28]; __pyx_result.win = __pyx_state[29]; __pyx_result.win_length = __pyx_state[30]
+ *     if len(__pyx_state) > 31 and hasattr(__pyx_result, '__dict__'):
+ *         __pyx_result.__dict__.update(__pyx_state[31])             # <<<<<<<<<<<<<<
  */
     __pyx_t_9 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v___pyx_result), __pyx_n_s_dict); if (unlikely(!__pyx_t_9)) __PYX_ERR(2, 12, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
@@ -8483,7 +9055,7 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
       __PYX_ERR(2, 12, __pyx_L1_error)
     }
-    __pyx_t_9 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 28, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(2, 12, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 31, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_9)) __PYX_ERR(2, 12, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __pyx_t_11 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_10))) {
@@ -8535,9 +9107,9 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
 
     /* "(tree fragment)":11
  * cdef __pyx_unpickle_GrainCloud__set_state(GrainCloud __pyx_result, tuple __pyx_state):
- *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.grainlength = __pyx_state[7]; __pyx_result.grainlength_lfo = __pyx_state[8]; __pyx_result.grainlength_lfo_length = __pyx_state[9]; __pyx_result.grainlength_lfo_speed = __pyx_state[10]; __pyx_result.grains_per_sec = __pyx_state[11]; __pyx_result.jitter = __pyx_state[12]; __pyx_result.maxlength = __pyx_state[13]; __pyx_result.maxspeed = __pyx_state[14]; __pyx_result.minlength = __pyx_state[15]; __pyx_result.minspeed = __pyx_state[16]; __pyx_result.read_jitter = __pyx_state[17]; __pyx_result.read_lfo = __pyx_state[18]; __pyx_result.read_lfo_length = __pyx_state[19]; __pyx_result.read_lfo_speed = __pyx_state[20]; __pyx_result.samplerate = __pyx_state[21]; __pyx_result.speed = __pyx_state[22]; __pyx_result.speed_lfo = __pyx_state[23]; __pyx_result.speed_lfo_length = __pyx_state[24]; __pyx_result.spread = __pyx_state[25]; __pyx_result.win = __pyx_state[26]; __pyx_result.win_length = __pyx_state[27]
- *     if len(__pyx_state) > 28 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
- *         __pyx_result.__dict__.update(__pyx_state[28])
+ *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.freeze = __pyx_state[7]; __pyx_result.grainlength = __pyx_state[8]; __pyx_result.grainlength_lfo = __pyx_state[9]; __pyx_result.grainlength_lfo_length = __pyx_state[10]; __pyx_result.grainlength_lfo_speed = __pyx_state[11]; __pyx_result.grains_per_sec = __pyx_state[12]; __pyx_result.jitter = __pyx_state[13]; __pyx_result.maxdensity = __pyx_state[14]; __pyx_result.maxlength = __pyx_state[15]; __pyx_result.maxspeed = __pyx_state[16]; __pyx_result.mindensity = __pyx_state[17]; __pyx_result.minlength = __pyx_state[18]; __pyx_result.minspeed = __pyx_state[19]; __pyx_result.read_jitter = __pyx_state[20]; __pyx_result.read_lfo = __pyx_state[21]; __pyx_result.read_lfo_length = __pyx_state[22]; __pyx_result.read_lfo_speed = __pyx_state[23]; __pyx_result.samplerate = __pyx_state[24]; __pyx_result.speed = __pyx_state[25]; __pyx_result.speed_lfo = __pyx_state[26]; __pyx_result.speed_lfo_length = __pyx_state[27]; __pyx_result.spread = __pyx_state[28]; __pyx_result.win = __pyx_state[29]; __pyx_result.win_length = __pyx_state[30]
+ *     if len(__pyx_state) > 31 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
+ *         __pyx_result.__dict__.update(__pyx_state[31])
  */
   }
 
@@ -8545,8 +9117,8 @@ static PyObject *__pyx_f_5pippi_6grains___pyx_unpickle_GrainCloud__set_state(str
  *         __pyx_unpickle_GrainCloud__set_state(<GrainCloud> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_GrainCloud__set_state(GrainCloud __pyx_result, tuple __pyx_state):             # <<<<<<<<<<<<<<
- *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.grainlength = __pyx_state[7]; __pyx_result.grainlength_lfo = __pyx_state[8]; __pyx_result.grainlength_lfo_length = __pyx_state[9]; __pyx_result.grainlength_lfo_speed = __pyx_state[10]; __pyx_result.grains_per_sec = __pyx_state[11]; __pyx_result.jitter = __pyx_state[12]; __pyx_result.maxlength = __pyx_state[13]; __pyx_result.maxspeed = __pyx_state[14]; __pyx_result.minlength = __pyx_state[15]; __pyx_result.minspeed = __pyx_state[16]; __pyx_result.read_jitter = __pyx_state[17]; __pyx_result.read_lfo = __pyx_state[18]; __pyx_result.read_lfo_length = __pyx_state[19]; __pyx_result.read_lfo_speed = __pyx_state[20]; __pyx_result.samplerate = __pyx_state[21]; __pyx_result.speed = __pyx_state[22]; __pyx_result.speed_lfo = __pyx_state[23]; __pyx_result.speed_lfo_length = __pyx_state[24]; __pyx_result.spread = __pyx_state[25]; __pyx_result.win = __pyx_state[26]; __pyx_result.win_length = __pyx_state[27]
- *     if len(__pyx_state) > 28 and hasattr(__pyx_result, '__dict__'):
+ *     __pyx_result.buf = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.density = __pyx_state[2]; __pyx_result.density_jitter = __pyx_state[3]; __pyx_result.density_lfo = __pyx_state[4]; __pyx_result.density_lfo_length = __pyx_state[5]; __pyx_result.density_lfo_speed = __pyx_state[6]; __pyx_result.freeze = __pyx_state[7]; __pyx_result.grainlength = __pyx_state[8]; __pyx_result.grainlength_lfo = __pyx_state[9]; __pyx_result.grainlength_lfo_length = __pyx_state[10]; __pyx_result.grainlength_lfo_speed = __pyx_state[11]; __pyx_result.grains_per_sec = __pyx_state[12]; __pyx_result.jitter = __pyx_state[13]; __pyx_result.maxdensity = __pyx_state[14]; __pyx_result.maxlength = __pyx_state[15]; __pyx_result.maxspeed = __pyx_state[16]; __pyx_result.mindensity = __pyx_state[17]; __pyx_result.minlength = __pyx_state[18]; __pyx_result.minspeed = __pyx_state[19]; __pyx_result.read_jitter = __pyx_state[20]; __pyx_result.read_lfo = __pyx_state[21]; __pyx_result.read_lfo_length = __pyx_state[22]; __pyx_result.read_lfo_speed = __pyx_state[23]; __pyx_result.samplerate = __pyx_state[24]; __pyx_result.speed = __pyx_state[25]; __pyx_result.speed_lfo = __pyx_state[26]; __pyx_result.speed_lfo_length = __pyx_state[27]; __pyx_result.spread = __pyx_state[28]; __pyx_result.win = __pyx_state[29]; __pyx_result.win_length = __pyx_state[30]
+ *     if len(__pyx_state) > 31 and hasattr(__pyx_result, '__dict__'):
  */
 
   /* function exit code */
@@ -8763,7 +9335,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if itemsize <= 0:
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 131, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 131, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8795,7 +9367,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *         if not isinstance(format, bytes):
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 134, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 134, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -8830,7 +9402,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  */
     __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_format, __pyx_n_s_encode); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 137, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 137, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 137, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF_SET(__pyx_v_format, __pyx_t_5);
@@ -8910,7 +9482,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  * 
  */
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 146, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 146, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_Raise(__pyx_t_5, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -9194,7 +9766,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __
  * 
  *             if self.dtype_is_object:
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 174, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_MemoryError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 174, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -9432,7 +10004,7 @@ static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(stru
  *         info.buf = self.data
  *         info.len = self.len
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 190, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 190, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -10148,7 +10720,7 @@ static PyObject *__pyx_pf___pyx_array___reduce_cython__(CYTHON_UNUSED struct __p
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -10201,7 +10773,7 @@ static PyObject *__pyx_pf___pyx_array_2__setstate_cython__(CYTHON_UNUSED struct 
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__12, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -12844,7 +13416,7 @@ static PyObject *__pyx_memoryview_convert_item_to_object(struct __pyx_memoryview
  *         else:
  *             if len(self.view.format) == 1:
  */
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(2, 486, __pyx_L5_except_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__13, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(2, 486, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_Raise(__pyx_t_6, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -13683,7 +14255,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_7strides___get__(st
  * 
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__15, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 558, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__14, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 558, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -13797,7 +14369,7 @@ static PyObject *__pyx_pf_15View_dot_MemoryView_10memoryview_10suboffsets___get_
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->view.ndim); if (unlikely(!__pyx_t_2)) __PYX_ERR(2, 565, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__16, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 565, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_tuple__15, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(2, 565, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
@@ -14804,7 +15376,7 @@ static PyObject *__pyx_pf___pyx_memoryview___reduce_cython__(CYTHON_UNUSED struc
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__16, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -14857,7 +15429,7 @@ static PyObject *__pyx_pf___pyx_memoryview_2__setstate_cython__(CYTHON_UNUSED st
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__18, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__17, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -15208,9 +15780,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
         __Pyx_GOTREF(__pyx_t_7);
         { Py_ssize_t __pyx_temp;
           for (__pyx_temp=0; __pyx_temp < ((__pyx_v_ndim - __pyx_t_8) + 1); __pyx_temp++) {
-            __Pyx_INCREF(__pyx_slice__19);
-            __Pyx_GIVEREF(__pyx_slice__19);
-            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__19);
+            __Pyx_INCREF(__pyx_slice__18);
+            __Pyx_GIVEREF(__pyx_slice__18);
+            PyList_SET_ITEM(__pyx_t_7, __pyx_temp, __pyx_slice__18);
           }
         }
         __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_7); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(2, 670, __pyx_L1_error)
@@ -15243,7 +15815,7 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
  *         else:
  */
       /*else*/ {
-        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__20); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(2, 673, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_result, __pyx_slice__19); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(2, 673, __pyx_L1_error)
       }
       __pyx_L7:;
 
@@ -15388,9 +15960,9 @@ static PyObject *_unellipsify(PyObject *__pyx_v_index, int __pyx_v_ndim) {
     __Pyx_GOTREF(__pyx_t_3);
     { Py_ssize_t __pyx_temp;
       for (__pyx_temp=0; __pyx_temp < __pyx_v_nslices; __pyx_temp++) {
-        __Pyx_INCREF(__pyx_slice__21);
-        __Pyx_GIVEREF(__pyx_slice__21);
-        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__21);
+        __Pyx_INCREF(__pyx_slice__20);
+        __Pyx_GIVEREF(__pyx_slice__20);
+        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_slice__20);
       }
     }
     __pyx_t_9 = __Pyx_PyList_Extend(__pyx_v_result, __pyx_t_3); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(2, 684, __pyx_L1_error)
@@ -15514,7 +16086,7 @@ static PyObject *assert_direct_dimensions(Py_ssize_t *__pyx_v_suboffsets, int __
  * 
  * 
  */
-      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 691, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_Call(__pyx_builtin_ValueError, __pyx_tuple__21, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(2, 691, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_Raise(__pyx_t_5, 0, 0, 0);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -17685,7 +18257,7 @@ static PyObject *__pyx_pf___pyx_memoryviewslice___reduce_cython__(CYTHON_UNUSED 
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__22, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17738,7 +18310,7 @@ static PyObject *__pyx_pf___pyx_memoryviewslice_2__setstate_cython__(CYTHON_UNUS
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__24, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__23, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -21502,6 +22074,20 @@ static int __pyx_setprop_5pippi_6grains_10GrainCloud_win_length(PyObject *o, PyO
   }
 }
 
+static PyObject *__pyx_getprop_5pippi_6grains_10GrainCloud_freeze(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_5pippi_6grains_10GrainCloud_6freeze_1__get__(o);
+}
+
+static int __pyx_setprop_5pippi_6grains_10GrainCloud_freeze(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_5pippi_6grains_10GrainCloud_6freeze_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
 static PyObject *__pyx_getprop_5pippi_6grains_10GrainCloud_read_lfo(PyObject *o, CYTHON_UNUSED void *x) {
   return __pyx_pw_5pippi_6grains_10GrainCloud_8read_lfo_1__get__(o);
 }
@@ -21663,6 +22249,34 @@ static PyObject *__pyx_getprop_5pippi_6grains_10GrainCloud_density(PyObject *o, 
 static int __pyx_setprop_5pippi_6grains_10GrainCloud_density(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
   if (v) {
     return __pyx_pw_5pippi_6grains_10GrainCloud_7density_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_5pippi_6grains_10GrainCloud_mindensity(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_5pippi_6grains_10GrainCloud_10mindensity_1__get__(o);
+}
+
+static int __pyx_setprop_5pippi_6grains_10GrainCloud_mindensity(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_5pippi_6grains_10GrainCloud_10mindensity_3__set__(o, v);
+  }
+  else {
+    PyErr_SetString(PyExc_NotImplementedError, "__del__");
+    return -1;
+  }
+}
+
+static PyObject *__pyx_getprop_5pippi_6grains_10GrainCloud_maxdensity(PyObject *o, CYTHON_UNUSED void *x) {
+  return __pyx_pw_5pippi_6grains_10GrainCloud_10maxdensity_1__get__(o);
+}
+
+static int __pyx_setprop_5pippi_6grains_10GrainCloud_maxdensity(PyObject *o, PyObject *v, CYTHON_UNUSED void *x) {
+  if (v) {
+    return __pyx_pw_5pippi_6grains_10GrainCloud_10maxdensity_3__set__(o, v);
   }
   else {
     PyErr_SetString(PyExc_NotImplementedError, "__del__");
@@ -21837,6 +22451,7 @@ static struct PyGetSetDef __pyx_getsets_5pippi_6grains_GrainCloud[] = {
   {(char *)"samplerate", __pyx_getprop_5pippi_6grains_10GrainCloud_samplerate, __pyx_setprop_5pippi_6grains_10GrainCloud_samplerate, (char *)0, 0},
   {(char *)"win", __pyx_getprop_5pippi_6grains_10GrainCloud_win, __pyx_setprop_5pippi_6grains_10GrainCloud_win, (char *)0, 0},
   {(char *)"win_length", __pyx_getprop_5pippi_6grains_10GrainCloud_win_length, __pyx_setprop_5pippi_6grains_10GrainCloud_win_length, (char *)0, 0},
+  {(char *)"freeze", __pyx_getprop_5pippi_6grains_10GrainCloud_freeze, __pyx_setprop_5pippi_6grains_10GrainCloud_freeze, (char *)0, 0},
   {(char *)"read_lfo", __pyx_getprop_5pippi_6grains_10GrainCloud_read_lfo, __pyx_setprop_5pippi_6grains_10GrainCloud_read_lfo, (char *)0, 0},
   {(char *)"read_lfo_length", __pyx_getprop_5pippi_6grains_10GrainCloud_read_lfo_length, __pyx_setprop_5pippi_6grains_10GrainCloud_read_lfo_length, (char *)0, 0},
   {(char *)"read_lfo_speed", __pyx_getprop_5pippi_6grains_10GrainCloud_read_lfo_speed, __pyx_setprop_5pippi_6grains_10GrainCloud_read_lfo_speed, (char *)0, 0},
@@ -21849,6 +22464,8 @@ static struct PyGetSetDef __pyx_getsets_5pippi_6grains_GrainCloud[] = {
   {(char *)"spread", __pyx_getprop_5pippi_6grains_10GrainCloud_spread, __pyx_setprop_5pippi_6grains_10GrainCloud_spread, (char *)0, 0},
   {(char *)"jitter", __pyx_getprop_5pippi_6grains_10GrainCloud_jitter, __pyx_setprop_5pippi_6grains_10GrainCloud_jitter, (char *)0, 0},
   {(char *)"density", __pyx_getprop_5pippi_6grains_10GrainCloud_density, __pyx_setprop_5pippi_6grains_10GrainCloud_density, (char *)0, 0},
+  {(char *)"mindensity", __pyx_getprop_5pippi_6grains_10GrainCloud_mindensity, __pyx_setprop_5pippi_6grains_10GrainCloud_mindensity, (char *)0, 0},
+  {(char *)"maxdensity", __pyx_getprop_5pippi_6grains_10GrainCloud_maxdensity, __pyx_setprop_5pippi_6grains_10GrainCloud_maxdensity, (char *)0, 0},
   {(char *)"grains_per_sec", __pyx_getprop_5pippi_6grains_10GrainCloud_grains_per_sec, __pyx_setprop_5pippi_6grains_10GrainCloud_grains_per_sec, (char *)0, 0},
   {(char *)"density_lfo", __pyx_getprop_5pippi_6grains_10GrainCloud_density_lfo, __pyx_setprop_5pippi_6grains_10GrainCloud_density_lfo, (char *)0, 0},
   {(char *)"density_lfo_length", __pyx_getprop_5pippi_6grains_10GrainCloud_density_lfo_length, __pyx_setprop_5pippi_6grains_10GrainCloud_density_lfo_length, (char *)0, 0},
@@ -22635,7 +23252,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Cannot_index_with_type_s, __pyx_k_Cannot_index_with_type_s, sizeof(__pyx_k_Cannot_index_with_type_s), 0, 0, 1, 0},
   {&__pyx_n_s_Ellipsis, __pyx_k_Ellipsis, sizeof(__pyx_k_Ellipsis), 0, 0, 1, 1},
   {&__pyx_kp_s_Empty_shape_tuple_for_cython_arr, __pyx_k_Empty_shape_tuple_for_cython_arr, sizeof(__pyx_k_Empty_shape_tuple_for_cython_arr), 0, 0, 1, 0},
-  {&__pyx_kp_s_Incompatible_checksums_s_vs_0x0c, __pyx_k_Incompatible_checksums_s_vs_0x0c, sizeof(__pyx_k_Incompatible_checksums_s_vs_0x0c), 0, 0, 1, 0},
+  {&__pyx_kp_s_Incompatible_checksums_s_vs_0x94, __pyx_k_Incompatible_checksums_s_vs_0x94, sizeof(__pyx_k_Incompatible_checksums_s_vs_0x94), 0, 0, 1, 0},
   {&__pyx_kp_s_Incompatible_checksums_s_vs_0xb0, __pyx_k_Incompatible_checksums_s_vs_0xb0, sizeof(__pyx_k_Incompatible_checksums_s_vs_0xb0), 0, 0, 1, 0},
   {&__pyx_n_s_IndexError, __pyx_k_IndexError, sizeof(__pyx_k_IndexError), 0, 0, 1, 1},
   {&__pyx_kp_s_Indirect_dimensions_not_supporte, __pyx_k_Indirect_dimensions_not_supporte, sizeof(__pyx_k_Indirect_dimensions_not_supporte), 0, 0, 1, 0},
@@ -22652,6 +23269,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_n_s_View_MemoryView, __pyx_k_View_MemoryView, sizeof(__pyx_k_View_MemoryView), 0, 0, 1, 1},
   {&__pyx_n_s_allocate_buffer, __pyx_k_allocate_buffer, sizeof(__pyx_k_allocate_buffer), 0, 0, 1, 1},
+  {&__pyx_n_s_asarray, __pyx_k_asarray, sizeof(__pyx_k_asarray), 0, 0, 1, 1},
   {&__pyx_n_s_base, __pyx_k_base, sizeof(__pyx_k_base), 0, 0, 1, 1},
   {&__pyx_n_s_buf, __pyx_k_buf, sizeof(__pyx_k_buf), 0, 0, 1, 1},
   {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
@@ -22661,12 +23279,14 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
+  {&__pyx_n_s_d, __pyx_k_d, sizeof(__pyx_k_d), 0, 0, 1, 1},
   {&__pyx_n_s_density, __pyx_k_density, sizeof(__pyx_k_density), 0, 0, 1, 1},
   {&__pyx_n_s_density_lfo, __pyx_k_density_lfo, sizeof(__pyx_k_density_lfo), 0, 0, 1, 1},
   {&__pyx_n_s_density_lfo_length, __pyx_k_density_lfo_length, sizeof(__pyx_k_density_lfo_length), 0, 0, 1, 1},
   {&__pyx_n_s_density_lfo_speed, __pyx_k_density_lfo_speed, sizeof(__pyx_k_density_lfo_speed), 0, 0, 1, 1},
   {&__pyx_n_s_density_lfo_wt, __pyx_k_density_lfo_wt, sizeof(__pyx_k_density_lfo_wt), 0, 0, 1, 1},
   {&__pyx_n_s_dict, __pyx_k_dict, sizeof(__pyx_k_dict), 0, 0, 1, 1},
+  {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
@@ -22675,6 +23295,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
   {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
   {&__pyx_n_u_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 1, 0, 1},
+  {&__pyx_n_s_freeze, __pyx_k_freeze, sizeof(__pyx_k_freeze), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
   {&__pyx_n_s_grainlength, __pyx_k_grainlength, sizeof(__pyx_k_grainlength), 0, 0, 1, 1},
@@ -22689,9 +23310,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_jitter, __pyx_k_jitter, sizeof(__pyx_k_jitter), 0, 0, 1, 1},
   {&__pyx_n_s_length, __pyx_k_length, sizeof(__pyx_k_length), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
+  {&__pyx_n_s_maxdensity, __pyx_k_maxdensity, sizeof(__pyx_k_maxdensity), 0, 0, 1, 1},
   {&__pyx_n_s_maxlength, __pyx_k_maxlength, sizeof(__pyx_k_maxlength), 0, 0, 1, 1},
   {&__pyx_n_s_maxspeed, __pyx_k_maxspeed, sizeof(__pyx_k_maxspeed), 0, 0, 1, 1},
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
+  {&__pyx_n_s_mindensity, __pyx_k_mindensity, sizeof(__pyx_k_mindensity), 0, 0, 1, 1},
   {&__pyx_n_s_minlength, __pyx_k_minlength, sizeof(__pyx_k_minlength), 0, 0, 1, 1},
   {&__pyx_n_s_minspeed, __pyx_k_minspeed, sizeof(__pyx_k_minspeed), 0, 0, 1, 1},
   {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
@@ -22700,6 +23323,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_ndim, __pyx_k_ndim, sizeof(__pyx_k_ndim), 0, 0, 1, 1},
   {&__pyx_n_s_new, __pyx_k_new, sizeof(__pyx_k_new), 0, 0, 1, 1},
   {&__pyx_kp_s_no_default___reduce___due_to_non, __pyx_k_no_default___reduce___due_to_non, sizeof(__pyx_k_no_default___reduce___due_to_non), 0, 0, 1, 0},
+  {&__pyx_n_s_np, __pyx_k_np, sizeof(__pyx_k_np), 0, 0, 1, 1},
+  {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_n_s_obj, __pyx_k_obj, sizeof(__pyx_k_obj), 0, 0, 1, 1},
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
   {&__pyx_n_s_pan, __pyx_k_pan, sizeof(__pyx_k_pan), 0, 0, 1, 1},
@@ -22775,9 +23400,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if itemsize <= 0:
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(2, 131, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s_Empty_shape_tuple_for_cython_arr); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(2, 131, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__5);
+  __Pyx_GIVEREF(__pyx_tuple__5);
 
   /* "View.MemoryView":134
  * 
@@ -22786,9 +23411,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         if not isinstance(format, bytes):
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(2, 134, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_itemsize_0_for_cython_array); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(2, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
 
   /* "View.MemoryView":137
  * 
@@ -22797,9 +23422,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         self._format = format  # keep a reference to the byte string
  *         self.format = self._format
  */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_n_s_ASCII); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(2, 137, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_n_s_ASCII); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(2, 137, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
 
   /* "View.MemoryView":146
  * 
@@ -22808,9 +23433,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(2, 146, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__9);
-  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_shape_and_str); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(2, 146, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
 
   /* "View.MemoryView":174
  *             self.data = <char *>malloc(self.len)
@@ -22819,9 +23444,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *             if self.dtype_is_object:
  */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(2, 174, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_s_unable_to_allocate_array_data); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(2, 174, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
 
   /* "View.MemoryView":190
  *             bufmode = PyBUF_F_CONTIGUOUS | PyBUF_ANY_CONTIGUOUS
@@ -22830,9 +23455,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         info.buf = self.data
  *         info.len = self.len
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(2, 190, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__11);
-  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s_Can_only_create_a_buffer_that_is); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(2, 190, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__10);
+  __Pyx_GIVEREF(__pyx_tuple__10);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -22840,18 +23465,18 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(2, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__12);
-  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(2, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__13);
-  __Pyx_GIVEREF(__pyx_tuple__13);
+  __pyx_tuple__12 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
 
   /* "View.MemoryView":486
  *             result = struct.unpack(self.view.format, bytesitem)
@@ -22860,9 +23485,9 @@ static int __Pyx_InitCachedConstants(void) {
  *         else:
  *             if len(self.view.format) == 1:
  */
-  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(2, 486, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__14);
-  __Pyx_GIVEREF(__pyx_tuple__14);
+  __pyx_tuple__13 = PyTuple_Pack(1, __pyx_kp_s_Unable_to_convert_item_to_object); if (unlikely(!__pyx_tuple__13)) __PYX_ERR(2, 486, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__13);
+  __Pyx_GIVEREF(__pyx_tuple__13);
 
   /* "View.MemoryView":558
  *         if self.view.strides == NULL:
@@ -22871,9 +23496,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         return tuple([stride for stride in self.view.strides[:self.view.ndim]])
  */
-  __pyx_tuple__15 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(2, 558, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__15);
-  __Pyx_GIVEREF(__pyx_tuple__15);
+  __pyx_tuple__14 = PyTuple_Pack(1, __pyx_kp_s_Buffer_view_does_not_expose_stri); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(2, 558, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__14);
+  __Pyx_GIVEREF(__pyx_tuple__14);
 
   /* "View.MemoryView":565
  *     def suboffsets(self):
@@ -22882,12 +23507,12 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *         return tuple([suboffset for suboffset in self.view.suboffsets[:self.view.ndim]])
  */
-  __pyx_tuple__16 = PyTuple_New(1); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(2, 565, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__16);
+  __pyx_tuple__15 = PyTuple_New(1); if (unlikely(!__pyx_tuple__15)) __PYX_ERR(2, 565, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_INCREF(__pyx_int_neg_1);
   __Pyx_GIVEREF(__pyx_int_neg_1);
-  PyTuple_SET_ITEM(__pyx_tuple__16, 0, __pyx_int_neg_1);
-  __Pyx_GIVEREF(__pyx_tuple__16);
+  PyTuple_SET_ITEM(__pyx_tuple__15, 0, __pyx_int_neg_1);
+  __Pyx_GIVEREF(__pyx_tuple__15);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -22895,18 +23520,18 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(2, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__17);
-  __Pyx_GIVEREF(__pyx_tuple__17);
+  __pyx_tuple__16 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__16);
+  __Pyx_GIVEREF(__pyx_tuple__16);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__18 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(2, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__18);
-  __Pyx_GIVEREF(__pyx_tuple__18);
+  __pyx_tuple__17 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__17)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__17);
+  __Pyx_GIVEREF(__pyx_tuple__17);
 
   /* "View.MemoryView":670
  *         if item is Ellipsis:
@@ -22915,9 +23540,9 @@ static int __Pyx_InitCachedConstants(void) {
  *                 seen_ellipsis = True
  *             else:
  */
-  __pyx_slice__19 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__19)) __PYX_ERR(2, 670, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__19);
-  __Pyx_GIVEREF(__pyx_slice__19);
+  __pyx_slice__18 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__18)) __PYX_ERR(2, 670, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__18);
+  __Pyx_GIVEREF(__pyx_slice__18);
 
   /* "View.MemoryView":673
  *                 seen_ellipsis = True
@@ -22926,9 +23551,9 @@ static int __Pyx_InitCachedConstants(void) {
  *             have_slices = True
  *         else:
  */
-  __pyx_slice__20 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__20)) __PYX_ERR(2, 673, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__20);
-  __Pyx_GIVEREF(__pyx_slice__20);
+  __pyx_slice__19 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__19)) __PYX_ERR(2, 673, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__19);
+  __Pyx_GIVEREF(__pyx_slice__19);
 
   /* "View.MemoryView":684
  *     nslices = ndim - len(result)
@@ -22937,9 +23562,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  *     return have_slices or nslices, tuple(result)
  */
-  __pyx_slice__21 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__21)) __PYX_ERR(2, 684, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_slice__21);
-  __Pyx_GIVEREF(__pyx_slice__21);
+  __pyx_slice__20 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__20)) __PYX_ERR(2, 684, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_slice__20);
+  __Pyx_GIVEREF(__pyx_slice__20);
 
   /* "View.MemoryView":691
  *     for suboffset in suboffsets[:ndim]:
@@ -22948,9 +23573,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(2, 691, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__22);
-  __Pyx_GIVEREF(__pyx_tuple__22);
+  __pyx_tuple__21 = PyTuple_Pack(1, __pyx_kp_s_Indirect_dimensions_not_supporte); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(2, 691, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__21);
+  __Pyx_GIVEREF(__pyx_tuple__21);
 
   /* "(tree fragment)":2
  * def __reduce_cython__(self):
@@ -22958,28 +23583,28 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  */
-  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(2, 2, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__23);
-  __Pyx_GIVEREF(__pyx_tuple__23);
+  __pyx_tuple__22 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(2, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__22);
+  __Pyx_GIVEREF(__pyx_tuple__22);
 
   /* "(tree fragment)":4
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("no default __reduce__ due to non-trivial __cinit__")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__24 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(2, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__24);
-  __Pyx_GIVEREF(__pyx_tuple__24);
+  __pyx_tuple__23 = PyTuple_Pack(1, __pyx_kp_s_no_default___reduce___due_to_non); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(2, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__23);
+  __Pyx_GIVEREF(__pyx_tuple__23);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_GrainCloud(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
- *     if __pyx_checksum != 0x0c33ed3:
+ *     if __pyx_checksum != 0x9402e15:
  *         from pickle import PickleError as __pyx_PickleError
  */
-  __pyx_tuple__25 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__25);
-  __Pyx_GIVEREF(__pyx_tuple__25);
-  __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__25, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_GrainCloud, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __pyx_tuple__24 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__24);
+  __Pyx_GIVEREF(__pyx_tuple__24);
+  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_GrainCloud, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(2, 1, __pyx_L1_error)
 
   /* "View.MemoryView":284
  *         return self.name
@@ -22988,9 +23613,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_tuple__27 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(2, 284, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__27);
-  __Pyx_GIVEREF(__pyx_tuple__27);
+  __pyx_tuple__26 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(2, 284, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__26);
+  __Pyx_GIVEREF(__pyx_tuple__26);
 
   /* "View.MemoryView":285
  * 
@@ -22999,9 +23624,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_tuple__28 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(2, 285, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__28);
-  __Pyx_GIVEREF(__pyx_tuple__28);
+  __pyx_tuple__27 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(2, 285, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__27);
+  __Pyx_GIVEREF(__pyx_tuple__27);
 
   /* "View.MemoryView":286
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -23010,9 +23635,9 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__29 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__29)) __PYX_ERR(2, 286, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__29);
-  __Pyx_GIVEREF(__pyx_tuple__29);
+  __pyx_tuple__28 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(2, 286, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__28);
+  __Pyx_GIVEREF(__pyx_tuple__28);
 
   /* "View.MemoryView":289
  * 
@@ -23021,9 +23646,9 @@ static int __Pyx_InitCachedConstants(void) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_tuple__30 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(2, 289, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__30);
-  __Pyx_GIVEREF(__pyx_tuple__30);
+  __pyx_tuple__29 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__29)) __PYX_ERR(2, 289, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__29);
+  __Pyx_GIVEREF(__pyx_tuple__29);
 
   /* "View.MemoryView":290
  * 
@@ -23032,19 +23657,19 @@ static int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__31 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(2, 290, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__31);
-  __Pyx_GIVEREF(__pyx_tuple__31);
+  __pyx_tuple__30 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(2, 290, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__30);
+  __Pyx_GIVEREF(__pyx_tuple__30);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_Enum(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     if __pyx_checksum != 0xb068931:
  *         from pickle import PickleError as __pyx_PickleError
  */
-  __pyx_tuple__32 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__32);
-  __Pyx_GIVEREF(__pyx_tuple__32);
-  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __pyx_tuple__31 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__31);
+  __Pyx_GIVEREF(__pyx_tuple__31);
+  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) __PYX_ERR(2, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -23057,7 +23682,7 @@ static int __Pyx_InitGlobals(void) {
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_10 = PyInt_FromLong(10); if (unlikely(!__pyx_int_10)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_int_12795603 = PyInt_FromLong(12795603L); if (unlikely(!__pyx_int_12795603)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_155201045 = PyInt_FromLong(155201045L); if (unlikely(!__pyx_int_155201045)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_184977713 = PyInt_FromLong(184977713L); if (unlikely(!__pyx_int_184977713)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_neg_1 = PyInt_FromLong(-1); if (unlikely(!__pyx_int_neg_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   return 0;
@@ -23116,9 +23741,10 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
 {
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  __Pyx_memviewslice __pyx_t_3 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
-  static PyThread_type_lock __pyx_t_5[8];
+  __Pyx_memviewslice __pyx_t_5 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  static PyThread_type_lock __pyx_t_6[8];
   __Pyx_RefNannyDeclarations
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   if (__pyx_m && __pyx_m == __pyx_pyinit_module) return 0;
@@ -23211,10 +23837,10 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_5pippi_6grains_GrainCloud) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5pippi_6grains_GrainCloud) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
   __pyx_type_5pippi_6grains_GrainCloud.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "GrainCloud", (PyObject *)&__pyx_type_5pippi_6grains_GrainCloud) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5pippi_6grains_GrainCloud) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "GrainCloud", (PyObject *)&__pyx_type_5pippi_6grains_GrainCloud) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5pippi_6grains_GrainCloud) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
   __pyx_ptype_5pippi_6grains_GrainCloud = &__pyx_type_5pippi_6grains_GrainCloud;
   __pyx_vtabptr_array = &__pyx_vtable_array;
   __pyx_vtable_array.get_memview = (PyObject *(*)(struct __pyx_array_obj *))__pyx_array_get_memview;
@@ -23281,79 +23907,81 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
   __pyx_t_2 = __Pyx_ImportModule("pippi.wavetables"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_2, "_window", (void (**)(void))&__pyx_f_5pippi_10wavetables__window, "__Pyx_memviewslice (int, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_3 = __Pyx_ImportModule("pippi.interpolation"); if (!__pyx_t_3) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_3, "_linear", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear, "__Pyx_memviewslice (__Pyx_memviewslice, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  Py_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   /*--- Execution code ---*/
   #if defined(__Pyx_Generator_USED) || defined(__Pyx_Coroutine_USED)
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "pippi/grains.pyx":20
+  /* "pippi/grains.pyx":5
+ * from . cimport interpolation
+ * from libc.stdlib cimport rand, RAND_MAX
+ * import numpy as np             # <<<<<<<<<<<<<<
+ * 
+ * DEF MIN_DENSITY = 0.000001
+ */
+  __pyx_t_4 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_4) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+  /* "pippi/grains.pyx":24
  * 
  *             int win=-1,
  *             double[:] win_wt=None,             # <<<<<<<<<<<<<<
  *             int win_length=DEFAULT_WTSIZE,
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-  if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 20, __pyx_L1_error)
-  __pyx_k_ = __pyx_t_3;
-  __pyx_t_3.memview = NULL;
-  __pyx_t_3.data = NULL;
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+  if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_k_ = __pyx_t_5;
+  __pyx_t_5.memview = NULL;
+  __pyx_t_5.data = NULL;
 
-  /* "pippi/grains.pyx":24
- * 
- *             int read_lfo=-1,
- *             double[:] read_lfo_wt=None,             # <<<<<<<<<<<<<<
- *             double read_lfo_speed=1,
- *             int read_lfo_length=DEFAULT_WTSIZE,
- */
-  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-  if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 24, __pyx_L1_error)
-  __pyx_k__2 = __pyx_t_3;
-  __pyx_t_3.memview = NULL;
-  __pyx_t_3.data = NULL;
-
-  /* "pippi/grains.pyx":29
+  /* "pippi/grains.pyx":34
  * 
  *             int speed_lfo=-1,
  *             double[:] speed_lfo_wt=None,             # <<<<<<<<<<<<<<
  *             int speed_lfo_length=DEFAULT_WTSIZE,
  *             double speed=DEFAULT_SPEED,
  */
-  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-  if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 29, __pyx_L1_error)
-  __pyx_k__3 = __pyx_t_3;
-  __pyx_t_3.memview = NULL;
-  __pyx_t_3.data = NULL;
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+  if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_k__2 = __pyx_t_5;
+  __pyx_t_5.memview = NULL;
+  __pyx_t_5.data = NULL;
 
-  /* "pippi/grains.pyx":37
- *             double density=1,
+  /* "pippi/grains.pyx":41
+ * 
  *             int density_lfo=-1,
  *             double[:] density_lfo_wt=None,             # <<<<<<<<<<<<<<
  *             int density_lfo_length=DEFAULT_WTSIZE,
  *             double density_lfo_speed=1,
  */
-  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-  if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 37, __pyx_L1_error)
-  __pyx_k__4 = __pyx_t_3;
-  __pyx_t_3.memview = NULL;
-  __pyx_t_3.data = NULL;
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+  if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_k__3 = __pyx_t_5;
+  __pyx_t_5.memview = NULL;
+  __pyx_t_5.data = NULL;
 
-  /* "pippi/grains.pyx":43
+  /* "pippi/grains.pyx":50
  *             double grainlength=DEFAULT_GRAINLENGTH,
  *             int grainlength_lfo=-1,
  *             double[:] grainlength_lfo_wt=None,             # <<<<<<<<<<<<<<
  *             int grainlength_lfo_length=DEFAULT_WTSIZE,
  *             double grainlength_lfo_speed=1,
  */
-  __pyx_t_3 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
-  if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 43, __pyx_L1_error)
-  __pyx_k__5 = __pyx_t_3;
-  __pyx_t_3.memview = NULL;
-  __pyx_t_3.data = NULL;
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(Py_None);
+  if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_k__4 = __pyx_t_5;
+  __pyx_t_5.memview = NULL;
+  __pyx_t_5.data = NULL;
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_GrainCloud(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
- *     if __pyx_checksum != 0x0c33ed3:
+ *     if __pyx_checksum != 0x9402e15:
  *         from pickle import PickleError as __pyx_PickleError
  */
   __pyx_t_4 = PyCFunction_NewEx(&__pyx_mdef_5pippi_6grains_1__pyx_unpickle_GrainCloud, NULL, __pyx_n_s_pippi_grains); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 1, __pyx_L1_error)
@@ -23391,7 +24019,7 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__27, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 284, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__26, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 284, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_XGOTREF(generic);
   __Pyx_DECREF_SET(generic, __pyx_t_4);
@@ -23405,7 +24033,7 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__28, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 285, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__27, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 285, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_XGOTREF(strided);
   __Pyx_DECREF_SET(strided, __pyx_t_4);
@@ -23419,7 +24047,7 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
  * 
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__29, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 286, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__28, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_XGOTREF(indirect);
   __Pyx_DECREF_SET(indirect, __pyx_t_4);
@@ -23433,7 +24061,7 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__30, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 289, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__29, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 289, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_XGOTREF(contiguous);
   __Pyx_DECREF_SET(contiguous, __pyx_t_4);
@@ -23447,7 +24075,7 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
  * 
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__31, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 290, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__30, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(2, 290, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_XGOTREF(indirect_contiguous);
   __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_4);
@@ -23470,15 +24098,15 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
  *     PyThread_allocate_lock(),
  *     PyThread_allocate_lock(),
  */
-  __pyx_t_5[0] = PyThread_allocate_lock();
-  __pyx_t_5[1] = PyThread_allocate_lock();
-  __pyx_t_5[2] = PyThread_allocate_lock();
-  __pyx_t_5[3] = PyThread_allocate_lock();
-  __pyx_t_5[4] = PyThread_allocate_lock();
-  __pyx_t_5[5] = PyThread_allocate_lock();
-  __pyx_t_5[6] = PyThread_allocate_lock();
-  __pyx_t_5[7] = PyThread_allocate_lock();
-  memcpy(&(__pyx_memoryview_thread_locks[0]), __pyx_t_5, sizeof(__pyx_memoryview_thread_locks[0]) * (8));
+  __pyx_t_6[0] = PyThread_allocate_lock();
+  __pyx_t_6[1] = PyThread_allocate_lock();
+  __pyx_t_6[2] = PyThread_allocate_lock();
+  __pyx_t_6[3] = PyThread_allocate_lock();
+  __pyx_t_6[4] = PyThread_allocate_lock();
+  __pyx_t_6[5] = PyThread_allocate_lock();
+  __pyx_t_6[6] = PyThread_allocate_lock();
+  __pyx_t_6[7] = PyThread_allocate_lock();
+  memcpy(&(__pyx_memoryview_thread_locks[0]), __pyx_t_6, sizeof(__pyx_memoryview_thread_locks[0]) * (8));
 
   /* "View.MemoryView":537
  *         info.obj = self
@@ -23530,8 +24158,9 @@ static int __pyx_pymod_exec_grains(PyObject *__pyx_pyinit_module)
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
   if (__pyx_m) {
     if (__pyx_d) {
       __Pyx_AddTraceback("init pippi.grains", 0, __pyx_lineno, __pyx_filename);
@@ -23870,8 +24499,40 @@ static int __Pyx__ArgTypeTest(PyObject *obj, PyTypeObject *type, const char *nam
     return 0;
 }
 
+/* GetBuiltinName */
+static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
+    PyObject* result = __Pyx_PyObject_GetAttrStr(__pyx_b, name);
+    if (unlikely(!result)) {
+        PyErr_Format(PyExc_NameError,
+#if PY_MAJOR_VERSION >= 3
+            "name '%U' is not defined", name);
+#else
+            "name '%.200s' is not defined", PyString_AS_STRING(name));
+#endif
+    }
+    return result;
+}
+
+/* GetModuleGlobalName */
+static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name) {
+    PyObject *result;
+#if !CYTHON_AVOID_BORROWED_REFS
+    result = PyDict_GetItem(__pyx_d, name);
+    if (likely(result)) {
+        Py_INCREF(result);
+    } else {
+#else
+    result = PyObject_GetItem(__pyx_d, name);
+    if (!result) {
+        PyErr_Clear();
+#endif
+        result = __Pyx_GetBuiltinName(name);
+    }
+    return result;
+}
+
 /* PyObjectCall */
-#if CYTHON_COMPILING_IN_CPYTHON
+  #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg, PyObject *kw) {
     PyObject *result;
     ternaryfunc call = func->ob_type->tp_call;
@@ -23891,7 +24552,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_Call(PyObject *func, PyObject *arg
 #endif
 
 /* None */
-static CYTHON_INLINE long __Pyx_div_long(long a, long b) {
+  static CYTHON_INLINE long __Pyx_div_long(long a, long b) {
     long q = a / b;
     long r = a - q*b;
     q -= ((r != 0) & ((r ^ b) < 0));
@@ -23899,27 +24560,27 @@ static CYTHON_INLINE long __Pyx_div_long(long a, long b) {
 }
 
 /* None */
-static CYTHON_INLINE int __Pyx_mod_int(int a, int b) {
+  static CYTHON_INLINE int __Pyx_mod_int(int a, int b) {
     int r = a % b;
     r += ((r != 0) & ((r ^ b) < 0)) * b;
     return r;
 }
 
 /* BufferIndexError */
-static void __Pyx_RaiseBufferIndexError(int axis) {
+  static void __Pyx_RaiseBufferIndexError(int axis) {
   PyErr_Format(PyExc_IndexError,
      "Out of bounds on buffer access (axis %d)", axis);
 }
 
 /* None */
-static CYTHON_INLINE long __Pyx_mod_long(long a, long b) {
+  static CYTHON_INLINE long __Pyx_mod_long(long a, long b) {
     long r = a % b;
     r += ((r != 0) & ((r ^ b) < 0)) * b;
     return r;
 }
 
 /* SliceObject */
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
+  static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
         Py_ssize_t cstart, Py_ssize_t cstop,
         PyObject** _py_start, PyObject** _py_stop, PyObject** _py_slice,
         int has_cstart, int has_cstop, CYTHON_UNUSED int wraparound) {
@@ -24016,7 +24677,7 @@ bad:
 }
 
 /* PyCFunctionFastCall */
-#if CYTHON_FAST_PYCCALL
+  #if CYTHON_FAST_PYCCALL
 static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, PyObject **args, Py_ssize_t nargs) {
     PyCFunctionObject *func = (PyCFunctionObject*)func_obj;
     PyCFunction meth = PyCFunction_GET_FUNCTION(func);
@@ -24039,7 +24700,7 @@ static CYTHON_INLINE PyObject * __Pyx_PyCFunction_FastCall(PyObject *func_obj, P
 #endif
 
 /* PyFunctionFastCall */
-#if CYTHON_FAST_PYCALL
+  #if CYTHON_FAST_PYCALL
 #include "frameobject.h"
 static PyObject* __Pyx_PyFunction_FastCallNoKw(PyCodeObject *co, PyObject **args, Py_ssize_t na,
                                                PyObject *globals) {
@@ -24159,7 +24820,7 @@ done:
 #endif
 
 /* PyObjectCallMethO */
-#if CYTHON_COMPILING_IN_CPYTHON
+  #if CYTHON_COMPILING_IN_CPYTHON
 static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject *arg) {
     PyObject *self, *result;
     PyCFunction cfunc;
@@ -24179,7 +24840,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallMethO(PyObject *func, PyObject
 #endif
 
 /* PyObjectCallOneArg */
-#if CYTHON_COMPILING_IN_CPYTHON
+  #if CYTHON_COMPILING_IN_CPYTHON
 static PyObject* __Pyx__PyObject_CallOneArg(PyObject *func, PyObject *arg) {
     PyObject *result;
     PyObject *args = PyTuple_New(1);
@@ -24219,7 +24880,7 @@ static CYTHON_INLINE PyObject* __Pyx_PyObject_CallOneArg(PyObject *func, PyObjec
 #endif
 
 /* ExtTypeTest */
-static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
+  static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
     if (unlikely(!type)) {
         PyErr_SetString(PyExc_SystemError, "Missing type object");
         return 0;
@@ -24232,7 +24893,7 @@ static CYTHON_INLINE int __Pyx_TypeTest(PyObject *obj, PyTypeObject *type) {
 }
 
 /* PyErrExceptionMatches */
-#if CYTHON_FAST_THREAD_STATE
+  #if CYTHON_FAST_THREAD_STATE
 static int __Pyx_PyErr_ExceptionMatchesTuple(PyObject *exc_type, PyObject *tuple) {
     Py_ssize_t i, n;
     n = PyTuple_GET_SIZE(tuple);
@@ -24257,7 +24918,7 @@ static CYTHON_INLINE int __Pyx_PyErr_ExceptionMatchesInState(PyThreadState* tsta
 #endif
 
 /* PyErrFetchRestore */
-#if CYTHON_FAST_THREAD_STATE
+  #if CYTHON_FAST_THREAD_STATE
 static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
     PyObject *tmp_type, *tmp_value, *tmp_tb;
     tmp_type = tstate->curexc_type;
@@ -24281,7 +24942,7 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
 #endif
 
 /* GetAttr */
-static CYTHON_INLINE PyObject *__Pyx_GetAttr(PyObject *o, PyObject *n) {
+  static CYTHON_INLINE PyObject *__Pyx_GetAttr(PyObject *o, PyObject *n) {
 #if CYTHON_USE_TYPE_SLOTS
 #if PY_MAJOR_VERSION >= 3
     if (likely(PyUnicode_Check(n)))
@@ -24294,7 +24955,7 @@ static CYTHON_INLINE PyObject *__Pyx_GetAttr(PyObject *o, PyObject *n) {
 }
 
 /* GetAttr3 */
-static PyObject *__Pyx_GetAttr3Default(PyObject *d) {
+  static PyObject *__Pyx_GetAttr3Default(PyObject *d) {
     __Pyx_PyThreadState_declare
     __Pyx_PyThreadState_assign
     if (unlikely(!__Pyx_PyErr_ExceptionMatches(PyExc_AttributeError)))
@@ -24306,38 +24967,6 @@ static PyObject *__Pyx_GetAttr3Default(PyObject *d) {
 static CYTHON_INLINE PyObject *__Pyx_GetAttr3(PyObject *o, PyObject *n, PyObject *d) {
     PyObject *r = __Pyx_GetAttr(o, n);
     return (likely(r)) ? r : __Pyx_GetAttr3Default(d);
-}
-
-/* GetBuiltinName */
-static PyObject *__Pyx_GetBuiltinName(PyObject *name) {
-    PyObject* result = __Pyx_PyObject_GetAttrStr(__pyx_b, name);
-    if (unlikely(!result)) {
-        PyErr_Format(PyExc_NameError,
-#if PY_MAJOR_VERSION >= 3
-            "name '%U' is not defined", name);
-#else
-            "name '%.200s' is not defined", PyString_AS_STRING(name));
-#endif
-    }
-    return result;
-}
-
-/* GetModuleGlobalName */
-static CYTHON_INLINE PyObject *__Pyx_GetModuleGlobalName(PyObject *name) {
-    PyObject *result;
-#if !CYTHON_AVOID_BORROWED_REFS
-    result = PyDict_GetItem(__pyx_d, name);
-    if (likely(result)) {
-        Py_INCREF(result);
-    } else {
-#else
-    result = PyObject_GetItem(__pyx_d, name);
-    if (!result) {
-        PyErr_Clear();
-#endif
-        result = __Pyx_GetBuiltinName(name);
-    }
-    return result;
 }
 
 /* Import */

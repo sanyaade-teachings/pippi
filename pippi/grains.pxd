@@ -8,6 +8,7 @@ cdef class GrainCloud:
     cdef public double[:] win
     cdef public int win_length
 
+    cdef public double freeze
     cdef public double[:] read_lfo
     cdef public int read_lfo_length
     cdef public double read_lfo_speed
@@ -22,6 +23,8 @@ cdef class GrainCloud:
     cdef public double spread
     cdef public double jitter
     cdef public double density
+    cdef public double mindensity
+    cdef public double maxdensity
     cdef public double grains_per_sec
 
     cdef public double[:] density_lfo
