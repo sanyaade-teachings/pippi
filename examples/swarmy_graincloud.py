@@ -22,7 +22,7 @@ def makecloud(density):
 numclouds = 10
 densities = [ (random.triangular(0.1, 2),) for _ in range(numclouds) ]
 
-clouds = dsp.pool(makecloud, densities)
+clouds = dsp.pool(makecloud, numclouds, densities)
 out = dsp.buffer(length=20)
 for cloud in clouds:
     out.dub(cloud)
