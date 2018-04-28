@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Alpha 8
+v2.0.0 - Alpha 9
 
 ## Installation and setup
 
@@ -85,9 +85,9 @@ There are more examples, give em a whirl, and try your own.
 
 ## Release Notes
 
-### 2.0.0 - Alpha 9 (in development)
+### 2.0.0 - Alpha 9
 
-Final (probably) feature releases / big api changes before going to beta.
+Final feature releases / big api changes before going to beta.
 
 - Breaking changes:
     - Durations for most APIs are now given in seconds (floats) rather than 
