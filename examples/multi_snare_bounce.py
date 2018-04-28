@@ -23,7 +23,7 @@ for _ in range(numpasses):
     reverse = random.choice([True, False])
 
     # Randomly choose a window function for `rhythm.curve`
-    wintype = random.choice(['sine', 'tri', 'kaiser', 'hann', 'blackman', None])
+    wintype = random.choice([dsp.SINE, dsp.TRI, dsp.KAISER, dsp.HANN, dsp.BLACKMAN, None])
 
     # If wintype is None, generate a random list of values to use as a wavetable
     wavetable = None if wintype is not None else [ random.random() for _ in range(random.randint(3, 10)) ]
