@@ -1,7 +1,8 @@
 import random
 from pippi import dsp, graph
 
-out = dsp.buffer()
+buflength = 5
+out = dsp.buffer(length=buflength)
 
 sounds = [ 
     dsp.read('sounds/snare.wav'), 
@@ -9,17 +10,15 @@ sounds = [
     dsp.read('sounds/hat.wav'), 
 ]
 
-maxstart = 44100 * 5
 numsounds = random.randint(3, 5)
 
 # Put some sounds in a buffer to look at
 for _ in range(numsounds):
-
-    # Start anywhere between 0 and 5 seconds into the buffer
-    start = random.randint(0, maxstart)
-
     sound = random.choice(sounds)
     sound = sound.pan(random.random()) * random.random()
+
+    # Start anywhere between the start and buffer end length minus sound length 
+    start = random.triangular(0, buflength-sound.dur)
 
     out.dub(sound, start)
 
