@@ -42,7 +42,7 @@ while pos < tlength:
         amp = random.triangular(0.001, 0.1)
         params += [ (freq, lfo_freq, amp, length) ]
 
-    notes = dsp.pool(make_note, params)
+    notes = dsp.pool(make_note, random.randint(5,10), params)
 
     for note in notes:
         out.dub(note, pos + random.triangular(0, 0.1))
