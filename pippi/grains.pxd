@@ -3,10 +3,13 @@ from . cimport wavetables
 
 cdef class GrainCloud:
     cdef public SoundBuffer buf
+    cdef public double amp
     cdef public int channels
     cdef public int samplerate
     cdef public double[:] win
     cdef public int win_length
+
+    cdef public int[:] mask
 
     cdef public double freeze
     cdef public double[:] read_lfo

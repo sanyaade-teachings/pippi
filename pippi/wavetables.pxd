@@ -2,6 +2,9 @@ cdef double[:] _wavetable(int, int)
 cdef double[:] _window(int, int)
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
 
+cdef class Wavetable:
+    cdef public double[:] data
+
 cdef int SINE
 cdef int COS
 cdef int TRI

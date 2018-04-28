@@ -1,15 +1,12 @@
 import numbers
 import numpy as np
 from .soundbuffer cimport SoundBuffer
+from . import wavetables
 from . cimport wavetables
 from . cimport interpolation
 
 cimport cython
 from cpython.array cimport array, clone
-
-#ctypedef fused duration:
-#    cython.int
-#    cython.double
 
 cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
@@ -44,6 +41,7 @@ cdef class Osc:
     def __init__(
             self, 
             object wavetable=None, 
+              list stack=None,
             double freq=440, 
             double amp=1, 
             double pulsewidth=1,
@@ -79,49 +77,77 @@ cdef class Osc:
             # Create wavetable type if wavetable is an integer flag
             self.wavetable = wavetables._wavetable(wavetable, self.wtsize)
 
-        elif isinstance(wavetable, tuple):
-            # Create wavetable stack if wavetable is a tuple of wavetables
-            self.wavetable = None
-            self.wavetables = []
-            for i, wt in enumerate(wavetable):
-                if isinstance(wt, int):
-                    self.wavetables += [ wavetables._wavetable(wt, self.wtsize) ]
-                else:
-                    if len(wt) != self.wtsize:
-                        wt = interpolation._linear(wt, self.wtsize)
-                    self.wavetables += [ wt ]
+        elif isinstance(wavetable, wavetables.Wavetable):
+            self.wavetable = wavetable.data
 
-        elif isinstance(wavetable, list):
-            # Convert lists to memoryview of a numpy array
+        elif isinstance(wavetable, SoundBuffer):
+            if wavetable.channels > 1:
+                wavetable = wavetable.remix(1)
+            self.wavetable = wavetable.frames
+
+        elif wavetable is not None:
             self.wavetable = array('d', wavetable)
 
-        else:
-            # Fallback to SINE wavetable
-            self.wavetable = wavetables._wavetable(wavetables.SINE, self.wtsize)
+        if stack is not None:
+            self.wavetables = []
+            for i, wt in enumerate(stack):
+                if isinstance(wt, int):
+                    self.wavetables += [ wavetables._wavetable(wt, self.wtsize) ]
+                elif isinstance(wt, wavetables.Wavetable):
+                    self.wavetables += [ interpolation._linear(wt.data, self.wtsize) ]
+                elif isinstance(wt, SoundBuffer):
+                    if wt.channels > 1:
+                        wt = wt.remix(1)
+                    self.wavetables += [ interpolation._linear(wt.frames, self.wtsize) ]
+                else:
+                    self.wavetables += [ interpolation._linear(array('d', wt), self.wtsize) ]
 
         self.win_phase = win_phase
         if isinstance(window, int):
             self.window = wavetables._window(window, self.wtsize)
+        elif isinstance(window, wavetables.Wavetable):
+            self.window = interpolation._linear(window.data, self.wtsize)
+        elif isinstance(window, SoundBuffer):
+            if window.channels > 1:
+                window = window.remix(1)
+            self.window = interpolation._linear(window.frames, self.wtsize)
+        elif window is not None:
+            self.window = interpolation._linear(array('d', window), self.wtsize)
         else:
-            self.window = window
+            self.window = None
 
         self.mod_range = mod_range
         self.mod_phase = mod_phase
         self.mod_freq = mod_freq
         if isinstance(mod, int):
             self.mod = wavetables._window(mod, self.wtsize)
-        elif mod is not None:
-            self.mod = array('d', mod)
+        elif isinstance(mod, wavetables.Wavetable):
+            self.mod = interpolation._linear(mod.data, self.wtsize)
+        elif isinstance(mod, SoundBuffer):
+            if mod.channels > 1:
+                mod = mod.remix(1)
+            self.mod = interpolation._linear(mod.frames, self.wtsize)
+        elif isinstance(mod, list):
+            self.mod = interpolation._linear(array('d', mod), self.wtsize)
         else:
             self.mod = None
 
         self.lfo_freq = lfo_freq
         if isinstance(lfo, int):
             self.lfo = wavetables._window(lfo, self.wtsize)
-        elif lfo is not None:
-            self.lfo = array('d', lfo)
+        elif isinstance(lfo, wavetables.Wavetable):
+            self.lfo = interpolation._linear(lfo.data, self.wtsize)
+        elif isinstance(lfo, SoundBuffer):
+            if lfo.channels > 1:
+                lfo = lfo.remix(1)
+            self.lfo = interpolation._linear(lfo.frames, self.wtsize)
+        elif isinstance(lfo, list):
+            self.lfo = interpolation._linear(array('d', lfo), self.wtsize)
         else:
             self.lfo = None
+
+        if stack is not None and self.lfo is None:
+            self.lfo = wavetables._wavetable(wavetables.RSAW, self.wtsize)
 
     cpdef object play(self, 
              double length, 

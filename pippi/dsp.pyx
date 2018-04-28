@@ -49,6 +49,9 @@ def mix(sounds):
         out &= sound
 
     return out
+    
+cpdef wts.Wavetable wt(list values=None, int initwt=-1, int initwin=-1, int length=-1):
+    return wts.Wavetable(values, initwt, initwin, length)
 
 cpdef SoundBuffer stack(list sounds):
     cdef int channels = 0
@@ -68,25 +71,37 @@ cpdef SoundBuffer stack(list sounds):
     cdef int current_sound_index = 0
     cdef int source_channel_to_copy = 0
 
+    # TODO
     while copied_channels < channels:
         out.frames.base[:,channel_to_copy] = sounds[current_sound_index].frames.base[:,source_channel_to_copy]    
-
+        copied_channels += 1
 
     return out
 
-def join(sounds, channels=2, samplerate=44100):
+def join(sounds, overlap=None, channels=None, samplerate=None):
     """ Concatenate a list of sounds into a new sound
     """
-    out = SoundBuffer(length=1, channels=channels, samplerate=samplerate)
+    channels = channels or sounds[0].channels
+    samplerate = samplerate or sounds[0].samplerate
+
+    cdef double total_length = 0
+    cdef SoundBuffer sound
+
     for sound in sounds:
-        out += sound
+        total_length += sound.dur
+        if overlap is not None:
+            total_length -= overlap
+
+    out = SoundBuffer(length=total_length, channels=channels, samplerate=samplerate)
+
+    pos = 0
+    for sound in sounds:
+        out.dub(sound, pos)
+        pos += sound.dur
+        if overlap is not None:
+            pos -= overlap
 
     return out
-
-def silence(length=-1, channels=2, samplerate=44100):
-    """ Create a buffer of silence of a given length
-    """
-    return SoundBuffer(length=length, channels=channels, samplerate=samplerate)
 
 def buffer(frames=None, length=-1, channels=2, samplerate=44100):
     """ Identical to `silence` -- creates an empty buffer of a given length
@@ -118,13 +133,12 @@ def find(pattern, channels=2, samplerate=44100):
     for filename in glob.iglob(pattern, recursive=True):
         yield SoundBuffer(filename, channels=channels, samplerate=samplerate)
 
-def cloud(snd, *args, **kwargs):
-    return grains.GrainCloud(snd, *args, **kwargs)
-
-def pool(callback, params, processes=4):
+def pool(callback, reps=10, params=None, processes=4):
     out = []
+    if params is None:
+        params = [None]
     with mp.Pool(processes=processes) as process_pool:
-        for result in [ process_pool.apply_async(callback, p) for p in params ]:
+        for result in [ process_pool.apply_async(callback, params[i % len(params)]) for i in range(reps) ]:
             out += [ result.get() ]
 
     return out

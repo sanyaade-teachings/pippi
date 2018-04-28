@@ -3,6 +3,8 @@ from . cimport wavetables
 from . cimport interpolation
 from libc.stdlib cimport rand, RAND_MAX
 import numpy as np
+from cpython cimport array
+import array
 
 DEF MIN_DENSITY = 0.000001
 DEF MIN_SPEED = 0.000001
@@ -23,6 +25,8 @@ cdef class GrainCloud:
             int win=-1,
             double[:] win_wt=None,
             int win_length=DEFAULT_WTSIZE,
+
+            list mask=None,
 
             double freeze=-1, 
             int read_lfo=-1,
@@ -55,6 +59,7 @@ cdef class GrainCloud:
             double maxlength=DEFAULT_MAXGRAINLENGTH,    # max grain length in ms
             double spread=0,        # 0 = no panning, 1 = max random panning 
             double jitter=0,        # rhythm 0=regular, 1=totally random
+            double amp=1, 
         ):
 
         if spread < 0:
@@ -68,6 +73,12 @@ cdef class GrainCloud:
         self.spread = spread
         self.jitter = jitter
         self.freeze = freeze
+        self.amp = amp
+
+        cdef array.array cmask
+        if mask is not None:
+            cmask = array.array('i', mask)
+            self.mask = cmask
     
         # Window is always a wavetable, defaults to Hann
         if win > -1:
@@ -281,9 +292,13 @@ cdef class GrainCloud:
             if self.speed_lfo is not None:
                 self.speed = speed_frac_pos * (self.maxspeed - self.minspeed) + self.minspeed
 
+            #if self.mask is not None and self.mask[count] == 0:
+            #    pass
+
             if self.speed != 1:
                 adjusted_grainlength = <int>(grainlength * self.speed)
                 if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:
+
                     start = <int>(read_frac_pos * (input_length-adjusted_grainlength))
                     grain = self.buf[start:start+adjusted_grainlength] 
                     grain = grain.speed(self.speed)
@@ -302,7 +317,7 @@ cdef class GrainCloud:
                 grain = grain.pan(panpos)
 
             if write_pos + len(grain) < len(out):
-                out._dub(grain, write_pos)
+                out._dub(grain * self.amp, write_pos)
 
             self.grains_per_sec = <double>self.samplerate / (<double>len(grain) / 2.0)
             self.grains_per_sec *= density

@@ -89,7 +89,7 @@ There are more examples, give em a whirl, and try your own.
 
 Final (probably) feature releases / big api changes before going to beta.
 
-- Breaking API changes:
+- Breaking changes:
     - Durations for most APIs are now given in seconds (floats) rather than 
       integer frames. `len(SoundBuffer)` still returns a length in frames per
       python convention, and slicing into a `SoundBuffer` is also still done by frame
@@ -101,13 +101,36 @@ Final (probably) feature releases / big api changes before going to beta.
       The wavetypes available are `SINE`, `COS`, `TRI`, `SAW` (which is also aliased to 
       `PHASOR`), `RSAW` (reverse sawtooth), `HANN`, `HAMM`, `BLACK` or `BLACKMAN`, 
       `BART` or `BARTLETT`, `KAISER`, `SQUARE`, and the `RND` flag to select one at random.
+- `Osc` changes:
+    - Added 2d wavetable synthesis (similar to max/msp `2d.wave~`) to `Osc` plus example script
+    - To create a 2d `Osc`, use the `stack` keyword arg on initialization: `Osc(stack=[dsp.RND, [0,1], dsp.SINE], lfo=dsp.SINE)`
+    - `Osc` wavetables may be:
+        - an int flag for standard wavetables (dsp.SINE, dsp.TRI, etc)
+        - a python list of floats
+        - a wavetable instance
+        - a soundbuffer
+    - 2d wavetable stacks are a python list of any combination of the above.
+    - The same types are acceptable for:
+        - `wavetable` (the basic waveform)
+        - `window` (an optional window to apply to the waveform wavetable - useful for eg pulsar synthesis)
+        - `mod` (the frequency modulation wavetable)
+        - and `lfo` (the 2d modulation wavetable)
+- `SoundBuffer` changes:
+    - Added `remix` for remixing a soundbuffer from N channels to N channels.
+    - Panning algorithms operate on arbitrary numbers of channels (but use same algorithms applied to odd & even numbered channels instead of left & right)
+    - Return a reversed copy of a soundbuffer with `sound.reversed()` or reverse in place with `sound.reverse()`
+    - New ADSR envelopes with `sound.adsr(a=1, d=1, s=0.5, r=1)`
+    - Generate a `GrainCloud` from a `SoundBuffer` with `sound.cloud()`
+    - Clip samples to min/max with `sound.clip(minval=-1, maxval=1)`
+    - Taper ends of sounds (linear fade-in, fade-out) with `sound.taper(length)`
+- ADSR wavetable generator with `wavetables.adsr(a=100, d=100, s=0.5, r=100, 1024)`
+- New `Wavetable` type for `SoundBuffer`-like operator-overloaded wavetable manipulation & composition
 - New `GrainCloud` wavetable-driven granulator. See the `examples/swarmy_graincloud.py` example for more.
 - `GrainCloud`-driven pitch shift without time change (`sound.transpose(speed)`) 
    and time stretch without pitch shift (`sound.stretch(length)`) methods for `SoundBuffer`.
 - `dsp.cloud(SoundBuffer, *args, **kwargs)` shortcut for `GrainCloud` creation.
-- Added 2d wavetable synthesis (similar to max/msp `2d.wave~`) to `Osc` plus example script
 - Read wavetables from 1 channel sound files with `wavetables.fromfile`
-- Added a helper for async rendering with `multiprocessing.Pool`
+- Added a simple helper for async rendering with `multiprocessing.Pool`
 - `SoundBuffer`s can now be pickled (enables passing them between processes)
 - `SoundBuffer` can be initialized (and spread across channels) from a normal python list
 

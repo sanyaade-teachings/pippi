@@ -4,33 +4,32 @@
 from . import wavetables
 from . import interpolation
 from . import dsp
+import pyparsing
 
 REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
 
+CLAVE = {
+    'son':      'x..x..x...x.x...', 
+    'rumba':    'x..x...x..x.x...', 
+    'bell':     'x..x..xx..x.x..x', 
+    'tresillo': 'x..x..x.', 
+}
+
+
 def pattern(
-    p,              # Unicode pattern, 1 beat unit per char
-    meter=None,     # String rep like 9/8, 4/4 etc
-    beats=None,     # Number of beats to return (measured in smallest unit of meter)
-    offset=None,    # Beat offset start point in pattern, counting from 0
+    p,              # Pattern
+    beat=0.25,      # Beat length in seconds
+    length=1,       # Output length in seconds 
     bpm=None,       # Tempo in beats per minute
     hz=None,        # Or tempo in hz (overrides bpm)
     swing=0,        # MPC swing amount 0-1
-    reverse=False,  # Reverse the pattern
     lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
     lfo_tempo=None, # Lfo frequency in BPM string or Hz
     lfo_depth=None, # Fractional multiplier from original tempo
-    delay=0         # Fixed delay in fractional seconds added to each onset
+    delay=False     # Fixed delay in seconds added to each onset
 ):
     """ Onsets from ascii
     """
-    p = normalize_pattern(p, reverse, offset)
-
-    try:
-        numbeats, div = tuple(map(int, meter.split('/')))
-    except ValueError:
-        numbeats, div = (4, 4)
-
-    beats = beats if beats is not None else len(p)
 
     if bpm is not None:
         bpm = bpm if bpm > 0 else np.nextafter(0, 1)
@@ -38,21 +37,71 @@ def pattern(
     elif hz is not None:
         hz = hz if hz > 0 else np.nextafter(0, 1)
         beat = 1 / hz  
-    else:
-        beat = 0.25
 
-    onsets = []
-    # Todo apply LFO scaling during calc
-    for i in range(beats):
-        e = p[i % len(p)]
-        if e > 0:
-            t = i * beat
-            t += delay
-            onsets += [ t ]
+    positions = topositions(p, beat, length)
+    positions = onsetswing(onsets, swing, beat)
 
-    onsets = onsetswing(onsets, swing, beat)
+    if delay:
+        positions = [ pos + delay for pos in positions ]
 
-    return onsets
+    return positions
+
+def topositions(p, beat=0.25, length=1):
+    pos = 0
+    count = 0
+    div = 1
+    out = []
+
+    while pos < length:
+        index = count % len(p)
+        event = p[index]
+
+        if event in REST_SYMBOLS:
+            count += 1
+            pos += beat
+            continue
+
+        elif event == '[':
+            end = p.find(']', index) - 1
+            div = len(p[index : end])
+            beat /= div
+            count += 1
+            continue
+
+        elif event == ']':
+            beat *= div
+            count += 1
+            continue
+
+        out += [ pos ]
+        pos += beat
+        count += 1
+
+    return out
+
+def render(pattern, callback, beat=0.25, length=1, truncate=False):
+    out = dsp.buffer(length=length)
+
+    positions = topositions(pattern, beat, length)
+
+    for pos in positions:
+        clang = callback(pos/length)
+        if truncate and pos + clang.dur > length:
+            clang = clang.cut(0, length - pos)
+        out.dub(clang, pos)
+
+    return out
+
+
+def normalize_pattern(pattern, reverse=False, rotate=None):
+    pattern = [ 0 if tick in REST_SYMBOLS or not tick else 1 for tick in pattern ]
+    if reverse:
+        pattern = [ p for p in reversed(pattern) ]
+
+    if rotate:
+        pattern = [ 0 for _ in range(rotate) ] + pattern[:-rotate]
+
+    return pattern
 
 def onsetswing(onsets, amount, beat):
     """ Add MPC-style swing to a list of onsets.
@@ -94,16 +143,6 @@ def pgen(numbeats, div=1, offset=0, reps=None, reverse=False):
         pat = [ p for p in reversed(pat) ]
 
     return pat
-
-def normalize_pattern(pattern, reverse=False, rotate=None):
-    pattern = [ 0 if tick in REST_SYMBOLS or not tick else 1 for tick in pattern ]
-    if reverse:
-        pattern = [ p for p in reversed(pattern) ]
-
-    if rotate:
-        pattern = [ 0 for _ in range(rotate) ] + pattern[:-rotate]
-
-    return pattern
 
 def onsets(pattern, beat=0.2, length=None, start=0):
     length = length or len(pattern)

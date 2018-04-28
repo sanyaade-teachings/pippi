@@ -4,24 +4,6 @@ import random
 from unittest import TestCase
 from pippi import rhythm
 
-test_patterns = [
-    ((8, 1, 0, None, False), [1,1,1,1,1,1,1,1]), 
-    ((8, 2, 0, None, False), [1,0,1,0,1,0,1,0]), 
-    ((8, 3, 0, None, False), [1,0,0,1,0,0,1,0]), 
-    ((8, 4, 0, None, False), [1,0,0,0,1,0,0,0]), 
-    ((8, 5, 0, None, False), [1,0,0,0,0,1,0,0]), 
-    ((8, 6, 0, None, False), [1,0,0,0,0,0,1,0]), 
-    ((8, 7, 0, None, False), [1,0,0,0,0,0,0,1]), 
-    ((8, 8, 0, None, False), [1,0,0,0,0,0,0,0]), 
-
-    ((8, 3, 1, None, False), [0,1,0,0,1,0,0,1]), 
-    ((8, 2, 3, None, False), [0,0,0,1,0,1,0,1]), 
-    ((8, 4, 1, None, False), [0,1,0,0,0,1,0,0]), 
-
-    ((8, 2, 3, None, True), [1,0,1,0,1,0,0,0]), 
-    ((8, 3, 0, 2, False), [1,0,0,1,0,0,1,0, 1,0,0,1,0,0,1,0]), 
-]
-
 test_eu_patterns = [
     ((6, 3, 0, None, False), [1,0,1,0,1,0]), 
     ((6, 3, 0, 2, False), [1,0,1,0,1,0]*2), 
@@ -30,40 +12,27 @@ test_eu_patterns = [
     ((12, 3, 0, None, False), [1,0,0,0,1,0,0,0,1,0,0,0]), 
 ]
 
-test_topatterns = [
-    ('xx  ', [1,1,0,0]), 
-    ('xx- ', [1,1,0,0]), 
-    ('xx. ', [1,1,0,0]), 
-    ('-x..', [0,1,0,0]), 
-    ('X..1*!', [1,0,0,1,1,1]), 
-]
-
-test_onsets = [
-    ([1,1,0,0], 100, 6, 0, [0, 100, 400, 500]), 
-    ([0,1,0], 100, 8, 0, [100, 400, 700]), 
-    ([0,1,0], 100, 8, 50, [150, 450, 750]), 
-    ([0,1,0], 100, None, 50, [150]), 
+test_topositions = [
+    ('xxxx', 0.25, 1, [0, 0.25, 0.5, 0.75]), 
+    ('xxx.', 0.25, 1, [0, 0.25, 0.5]), 
+    ('xx.x', 0.25, 1, [0, 0.25, 0.75]), 
+    ('x..x', 0.25, 1, [0, 0.75]), 
+    ('x[xx]xx', 0.25, 1, [0, 0.25, 0.375, 0.5, 0.75]), 
+    ('x[.x]xx', 0.25, 1, [0, 0.375, 0.5, 0.75]), 
+    ('x[.x][xx].', 0.25, 1, [0, 0.375, 0.5, 0.625]), 
+    ('x[.x][xx]x', 0.25, 1, [0, 0.375, 0.5, 0.625, 0.75]), 
+    #('[xx][x[xx]]', 0.5, 1, [0, 0.25, 0.5, 0.75, 0.875]),  FIXME add nested beat divs
 ]
 
 class TestRhythm(TestCase):
-    def test_basic_patterns(self):
-        for pattern_args, result in test_patterns:
-            pattern = rhythm.pgen(*pattern_args)
-            self.assertEqual(pattern, result)
-
-    def test_basic_topatterns(self):
-        for pattern, result in test_topatterns:
-            pattern = rhythm.normalize_pattern(pattern)
-            self.assertEqual(pattern, result)
-
-    def test_onsets(self):
-        for pattern, beat, length, start, result in test_onsets:
-            onsets = rhythm.onsets(pattern, beat, length, start)
-            self.assertEqual(onsets, result)
-
     def test_eu(self):
         for args, result in test_eu_patterns:
             pattern = rhythm.eu(*args)
             self.assertEqual(pattern, result)
 
+    def test_topositions(self):
+        for pattern, beat, length, result in test_topositions:
+            pattern = rhythm.topositions(pattern, beat, length)
+            self.assertEqual(pattern, result)
 
+       
