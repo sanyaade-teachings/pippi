@@ -45,7 +45,7 @@ class TestGrainCloud(TestCase):
 
     def test_maxspeed_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        cloud = grains.GrainCloud(sound, speed=9999999999)
+        cloud = grains.GrainCloud(sound, speed=99)
 
         length = random.triangular(1, 4)
         framelength = int(length * sound.samplerate)

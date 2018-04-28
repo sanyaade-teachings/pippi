@@ -26,7 +26,7 @@ cdef double[:,:] _remix(double[:,:] values, int framelength, int channels):
         return out
 
     elif channels <= 1:
-        return np.sum(values[i], 1)
+        return np.sum(values, 1).reshape(len(values), 1)
 
     else:
         out = np.zeros((framelength, channels))

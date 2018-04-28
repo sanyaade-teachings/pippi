@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Alpha 9
+v2.0.0 - Beta 1 (In Development)
 
 ## Installation and setup
 
@@ -85,6 +85,10 @@ There are more examples, give em a whirl, and try your own.
     make test
 
 ## Release Notes
+
+### 2.0.0 - Beta 1 (In Development)
+
+- Fixed a bug with `SoundBuffer.remix` when mixing to a single channel
 
 ### 2.0.0 - Alpha 9
 

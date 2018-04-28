@@ -28,7 +28,7 @@ except ImportError:
 
 setup(
     name='pippi',
-    version='2.0.0-a9',
+    version='2.0.0-beta-1',
     description='Computer music with Python',
     author='He Can Jog',
     author_email='erik@hecanjog.com',
@@ -43,7 +43,7 @@ setup(
     keywords='algorithmic computer music', 
     python_requires='>=3',
     classifiers=[
-        'Development Status :: 3 - Alpha', 
+        'Development Status :: 4 - Beta', 
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
         'Intended Audience :: Other Audience', # Musicians and audio tinkerers, and of course anyone else...

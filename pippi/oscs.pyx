@@ -83,7 +83,7 @@ cdef class Osc:
         elif isinstance(wavetable, SoundBuffer):
             if wavetable.channels > 1:
                 wavetable = wavetable.remix(1)
-            self.wavetable = wavetable.frames
+            self.wavetable = wavetable.frames.base.flatten()
 
         elif wavetable is not None:
             self.wavetable = array('d', wavetable)
@@ -98,7 +98,7 @@ cdef class Osc:
                 elif isinstance(wt, SoundBuffer):
                     if wt.channels > 1:
                         wt = wt.remix(1)
-                    self.wavetables += [ interpolation._linear(wt.frames, self.wtsize) ]
+                    self.wavetables += [ interpolation._linear(wt.frames.base.flatten(), self.wtsize) ]
                 else:
                     self.wavetables += [ interpolation._linear(array('d', wt), self.wtsize) ]
 
@@ -110,7 +110,7 @@ cdef class Osc:
         elif isinstance(window, SoundBuffer):
             if window.channels > 1:
                 window = window.remix(1)
-            self.window = interpolation._linear(window.frames, self.wtsize)
+            self.window = interpolation._linear(window.frames.base.flatten(), self.wtsize)
         elif window is not None:
             self.window = interpolation._linear(array('d', window), self.wtsize)
         else:
@@ -126,7 +126,7 @@ cdef class Osc:
         elif isinstance(mod, SoundBuffer):
             if mod.channels > 1:
                 mod = mod.remix(1)
-            self.mod = interpolation._linear(mod.frames, self.wtsize)
+            self.mod = interpolation._linear(mod.frames.base.flatten(), self.wtsize)
         elif isinstance(mod, list):
             self.mod = interpolation._linear(array('d', mod), self.wtsize)
         else:
@@ -140,7 +140,7 @@ cdef class Osc:
         elif isinstance(lfo, SoundBuffer):
             if lfo.channels > 1:
                 lfo = lfo.remix(1)
-            self.lfo = interpolation._linear(lfo.frames, self.wtsize)
+            self.lfo = interpolation._linear(lfo.frames.base.flatten(), self.wtsize)
         elif isinstance(lfo, list):
             self.lfo = interpolation._linear(array('d', lfo), self.wtsize)
         else:

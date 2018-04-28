@@ -2,6 +2,7 @@ import random
 from unittest import TestCase
 
 from pippi.oscs import Osc
+from pippi.soundbuffer import SoundBuffer
 from pippi import dsp
 
 class TestOscs(TestCase):
