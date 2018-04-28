@@ -110,10 +110,10 @@ Final feature releases / big api changes before going to beta.
     - Added 2d wavetable synthesis (similar to max/msp `2d.wave~`) to `Osc` plus example script
     - To create a 2d `Osc`, use the `stack` keyword arg on initialization: `Osc(stack=[dsp.RND, [0,1], dsp.SINE], lfo=dsp.SINE)`
     - `Osc` wavetables may be:
-        - an int flag for standard wavetables (dsp.SINE, dsp.TRI, etc)
-        - a python list of floats
-        - a wavetable instance
-        - a soundbuffer
+        - an int flag for standard wavetables (`dsp.SINE`, `dsp.TRI`, etc)
+        - a python list of floats (`[0,1,0.5,0.3]`)
+        - a wavetable (`wavetables.Wavetable([0,1,0,1])`)
+        - a soundbuffer (`soundbuffer.SoundBuffer(filename='something.flac')`)
     - 2d wavetable stacks are a python list of any combination of the above.
     - The same types are acceptable for:
         - `wavetable` (the basic waveform)
