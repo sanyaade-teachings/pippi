@@ -28,7 +28,7 @@ except ImportError:
 
 setup(
     name='pippi',
-    version='2.0.0-a8',
+    version='2.0.0-a9',
     description='Computer music with Python',
     author='He Can Jog',
     author_email='erik@hecanjog.com',
@@ -37,7 +37,7 @@ setup(
     ext_modules=ext_modules, 
     install_requires=[
         'numpy', 
-        'Pillow-SIMD', 
+        'Pillow', 
         'PySoundFile'
     ], 
     keywords='algorithmic computer music', 
