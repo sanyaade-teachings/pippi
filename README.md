@@ -8,12 +8,12 @@ Pippi requires python 3 which can be found here:
 
     https://www.python.org/downloads/
 
-I'm just testing against the latest stable version (currently 3.6.2) at the moment.
+I'm just testing against the latest stable version (the 3.6.x branch) at the moment.
 
 I recommend you install pippi and work from a python virtualenv, which 
 is built into the standard library in recent versions of python.
 
-Create a virtualenv in a directory called `venv` with python 3.6+:
+Create a python 3 virtualenv in a directory called `venv`:
 
     python3 -m venv venv
 
@@ -34,6 +34,7 @@ To use the most recent release from pip, just:
 Or to install the most recent development version, clone this repo 
 and install with the `-e` / 'editable' option. (Also note the `.` pointing to the current working directory.)
 
+    pip install -r requirements.txt
     pip install -e .
 
 Pippi uses `numpy`, [pysndfile][psf], and Cython which all 
