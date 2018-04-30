@@ -129,6 +129,8 @@ cdef class Osc:
             self.mod = interpolation._linear(mod.frames.base.flatten(), self.wtsize)
         elif isinstance(mod, list):
             self.mod = interpolation._linear(array('d', mod), self.wtsize)
+        elif mod is not None:
+            self.mod = mod
         else:
             self.mod = None
 
@@ -246,18 +248,39 @@ cdef class Osc:
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
         cdef double[:,:] stack = np.column_stack(self.wavetables)
         cdef int stack_depth = len(self.wavetables)
-
+        cdef double isamplerate = (1.0 / self.samplerate)
         cdef double wt_lfo_phase_inc = len(self.lfo) * (1.0 / length)
-        cdef double phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
-        cdef double wt_phase_inc = self.freq * self.wtsize * (1.0 / self.samplerate)
+        cdef double phase_inc = self.freq * self.wtsize * isamplerate
+        cdef double wt_phase_inc = self.freq * self.wtsize * isamplerate
 
         cdef double wt_lfo_phase, wt_lfo_frac, wt_lfo_y0, wt_lfo_y1, wt_lfo_pos
         cdef double stack_frac, stack_phase
         cdef double phase, frac, y0, y1, val
+        cdef double wt_mod_val = 1
+        cdef double wt_mod_phase = 0
+        cdef double wt_mod_frac = 0
+        cdef double wt_mod_next = 0
 
-        cdef int i, wt_lfo_x, stack_x, channel
+        cdef int i, wt_lfo_x, stack_x, channel, wt_mod_i
+        cdef int wt_mod_length = 1 if self.mod is None else len(self.mod)
+        cdef int wt_mod_boundry = wt_mod_length - 1
+        cdef double wt_phase = 0
+        cdef double wt_mod_phase_inc = self.mod_freq * wt_mod_length * isamplerate
 
         for i in range(length):
+            if self.mod is not None:
+                wt_mod_i = <int>self.mod_phase % wt_mod_length
+                if wt_mod_i < wt_mod_boundry:
+                    wt_mod_next = self.mod[wt_mod_i + 1]
+                else:
+                    wt_mod_next = self.mod[0]
+
+                wt_mod_frac = self.mod_phase - <int>self.mod_phase
+                wt_mod_val = self.mod[wt_mod_i]
+                wt_mod_val = (1.0 - wt_mod_frac) * wt_mod_val + wt_mod_frac * wt_mod_next
+                wt_mod_val = 1.0 + (wt_mod_val * self.mod_range)
+                self.mod_phase += wt_mod_phase_inc
+
             wt_lfo_phase = i * wt_lfo_phase_inc
             wt_lfo_x = <int>wt_lfo_phase
             wt_lfo_frac = wt_lfo_phase - wt_lfo_x
@@ -268,7 +291,7 @@ cdef class Osc:
 
             stack_phase = wt_lfo_pos * stack_depth
             stack_x = <int>stack_phase
-            wt_phase = i * wt_phase_inc
+            wt_phase += wt_phase_inc * wt_mod_val
             wt_x = <int>wt_phase
             stack_frac = stack_phase - stack_x
 
