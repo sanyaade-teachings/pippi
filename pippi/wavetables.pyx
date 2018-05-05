@@ -445,6 +445,14 @@ cdef double[:] _window(int window_type, int length):
     return wt
 
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release):
+    cdef int alen = attack + decay + release
+    cdef double mult = 1
+    if alen > framelength:
+        mult = <double>framelength / <double>alen
+        attack = <int>(mult * attack)
+        decay = <int>(mult * decay)
+        release = <int>(mult * release)
+
     cdef int decay_breakpoint = decay + attack
     cdef int sustain_breakpoint = framelength - release
     cdef int decay_framelength = decay_breakpoint - attack
