@@ -11,7 +11,7 @@ def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mul
 
     x = range(width*upsample_x)
 
-    img = Image.new('RGBA', (width, height), (255, 255, 255, 0))
+    img = Image.new('RGBA', (width, height), (255, 255, 255, 255))
     draw = ImageDraw.Draw(img)
 
     for channel in range(sound.channels):

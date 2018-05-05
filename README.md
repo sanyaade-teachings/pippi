@@ -88,6 +88,7 @@ There are more examples, give em a whirl, and try your own.
 
 ### 2.0.0 - Beta 1 (In Development)
 
+- Better overflow handling in `SoundBuffer.adsr`
 - Fixed a bug with `SoundBuffer.remix` when mixing to a single channel
 
 ### 2.0.0 - Alpha 9

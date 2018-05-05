@@ -190,6 +190,19 @@ cdef class SoundBuffer:
 
 
     cdef SoundBuffer _adsr(self, double attack, double decay, double sustain, double release):
+        sustain = min(max(0, sustain), 1)
+        attack = max(0, attack)
+        decay = max(0, decay)
+        release = max(0, release)
+
+        cdef double alen = attack + decay + release
+        cdef double mult = 1
+        if alen > self.dur:
+            mult = self.dur / alen
+            attack *= mult
+            decay *= mult
+            release *= mult
+
         cdef int framelength = len(self)
         cdef int attack_breakpoint = <int>(<double>self.samplerate * attack)
         cdef int decay_breakpoint = <int>(<double>self.samplerate * decay) + attack_breakpoint
@@ -208,7 +221,8 @@ cdef class SoundBuffer:
                 self.frames.base[i] = self.frames.base[i] * sustain
 
             else:
-                self.frames.base[i] = self.frames.base[i] * ((1 - ((i - sustain_breakpoint) / <double>release_framelength)) * sustain)
+                release = 1 - ((i - sustain_breakpoint) / <double>release_framelength)
+                self.frames.base[i] = self.frames.base[i] * release * sustain
 
         return self
 

@@ -265,7 +265,7 @@ cdef class Osc:
         cdef int wt_mod_length = 1 if self.mod is None else len(self.mod)
         cdef int wt_mod_boundry = wt_mod_length - 1
         cdef double wt_phase = 0
-        cdef double wt_mod_phase_inc = self.mod_freq * wt_mod_length * isamplerate
+        cdef double wt_mod_phase_inc = self.mod_freq * (1.0 / length) * wt_mod_length
 
         for i in range(length):
             if self.mod is not None:
@@ -277,24 +277,24 @@ cdef class Osc:
 
                 wt_mod_frac = self.mod_phase - <int>self.mod_phase
                 wt_mod_val = self.mod[wt_mod_i]
-                wt_mod_val = (1.0 - wt_mod_frac) * wt_mod_val + wt_mod_frac * wt_mod_next
+                wt_mod_val = (1.0 - wt_mod_frac) * wt_mod_val + (wt_mod_frac * wt_mod_next)
                 wt_mod_val = 1.0 + (wt_mod_val * self.mod_range)
                 self.mod_phase += wt_mod_phase_inc
 
+            # Calculate stack LFO position
             wt_lfo_phase = i * wt_lfo_phase_inc
             wt_lfo_x = <int>wt_lfo_phase
             wt_lfo_frac = wt_lfo_phase - wt_lfo_x
             wt_lfo_y0 = self.lfo[wt_lfo_x % len(self.lfo)]
             wt_lfo_y1 = self.lfo[(wt_lfo_x + 1) % len(self.lfo)]
-
             wt_lfo_pos = (1.0 - wt_lfo_frac) * wt_lfo_y0 + (wt_lfo_frac * wt_lfo_y1)
 
+            # Calculate wavetable value based on LFO position
             stack_phase = wt_lfo_pos * stack_depth
             stack_x = <int>stack_phase
-            wt_phase += wt_phase_inc * wt_mod_val
+            wt_phase += (wt_phase_inc * wt_mod_val)
             wt_x = <int>wt_phase
             stack_frac = stack_phase - stack_x
-
             y0 = self.wavetables[stack_x % stack_depth][wt_x % self.wtsize]
             y1 = self.wavetables[(stack_x + 1) % stack_depth][wt_x % self.wtsize]
             val = (1.0 - stack_frac) * y0 + (stack_frac * y1)
