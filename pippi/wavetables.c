@@ -2624,7 +2624,7 @@ static int __pyx_pf_5pippi_10wavetables_9Wavetable___cinit__(struct __pyx_obj_5p
  * 
  *         if values is not None:             # <<<<<<<<<<<<<<
  *             self.data = np.array(values)
- *         elif initwt < 0:
+ *         elif initwt >= 0:
  */
   __pyx_t_1 = (__pyx_v_values != ((PyObject*)Py_None));
   __pyx_t_2 = (__pyx_t_1 != 0);
@@ -2634,7 +2634,7 @@ static int __pyx_pf_5pippi_10wavetables_9Wavetable___cinit__(struct __pyx_obj_5p
  * 
  *         if values is not None:
  *             self.data = np.array(values)             # <<<<<<<<<<<<<<
- *         elif initwt < 0:
+ *         elif initwt >= 0:
  *             self.data = _wavetable(initwt, length)
  */
     __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
@@ -2698,7 +2698,7 @@ static int __pyx_pf_5pippi_10wavetables_9Wavetable___cinit__(struct __pyx_obj_5p
  * 
  *         if values is not None:             # <<<<<<<<<<<<<<
  *             self.data = np.array(values)
- *         elif initwt < 0:
+ *         elif initwt >= 0:
  */
     goto __pyx_L4;
   }
@@ -2706,19 +2706,19 @@ static int __pyx_pf_5pippi_10wavetables_9Wavetable___cinit__(struct __pyx_obj_5p
   /* "pippi/wavetables.pyx":89
  *         if values is not None:
  *             self.data = np.array(values)
- *         elif initwt < 0:             # <<<<<<<<<<<<<<
+ *         elif initwt >= 0:             # <<<<<<<<<<<<<<
  *             self.data = _wavetable(initwt, length)
- *         elif initwin < 0:
+ *         elif initwin >= 0:
  */
-  __pyx_t_2 = ((__pyx_v_initwt < 0) != 0);
+  __pyx_t_2 = ((__pyx_v_initwt >= 0) != 0);
   if (__pyx_t_2) {
 
     /* "pippi/wavetables.pyx":90
  *             self.data = np.array(values)
- *         elif initwt < 0:
+ *         elif initwt >= 0:
  *             self.data = _wavetable(initwt, length)             # <<<<<<<<<<<<<<
- *         elif initwin < 0:
- *             self.data = _window(initwt, length)
+ *         elif initwin >= 0:
+ *             self.data = _window(initwin, length)
  */
     __pyx_t_7 = __pyx_f_5pippi_10wavetables__wavetable(__pyx_v_initwt, __pyx_v_length); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 90, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->data, 0);
@@ -2729,48 +2729,48 @@ static int __pyx_pf_5pippi_10wavetables_9Wavetable___cinit__(struct __pyx_obj_5p
     /* "pippi/wavetables.pyx":89
  *         if values is not None:
  *             self.data = np.array(values)
- *         elif initwt < 0:             # <<<<<<<<<<<<<<
+ *         elif initwt >= 0:             # <<<<<<<<<<<<<<
  *             self.data = _wavetable(initwt, length)
- *         elif initwin < 0:
+ *         elif initwin >= 0:
  */
     goto __pyx_L4;
   }
 
   /* "pippi/wavetables.pyx":91
- *         elif initwt < 0:
+ *         elif initwt >= 0:
  *             self.data = _wavetable(initwt, length)
- *         elif initwin < 0:             # <<<<<<<<<<<<<<
- *             self.data = _window(initwt, length)
+ *         elif initwin >= 0:             # <<<<<<<<<<<<<<
+ *             self.data = _window(initwin, length)
  *         else:
  */
-  __pyx_t_2 = ((__pyx_v_initwin < 0) != 0);
+  __pyx_t_2 = ((__pyx_v_initwin >= 0) != 0);
   if (__pyx_t_2) {
 
     /* "pippi/wavetables.pyx":92
  *             self.data = _wavetable(initwt, length)
- *         elif initwin < 0:
- *             self.data = _window(initwt, length)             # <<<<<<<<<<<<<<
+ *         elif initwin >= 0:
+ *             self.data = _window(initwin, length)             # <<<<<<<<<<<<<<
  *         else:
  *             self.data = None
  */
-    __pyx_t_7 = __pyx_f_5pippi_10wavetables__window(__pyx_v_initwt, __pyx_v_length); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 92, __pyx_L1_error)
+    __pyx_t_7 = __pyx_f_5pippi_10wavetables__window(__pyx_v_initwin, __pyx_v_length); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 92, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->data, 0);
     __pyx_v_self->data = __pyx_t_7;
     __pyx_t_7.memview = NULL;
     __pyx_t_7.data = NULL;
 
     /* "pippi/wavetables.pyx":91
- *         elif initwt < 0:
+ *         elif initwt >= 0:
  *             self.data = _wavetable(initwt, length)
- *         elif initwin < 0:             # <<<<<<<<<<<<<<
- *             self.data = _window(initwt, length)
+ *         elif initwin >= 0:             # <<<<<<<<<<<<<<
+ *             self.data = _window(initwin, length)
  *         else:
  */
     goto __pyx_L4;
   }
 
   /* "pippi/wavetables.pyx":94
- *             self.data = _window(initwt, length)
+ *             self.data = _window(initwin, length)
  *         else:
  *             self.data = None             # <<<<<<<<<<<<<<
  * 

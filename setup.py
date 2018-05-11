@@ -8,6 +8,7 @@ try:
         'pippi/oscs.pyx', 
         'pippi/defaults.pyx', 
         'pippi/dsp.pyx', 
+        'pippi/fx.pyx', 
         'pippi/soundbuffer.pyx', 
         'pippi/interpolation.pyx',
         'pippi/grains.pyx',
@@ -19,6 +20,7 @@ except ImportError:
     ext_modules = [
         Extension('pippi.oscs', ['pippi/oscs.c']), 
         Extension('pippi.dsp', ['pippi/dsp.c']), 
+        Extension('pippi.fx', ['pippi/fx.c']), 
         Extension('pippi.grains', ['pippi/grains.c']), 
         Extension('pippi.defaults', ['pippi/defaults.c']), 
         Extension('pippi.soundbuffer', ['pippi/soundbuffer.c']), 
@@ -33,7 +35,7 @@ setup(
     author='He Can Jog',
     author_email='erik@hecanjog.com',
     url='https://github.com/hecanjog/pippi',
-    packages=['pippi'],
+    packages=['pippi', 'pippi.tune'],
     ext_modules=ext_modules, 
     install_requires=[
         'numpy', 

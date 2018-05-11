@@ -88,8 +88,17 @@ There are more examples, give em a whirl, and try your own.
 
 ### 2.0.0 - Beta 1 (In Development)
 
+#### Features
+
+- Added `fx` module
+- Added first pass `fx.go` granular overdrive effect. See `examples/fxgo_example.py` for usage.
+
+#### Bugfixes
+
+- Fixed a packaging issue preventing the `tune` module from loading.
 - Better overflow handling in `SoundBuffer.adsr` and `wavetables.adsr`
 - Fixed a bug with `SoundBuffer.remix` when mixing to a single channel
+- Fixed a bug during `Wavetable` initialization when using wavetable flags to create a window.
 
 ### 2.0.0 - Alpha 9
 

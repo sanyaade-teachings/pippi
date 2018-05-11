@@ -24,7 +24,7 @@ def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mul
             y = int(((point + 1) / 2) * (height - (stroke * 2)) + stroke)
             pos /= upsample_x
             mapped_points += [ (pos, y) ]
-            #draw.ellipse((pos-stroke, y-stroke, pos+stroke, y+stroke), fill=color)
+            draw.ellipse((pos-stroke, y-stroke, pos+stroke, y+stroke), fill=color)
         draw.line(mapped_points, fill=color, width=stroke)
 
     if show_axis:

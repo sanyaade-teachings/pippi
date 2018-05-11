@@ -86,10 +86,10 @@ cdef class Wavetable:
 
         if values is not None:
             self.data = np.array(values)
-        elif initwt < 0:
+        elif initwt >= 0:
             self.data = _wavetable(initwt, length)
-        elif initwin < 0:
-            self.data = _window(initwt, length)
+        elif initwin >= 0:
+            self.data = _window(initwin, length)
         else:
             self.data = None
 

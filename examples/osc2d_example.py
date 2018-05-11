@@ -4,65 +4,114 @@ from pippi import dsp, oscs, tune, wavetables
 
 start_time = time.time()
 
-tlength = 600
+tlength = 200
 out = dsp.buffer(length=tlength)
 pos = 0
 count = 0
 count2 = 0
 
 def make_note(freq, amp, length):
-    numtables = random.randint(1, random.randint(5, 20))
-    lfo = wavetables.randline(random.randint(10, random.randint(100, 1000)))
-    lfo_freq = random.triangular(0.01, 30)
+    lfo = dsp.SINE
+    lfo_freq = random.triangular(0.001, 15)
 
-    mod = wavetables.randline(random.randint(10, 100))
+    # Frequency modulation wavetable
+    mod = wavetables.randline(random.randint(10, 30))
+
+    # Frequency of the freq mod wavetable
     mod_freq = random.triangular(0.001, 2)
-    if random.random() > 0.75:
-        mod_range = random.triangular(0, random.triangular(0.05, 1))
-    else:
-        mod_range = random.triangular(0, 0.03)
+
+    # Range / depth of the freq mod wavetable
+    mod_range = random.triangular(0, 0.025)
 
     pulsewidth = random.random()
 
+    # Fill up a stack of wavetables to give to the Osc.
+    # The lfo wavetable above will control the morph position 
+    # in the wavetable stack during the render.
     stack = []
+    numtables = random.randint(3, 30)
     for _ in range(numtables):
-        if random.random() > 0.5:
-            stack += [ random.choice([dsp.SINE, dsp.SQUARE, dsp.TRI, dsp.SAW]) ]
+        if random.random() > 0.25:
+           stack += [ random.choice([dsp.SINE, dsp.TRI]) ]
         else:
-            stack += [ wavetables.randline(random.randint(3, random.randint(10, 200))) ]
+           stack += [ wavetables.randline(random.randint(3, random.randint(5, 50))) ]
 
-    return oscs.Osc(stack=stack, window=dsp.SINE, mod=mod, lfo=lfo, pulsewidth=pulsewidth, mod_freq=mod_freq, mod_range=mod_range, lfo_freq=lfo_freq).play(length=length, freq=freq, amp=amp)
+    # ADSR params
+    a = random.triangular(0.1, 1)
+    d = random.triangular(0.01, 3)
+    s = random.triangular(0.03, 0.15)
+    r = random.triangular(0.1, 10)
+
+    # Render a note
+    note = oscs.Osc(
+                stack=stack, 
+                window=dsp.SINE,
+                mod=mod, 
+                pulsewidth=pulsewidth, 
+                mod_freq=mod_freq, 
+                mod_range=mod_range, 
+                lfo=lfo, 
+                lfo_freq=lfo_freq
+            ).play(length=length, freq=freq, amp=amp).adsr(a=a,d=d,s=s,r=r)
+
+    # Sometimes mix in a granulated layer of the note
+    if random.random() > 0.75:
+        a = random.triangular(5, 10)
+        d = random.triangular(0.1, 20)
+        s = random.triangular(0.01, 0.1)
+        r = random.triangular(5, 10)
+
+        arp = note.cloud(length * random.triangular(1.5, 3), 
+                    win=dsp.HANN, 
+                    minlength=(note.dur/50)*1000, 
+                    maxlength=(note.dur/3)*1000, 
+                    grainlength_lfo_wt=wavetables.randline(random.randint(10, 100)),
+                    mindensity=0.1, 
+                    maxdensity=random.triangular(0.25, 0.75), 
+                    spread=1, 
+                    speed=random.choice([1, 1.5, 2]),
+                    jitter=random.triangular(0, 0.05),
+                    density_lfo_wt=wavetables.randline(random.randint(5, 50)),
+                ).adsr(a,d,s,r)
+        note.dub(arp, 0)
+
+    return note
 
 
 def get_freqs(count):
-    chords = ['II', 'V9', 'vii*', 'IV7']
-    return tune.chord(chords[count % len(chords)], octave=1)
+    # mahjong by wayne shorter
+    chords = (['i11', 'VII69'] * 6) + (['VI9', 'VII69'] * 4) + (['VI7', 'vii7', 'III7', 'VI9', 'vi7', 'II7']) + (['i11', 'VII69'] * 6)
+    chords = ['i','i','i','I','I','I69','i','i','i']
+    return tune.chord(chords[count % len(chords)], octave=2)
 
 freqs = get_freqs(0)
+beat = 1
 
+blens = [] 
+blens += [beat * 0.25] * 5 
+blens += [beat * 0.5] * 25 
+blens += [beat] * 25 
+
+random.seed(1992)
+drift = 0 
 while pos < tlength:
-    print('Swell %s, pos %s' % (count, pos))
-
-    length = random.triangular(0.04, 40)
-    freqs = get_freqs(count // 8)
+    length = random.choice(blens)
+    freqs = get_freqs(count // 3)
     params = []
-    reps = random.randint(20, 30)
+    reps = random.choice([1,2,3,4,8])
+    dist = random.choice(blens) / reps
 
+    print('Swell %s, pos %s, reps %s, length %s' % (count, pos, reps, length))
     for _ in range(reps):
-        freq = freqs[count2 % len(freqs)] * 2**random.randint(0, 4)
-        amp = random.triangular(0.001, 0.02)
-        params += [ (freq, amp, length * random.triangular(0.75, 1.5)) ]
+        freq = freqs[(count2 // random.randint(1,3)) % len(freqs)] * 2**random.randint(0, 3)
+        amp = random.triangular(0.05, 0.15)
+        note = make_note(freq, amp, length)
+        out.dub(note, pos)
         count2 += 1
-
-    notes = dsp.pool(make_note, random.randint(5,10), params)
-
-    for note in notes:
-        note = note.adsr(a=0.01, d=0.1, s=0.5, r=0.1) * wavetables.randline(random.randint(10, 100))
-        out.dub(note, pos + random.triangular(0, 0.1))
+        pos += dist + drift
+        drift += random.triangular(-0.002, 0.005)
 
     count += 1
-    count2 += 1
-    pos += random.triangular(length * 0.75, length * 1.25)
 
 out.write('osc2d_out.wav')
 

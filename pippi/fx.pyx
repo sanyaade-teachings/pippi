@@ -1,20 +1,54 @@
 import numpy as np
+import random
+cimport cython
+from .soundbuffer cimport SoundBuffer
+from . cimport wavetables
+from . import graph
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef double _butter(double x, double y0, double y1, double y2, double y3):
-    """ Taken from version #2 by James McCartney 
-        http://musicdsp.org/showone.php?id=93
-    """
-    cdef double c0 = y1
-    cdef double c1 = 0.5 * (y2 - y0)
-    cdef double c3 = 1.5 * (y1 - y2) + 0.5 * (y3 - y0)
-    cdef double c2 = y0 - y1 + c1 - c3
+cdef double MINDENSITY = 0.001
 
-    return ((c3 * x + c2) * x + c1) * x + c0
+cpdef SoundBuffer go(SoundBuffer snd, 
+                          double factor=30,
+                          double density=1, 
+                          double wet=1,
+                          double minlength=0.01, 
+                          double maxlength=0.06, 
+                          double minclip=0.4, 
+                          double maxclip=0.8, 
+                          object win=None
+                    ):
+    if wet <= 0:
+        return snd
 
+    density = max(MINDENSITY, density)
 
-def lowpass(snd, freq):
-    pass
+    cdef double outlen = snd.dur + maxlength
+    cdef SoundBuffer out = SoundBuffer(length=outlen, channels=snd.channels, samplerate=snd.samplerate)
+    cdef wavetables.Wavetable window
+    if win is None:
+        window = wavetables.Wavetable(initwin=wavetables.HANN)
+    else:
+        window = wavetables.Wavetable(win)
 
+    cdef double grainlength = random.triangular(minlength, maxlength)
+    cdef double pos = 0
+    cdef double clip
+    cdef SoundBuffer grain
 
+    while pos < outlen:
+        grain = snd.cut(pos, grainlength)
+        clip = random.triangular(minclip, maxclip)
+        grain *= random.triangular(0, factor * wet)
+        grain = grain.clip(-clip, clip)
+        out.dub(grain * window.data, pos)
+
+        pos += (grainlength/2) * (1/density)
+        grainlength = random.triangular(minlength, maxlength)
+
+    if wet > 0:
+        out *= wet
+
+    if wet < 1:
+        out.dub(snd * abs(wet-1), 0)
+
+    return out
