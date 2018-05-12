@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Beta 1
+v2.0.0 - Beta 2 (In Development)
 
 ## Installation and setup
 
@@ -70,10 +70,21 @@ Please let me know if you run into problems!
 
 ## Run the multi snare bounce example
 
-    cd examples
-    python multi_snare_bounce.py
+    python examples/multi_snare_bounce.py
 
 Which will produce a WAV file named `multi_snare_bounce_example.wav` in the examples directory.
+
+## Run every example
+
+    make examples
+
+Which will run every example, creating files in the examples directory.
+
+## Make an examples mix
+
+    make mix
+
+Render every example and stitch them into a single audio file with `sox`.
 
 ## Now what?
 
@@ -85,6 +96,12 @@ There are more examples, give em a whirl, and try your own.
     make test
 
 ## Release Notes
+
+### 2.0.0 - Beta 2 (In Development)
+
+#### Bugfixes
+
+- Examples can be run from anywhere
 
 ### 2.0.0 - Beta 1
 

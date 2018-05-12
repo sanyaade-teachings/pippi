@@ -1,9 +1,12 @@
 import random
 import time
 from pippi import dsp, sampler, tune, rhythm
+import os
 
+PATH = os.path.dirname(os.path.realpath(__file__))
 start_time = time.time()
-samp = sampler.Sampler('sounds/harpc2.wav', 'c2')
+
+samp = sampler.Sampler('%s/sounds/harpc2.wav' % PATH, 'c2')
 
 out = dsp.buffer(length=32)
 chords = ['iii', 'vi', 'ii', 'V']
@@ -32,7 +35,7 @@ for i in range(32):
 
     pos += 1
 
-out.write('sampler_example.wav')
+out.write('%s/sampler_example.wav' % PATH)
 elapsed_time = time.time() - start_time
 print('Render time: %s seconds' % round(elapsed_time, 2))
 print('Output length: %s seconds' % round(len(out)/44100, 2))

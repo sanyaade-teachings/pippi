@@ -1,12 +1,14 @@
 import time
 from pippi import dsp
+import os
 
+PATH = os.path.dirname(os.path.realpath(__file__))
 start_time = time.time()
 
 # Load some boinging into a SoundBuffer. Or:
 #   from pippi.soundbuffer import SoundBuffer
 #   snd = SoundBuffer(filename='sounds/boing.wav')
-snd = dsp.read('sounds/boing.wav')
+snd = dsp.read('%s/sounds/boing.wav' % PATH)
 
 # Returns an empty SoundBuffer instance that 
 # we can dub our grains into. Or:
@@ -39,7 +41,7 @@ for i in range(num_passes):
         recordhead += i * 0.01 + 0.01
 
 # Write the output buffer to a WAV file
-out.write('simple_grains.wav')
+out.write('%s/simple_grains.wav' % PATH)
 elapsed_time = time.time() - start_time
 print('Render time: %s seconds' % round(elapsed_time, 2))
 print('Output length: %s seconds' % round(out.dur, 2))

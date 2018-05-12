@@ -1,10 +1,12 @@
 import random
 import time
 from pippi import dsp, oscs, tune, wavetables
+import os
 
+PATH = os.path.dirname(os.path.realpath(__file__))
 start_time = time.time()
 
-tlength = 200
+tlength = 20
 out = dsp.buffer(length=tlength)
 pos = 0
 count = 0
@@ -101,7 +103,6 @@ while pos < tlength:
     reps = random.choice([1,2,3,4,8])
     dist = random.choice(blens) / reps
 
-    print('Swell %s, pos %s, reps %s, length %s' % (count, pos, reps, length))
     for _ in range(reps):
         freq = freqs[(count2 // random.randint(1,3)) % len(freqs)] * 2**random.randint(0, 3)
         amp = random.triangular(0.05, 0.15)
@@ -113,7 +114,7 @@ while pos < tlength:
 
     count += 1
 
-out.write('osc2d_out.wav')
+out.write('%s/osc2d_out.wav' % PATH)
 
 elapsed_time = time.time() - start_time
 print('Render time: %s seconds' % round(elapsed_time, 2))

@@ -1,11 +1,14 @@
 from pippi import dsp, rhythm
 import random
+import os
+
+PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Create an empty buffer to dub sounds into
 out = dsp.buffer()
 
 # Load a snare drum sample from the `sounds` directory
-snare = dsp.read('sounds/snare.wav')
+snare = dsp.read('%s/sounds/snare.wav' % PATH)
 
 # Make a random number of passes dubbing into the 
 # output buffer. On each pass...
@@ -56,4 +59,4 @@ for _ in range(numpasses):
         out.dub(hit, pos)
 
 # Write the sound to disk
-out.write('multi_snare_bounce_example.wav')
+out.write('%s/multi_snare_bounce_example.wav' % PATH)

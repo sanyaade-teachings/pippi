@@ -1,7 +1,10 @@
 from pippi import dsp, grains, interpolation
 import random
+import os
 
-snd = dsp.read('sounds/linus.wav')
+PATH = os.path.dirname(os.path.realpath(__file__))
+
+snd = dsp.read('%s/sounds/linus.wav' % PATH)
 
 def makecloud(density):
     return grains.GrainCloud(snd * 0.125, 
@@ -27,4 +30,4 @@ out = dsp.buffer(length=20)
 for cloud in clouds:
     out.dub(cloud)
 
-out.write('swarmy_graincloud.wav')
+out.write('%s/swarmy_graincloud.wav' % PATH)

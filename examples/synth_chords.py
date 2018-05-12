@@ -1,7 +1,9 @@
 import random
 import time
 from pippi import dsp, oscs, tune
+import os
 
+PATH = os.path.dirname(os.path.realpath(__file__))
 start_time = time.time()
 
 def make_wavetable():
@@ -36,7 +38,7 @@ for chord in chords.split(' ') * 8:
 
     dubhead += chordlength - (chordlength * 0.1)
 
-out.write('synth_chords.wav')
+out.write('%s/synth_chords.wav' % PATH)
 elapsed_time = time.time() - start_time
 print('Render time: %s seconds' % round(elapsed_time, 2))
 print('Output length: %s seconds' % round(out.dur, 2))

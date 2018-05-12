@@ -1,13 +1,16 @@
 import random
 from pippi import dsp, graph
+import os
+
+PATH = os.path.dirname(os.path.realpath(__file__))
 
 buflength = 5
 out = dsp.buffer(length=buflength)
 
 sounds = [ 
-    dsp.read('sounds/snare.wav'), 
-    dsp.read('sounds/boing.wav'), 
-    dsp.read('sounds/hat.wav'), 
+    dsp.read('%s/sounds/snare.wav' % PATH), 
+    dsp.read('%s/sounds/boing.wav' % PATH), 
+    dsp.read('%s/sounds/hat.wav' % PATH), 
 ]
 
 numsounds = random.randint(3, 5)
@@ -22,4 +25,4 @@ for _ in range(numsounds):
 
     out.dub(sound, start)
 
-graph.waveform(out, 'draw_waveform_example.png', width=600, height=300)
+graph.waveform(out, '%s/draw_waveform_example.png' % PATH, width=600, height=300)

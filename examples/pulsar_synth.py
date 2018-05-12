@@ -1,7 +1,9 @@
 import random
 import time
 from pippi import dsp, oscs, tune
+import os
 
+PATH = os.path.dirname(os.path.realpath(__file__))
 start_time = time.time()
 
 out = dsp.buffer(length=40)
@@ -34,7 +36,7 @@ for _ in range(1000):
 
     out.dub(note, pos)
 
-out.write('pulsar_synth.wav')
+out.write('%s/pulsar_synth.wav' % PATH)
 elapsed_time = time.time() - start_time
 print('Render time: %s seconds' % round(elapsed_time, 2))
 print('Output length: %s seconds' % out.dur)

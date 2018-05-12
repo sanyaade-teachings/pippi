@@ -30,7 +30,7 @@ except ImportError:
 
 setup(
     name='pippi',
-    version='2.0.0-beta-1',
+    version='2.0.0-beta-2',
     description='Computer music with Python',
     author='He Can Jog',
     author_email='erik@hecanjog.com',

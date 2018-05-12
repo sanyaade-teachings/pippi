@@ -1,7 +1,9 @@
 from pippi import dsp, fx, graph
+import os
 
-snd = dsp.read('examples/sounds/harpc2.wav')
-snd = snd.cut(0.4, 0.5)
+PATH = os.path.dirname(os.path.realpath(__file__))
+
+snd = dsp.read('%s/sounds/harpc2.wav' % PATH)
 snd = fx.go(snd, 
                 factor=200, 
                 minclip=0.125, 
@@ -11,5 +13,5 @@ snd = fx.go(snd,
                 maxlength=0.04
             )
 
-snd.write('fxgo.wav')
-graph.waveform(snd, 'bit-fxgo.png')
+snd.write('%s/fxgo.wav' % PATH)
+graph.waveform(snd, '%s/fxgo.png' % PATH)

@@ -2,6 +2,9 @@ import random
 
 from pippi import dsp
 from pippi.oscs import Osc
+import os
+
+PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Create a wavetable osc with a randomly 
 # selected waveform type
@@ -14,4 +17,4 @@ length = 1
 out = osc.play(length) * 0.5
 
 # Write the output buffer to a WAV file
-out.write('simple_osc.wav')
+out.write('%s/simple_osc.wav' % PATH)
