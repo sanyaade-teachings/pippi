@@ -1,14 +1,16 @@
+# cython: language_level=3
+
 import numpy as np
+import numbers
 import random
 cimport cython
 from .soundbuffer cimport SoundBuffer
 from . cimport wavetables
-from . import graph
 
 cdef double MINDENSITY = 0.001
 
 cpdef SoundBuffer go(SoundBuffer snd, 
-                          double factor=30,
+                          object factor,
                           double density=1, 
                           double wet=1,
                           double minlength=0.01, 
@@ -19,6 +21,10 @@ cpdef SoundBuffer go(SoundBuffer snd,
                     ):
     if wet <= 0:
         return snd
+
+    cdef wavetables.Wavetable factors = None
+    if not isinstance(factor, numbers.Real):
+        factors = wavetables.Wavetable(factor)
 
     density = max(MINDENSITY, density)
 

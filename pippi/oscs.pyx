@@ -1,3 +1,5 @@
+# cython: language_level=3
+
 import numbers
 import numpy as np
 from .soundbuffer cimport SoundBuffer

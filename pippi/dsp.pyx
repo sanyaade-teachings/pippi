@@ -1,6 +1,3 @@
-""" Some shortcuts to doing boilerplate work with SoundBuffers
-    which make live coding suck less, hopefully.
-"""
 import glob
 import math
 import multiprocessing as mp
@@ -31,6 +28,8 @@ BARTLETT = wts.BARTLETT
 KAISER = wts.KAISER
 SQUARE = wts.SQUARE
 RND = wts.RND
+LINEAR = wts.LINEAR
+TRUNC = wts.TRUNC
 
 # Just a shorthand for MS in scripts. 
 # For example:

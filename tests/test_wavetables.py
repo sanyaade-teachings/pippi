@@ -36,23 +36,18 @@ class TestWavetables(TestCase):
         self.assertEqual(len(wt2), 4096)
         self.assertEqual(len(wt3), 1000)
 
+    """
     def test_polyseg(self):
         score = 'sine 1,tri,0-1 rand,0.3-0.8'
         length = random.randint(100, 1000)
         for segment in score.split(' '):
-            print(segment)
             match = wavetables.SEGMENT_RE.match(segment)
-            print(match)
-            print(match.group('length'))
-            print(match.group('wtype'))
-            print(match.group('start'))
-            print(match.group('end'))
 
-        print()
      
         wt = wavetables.polyseg(score, length)
 
         self.assertEqual(len(wt), length)
+    """
 
     def test_randline(self):
         numpoints = random.randint(1, 10)

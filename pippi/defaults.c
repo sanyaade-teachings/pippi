@@ -20,7 +20,7 @@ END: Cython Metadata */
     #error Cython requires Python 2.6+ or Python 3.3+.
 #else
 #define CYTHON_ABI "0_27_3"
-#define CYTHON_FUTURE_DIVISION 0
+#define CYTHON_FUTURE_DIVISION 1
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -1171,21 +1171,24 @@ static int __pyx_pymod_exec_defaults(PyObject *__pyx_pyinit_module)
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "pippi/defaults.pyx":1
+  /* "pippi/defaults.pyx":3
+ * # cython: language_level=3
+ * 
  * cdef int DEFAULT_CHANNELS = 2             # <<<<<<<<<<<<<<
  * cdef int DEFAULT_SAMPLERATE = 44100
  * cdef unicode DEFAULT_SOUNDFILE = u'wav'
  */
   __pyx_v_5pippi_8defaults_DEFAULT_CHANNELS = 2;
 
-  /* "pippi/defaults.pyx":2
+  /* "pippi/defaults.pyx":4
+ * 
  * cdef int DEFAULT_CHANNELS = 2
  * cdef int DEFAULT_SAMPLERATE = 44100             # <<<<<<<<<<<<<<
  * cdef unicode DEFAULT_SOUNDFILE = u'wav'
  */
   __pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE = 0xAC44;
 
-  /* "pippi/defaults.pyx":3
+  /* "pippi/defaults.pyx":5
  * cdef int DEFAULT_CHANNELS = 2
  * cdef int DEFAULT_SAMPLERATE = 44100
  * cdef unicode DEFAULT_SOUNDFILE = u'wav'             # <<<<<<<<<<<<<<
@@ -1196,9 +1199,9 @@ static int __pyx_pymod_exec_defaults(PyObject *__pyx_pyinit_module)
   __Pyx_GIVEREF(__pyx_n_u_wav);
 
   /* "pippi/defaults.pyx":1
- * cdef int DEFAULT_CHANNELS = 2             # <<<<<<<<<<<<<<
- * cdef int DEFAULT_SAMPLERATE = 44100
- * cdef unicode DEFAULT_SOUNDFILE = u'wav'
+ * # cython: language_level=3             # <<<<<<<<<<<<<<
+ * 
+ * cdef int DEFAULT_CHANNELS = 2
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

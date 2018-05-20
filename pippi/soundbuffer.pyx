@@ -1,3 +1,5 @@
+# cython: language_level=3
+
 import numbers
 import random
 import reprlib

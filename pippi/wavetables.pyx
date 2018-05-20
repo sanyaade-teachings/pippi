@@ -1,5 +1,3 @@
-# cython: language_level=3
-
 import collections
 import random
 import numbers
@@ -30,6 +28,9 @@ cdef int BARTLETT = 8
 cdef int KAISER = 9
 cdef int SQUARE = 10
 cdef int RND = 11
+
+cdef int LINEAR = 12
+cdef int TRUNC = 13
 
 cdef dict wtype_flags = {
     'sine': SINE, 
@@ -324,9 +325,23 @@ cdef class Wavetable:
     def reversed(self):
         return Wavetable(np.flip(self.data, 0))
 
-    def taper(self, double length):
-        cdef int framelength = <int>(self.samplerate * length)
-        return self * _adsr(len(self), framelength, 0, 1, framelength)
+    def taper(self, int length):
+        return self * _adsr(len(self), length, 0, 1, length)
+
+    def interp(self, pos, method=LINEAR):
+        return _interp(self.data, pos, method)
+
+cdef double _interp(double[:] data, double pos, int method):
+    cdef double a, b
+    cdef int length = <int>len(data)
+    cdef int i = <int>(pos*length)
+    if method == LINEAR:
+        a = data[i % length]
+        b = data[(i+1) % length]
+        return (1-pos) * a + pos * b
+
+    elif method == TRUNC:
+        return data[i]
 
 
 cdef tuple _parse_polyseg(str score, int length, int wtlength):
