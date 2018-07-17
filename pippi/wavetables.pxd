@@ -22,6 +22,7 @@ cdef int SQUARE
 cdef int RND
 cdef int LINEAR
 cdef int TRUNC
+cdef int HERMITE
 
 cdef int LEN_WINDOWS
 cdef int *ALL_WINDOWS

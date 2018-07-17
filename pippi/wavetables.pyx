@@ -31,6 +31,7 @@ cdef int RND = 11
 
 cdef int LINEAR = 12
 cdef int TRUNC = 13
+cdef int HERMITE = 14
 
 cdef dict wtype_flags = {
     'sine': SINE, 

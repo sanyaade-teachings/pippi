@@ -748,21 +748,25 @@ cdef class SoundBuffer:
     def reversed(self):
         return SoundBuffer(np.flip(self.frames, 0), channels=self.channels, samplerate=self.samplerate)
 
-    cdef double[:,:] _speed(self, double speed):
+    cdef double[:,:] _speed(self, double speed, int scheme):
         speed = speed if speed > 0 else 0.001
         cdef int length = <int>(len(self) * (1.0 / speed))
         cdef double[:,:] out = np.zeros((length, self.channels))
         cdef int channel
 
-        for channel in range(self.channels):
-            out[:,channel] = interpolation._linear(np.asarray(self.frames[:,channel]), length)
+        if scheme == wavetables.LINEAR:
+            for channel in range(self.channels):
+                out[:,channel] = interpolation._linear(np.asarray(self.frames[:,channel]), length)
+        else:
+            for channel in range(self.channels):
+                out[:,channel] = interpolation._hermite(np.asarray(self.frames[:,channel]), length)
 
         return out
 
-    def speed(self, double speed):
+    def speed(self, double speed, int scheme=wavetables.LINEAR):
         """ Change the speed of the sound
         """
-        return SoundBuffer(self._speed(speed), channels=self.channels, samplerate=self.samplerate)
+        return SoundBuffer(self._speed(speed, scheme), channels=self.channels, samplerate=self.samplerate)
 
     def stretch(self, double length, double grainlength=60):
         """ Change the length of the sound without changing the pitch.

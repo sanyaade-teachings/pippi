@@ -30,6 +30,7 @@ SQUARE = wts.SQUARE
 RND = wts.RND
 LINEAR = wts.LINEAR
 TRUNC = wts.TRUNC
+HERMITE = wts.HERMITE
 
 # Just a shorthand for MS in scripts. 
 # For example:

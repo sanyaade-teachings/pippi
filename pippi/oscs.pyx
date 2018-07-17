@@ -17,30 +17,7 @@ cdef inline double MIN_PULSEWIDTH = 0.0001
 cdef class Osc:
     """ 1d or 2d wavetable osc
     """
-    cdef double freq
-    cdef double amp
-
-    cdef double[:] wavetable
-    cdef list wavetables
-    cdef double lfo_freq
-    cdef object lfo
-
-    cdef double[:] window
-    cdef double pulsewidth
-
-    cdef double[:] mod
-    cdef double mod_range
-    cdef double mod_freq
-
-    cdef double phase
-    cdef double win_phase
-    cdef double mod_phase
-
-    cdef int channels
-    cdef int samplerate
-    cdef int wtsize
-
-    def __init__(
+    def __cinit__(
             self, 
             object wavetable=None, 
               list stack=None,
@@ -153,13 +130,13 @@ cdef class Osc:
         if stack is not None and self.lfo is None:
             self.lfo = wavetables._wavetable(wavetables.RSAW, self.wtsize)
 
-    cpdef object play(self, 
-             double length, 
-             double freq=-1, 
-             double amp=-1, 
-             double pulsewidth=-1,
-             double mod_freq=-1,
-             double mod_range=-1,
+    def play(self, 
+             length, 
+             freq=-1, 
+             amp=-1, 
+             pulsewidth=-1,
+             mod_freq=-1,
+             mod_range=-1,
         ):
 
         framelength = <int>(length * self.samplerate)
