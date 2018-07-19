@@ -7,6 +7,8 @@ cdef class SoundBuffer:
     cdef void _dub(self, SoundBuffer sound, int framepos=*)
     cdef void _fill(self, double[:,:] frames)
     cdef double[:,:] _speed(self, double speed, int scheme)
+    cdef SoundBuffer _adsr(SoundBuffer self, double attack, double decay, double sustain, double release)
+    cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
 
 cdef class RingBuffer:
     cdef public int length

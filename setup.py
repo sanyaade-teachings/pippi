@@ -13,7 +13,7 @@ try:
         'pippi/interpolation.pyx',
         'pippi/grains.pyx',
         'pippi/wavetables.pyx'
-    ], include_path=[np.get_include()]) 
+    ], include_path=[np.get_include()], annotate=True) 
 
 except ImportError:
     from setuptools.extension import Extension

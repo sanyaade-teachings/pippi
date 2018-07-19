@@ -52,12 +52,13 @@ cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
 
     return output
 
+@cython.final
 cdef class SoundBuffer:
     """ A sequence of audio frames 
         representing a buffer of sound.
     """
 
-    def __cinit__(self, 
+    def __cinit__(SoundBuffer self, 
             object frames=None, 
             double length=-1, 
                int channels=-1, 
@@ -135,7 +136,7 @@ cdef class SoundBuffer:
     #############################################
     # (+) Addition & concatenation operator (+) #
     #############################################
-    def __add__(self, value):
+    def __add__(SoundBuffer self, object value):
         """ Add a number to every sample in this SoundBuffer or concatenate with another 
             SoundBuffer or iterable with compatible dimensions
         """
@@ -165,7 +166,7 @@ cdef class SoundBuffer:
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-    def __iadd__(self, value):
+    def __iadd__(SoundBuffer self, object value):
         """ In place add either adding number to every value without copy, or 
             directly extending internal frame buffer.
         """
@@ -187,11 +188,10 @@ cdef class SoundBuffer:
 
         return self
 
-    def __radd__(self, value):
+    def __radd__(SoundBuffer self, object value):
         return self + value
 
-
-    cdef SoundBuffer _adsr(self, double attack, double decay, double sustain, double release):
+    cdef SoundBuffer _adsr(SoundBuffer self, double attack, double decay, double sustain, double release):
         sustain = min(max(0, sustain), 1)
         attack = max(0, attack)
         decay = max(0, decay)
@@ -228,14 +228,13 @@ cdef class SoundBuffer:
 
         return self
 
-    def adsr(self, double a=0, double d=0, double s=1, double r=0):
+    cpdef SoundBuffer adsr(SoundBuffer self, double a=0, double d=0, double s=1, double r=0):
         return self._adsr(a, d, s, r)
-
 
     ########################
     # (&) Mix operator (&) #
     ########################
-    def __and__(self, value):
+    def __and__(SoundBuffer self, object value):
         """ Mix two SoundBuffers or two 2d arrays with compatible dimensions
 
             >>> sound = SoundBuffer(length=1, channels=2, samplerate=44100)
@@ -253,13 +252,13 @@ cdef class SoundBuffer:
         except TypeError as e:
             return NotImplemented
 
-    def __iand__(self, value):
+    def __iand__(SoundBuffer self, object value):
         """ Mix in place two SoundBuffers or two 2d arrays with compatible dimensions
         """
         self.frames = np.add(self.frames, value[:len(self.frames)])
         return self
 
-    def __rand__(self, value):
+    def __rand__(SoundBuffer self, object value):
         return self & value
 
 

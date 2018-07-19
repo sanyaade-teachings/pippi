@@ -34,11 +34,11 @@ cdef class GrainCloud:
             int read_lfo=-1,
             object read_lfo_wt=None,
             double read_lfo_speed=1,
-            int read_lfo_length=DEFAULT_WTSIZE,
+            unsigned int read_lfo_length=DEFAULT_WTSIZE,
 
             int speed_lfo=-1,
             double[:] speed_lfo_wt=None,
-            int speed_lfo_length=DEFAULT_WTSIZE,
+            unsigned int speed_lfo_length=DEFAULT_WTSIZE,
             double speed=DEFAULT_SPEED,
             double minspeed=DEFAULT_SPEED, 
             double maxspeed=DEFAULT_MAXSPEED, 
@@ -54,7 +54,7 @@ cdef class GrainCloud:
             double grainlength=DEFAULT_GRAINLENGTH, 
             int grainlength_lfo=-1,
             double[:] grainlength_lfo_wt=None,
-            int grainlength_lfo_length=DEFAULT_WTSIZE,
+            unsigned int grainlength_lfo_length=DEFAULT_WTSIZE,
             double grainlength_lfo_speed=1,
 
             double minlength=DEFAULT_GRAINLENGTH,    # min grain length in ms
@@ -164,12 +164,12 @@ cdef class GrainCloud:
             self.grainlength_lfo_length = len(self.grainlength_lfo)
  
     def play(self, length=10):
-        cdef int framelength = <int>(self.samplerate * length)
-        cdef int input_length = len(self.buf)
+        cdef unsigned int framelength = <int>(self.samplerate * length)
+        cdef unsigned int input_length = len(self.buf)
 
-        cdef int write_pos = 0              # frame position in output buffer for writing
-        cdef int start = 0                  # grain start position in input buffer (frames)
-        cdef int end = 0                    # grain end position in input buffer (frames)
+        cdef unsigned int write_pos = 0              # frame position in output buffer for writing
+        cdef unsigned int start = 0                  # grain start position in input buffer (frames)
+        cdef unsigned int end = 0                    # grain end position in input buffer (frames)
         cdef double panpos = 0.5
 
         ###########
@@ -180,8 +180,8 @@ cdef class GrainCloud:
         cdef double read_frac = 0           # fractional index for interpolation
         cdef double read_phase = 0
         cdef double read_phase_inc = (1.0 / framelength) * self.read_lfo_length
-        cdef int read_pos = 0               # frame position in input buffer for reading
-        cdef int read_index = 0
+        cdef unsigned int read_pos = 0               # frame position in input buffer for reading
+        cdef unsigned int read_index = 0
 
         ############
         # Speed LFO
@@ -191,7 +191,7 @@ cdef class GrainCloud:
         cdef double speed_frac = 0           # fractional index for interpolation
         cdef double speed_phase = 0
         cdef double speed_phase_inc = (1.0 / framelength) * self.speed_lfo_length
-        cdef int speed_index = 0
+        cdef unsigned int speed_index = 0
 
         ##############
         # Density LFO
@@ -201,8 +201,8 @@ cdef class GrainCloud:
         cdef double density_frac = 0           # fractional index for interpolation
         cdef double density_phase = 0
         cdef double density_phase_inc = (1.0 / framelength) * self.density_lfo_length
-        cdef int density_pos = 0              # frame position in output buffer for writing
-        cdef int density_index = 0
+        cdef unsigned int density_pos = 0              # frame position in output buffer for writing
+        cdef unsigned int density_index = 0
 
         ###################
         # Grain Length LFO
@@ -212,12 +212,12 @@ cdef class GrainCloud:
         cdef double grainlength_frac = 0           # fractional index for interpolation
         cdef double grainlength_phase = 0
         cdef double grainlength_phase_inc = (1.0 / framelength) * self.grainlength_lfo_length
-        cdef int grainlength_pos = 0              # frame position in output buffer for writing
-        cdef int grainlength_index = 0
-        cdef int grainlength = <int>(<double>self.samplerate * self.grainlength * 0.001)
-        cdef int adjusted_grainlength = 0
+        cdef unsigned int grainlength_pos = 0              # frame position in output buffer for writing
+        cdef unsigned int grainlength_index = 0
+        cdef unsigned int grainlength = <int>(<double>self.samplerate * self.grainlength * 0.001)
+        cdef unsigned int adjusted_grainlength = 0
 
-        cdef int max_read_pos = input_length - grainlength
+        cdef unsigned int max_read_pos = input_length - grainlength
 
         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
 
@@ -230,7 +230,8 @@ cdef class GrainCloud:
             # re-cap maxspeed based on grainlength
             self.speed = maxspeed
 
-        cdef int count = 0
+        cdef unsigned int count = 0
+        
         while write_pos < framelength - grainlength:
             # Grain length LFO
             if self.grainlength_lfo is not None:
@@ -298,17 +299,17 @@ cdef class GrainCloud:
             #    pass
 
             if self.speed != 1:
-                adjusted_grainlength = <int>(grainlength * self.speed)
+                adjusted_grainlength = <unsigned int>(grainlength * self.speed)
                 if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:
 
-                    start = <int>(read_frac_pos * (input_length-adjusted_grainlength))
+                    start = <unsigned int>(read_frac_pos * (input_length-adjusted_grainlength))
                     grain = self.buf[start:start+adjusted_grainlength] 
                     grain = grain.speed(self.speed)
                 else:
                     write_pos += MIN_GRAIN_FRAMELENGTH
                     continue
             else:
-                start = <int>(read_frac_pos * max_read_pos)
+                start = <unsigned int>(read_frac_pos * max_read_pos)
                 grain = self.buf[start:start+grainlength] 
 
 
@@ -324,7 +325,7 @@ cdef class GrainCloud:
             self.grains_per_sec = <double>self.samplerate / (<double>len(grain) / 2.0)
             self.grains_per_sec *= density
 
-            write_pos += <int>(<double>self.samplerate / self.grains_per_sec)
+            write_pos += <unsigned int>(<double>self.samplerate / self.grains_per_sec)
             count += 1
 
         return out
