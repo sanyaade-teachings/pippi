@@ -1,4 +1,4 @@
-# cython: language_level=3
+# cython: language_level=3, profile=True
 
 import numbers
 import random
@@ -51,6 +51,49 @@ cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
         output.base[:,channel] *= values
 
     return output
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:,:] _adsr(double[:,:] frames, int framelength, int channels, double samplerate, double attack, double decay, double sustain, double release) nogil:
+    cdef double length = <double>(framelength / samplerate)
+    sustain = min(max(0, sustain), 1)
+    attack = max(0, attack)
+    decay = max(0, decay)
+    release = max(0, release)
+    cdef int i = 0
+    cdef int c = 0
+    cdef double alen = attack + decay + release
+    cdef double mult = 1
+    if alen > length:
+        mult = length / alen
+        attack *= mult
+        decay *= mult
+        release *= mult
+
+    cdef int attack_breakpoint = <int>(samplerate * attack)
+    cdef int decay_breakpoint = <int>(samplerate * decay) + attack_breakpoint
+    cdef int sustain_breakpoint = framelength - <int>(release * samplerate)
+    cdef int decay_framelength = decay_breakpoint - attack_breakpoint
+    cdef int release_framelength = framelength - sustain_breakpoint
+
+    for i in range(framelength):
+        for c in range(channels):
+            if i <= attack_breakpoint and attack_breakpoint > 0:
+                frames[i,c] = frames[i,c] * (i / <double>attack_breakpoint)
+
+            elif i <= decay_breakpoint and decay_breakpoint > 0:
+                frames[i,c] = frames[i,c] * ((1 - ((i - attack_breakpoint) / <double>decay_framelength)) * (1 - sustain) + sustain)
+        
+            elif i <= sustain_breakpoint:
+                frames[i,c] = frames[i,c] * sustain
+
+            else:
+                release = 1 - ((i - sustain_breakpoint) / <double>release_framelength)
+                frames[i,c] = frames[i,c] * release * sustain
+
+    return frames
+
 
 @cython.final
 cdef class SoundBuffer:
@@ -191,46 +234,9 @@ cdef class SoundBuffer:
     def __radd__(SoundBuffer self, object value):
         return self + value
 
-    cdef SoundBuffer _adsr(SoundBuffer self, double attack, double decay, double sustain, double release):
-        sustain = min(max(0, sustain), 1)
-        attack = max(0, attack)
-        decay = max(0, decay)
-        release = max(0, release)
-        cdef double length = <double>self.dur
-        cdef Py_ssize_t i = 0
-        cdef double alen = attack + decay + release
-        cdef double mult = 1
-        if alen > length:
-            mult = length / alen
-            attack *= mult
-            decay *= mult
-            release *= mult
-
-        cdef int framelength = len(self)
-        cdef int attack_breakpoint = <int>(<double>self.samplerate * attack)
-        cdef int decay_breakpoint = <int>(<double>self.samplerate * decay) + attack_breakpoint
-        cdef int sustain_breakpoint = framelength - <int>(release * <double>self.samplerate)
-        cdef int decay_framelength = decay_breakpoint - attack_breakpoint
-        cdef int release_framelength = framelength - sustain_breakpoint
-
-        for i in range(framelength):
-            if i <= attack_breakpoint and attack_breakpoint > 0:
-                self.frames.base[i] = self.frames.base[i] * (i / <double>attack_breakpoint)
-
-            elif i <= decay_breakpoint and decay_breakpoint > 0:
-                self.frames.base[i] = self.frames.base[i] * ((1 - ((i - attack_breakpoint) / <double>decay_framelength)) * (1 - sustain) + sustain)
-        
-            elif i <= sustain_breakpoint:
-                self.frames.base[i] = self.frames.base[i] * sustain
-
-            else:
-                release = 1 - ((i - sustain_breakpoint) / <double>release_framelength)
-                self.frames.base[i] = self.frames.base[i] * release * sustain
-
-        return self
-
     cpdef SoundBuffer adsr(SoundBuffer self, double a=0, double d=0, double s=1, double r=0):
-        return self._adsr(a, d, s, r)
+        self.frames = _adsr(self.frames, <int>len(self), <int>self.channels, <double>self.samplerate, a, d, s, r)
+        return self
 
     ########################
     # (&) Mix operator (&) #
