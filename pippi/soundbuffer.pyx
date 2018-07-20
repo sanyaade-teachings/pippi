@@ -196,11 +196,12 @@ cdef class SoundBuffer:
         attack = max(0, attack)
         decay = max(0, decay)
         release = max(0, release)
-
+        cdef double length = <double>self.dur
+        cdef Py_ssize_t i = 0
         cdef double alen = attack + decay + release
         cdef double mult = 1
-        if alen > self.dur:
-            mult = self.dur / alen
+        if alen > length:
+            mult = length / alen
             attack *= mult
             decay *= mult
             release *= mult
