@@ -456,12 +456,15 @@ cdef class SoundBuffer:
         else:
             self.frames = np.zeros((length, self.channels))
 
-    def cloud(self, double length=-1, *args, **kwargs):
+    cdef SoundBuffer _cloud(SoundBuffer self, grains.GrainCloud cloud, double length):
+        if length <= 0:
+            length = <double>self.dur
+        return cloud.play(length)
+
+    def cloud(SoundBuffer self, double length=-1, *args, **kwargs):
         """ Create a new GrainCloud from this SoundBuffer
         """
-        if length <= 0:
-            length = self.dur
-        return grains.GrainCloud(self, *args, **kwargs).play(length)
+        return self._cloud(grains.GrainCloud(self, *args, **kwargs), length)
 
     def copy(self):
         """ Return a new copy of this SoundBuffer.

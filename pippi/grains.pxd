@@ -42,3 +42,4 @@ cdef class GrainCloud:
     cdef public double minlength
     cdef public double maxlength
 
+    cdef public play(GrainCloud self, double length=*)

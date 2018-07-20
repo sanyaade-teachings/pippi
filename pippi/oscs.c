@@ -745,8 +745,9 @@ static const char *__pyx_f[] = {
   "stringsource",
   "pippi/oscs.pxd",
   "venv/lib/python3.6/site-packages/Cython/Includes/cpython/array.pxd",
-  "pippi/soundbuffer.pxd",
   "pippi/wavetables.pxd",
+  "pippi/grains.pxd",
+  "pippi/soundbuffer.pxd",
   "venv/lib/python3.6/site-packages/Cython/Includes/cpython/type.pxd",
 };
 /* MemviewSliceStruct.proto */
@@ -863,32 +864,44 @@ typedef struct {
 struct arrayobject;
 typedef struct arrayobject arrayobject;
 #endif
+struct __pyx_obj_5pippi_10wavetables_Wavetable;
+struct __pyx_obj_5pippi_6grains_GrainCloud;
 struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer;
 struct __pyx_obj_5pippi_11soundbuffer_RingBuffer;
-struct __pyx_obj_5pippi_10wavetables_Wavetable;
 struct __pyx_obj_5pippi_4oscs_Osc;
 struct __pyx_obj_5pippi_4oscs_Fold;
 struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
+struct __pyx_opt_args_5pippi_6grains_10GrainCloud_play;
+
+/* "grains.pxd":45
+ *     cdef public double maxlength
+ * 
+ *     cdef public play(GrainCloud self, double length=*)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_5pippi_6grains_10GrainCloud_play {
+  int __pyx_n;
+  double length;
+};
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer__dub;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
 
-/* "soundbuffer.pxd":7
- * 
- *     cdef SoundBuffer _adsr(self, double attack, double decay, double sustain, double release)
- *     cdef void _dub(self, SoundBuffer sound, int framepos=*)             # <<<<<<<<<<<<<<
- *     cdef void _fill(self, double[:,:] frames)
- *     cdef double[:,:] _speed(self, double speed, int scheme)
+/* "soundbuffer.pxd":10
+ *     cdef SoundBuffer _adsr(SoundBuffer self, double attack, double decay, double sustain, double release)
+ *     cdef SoundBuffer _cloud(SoundBuffer self, GrainCloud cloud, double length)
+ *     cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos=*)             # <<<<<<<<<<<<<<
+ *     cdef void _fill(SoundBuffer self, double[:,:] frames)
+ *     cdef double[:,:] _speed(SoundBuffer self, double speed, int scheme)
  */
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer__dub {
   int __pyx_n;
   int framepos;
 };
 
-/* "soundbuffer.pxd":11
- *     cdef double[:,:] _speed(self, double speed, int scheme)
+/* "soundbuffer.pxd":14
+ *     cdef double[:,:] _speed(SoundBuffer self, double speed, int scheme)
  *     cdef SoundBuffer _adsr(SoundBuffer self, double attack, double decay, double sustain, double release)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)             # <<<<<<<<<<<<<<
  * 
@@ -902,7 +915,68 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
   double r;
 };
 
-/* "soundbuffer.pxd":1
+/* "wavetables.pxd":5
+ * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
+ * 
+ * cdef class Wavetable:             # <<<<<<<<<<<<<<
+ *     cdef public double[:] data
+ * 
+ */
+struct __pyx_obj_5pippi_10wavetables_Wavetable {
+  PyObject_HEAD
+  __Pyx_memviewslice data;
+};
+
+
+/* "grains.pxd":4
+ * from . cimport wavetables
+ * 
+ * cdef class GrainCloud:             # <<<<<<<<<<<<<<
+ *     cdef public SoundBuffer buf
+ *     cdef public double amp
+ */
+struct __pyx_obj_5pippi_6grains_GrainCloud {
+  PyObject_HEAD
+  struct __pyx_vtabstruct_5pippi_6grains_GrainCloud *__pyx_vtab;
+  struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *buf;
+  double amp;
+  int channels;
+  int samplerate;
+  __Pyx_memviewslice win;
+  int win_length;
+  __Pyx_memviewslice mask;
+  double freeze;
+  __Pyx_memviewslice read_lfo;
+  int read_lfo_length;
+  double read_lfo_speed;
+  double read_jitter;
+  __Pyx_memviewslice speed_lfo;
+  int speed_lfo_length;
+  double speed;
+  double minspeed;
+  double maxspeed;
+  double spread;
+  double jitter;
+  double density;
+  double mindensity;
+  double maxdensity;
+  double grains_per_sec;
+  __Pyx_memviewslice density_lfo;
+  int density_lfo_length;
+  double density_lfo_speed;
+  double density_jitter;
+  double grainlength;
+  __Pyx_memviewslice grainlength_lfo;
+  int grainlength_lfo_length;
+  double grainlength_lfo_speed;
+  double minlength;
+  double maxlength;
+};
+
+
+/* "soundbuffer.pxd":3
+ * from .grains cimport GrainCloud
+ * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
  *     cdef public int samplerate
  *     cdef public int channels
@@ -916,7 +990,7 @@ struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer {
 };
 
 
-/* "soundbuffer.pxd":13
+/* "soundbuffer.pxd":16
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  * 
  * cdef class RingBuffer:             # <<<<<<<<<<<<<<
@@ -932,19 +1006,6 @@ struct __pyx_obj_5pippi_11soundbuffer_RingBuffer {
   int write_head;
   __Pyx_memviewslice frames;
   __Pyx_memviewslice copyout;
-};
-
-
-/* "wavetables.pxd":5
- * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
- * 
- * cdef class Wavetable:             # <<<<<<<<<<<<<<
- *     cdef public double[:] data
- * 
- */
-struct __pyx_obj_5pippi_10wavetables_Wavetable {
-  PyObject_HEAD
-  __Pyx_memviewslice data;
 };
 
 
@@ -1075,7 +1136,23 @@ struct __pyx_memoryviewslice_obj {
 
 
 
-/* "soundbuffer.pxd":1
+/* "grains.pxd":4
+ * from . cimport wavetables
+ * 
+ * cdef class GrainCloud:             # <<<<<<<<<<<<<<
+ *     cdef public SoundBuffer buf
+ *     cdef public double amp
+ */
+
+struct __pyx_vtabstruct_5pippi_6grains_GrainCloud {
+  PyObject *(*play)(struct __pyx_obj_5pippi_6grains_GrainCloud *, struct __pyx_opt_args_5pippi_6grains_10GrainCloud_play *__pyx_optional_args);
+};
+static struct __pyx_vtabstruct_5pippi_6grains_GrainCloud *__pyx_vtabptr_5pippi_6grains_GrainCloud;
+
+
+/* "soundbuffer.pxd":3
+ * from .grains cimport GrainCloud
+ * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
  *     cdef public int samplerate
  *     cdef public int channels
@@ -1083,6 +1160,7 @@ struct __pyx_memoryviewslice_obj {
 
 struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*_adsr)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, double, double, double, double);
+  struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*_cloud)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, struct __pyx_obj_5pippi_6grains_GrainCloud *, double);
   void (*_dub)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer__dub *__pyx_optional_args);
   void (*_fill)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, __Pyx_memviewslice);
   __Pyx_memviewslice (*_speed)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, double, int);
@@ -1091,7 +1169,7 @@ struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
 static struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer;
 
 
-/* "soundbuffer.pxd":13
+/* "soundbuffer.pxd":16
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  * 
  * cdef class RingBuffer:             # <<<<<<<<<<<<<<
@@ -1894,10 +1972,6 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp); /* proto*/
 static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp, PyObject *__pyx_v_value); /* proto*/
 
-/* Module declarations from 'pippi.soundbuffer' */
-static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
-static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_RingBuffer = 0;
-
 /* Module declarations from 'pippi' */
 
 /* Module declarations from 'pippi.wavetables' */
@@ -1948,6 +2022,13 @@ static int **__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES = 0;
 #define __pyx_v_5pippi_10wavetables_ALL_WAVETABLES (*__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES)
 static __Pyx_memviewslice (*__pyx_f_5pippi_10wavetables__wavetable)(int, int); /*proto*/
 static __Pyx_memviewslice (*__pyx_f_5pippi_10wavetables__window)(int, int); /*proto*/
+
+/* Module declarations from 'pippi.grains' */
+static PyTypeObject *__pyx_ptype_5pippi_6grains_GrainCloud = 0;
+
+/* Module declarations from 'pippi.soundbuffer' */
+static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
+static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_RingBuffer = 0;
 
 /* Module declarations from 'pippi.interpolation' */
 static __Pyx_memviewslice (*__pyx_f_5pippi_13interpolation__linear)(__Pyx_memviewslice, int); /*proto*/
@@ -25047,18 +25128,20 @@ static int __pyx_pymod_exec_oscs(PyObject *__pyx_pyinit_module)
   if (__Pyx_setup_reduce((PyObject*)&__pyx_type___pyx_memoryviewslice) < 0) __PYX_ERR(1, 953, __pyx_L1_error)
   __pyx_memoryviewslice_type = &__pyx_type___pyx_memoryviewslice;
   /*--- Type import code ---*/
-  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType("pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(4, 1, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(4, 1, __pyx_L1_error)
-  __pyx_ptype_5pippi_11soundbuffer_RingBuffer = __Pyx_ImportType("pippi.soundbuffer", "RingBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_RingBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_RingBuffer)) __PYX_ERR(4, 13, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_11soundbuffer_RingBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_RingBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_RingBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_RingBuffer)) __PYX_ERR(4, 13, __pyx_L1_error)
-  __pyx_ptype_5pippi_10wavetables_Wavetable = __Pyx_ImportType("pippi.wavetables", "Wavetable", sizeof(struct __pyx_obj_5pippi_10wavetables_Wavetable), 1); if (unlikely(!__pyx_ptype_5pippi_10wavetables_Wavetable)) __PYX_ERR(5, 5, __pyx_L1_error)
+  __pyx_ptype_5pippi_10wavetables_Wavetable = __Pyx_ImportType("pippi.wavetables", "Wavetable", sizeof(struct __pyx_obj_5pippi_10wavetables_Wavetable), 1); if (unlikely(!__pyx_ptype_5pippi_10wavetables_Wavetable)) __PYX_ERR(4, 5, __pyx_L1_error)
+  __pyx_ptype_5pippi_6grains_GrainCloud = __Pyx_ImportType("pippi.grains", "GrainCloud", sizeof(struct __pyx_obj_5pippi_6grains_GrainCloud), 1); if (unlikely(!__pyx_ptype_5pippi_6grains_GrainCloud)) __PYX_ERR(5, 4, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_6grains_GrainCloud = (struct __pyx_vtabstruct_5pippi_6grains_GrainCloud*)__Pyx_GetVtable(__pyx_ptype_5pippi_6grains_GrainCloud->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_6grains_GrainCloud)) __PYX_ERR(5, 4, __pyx_L1_error)
+  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType("pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(6, 3, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(6, 3, __pyx_L1_error)
+  __pyx_ptype_5pippi_11soundbuffer_RingBuffer = __Pyx_ImportType("pippi.soundbuffer", "RingBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_RingBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_RingBuffer)) __PYX_ERR(6, 16, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_11soundbuffer_RingBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_RingBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_RingBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_RingBuffer)) __PYX_ERR(6, 16, __pyx_L1_error)
   __pyx_ptype_7cpython_4type_type = __Pyx_ImportType(__Pyx_BUILTIN_MODULE_NAME, "type", 
   #if CYTHON_COMPILING_IN_PYPY
   sizeof(PyTypeObject),
   #else
   sizeof(PyHeapTypeObject),
   #endif
-  0); if (unlikely(!__pyx_ptype_7cpython_4type_type)) __PYX_ERR(6, 9, __pyx_L1_error)
+  0); if (unlikely(!__pyx_ptype_7cpython_4type_type)) __PYX_ERR(7, 9, __pyx_L1_error)
   __pyx_ptype_7cpython_5array_array = __Pyx_ImportType("array", "array", sizeof(arrayobject), 0); if (unlikely(!__pyx_ptype_7cpython_5array_array)) __PYX_ERR(3, 58, __pyx_L1_error)
   /*--- Variable import code ---*/
   __pyx_t_1 = __Pyx_ImportModule("pippi.wavetables"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)

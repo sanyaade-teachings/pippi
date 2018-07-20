@@ -163,7 +163,7 @@ cdef class GrainCloud:
         if self.grainlength_lfo is not None:
             self.grainlength_lfo_length = len(self.grainlength_lfo)
  
-    def play(self, length=10):
+    cdef play(GrainCloud self, double length=10):
         cdef unsigned int framelength = <int>(self.samplerate * length)
         cdef unsigned int input_length = len(self.buf)
 
