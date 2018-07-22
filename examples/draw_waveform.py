@@ -3,6 +3,7 @@ from pippi import dsp, graph
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
 
 buflength = 5
 out = dsp.buffer(length=buflength)

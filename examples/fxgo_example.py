@@ -2,6 +2,7 @@ from pippi import dsp, fx, graph
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
 
 snd = dsp.read('%s/sounds/harpc2.wav' % PATH)
 snd = fx.go(snd, 

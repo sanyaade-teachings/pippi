@@ -1,6 +1,8 @@
 from .soundbuffer cimport SoundBuffer
 from . cimport wavetables
 
+cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, double length)
+
 cdef class GrainCloud:
     cdef public SoundBuffer buf
     cdef public double amp
@@ -42,4 +44,5 @@ cdef class GrainCloud:
     cdef public double minlength
     cdef public double maxlength
 
-    cdef public play(GrainCloud self, double length=*)
+    cpdef SoundBuffer play(GrainCloud self, double length=*)
+

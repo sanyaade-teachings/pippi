@@ -3,6 +3,7 @@ from pippi import dsp, oscs
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
 
 # Create a list of random values, padded 
 # with zeros on either end to use as the 

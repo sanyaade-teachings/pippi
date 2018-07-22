@@ -117,7 +117,7 @@ class TestSoundBuffer(TestCase):
 
     def test_pan(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        for pan_method in ('linear', 'constant', 'linear'):
+        for pan_method in (dsp.LINEAR, dsp.CONSTANT, dsp.GOGINS):
             # Hard pan smoke test
             pan_left = sound.pan(0, method=pan_method)
             self.assertEqual(pan_left[random.randint(0, len(pan_left))][0], 0)

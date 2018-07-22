@@ -4,6 +4,7 @@ from pippi import dsp, oscs, tune
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
 start_time = time.time()
 
 out = dsp.buffer(length=40)

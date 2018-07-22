@@ -4,6 +4,7 @@ from pippi import dsp, sampler, tune, rhythm
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
 start_time = time.time()
 
 samp = sampler.Sampler('%s/sounds/harpc2.wav' % PATH, 'c2')

@@ -32,6 +32,9 @@ cdef int RND = 11
 cdef int LINEAR = 12
 cdef int TRUNC = 13
 cdef int HERMITE = 14
+cdef int CONSTANT = 15
+cdef int GOGINS = 16
+
 
 cdef dict wtype_flags = {
     'sine': SINE, 
@@ -330,19 +333,10 @@ cdef class Wavetable:
         return self * _adsr(len(self), length, 0, 1, length)
 
     def interp(self, pos, method=LINEAR):
-        return _interp(self.data, pos, method)
-
-cdef double _interp(double[:] data, double pos, int method):
-    cdef double a, b
-    cdef int length = <int>len(data)
-    cdef int i = <int>(pos*length)
-    if method == LINEAR:
-        a = data[i % length]
-        b = data[(i+1) % length]
-        return (1-pos) * a + pos * b
-
-    elif method == TRUNC:
-        return data[i]
+        if method == LINEAR:
+            return interpolation._linear_point(self.data, pos)
+        else:
+            return interpolation._trunc_point(self.data, pos)
 
 
 cdef tuple _parse_polyseg(str score, int length, int wtlength):

@@ -3,6 +3,7 @@ from pippi import dsp
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
 start_time = time.time()
 
 # Load some boinging into a SoundBuffer. Or:

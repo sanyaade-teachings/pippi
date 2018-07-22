@@ -23,6 +23,8 @@ cdef int RND
 cdef int LINEAR
 cdef int TRUNC
 cdef int HERMITE
+cdef int CONSTANT
+cdef int GOGINS
 
 cdef int LEN_WINDOWS
 cdef int *ALL_WINDOWS

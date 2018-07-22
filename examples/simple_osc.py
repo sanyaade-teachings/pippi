@@ -5,6 +5,7 @@ from pippi.oscs import Osc
 import os
 
 PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
 
 # Create a wavetable osc with a randomly 
 # selected waveform type

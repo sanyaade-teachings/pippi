@@ -1,6 +1,6 @@
 # cython: language_level=3, profile=True
 
-from .soundbuffer cimport SoundBuffer
+from .soundbuffer cimport SoundBuffer, _cut, _dub, _speed, _pan, _env
 from . cimport wavetables
 from . cimport interpolation
 from libc.stdlib cimport rand, RAND_MAX
@@ -10,7 +10,7 @@ import array
 
 DEF MIN_DENSITY = 0.000001
 DEF MIN_SPEED = 0.000001
-DEF MIN_GRAIN_FRAMELENGTH = 8
+DEF MIN_GRAIN_FRAMELENGTH = 441
 DEF DEFAULT_WTSIZE = 4096
 DEF DEFAULT_GRAINLENGTH = 60
 DEF DEFAULT_MAXGRAINLENGTH = 80
@@ -19,6 +19,139 @@ DEF DEFAULT_MAXSPEED = 2
 DEF DEFAULT_DENSITY = 1
 DEF DEFAULT_MINDENSITY = 0.5
 DEF DEFAULT_MAXDENSITY = 1.5
+
+cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, double length):
+    cdef int input_length = len(cloud.buf)
+
+    cdef int fi = 0
+    cdef int ci = 0
+
+    cdef int write_pos = 0 
+    cdef int write_inc = 0 
+    cdef int start = 0 
+    cdef int end = 0 
+    cdef double panpos = 0.5
+
+    cdef double read_frac_pos = 0
+    cdef double grain_speed = 0
+    cdef double density_frac_pos = 0
+    cdef double grainlength_frac_pos = 0
+
+    cdef unsigned long initial_grainlength = <unsigned long>(<double>cloud.samplerate * cloud.grainlength * 0.001)
+    cdef unsigned long grainlength = initial_grainlength
+
+    cdef unsigned long preresample_grainlength = 0
+    cdef unsigned long target_grainlength = 0
+
+    cdef int max_read_pos = input_length - grainlength
+    cdef double read_pos = 0
+    cdef double[:,:] grain
+    cdef double[:,:] grain_pre
+    cdef double[:] grainchan
+    cdef double[:] grainchan_pre
+
+    cdef double playhead = 0
+    
+    while write_pos < framelength - grainlength:
+        playhead = <double>write_pos / framelength
+
+        # Set (target) grain length
+        if cloud.grainlength_lfo is not None:
+            grainlength_frac_pos = interpolation._linear_point(cloud.grainlength_lfo, playhead)
+
+            if cloud.jitter > 0:
+                grainlength_frac_pos = grainlength_frac_pos * ((rand()/<double>RAND_MAX) * cloud.jitter + 1)
+
+            grainlength = <int>(((grainlength_frac_pos * (cloud.maxlength - cloud.minlength)) + cloud.minlength) * (cloud.samplerate / 1000.0))
+            max_read_pos = input_length - grainlength
+
+        if grainlength < 0:
+            print(grainlength, write_pos)
+            grainlength *= -1
+
+        # Get read position for _cut
+        if cloud.freeze >= 0:
+            read_pos = (cloud.samplerate * cloud.freeze)
+            if read_pos > <double>max_read_pos:
+                read_pos = <double>max_read_pos
+            read_frac_pos = read_pos / <double>max_read_pos
+        else:
+            read_frac_pos = interpolation._linear_point(cloud.read_lfo, playhead)
+
+        start = <int>(read_frac_pos * max_read_pos)
+
+
+        # Get grain speed
+        if cloud.speed_lfo is not None:
+            grain_speed = interpolation._linear_point(cloud.speed_lfo, playhead)
+            cloud.speed = (grain_speed * (cloud.maxspeed - cloud.minspeed)) + cloud.minspeed
+
+
+        ############################
+        # Cut grain and pitch shift
+        if cloud.speed != 1:
+            # Length of segment to copy from source buffer: grainlength * speed
+            #cloud.speed = cloud.speed if cloud.speed > cloud.minspeed else cloud.minspeed
+            #cloud.speed = cloud.speed if cloud.speed < cloud.maxspeed else cloud.maxspeed
+            preresample_grainlength = <unsigned long>(grainlength * cloud.speed)
+            if preresample_grainlength > (framelength - start):
+                # get min(available_length, preresample_length)
+                # adjust target/grainlength to match speed based on available length
+                preresample_grainlength = framelength - start
+                cloud.speed = <double>preresample_grainlength / grainlength
+
+
+            # TODO can probably init maxlength versions of these outside the loop, 
+            # and reuse them in sequence (careful of gil-releasing...)
+            grain_pre = np.zeros((preresample_grainlength, cloud.channels), dtype='d')
+            grainchan_pre = np.zeros(preresample_grainlength, dtype='d')
+            grain = np.zeros((grainlength, cloud.channels), dtype='d')
+            grainchan = np.zeros(grainlength, dtype='d')
+
+            grain_pre = _cut(cloud.buf.frames, framelength, start, preresample_grainlength)
+            grain = _speed(grain_pre, grain, grainchan_pre, grainchan, cloud.channels)
+        else:
+            grain = np.zeros((grainlength, cloud.channels), dtype='d')
+            grain = _cut(cloud.buf.frames, framelength, start, grainlength)
+
+
+        # Apply grain window
+        grain = _env(grain, cloud.channels, cloud.win)
+
+        # Pan grain if spread > 0
+        if cloud.spread > 0:
+            panpos = (rand()/<double>RAND_MAX) * cloud.spread + (0.5 - (cloud.spread * 0.5))
+            grain = _pan(grain, grainlength, cloud.channels, panpos, wavetables.CONSTANT)
+
+
+        # Dub grain to output
+        if write_pos + len(grain) < len(out):
+            for fi in range(len(grain)):
+                for ci in range(cloud.channels):
+                    out[fi + write_pos, ci] += (grain[fi, ci] * cloud.amp)
+
+
+        # Get density for write_inc modulation
+        if cloud.density_lfo is not None:
+            density_frac_pos = interpolation._linear_point(cloud.density_lfo, playhead)
+            density = (density_frac_pos * (cloud.maxdensity - cloud.mindensity)) + cloud.mindensity
+        else:
+            density = cloud.density
+
+        # Increment write_pos based on grainlength & density
+        try:
+            cloud.grains_per_sec = <double>cloud.samplerate / (<double>len(grain) / 2.0)
+            cloud.grains_per_sec *= density
+            write_inc = <int>(<double>cloud.samplerate / cloud.grains_per_sec)
+            if write_inc < MIN_GRAIN_FRAMELENGTH:
+                write_pos += MIN_GRAIN_FRAMELENGTH
+            else:
+                write_pos += write_inc
+        except ZeroDivisionError:
+            write_pos += MIN_GRAIN_FRAMELENGTH
+        
+    return out
+
 
 cdef class GrainCloud:
     def __init__(self, 
@@ -92,22 +225,15 @@ cdef class GrainCloud:
         self.win_length = len(self.win)
 
         # Read lfo is always a wavetable, defaults to phasor
-        if self.freeze > -1:
-            self.read_lfo = None
-        elif read_lfo > -1:
+        if read_lfo > -1:
             self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
         elif read_lfo_wt is not None:
-            #self.read_lfo = read_lfo_wt
             self.read_lfo = interpolation._linear(np.asarray(read_lfo_wt, dtype='d'), read_lfo_length)
         else:
             self.read_lfo = wavetables._window(wavetables.PHASOR, read_lfo_length)
 
-        # 0 lfo speed freezes position
-        if self.read_lfo is not None:
-            if read_lfo_speed <= 0:
-                read_lfo_speed = 0
-            self.read_lfo_speed = read_lfo_speed
-            self.read_lfo_length = len(self.read_lfo)
+        self.read_lfo_speed = read_lfo_speed
+        self.read_lfo_length = read_lfo_length
 
         # If speed_lfo < 0 and speed_lfo_wt is None, then use fixed speed
         # No transposition is done if speed == 1
@@ -163,172 +289,11 @@ cdef class GrainCloud:
         if self.grainlength_lfo is not None:
             self.grainlength_lfo_length = len(self.grainlength_lfo)
  
-    cdef play(GrainCloud self, double length=10):
-        cdef unsigned int framelength = <int>(self.samplerate * length)
-        cdef unsigned int input_length = len(self.buf)
-
-        cdef unsigned int write_pos = 0              # frame position in output buffer for writing
-        cdef unsigned int start = 0                  # grain start position in input buffer (frames)
-        cdef unsigned int end = 0                    # grain end position in input buffer (frames)
-        cdef double panpos = 0.5
-
-        ###########
-        # Read LFO
-        ###########
-        cdef double read_frac_pos = 0       # 0-1 pos in read buffer
-        cdef double read_frac_pos_next = 0  # next value of 0-1 pos in read buffer for interpolation
-        cdef double read_frac = 0           # fractional index for interpolation
-        cdef double read_phase = 0
-        cdef double read_phase_inc = (1.0 / framelength) * self.read_lfo_length
-        cdef unsigned int read_pos = 0               # frame position in input buffer for reading
-        cdef unsigned int read_index = 0
-
-        ############
-        # Speed LFO
-        ############
-        cdef double speed_frac_pos = 0       # 0-1 pos in speed buffer
-        cdef double speed_frac_pos_next = 0  # next value of 0-1 pos in speed buffer for interpolation
-        cdef double speed_frac = 0           # fractional index for interpolation
-        cdef double speed_phase = 0
-        cdef double speed_phase_inc = (1.0 / framelength) * self.speed_lfo_length
-        cdef unsigned int speed_index = 0
-
-        ##############
-        # Density LFO
-        ##############
-        cdef double density_frac_pos = 0       # 0-1 pos in density buffer
-        cdef double density_frac_pos_next = 0  # next value of 0-1 pos in density buffer for interpolation
-        cdef double density_frac = 0           # fractional index for interpolation
-        cdef double density_phase = 0
-        cdef double density_phase_inc = (1.0 / framelength) * self.density_lfo_length
-        cdef unsigned int density_pos = 0              # frame position in output buffer for writing
-        cdef unsigned int density_index = 0
-
-        ###################
-        # Grain Length LFO
-        ###################
-        cdef double grainlength_frac_pos = 0       # 0-1 pos in grainlength buffer
-        cdef double grainlength_frac_pos_next = 0  # next value of 0-1 pos in grainlength buffer for interpolation
-        cdef double grainlength_frac = 0           # fractional index for interpolation
-        cdef double grainlength_phase = 0
-        cdef double grainlength_phase_inc = (1.0 / framelength) * self.grainlength_lfo_length
-        cdef unsigned int grainlength_pos = 0              # frame position in output buffer for writing
-        cdef unsigned int grainlength_index = 0
-        cdef unsigned int grainlength = <int>(<double>self.samplerate * self.grainlength * 0.001)
-        cdef unsigned int adjusted_grainlength = 0
-
-        cdef unsigned int max_read_pos = input_length - grainlength
-
-        cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
-
-        cdef double maxspeed = <double>(input_length/4) / <double>min(self.grainlength, self.minlength)
-        if self.maxspeed > maxspeed:
-            # re-cap maxspeed based on grainlength
-            self.maxspeed = maxspeed
-
-        if self.speed > maxspeed:
-            # re-cap maxspeed based on grainlength
-            self.speed = maxspeed
-
-        cdef unsigned int count = 0
-        
-        while write_pos < framelength - grainlength:
-            # Grain length LFO
-            if self.grainlength_lfo is not None:
-                grainlength_phase = (<double>write_pos / framelength) * <double>self.grainlength_lfo_length * self.grainlength_lfo_speed
-                grainlength_index = <int>grainlength_phase
-                grainlength_frac = grainlength_phase - grainlength_index
-                grainlength_frac_pos = self.grainlength_lfo[grainlength_index % self.grainlength_lfo_length]
-                grainlength_frac_pos_next = self.grainlength_lfo[(grainlength_index+1) % self.grainlength_lfo_length]
-                grainlength_frac_pos = (1.0 - grainlength_frac) * grainlength_frac_pos + grainlength_frac * grainlength_frac_pos_next
-                grainlength_phase += grainlength_phase_inc
-
-                if self.jitter > 0:
-                    grainlength_frac_pos = grainlength_frac_pos * ((rand()/<double>RAND_MAX) * self.jitter + 1)
-
-                grainlength = <int>(((grainlength_frac_pos * (self.maxlength - self.minlength)) + self.minlength) * (self.samplerate / 1000.0))
-                max_read_pos = input_length - grainlength
-
-            # Read LFO
-            if self.read_lfo is None:
-                if self.freeze < 0:
-                    self.freeze = 0
-                read_frac_pos = (self.samplerate * self.freeze) / <double>max_read_pos
-                if read_frac_pos > 1:
-                    read_frac_pos = 1
-            else:
-                read_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.read_lfo_length * self.read_lfo_speed
-                read_index = <int>read_phase
-                read_frac = read_phase - read_index
-                read_frac_pos = self.read_lfo[read_index % self.read_lfo_length]
-                read_frac_pos_next = self.read_lfo[(read_index+1) % self.read_lfo_length]
-                read_frac_pos = (1.0 - read_frac) * read_frac_pos + read_frac * read_frac_pos_next
-                read_phase += read_phase_inc
-
-            # Speed LFO
-            if self.speed_lfo is not None:
-                speed_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.speed_lfo_length
-                speed_index = <int>speed_phase
-                speed_frac = speed_phase - speed_index
-                speed_frac_pos = self.speed_lfo[speed_index % self.speed_lfo_length]
-                speed_frac_pos_next = self.speed_lfo[(speed_index+1) % self.speed_lfo_length]
-                speed_frac_pos = (1.0 - speed_frac) * speed_frac_pos + speed_frac * speed_frac_pos_next
-                speed_phase += speed_phase_inc
-
-            # Density LFO
-            if self.density_lfo is not None:
-                density_phase = (<double>write_pos / (framelength - grainlength)) * <double>self.density_lfo_length * self.density_lfo_speed
-                density_index = <int>density_phase
-                density_frac = density_phase - density_index
-                density_frac_pos = self.density_lfo[density_index % self.density_lfo_length]
-                density_frac_pos_next = self.density_lfo[(density_index+1) % self.density_lfo_length]
-                density_frac_pos = (1.0 - density_frac) * density_frac_pos + density_frac * density_frac_pos_next
-                density = (density_frac_pos * (self.maxdensity - self.mindensity)) + self.mindensity
-                density_phase += density_phase_inc
-
-            else:
-                density = self.density
-
-            if density < MIN_DENSITY:
-                density = MIN_DENSITY
-
-            if self.speed_lfo is not None:
-                self.speed = speed_frac_pos * (self.maxspeed - self.minspeed) + self.minspeed
-
-            #if self.mask is not None and self.mask[count] == 0:
-            #    pass
-
-            if self.speed != 1:
-                adjusted_grainlength = <unsigned int>(grainlength * self.speed)
-                if adjusted_grainlength > MIN_GRAIN_FRAMELENGTH:
-
-                    start = <unsigned int>(read_frac_pos * (input_length-adjusted_grainlength))
-                    grain = self.buf[start:start+adjusted_grainlength] 
-                    grain = grain.speed(self.speed)
-                else:
-                    write_pos += MIN_GRAIN_FRAMELENGTH
-                    continue
-            else:
-                start = <unsigned int>(read_frac_pos * max_read_pos)
-                grain = self.buf[start:start+grainlength] 
-
-
-            grain = grain * self.win
-
-            if self.spread > 0:
-                panpos = (rand()/<double>RAND_MAX) * self.spread + (0.5 - (self.spread * 0.5))
-                grain = grain.pan(panpos)
-
-            if write_pos + len(grain) < len(out):
-                out._dub(grain * self.amp, write_pos)
-
-            self.grains_per_sec = <double>self.samplerate / (<double>len(grain) / 2.0)
-            self.grains_per_sec *= density
-
-            write_pos += <unsigned int>(<double>self.samplerate / self.grains_per_sec)
-            count += 1
-
-        return out
+    cpdef SoundBuffer play(GrainCloud self, double length=10):
+        cdef int framelength = <int>(self.samplerate * length)
+        cdef double[:,:] out = np.zeros((framelength, self.channels), dtype='d')
+        out = _play(self, out, framelength, length)
+        return SoundBuffer(out, length=length, channels=self.channels, samplerate=self.samplerate)
 
 
 

@@ -31,6 +31,8 @@ RND = wts.RND
 LINEAR = wts.LINEAR
 TRUNC = wts.TRUNC
 HERMITE = wts.HERMITE
+CONSTANT = wts.CONSTANT
+GOGINS = wts.GOGINS
 
 # Just a shorthand for MS in scripts. 
 # For example:

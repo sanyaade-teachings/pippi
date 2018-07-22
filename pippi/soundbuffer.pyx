@@ -14,8 +14,79 @@ from . cimport interpolation
 from . cimport grains
 from .defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double[:,:] _dub(double[:,:] target, int target_length, double[:,:] todub, int todub_length, int channels, int framepos) nogil:
+    cdef int i = 0
+    cdef int c = 0
+    for i in range(todub_length):
+        for c in range(channels):
+            target[framepos+i, c] += todub[i, c]
+
+    return target
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double[:,:] _cut(double[:,:] snd, int snd_length, int start, int length) nogil:
+    cdef int end = min(start+length, snd_length)
+    start = max(start, 0)
+    return snd[start:end]
+
+cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method):
+    if method == wavetables.CONSTANT:
+        for channel in range(channels):
+            if channel % 2 == 0:
+                out.base[:,channel] *= math.sqrt(pos)
+            else:
+                out.base[:,channel] *= math.sqrt(1 - pos)
+
+    elif method == wavetables.LINEAR:
+        for channel in range(channels):
+            if channel % 2 == 0:
+                out.base[:,channel] *= pos
+            else:
+                out.base[:,channel] *= 1 - pos
+
+    elif method == wavetables.SINE:
+        for channel in range(channels):
+            if channel % 2 == 0:
+                out.base[:,channel] *= math.sin(pos * (math.pi / 2))
+            else:
+                out.base[:,channel] *= math.cos(pos * (math.pi / 2))
+
+    elif method == wavetables.GOGINS:
+        for channel in range(channels):
+            if channel % 2 == 0:
+                out.base[:,channel] *= math.sin((pos + 0.5) * (math.pi / 2))
+            else:
+                out.base[:,channel] *= math.cos((pos + 0.5) * (math.pi / 2))
+
+    return out
+
+cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil:
+    cdef int i = 0
+    cdef int c = 0
+    cdef int count = 0
+    cdef double pos = 0
+    cdef int framelength = len(snd)
+    cdef int blocksize = 64
+    cdef double mult = win[0]
+
+    for i in range(framelength):
+        pos = i / <double>framelength
+        for c in range(channels):
+            snd[i,c] *= mult
+
+        if count >= blocksize:
+            mult = interpolation._linear_point(win, pos)
+            count = 0
+
+        count += 1
+
+    return snd
+
 cdef double[:,:] _remix(double[:,:] values, int framelength, int channels):
-    if len(values) == framelength and values.shape[1] == channels:
+    if <int>len(values) == framelength and values.shape[1] == channels:
         return values
 
     cdef double[:,:] out = None
@@ -44,7 +115,7 @@ cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
     cdef int channels = output.shape[1]
     cdef int framelength = len(output)
 
-    if len(values) != framelength:
+    if <int>len(values) != framelength:
         values = interpolation._linear(values, framelength)
 
     for channel in range(channels):
@@ -94,6 +165,28 @@ cdef double[:,:] _adsr(double[:,:] frames, int framelength, int channels, double
 
     return frames
 
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:,:] _speed(double[:,:] frames, 
+                        double[:,:] out, 
+                        double[:] chan, 
+                        double[:] outchan, 
+                        int channels) nogil:
+    cdef int c = 0
+    cdef int i = 0
+    cdef int framelength = len(frames)
+    cdef int length = len(out)
+
+    for c in range(channels):
+        for i in range(framelength):
+            chan[i] = frames[i,c]
+        outchan = interpolation._linear_inner(chan, outchan, length)
+        for i in range(length):
+            out[i,c] = outchan[i]
+
+    return out
 
 @cython.final
 cdef class SoundBuffer:
@@ -527,26 +620,23 @@ cdef class SoundBuffer:
         cdef double start = random.triangular(0, maxlen)
         return self.cut(start, length)
 
-    cdef void _dub(self, SoundBuffer sound, int framepos=0):
-        cdef int dubsnd_length = len(sound.frames)
-        cdef int source_length = len(self.frames)
-        cdef int total_length = framepos + dubsnd_length
-        if self.frames is None or source_length == 0:
-            self.frames = np.zeros((total_length, self.channels), dtype='float64')
+    cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos):
+        cdef int target_length = len(self)
+        cdef int todub_length = len(sound)
+        cdef int total_length = framepos + todub_length
+        cdef int channels = self.channels
 
-        elif source_length < total_length:
+        if target_length == 0:
+            self.frames = np.zeros((total_length, channels), dtype='d')
+            target_length = total_length
+        elif target_length < total_length:
             self.frames = np.vstack((
                     self.frames.copy(), 
-                    np.zeros((total_length - source_length, self.channels), dtype='float64')
+                    np.zeros((total_length - target_length, channels), dtype='d')
                 ))
+            target_length = len(self)
 
-        #cdef int i = 0
-        #cdef int c = 0
-        #for i in range(dubsnd_length):
-        #    for c in range(self.channels):
-        #        self.frames[framepos+i][c] += sound[i][c]
-
-        self.frames.base[framepos:total_length] += sound.frames
+        self.frames = _dub(self.frames, target_length, sound.frames, todub_length, channels, framepos)
 
     def dub(self, sounds, double pos=-1, int framepos=0):
         """ Dub a sound or iterable of sounds into this soundbuffer
@@ -677,7 +767,7 @@ cdef class SoundBuffer:
  
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-    def pan(self, double pos=0.5, unicode method=None, int start=0):
+    def pan(self, double pos=0.5, int method=-1, int start=0):
         """ Pan a stereo sound from pos=0 (hard left) 
             to pos=1 (hard right)
 
@@ -701,41 +791,13 @@ cdef class SoundBuffer:
                 Michael Gogins' variation on the above 
                 which uses a different part of the sinewave.
         """
-        if method is None:
-            method = u'constant'
+        if method < 0:
+            method = wavetables.CONSTANT
 
         cdef double[:,:] out = self.frames
         cdef int length = len(self)
         cdef int channel = 0
-
-        if method == 'constant':
-            for channel in range(self.channels):
-                if channel % 2 == 0:
-                    out.base[:,channel] *= math.sqrt(pos)
-                else:
-                    out.base[:,channel] *= math.sqrt(1 - pos)
-
-        elif method == 'linear':
-            for channel in range(self.channels):
-                if channel % 2 == 0:
-                    out.base[:,channel] *= pos
-                else:
-                    out.base[:,channel] *= 1 - pos
-
-        elif method == 'sine':
-            for channel in range(self.channels):
-                if channel % 2 == 0:
-                    out.base[:,channel] *= math.sin(pos * (math.pi / 2))
-                else:
-                    out.base[:,channel] *= math.cos(pos * (math.pi / 2))
-
-        elif method == 'gogins':
-            for channel in range(self.channels):
-                if channel % 2 == 0:
-                    out.base[:,channel] *= math.sin((pos + 0.5) * (math.pi / 2))
-                else:
-                    out.base[:,channel] *= math.cos((pos + 0.5) * (math.pi / 2))
-
+        out = _pan(out, length, self.channels, pos, method)
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     def remix(self, int channels):
@@ -757,25 +819,20 @@ cdef class SoundBuffer:
     def reversed(self):
         return SoundBuffer(np.flip(self.frames, 0), channels=self.channels, samplerate=self.samplerate)
 
-    cdef double[:,:] _speed(self, double speed, int scheme):
-        speed = speed if speed > 0 else 0.001
-        cdef int length = <int>(len(self) * (1.0 / speed))
-        cdef double[:,:] out = np.zeros((length, self.channels))
-        cdef int channel
-
-        if scheme == wavetables.LINEAR:
-            for channel in range(self.channels):
-                out[:,channel] = interpolation._linear(np.asarray(self.frames[:,channel]), length)
-        else:
-            for channel in range(self.channels):
-                out[:,channel] = interpolation._hermite(np.asarray(self.frames[:,channel]), length)
-
-        return out
-
     def speed(self, double speed, int scheme=wavetables.LINEAR):
         """ Change the speed of the sound
         """
-        return SoundBuffer(self._speed(speed, scheme), channels=self.channels, samplerate=self.samplerate)
+        cdef int framelength = len(self)
+        cdef double[:] chan = np.zeros(framelength, dtype='d')
+
+        speed = speed if speed > 0 else 0.001
+        cdef int length = <int>(framelength * (1.0 / speed))
+
+        cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
+        cdef double[:] outchan = np.zeros(length, dtype='d')
+
+        out = _speed(self.frames, out, chan, outchan, <int>self.channels)
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     def stretch(self, double length, double grainlength=60):
         """ Change the length of the sound without changing the pitch.

@@ -1,4 +1,4 @@
-# cython: language_level=3
+# cython: language_level=3, profile=True
 
 import numpy as np
 cimport cython
@@ -39,9 +39,9 @@ cdef public double[:] _hermite(double[:] data, int length):
 
     return out
 
-cdef public double[:] _linear(double[:] data, int length):
-    cdef double[:] out = np.zeros(length) 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef public double[:] _linear_inner(double[:] data, double[:] out, int length) nogil:
     cdef int i = 0
     cdef int readindex = 0
     cdef int inputlength = len(data)
@@ -56,9 +56,9 @@ cdef public double[:] _linear(double[:] data, int length):
 
         val = data[readindex]
 
-        try:
+        if readindex + 1 < length:
             nextval = data[readindex + 1]
-        except IndexError:
+        else:
             nextval = data[0]
 
         frac = phase - <int>phase
@@ -71,7 +71,40 @@ cdef public double[:] _linear(double[:] data, int length):
 
     return out
 
-def linear(data, int length):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef public double[:] _linear(double[:] data, int length):
+    cdef double[:] out = np.zeros(length) 
+    return _linear_inner(data, out, length)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _linear_point(double[:] data, double pos) nogil:
+    cdef int length = <int>len(data)
+    pos = pos * <double>(length-1)
+    cdef int i = <int>pos
+    cdef double frac = pos - <int>pos
+    cdef double a, b
+
+    a = data[i]
+    if i < length-1:
+        b = data[i+1]
+    else:
+        b = a
+
+    return (1.0 - frac) * a + (frac * b)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _trunc_point(double[:] data, double pos) nogil:
+    cdef int length = <int>len(data)
+    cdef int i = <int>(pos*length)
+    return data[i]
+
+cpdef double linear_point(double[:] data, double pos):
+    return _linear_point(data, pos)
+
+cpdef double[:] linear(data, int length):
     if isinstance(data, list):
         data = np.asarray(data, dtype='d')
     return _linear(data, length)
