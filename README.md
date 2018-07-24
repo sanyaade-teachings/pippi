@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Beta 2 (In Development)
+v2.0.0 - Beta 2
 
 ## Installation and setup
 
@@ -85,7 +85,7 @@ There are more examples, give em a whirl, and try your own.
 
 ## Release Notes
 
-### 2.0.0 - Beta 2 (In Development)
+### 2.0.0 - Beta 2
 
 #### Features
 
