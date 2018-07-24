@@ -7,7 +7,7 @@ class TestInterpolation(TestCase):
     def test_interpolate_linear(self):
         for _ in range(10):
             wtsize = random.randint(1, 100)
-            npoints = random.randint(1, 100) 
+            npoints = random.randint(2, 100) 
             wt = np.array([ random.random() for _ in range(wtsize) ], dtype='d')
 
             #print(wtsize, npoints)

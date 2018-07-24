@@ -63,6 +63,8 @@ cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int
 
     return out
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil:
     cdef int i = 0
     cdef int c = 0
@@ -107,9 +109,13 @@ cdef double[:,:] _remix(double[:,:] values, int framelength, int channels):
             out[i] = interpolation._linear(values[i], channels)
         return out
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef double[:,:] _mul2d(double[:,:] output, double[:,:] values):
     return np.multiply(output, _remix(values, len(output), output.shape[1]))
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
     cdef int channel = 0
     cdef int channels = output.shape[1]
