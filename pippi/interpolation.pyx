@@ -42,32 +42,14 @@ cdef public double[:] _hermite(double[:] data, int length):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef public double[:] _linear_inner(double[:] data, double[:] out, int length) nogil:
-    cdef int i = 0
-    cdef int readindex = 0
+    cdef Py_ssize_t i
     cdef int inputlength = len(data)
-    cdef double phase = 0
-    cdef double val, nextval, frac
 
     if inputlength <= 1:
         return out
 
     for i in range(length):
-        readindex = <int>phase % inputlength
-
-        val = data[readindex]
-
-        if readindex + 1 < length:
-            nextval = data[readindex + 1]
-        else:
-            nextval = data[0]
-
-        frac = phase - <int>phase
-
-        val = (1.0 - frac) * val + (frac * nextval)
-
-        out[i] = val
-
-        phase += inputlength * (1.0 / length)
+        out[i] = _linear_point(data, <double>i/(length-1))
 
     return out
 
