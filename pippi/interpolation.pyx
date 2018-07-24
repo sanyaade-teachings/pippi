@@ -1,4 +1,4 @@
-# cython: language_level=3, profile=True
+# cython: language_level=3
 
 import numpy as np
 cimport cython

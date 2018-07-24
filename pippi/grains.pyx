@@ -1,4 +1,4 @@
-# cython: language_level=3, profile=True
+# cython: language_level=3
 
 from .soundbuffer cimport SoundBuffer, _cut, _dub, _speed, _pan, _env
 from . cimport wavetables
