@@ -4,30 +4,17 @@ v2.0.0 - Beta 2 (In Development)
 
 ## Installation and setup
 
-Pippi requires python 3 which can be found here:
+Pippi requires python 3.6+ which can be found here:
 
     https://www.python.org/downloads/
 
-I'm just testing against the latest stable version (the 3.6.x branch) at the moment.
-
-I recommend you install pippi and work from a python virtualenv, which 
-is built into the standard library in recent versions of python.
-
-Create a python 3 virtualenv in a directory called `venv`:
-
-    python3 -m venv venv
-
-Activate the virtualenv:
-
-    source venv/bin/activate
+The 3.5.x branch of python might work too, but is untested.
 
 ### Install from pip
 
 To use the most recent release from pip, just:
 
     pip install pippi
-
-...from inside your virtualenv.
 
 ### Install from source
 
@@ -72,19 +59,20 @@ Please let me know if you run into problems!
 
     python examples/multi_snare_bounce.py
 
-Which will produce a WAV file named `multi_snare_bounce_example.wav` in the examples directory.
+Which will produce a file named `multi_snare_bounce_example.wav` in the examples directory.
 
 ## Run every example
 
     make examples
 
-Which will run every example, creating files in the examples directory.
+Which will run every example, creating audio files in the examples directory.
 
 ## Make an examples mix
 
     make mix
 
-Render every example and stitch them into a single audio file with `sox`.
+This also renders every example but then dumps them into a single audio file called `example_mix.wav`
+(It's the pippi demo reel, I guess.)
 
 ## Now what?
 
@@ -99,9 +87,22 @@ There are more examples, give em a whirl, and try your own.
 
 ### 2.0.0 - Beta 2 (In Development)
 
+#### Features
+
+- Point interpolation with `interpolation.linear_point`
+
 #### Bugfixes
 
 - Examples can be run from anywhere
+- Interpolation fixes
+
+#### Performance Optimizations
+
+- Faster ADSR wavetable generation
+- Faster pitch shifting
+- Faster interpolation
+- Faster grain cloud generation
+- Some misc `SoundBuffer` performance improvements (more to come)
 
 ### 2.0.0 - Beta 1
 
