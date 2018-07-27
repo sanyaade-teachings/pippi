@@ -93,6 +93,10 @@ There are more examples, give em a whirl, and try your own.
 - SoundBuffer normalization with `fx.norm`
 - Get SoundBuffer magnitude with `dsp.mag`
 
+#### Bugfixes
+
+- Fix phase overflow in `interpolation._linear_point`
+
 ### 2.0.0 - Beta 2
 
 #### Features
