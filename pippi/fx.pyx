@@ -6,8 +6,31 @@ import random
 cimport cython
 from .soundbuffer cimport SoundBuffer
 from . cimport wavetables
+from .dsp cimport _mag
 
 cdef double MINDENSITY = 0.001
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:,:] _norm(double[:,:] snd, double ceiling):
+    cdef int i = 0
+    cdef int c = 0
+    cdef int framelength = len(snd)
+    cdef int channels = snd.shape[1]
+    cdef double normval = 1
+    cdef double maxval = _mag(snd)
+
+    normval = ceiling / maxval
+    for i in range(framelength):
+        for c in range(channels):
+            snd[i,c] *= normval
+
+    return snd
+
+cpdef SoundBuffer norm(SoundBuffer snd, double ceiling):
+    snd.frames = _norm(snd.frames, ceiling)
+    return snd
 
 cpdef SoundBuffer go(SoundBuffer snd, 
                           object factor,

@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Beta 2
+v2.0.0 - Beta 3 (In Development)
 
 ## Installation and setup
 
@@ -84,6 +84,14 @@ There are more examples, give em a whirl, and try your own.
     make test
 
 ## Release Notes
+
+### 2.0.0 - Beta 3 (In Development)
+
+#### Features
+
+- Basic FIR filter with `filters.fir`
+- SoundBuffer normalization with `fx.norm`
+- Get SoundBuffer magnitude with `dsp.mag`
 
 ### 2.0.0 - Beta 2
 

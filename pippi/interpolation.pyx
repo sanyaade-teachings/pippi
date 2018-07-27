@@ -64,13 +64,15 @@ cdef public double[:] _linear(double[:] data, int length):
 cdef double _linear_point(double[:] data, double pos) nogil:
     cdef int length = <int>len(data)
     pos = pos * <double>(length-1)
-    cdef int i = <int>pos
     cdef double frac = pos - <int>pos
+    cdef int i = <int>pos % length
+    cdef int n
     cdef double a, b
 
     a = data[i]
-    if i < length-1:
-        b = data[i+1]
+    n = i+1
+    if n < length:
+        b = data[n]
     else:
         b = a
 

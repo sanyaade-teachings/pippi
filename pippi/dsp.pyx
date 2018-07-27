@@ -43,6 +43,26 @@ GOGINS = wts.GOGINS
 # a 32 millisecond section from the SoundBuffer `snd`.
 MS = 0.001
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double _mag(double[:,:] snd):
+    cdef int i = 0
+    cdef int c = 0
+    cdef int framelength = len(snd)
+    cdef int channels = snd.shape[1]
+    cdef double maxval = 0
+
+    for i in range(framelength):
+        for c in range(channels):
+            maxval = max(maxval, abs(snd[i,c]))
+
+    return maxval
+
+cpdef double mag(SoundBuffer snd):
+    return _mag(snd.frames)
+
+
 def mix(sounds):
     """ Mix a list of sounds into a new sound
     """

@@ -9,6 +9,7 @@ try:
         'pippi/defaults.pyx', 
         'pippi/dsp.pyx', 
         'pippi/fx.pyx', 
+        'pippi/filters.pyx', 
         'pippi/soundbuffer.pyx', 
         'pippi/interpolation.pyx',
         'pippi/grains.pyx',
@@ -21,6 +22,7 @@ except ImportError:
         Extension('pippi.oscs', ['pippi/oscs.c']), 
         Extension('pippi.dsp', ['pippi/dsp.c']), 
         Extension('pippi.fx', ['pippi/fx.c']), 
+        Extension('pippi.filters', ['pippi/filters.c']), 
         Extension('pippi.grains', ['pippi/grains.c']), 
         Extension('pippi.defaults', ['pippi/defaults.c']), 
         Extension('pippi.soundbuffer', ['pippi/soundbuffer.c']), 
@@ -30,7 +32,7 @@ except ImportError:
 
 setup(
     name='pippi',
-    version='2.0.0-beta-2',
+    version='2.0.0-beta-3',
     description='Computer music with Python',
     author='He Can Jog',
     author_email='erik@hecanjog.com',

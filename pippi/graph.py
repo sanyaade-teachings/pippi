@@ -1,6 +1,8 @@
 import random
 from PIL import Image, ImageDraw
 from . import interpolation
+from . import dsp
+import sys
 
 def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mult=5, upsample_x=20, show_axis=True):
     width *= upsample_mult
@@ -33,3 +35,8 @@ def waveform(sound, filename=None, width=400, height=300, stroke=3, upsample_mul
     img.thumbnail((width//upsample_mult, height//upsample_mult))
     img.save(filename)
 
+if __name__ == '__main__':
+    snd_filename = sys.argv[1]
+    out_filename = sys.argv[2]
+    snd = dsp.read(snd_filename).remix(1)
+    waveform(snd, out_filename, width=2050, height=1024)
