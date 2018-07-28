@@ -89,9 +89,10 @@ There are more examples, give em a whirl, and try your own.
 
 #### Features
 
-- Basic FIR filter with `filters.fir`
+- Basic FIR filter with `filters.fir` or `fx.convolve`
 - SoundBuffer normalization with `fx.norm`
 - Get SoundBuffer magnitude with `dsp.mag`
+- Single and multitap delays with `fx.delay` and `fx.mdelay`
 
 #### Bugfixes
 
