@@ -6,6 +6,7 @@ import random
 cimport cython
 from .soundbuffer cimport SoundBuffer
 from . cimport wavetables
+from .interpolation cimport _linear_point
 from .filters cimport _fir
 from .dsp cimport _mag
 from cpython cimport bool
@@ -33,6 +34,40 @@ cdef double[:,:] _norm(double[:,:] snd, double ceiling):
 cpdef SoundBuffer norm(SoundBuffer snd, double ceiling):
     snd.frames = _norm(snd.frames, ceiling)
     return snd
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:,:] _vspeed(double[:,:] snd, double[:] chan, double[:,:] out, double[:] lfo, double minspeed, double maxspeed, int samplerate):
+    cdef int i = 0
+    cdef int c = 0
+    cdef int framelength = len(snd)
+    cdef int channels = snd.shape[1]
+    cdef double speed = 0
+    cdef double posinc = 1.0 / <double>framelength
+    cdef double pos = 0
+    cdef double lfopos = 0
+
+    for c in range(channels):
+        for i in range(framelength):
+            chan[i] = snd[i,c]
+
+        pos = 0
+        lfopos = 0
+        for i in range(framelength):
+            speed = _linear_point(lfo, lfopos) * (maxspeed - minspeed) + minspeed
+            out[i,c] = _linear_point(chan, pos)
+            pos += posinc * speed
+            lfopos += posinc
+
+    return out
+
+cpdef SoundBuffer vspeed(SoundBuffer snd, double[:] lfo, double minspeed, double maxspeed):
+    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
+    cdef double[:] chan = np.zeros(len(snd), dtype='d')
+    snd.frames = _vspeed(snd.frames, chan, out, lfo, minspeed, maxspeed, snd.samplerate)
+    return snd
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
