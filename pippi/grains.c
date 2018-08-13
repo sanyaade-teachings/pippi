@@ -786,12 +786,12 @@ static const char *__pyx_f[] = {
   "pippi/grains.pyx",
   "pippi/grains.pxd",
   "stringsource",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/array.pxd",
+  "array.pxd",
   "pippi/soundbuffer.pxd",
   "pippi/wavetables.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/type.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/bool.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/complex.pxd",
+  "type.pxd",
+  "bool.pxd",
+  "complex.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;

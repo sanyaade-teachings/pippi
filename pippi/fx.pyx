@@ -77,6 +77,7 @@ cdef double[:,:] _delay(double[:,:] snd, double[:,:] out, int delayframes, doubl
     cdef int c = 0
     cdef int framelength = len(snd)
     cdef int channels = snd.shape[1]
+    cdef int delayindex = 0
     cdef double sample = 0
 
     for i in range(framelength):
@@ -96,6 +97,96 @@ cpdef SoundBuffer delay(SoundBuffer snd, double delaytime, double feedback):
     cdef int delayframes = <int>(snd.samplerate * delaytime)
     snd.frames = _delay(snd.frames, out, delayframes, feedback)
     return snd
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(False)
+cdef double[:,:] _vdelay(double[:,:] snd, 
+                         double[:,:] out, 
+                         double[:] lfo, 
+                         double[:,:] delayline, 
+                         double mindelay, 
+                         double maxdelay, 
+                         double feedback, 
+                         int samplerate):
+    cdef int i = 0
+    cdef int c = 0
+    cdef double pos = 0
+    cdef int framelength = len(snd)
+    cdef int delaylinelength = len(delayline)
+    cdef int channels = snd.shape[1]
+    cdef int delayindex = 0
+    cdef int delayindexnext = 0
+    cdef int delaylineindex = 0
+    cdef double sample = 0
+    cdef double output = 0
+    cdef double delaytime = 0
+    cdef int delayframes = 0
+
+    """
+        float interp_delay(float n, float buffer[], int L, current) {
+            int t1, t2;
+            t1 = current + n;
+            t1 %= L
+            t2 = t1 + 1
+            t2 %= L
+
+            return buffer[t1] + (n - <int>n) * (buffer[t2] - buffer[t1]);
+        }
+
+        t1 = i + delaytimeframes
+        t1 %= delaylinelength
+        t2 = t1 + 1
+        t2 %= delaylinelength
+
+    for i in range(framelength):
+        pos = <double>i / <double>framelength
+        delaytime = (_linear_point(lfo, pos) * (maxdelay-mindelay) + mindelay) * samplerate
+        delayindex = delaylineindex + <int>delaytime
+        delayindex %= delaylinelength
+        delayindexnext = delayindex + 1
+        delayindexnext %= delaylinelength
+
+        for c in range(channels):
+            delayline[delaylineindex,c] += snd[i,c] * feedback
+            sample = delayline[delayindex,c] + ((delaytime - <int>delaytime) * (delayline[delayindexnext,c] + delayline[delayindex,c]))
+            out[i,c] = sample + snd[i,c]
+
+        delaylineindex -= 1
+        delaylineindex %= delaylinelength
+        #print(delaylineindex, delayindex)
+    """
+
+    delayindex = 0
+
+    for i in range(framelength):
+        pos = <double>i / <double>framelength
+        delaytime = (_linear_point(lfo, pos) * (maxdelay-mindelay) + mindelay) * samplerate
+        delayreadindex = <int>(i - delaytime)
+        for c in range(channels):
+            sample = snd[i,c]
+
+            if delayreadindex >= 0:
+                output = snd[delayreadindex,c] * feedback
+                sample += output
+
+            delayindex += 1
+            delayindex %= delaylinelength
+
+            delayline[delayindex,c] = output
+
+            out[i,c] = sample
+
+    return out
+
+cpdef SoundBuffer vdelay(SoundBuffer snd, double[:] lfo, double mindelay, double maxdelay, double feedback):
+    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
+    cdef int maxdelayframes = <int>(snd.samplerate * maxdelay)
+    cdef double[:,:] delayline = np.zeros((maxdelayframes, snd.channels), dtype='d')
+    snd.frames = _vdelay(snd.frames, out, lfo, delayline, mindelay, maxdelay, feedback, snd.samplerate)
+    return snd
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

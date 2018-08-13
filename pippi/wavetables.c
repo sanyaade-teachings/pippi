@@ -942,15 +942,15 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable;
 /* "pippi/wavetables.pyx":414
  * 
  * 
- * cpdef double[:] randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):             # <<<<<<<<<<<<<<
+ * cpdef double[:] randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):             # <<<<<<<<<<<<<<
  *     points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
  *     return interpolation._linear(points, wtsize)
  */
 struct __pyx_opt_args_5pippi_10wavetables_randline {
   int __pyx_n;
+  int wtsize;
   double lowvalue;
   double highvalue;
-  int wtsize;
 };
 
 /* "pippi/wavetables.pyx":532
@@ -2484,7 +2484,7 @@ static int __pyx_pf_5pippi_10wavetables_9Wavetable_4data_2__set__(struct __pyx_o
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_50__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_52__setstate_cython__(CYTHON_UNUSED struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v___pyx_state); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_polyseg(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_segments, int __pyx_v_length); /* proto */
-static PyObject *__pyx_pf_5pippi_10wavetables_2randline(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_numpoints, double __pyx_v_lowvalue, double __pyx_v_highvalue, int __pyx_v_wtsize); /* proto */
+static PyObject *__pyx_pf_5pippi_10wavetables_2randline(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_numpoints, int __pyx_v_wtsize, double __pyx_v_lowvalue, double __pyx_v_highvalue); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_4adsr(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_length, int __pyx_v_attack, int __pyx_v_decay, double __pyx_v_sustain, int __pyx_v_release); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_6window(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_window_type, int __pyx_v_length, __Pyx_memviewslice __pyx_v_data); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_8wavetable(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_wavetable_type, int __pyx_v_length, __Pyx_memviewslice __pyx_v_data); /* proto */
@@ -9789,16 +9789,16 @@ static PyObject *__pyx_pf_5pippi_10wavetables_polyseg(CYTHON_UNUSED PyObject *__
 /* "pippi/wavetables.pyx":414
  * 
  * 
- * cpdef double[:] randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):             # <<<<<<<<<<<<<<
+ * cpdef double[:] randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):             # <<<<<<<<<<<<<<
  *     points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
  *     return interpolation._linear(points, wtsize)
  */
 
 static PyObject *__pyx_pw_5pippi_10wavetables_3randline(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static __Pyx_memviewslice __pyx_f_5pippi_10wavetables_randline(int __pyx_v_numpoints, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_randline *__pyx_optional_args) {
+  int __pyx_v_wtsize = ((int)0x1000);
   double __pyx_v_lowvalue = ((double)0.0);
   double __pyx_v_highvalue = ((double)1.0);
-  int __pyx_v_wtsize = ((int)0x1000);
   PyObject *__pyx_v_points = NULL;
   CYTHON_UNUSED int __pyx_v__;
   __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -9820,11 +9820,11 @@ static __Pyx_memviewslice __pyx_f_5pippi_10wavetables_randline(int __pyx_v_numpo
   __Pyx_RefNannySetupContext("randline", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
-      __pyx_v_lowvalue = __pyx_optional_args->lowvalue;
+      __pyx_v_wtsize = __pyx_optional_args->wtsize;
       if (__pyx_optional_args->__pyx_n > 1) {
-        __pyx_v_highvalue = __pyx_optional_args->highvalue;
+        __pyx_v_lowvalue = __pyx_optional_args->lowvalue;
         if (__pyx_optional_args->__pyx_n > 2) {
-          __pyx_v_wtsize = __pyx_optional_args->wtsize;
+          __pyx_v_highvalue = __pyx_optional_args->highvalue;
         }
       }
     }
@@ -9832,7 +9832,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_10wavetables_randline(int __pyx_v_numpo
 
   /* "pippi/wavetables.pyx":415
  * 
- * cpdef double[:] randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
+ * cpdef double[:] randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):
  *     points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')             # <<<<<<<<<<<<<<
  *     return interpolation._linear(points, wtsize)
  * 
@@ -9926,7 +9926,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_10wavetables_randline(int __pyx_v_numpo
   __pyx_t_8 = 0;
 
   /* "pippi/wavetables.pyx":416
- * cpdef double[:] randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
+ * cpdef double[:] randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):
  *     points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
  *     return interpolation._linear(points, wtsize)             # <<<<<<<<<<<<<<
  * 
@@ -9945,7 +9945,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_10wavetables_randline(int __pyx_v_numpo
   /* "pippi/wavetables.pyx":414
  * 
  * 
- * cpdef double[:] randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):             # <<<<<<<<<<<<<<
+ * cpdef double[:] randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):             # <<<<<<<<<<<<<<
  *     points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
  *     return interpolation._linear(points, wtsize)
  */
@@ -9981,14 +9981,14 @@ static __Pyx_memviewslice __pyx_f_5pippi_10wavetables_randline(int __pyx_v_numpo
 static PyObject *__pyx_pw_5pippi_10wavetables_3randline(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_5pippi_10wavetables_3randline(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   int __pyx_v_numpoints;
+  int __pyx_v_wtsize;
   double __pyx_v_lowvalue;
   double __pyx_v_highvalue;
-  int __pyx_v_wtsize;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("randline (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_numpoints,&__pyx_n_s_lowvalue,&__pyx_n_s_highvalue,&__pyx_n_s_wtsize,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_numpoints,&__pyx_n_s_wtsize,&__pyx_n_s_lowvalue,&__pyx_n_s_highvalue,0};
     PyObject* values[4] = {0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -10013,19 +10013,19 @@ static PyObject *__pyx_pw_5pippi_10wavetables_3randline(PyObject *__pyx_self, Py
         CYTHON_FALLTHROUGH;
         case  1:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_lowvalue);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_wtsize);
           if (value) { values[1] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_highvalue);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_lowvalue);
           if (value) { values[2] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_wtsize);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_highvalue);
           if (value) { values[3] = value; kw_args--; }
         }
       }
@@ -10047,19 +10047,19 @@ static PyObject *__pyx_pw_5pippi_10wavetables_3randline(PyObject *__pyx_self, Py
     }
     __pyx_v_numpoints = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_numpoints == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L3_error)
     if (values[1]) {
-      __pyx_v_lowvalue = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_lowvalue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L3_error)
+      __pyx_v_wtsize = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_wtsize == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L3_error)
+    } else {
+      __pyx_v_wtsize = ((int)0x1000);
+    }
+    if (values[2]) {
+      __pyx_v_lowvalue = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_lowvalue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L3_error)
     } else {
       __pyx_v_lowvalue = ((double)0.0);
     }
-    if (values[2]) {
-      __pyx_v_highvalue = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_highvalue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L3_error)
+    if (values[3]) {
+      __pyx_v_highvalue = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_highvalue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L3_error)
     } else {
       __pyx_v_highvalue = ((double)1.0);
-    }
-    if (values[3]) {
-      __pyx_v_wtsize = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_wtsize == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L3_error)
-    } else {
-      __pyx_v_wtsize = ((int)0x1000);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
@@ -10070,14 +10070,14 @@ static PyObject *__pyx_pw_5pippi_10wavetables_3randline(PyObject *__pyx_self, Py
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_10wavetables_2randline(__pyx_self, __pyx_v_numpoints, __pyx_v_lowvalue, __pyx_v_highvalue, __pyx_v_wtsize);
+  __pyx_r = __pyx_pf_5pippi_10wavetables_2randline(__pyx_self, __pyx_v_numpoints, __pyx_v_wtsize, __pyx_v_lowvalue, __pyx_v_highvalue);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_10wavetables_2randline(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_numpoints, double __pyx_v_lowvalue, double __pyx_v_highvalue, int __pyx_v_wtsize) {
+static PyObject *__pyx_pf_5pippi_10wavetables_2randline(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_numpoints, int __pyx_v_wtsize, double __pyx_v_lowvalue, double __pyx_v_highvalue) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -10086,9 +10086,9 @@ static PyObject *__pyx_pf_5pippi_10wavetables_2randline(CYTHON_UNUSED PyObject *
   __Pyx_RefNannySetupContext("randline", 0);
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2.__pyx_n = 3;
+  __pyx_t_2.wtsize = __pyx_v_wtsize;
   __pyx_t_2.lowvalue = __pyx_v_lowvalue;
   __pyx_t_2.highvalue = __pyx_v_highvalue;
-  __pyx_t_2.wtsize = __pyx_v_wtsize;
   __pyx_t_1 = __pyx_f_5pippi_10wavetables_randline(__pyx_v_numpoints, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 414, __pyx_L1_error)
   __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 414, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);

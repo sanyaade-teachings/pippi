@@ -245,6 +245,7 @@ def nti(note):
 def ntf(note, octave=None, ratios=None):
     """ Note to freq 
     """
+    note = note.lower()
     if re.match('[a-zA-Z]#?b?\d+', note) is not None:
         parsed = re.match('([a-zA-Z]#?b?)(\d+)', note)
         note = parsed.group(1)

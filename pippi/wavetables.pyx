@@ -411,7 +411,7 @@ cpdef double[:] polyseg(list segments, int length):
     return out
 
 
-cpdef double[:] randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
+cpdef double[:] randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):
     points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
     return interpolation._linear(points, wtsize)
 

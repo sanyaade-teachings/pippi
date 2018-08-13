@@ -71,6 +71,8 @@ class TestSoundBuffer(TestCase):
         remainderframes = int((sound.dur - sum(durations[:-1])) * sound.samplerate)
         self.assertEqual(int(durations[-1] * sound.samplerate), remainderframes)
 
+        print(durations[-1], remainderframes)
+
         # Check that all the grains add up
         self.assertEqual(sum(durations), sound.dur)
 
