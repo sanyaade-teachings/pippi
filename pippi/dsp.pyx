@@ -63,12 +63,20 @@ cpdef double mag(SoundBuffer snd):
     return _mag(snd.frames)
 
 
-def mix(sounds):
+cpdef SoundBuffer mix(list sounds, align_end=False):
     """ Mix a list of sounds into a new sound
     """
-    out = SoundBuffer(length=1)
-    for sound in sounds:
-        out &= sound
+    cdef double maxlength = 0
+    cdef int maxchannels = 1
+    cdef SoundBuffer out = SoundBuffer(length=maxlength, channels=maxchannels)
+    cdef SoundBuffer sound
+
+    if align_end:
+        for sound in sounds:
+            out.dub(sound, maxlength - sound.dur)
+    else:
+        for sound in sounds:
+            out.dub(sound, 0)
 
     return out
     
@@ -125,9 +133,7 @@ def join(sounds, overlap=None, channels=None, samplerate=None):
 
     return out
 
-def buffer(frames=None, length=-1, channels=2, samplerate=44100):
-    """ Identical to `silence` -- creates an empty buffer of a given length
-    """
+cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, int samplerate=44100):
     return SoundBuffer(frames=frames, length=length, channels=channels, samplerate=samplerate)
 
 def read(frames, channels=2, samplerate=44100):
