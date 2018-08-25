@@ -251,7 +251,7 @@ cdef class SoundBuffer:
 
         if filename is not None:
             framestart = <int>(start * self.samplerate)
-            self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0)
+            self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0, always_2d=True)
             self.channels = self.frames.shape[1]
 
         elif buf is not None:

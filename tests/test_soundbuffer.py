@@ -23,11 +23,26 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound)
 
-    def test_create_buffer_from_soundfile(self):
+    def test_create_stereo_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
+
+        sound = dsp.read('tests/sounds/guitar1s.wav')
+        self.assertEqual(len(sound), 44100)
+        self.assertTrue(sound.samplerate == 44100)
+
+
+    def test_create_mono_buffer_from_soundfile(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        self.assertTrue(sound.samplerate == 44100)
+        self.assertTrue(sound.channels == 1)
+        self.assertEqual(len(sound), 228554)
+
+        sound = dsp.read('tests/sounds/linux.wav')
+        self.assertTrue(sound.samplerate == 44100)
+        self.assertTrue(sound.channels == 1)
+        self.assertEqual(len(sound), 228554)
 
     def test_clip_soundbuffer(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')

@@ -2187,6 +2187,7 @@ static const char __pyx_k_pyx_type[] = "__pyx_type";
 static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_subtract[] = "subtract";
 static const char __pyx_k_TypeError[] = "TypeError";
+static const char __pyx_k_always_2d[] = "always_2d";
 static const char __pyx_k_enumerate[] = "enumerate";
 static const char __pyx_k_maxlength[] = "maxlength";
 static const char __pyx_k_minlength[] = "minlength";
@@ -2302,6 +2303,7 @@ static PyObject *__pyx_n_s_View_MemoryView;
 static PyObject *__pyx_n_s_a;
 static PyObject *__pyx_n_s_add;
 static PyObject *__pyx_n_s_allocate_buffer;
+static PyObject *__pyx_n_s_always_2d;
 static PyObject *__pyx_n_s_amax;
 static PyObject *__pyx_n_s_args;
 static PyObject *__pyx_n_s_array;
@@ -5590,7 +5592,7 @@ static int __pyx_pf_5pippi_11soundbuffer_11SoundBuffer___cinit__(struct __pyx_ob
  * 
  *         if filename is not None:             # <<<<<<<<<<<<<<
  *             framestart = <int>(start * self.samplerate)
- *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0)
+ *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0, always_2d=True)
  */
   __pyx_t_1 = (__pyx_v_filename != ((PyObject*)Py_None));
   __pyx_t_2 = (__pyx_t_1 != 0);
@@ -5600,7 +5602,7 @@ static int __pyx_pf_5pippi_11soundbuffer_11SoundBuffer___cinit__(struct __pyx_ob
  * 
  *         if filename is not None:
  *             framestart = <int>(start * self.samplerate)             # <<<<<<<<<<<<<<
- *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0)
+ *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0, always_2d=True)
  *             self.channels = self.frames.shape[1]
  */
     __pyx_v_framestart = ((int)(__pyx_v_start * __pyx_v_self->samplerate));
@@ -5608,7 +5610,7 @@ static int __pyx_pf_5pippi_11soundbuffer_11SoundBuffer___cinit__(struct __pyx_ob
     /* "pippi/soundbuffer.pyx":254
  *         if filename is not None:
  *             framestart = <int>(start * self.samplerate)
- *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0)             # <<<<<<<<<<<<<<
+ *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0, always_2d=True)             # <<<<<<<<<<<<<<
  *             self.channels = self.frames.shape[1]
  * 
  */
@@ -5632,10 +5634,11 @@ static int __pyx_pf_5pippi_11soundbuffer_11SoundBuffer___cinit__(struct __pyx_ob
     PyTuple_SET_ITEM(__pyx_t_6, 2, __pyx_t_5);
     __pyx_t_3 = 0;
     __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 254, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_n_u_float64) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
     if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_fill_value, __pyx_int_0) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_always_2d, Py_True) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
     __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 254, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -5699,7 +5702,7 @@ static int __pyx_pf_5pippi_11soundbuffer_11SoundBuffer___cinit__(struct __pyx_ob
 
     /* "pippi/soundbuffer.pyx":255
  *             framestart = <int>(start * self.samplerate)
- *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0)
+ *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0, always_2d=True)
  *             self.channels = self.frames.shape[1]             # <<<<<<<<<<<<<<
  * 
  *         elif buf is not None:
@@ -5712,7 +5715,7 @@ static int __pyx_pf_5pippi_11soundbuffer_11SoundBuffer___cinit__(struct __pyx_ob
  * 
  *         if filename is not None:             # <<<<<<<<<<<<<<
  *             framestart = <int>(start * self.samplerate)
- *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0)
+ *             self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0, always_2d=True)
  */
     goto __pyx_L3;
   }
@@ -33044,6 +33047,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_a, __pyx_k_a, sizeof(__pyx_k_a), 0, 0, 1, 1},
   {&__pyx_n_s_add, __pyx_k_add, sizeof(__pyx_k_add), 0, 0, 1, 1},
   {&__pyx_n_s_allocate_buffer, __pyx_k_allocate_buffer, sizeof(__pyx_k_allocate_buffer), 0, 0, 1, 1},
+  {&__pyx_n_s_always_2d, __pyx_k_always_2d, sizeof(__pyx_k_always_2d), 0, 0, 1, 1},
   {&__pyx_n_s_amax, __pyx_k_amax, sizeof(__pyx_k_amax), 0, 0, 1, 1},
   {&__pyx_n_s_args, __pyx_k_args, sizeof(__pyx_k_args), 0, 0, 1, 1},
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},

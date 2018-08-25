@@ -97,6 +97,7 @@ There are more examples, give em a whirl, and try your own.
 #### Bugfixes
 
 - Fix phase overflow in `interpolation._linear_point`
+- Fixed a nasty bug when loading mono soundfiles from disk.
 
 ### 2.0.0 - Beta 2
 

@@ -74,10 +74,14 @@ progressions = {
     'IV': ['V', 'vii*'],
     'iv': ['V', 'vii*'],
     'V': ['I', 'i'], # a pivot
+    'v': ['I', 'i'], # a pivot
     'vi': ['ii', 'IV'],
     'VI': ['ii*', 'iv'],
     'vii*': ['I', 'i'], # a pivot
+    'vii': ['I', 'i'], # a pivot
 }
+
+equal = tuple([ 2**(i/12) for i in range(12) ])
 
 just = ( 
     (1.0, 1.0),     # P1
@@ -125,18 +129,18 @@ young = (
 )
 
 louis = (
-    (1.0, 1.0),       # P1 1.0
-    (1.0, 1.0),       # m2 1.0
-    (9.0, 8.0),       # M2 1.125
-    (9.0, 8.0),       # m3 1.125
-    (5.0, 4.0),       # M3 1.25
-    (5.0, 4.0),       # P4 1.25
-    (3.0, 2.0),       # TT 1.5
-    (3.0, 2.0),       # P5 1.5
-    (8.0, 5.0),       # m6 1.6
-    (7.0, 4.0),       # M6 1.75
-    (9.0, 5.0),       # m7 1.8
-    (9.0, 5.0),       # M7 1.8
+    1, 
+    math.sqrt(5) * 0.5,
+    math.sqrt(6) * 0.5, 
+    math.sqrt(7) * 0.5, 
+    math.sqrt(2), 
+    math.sqrt(9) * 0.5, 
+    math.sqrt(10) * 0.5, 
+    math.sqrt(11) * 0.5, 
+    math.sqrt(3), 
+    math.sqrt(13) * 0.5, 
+    math.sqrt(14) * 0.5, 
+    math.sqrt(15) * 0.5, 
 )
 
 
@@ -144,6 +148,7 @@ louis = (
 # standard
 major = (0, 2, 4, 5, 7, 9, 11)
 minor = (0, 2, 3, 5, 7, 8, 10)
+chromatic = tuple(range(12))
 
 # notated as semitone deviations from 
 # a major scale for readability
@@ -229,10 +234,10 @@ def ptom(pitch):
 def edo(degree, divs=12):
     return 2**(degree/float(divs))
 
-def edoRatios(divs=12):
+def edo_ratios(divs=12):
     return [ (edo(i, divs), 1.0) for i in range(1, divs+1) ]
 
-def edoScale(divs=12):
+def edo_scale(divs=12):
     return [ edo(i, divs) for i in range(1, divs+1) ]
 
 def nti(note):
@@ -299,28 +304,67 @@ def nts(note, octave):
 
     return degree
 
-def getscale(degrees, root=261.63, ratios=None, scale=None):
+def getmultiplier(ratios, scale, degree):
+    base = scale[(degree - 1) % len(scale)]
+    octave = degree // (len(scale) + 1)
+    mult = ratios[base]
+    if isinstance(mult, tuple):
+        mult = mult[0] / mult[1]
+    mult = mult * 2**octave
+    return mult
+
+def int_to_byte_list(val):
+    return list(map(int, list(bin(val))[2:]))
+
+def str_to_byte_list(val):
+    return list(map(int, val))
+
+def to_scale_mask(mapping):
+    mask = []
+    if isinstance(mapping, int):
+        mask = int_to_byte_list(mapping)
+    elif isinstance(mapping, bytes):
+        for i in list(mapping):
+            mask += int_to_byte_list(i)
+    elif isinstance(mapping, str):
+        mask = str_to_byte_list(mapping)
+    elif isinstance(mapping, list) or isinstance(mapping, tuple):
+        mask = list(map(int, mapping))
+    else:
+        raise NotImplemented
+
+    return mask
+
+def scale_mask_to_indexes(mask):
+    mask = to_scale_mask(mask)
+    scale_indexes = []
+    for i, m in enumerate(mask):
+        if m == 1:
+            scale_indexes += [ i ]
+    return scale_indexes
+
+def getfreqs(degrees=None, root=261.63, ratios=None, scale=None, scale_mask=None):
     if ratios is None:
-        ratios = terry
+        ratios = just
 
     if scale is None:
         scale = major
+    
+    if degrees is None:
+        degrees = list(range(len(scale)))
 
-    multipliers = []
+    if scale_mask is not None:
+        scale = scale_mask_to_indexes(scale_mask)
 
+    freqs = []
     for degree in degrees:
-        base = scale[(degree - 1) % len(scale)]
-        octave = degree / (len(scale) + 1)
+        freq = root * getmultiplier(ratios, scale, degree)
+        freqs += [ freq ]
 
-        multiplier = ratios[base][0] / ratios[base][1]
-        multiplier = multiplier * 2**octave
-
-        multipliers += [ multiplier ]
-
-    return [ root * m for m in multipliers ]
+    return freqs
 
 def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None):
-    #major = (0, 2, 4, 5, 7, 9, 11)
+    # TODO maybe depricate in favor of to_freqs()
     if scale_degrees is None:
         scale_degrees = [1,3,5]
 
@@ -346,18 +390,18 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
 
     return freqs
 
-def getQuality(name):
+def get_quality(name):
     quality = '-' if name.islower() else '^'
     quality = '*' if re.match(match_roman + '[*]', name) is not None else quality
 
     return quality
 
-def getExtension(name):
+def get_extension(name):
     return re.sub(match_roman + '[/*+]?', '', name)
 
-def getIntervals(name):
-    quality = getQuality(name)
-    extension = getExtension(name)
+def get_intervals(name):
+    quality = get_quality(name)
+    extension = get_extension(name)
 
     chord = base_qualities[quality]
 
@@ -366,19 +410,19 @@ def getIntervals(name):
 
     return chord
 
-def getFreqFromChordName(name, root=440, octave=3, ratios=just):
-    index = getChordRootIndex(name)
+def get_freq_from_chord_name(name, root=440, octave=3, ratios=just):
+    index = get_chord_root_index(name)
     freq = ratios[index]
     freq = root * (freq[0] / freq[1]) * 2**octave
 
     return freq
 
-def stripChord(name):
+def strip_chord(name):
     root = re.sub('[#b+/*^0-9]+', '', name)
     return root.lower()
 
-def getChordRootIndex(name):
-    root = chord_romans[stripChord(name)]
+def get_chord_root_index(name):
+    root = chord_romans[strip_chord(name)]
 
     if '#' in name:
         root += 1
@@ -388,7 +432,7 @@ def getChordRootIndex(name):
 
     return root % 12
 
-def addIntervals(a, b):
+def add_intervals(a, b):
     a = intervals[a]
     b = intervals[b]
     c = a + b
@@ -398,7 +442,7 @@ def addIntervals(a, b):
 
     return c
 
-def getRatioFromInterval(interval, ratios):
+def get_ratio_from_interval(interval, ratios):
     try:
         index = intervals[interval]
     except IndexError:
@@ -418,8 +462,8 @@ def getRatioFromInterval(interval, ratios):
 
     return ratio
 
-def nextChord(name):
-    name = stripChord(name)
+def next_chord(name):
+    name = strip_chord(name)
     return random.choice(progressions[name])
 
 def chord(name, key=None, octave=3, ratios=None):
@@ -430,12 +474,12 @@ def chord(name, key=None, octave=3, ratios=None):
         ratios = terry
 
     key = ntf(key, octave, ratios)
-    root = ratios[getChordRootIndex(name)]
+    root = ratios[get_chord_root_index(name)]
     root = key * (root[0] / root[1])
 
     name = re.sub('[#b]+', '', name)
-    chord = getIntervals(name)
-    chord = [ getRatioFromInterval(interval, ratios) for interval in chord ]
+    chord = get_intervals(name)
+    chord = [ get_ratio_from_interval(interval, ratios) for interval in chord ]
     chord = [ root * ratio for ratio in chord ]
 
     return chord
@@ -446,7 +490,7 @@ def chords(names, key=None, octave=3, ratios=just):
 
     return [ chord(name, key, octave, ratios) for name in names ]
 
-def fitScale(freq, scale):
+def fit_scale(freq, scale):
     # Thanks to @kennytm from stack overflow for this <3 <3
     return min(scale, key=lambda x:abs(x-freq))
 
