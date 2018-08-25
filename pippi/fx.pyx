@@ -250,7 +250,7 @@ cpdef SoundBuffer convolve(SoundBuffer snd, double[:] impulse, bool normalize=Tr
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
     cdef int _normalize = 1 if normalize else 0
     snd.frames = _fir(snd.frames, out, impulse, normalize)
-    return 
+    return snd
 
 cpdef SoundBuffer go(SoundBuffer snd, 
                           object factor,

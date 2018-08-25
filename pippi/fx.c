@@ -954,7 +954,7 @@ struct __pyx_opt_args_5pippi_2fx_convolve {
 };
 
 /* "pippi/fx.pyx":255
- *     return
+ *     return snd
  * 
  * cpdef SoundBuffer go(SoundBuffer snd,             # <<<<<<<<<<<<<<
  *                           object factor,
@@ -5222,7 +5222,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_2fx_con
  *     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
  *     cdef int _normalize = 1 if normalize else 0             # <<<<<<<<<<<<<<
  *     snd.frames = _fir(snd.frames, out, impulse, normalize)
- *     return
+ *     return snd
  */
   __pyx_t_8 = __Pyx_PyObject_IsTrue(((PyObject *)__pyx_v_normalize)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 251, __pyx_L1_error)
   if (__pyx_t_8) {
@@ -5236,7 +5236,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_2fx_con
  *     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
  *     cdef int _normalize = 1 if normalize else 0
  *     snd.frames = _fir(snd.frames, out, impulse, normalize)             # <<<<<<<<<<<<<<
- *     return
+ *     return snd
  * 
  */
   if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 252, __pyx_L1_error)}
@@ -5250,12 +5250,13 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_2fx_con
   /* "pippi/fx.pyx":253
  *     cdef int _normalize = 1 if normalize else 0
  *     snd.frames = _fir(snd.frames, out, impulse, normalize)
- *     return             # <<<<<<<<<<<<<<
+ *     return snd             # <<<<<<<<<<<<<<
  * 
  * cpdef SoundBuffer go(SoundBuffer snd,
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __pyx_r = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)Py_None); __Pyx_INCREF(Py_None);
+  __Pyx_INCREF(((PyObject *)__pyx_v_snd));
+  __pyx_r = __pyx_v_snd;
   goto __pyx_L0;
 
   /* "pippi/fx.pyx":249
@@ -5393,7 +5394,7 @@ static PyObject *__pyx_pf_5pippi_2fx_10convolve(CYTHON_UNUSED PyObject *__pyx_se
 }
 
 /* "pippi/fx.pyx":255
- *     return
+ *     return snd
  * 
  * cpdef SoundBuffer go(SoundBuffer snd,             # <<<<<<<<<<<<<<
  *                           object factor,
@@ -6300,7 +6301,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_2fx_go(
   goto __pyx_L0;
 
   /* "pippi/fx.pyx":255
- *     return
+ *     return snd
  * 
  * cpdef SoundBuffer go(SoundBuffer snd,             # <<<<<<<<<<<<<<
  *                           object factor,
@@ -6504,7 +6505,7 @@ static PyObject *__pyx_pw_5pippi_2fx_13go(PyObject *__pyx_self, PyObject *__pyx_
   __pyx_r = __pyx_pf_5pippi_2fx_12go(__pyx_self, __pyx_v_snd, __pyx_v_factor, __pyx_v_density, __pyx_v_wet, __pyx_v_minlength, __pyx_v_maxlength, __pyx_v_minclip, __pyx_v_maxclip, __pyx_v_win);
 
   /* "pippi/fx.pyx":255
- *     return
+ *     return snd
  * 
  * cpdef SoundBuffer go(SoundBuffer snd,             # <<<<<<<<<<<<<<
  *                           object factor,
