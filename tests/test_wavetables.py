@@ -3,7 +3,7 @@ import random
 import re
 
 from unittest import TestCase
-from pippi import wavetables, dsp
+from pippi import wavetables, dsp, graph
 
 class TestWavetables(TestCase):
     def test_random_window(self):

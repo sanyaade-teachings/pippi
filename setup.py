@@ -5,28 +5,30 @@ try:
     from Cython.Build import cythonize
     import numpy as np
     ext_modules = cythonize([
-        'pippi/oscs.pyx', 
         'pippi/defaults.pyx', 
         'pippi/dsp.pyx', 
-        'pippi/fx.pyx', 
         'pippi/filters.pyx', 
-        'pippi/soundbuffer.pyx', 
-        'pippi/interpolation.pyx',
+        'pippi/fx.pyx', 
         'pippi/grains.pyx',
+        'pippi/graph.pyx', 
+        'pippi/interpolation.pyx',
+        'pippi/oscs.pyx', 
+        'pippi/soundbuffer.pyx', 
         'pippi/wavetables.pyx'
     ], include_path=[np.get_include()], annotate=True) 
 
 except ImportError:
     from setuptools.extension import Extension
     ext_modules = [
-        Extension('pippi.oscs', ['pippi/oscs.c']), 
-        Extension('pippi.dsp', ['pippi/dsp.c']), 
-        Extension('pippi.fx', ['pippi/fx.c']), 
-        Extension('pippi.filters', ['pippi/filters.c']), 
-        Extension('pippi.grains', ['pippi/grains.c']), 
         Extension('pippi.defaults', ['pippi/defaults.c']), 
-        Extension('pippi.soundbuffer', ['pippi/soundbuffer.c']), 
+        Extension('pippi.dsp', ['pippi/dsp.c']), 
+        Extension('pippi.filters', ['pippi/filters.c']), 
+        Extension('pippi.fx', ['pippi/fx.c']), 
+        Extension('pippi.grains', ['pippi/grains.c']), 
+        Extension('pippi.graph', ['pippi/graph.c']), 
         Extension('pippi.interpolation', ['pippi/interpolation.c']),
+        Extension('pippi.oscs', ['pippi/oscs.c']), 
+        Extension('pippi.soundbuffer', ['pippi/soundbuffer.c']), 
         Extension('pippi.wavetables', ['pippi/wavetables.c']),
     ]
 

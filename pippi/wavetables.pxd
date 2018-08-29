@@ -6,12 +6,16 @@ cdef class Wavetable:
     cdef public double[:] data
 
 cdef int SINE
+cdef int SINEIN 
+cdef int SINEOUT
 cdef int COS
 cdef int TRI
 cdef int SAW
 cdef int PHASOR
 cdef int RSAW
 cdef int HANN
+cdef int HANNIN
+cdef int HANNOUT
 cdef int HAMM
 cdef int BLACK
 cdef int BLACKMAN

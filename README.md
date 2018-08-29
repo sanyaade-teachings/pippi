@@ -93,6 +93,8 @@ There are more examples, give em a whirl, and try your own.
 - SoundBuffer normalization with `fx.norm`
 - Get SoundBuffer magnitude with `dsp.mag`
 - Single and multitap delays with `fx.delay` and `fx.mdelay`
+- Some new built-in `wavetable.window` types: `dsp.SINEIN` / `dsp.SINEOUT`, `dsp.HANNIN` / `dsp.HANNOUT` for fades
+- More flexible frequency table creation from arbitrary scales, tunings and scale bitmasks with `tune.tofreqs`
 
 #### Bugfixes
 

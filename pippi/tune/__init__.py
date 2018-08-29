@@ -343,7 +343,7 @@ def scale_mask_to_indexes(mask):
             scale_indexes += [ i ]
     return scale_indexes
 
-def getfreqs(degrees=None, root=261.63, ratios=None, scale=None, scale_mask=None):
+def tofreqs(degrees=None, root=261.63, ratios=None, scale=None, scale_mask=None):
     if ratios is None:
         ratios = just
 

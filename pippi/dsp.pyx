@@ -14,12 +14,16 @@ cimport wavetables as wts
 # Expose some C flags / constants to python
 # FIXME might be faster to use newish cpdef enum defs? donno
 SINE = wts.SINE
+SINEIN = wts.SINEIN
+SINEOUT = wts.SINEOUT
 COS = wts.COS
 TRI = wts.TRI
 SAW = wts.SAW
 PHASOR = wts.PHASOR
 RSAW = wts.RSAW
 HANN = wts.HANN
+HANNIN = wts.HANNIN
+HANNOUT = wts.HANNOUT
 HAMM = wts.HAMM
 BLACK = wts.BLACK
 BLACKMAN = wts.BLACK

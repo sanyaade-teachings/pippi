@@ -786,11 +786,11 @@ static const char *__pyx_f[] = {
   "pippi/oscs.pyx",
   "stringsource",
   "pippi/oscs.pxd",
-  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/array.pxd",
+  "array.pxd",
   "pippi/wavetables.pxd",
   "pippi/grains.pxd",
   "pippi/soundbuffer.pxd",
-  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/type.pxd",
+  "type.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -2019,6 +2019,10 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
 static PyTypeObject *__pyx_ptype_5pippi_10wavetables_Wavetable = 0;
 static int *__pyx_vp_5pippi_10wavetables_SINE = 0;
 #define __pyx_v_5pippi_10wavetables_SINE (*__pyx_vp_5pippi_10wavetables_SINE)
+static int *__pyx_vp_5pippi_10wavetables_SINEIN = 0;
+#define __pyx_v_5pippi_10wavetables_SINEIN (*__pyx_vp_5pippi_10wavetables_SINEIN)
+static int *__pyx_vp_5pippi_10wavetables_SINEOUT = 0;
+#define __pyx_v_5pippi_10wavetables_SINEOUT (*__pyx_vp_5pippi_10wavetables_SINEOUT)
 static int *__pyx_vp_5pippi_10wavetables_COS = 0;
 #define __pyx_v_5pippi_10wavetables_COS (*__pyx_vp_5pippi_10wavetables_COS)
 static int *__pyx_vp_5pippi_10wavetables_TRI = 0;
@@ -2031,6 +2035,10 @@ static int *__pyx_vp_5pippi_10wavetables_RSAW = 0;
 #define __pyx_v_5pippi_10wavetables_RSAW (*__pyx_vp_5pippi_10wavetables_RSAW)
 static int *__pyx_vp_5pippi_10wavetables_HANN = 0;
 #define __pyx_v_5pippi_10wavetables_HANN (*__pyx_vp_5pippi_10wavetables_HANN)
+static int *__pyx_vp_5pippi_10wavetables_HANNIN = 0;
+#define __pyx_v_5pippi_10wavetables_HANNIN (*__pyx_vp_5pippi_10wavetables_HANNIN)
+static int *__pyx_vp_5pippi_10wavetables_HANNOUT = 0;
+#define __pyx_v_5pippi_10wavetables_HANNOUT (*__pyx_vp_5pippi_10wavetables_HANNOUT)
 static int *__pyx_vp_5pippi_10wavetables_HAMM = 0;
 #define __pyx_v_5pippi_10wavetables_HAMM (*__pyx_vp_5pippi_10wavetables_HAMM)
 static int *__pyx_vp_5pippi_10wavetables_BLACK = 0;
@@ -25194,12 +25202,16 @@ static int __Pyx_modinit_variable_import_code(void) {
   /*--- Variable import code ---*/
   __pyx_t_1 = __Pyx_ImportModule("pippi.wavetables"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "SINE", (void **)&__pyx_vp_5pippi_10wavetables_SINE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "SINEIN", (void **)&__pyx_vp_5pippi_10wavetables_SINEIN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "SINEOUT", (void **)&__pyx_vp_5pippi_10wavetables_SINEOUT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "COS", (void **)&__pyx_vp_5pippi_10wavetables_COS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "TRI", (void **)&__pyx_vp_5pippi_10wavetables_TRI, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "SAW", (void **)&__pyx_vp_5pippi_10wavetables_SAW, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "PHASOR", (void **)&__pyx_vp_5pippi_10wavetables_PHASOR, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "RSAW", (void **)&__pyx_vp_5pippi_10wavetables_RSAW, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "HANN", (void **)&__pyx_vp_5pippi_10wavetables_HANN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "HANNIN", (void **)&__pyx_vp_5pippi_10wavetables_HANNIN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "HANNOUT", (void **)&__pyx_vp_5pippi_10wavetables_HANNOUT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "HAMM", (void **)&__pyx_vp_5pippi_10wavetables_HAMM, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "BLACK", (void **)&__pyx_vp_5pippi_10wavetables_BLACK, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_1, "BLACKMAN", (void **)&__pyx_vp_5pippi_10wavetables_BLACKMAN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)

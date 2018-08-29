@@ -14,12 +14,16 @@ from . cimport interpolation
 from .soundbuffer cimport SoundBuffer
 
 cdef int SINE = 0
+cdef int SINEIN = 17
+cdef int SINEOUT = 18
 cdef int COS = 1
 cdef int TRI = 2
 cdef int SAW = 3
 cdef int PHASOR = SAW
 cdef int RSAW = 4
 cdef int HANN = 5
+cdef int HANNIN = 21
+cdef int HANNOUT = 22
 cdef int HAMM = 6
 cdef int BLACK = 7
 cdef int BLACKMAN = 7
@@ -38,6 +42,8 @@ cdef int GOGINS = 16
 
 cdef dict wtype_flags = {
     'sine': SINE, 
+    'sinein': SINEIN, 
+    'sineout': SINEOUT, 
     'cos': COS, 
     'tri': TRI, 
     'saw': SAW, 
@@ -56,10 +62,15 @@ cdef dict wtype_flags = {
 cdef int LEN_WINDOWS = 9
 cdef int *ALL_WINDOWS = [
             SINE, 
+            SINEIN, 
+            SINEOUT, 
+            COS,
             TRI, 
             SAW,
             RSAW,
             HANN,
+            HANNIN,
+            HANNOUT,
             HAMM,
             BLACK,
             BART,
@@ -425,6 +436,15 @@ cdef double[:] _window(int window_type, int length):
     elif window_type == SINE:
         wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
 
+    elif window_type == SINEIN:
+        wt = np.sin(np.linspace(np.pi/2, np.pi, length, dtype='d'))
+
+    elif window_type == SINEOUT:
+        wt = np.sin(np.linspace(0, np.pi/2, length, dtype='d'))
+
+    elif window_type == COS:
+        wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
+
     elif window_type == TRI:
         wt = np.abs(np.abs(np.linspace(0, 2, length, dtype='d') - 1) - 1)
 
@@ -436,6 +456,12 @@ cdef double[:] _window(int window_type, int length):
 
     elif window_type == HANN:
         wt = np.hanning(length)
+
+    elif window_type == HANNIN:
+        wt = np.hanning(length * 2)[length:]
+
+    elif window_type == HANNOUT:
+        wt = np.hanning(length * 2)[:length]
 
     elif window_type == HAMM:
         wt = np.hamming(length)
