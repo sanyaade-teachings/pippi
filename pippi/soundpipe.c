@@ -584,9 +584,9 @@ static CYTHON_INLINE float __PYX_NAN() {
 /* Early includes */
 #include <stdint.h>
 #include "soundpipe.h"
-#include "pythread.h"
 #include <string.h>
 #include <stdlib.h>
+#include "pythread.h"
 #include <stdio.h>
 #include "pystate.h"
 #ifdef _OPENMP
@@ -1846,8 +1846,6 @@ static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 
 /* Module declarations from 'pippi.dsp' */
 
-/* Module declarations from 'pippi.filters' */
-
 /* Module declarations from 'pippi.fx' */
 
 /* Module declarations from 'pippi.interpolation' */
@@ -1922,6 +1920,10 @@ static PyTypeObject *__pyx_ptype_5pippi_6grains_GrainCloud = 0;
 /* Module declarations from 'pippi.soundbuffer' */
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_RingBuffer = 0;
+
+/* Module declarations from 'libc.string' */
+
+/* Module declarations from 'libc.stdlib' */
 
 /* Module declarations from 'pippi.soundpipe' */
 static PyTypeObject *__pyx_array_type = 0;
@@ -2269,17 +2271,17 @@ static PyObject *__pyx_tuple__27;
 static PyObject *__pyx_codeobj__28;
 /* Late includes */
 
-/* "pippi/soundpipe.pyx":4
+/* "pippi/soundpipe.pyx":5
  * import numpy as np
  * 
  * cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_butbp* butbp
+ *     cdef sp_butbp** butbps = <sp_butbp**>malloc(channels * sizeof(sp_butbp*))
  */
 
 static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __pyx_v_snd, __Pyx_memviewslice __pyx_v_out, float __pyx_v_freq, int __pyx_v_length, int __pyx_v_channels) {
   sp_data *__pyx_v_sp;
-  sp_butbp *__pyx_v_butbp;
+  sp_butbp **__pyx_v_butbps;
   float __pyx_v_sample;
   float __pyx_v_output;
   int __pyx_v_i;
@@ -2300,16 +2302,25 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
   __Pyx_RefNannySetupContext("_butbp", 0);
 
   /* "pippi/soundpipe.pyx":7
+ * cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
  *     cdef sp_data* sp
- *     cdef sp_butbp* butbp
+ *     cdef sp_butbp** butbps = <sp_butbp**>malloc(channels * sizeof(sp_butbp*))             # <<<<<<<<<<<<<<
+ *     cdef float sample = 0
+ *     cdef float output = 0
+ */
+  __pyx_v_butbps = ((sp_butbp **)malloc((__pyx_v_channels * (sizeof(sp_butbp *)))));
+
+  /* "pippi/soundpipe.pyx":8
+ *     cdef sp_data* sp
+ *     cdef sp_butbp** butbps = <sp_butbp**>malloc(channels * sizeof(sp_butbp*))
  *     cdef float sample = 0             # <<<<<<<<<<<<<<
  *     cdef float output = 0
  *     cdef int i = 0
  */
   __pyx_v_sample = 0.0;
 
-  /* "pippi/soundpipe.pyx":8
- *     cdef sp_butbp* butbp
+  /* "pippi/soundpipe.pyx":9
+ *     cdef sp_butbp** butbps = <sp_butbp**>malloc(channels * sizeof(sp_butbp*))
  *     cdef float sample = 0
  *     cdef float output = 0             # <<<<<<<<<<<<<<
  *     cdef int i = 0
@@ -2317,7 +2328,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
  */
   __pyx_v_output = 0.0;
 
-  /* "pippi/soundpipe.pyx":9
+  /* "pippi/soundpipe.pyx":10
  *     cdef float sample = 0
  *     cdef float output = 0
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -2326,7 +2337,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
  */
   __pyx_v_i = 0;
 
-  /* "pippi/soundpipe.pyx":10
+  /* "pippi/soundpipe.pyx":11
  *     cdef float output = 0
  *     cdef int i = 0
  *     cdef int c = 0             # <<<<<<<<<<<<<<
@@ -2335,71 +2346,84 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
  */
   __pyx_v_c = 0;
 
-  /* "pippi/soundpipe.pyx":12
+  /* "pippi/soundpipe.pyx":13
  *     cdef int c = 0
  * 
  *     sp_create(&sp)             # <<<<<<<<<<<<<<
- *     sp_butbp_create(&butbp)
- *     sp_butbp_init(sp, butbp)
+ * 
+ *     for c in range(channels):
  */
   (void)(sp_create((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":13
- * 
+  /* "pippi/soundpipe.pyx":15
  *     sp_create(&sp)
- *     sp_butbp_create(&butbp)             # <<<<<<<<<<<<<<
- *     sp_butbp_init(sp, butbp)
  * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_butbp_create(&butbps[c])
+ *         sp_butbp_init(sp, butbps[c])
  */
-  (void)(sp_butbp_create((&__pyx_v_butbp)));
-
-  /* "pippi/soundpipe.pyx":14
- *     sp_create(&sp)
- *     sp_butbp_create(&butbp)
- *     sp_butbp_init(sp, butbp)             # <<<<<<<<<<<<<<
- * 
- *     butbp.freq = freq
- */
-  (void)(sp_butbp_init(__pyx_v_sp, __pyx_v_butbp));
-
-  /* "pippi/soundpipe.pyx":16
- *     sp_butbp_init(sp, butbp)
- * 
- *     butbp.freq = freq             # <<<<<<<<<<<<<<
- * 
- *     for i in range(length):
- */
-  __pyx_v_butbp->freq = __pyx_v_freq;
-
-  /* "pippi/soundpipe.pyx":18
- *     butbp.freq = freq
- * 
- *     for i in range(length):             # <<<<<<<<<<<<<<
- *         for c in range(channels):
- *             sample = <float>snd[i,c]
- */
-  __pyx_t_1 = __pyx_v_length;
+  __pyx_t_1 = __pyx_v_channels;
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_i = __pyx_t_3;
+    __pyx_v_c = __pyx_t_3;
 
-    /* "pippi/soundpipe.pyx":19
+    /* "pippi/soundpipe.pyx":16
  * 
- *     for i in range(length):
- *         for c in range(channels):             # <<<<<<<<<<<<<<
- *             sample = <float>snd[i,c]
- *             sp_butbp_compute(sp, butbp, &sample, &output)
+ *     for c in range(channels):
+ *         sp_butbp_create(&butbps[c])             # <<<<<<<<<<<<<<
+ *         sp_butbp_init(sp, butbps[c])
+ *         butbps[c].freq = freq
  */
-    __pyx_t_4 = __pyx_v_channels;
+    (void)(sp_butbp_create((&(__pyx_v_butbps[__pyx_v_c]))));
+
+    /* "pippi/soundpipe.pyx":17
+ *     for c in range(channels):
+ *         sp_butbp_create(&butbps[c])
+ *         sp_butbp_init(sp, butbps[c])             # <<<<<<<<<<<<<<
+ *         butbps[c].freq = freq
+ * 
+ */
+    (void)(sp_butbp_init(__pyx_v_sp, (__pyx_v_butbps[__pyx_v_c])));
+
+    /* "pippi/soundpipe.pyx":18
+ *         sp_butbp_create(&butbps[c])
+ *         sp_butbp_init(sp, butbps[c])
+ *         butbps[c].freq = freq             # <<<<<<<<<<<<<<
+ * 
+ *     for c in range(channels):
+ */
+    (__pyx_v_butbps[__pyx_v_c])->freq = __pyx_v_freq;
+  }
+
+  /* "pippi/soundpipe.pyx":20
+ *         butbps[c].freq = freq
+ * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         for i in range(length):
+ *             sample = <float>snd[i,c]
+ */
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
+
+    /* "pippi/soundpipe.pyx":21
+ * 
+ *     for c in range(channels):
+ *         for i in range(length):             # <<<<<<<<<<<<<<
+ *             sample = <float>snd[i,c]
+ *             sp_butbp_compute(sp, butbps[c], &sample, &output)
+ */
+    __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_c = __pyx_t_6;
+      __pyx_v_i = __pyx_t_6;
 
-      /* "pippi/soundpipe.pyx":20
- *     for i in range(length):
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":22
+ *     for c in range(channels):
+ *         for i in range(length):
  *             sample = <float>snd[i,c]             # <<<<<<<<<<<<<<
- *             sp_butbp_compute(sp, butbp, &sample, &output)
+ *             sp_butbp_compute(sp, butbps[c], &sample, &output)
  *             out[i,c] = <double>output
  */
       __pyx_t_7 = __pyx_v_i;
@@ -2415,25 +2439,25 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_8 >= __pyx_v_snd.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 20, __pyx_L1_error)
+        __PYX_ERR(0, 22, __pyx_L1_error)
       }
       __pyx_v_sample = ((float)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
-      /* "pippi/soundpipe.pyx":21
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":23
+ *         for i in range(length):
  *             sample = <float>snd[i,c]
- *             sp_butbp_compute(sp, butbp, &sample, &output)             # <<<<<<<<<<<<<<
+ *             sp_butbp_compute(sp, butbps[c], &sample, &output)             # <<<<<<<<<<<<<<
  *             out[i,c] = <double>output
  * 
  */
-      (void)(sp_butbp_compute(__pyx_v_sp, __pyx_v_butbp, (&__pyx_v_sample), (&__pyx_v_output)));
+      (void)(sp_butbp_compute(__pyx_v_sp, (__pyx_v_butbps[__pyx_v_c]), (&__pyx_v_sample), (&__pyx_v_output)));
 
-      /* "pippi/soundpipe.pyx":22
+      /* "pippi/soundpipe.pyx":24
  *             sample = <float>snd[i,c]
- *             sp_butbp_compute(sp, butbp, &sample, &output)
+ *             sp_butbp_compute(sp, butbps[c], &sample, &output)
  *             out[i,c] = <double>output             # <<<<<<<<<<<<<<
  * 
- *     sp_butbp_destroy(&butbp)
+ *     for c in range(channels):
  */
       __pyx_t_10 = __pyx_v_i;
       __pyx_t_11 = __pyx_v_c;
@@ -2448,32 +2472,54 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_11 >= __pyx_v_out.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 22, __pyx_L1_error)
+        __PYX_ERR(0, 24, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) ) + __pyx_t_11 * __pyx_v_out.strides[1]) )) = ((double)__pyx_v_output);
     }
   }
 
-  /* "pippi/soundpipe.pyx":24
+  /* "pippi/soundpipe.pyx":26
  *             out[i,c] = <double>output
  * 
- *     sp_butbp_destroy(&butbp)             # <<<<<<<<<<<<<<
- *     sp_destroy(&sp)
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_butbp_destroy(&butbps[c])
  * 
  */
-  (void)(sp_butbp_destroy((&__pyx_v_butbp)));
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
 
-  /* "pippi/soundpipe.pyx":25
+    /* "pippi/soundpipe.pyx":27
  * 
- *     sp_butbp_destroy(&butbp)
+ *     for c in range(channels):
+ *         sp_butbp_destroy(&butbps[c])             # <<<<<<<<<<<<<<
+ * 
+ *     sp_destroy(&sp)
+ */
+    (void)(sp_butbp_destroy((&(__pyx_v_butbps[__pyx_v_c]))));
+  }
+
+  /* "pippi/soundpipe.pyx":29
+ *         sp_butbp_destroy(&butbps[c])
+ * 
  *     sp_destroy(&sp)             # <<<<<<<<<<<<<<
+ *     free(butbps)
  * 
- *     return out
  */
   (void)(sp_destroy((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":27
+  /* "pippi/soundpipe.pyx":30
+ * 
  *     sp_destroy(&sp)
+ *     free(butbps)             # <<<<<<<<<<<<<<
+ * 
+ *     return out
+ */
+  free(__pyx_v_butbps);
+
+  /* "pippi/soundpipe.pyx":32
+ *     free(butbps)
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
@@ -2483,12 +2529,12 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
   __pyx_r = __pyx_v_out;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":4
+  /* "pippi/soundpipe.pyx":5
  * import numpy as np
  * 
  * cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_butbp* butbp
+ *     cdef sp_butbp** butbps = <sp_butbp**>malloc(channels * sizeof(sp_butbp*))
  */
 
   /* function exit code */
@@ -2507,7 +2553,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":29
+/* "pippi/soundpipe.pyx":34
  *     return out
  * 
  * cpdef SoundBuffer butbp(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -2531,17 +2577,17 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("butbp", 0);
 
-  /* "pippi/soundpipe.pyx":30
+  /* "pippi/soundpipe.pyx":35
  * 
  * cpdef SoundBuffer butbp(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)             # <<<<<<<<<<<<<<
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  */
-  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 35, __pyx_L1_error)
   __pyx_v_length = __pyx_t_1;
 
-  /* "pippi/soundpipe.pyx":31
+  /* "pippi/soundpipe.pyx":36
  * cpdef SoundBuffer butbp(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels             # <<<<<<<<<<<<<<
@@ -2551,23 +2597,23 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_t_2 = __pyx_v_snd->channels;
   __pyx_v_channels = __pyx_t_2;
 
-  /* "pippi/soundpipe.pyx":32
+  /* "pippi/soundpipe.pyx":37
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')             # <<<<<<<<<<<<<<
  *     snd.frames = _butbp(snd.frames, out, freq, length, channels)
  *     return snd
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3);
@@ -2575,40 +2621,40 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
   __pyx_t_3 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 32, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 37, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_out = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":33
+  /* "pippi/soundpipe.pyx":38
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _butbp(snd.frames, out, freq, length, channels)             # <<<<<<<<<<<<<<
  *     return snd
  * 
  */
-  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 33, __pyx_L1_error)}
-  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__butbp(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 33, __pyx_L1_error)
+  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 38, __pyx_L1_error)}
+  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__butbp(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 38, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_snd->frames, 0);
   __pyx_v_snd->frames = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":34
+  /* "pippi/soundpipe.pyx":39
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _butbp(snd.frames, out, freq, length, channels)
  *     return snd             # <<<<<<<<<<<<<<
@@ -2620,7 +2666,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_r = __pyx_v_snd;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":29
+  /* "pippi/soundpipe.pyx":34
  *     return out
  * 
  * cpdef SoundBuffer butbp(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -2675,11 +2721,11 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_1butbp(PyObject *__pyx_self, PyObjec
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_freq)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("butbp", 1, 2, 2, 1); __PYX_ERR(0, 29, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("butbp", 1, 2, 2, 1); __PYX_ERR(0, 34, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "butbp") < 0)) __PYX_ERR(0, 29, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "butbp") < 0)) __PYX_ERR(0, 34, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2688,17 +2734,17 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_1butbp(PyObject *__pyx_self, PyObjec
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_snd = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)values[0]);
-    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L3_error)
+    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("butbp", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 29, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("butbp", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 34, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.soundpipe.butbp", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 29, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 34, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_9soundpipe_butbp(__pyx_self, __pyx_v_snd, __pyx_v_freq);
 
   /* function exit code */
@@ -2716,7 +2762,7 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_butbp(CYTHON_UNUSED PyObject *__pyx_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("butbp", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_butbp(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_butbp(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -2733,17 +2779,17 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_butbp(CYTHON_UNUSED PyObject *__pyx_
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":36
+/* "pippi/soundpipe.pyx":41
  *     return snd
  * 
  * cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_butbr* butbr
+ *     cdef sp_butbr** butbrs = <sp_butbr**>malloc(channels * sizeof(sp_butbr*))
  */
 
 static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __pyx_v_snd, __Pyx_memviewslice __pyx_v_out, float __pyx_v_freq, int __pyx_v_length, int __pyx_v_channels) {
   sp_data *__pyx_v_sp;
-  sp_butbr *__pyx_v_butbr;
+  sp_butbr **__pyx_v_butbrs;
   float __pyx_v_sample;
   float __pyx_v_output;
   int __pyx_v_i;
@@ -2763,17 +2809,26 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
   Py_ssize_t __pyx_t_11;
   __Pyx_RefNannySetupContext("_butbr", 0);
 
-  /* "pippi/soundpipe.pyx":39
+  /* "pippi/soundpipe.pyx":43
+ * cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
  *     cdef sp_data* sp
- *     cdef sp_butbr* butbr
+ *     cdef sp_butbr** butbrs = <sp_butbr**>malloc(channels * sizeof(sp_butbr*))             # <<<<<<<<<<<<<<
+ *     cdef float sample = 0
+ *     cdef float output = 0
+ */
+  __pyx_v_butbrs = ((sp_butbr **)malloc((__pyx_v_channels * (sizeof(sp_butbr *)))));
+
+  /* "pippi/soundpipe.pyx":44
+ *     cdef sp_data* sp
+ *     cdef sp_butbr** butbrs = <sp_butbr**>malloc(channels * sizeof(sp_butbr*))
  *     cdef float sample = 0             # <<<<<<<<<<<<<<
  *     cdef float output = 0
  *     cdef int i = 0
  */
   __pyx_v_sample = 0.0;
 
-  /* "pippi/soundpipe.pyx":40
- *     cdef sp_butbr* butbr
+  /* "pippi/soundpipe.pyx":45
+ *     cdef sp_butbr** butbrs = <sp_butbr**>malloc(channels * sizeof(sp_butbr*))
  *     cdef float sample = 0
  *     cdef float output = 0             # <<<<<<<<<<<<<<
  *     cdef int i = 0
@@ -2781,7 +2836,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
  */
   __pyx_v_output = 0.0;
 
-  /* "pippi/soundpipe.pyx":41
+  /* "pippi/soundpipe.pyx":46
  *     cdef float sample = 0
  *     cdef float output = 0
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -2790,7 +2845,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
  */
   __pyx_v_i = 0;
 
-  /* "pippi/soundpipe.pyx":42
+  /* "pippi/soundpipe.pyx":47
  *     cdef float output = 0
  *     cdef int i = 0
  *     cdef int c = 0             # <<<<<<<<<<<<<<
@@ -2799,71 +2854,84 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
  */
   __pyx_v_c = 0;
 
-  /* "pippi/soundpipe.pyx":44
+  /* "pippi/soundpipe.pyx":49
  *     cdef int c = 0
  * 
  *     sp_create(&sp)             # <<<<<<<<<<<<<<
- *     sp_butbr_create(&butbr)
- *     sp_butbr_init(sp, butbr)
+ * 
+ *     for c in range(channels):
  */
   (void)(sp_create((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":45
- * 
+  /* "pippi/soundpipe.pyx":51
  *     sp_create(&sp)
- *     sp_butbr_create(&butbr)             # <<<<<<<<<<<<<<
- *     sp_butbr_init(sp, butbr)
  * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_butbr_create(&butbrs[c])
+ *         sp_butbr_init(sp, butbrs[c])
  */
-  (void)(sp_butbr_create((&__pyx_v_butbr)));
-
-  /* "pippi/soundpipe.pyx":46
- *     sp_create(&sp)
- *     sp_butbr_create(&butbr)
- *     sp_butbr_init(sp, butbr)             # <<<<<<<<<<<<<<
- * 
- *     butbr.freq = freq
- */
-  (void)(sp_butbr_init(__pyx_v_sp, __pyx_v_butbr));
-
-  /* "pippi/soundpipe.pyx":48
- *     sp_butbr_init(sp, butbr)
- * 
- *     butbr.freq = freq             # <<<<<<<<<<<<<<
- * 
- *     for i in range(length):
- */
-  __pyx_v_butbr->freq = __pyx_v_freq;
-
-  /* "pippi/soundpipe.pyx":50
- *     butbr.freq = freq
- * 
- *     for i in range(length):             # <<<<<<<<<<<<<<
- *         for c in range(channels):
- *             sample = <float>snd[i,c]
- */
-  __pyx_t_1 = __pyx_v_length;
+  __pyx_t_1 = __pyx_v_channels;
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_i = __pyx_t_3;
+    __pyx_v_c = __pyx_t_3;
 
-    /* "pippi/soundpipe.pyx":51
+    /* "pippi/soundpipe.pyx":52
  * 
- *     for i in range(length):
- *         for c in range(channels):             # <<<<<<<<<<<<<<
- *             sample = <float>snd[i,c]
- *             sp_butbr_compute(sp, butbr, &sample, &output)
+ *     for c in range(channels):
+ *         sp_butbr_create(&butbrs[c])             # <<<<<<<<<<<<<<
+ *         sp_butbr_init(sp, butbrs[c])
+ *         butbrs[c].freq = freq
  */
-    __pyx_t_4 = __pyx_v_channels;
+    (void)(sp_butbr_create((&(__pyx_v_butbrs[__pyx_v_c]))));
+
+    /* "pippi/soundpipe.pyx":53
+ *     for c in range(channels):
+ *         sp_butbr_create(&butbrs[c])
+ *         sp_butbr_init(sp, butbrs[c])             # <<<<<<<<<<<<<<
+ *         butbrs[c].freq = freq
+ * 
+ */
+    (void)(sp_butbr_init(__pyx_v_sp, (__pyx_v_butbrs[__pyx_v_c])));
+
+    /* "pippi/soundpipe.pyx":54
+ *         sp_butbr_create(&butbrs[c])
+ *         sp_butbr_init(sp, butbrs[c])
+ *         butbrs[c].freq = freq             # <<<<<<<<<<<<<<
+ * 
+ *     for c in range(channels):
+ */
+    (__pyx_v_butbrs[__pyx_v_c])->freq = __pyx_v_freq;
+  }
+
+  /* "pippi/soundpipe.pyx":56
+ *         butbrs[c].freq = freq
+ * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         for i in range(length):
+ *             sample = <float>snd[i,c]
+ */
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
+
+    /* "pippi/soundpipe.pyx":57
+ * 
+ *     for c in range(channels):
+ *         for i in range(length):             # <<<<<<<<<<<<<<
+ *             sample = <float>snd[i,c]
+ *             sp_butbr_compute(sp, butbrs[c], &sample, &output)
+ */
+    __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_c = __pyx_t_6;
+      __pyx_v_i = __pyx_t_6;
 
-      /* "pippi/soundpipe.pyx":52
- *     for i in range(length):
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":58
+ *     for c in range(channels):
+ *         for i in range(length):
  *             sample = <float>snd[i,c]             # <<<<<<<<<<<<<<
- *             sp_butbr_compute(sp, butbr, &sample, &output)
+ *             sp_butbr_compute(sp, butbrs[c], &sample, &output)
  *             out[i,c] = <double>output
  */
       __pyx_t_7 = __pyx_v_i;
@@ -2879,25 +2947,25 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_8 >= __pyx_v_snd.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 52, __pyx_L1_error)
+        __PYX_ERR(0, 58, __pyx_L1_error)
       }
       __pyx_v_sample = ((float)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
-      /* "pippi/soundpipe.pyx":53
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":59
+ *         for i in range(length):
  *             sample = <float>snd[i,c]
- *             sp_butbr_compute(sp, butbr, &sample, &output)             # <<<<<<<<<<<<<<
+ *             sp_butbr_compute(sp, butbrs[c], &sample, &output)             # <<<<<<<<<<<<<<
  *             out[i,c] = <double>output
  * 
  */
-      (void)(sp_butbr_compute(__pyx_v_sp, __pyx_v_butbr, (&__pyx_v_sample), (&__pyx_v_output)));
+      (void)(sp_butbr_compute(__pyx_v_sp, (__pyx_v_butbrs[__pyx_v_c]), (&__pyx_v_sample), (&__pyx_v_output)));
 
-      /* "pippi/soundpipe.pyx":54
+      /* "pippi/soundpipe.pyx":60
  *             sample = <float>snd[i,c]
- *             sp_butbr_compute(sp, butbr, &sample, &output)
+ *             sp_butbr_compute(sp, butbrs[c], &sample, &output)
  *             out[i,c] = <double>output             # <<<<<<<<<<<<<<
  * 
- *     sp_butbr_destroy(&butbr)
+ *     for c in range(channels):
  */
       __pyx_t_10 = __pyx_v_i;
       __pyx_t_11 = __pyx_v_c;
@@ -2912,32 +2980,54 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_11 >= __pyx_v_out.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 54, __pyx_L1_error)
+        __PYX_ERR(0, 60, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) ) + __pyx_t_11 * __pyx_v_out.strides[1]) )) = ((double)__pyx_v_output);
     }
   }
 
-  /* "pippi/soundpipe.pyx":56
+  /* "pippi/soundpipe.pyx":62
  *             out[i,c] = <double>output
  * 
- *     sp_butbr_destroy(&butbr)             # <<<<<<<<<<<<<<
- *     sp_destroy(&sp)
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_butbr_destroy(&butbrs[c])
  * 
  */
-  (void)(sp_butbr_destroy((&__pyx_v_butbr)));
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
 
-  /* "pippi/soundpipe.pyx":57
+    /* "pippi/soundpipe.pyx":63
  * 
- *     sp_butbr_destroy(&butbr)
+ *     for c in range(channels):
+ *         sp_butbr_destroy(&butbrs[c])             # <<<<<<<<<<<<<<
+ * 
+ *     sp_destroy(&sp)
+ */
+    (void)(sp_butbr_destroy((&(__pyx_v_butbrs[__pyx_v_c]))));
+  }
+
+  /* "pippi/soundpipe.pyx":65
+ *         sp_butbr_destroy(&butbrs[c])
+ * 
  *     sp_destroy(&sp)             # <<<<<<<<<<<<<<
+ *     free(butbrs)
  * 
- *     return out
  */
   (void)(sp_destroy((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":59
+  /* "pippi/soundpipe.pyx":66
+ * 
  *     sp_destroy(&sp)
+ *     free(butbrs)             # <<<<<<<<<<<<<<
+ * 
+ *     return out
+ */
+  free(__pyx_v_butbrs);
+
+  /* "pippi/soundpipe.pyx":68
+ *     free(butbrs)
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
@@ -2947,12 +3037,12 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
   __pyx_r = __pyx_v_out;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":36
+  /* "pippi/soundpipe.pyx":41
  *     return snd
  * 
  * cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_butbr* butbr
+ *     cdef sp_butbr** butbrs = <sp_butbr**>malloc(channels * sizeof(sp_butbr*))
  */
 
   /* function exit code */
@@ -2971,7 +3061,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":61
+/* "pippi/soundpipe.pyx":70
  *     return out
  * 
  * cpdef SoundBuffer butbr(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -2995,17 +3085,17 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("butbr", 0);
 
-  /* "pippi/soundpipe.pyx":62
+  /* "pippi/soundpipe.pyx":71
  * 
  * cpdef SoundBuffer butbr(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)             # <<<<<<<<<<<<<<
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  */
-  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 71, __pyx_L1_error)
   __pyx_v_length = __pyx_t_1;
 
-  /* "pippi/soundpipe.pyx":63
+  /* "pippi/soundpipe.pyx":72
  * cpdef SoundBuffer butbr(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels             # <<<<<<<<<<<<<<
@@ -3015,23 +3105,23 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_t_2 = __pyx_v_snd->channels;
   __pyx_v_channels = __pyx_t_2;
 
-  /* "pippi/soundpipe.pyx":64
+  /* "pippi/soundpipe.pyx":73
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')             # <<<<<<<<<<<<<<
  *     snd.frames = _butbr(snd.frames, out, freq, length, channels)
  *     return snd
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3);
@@ -3039,40 +3129,40 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
   __pyx_t_3 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 64, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 64, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 73, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_out = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":65
+  /* "pippi/soundpipe.pyx":74
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _butbr(snd.frames, out, freq, length, channels)             # <<<<<<<<<<<<<<
  *     return snd
  * 
  */
-  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 65, __pyx_L1_error)}
-  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__butbr(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 65, __pyx_L1_error)
+  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 74, __pyx_L1_error)}
+  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__butbr(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 74, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_snd->frames, 0);
   __pyx_v_snd->frames = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":66
+  /* "pippi/soundpipe.pyx":75
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _butbr(snd.frames, out, freq, length, channels)
  *     return snd             # <<<<<<<<<<<<<<
@@ -3084,7 +3174,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_r = __pyx_v_snd;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":61
+  /* "pippi/soundpipe.pyx":70
  *     return out
  * 
  * cpdef SoundBuffer butbr(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -3139,11 +3229,11 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_3butbr(PyObject *__pyx_self, PyObjec
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_freq)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("butbr", 1, 2, 2, 1); __PYX_ERR(0, 61, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("butbr", 1, 2, 2, 1); __PYX_ERR(0, 70, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "butbr") < 0)) __PYX_ERR(0, 61, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "butbr") < 0)) __PYX_ERR(0, 70, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3152,17 +3242,17 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_3butbr(PyObject *__pyx_self, PyObjec
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_snd = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)values[0]);
-    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 61, __pyx_L3_error)
+    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("butbr", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 61, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("butbr", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 70, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.soundpipe.butbr", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 61, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 70, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_9soundpipe_2butbr(__pyx_self, __pyx_v_snd, __pyx_v_freq);
 
   /* function exit code */
@@ -3180,7 +3270,7 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_2butbr(CYTHON_UNUSED PyObject *__pyx
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("butbr", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_butbr(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_butbr(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3197,17 +3287,17 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_2butbr(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":68
+/* "pippi/soundpipe.pyx":77
  *     return snd
  * 
  * cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_buthp* buthp
+ *     cdef sp_buthp** buthps = <sp_buthp**>malloc(channels * sizeof(sp_buthp*))
  */
 
 static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __pyx_v_snd, __Pyx_memviewslice __pyx_v_out, float __pyx_v_freq, int __pyx_v_length, int __pyx_v_channels) {
   sp_data *__pyx_v_sp;
-  sp_buthp *__pyx_v_buthp;
+  sp_buthp **__pyx_v_buthps;
   float __pyx_v_sample;
   float __pyx_v_output;
   int __pyx_v_i;
@@ -3227,17 +3317,26 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
   Py_ssize_t __pyx_t_11;
   __Pyx_RefNannySetupContext("_buthp", 0);
 
-  /* "pippi/soundpipe.pyx":71
+  /* "pippi/soundpipe.pyx":79
+ * cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
  *     cdef sp_data* sp
- *     cdef sp_buthp* buthp
+ *     cdef sp_buthp** buthps = <sp_buthp**>malloc(channels * sizeof(sp_buthp*))             # <<<<<<<<<<<<<<
+ *     cdef float sample = 0
+ *     cdef float output = 0
+ */
+  __pyx_v_buthps = ((sp_buthp **)malloc((__pyx_v_channels * (sizeof(sp_buthp *)))));
+
+  /* "pippi/soundpipe.pyx":80
+ *     cdef sp_data* sp
+ *     cdef sp_buthp** buthps = <sp_buthp**>malloc(channels * sizeof(sp_buthp*))
  *     cdef float sample = 0             # <<<<<<<<<<<<<<
  *     cdef float output = 0
  *     cdef int i = 0
  */
   __pyx_v_sample = 0.0;
 
-  /* "pippi/soundpipe.pyx":72
- *     cdef sp_buthp* buthp
+  /* "pippi/soundpipe.pyx":81
+ *     cdef sp_buthp** buthps = <sp_buthp**>malloc(channels * sizeof(sp_buthp*))
  *     cdef float sample = 0
  *     cdef float output = 0             # <<<<<<<<<<<<<<
  *     cdef int i = 0
@@ -3245,7 +3344,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
  */
   __pyx_v_output = 0.0;
 
-  /* "pippi/soundpipe.pyx":73
+  /* "pippi/soundpipe.pyx":82
  *     cdef float sample = 0
  *     cdef float output = 0
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -3254,7 +3353,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
  */
   __pyx_v_i = 0;
 
-  /* "pippi/soundpipe.pyx":74
+  /* "pippi/soundpipe.pyx":83
  *     cdef float output = 0
  *     cdef int i = 0
  *     cdef int c = 0             # <<<<<<<<<<<<<<
@@ -3263,71 +3362,84 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
  */
   __pyx_v_c = 0;
 
-  /* "pippi/soundpipe.pyx":76
+  /* "pippi/soundpipe.pyx":85
  *     cdef int c = 0
  * 
  *     sp_create(&sp)             # <<<<<<<<<<<<<<
- *     sp_buthp_create(&buthp)
- *     sp_buthp_init(sp, buthp)
+ * 
+ *     for c in range(channels):
  */
   (void)(sp_create((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":77
- * 
+  /* "pippi/soundpipe.pyx":87
  *     sp_create(&sp)
- *     sp_buthp_create(&buthp)             # <<<<<<<<<<<<<<
- *     sp_buthp_init(sp, buthp)
  * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_buthp_create(&buthps[c])
+ *         sp_buthp_init(sp, buthps[c])
  */
-  (void)(sp_buthp_create((&__pyx_v_buthp)));
-
-  /* "pippi/soundpipe.pyx":78
- *     sp_create(&sp)
- *     sp_buthp_create(&buthp)
- *     sp_buthp_init(sp, buthp)             # <<<<<<<<<<<<<<
- * 
- *     buthp.freq = freq
- */
-  (void)(sp_buthp_init(__pyx_v_sp, __pyx_v_buthp));
-
-  /* "pippi/soundpipe.pyx":80
- *     sp_buthp_init(sp, buthp)
- * 
- *     buthp.freq = freq             # <<<<<<<<<<<<<<
- * 
- *     for i in range(length):
- */
-  __pyx_v_buthp->freq = __pyx_v_freq;
-
-  /* "pippi/soundpipe.pyx":82
- *     buthp.freq = freq
- * 
- *     for i in range(length):             # <<<<<<<<<<<<<<
- *         for c in range(channels):
- *             sample = <float>snd[i,c]
- */
-  __pyx_t_1 = __pyx_v_length;
+  __pyx_t_1 = __pyx_v_channels;
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_i = __pyx_t_3;
+    __pyx_v_c = __pyx_t_3;
 
-    /* "pippi/soundpipe.pyx":83
+    /* "pippi/soundpipe.pyx":88
  * 
- *     for i in range(length):
- *         for c in range(channels):             # <<<<<<<<<<<<<<
- *             sample = <float>snd[i,c]
- *             sp_buthp_compute(sp, buthp, &sample, &output)
+ *     for c in range(channels):
+ *         sp_buthp_create(&buthps[c])             # <<<<<<<<<<<<<<
+ *         sp_buthp_init(sp, buthps[c])
+ *         buthps[c].freq = freq
  */
-    __pyx_t_4 = __pyx_v_channels;
+    (void)(sp_buthp_create((&(__pyx_v_buthps[__pyx_v_c]))));
+
+    /* "pippi/soundpipe.pyx":89
+ *     for c in range(channels):
+ *         sp_buthp_create(&buthps[c])
+ *         sp_buthp_init(sp, buthps[c])             # <<<<<<<<<<<<<<
+ *         buthps[c].freq = freq
+ * 
+ */
+    (void)(sp_buthp_init(__pyx_v_sp, (__pyx_v_buthps[__pyx_v_c])));
+
+    /* "pippi/soundpipe.pyx":90
+ *         sp_buthp_create(&buthps[c])
+ *         sp_buthp_init(sp, buthps[c])
+ *         buthps[c].freq = freq             # <<<<<<<<<<<<<<
+ * 
+ *     for c in range(channels):
+ */
+    (__pyx_v_buthps[__pyx_v_c])->freq = __pyx_v_freq;
+  }
+
+  /* "pippi/soundpipe.pyx":92
+ *         buthps[c].freq = freq
+ * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         for i in range(length):
+ *             sample = <float>snd[i,c]
+ */
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
+
+    /* "pippi/soundpipe.pyx":93
+ * 
+ *     for c in range(channels):
+ *         for i in range(length):             # <<<<<<<<<<<<<<
+ *             sample = <float>snd[i,c]
+ *             sp_buthp_compute(sp, buthps[c], &sample, &output)
+ */
+    __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_c = __pyx_t_6;
+      __pyx_v_i = __pyx_t_6;
 
-      /* "pippi/soundpipe.pyx":84
- *     for i in range(length):
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":94
+ *     for c in range(channels):
+ *         for i in range(length):
  *             sample = <float>snd[i,c]             # <<<<<<<<<<<<<<
- *             sp_buthp_compute(sp, buthp, &sample, &output)
+ *             sp_buthp_compute(sp, buthps[c], &sample, &output)
  *             out[i,c] = <double>output
  */
       __pyx_t_7 = __pyx_v_i;
@@ -3343,25 +3455,25 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_8 >= __pyx_v_snd.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 84, __pyx_L1_error)
+        __PYX_ERR(0, 94, __pyx_L1_error)
       }
       __pyx_v_sample = ((float)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
-      /* "pippi/soundpipe.pyx":85
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":95
+ *         for i in range(length):
  *             sample = <float>snd[i,c]
- *             sp_buthp_compute(sp, buthp, &sample, &output)             # <<<<<<<<<<<<<<
+ *             sp_buthp_compute(sp, buthps[c], &sample, &output)             # <<<<<<<<<<<<<<
  *             out[i,c] = <double>output
  * 
  */
-      (void)(sp_buthp_compute(__pyx_v_sp, __pyx_v_buthp, (&__pyx_v_sample), (&__pyx_v_output)));
+      (void)(sp_buthp_compute(__pyx_v_sp, (__pyx_v_buthps[__pyx_v_c]), (&__pyx_v_sample), (&__pyx_v_output)));
 
-      /* "pippi/soundpipe.pyx":86
+      /* "pippi/soundpipe.pyx":96
  *             sample = <float>snd[i,c]
- *             sp_buthp_compute(sp, buthp, &sample, &output)
+ *             sp_buthp_compute(sp, buthps[c], &sample, &output)
  *             out[i,c] = <double>output             # <<<<<<<<<<<<<<
  * 
- *     sp_buthp_destroy(&buthp)
+ *     for c in range(channels):
  */
       __pyx_t_10 = __pyx_v_i;
       __pyx_t_11 = __pyx_v_c;
@@ -3376,32 +3488,54 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_11 >= __pyx_v_out.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 86, __pyx_L1_error)
+        __PYX_ERR(0, 96, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) ) + __pyx_t_11 * __pyx_v_out.strides[1]) )) = ((double)__pyx_v_output);
     }
   }
 
-  /* "pippi/soundpipe.pyx":88
+  /* "pippi/soundpipe.pyx":98
  *             out[i,c] = <double>output
  * 
- *     sp_buthp_destroy(&buthp)             # <<<<<<<<<<<<<<
- *     sp_destroy(&sp)
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_buthp_destroy(&buthps[c])
  * 
  */
-  (void)(sp_buthp_destroy((&__pyx_v_buthp)));
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
 
-  /* "pippi/soundpipe.pyx":89
+    /* "pippi/soundpipe.pyx":99
  * 
- *     sp_buthp_destroy(&buthp)
+ *     for c in range(channels):
+ *         sp_buthp_destroy(&buthps[c])             # <<<<<<<<<<<<<<
+ * 
+ *     sp_destroy(&sp)
+ */
+    (void)(sp_buthp_destroy((&(__pyx_v_buthps[__pyx_v_c]))));
+  }
+
+  /* "pippi/soundpipe.pyx":101
+ *         sp_buthp_destroy(&buthps[c])
+ * 
  *     sp_destroy(&sp)             # <<<<<<<<<<<<<<
+ *     free(buthps)
  * 
- *     return out
  */
   (void)(sp_destroy((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":91
+  /* "pippi/soundpipe.pyx":102
+ * 
  *     sp_destroy(&sp)
+ *     free(buthps)             # <<<<<<<<<<<<<<
+ * 
+ *     return out
+ */
+  free(__pyx_v_buthps);
+
+  /* "pippi/soundpipe.pyx":104
+ *     free(buthps)
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
@@ -3411,12 +3545,12 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
   __pyx_r = __pyx_v_out;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":68
+  /* "pippi/soundpipe.pyx":77
  *     return snd
  * 
  * cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_buthp* buthp
+ *     cdef sp_buthp** buthps = <sp_buthp**>malloc(channels * sizeof(sp_buthp*))
  */
 
   /* function exit code */
@@ -3435,7 +3569,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":93
+/* "pippi/soundpipe.pyx":106
  *     return out
  * 
  * cpdef SoundBuffer buthp(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -3459,17 +3593,17 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("buthp", 0);
 
-  /* "pippi/soundpipe.pyx":94
+  /* "pippi/soundpipe.pyx":107
  * 
  * cpdef SoundBuffer buthp(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)             # <<<<<<<<<<<<<<
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  */
-  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 94, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 107, __pyx_L1_error)
   __pyx_v_length = __pyx_t_1;
 
-  /* "pippi/soundpipe.pyx":95
+  /* "pippi/soundpipe.pyx":108
  * cpdef SoundBuffer buthp(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels             # <<<<<<<<<<<<<<
@@ -3479,23 +3613,23 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_t_2 = __pyx_v_snd->channels;
   __pyx_v_channels = __pyx_t_2;
 
-  /* "pippi/soundpipe.pyx":96
+  /* "pippi/soundpipe.pyx":109
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')             # <<<<<<<<<<<<<<
  *     snd.frames = _buthp(snd.frames, out, freq, length, channels)
  *     return snd
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3);
@@ -3503,40 +3637,40 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
   __pyx_t_3 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 96, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 96, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 109, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 96, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_out = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":97
+  /* "pippi/soundpipe.pyx":110
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _buthp(snd.frames, out, freq, length, channels)             # <<<<<<<<<<<<<<
  *     return snd
  * 
  */
-  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 97, __pyx_L1_error)}
-  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__buthp(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 97, __pyx_L1_error)
+  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 110, __pyx_L1_error)}
+  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__buthp(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 110, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_snd->frames, 0);
   __pyx_v_snd->frames = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":98
+  /* "pippi/soundpipe.pyx":111
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _buthp(snd.frames, out, freq, length, channels)
  *     return snd             # <<<<<<<<<<<<<<
@@ -3548,7 +3682,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_r = __pyx_v_snd;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":93
+  /* "pippi/soundpipe.pyx":106
  *     return out
  * 
  * cpdef SoundBuffer buthp(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -3603,11 +3737,11 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_5buthp(PyObject *__pyx_self, PyObjec
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_freq)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("buthp", 1, 2, 2, 1); __PYX_ERR(0, 93, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("buthp", 1, 2, 2, 1); __PYX_ERR(0, 106, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "buthp") < 0)) __PYX_ERR(0, 93, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "buthp") < 0)) __PYX_ERR(0, 106, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3616,17 +3750,17 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_5buthp(PyObject *__pyx_self, PyObjec
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_snd = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)values[0]);
-    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
+    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("buthp", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 93, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("buthp", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 106, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.soundpipe.buthp", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 93, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 106, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_9soundpipe_4buthp(__pyx_self, __pyx_v_snd, __pyx_v_freq);
 
   /* function exit code */
@@ -3644,7 +3778,7 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_4buthp(CYTHON_UNUSED PyObject *__pyx
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("buthp", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_buthp(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_buthp(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3661,17 +3795,17 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_4buthp(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":100
+/* "pippi/soundpipe.pyx":113
  *     return snd
  * 
  * cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_butlp* butlp
+ *     cdef sp_butlp** butlps = <sp_butlp**>malloc(channels * sizeof(sp_butlp*))
  */
 
 static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __pyx_v_snd, __Pyx_memviewslice __pyx_v_out, float __pyx_v_freq, int __pyx_v_length, int __pyx_v_channels) {
   sp_data *__pyx_v_sp;
-  sp_butlp *__pyx_v_butlp;
+  sp_butlp **__pyx_v_butlps;
   float __pyx_v_sample;
   float __pyx_v_output;
   int __pyx_v_i;
@@ -3691,17 +3825,26 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
   Py_ssize_t __pyx_t_11;
   __Pyx_RefNannySetupContext("_butlp", 0);
 
-  /* "pippi/soundpipe.pyx":103
+  /* "pippi/soundpipe.pyx":115
+ * cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
  *     cdef sp_data* sp
- *     cdef sp_butlp* butlp
+ *     cdef sp_butlp** butlps = <sp_butlp**>malloc(channels * sizeof(sp_butlp*))             # <<<<<<<<<<<<<<
+ *     cdef float sample = 0
+ *     cdef float output = 0
+ */
+  __pyx_v_butlps = ((sp_butlp **)malloc((__pyx_v_channels * (sizeof(sp_butlp *)))));
+
+  /* "pippi/soundpipe.pyx":116
+ *     cdef sp_data* sp
+ *     cdef sp_butlp** butlps = <sp_butlp**>malloc(channels * sizeof(sp_butlp*))
  *     cdef float sample = 0             # <<<<<<<<<<<<<<
  *     cdef float output = 0
  *     cdef int i = 0
  */
   __pyx_v_sample = 0.0;
 
-  /* "pippi/soundpipe.pyx":104
- *     cdef sp_butlp* butlp
+  /* "pippi/soundpipe.pyx":117
+ *     cdef sp_butlp** butlps = <sp_butlp**>malloc(channels * sizeof(sp_butlp*))
  *     cdef float sample = 0
  *     cdef float output = 0             # <<<<<<<<<<<<<<
  *     cdef int i = 0
@@ -3709,7 +3852,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
  */
   __pyx_v_output = 0.0;
 
-  /* "pippi/soundpipe.pyx":105
+  /* "pippi/soundpipe.pyx":118
  *     cdef float sample = 0
  *     cdef float output = 0
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -3718,7 +3861,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
  */
   __pyx_v_i = 0;
 
-  /* "pippi/soundpipe.pyx":106
+  /* "pippi/soundpipe.pyx":119
  *     cdef float output = 0
  *     cdef int i = 0
  *     cdef int c = 0             # <<<<<<<<<<<<<<
@@ -3727,71 +3870,84 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
  */
   __pyx_v_c = 0;
 
-  /* "pippi/soundpipe.pyx":108
+  /* "pippi/soundpipe.pyx":121
  *     cdef int c = 0
  * 
  *     sp_create(&sp)             # <<<<<<<<<<<<<<
- *     sp_butlp_create(&butlp)
- *     sp_butlp_init(sp, butlp)
+ * 
+ *     for c in range(channels):
  */
   (void)(sp_create((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":109
- * 
+  /* "pippi/soundpipe.pyx":123
  *     sp_create(&sp)
- *     sp_butlp_create(&butlp)             # <<<<<<<<<<<<<<
- *     sp_butlp_init(sp, butlp)
  * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_butlp_create(&butlps[c])
+ *         sp_butlp_init(sp, butlps[c])
  */
-  (void)(sp_butlp_create((&__pyx_v_butlp)));
-
-  /* "pippi/soundpipe.pyx":110
- *     sp_create(&sp)
- *     sp_butlp_create(&butlp)
- *     sp_butlp_init(sp, butlp)             # <<<<<<<<<<<<<<
- * 
- *     butlp.freq = freq
- */
-  (void)(sp_butlp_init(__pyx_v_sp, __pyx_v_butlp));
-
-  /* "pippi/soundpipe.pyx":112
- *     sp_butlp_init(sp, butlp)
- * 
- *     butlp.freq = freq             # <<<<<<<<<<<<<<
- * 
- *     for i in range(length):
- */
-  __pyx_v_butlp->freq = __pyx_v_freq;
-
-  /* "pippi/soundpipe.pyx":114
- *     butlp.freq = freq
- * 
- *     for i in range(length):             # <<<<<<<<<<<<<<
- *         for c in range(channels):
- *             sample = <float>snd[i,c]
- */
-  __pyx_t_1 = __pyx_v_length;
+  __pyx_t_1 = __pyx_v_channels;
   __pyx_t_2 = __pyx_t_1;
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
-    __pyx_v_i = __pyx_t_3;
+    __pyx_v_c = __pyx_t_3;
 
-    /* "pippi/soundpipe.pyx":115
+    /* "pippi/soundpipe.pyx":124
  * 
- *     for i in range(length):
- *         for c in range(channels):             # <<<<<<<<<<<<<<
- *             sample = <float>snd[i,c]
- *             sp_butlp_compute(sp, butlp, &sample, &output)
+ *     for c in range(channels):
+ *         sp_butlp_create(&butlps[c])             # <<<<<<<<<<<<<<
+ *         sp_butlp_init(sp, butlps[c])
+ *         butlps[c].freq = freq
  */
-    __pyx_t_4 = __pyx_v_channels;
+    (void)(sp_butlp_create((&(__pyx_v_butlps[__pyx_v_c]))));
+
+    /* "pippi/soundpipe.pyx":125
+ *     for c in range(channels):
+ *         sp_butlp_create(&butlps[c])
+ *         sp_butlp_init(sp, butlps[c])             # <<<<<<<<<<<<<<
+ *         butlps[c].freq = freq
+ * 
+ */
+    (void)(sp_butlp_init(__pyx_v_sp, (__pyx_v_butlps[__pyx_v_c])));
+
+    /* "pippi/soundpipe.pyx":126
+ *         sp_butlp_create(&butlps[c])
+ *         sp_butlp_init(sp, butlps[c])
+ *         butlps[c].freq = freq             # <<<<<<<<<<<<<<
+ * 
+ *     for c in range(channels):
+ */
+    (__pyx_v_butlps[__pyx_v_c])->freq = __pyx_v_freq;
+  }
+
+  /* "pippi/soundpipe.pyx":128
+ *         butlps[c].freq = freq
+ * 
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         for i in range(length):
+ *             sample = <float>snd[i,c]
+ */
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
+
+    /* "pippi/soundpipe.pyx":129
+ * 
+ *     for c in range(channels):
+ *         for i in range(length):             # <<<<<<<<<<<<<<
+ *             sample = <float>snd[i,c]
+ *             sp_butlp_compute(sp, butlps[c], &sample, &output)
+ */
+    __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
-      __pyx_v_c = __pyx_t_6;
+      __pyx_v_i = __pyx_t_6;
 
-      /* "pippi/soundpipe.pyx":116
- *     for i in range(length):
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":130
+ *     for c in range(channels):
+ *         for i in range(length):
  *             sample = <float>snd[i,c]             # <<<<<<<<<<<<<<
- *             sp_butlp_compute(sp, butlp, &sample, &output)
+ *             sp_butlp_compute(sp, butlps[c], &sample, &output)
  *             out[i,c] = <double>output
  */
       __pyx_t_7 = __pyx_v_i;
@@ -3807,25 +3963,25 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_8 >= __pyx_v_snd.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 116, __pyx_L1_error)
+        __PYX_ERR(0, 130, __pyx_L1_error)
       }
       __pyx_v_sample = ((float)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
-      /* "pippi/soundpipe.pyx":117
- *         for c in range(channels):
+      /* "pippi/soundpipe.pyx":131
+ *         for i in range(length):
  *             sample = <float>snd[i,c]
- *             sp_butlp_compute(sp, butlp, &sample, &output)             # <<<<<<<<<<<<<<
+ *             sp_butlp_compute(sp, butlps[c], &sample, &output)             # <<<<<<<<<<<<<<
  *             out[i,c] = <double>output
  * 
  */
-      (void)(sp_butlp_compute(__pyx_v_sp, __pyx_v_butlp, (&__pyx_v_sample), (&__pyx_v_output)));
+      (void)(sp_butlp_compute(__pyx_v_sp, (__pyx_v_butlps[__pyx_v_c]), (&__pyx_v_sample), (&__pyx_v_output)));
 
-      /* "pippi/soundpipe.pyx":118
+      /* "pippi/soundpipe.pyx":132
  *             sample = <float>snd[i,c]
- *             sp_butlp_compute(sp, butlp, &sample, &output)
+ *             sp_butlp_compute(sp, butlps[c], &sample, &output)
  *             out[i,c] = <double>output             # <<<<<<<<<<<<<<
  * 
- *     sp_butlp_destroy(&butlp)
+ *     for c in range(channels):
  */
       __pyx_t_10 = __pyx_v_i;
       __pyx_t_11 = __pyx_v_c;
@@ -3840,32 +3996,54 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
       } else if (unlikely(__pyx_t_11 >= __pyx_v_out.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 118, __pyx_L1_error)
+        __PYX_ERR(0, 132, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) ) + __pyx_t_11 * __pyx_v_out.strides[1]) )) = ((double)__pyx_v_output);
     }
   }
 
-  /* "pippi/soundpipe.pyx":120
+  /* "pippi/soundpipe.pyx":134
  *             out[i,c] = <double>output
  * 
- *     sp_butlp_destroy(&butlp)             # <<<<<<<<<<<<<<
- *     sp_destroy(&sp)
+ *     for c in range(channels):             # <<<<<<<<<<<<<<
+ *         sp_butlp_destroy(&butlps[c])
  * 
  */
-  (void)(sp_butlp_destroy((&__pyx_v_butlp)));
+  __pyx_t_1 = __pyx_v_channels;
+  __pyx_t_2 = __pyx_t_1;
+  for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
+    __pyx_v_c = __pyx_t_3;
 
-  /* "pippi/soundpipe.pyx":121
+    /* "pippi/soundpipe.pyx":135
  * 
- *     sp_butlp_destroy(&butlp)
+ *     for c in range(channels):
+ *         sp_butlp_destroy(&butlps[c])             # <<<<<<<<<<<<<<
+ * 
+ *     sp_destroy(&sp)
+ */
+    (void)(sp_butlp_destroy((&(__pyx_v_butlps[__pyx_v_c]))));
+  }
+
+  /* "pippi/soundpipe.pyx":137
+ *         sp_butlp_destroy(&butlps[c])
+ * 
  *     sp_destroy(&sp)             # <<<<<<<<<<<<<<
+ *     free(butlps)
  * 
- *     return out
  */
   (void)(sp_destroy((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":123
+  /* "pippi/soundpipe.pyx":138
+ * 
  *     sp_destroy(&sp)
+ *     free(butlps)             # <<<<<<<<<<<<<<
+ * 
+ *     return out
+ */
+  free(__pyx_v_butlps);
+
+  /* "pippi/soundpipe.pyx":140
+ *     free(butlps)
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
@@ -3875,12 +4053,12 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
   __pyx_r = __pyx_v_out;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":100
+  /* "pippi/soundpipe.pyx":113
  *     return snd
  * 
  * cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):             # <<<<<<<<<<<<<<
  *     cdef sp_data* sp
- *     cdef sp_butlp* butlp
+ *     cdef sp_butlp** butlps = <sp_butlp**>malloc(channels * sizeof(sp_butlp*))
  */
 
   /* function exit code */
@@ -3899,7 +4077,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":125
+/* "pippi/soundpipe.pyx":142
  *     return out
  * 
  * cpdef SoundBuffer butlp(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -3923,17 +4101,17 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("butlp", 0);
 
-  /* "pippi/soundpipe.pyx":126
+  /* "pippi/soundpipe.pyx":143
  * 
  * cpdef SoundBuffer butlp(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)             # <<<<<<<<<<<<<<
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  */
-  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 126, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 143, __pyx_L1_error)
   __pyx_v_length = __pyx_t_1;
 
-  /* "pippi/soundpipe.pyx":127
+  /* "pippi/soundpipe.pyx":144
  * cpdef SoundBuffer butlp(SoundBuffer snd, float freq):
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels             # <<<<<<<<<<<<<<
@@ -3943,23 +4121,23 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_t_2 = __pyx_v_snd->channels;
   __pyx_v_channels = __pyx_t_2;
 
-  /* "pippi/soundpipe.pyx":128
+  /* "pippi/soundpipe.pyx":145
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')             # <<<<<<<<<<<<<<
  *     snd.frames = _butlp(snd.frames, out, freq, length, channels)
  *     return snd
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3);
@@ -3967,40 +4145,40 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
   __pyx_t_3 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 145, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_out = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":129
+  /* "pippi/soundpipe.pyx":146
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _butlp(snd.frames, out, freq, length, channels)             # <<<<<<<<<<<<<<
  *     return snd
  * 
  */
-  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 129, __pyx_L1_error)}
-  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__butlp(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 129, __pyx_L1_error)
+  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 146, __pyx_L1_error)}
+  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__butlp(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_freq, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 146, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_snd->frames, 0);
   __pyx_v_snd->frames = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":130
+  /* "pippi/soundpipe.pyx":147
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _butlp(snd.frames, out, freq, length, channels)
  *     return snd             # <<<<<<<<<<<<<<
@@ -4012,7 +4190,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_r = __pyx_v_snd;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":125
+  /* "pippi/soundpipe.pyx":142
  *     return out
  * 
  * cpdef SoundBuffer butlp(SoundBuffer snd, float freq):             # <<<<<<<<<<<<<<
@@ -4067,11 +4245,11 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_7butlp(PyObject *__pyx_self, PyObjec
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_freq)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("butlp", 1, 2, 2, 1); __PYX_ERR(0, 125, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("butlp", 1, 2, 2, 1); __PYX_ERR(0, 142, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "butlp") < 0)) __PYX_ERR(0, 125, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "butlp") < 0)) __PYX_ERR(0, 142, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -4080,17 +4258,17 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_7butlp(PyObject *__pyx_self, PyObjec
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_snd = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)values[0]);
-    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 125, __pyx_L3_error)
+    __pyx_v_freq = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_freq == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 142, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("butlp", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 125, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("butlp", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 142, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.soundpipe.butlp", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 125, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 142, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_9soundpipe_6butlp(__pyx_self, __pyx_v_snd, __pyx_v_freq);
 
   /* function exit code */
@@ -4108,7 +4286,7 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_6butlp(CYTHON_UNUSED PyObject *__pyx
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("butlp", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_butlp(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_butlp(__pyx_v_snd, __pyx_v_freq, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -4125,7 +4303,7 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_6butlp(CYTHON_UNUSED PyObject *__pyx
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":132
+/* "pippi/soundpipe.pyx":149
  *     return snd
  * 
  * cdef double[:,:] _compressor(double[:,:] snd, double[:,:] out, float ratio, float thresh, float atk, float rel, int length, int channels):             # <<<<<<<<<<<<<<
@@ -4155,7 +4333,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
   Py_ssize_t __pyx_t_11;
   __Pyx_RefNannySetupContext("_compressor", 0);
 
-  /* "pippi/soundpipe.pyx":135
+  /* "pippi/soundpipe.pyx":152
  *     cdef sp_data* sp
  *     cdef sp_compressor* compressor
  *     cdef float sample = 0             # <<<<<<<<<<<<<<
@@ -4164,7 +4342,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_sample = 0.0;
 
-  /* "pippi/soundpipe.pyx":136
+  /* "pippi/soundpipe.pyx":153
  *     cdef sp_compressor* compressor
  *     cdef float sample = 0
  *     cdef float output = 0             # <<<<<<<<<<<<<<
@@ -4173,7 +4351,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_output = 0.0;
 
-  /* "pippi/soundpipe.pyx":137
+  /* "pippi/soundpipe.pyx":154
  *     cdef float sample = 0
  *     cdef float output = 0
  *     cdef int i = 0             # <<<<<<<<<<<<<<
@@ -4182,7 +4360,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_i = 0;
 
-  /* "pippi/soundpipe.pyx":138
+  /* "pippi/soundpipe.pyx":155
  *     cdef float output = 0
  *     cdef int i = 0
  *     cdef int c = 0             # <<<<<<<<<<<<<<
@@ -4191,7 +4369,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_c = 0;
 
-  /* "pippi/soundpipe.pyx":140
+  /* "pippi/soundpipe.pyx":157
  *     cdef int c = 0
  * 
  *     sp_create(&sp)             # <<<<<<<<<<<<<<
@@ -4200,7 +4378,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   (void)(sp_create((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":141
+  /* "pippi/soundpipe.pyx":158
  * 
  *     sp_create(&sp)
  *     sp_compressor_create(&compressor)             # <<<<<<<<<<<<<<
@@ -4209,7 +4387,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   (void)(sp_compressor_create((&__pyx_v_compressor)));
 
-  /* "pippi/soundpipe.pyx":142
+  /* "pippi/soundpipe.pyx":159
  *     sp_create(&sp)
  *     sp_compressor_create(&compressor)
  *     sp_compressor_init(sp, compressor)             # <<<<<<<<<<<<<<
@@ -4218,7 +4396,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   (void)(sp_compressor_init(__pyx_v_sp, __pyx_v_compressor));
 
-  /* "pippi/soundpipe.pyx":144
+  /* "pippi/soundpipe.pyx":161
  *     sp_compressor_init(sp, compressor)
  * 
  *     compressor.ratio = &ratio             # <<<<<<<<<<<<<<
@@ -4227,7 +4405,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_compressor->ratio = (&__pyx_v_ratio);
 
-  /* "pippi/soundpipe.pyx":145
+  /* "pippi/soundpipe.pyx":162
  * 
  *     compressor.ratio = &ratio
  *     compressor.thresh = &thresh             # <<<<<<<<<<<<<<
@@ -4236,7 +4414,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_compressor->thresh = (&__pyx_v_thresh);
 
-  /* "pippi/soundpipe.pyx":146
+  /* "pippi/soundpipe.pyx":163
  *     compressor.ratio = &ratio
  *     compressor.thresh = &thresh
  *     compressor.atk = &atk             # <<<<<<<<<<<<<<
@@ -4245,7 +4423,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_compressor->atk = (&__pyx_v_atk);
 
-  /* "pippi/soundpipe.pyx":147
+  /* "pippi/soundpipe.pyx":164
  *     compressor.thresh = &thresh
  *     compressor.atk = &atk
  *     compressor.rel = &rel             # <<<<<<<<<<<<<<
@@ -4254,7 +4432,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   __pyx_v_compressor->rel = (&__pyx_v_rel);
 
-  /* "pippi/soundpipe.pyx":149
+  /* "pippi/soundpipe.pyx":166
  *     compressor.rel = &rel
  * 
  *     for i in range(length):             # <<<<<<<<<<<<<<
@@ -4266,7 +4444,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
   for (__pyx_t_3 = 0; __pyx_t_3 < __pyx_t_2; __pyx_t_3+=1) {
     __pyx_v_i = __pyx_t_3;
 
-    /* "pippi/soundpipe.pyx":150
+    /* "pippi/soundpipe.pyx":167
  * 
  *     for i in range(length):
  *         for c in range(channels):             # <<<<<<<<<<<<<<
@@ -4278,7 +4456,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
       __pyx_v_c = __pyx_t_6;
 
-      /* "pippi/soundpipe.pyx":151
+      /* "pippi/soundpipe.pyx":168
  *     for i in range(length):
  *         for c in range(channels):
  *             sample = <float>snd[i,c]             # <<<<<<<<<<<<<<
@@ -4298,11 +4476,11 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
       } else if (unlikely(__pyx_t_8 >= __pyx_v_snd.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 151, __pyx_L1_error)
+        __PYX_ERR(0, 168, __pyx_L1_error)
       }
       __pyx_v_sample = ((float)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
-      /* "pippi/soundpipe.pyx":152
+      /* "pippi/soundpipe.pyx":169
  *         for c in range(channels):
  *             sample = <float>snd[i,c]
  *             sp_compressor_compute(sp, compressor, &sample, &output)             # <<<<<<<<<<<<<<
@@ -4311,7 +4489,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
       (void)(sp_compressor_compute(__pyx_v_sp, __pyx_v_compressor, (&__pyx_v_sample), (&__pyx_v_output)));
 
-      /* "pippi/soundpipe.pyx":153
+      /* "pippi/soundpipe.pyx":170
  *             sample = <float>snd[i,c]
  *             sp_compressor_compute(sp, compressor, &sample, &output)
  *             out[i,c] = <double>output             # <<<<<<<<<<<<<<
@@ -4331,13 +4509,13 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
       } else if (unlikely(__pyx_t_11 >= __pyx_v_out.shape[1])) __pyx_t_9 = 1;
       if (unlikely(__pyx_t_9 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_9);
-        __PYX_ERR(0, 153, __pyx_L1_error)
+        __PYX_ERR(0, 170, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) ) + __pyx_t_11 * __pyx_v_out.strides[1]) )) = ((double)__pyx_v_output);
     }
   }
 
-  /* "pippi/soundpipe.pyx":155
+  /* "pippi/soundpipe.pyx":172
  *             out[i,c] = <double>output
  * 
  *     sp_compressor_destroy(&compressor)             # <<<<<<<<<<<<<<
@@ -4346,7 +4524,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   (void)(sp_compressor_destroy((&__pyx_v_compressor)));
 
-  /* "pippi/soundpipe.pyx":156
+  /* "pippi/soundpipe.pyx":173
  * 
  *     sp_compressor_destroy(&compressor)
  *     sp_destroy(&sp)             # <<<<<<<<<<<<<<
@@ -4355,7 +4533,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
  */
   (void)(sp_destroy((&__pyx_v_sp)));
 
-  /* "pippi/soundpipe.pyx":158
+  /* "pippi/soundpipe.pyx":175
  *     sp_destroy(&sp)
  * 
  *     return out             # <<<<<<<<<<<<<<
@@ -4366,7 +4544,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
   __pyx_r = __pyx_v_out;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":132
+  /* "pippi/soundpipe.pyx":149
  *     return snd
  * 
  * cdef double[:,:] _compressor(double[:,:] snd, double[:,:] out, float ratio, float thresh, float atk, float rel, int length, int channels):             # <<<<<<<<<<<<<<
@@ -4390,7 +4568,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__compressor(__Pyx_memviewsli
   return __pyx_r;
 }
 
-/* "pippi/soundpipe.pyx":160
+/* "pippi/soundpipe.pyx":177
  *     return out
  * 
  * cpdef SoundBuffer compressor(SoundBuffer snd, float ratio, float thresh, float atk, float rel):             # <<<<<<<<<<<<<<
@@ -4414,17 +4592,17 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __Pyx_memviewslice __pyx_t_7 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("compressor", 0);
 
-  /* "pippi/soundpipe.pyx":161
+  /* "pippi/soundpipe.pyx":178
  * 
  * cpdef SoundBuffer compressor(SoundBuffer snd, float ratio, float thresh, float atk, float rel):
  *     cdef int length = len(snd)             # <<<<<<<<<<<<<<
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  */
-  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_1 = PyObject_Length(((PyObject *)__pyx_v_snd)); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 178, __pyx_L1_error)
   __pyx_v_length = __pyx_t_1;
 
-  /* "pippi/soundpipe.pyx":162
+  /* "pippi/soundpipe.pyx":179
  * cpdef SoundBuffer compressor(SoundBuffer snd, float ratio, float thresh, float atk, float rel):
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels             # <<<<<<<<<<<<<<
@@ -4434,23 +4612,23 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_t_2 = __pyx_v_snd->channels;
   __pyx_v_channels = __pyx_t_2;
 
-  /* "pippi/soundpipe.pyx":163
+  /* "pippi/soundpipe.pyx":180
  *     cdef int length = len(snd)
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')             # <<<<<<<<<<<<<<
  *     snd.frames = _compressor(snd.frames, out, ratio, thresh, atk, rel, length, channels)
  *     return snd
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_3);
@@ -4458,40 +4636,40 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_5);
   __pyx_t_3 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 163, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 163, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_s_d) < 0) __PYX_ERR(0, 180, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 163, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_3, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_out = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":164
+  /* "pippi/soundpipe.pyx":181
  *     cdef int channels = snd.channels
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _compressor(snd.frames, out, ratio, thresh, atk, rel, length, channels)             # <<<<<<<<<<<<<<
  *     return snd
  * 
  */
-  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 164, __pyx_L1_error)}
-  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__compressor(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_ratio, __pyx_v_thresh, __pyx_v_atk, __pyx_v_rel, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 164, __pyx_L1_error)
+  if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 181, __pyx_L1_error)}
+  __pyx_t_7 = __pyx_f_5pippi_9soundpipe__compressor(__pyx_v_snd->frames, __pyx_v_out, __pyx_v_ratio, __pyx_v_thresh, __pyx_v_atk, __pyx_v_rel, __pyx_v_length, __pyx_v_channels); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 181, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_snd->frames, 0);
   __pyx_v_snd->frames = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/soundpipe.pyx":165
+  /* "pippi/soundpipe.pyx":182
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     snd.frames = _compressor(snd.frames, out, ratio, thresh, atk, rel, length, channels)
  *     return snd             # <<<<<<<<<<<<<<
@@ -4502,7 +4680,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundp
   __pyx_r = __pyx_v_snd;
   goto __pyx_L0;
 
-  /* "pippi/soundpipe.pyx":160
+  /* "pippi/soundpipe.pyx":177
  *     return out
  * 
  * cpdef SoundBuffer compressor(SoundBuffer snd, float ratio, float thresh, float atk, float rel):             # <<<<<<<<<<<<<<
@@ -4566,29 +4744,29 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_9compressor(PyObject *__pyx_self, Py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ratio)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 1); __PYX_ERR(0, 160, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 1); __PYX_ERR(0, 177, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_thresh)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 2); __PYX_ERR(0, 160, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 2); __PYX_ERR(0, 177, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_atk)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 3); __PYX_ERR(0, 160, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 3); __PYX_ERR(0, 177, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rel)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 4); __PYX_ERR(0, 160, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, 4); __PYX_ERR(0, 177, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "compressor") < 0)) __PYX_ERR(0, 160, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "compressor") < 0)) __PYX_ERR(0, 177, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -4600,20 +4778,20 @@ static PyObject *__pyx_pw_5pippi_9soundpipe_9compressor(PyObject *__pyx_self, Py
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
     }
     __pyx_v_snd = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)values[0]);
-    __pyx_v_ratio = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_ratio == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 160, __pyx_L3_error)
-    __pyx_v_thresh = __pyx_PyFloat_AsFloat(values[2]); if (unlikely((__pyx_v_thresh == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 160, __pyx_L3_error)
-    __pyx_v_atk = __pyx_PyFloat_AsFloat(values[3]); if (unlikely((__pyx_v_atk == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 160, __pyx_L3_error)
-    __pyx_v_rel = __pyx_PyFloat_AsFloat(values[4]); if (unlikely((__pyx_v_rel == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 160, __pyx_L3_error)
+    __pyx_v_ratio = __pyx_PyFloat_AsFloat(values[1]); if (unlikely((__pyx_v_ratio == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 177, __pyx_L3_error)
+    __pyx_v_thresh = __pyx_PyFloat_AsFloat(values[2]); if (unlikely((__pyx_v_thresh == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 177, __pyx_L3_error)
+    __pyx_v_atk = __pyx_PyFloat_AsFloat(values[3]); if (unlikely((__pyx_v_atk == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 177, __pyx_L3_error)
+    __pyx_v_rel = __pyx_PyFloat_AsFloat(values[4]); if (unlikely((__pyx_v_rel == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 177, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 160, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("compressor", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 177, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.soundpipe.compressor", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 160, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_snd), __pyx_ptype_5pippi_11soundbuffer_SoundBuffer, 1, "snd", 0))) __PYX_ERR(0, 177, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_9soundpipe_8compressor(__pyx_self, __pyx_v_snd, __pyx_v_ratio, __pyx_v_thresh, __pyx_v_atk, __pyx_v_rel);
 
   /* function exit code */
@@ -4631,7 +4809,7 @@ static PyObject *__pyx_pf_5pippi_9soundpipe_8compressor(CYTHON_UNUSED PyObject *
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("compressor", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_compressor(__pyx_v_snd, __pyx_v_ratio, __pyx_v_thresh, __pyx_v_atk, __pyx_v_rel, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundpipe_compressor(__pyx_v_snd, __pyx_v_ratio, __pyx_v_thresh, __pyx_v_atk, __pyx_v_rel, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -18377,7 +18555,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 15, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 132, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 147, __pyx_L1_error)
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(1, 150, __pyx_L1_error)
@@ -19057,21 +19235,22 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "pippi/soundpipe.pyx":2
+  /* "pippi/soundpipe.pyx":3
  * from pippi.soundbuffer cimport SoundBuffer
+ * from libc.stdlib cimport malloc, free
  * import numpy as np             # <<<<<<<<<<<<<<
  * 
  * cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "pippi/soundpipe.pyx":1
  * from pippi.soundbuffer cimport SoundBuffer             # <<<<<<<<<<<<<<
+ * from libc.stdlib cimport malloc, free
  * import numpy as np
- * 
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

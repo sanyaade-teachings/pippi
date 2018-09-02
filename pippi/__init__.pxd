@@ -1,6 +1,5 @@
 from pippi cimport defaults
 from pippi cimport dsp
-from pippi cimport filters
 from pippi cimport fx
 from pippi cimport grains
 from pippi cimport interpolation

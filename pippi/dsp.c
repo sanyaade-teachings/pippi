@@ -1986,8 +1986,6 @@ static int *__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE = 0;
 static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 #define __pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE (*__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE)
 
-/* Module declarations from 'pippi.filters' */
-
 /* Module declarations from 'pippi.fx' */
 
 /* Module declarations from 'pippi.interpolation' */

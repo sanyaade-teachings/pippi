@@ -1987,8 +1987,6 @@ static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 
 /* Module declarations from 'pippi.dsp' */
 
-/* Module declarations from 'pippi.filters' */
-
 /* Module declarations from 'pippi.fx' */
 
 /* Module declarations from 'pippi.interpolation' */

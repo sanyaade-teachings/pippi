@@ -7,7 +7,6 @@ import numpy as np
 ext_modules = cythonize([
         Extension('pippi.defaults', ['pippi/defaults.pyx']), 
         Extension('pippi.dsp', ['pippi/dsp.pyx']), 
-        Extension('pippi.filters', ['pippi/filters.pyx']), 
         Extension('pippi.fx', ['pippi/fx.pyx']), 
         Extension('pippi.grains', ['pippi/grains.pyx']), 
         Extension('pippi.graph', ['pippi/graph.pyx']), 
