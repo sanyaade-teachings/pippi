@@ -788,9 +788,9 @@ static const char *__pyx_f[] = {
   "pippi/wavetables.pxd",
   "pippi/grains.pxd",
   "pippi/soundbuffer.pxd",
-  "type.pxd",
-  "bool.pxd",
-  "complex.pxd",
+  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/type.pxd",
+  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/bool.pxd",
+  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/complex.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
