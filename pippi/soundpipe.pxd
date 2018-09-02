@@ -31,15 +31,38 @@ cdef extern from "soundpipe.h":
     int sp_compressor_init(sp_data*, sp_compressor*)
     int sp_compressor_compute(sp_data*, sp_compressor*, float*, float*)
 
+    ctypedef struct sp_dcblock:
+        float gg
+        float outputs
+        float inputs
+        float gain
+
+    int sp_dcblock_create(sp_dcblock**)
+    int sp_dcblock_destroy(sp_dcblock**)
+    int sp_dcblock_init(sp_data*, sp_dcblock*)
+    int sp_dcblock_compute(sp_data*, sp_dcblock*, float*, float*);
+
+    ctypedef struct sp_saturator:
+        float drive
+        float dcoffset
+        float dcblocker[2][7]
+        float ai[6][7]
+        float aa[6][7]
+
+    int sp_saturator_create(sp_saturator**)
+    int sp_saturator_destroy(sp_saturator**)
+    int sp_saturator_init(sp_data*, sp_saturator*);
+    int sp_saturator_compute(sp_data*, sp_saturator*, float*, float*);
+
     ctypedef struct sp_butlp:
         float sr, freq, istor
         float lkf
         float a[8]
         float pidsr
 
-    int sp_butlp_create(sp_butlp** p)
-    int sp_butlp_destroy(sp_butlp** p)
-    int sp_butlp_init(sp_data* sp, sp_butlp* p)
+    int sp_butlp_create(sp_butlp**)
+    int sp_butlp_destroy(sp_butlp**)
+    int sp_butlp_init(sp_data*, sp_butlp*)
     int sp_butlp_compute(sp_data*, sp_butlp*, float*, float*)
 
     ctypedef struct sp_buthp:
@@ -48,9 +71,9 @@ cdef extern from "soundpipe.h":
         float a[8]
         float pidsr
 
-    int sp_buthp_create(sp_buthp** p)
-    int sp_buthp_destroy(sp_buthp** p)
-    int sp_buthp_init(sp_data* sp, sp_buthp* p)
+    int sp_buthp_create(sp_buthp**)
+    int sp_buthp_destroy(sp_buthp**)
+    int sp_buthp_init(sp_data*, sp_buthp*)
     int sp_buthp_compute(sp_data*, sp_buthp*, float*, float*)
 
     ctypedef struct sp_butbp:
@@ -59,9 +82,9 @@ cdef extern from "soundpipe.h":
         float a[8]
         float pidsr
 
-    int sp_butbp_create(sp_butbp** p)
-    int sp_butbp_destroy(sp_butbp** p)
-    int sp_butbp_init(sp_data* sp, sp_butbp* p)
+    int sp_butbp_create(sp_butbp**)
+    int sp_butbp_destroy(sp_butbp**)
+    int sp_butbp_init(sp_data*, sp_butbp*)
     int sp_butbp_compute(sp_data*, sp_butbp*, float*, float*)
 
     ctypedef struct sp_butbr:
@@ -70,9 +93,9 @@ cdef extern from "soundpipe.h":
         float a[8]
         float pidsr
 
-    int sp_butbr_create(sp_butbr** p)
-    int sp_butbr_destroy(sp_butbr** p)
-    int sp_butbr_init(sp_data* sp, sp_butbr* p)
+    int sp_butbr_create(sp_butbr**)
+    int sp_butbr_destroy(sp_butbr**)
+    int sp_butbr_init(sp_data*, sp_butbr*)
     int sp_butbr_compute(sp_data*, sp_butbr*, float*, float*)
 
 cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length, int channels)
