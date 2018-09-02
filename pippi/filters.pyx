@@ -1,10 +1,10 @@
 # cython: language_level=3
 
-from .soundbuffer cimport SoundBuffer
-from .interpolation cimport _linear_point
-from . cimport wavetables
-from .dsp cimport _mag
-from .fx cimport _norm
+from pippi.soundbuffer cimport SoundBuffer
+from pippi.interpolation cimport _linear_point
+from pippi cimport wavetables
+from pippi.dsp cimport _mag
+from pippi.fx cimport _norm
 cimport cython
 from cpython cimport bool
 import numpy as np

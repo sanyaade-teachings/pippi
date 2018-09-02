@@ -18,9 +18,7 @@
   #define DL_IMPORT(_T) _T
 #endif
 
-__PYX_EXTERN_C __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewslice, int);
-__PYX_EXTERN_C __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear_inner(__Pyx_memviewslice, __Pyx_memviewslice, int);
-__PYX_EXTERN_C __Pyx_memviewslice __pyx_f_5pippi_13interpolation__hermite(__Pyx_memviewslice, int);
+__PYX_EXTERN_C __Pyx_memviewslice _hermite(__Pyx_memviewslice, int);
 
 #endif /* !__PYX_HAVE_API__pippi__interpolation */
 

@@ -10,8 +10,8 @@ from libc.stdlib cimport malloc, realloc, calloc, free
 from libc.stdlib cimport rand
 from libc cimport math
 
-from . cimport interpolation
-from .soundbuffer cimport SoundBuffer
+from pippi cimport interpolation
+from pippi.soundbuffer cimport SoundBuffer
 
 cdef int SINE = 0
 cdef int SINEIN = 17

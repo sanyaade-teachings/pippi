@@ -2,10 +2,10 @@
 
 import numbers
 import numpy as np
-from .soundbuffer cimport SoundBuffer
-from . import wavetables
-from . cimport wavetables
-from . cimport interpolation
+from pippi.soundbuffer cimport SoundBuffer
+from pippi import wavetables
+from pippi cimport wavetables
+from pippi cimport interpolation
 
 cimport cython
 from cpython.array cimport array, clone
@@ -177,7 +177,7 @@ cdef class Osc:
         cdef double[:] wavetable = self.wavetable
         cdef double[:] window
 
-        cdef unsigned int j = 0
+        cdef int j = 0
 
         if self.window is not None:
             window = interpolation._linear(self.window, wtlength)

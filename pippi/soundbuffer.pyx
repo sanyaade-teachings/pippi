@@ -9,10 +9,10 @@ import numpy as np
 cimport cython
 from libc cimport math
 
-from . cimport wavetables
-from . cimport interpolation
-from . cimport grains
-from .defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
+from pippi cimport wavetables
+from pippi cimport interpolation
+from pippi cimport grains
+from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

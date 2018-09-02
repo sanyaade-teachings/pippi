@@ -1,8 +1,8 @@
 # cython: language_level=3
 
-from .soundbuffer cimport SoundBuffer, _cut, _dub, _speed, _pan, _env
-from . cimport wavetables
-from . cimport interpolation
+from pippi.soundbuffer cimport SoundBuffer, _cut, _dub, _speed, _pan, _env
+from pippi cimport wavetables
+from pippi cimport interpolation
 from libc.stdlib cimport rand, RAND_MAX
 import numpy as np
 from cpython cimport array
@@ -37,11 +37,11 @@ cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, doubl
     cdef double density_frac_pos = 0
     cdef double grainlength_frac_pos = 0
 
-    cdef unsigned long initial_grainlength = <unsigned long>(<double>cloud.samplerate * cloud.grainlength * 0.001)
-    cdef unsigned long grainlength = initial_grainlength
+    cdef int initial_grainlength = <int>(<double>cloud.samplerate * cloud.grainlength * 0.001)
+    cdef int grainlength = initial_grainlength
 
-    cdef unsigned long preresample_grainlength = 0
-    cdef unsigned long target_grainlength = 0
+    cdef int preresample_grainlength = 0
+    cdef int target_grainlength = 0
 
     cdef int max_read_pos = input_length - grainlength
     cdef double read_pos = 0
@@ -93,7 +93,7 @@ cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, doubl
             # Length of segment to copy from source buffer: grainlength * speed
             #cloud.speed = cloud.speed if cloud.speed > cloud.minspeed else cloud.minspeed
             #cloud.speed = cloud.speed if cloud.speed < cloud.maxspeed else cloud.maxspeed
-            preresample_grainlength = <unsigned long>(grainlength * cloud.speed)
+            preresample_grainlength = <int>(grainlength * cloud.speed)
             if preresample_grainlength > (framelength - start):
                 # get min(available_length, preresample_length)
                 # adjust target/grainlength to match speed based on available length
@@ -167,11 +167,11 @@ cdef class GrainCloud:
             int read_lfo=-1,
             object read_lfo_wt=None,
             double read_lfo_speed=1,
-            unsigned int read_lfo_length=DEFAULT_WTSIZE,
+            int read_lfo_length=DEFAULT_WTSIZE,
 
             int speed_lfo=-1,
             double[:] speed_lfo_wt=None,
-            unsigned int speed_lfo_length=DEFAULT_WTSIZE,
+            int speed_lfo_length=DEFAULT_WTSIZE,
             double speed=DEFAULT_SPEED,
             double minspeed=DEFAULT_SPEED, 
             double maxspeed=DEFAULT_MAXSPEED, 
@@ -187,7 +187,7 @@ cdef class GrainCloud:
             double grainlength=DEFAULT_GRAINLENGTH, 
             int grainlength_lfo=-1,
             double[:] grainlength_lfo_wt=None,
-            unsigned int grainlength_lfo_length=DEFAULT_WTSIZE,
+            int grainlength_lfo_length=DEFAULT_WTSIZE,
             double grainlength_lfo_speed=1,
 
             double minlength=DEFAULT_GRAINLENGTH,    # min grain length in ms

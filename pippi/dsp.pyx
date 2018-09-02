@@ -6,9 +6,9 @@ import random
 
 cimport cython
 
-from .soundbuffer import SoundBuffer
-from .soundbuffer cimport SoundBuffer
-from . cimport grains
+from pippi.soundbuffer import SoundBuffer
+from pippi.soundbuffer cimport SoundBuffer
+from pippi cimport grains
 cimport wavetables as wts
 
 # Expose some C flags / constants to python

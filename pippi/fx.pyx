@@ -4,11 +4,12 @@ import numpy as np
 import numbers
 import random
 cimport cython
-from .soundbuffer cimport SoundBuffer
-from . cimport wavetables
-from .interpolation cimport _linear_point
-from .filters cimport _fir
-from .dsp cimport _mag
+from pippi.soundbuffer cimport SoundBuffer
+from pippi cimport wavetables
+from pippi.interpolation cimport _linear_point
+from pippi.filters cimport _fir
+from pippi.dsp cimport _mag
+from pippi cimport soundpipe
 from cpython cimport bool
 
 cdef double MINDENSITY = 0.001
@@ -245,6 +246,21 @@ cpdef SoundBuffer mdelay(SoundBuffer snd, list delays, double feedback):
     cdef int[:] delayframes = np.array([ snd.samplerate * delay for delay in delays ], dtype='i')
     snd.frames = _mdelay(snd.frames, out, delayframes, feedback)
     return snd
+
+cpdef SoundBuffer lpf(SoundBuffer snd, float freq):
+    return soundpipe.butlp(snd, freq)
+
+cpdef SoundBuffer hpf(SoundBuffer snd, float freq):
+    return soundpipe.buthp(snd, freq)
+
+cpdef SoundBuffer bpf(SoundBuffer snd, float freq):
+    return soundpipe.butbp(snd, freq)
+
+cpdef SoundBuffer brf(SoundBuffer snd, float freq):
+    return soundpipe.butbr(snd, freq)
+
+cpdef SoundBuffer compressor(SoundBuffer snd, float ratio=4, float threshold=-30, float attack=0.2, float release=0.2):
+    return soundpipe.compressor(snd, ratio, threshold, attack, release)
 
 cpdef SoundBuffer convolve(SoundBuffer snd, double[:] impulse, bool normalize=True):
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')

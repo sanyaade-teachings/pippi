@@ -1,5 +1,5 @@
-from .soundbuffer cimport SoundBuffer
-from . cimport wavetables
+from pippi.soundbuffer cimport SoundBuffer
+from pippi cimport wavetables
 
 cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, double length)
 

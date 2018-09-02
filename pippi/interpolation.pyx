@@ -19,7 +19,7 @@ cdef double hermite_get_sample(double x, double y0, double y1, double y2, double
 
     return ((c3 * x + c2) * x + c1) * x + c0
 
-cdef public double[:] _hermite(double[:] data, int length):
+cdef double[:] _hermite(double[:] data, int length):
     cdef int fi = 0
     cdef double[:] out = np.zeros(length)
     cdef get_sample_t get_sample = hermite_get_sample
@@ -41,7 +41,7 @@ cdef public double[:] _hermite(double[:] data, int length):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef public double[:] _linear_inner(double[:] data, double[:] out, int length) nogil:
+cdef double[:] _linear_inner(double[:] data, double[:] out, int length) nogil:
     cdef Py_ssize_t i
     cdef int inputlength = len(data)
 
@@ -55,7 +55,7 @@ cdef public double[:] _linear_inner(double[:] data, double[:] out, int length) n
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef public double[:] _linear(double[:] data, int length):
+cdef double[:] _linear(double[:] data, int length):
     cdef double[:] out = np.zeros(length) 
     return _linear_inner(data, out, length)
 
