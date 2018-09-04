@@ -42,6 +42,34 @@ cdef extern from "soundpipe.h":
     int sp_dcblock_init(sp_data*, sp_dcblock*)
     int sp_dcblock_compute(sp_data*, sp_dcblock*, float*, float*);
 
+    ctypedef struct sp_ftbl:
+        pass
+
+    int sp_ftbl_create(sp_data*, sp_ftbl**, size_t)
+    int sp_ftbl_init(sp_data*, sp_ftbl*, size_t)
+    int sp_ftbl_bind(sp_data*, sp_ftbl**, float*, size_t)
+    int sp_ftbl_destroy(sp_ftbl**)
+    int sp_gen_vals(sp_data*, sp_ftbl*, const char*)
+    int sp_gen_sine(sp_data*, sp_ftbl*)
+    int sp_gen_file(sp_data*, sp_ftbl*, const char*)
+    int sp_gen_sinesum(sp_data*, sp_ftbl*, const char*)
+    int sp_gen_line(sp_data*, sp_ftbl*, const char*)
+    int sp_gen_xline(sp_data*, sp_ftbl*, const char*)
+    int sp_gen_gauss(sp_data*, sp_ftbl*, float, uint32_t)
+    int sp_ftbl_loadfile(sp_data*, sp_ftbl**, const char*)
+    int sp_ftbl_loadspa(sp_data*, sp_ftbl**, const char*)
+    int sp_gen_composite(sp_data*, sp_ftbl*, const char*)
+    int sp_gen_rand(sp_data*, sp_ftbl*, const char*)
+    int sp_gen_triangle(sp_data*, sp_ftbl*)
+
+    ctypedef struct sp_paulstretch:
+        pass
+
+    int sp_paulstretch_create(sp_paulstretch**)
+    int sp_paulstretch_destroy(sp_paulstretch**)
+    int sp_paulstretch_init(sp_data*, sp_paulstretch*, sp_ftbl*, float windowsize, float stretch);
+    int sp_paulstretch_compute(sp_data*, sp_paulstretch*, float*, float*);
+
     ctypedef struct sp_saturator:
         float drive
         float dcoffset

@@ -1,5 +1,22 @@
 from pippi.soundbuffer cimport SoundBuffer
+from libc.stdlib cimport malloc, free
 import numpy as np
+
+cdef float** memoryview2ftbls(double[:,:] snd):
+    cdef int length = snd.shape[0]
+    cdef int channels = snd.shape[1]
+    cdef int i = 0
+    cdef int c = 0
+    cdef float** tbls = <float**>malloc(channels * sizeof(float*))
+    cdef float* tbl
+
+    for c in range(channels):
+        tbl = <float*>malloc(length * sizeof(float))
+        for i in range(length):
+            tbl[i] = <float>snd[i,c]
+        tbls[c] = tbl
+
+    return tbls
 
 cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
     cdef sp_data* sp
@@ -258,4 +275,42 @@ cpdef SoundBuffer saturator(SoundBuffer snd, float drive, float dcoffset, bint d
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     snd.frames = _saturator(snd.frames, out, drive, dcoffset, length, channels, dcblock)
     return snd
+
+cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, float windowsize, float stretch, int length, int outlength, int channels):
+    cdef sp_data* sp
+    cdef sp_paulstretch* paulstretch
+    cdef float sample = 0
+    cdef float output = 0
+    cdef int i = 0
+    cdef int c = 0
+    cdef float** tbls = memoryview2ftbls(snd)
+    cdef sp_ftbl* tbl
+
+    sp_create(&sp)
+    
+    for c in range(channels):
+        sp_ftbl_bind(sp, &tbl, tbls[c], length)
+        sp_paulstretch_create(&paulstretch)
+        sp_paulstretch_init(sp, paulstretch, tbl, windowsize, stretch)
+
+        for i in range(outlength):
+            sp_paulstretch_compute(sp, paulstretch, NULL, &output)
+            out[i,c] = <double>output
+
+        sp_paulstretch_destroy(&paulstretch)
+        sp_ftbl_destroy(&tbl)
+        free(tbls[c])
+
+    sp_destroy(&sp)
+    free(tbls)
+
+    return out
+
+cpdef SoundBuffer paulstretch(SoundBuffer snd, float windowsize, float stretch):
+    cdef int length = len(snd)
+    cdef int outlength = <int>(stretch * snd.samplerate)
+    cdef int channels = snd.channels
+    cdef double[:,:] out = np.zeros((outlength, channels), dtype='d')
+    out = _paulstretch(snd.frames, out, windowsize, stretch, length, outlength, channels)
+    return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
 
