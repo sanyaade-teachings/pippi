@@ -68,13 +68,13 @@ def make_note(freq, amp, length):
                     win=dsp.HANN, 
                     minlength=(note.dur/50)*1000, 
                     maxlength=(note.dur/3)*1000, 
-                    grainlength_lfo_wt=wavetables.randline(random.randint(10, 100)),
+                    grainlength_lfo=wavetables.randline(random.randint(10, 100)),
                     mindensity=0.1, 
                     maxdensity=random.triangular(0.25, 0.75), 
                     spread=1, 
                     speed=random.choice([1, 1.5, 2]),
                     jitter=random.triangular(0, 0.05),
-                    density_lfo_wt=wavetables.randline(random.randint(5, 50)),
+                    density_lfo=wavetables.randline(random.randint(5, 50)),
                 ).adsr(a,d,s,r)
         note.dub(arp, 0)
 

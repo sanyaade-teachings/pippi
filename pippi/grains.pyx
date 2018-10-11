@@ -1,9 +1,9 @@
 # cython: language_level=3
 
-from pippi.soundbuffer cimport SoundBuffer, _cut, _dub, _speed, _pan, _env
-from pippi cimport wavetables
+from pippi.wavetables cimport HANN, PHASOR, to_window, to_wavetable
 from pippi cimport interpolation
-from libc.stdlib cimport rand, RAND_MAX
+from pippi cimport soundpipe as SP
+from libc.stdlib cimport rand, RAND_MAX, malloc, free
 import numpy as np
 from cpython cimport array
 import array
@@ -20,8 +20,167 @@ DEF DEFAULT_DENSITY = 1
 DEF DEFAULT_MINDENSITY = 0.5
 DEF DEFAULT_MAXDENSITY = 1.5
 
-cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, double length):
+cdef double** snd2array(double[:,:] snd, int length, int channels):
+    cdef int i = 0
+    cdef int c = 0
+    cdef double** tbls = <double**>malloc(channels * sizeof(double*))
+    cdef double* tbl
+
+    for c in range(channels):
+        tbl = <double*>malloc(length * sizeof(double))
+        for i in range(length):
+            tbl[i] = snd[i,c]
+        tbls[c] = tbl
+
+    return tbls
+
+cdef class Cloud:
+    def __cinit__(self, 
+            double[:,:] snd, 
+            object window=None, 
+            object position=None,
+            object amp=1.0,
+            object speed=1.0, 
+            object spread=0.0, 
+            object jitter=0.0, 
+            object grainlength=0.082, 
+            object grid=None,
+            object lpf=None,
+            object hpf=None, 
+            object bpf=None,
+            object mask=None,
+            unsigned int wtsize=4096,
+            unsigned int samplerate=44100,
+        ):
+
+        self.snd = SP.memoryview2ftbls(snd)
+        self.framelength = <unsigned int>len(snd)
+        self.length = <double>(self.framelength / <double>samplerate)
+        self.channels = <unsigned int>snd.shape[1]
+        self.samplerate = samplerate
+
+        self.wtsize = wtsize
+
+        if window is None:
+            window = HANN
+        self.window = to_window(window)
+
+        if position is None:
+            position = PHASOR
+        self.position = to_window(position)
+
+        self.speed = to_wavetable(speed)
+        self.spread = to_wavetable(spread)
+        self.jitter = to_wavetable(jitter)
+        self.grainlength = to_wavetable(grainlength)
+
+        if grid is None:
+            grid = np.multiply(self.grainlength, 0.5)
+        self.grid = to_wavetable(grid)
+
+        if lpf is None:
+            self.has_lpf = False
+        else:
+            self.has_lpf = True
+            self.lpf = to_wavetable(lpf)
+
+        if hpf is None:
+            self.has_hpf = False
+        else:
+            self.has_hpf = True
+            self.hpf = to_wavetable(hpf)
+
+        if bpf is None:
+            self.has_bpf = False
+        else:
+            self.has_bpf = True
+            self.bpf = to_wavetable(bpf)
+
+        if mask is None:
+            self.has_mask = False
+        else:
+            self.has_mask = True
+            self.mask = array.array('i', mask)
+
+    def __dealloc__(self):
+        cdef int c = 0
+        for c in self.channels:
+            free(self.snd[c])
+        free(self.snd)
+
+    def play(self, double length):
+        cdef unsigned int outframelength = <unsigned int>(self.samplerate * length)
+        cdef double[:,:] out = np.zeros((outframelength, self.channels), dtype='d')
+        cdef unsigned int write_pos = 0
+        cdef unsigned int read_pos = 0
+        cdef unsigned int grainlength = 4410
+        cdef unsigned int grainincrement = grainlength // 2
+        cdef double pos = 0
+        cdef double grainpos = 0
+        cdef double panpos = 0
+        cdef double sample = 0
+        cdef float fsample = 0
+        cdef double spread = 0
+        cdef unsigned int masklength = 0
+        cdef unsigned int count = 0
+        cdef SP.sp_data* sp
+        cdef SP.sp_mincer* mincer
+        cdef SP.sp_ftbl* tbl
+
+        SP.sp_create(&sp)
+
+        if self.has_mask:
+            masklength = <unsigned int>len(self.mask)
+
+        while write_pos < outframelength - grainlength: 
+            if self.has_mask and self.mask[<int>(count % masklength)] == 0:
+                write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
+                pos = <double>write_pos / <double>outframelength
+                count += 1
+                continue
+
+            grainlength = <unsigned int>(interpolation._linear_point(self.grainlength, pos) * self.samplerate)
+            read_pos = <unsigned int>(interpolation._linear_point(self.position, pos) * self.length)
+
+            spread = interpolation._linear_point(self.spread, pos)
+            panpos = (rand()/<double>RAND_MAX) * spread + (0.5 - (spread * 0.5))
+            pans = [panpos, 1-panpos]
+
+            for c in range(self.channels):
+                SP.sp_ftbl_bind(sp, &tbl, self.snd[c], self.framelength)
+                SP.sp_mincer_create(&mincer)
+                SP.sp_mincer_init(sp, mincer, tbl, self.wtsize)
+
+                panpos = pans[c % 2]
+
+                for i in range(grainlength):
+                    grainpos = <double>i / grainlength
+                    if i+read_pos < self.length:
+                        mincer.time = <float>((read_pos+i)/<float>self.samplerate)
+                        mincer.pitch = <float>interpolation._linear_point(self.speed, pos)
+                        mincer.amp = <float>interpolation._linear_point(self.amp, pos)
+
+                        SP.sp_mincer_compute(sp, mincer, NULL, &fsample)
+                        sample = <double>fsample * interpolation._linear_point(self.window, grainpos)
+                        sample *= panpos
+                        out[i+write_pos,c] += sample
+
+                SP.sp_mincer_destroy(&mincer)
+                SP.sp_ftbl_destroy(&tbl)
+
+            write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
+            pos = <double>write_pos / <double>outframelength
+            count += 1
+
+        SP.sp_destroy(&sp)
+
+        return out
+
+"""
+cdef double[:,:] _play(GrainCloud cloud, double[:,:] out):
     cdef int input_length = len(cloud.buf)
+    cdef int framelength = out.shape[0]
+    cdef int channels = out.shape[1]
 
     cdef int fi = 0
     cdef int ci = 0
@@ -56,7 +215,7 @@ cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, doubl
         playhead = <double>write_pos / framelength
 
         # Set (target) grain length
-        if cloud.grainlength_lfo is not None:
+        if cloud.has_grainlength_lfo:
             grainlength_frac_pos = interpolation._linear_point(cloud.grainlength_lfo, playhead)
 
             if cloud.jitter > 0:
@@ -66,7 +225,6 @@ cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, doubl
             max_read_pos = input_length - grainlength
 
         if grainlength < 0:
-            print(grainlength, write_pos)
             grainlength *= -1
 
         # Get read position for _cut
@@ -82,7 +240,7 @@ cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, doubl
 
 
         # Get grain speed
-        if cloud.speed_lfo is not None:
+        if cloud.has_speed_lfo:
             grain_speed = interpolation._linear_point(cloud.speed_lfo, playhead)
             cloud.speed = (grain_speed * (cloud.maxspeed - cloud.minspeed)) + cloud.minspeed
 
@@ -103,36 +261,36 @@ cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, doubl
 
             # TODO can probably init maxlength versions of these outside the loop, 
             # and reuse them in sequence (careful of gil-releasing...)
-            grain_pre = np.zeros((preresample_grainlength, cloud.channels), dtype='d')
+            grain_pre = np.zeros((preresample_grainlength, channels), dtype='d')
             grainchan_pre = np.zeros(preresample_grainlength, dtype='d')
-            grain = np.zeros((grainlength, cloud.channels), dtype='d')
+            grain = np.zeros((grainlength, channels), dtype='d')
             grainchan = np.zeros(grainlength, dtype='d')
 
             grain_pre = _cut(cloud.buf.frames, framelength, start, preresample_grainlength)
-            grain = _speed(grain_pre, grain, grainchan_pre, grainchan, cloud.channels)
+            grain = _speed(grain_pre, grain, grainchan_pre, grainchan, channels)
         else:
-            grain = np.zeros((grainlength, cloud.channels), dtype='d')
+            grain = np.zeros((grainlength, channels), dtype='d')
             grain = _cut(cloud.buf.frames, framelength, start, grainlength)
 
 
         # Apply grain window
-        grain = _env(grain, cloud.channels, cloud.win)
+        grain = _env(grain, channels, cloud.win)
 
         # Pan grain if spread > 0
         if cloud.spread > 0:
             panpos = (rand()/<double>RAND_MAX) * cloud.spread + (0.5 - (cloud.spread * 0.5))
-            grain = _pan(grain, grainlength, cloud.channels, panpos, wavetables.CONSTANT)
+            grain = _pan(grain, grainlength, channels, panpos, wts.CONSTANT)
 
 
         # Dub grain to output
         if write_pos + len(grain) < len(out):
             for fi in range(len(grain)):
-                for ci in range(cloud.channels):
+                for ci in range(channels):
                     out[fi + write_pos, ci] += (grain[fi, ci] * cloud.amp)
 
 
         # Get density for write_inc modulation
-        if cloud.density_lfo is not None:
+        if cloud.has_density_lfo:
             density_frac_pos = interpolation._linear_point(cloud.density_lfo, playhead)
             density = (density_frac_pos * (cloud.maxdensity - cloud.mindensity)) + cloud.mindensity
         else:
@@ -157,37 +315,28 @@ cdef class GrainCloud:
     def __init__(self, 
             SoundBuffer buf, 
 
-            int win=-1,
-            double[:] win_wt=None,
-            int win_length=DEFAULT_WTSIZE,
+            object win=None,
+            int wtsize=DEFAULT_WTSIZE,
 
             list mask=None,
 
             double freeze=-1, 
-            int read_lfo=-1,
-            object read_lfo_wt=None,
+            object read_lfo=None,
             double read_lfo_speed=1,
-            int read_lfo_length=DEFAULT_WTSIZE,
 
-            int speed_lfo=-1,
-            double[:] speed_lfo_wt=None,
-            int speed_lfo_length=DEFAULT_WTSIZE,
+            object speed_lfo=None,
             double speed=DEFAULT_SPEED,
             double minspeed=DEFAULT_SPEED, 
             double maxspeed=DEFAULT_MAXSPEED, 
 
-            int density_lfo=-1,
-            double[:] density_lfo_wt=None,
-            int density_lfo_length=DEFAULT_WTSIZE,
+            object density_lfo=None,
             double density_lfo_speed=1,
             double density=DEFAULT_DENSITY, 
             double mindensity=DEFAULT_MINDENSITY, 
             double maxdensity=DEFAULT_MAXDENSITY, 
 
             double grainlength=DEFAULT_GRAINLENGTH, 
-            int grainlength_lfo=-1,
-            double[:] grainlength_lfo_wt=None,
-            int grainlength_lfo_length=DEFAULT_WTSIZE,
+            object grainlength_lfo=None,
             double grainlength_lfo_speed=1,
 
             double minlength=DEFAULT_GRAINLENGTH,    # min grain length in ms
@@ -209,6 +358,7 @@ cdef class GrainCloud:
         self.jitter = jitter
         self.freeze = freeze
         self.amp = amp
+        self.wtsize = wtsize
 
         cdef array.array cmask
         if mask is not None:
@@ -216,36 +366,23 @@ cdef class GrainCloud:
             self.mask = cmask
     
         # Window is always a wavetable, defaults to Hann
-        if win > -1:
-            self.win = wavetables._window(win, win_length)
-        elif win_wt is not None:
-            self.win = win_wt
+        if win is None:
+            self.win = wts._window(wts.HANN, wtsize)
         else:
-            self.win = wavetables._window(wavetables.HANN, win_length)
-        self.win_length = len(self.win)
+            self.win = wts.to_wavetable(win, wtsize)
 
         # Read lfo is always a wavetable, defaults to phasor
-        if read_lfo > -1:
-            self.read_lfo = wavetables._window(read_lfo, read_lfo_length)
-        elif read_lfo_wt is not None:
-            self.read_lfo = interpolation._linear(np.asarray(read_lfo_wt, dtype='d'), read_lfo_length)
+        if read_lfo is None:
+            self.read_lfo = wts._window(wts.PHASOR, wtsize)
         else:
-            self.read_lfo = wavetables._window(wavetables.PHASOR, read_lfo_length)
+            self.read_lfo = wts.to_wavetable(read_lfo, wtsize)
 
         self.read_lfo_speed = read_lfo_speed
-        self.read_lfo_length = read_lfo_length
 
-        # If speed_lfo < 0 and speed_lfo_wt is None, then use fixed speed
-        # No transposition is done if speed == 1
-        if speed_lfo > -1:
-            self.speed_lfo = wavetables._window(speed_lfo, speed_lfo_length)
-        elif speed_lfo_wt is not None:
-            self.speed_lfo = speed_lfo_wt
-        else:
-            self.speed_lfo = None
-
-        if self.speed_lfo is not None:
-            self.speed_lfo_length = len(self.speed_lfo)
+        self.has_speed_lfo = False
+        if speed_lfo is not None:
+            self.speed_lfo = wts.to_wavetable(speed_lfo, wtsize)
+            self.has_speed_lfo = True
 
         if speed <= 0:
             speed = MIN_SPEED
@@ -263,37 +400,28 @@ cdef class GrainCloud:
         self.density = density
         self.mindensity = mindensity
         self.maxdensity = maxdensity
-        if density_lfo > -1:
-            self.density_lfo = wavetables._window(density_lfo, density_lfo_length)
-        elif density_lfo_wt is not None:
-            self.density_lfo = density_lfo_wt
-        else:
-            self.density_lfo = None
+        self.has_density_lfo = False
+        if density_lfo is not None:
+            self.density_lfo = wts.to_wavetable(density_lfo, wtsize)
+            self.has_density_lfo = True
 
         self.density_lfo_speed = density_lfo_speed
-        if self.density_lfo is not None:
-            self.density_lfo_length = len(self.density_lfo)
 
-        if grainlength_lfo > -1:
-            self.grainlength_lfo = wavetables._window(grainlength_lfo, grainlength_lfo_length)
-            self.grainlength = -1
-        elif grainlength_lfo_wt is not None:
-            self.grainlength_lfo = grainlength_lfo_wt
-        else:
-            self.grainlength_lfo = None
+        self.has_grainlength_lfo = False
+        if grainlength_lfo is not None:
+            self.grainlength_lfo = wts.to_wavetable(grainlength_lfo, wtsize)
+            self.has_grainlength_lfo = True
 
         self.grainlength = grainlength
         self.minlength = minlength
         self.maxlength = maxlength
         self.grainlength_lfo_speed = grainlength_lfo_speed
-        if self.grainlength_lfo is not None:
-            self.grainlength_lfo_length = len(self.grainlength_lfo)
  
     cpdef SoundBuffer play(GrainCloud self, double length=10):
         cdef int framelength = <int>(self.samplerate * length)
         cdef double[:,:] out = np.zeros((framelength, self.channels), dtype='d')
-        out = _play(self, out, framelength, length)
-        return SoundBuffer(out, length=length, channels=self.channels, samplerate=self.samplerate)
+        out = _play(self, out)
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-
+"""
 

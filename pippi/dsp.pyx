@@ -9,7 +9,7 @@ cimport cython
 from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport grains
-cimport wavetables as wts
+from pippi cimport wavetables as wts
 
 # Expose some C flags / constants to python
 # FIXME might be faster to use newish cpdef enum defs? donno
@@ -20,6 +20,7 @@ COS = wts.COS
 TRI = wts.TRI
 SAW = wts.SAW
 PHASOR = wts.PHASOR
+LINE = wts.LINE
 RSAW = wts.RSAW
 HANN = wts.HANN
 HANNIN = wts.HANNIN
@@ -84,8 +85,8 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
 
     return out
     
-cpdef wts.Wavetable wt(list values=None, int initwt=-1, int initwin=-1, int length=-1):
-    return wts.Wavetable(values, initwt, initwin, length)
+cpdef wts.Wavetable wt(object values, int wtsize=4096, bint window=True):
+    return wts.Wavetable(values, wtsize, window)
 
 cpdef SoundBuffer stack(list sounds):
     cdef int channels = 0
@@ -138,7 +139,7 @@ def join(sounds, overlap=None, channels=None, samplerate=None):
     return out
 
 cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, int samplerate=44100):
-    return SoundBuffer(frames=frames, length=length, channels=channels, samplerate=samplerate)
+    return SoundBuffer.__new__(SoundBuffer, frames=frames, length=length, channels=channels, samplerate=samplerate)
 
 def read(frames, channels=2, samplerate=44100):
     """ Read a soundfile from disk and return a `SoundBuffer` with its contents

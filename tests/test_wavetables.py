@@ -25,8 +25,8 @@ class TestWavetables(TestCase):
         self.assertRaises(TypeError, wavetables.wavetable, 'this is not a wavetable type', length)
 
     def test_wtclass(self):
-        wt1 = dsp.wt(initwt=dsp.RND)
-        wt2 = dsp.wt(initwin=dsp.TRI)
+        wt1 = dsp.wt(dsp.RND, 4096)
+        wt2 = dsp.wt(dsp.TRI, 4096)
         wt3 = dsp.wt([ random.random()+0.001 for _ in range(1000) ])
 
         self.assertTrue(max(wt1) > 0)

@@ -18,6 +18,9 @@ ext_modules = cythonize([
             library_dirs=['/usr/local/lib']
         ), 
         Extension('pippi.wavetables', ['pippi/wavetables.pyx']),
+        #Extension('pippi.ugens.core', ['pippi/ugens/core.pyx'], include_dirs=['.']),
+        #Extension('pippi.ugens.lpf_ugen', ['pippi/ugens/lpf_ugen.pyx'], include_dirs=['.']),
+        #Extension('pippi.ugens.val_ugen', ['pippi/ugens/val_ugen.pyx'], include_dirs=['.']),
     ], 
     include_path=[
         np.get_include(), 
@@ -27,10 +30,15 @@ ext_modules = cythonize([
     annotate=True
 ) 
 
+with open('README.md') as f:
+    readme = f.read()
+
 setup(
     name='pippi',
     version='2.0.0-beta-4',
     description='Computer music with Python',
+    long_description=readme,
+    long_description_content_type='text/markdown',
     author='He Can Jog',
     author_email='erik@hecanjog.com',
     url='https://github.com/hecanjog/pippi',

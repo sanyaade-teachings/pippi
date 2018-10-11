@@ -17,6 +17,19 @@ class TestGrainCloud(TestCase):
     def tearDown(self):
         shutil.rmtree(self.soundfiles)
 
+    def test_newcloud(self):
+        sound = SoundBuffer(filename='examples/sounds/linus.wav')
+        cloud = grains.Cloud(sound.frames, 
+                samplerate=sound.samplerate,
+                window=dsp.HANN,
+                grainlength=dsp.wt(dsp.SINE) * 0.05 + 0.001,
+                spread=dsp.PHASOR,
+                grid=0.04,
+                )
+                #mask=[0,1,0,1,1])
+        out = cloud.play(10)
+        out.write('tests/renders/cloud_new.wav')
+
     def test_unmodulated_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         cloud = grains.GrainCloud(sound)
@@ -28,7 +41,7 @@ class TestGrainCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         if save:
-            out.write('test_unmodulated_graincloud.flac')
+            out.write('tests/renders/test_unmodulated_graincloud.flac')
 
     def test_minspeed_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -41,7 +54,7 @@ class TestGrainCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         if save:
-            out.write('test_minspeed_graincloud.flac')
+            out.write('tests/renders/test_minspeed_graincloud.flac')
 
     def test_maxspeed_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -54,7 +67,7 @@ class TestGrainCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         if save:
-            out.write('test_maxspeed_graincloud.flac')
+            out.write('tests/renders/test_maxspeed_graincloud.flac')
 
     def test_graincloud_with_length_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -67,7 +80,7 @@ class TestGrainCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         if save:
-            out.write('test_graincloud_with_length_lfo.flac')
+            out.write('tests/renders/test_graincloud_with_length_lfo.flac')
 
     def test_graincloud_with_speed_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -86,7 +99,7 @@ class TestGrainCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         if save:
-            out.write('test_graincloud_with_speed_lfo.flac')
+            out.write('tests/renders/test_graincloud_with_speed_lfo.flac')
 
     def test_graincloud_with_density_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -102,7 +115,7 @@ class TestGrainCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         if save:
-            out.write('test_graincloud_with_density_lfo.flac')
+            out.write('tests/renders/test_graincloud_with_density_lfo.flac')
 
     def test_graincloud_with_read_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -118,6 +131,6 @@ class TestGrainCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         if save:
-            out.write('test_graincloud_with_read_lfo.flac')
+            out.write('tests/renders/test_graincloud_with_read_lfo.flac')
 
 

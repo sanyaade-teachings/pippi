@@ -1,4 +1,4 @@
-from pippi import dsp, grains, interpolation
+from pippi import dsp, grains, interpolation, wavetables
 import random
 import os
 import time
@@ -14,9 +14,9 @@ def makecloud(density):
     return grains.GrainCloud(snd * 0.125, 
                 win=dsp.HANN, 
                 read_lfo=dsp.PHASOR, 
-                speed_lfo_wt=interpolation.linear([ random.random() for _ in range(random.randint(10, 1000)) ], 4096), 
-                density_lfo_wt=interpolation.linear([ random.random() for _ in range(random.randint(10, 1000)) ], 4096), 
-                grainlength_lfo_wt=interpolation.linear([ random.random() for _ in range(random.randint(10, 500)) ], 4096), 
+                speed_lfo=wavetables.randline(random.randint(10, 1000)), 
+                density_lfo=wavetables.randline(random.randint(10, 1000)), 
+                grainlength_lfo=wavetables.randline(random.randint(10, 500)), 
                 minspeed=0.25, 
                 maxspeed=random.triangular(0.25, 10),
                 density=density,

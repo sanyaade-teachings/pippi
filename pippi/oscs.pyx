@@ -3,7 +3,7 @@
 import numbers
 import numpy as np
 from pippi.soundbuffer cimport SoundBuffer
-from pippi import wavetables
+#from pippi import wavetables
 from pippi cimport wavetables
 from pippi cimport interpolation
 
@@ -51,84 +51,25 @@ cdef class Osc:
         self.wtsize = wtsize
 
         self.pulsewidth = pulsewidth if pulsewidth >= MIN_PULSEWIDTH else MIN_PULSEWIDTH
-
-        if isinstance(wavetable, int):
-            # Create wavetable type if wavetable is an integer flag
-            self.wavetable = wavetables._wavetable(wavetable, self.wtsize)
-
-        elif isinstance(wavetable, wavetables.Wavetable):
-            self.wavetable = wavetable.data
-
-        elif isinstance(wavetable, SoundBuffer):
-            if wavetable.channels > 1:
-                wavetable = wavetable.remix(1)
-            self.wavetable = wavetable.frames.base.flatten()
-
-        elif wavetable is not None:
-            self.wavetable = array('d', wavetable)
+        self.wavetable = wavetables.to_wavetable(wavetable, self.wtsize)
 
         if stack is not None:
-            self.wavetables = []
-            for i, wt in enumerate(stack):
-                if isinstance(wt, int):
-                    self.wavetables += [ wavetables._wavetable(wt, self.wtsize) ]
-                elif isinstance(wt, wavetables.Wavetable):
-                    self.wavetables += [ interpolation._linear(wt.data, self.wtsize) ]
-                elif isinstance(wt, SoundBuffer):
-                    if wt.channels > 1:
-                        wt = wt.remix(1)
-                    self.wavetables += [ interpolation._linear(wt.frames.base.flatten(), self.wtsize) ]
-                else:
-                    self.wavetables += [ interpolation._linear(array('d', wt), self.wtsize) ]
+            self.wavetables = wavetables.to_lfostack(stack, self.wtsize)
+
+        self.window = wavetables.to_wavetable(window, self.wtsize)
 
         self.win_phase = win_phase
-        if isinstance(window, int):
-            self.window = wavetables._window(window, self.wtsize)
-        elif isinstance(window, wavetables.Wavetable):
-            self.window = interpolation._linear(window.data, self.wtsize)
-        elif isinstance(window, SoundBuffer):
-            if window.channels > 1:
-                window = window.remix(1)
-            self.window = interpolation._linear(window.frames.base.flatten(), self.wtsize)
-        elif window is not None:
-            self.window = interpolation._linear(array('d', window), self.wtsize)
-        else:
-            self.window = None
-
         self.mod_range = mod_range
         self.mod_phase = mod_phase
         self.mod_freq = mod_freq
-        if isinstance(mod, int):
-            self.mod = wavetables._window(mod, self.wtsize)
-        elif isinstance(mod, wavetables.Wavetable):
-            self.mod = interpolation._linear(mod.data, self.wtsize)
-        elif isinstance(mod, SoundBuffer):
-            if mod.channels > 1:
-                mod = mod.remix(1)
-            self.mod = interpolation._linear(mod.frames.base.flatten(), self.wtsize)
-        elif isinstance(mod, list):
-            self.mod = interpolation._linear(array('d', mod), self.wtsize)
-        elif mod is not None:
-            self.mod = mod
-        else:
-            self.mod = None
+        self.mod = wavetables.to_wavetable(mod, self.wtsize)
 
         self.lfo_freq = lfo_freq
-        if isinstance(lfo, int):
-            self.lfo = wavetables._window(lfo, self.wtsize)
-        elif isinstance(lfo, wavetables.Wavetable):
-            self.lfo = interpolation._linear(lfo.data, self.wtsize)
-        elif isinstance(lfo, SoundBuffer):
-            if lfo.channels > 1:
-                lfo = lfo.remix(1)
-            self.lfo = interpolation._linear(lfo.frames.base.flatten(), self.wtsize)
-        elif isinstance(lfo, list):
-            self.lfo = interpolation._linear(array('d', lfo), self.wtsize)
-        else:
-            self.lfo = None
 
-        if stack is not None and self.lfo is None:
+        if stack is not None and lfo is None:
             self.lfo = wavetables._wavetable(wavetables.RSAW, self.wtsize)
+        else:
+            self.lfo = wavetables.to_wavetable(lfo, self.wtsize)
 
     def play(self, 
              length, 

@@ -1,7 +1,6 @@
 #clib soundpipe
 
 from libc.stdint cimport uint32_t, int64_t
-from .soundbuffer cimport SoundBuffer
 
 cdef extern from "soundpipe.h":
     ctypedef struct sp_data:
@@ -82,6 +81,17 @@ cdef extern from "soundpipe.h":
     int sp_saturator_init(sp_data*, sp_saturator*);
     int sp_saturator_compute(sp_data*, sp_saturator*, float*, float*);
 
+    ctypedef struct sp_mincer:
+        float time
+        float amp
+        float pitch
+        sp_ftbl* ft
+
+    int sp_mincer_create(sp_mincer**)
+    int sp_mincer_destroy(sp_mincer**)
+    int sp_mincer_init(sp_data*, sp_mincer*, sp_ftbl*, int)
+    int sp_mincer_compute(sp_data*, sp_mincer*, float*, float*)
+
     ctypedef struct sp_butlp:
         float sr, freq, istor
         float lkf
@@ -126,14 +136,38 @@ cdef extern from "soundpipe.h":
     int sp_butbr_init(sp_data*, sp_butbr*)
     int sp_butbr_compute(sp_data*, sp_butbr*, float*, float*)
 
+    ctypedef struct sp_bal:
+        float asig, csig, ihp
+        float c1, c2, prvq, prvr, prva
+
+    int sp_bal_create(sp_bal**)
+    int sp_bal_destroy(sp_bal**)
+    int sp_bal_init(sp_data*, sp_bal*)
+    int sp_bal_compute(sp_data*, sp_bal*, float*, float*, float*)
+
+
 cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length, int channels)
-cpdef SoundBuffer butbr(SoundBuffer snd, float freq)
+cpdef double[:,:] butbr(double[:,:] snd, float freq)
 cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length, int channels)
-cpdef SoundBuffer butbp(SoundBuffer snd, float freq)
+cpdef double[:,:] butbp(double[:,:] snd, float freq)
 cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, float freq, int length, int channels)
-cpdef SoundBuffer buthp(SoundBuffer snd, float freq)
+cpdef double[:,:] buthp(double[:,:] snd, float freq)
 cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, float freq, int length, int channels)
-cpdef SoundBuffer butlp(SoundBuffer snd, float freq)
+cpdef double[:,:] butlp(double[:,:] snd, float freq)
+
+cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, float amp, double[:] pitch)
+cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, float amp, double[:] pitch, int wtsize=?, int samplerate=?)
+
+cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, float drive, float dcoffset, int length, int channels, bint dcblock)
+cpdef double[:,:] saturator(double[:,:] snd, float drive, float dcoffset, bint dcblock)
 
 cdef double[:,:] _compressor(double[:,:] snd, double[:,:] out, float ratio, float thresh, float atk, float rel, int length, int channels)
-cpdef SoundBuffer compressor(SoundBuffer snd, float ratio, float thresh, float atk, float rel)
+cpdef double[:,:] compressor(double[:,:] snd, float ratio, float thresh, float atk, float rel)
+
+cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, float windowsize, float stretch, int length, int outlength, int channels)
+cpdef double[:,:] paulstretch(double[:,:] snd, float windowsize, float stretch, int samplerate=?)
+
+cdef double[:,:] _filterbank(double[:,:] snd, double[:,:] out, list freqs, list lfos, int length, int channels)
+cpdef double[:,:] filterbank(double[:,:] snd, list freqs, list lfos)
+
+cdef float** memoryview2ftbls(double[:,:] snd)
