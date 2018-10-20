@@ -34,16 +34,11 @@ Please let me know if you run into problems!
 
 Which will run every example in the `examples` directory, creating audio file renders in the same directory.
 
-## Make an examples mix
-
-    make mix
-
-This also renders every example but then dumps them into a single audio file called `example_mix.wav`
-(It's the pippi demo reel, I guess.)
-
 ## To run tests
 
     make test
+
+In many cases, this will produce a soundfile in the `tests/renders` directory for the corresponding test. (Ear-driven regression testing...)
 
 ## Release Notes
 

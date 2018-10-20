@@ -11,8 +11,5 @@ clean:
 examples:
 	ls examples/*.py | xargs -n 1 -P `nproc --all` python
 
-mix: examples
-	sox examples/*.wav example_mix.wav
-
 build:
 	python setup.py develop
