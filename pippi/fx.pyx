@@ -279,32 +279,37 @@ cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, int n
     else:
         return out
 
-cpdef SoundBuffer fir(SoundBuffer snd, double[:] impulse, bool normalize=True):
+cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bool normalize=True):
+    cdef double[:] impulsewt = wavetables.to_window(impulse)
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
     cdef int _normalize = 1 if normalize else 0
-    snd.frames = _fir(snd.frames, out, impulse, normalize)
-    return snd
+    return SoundBuffer(_fir(snd.frames, out, impulsewt, normalize), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer lpf(SoundBuffer snd, float freq):
-    return soundpipe.butlp(snd, freq)
+    return SoundBuffer(soundpipe.butlp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer hpf(SoundBuffer snd, float freq):
-    return soundpipe.buthp(snd, freq)
+    return SoundBuffer(soundpipe.buthp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer bpf(SoundBuffer snd, float freq):
-    return soundpipe.butbp(snd, freq)
+    return SoundBuffer(soundpipe.butbp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer brf(SoundBuffer snd, float freq):
-    return soundpipe.butbr(snd, freq)
+    return SoundBuffer(soundpipe.butbr(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer compressor(SoundBuffer snd, float ratio=4, float threshold=-30, float attack=0.2, float release=0.2):
-    return soundpipe.compressor(snd, ratio, threshold, attack, release)
+    return SoundBuffer(soundpipe.compressor(snd.frames, ratio, threshold, attack, release), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer mincer(SoundBuffer snd, double length, object position, object pitch, double amp, int wtsize=4096):
+cpdef SoundBuffer saturator(SoundBuffer snd, double drive=10, double offset=0, bint dcblock=True):
+    return SoundBuffer(soundpipe.saturator(snd.frames, drive, offset, dcblock), channels=snd.channels, samplerate=snd.samplerate)
+
+cpdef SoundBuffer paulstretch(SoundBuffer snd, stretch=1, windowsize=1):
+    return SoundBuffer(soundpipe.paulstretch(snd.frames, windowsize, stretch, snd.samplerate), channels=snd.channels, samplerate=snd.samplerate)
+
+cpdef SoundBuffer mincer(SoundBuffer snd, double length, object position, object pitch, double amp=1, int wtsize=4096):
     cdef double[:] time_lfo = wavetables.to_window(position)
     cdef double[:] pitch_lfo = wavetables.to_window(pitch)
-
-    return snd
+    return SoundBuffer(soundpipe.mincer(snd.frames, length, time_lfo, amp, pitch_lfo, wtsize, snd.samplerate), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer convolve(SoundBuffer snd, double[:] impulse, bool normalize=True):
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')

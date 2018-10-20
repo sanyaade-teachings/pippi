@@ -1,6 +1,6 @@
 # Pippi: Computer music with python
 
-v2.0.0 - Beta 3
+v2.0.0 - Beta 4 (In Development)
 
 ## Installation and setup
 
@@ -22,50 +22,18 @@ Or to install the most recent development version, clone this repo
 and install with the `-e` / 'editable' option. (Also note the `.` pointing to the current working directory.)
 
     pip install -r requirements.txt
-    pip install -e .
 
-Pippi uses `numpy`, [pysndfile][psf], and Cython which all 
-may create installation roadbumps depending on your platform.
+Build the cython extensions from source & run the test suite
 
-If you're lucky, the above command ran without errors and you're 
-good to go!
-
-Otherwise, if there was a problem installing `numpy` please check out 
-this page for more information about how to install it on your platform:
-
-    https://www.scipy.org/scipylib/download.html
-
-If there was a problem installing `pysndfile` you likely just need to install 
-the library it wraps, `libsndfile`. 
-
-On linux, you should be able to find `libsndfile` in your distro's package manager.
-
-If you're on a mac, it looks like it can be installed with homebrew:
-
-    http://brewformulas.org/Libsndfile
-
-On windows, Erik de Castro Lopo provides an installer on the libsndfile page:
-
-    http://www.mega-nerd.com/libsndfile/#Download
-
-If you have trouble compiling the Cython parts of pippi, you may need to install 
-the python development headers, and/or build tools for your system. More here:
-
-    http://docs.cython.org/en/latest/src/quickstart/install.html
+    make clean build test
 
 Please let me know if you run into problems!
 
-## Run the multi snare bounce example
-
-    python examples/multi_snare_bounce.py
-
-Which will produce a file named `multi_snare_bounce_example.wav` in the examples directory.
-
-## Run every example
+## Run examples
 
     make examples
 
-Which will run every example, creating audio files in the examples directory.
+Which will run every example in the `examples` directory, creating audio file renders in the same directory.
 
 ## Make an examples mix
 
@@ -74,16 +42,31 @@ Which will run every example, creating audio files in the examples directory.
 This also renders every example but then dumps them into a single audio file called `example_mix.wav`
 (It's the pippi demo reel, I guess.)
 
-## Now what?
-
-There are more examples, give em a whirl, and try your own. 
-(And let me know when things break please!)
-
 ## To run tests
 
     make test
 
 ## Release Notes
+
+### 2.0.0 - Beta 4
+
+#### Features
+
+- The first set of soundpipe modules are now available via the `fx` module!
+    - `fx.lpf`, `fx.hpf`, `fx.bpf`, and `fx.brf` butterworth filters.
+    - `fx.compressor`... a compressor.
+    - `fx.mincer` a phase vocoder with independent control over pitch and speed.
+    - `fx.paulstretch`... paulstretch.
+    - `fx.saturator` a saturation distortion.
+- Total rewrite of `grains.GrainCloud`, now `grains.Cloud` (and `SoundBuffer.cloud`) (In progress)
+    - Uses `mincer` for pitch shifting
+    - Grainlength and grain density are no longer tightly coupled: no more `density` param. It is replaced with a `grainlength` value/wavetable and a `grid` value/wavetable.
+    - Grain masking
+    - Optional per-grain butterworth filters (in progress)
+
+#### Bugfixes
+
+- Some cython extension packaging improvements (in progress)
 
 ### 2.0.0 - Beta 3
 
