@@ -243,24 +243,6 @@ This release provides:
 - A small set of helpers and shortcuts via the `dsp` module for loading, mixing, and concatenating (via `dsp.join`) sounds.
 - Basic granular synthesis and wavetable synthesis examples.
 
-Some basic things from pippi 1 that are still missing (and coming very soon!):
-
-- Pitch shifting sounds
-- Square and impulse wavetables for windowing and synthesis
-- Using arbitrary wavetables for windowing and synthesis
-
-Bigger things from pippi 1 that are still missing:
-
-- Pulsar synthesis
-- The interactive / live mode and console which includes stuff like
-    - MIDI support
-    - Voice handling
-    - Live code reloading
-
-I'm excited to revisit the interactive console especially, and I'm looking into some cool 
-stuff like using pippi instruments as generators to feed into sound streams, which should 
-hopefully overcome some awkwardness of treating pippi 1 instruments like streams.
-
 
 [psf]: https://forge.ircam.fr/p/pysndfile/
 [lsf]: http://www.mega-nerd.com/libsndfile/
