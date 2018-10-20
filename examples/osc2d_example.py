@@ -63,18 +63,16 @@ def make_note(freq, amp, length):
         d = random.triangular(0.1, 20)
         s = random.triangular(0.01, 0.1)
         r = random.triangular(5, 10)
+        minlength = (note.dur/50)*1000
+        maxlength = (note.dur/3)*1000 
 
         arp = note.cloud(length * random.triangular(1.5, 3), 
-                    win=dsp.HANN, 
-                    minlength=(note.dur/50)*1000, 
-                    maxlength=(note.dur/3)*1000, 
-                    grainlength_lfo_wt=wavetables.randline(random.randint(10, 100)),
-                    mindensity=0.1, 
-                    maxdensity=random.triangular(0.25, 0.75), 
+                    window=dsp.HANN, 
+                    grainlength=wavetables.randline(random.randint(10, 100), lowvalue=minlength, highvalue=maxlength),
                     spread=1, 
                     speed=random.choice([1, 1.5, 2]),
                     jitter=random.triangular(0, 0.05),
-                    density_lfo_wt=wavetables.randline(random.randint(5, 50)),
+                    grid=wavetables.randline(random.randint(5, 50), lowvalue=0.1, highvalue=random.triangular(0.25, 0.75)),
                 ).adsr(a,d,s,r)
         note.dub(arp, 0)
 

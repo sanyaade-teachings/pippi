@@ -1,9 +1,9 @@
 # cython: language_level=3, profile=True
 import random
 from PIL import Image, ImageDraw
-from . import interpolation
-from . import dsp
-from .soundbuffer cimport SoundBuffer
+from pippi import interpolation
+from pippi import dsp
+from pippi.soundbuffer cimport SoundBuffer
 import sys
        
 cpdef void waveform(SoundBuffer sound, str filename=None, int width=400, int height=300, int stroke=3, int upsample_mult=5, int upsample_x=20, bint show_axis=True):

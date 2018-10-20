@@ -180,11 +180,12 @@ cdef double[:,:] _vdelay(double[:,:] snd,
 
     return out
 
-cpdef SoundBuffer vdelay(SoundBuffer snd, double[:] lfo, double mindelay, double maxdelay, double feedback):
+cpdef SoundBuffer vdelay(SoundBuffer snd, object lfo, double mindelay, double maxdelay, double feedback):
+    cdef double[:] lfo_wt = wavetables.to_wavetable(lfo, 4096)
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
     cdef int maxdelayframes = <int>(snd.samplerate * maxdelay)
     cdef double[:,:] delayline = np.zeros((maxdelayframes, snd.channels), dtype='d')
-    snd.frames = _vdelay(snd.frames, out, lfo, delayline, mindelay, maxdelay, feedback, snd.samplerate)
+    snd.frames = _vdelay(snd.frames, out, lfo_wt, delayline, mindelay, maxdelay, feedback, snd.samplerate)
     return snd
 
 
@@ -299,6 +300,12 @@ cpdef SoundBuffer brf(SoundBuffer snd, float freq):
 cpdef SoundBuffer compressor(SoundBuffer snd, float ratio=4, float threshold=-30, float attack=0.2, float release=0.2):
     return soundpipe.compressor(snd, ratio, threshold, attack, release)
 
+cpdef SoundBuffer mincer(SoundBuffer snd, double length, object position, object pitch, double amp, int wtsize=4096):
+    cdef double[:] time_lfo = wavetables.to_window(position)
+    cdef double[:] pitch_lfo = wavetables.to_window(pitch)
+
+    return snd
+
 cpdef SoundBuffer convolve(SoundBuffer snd, double[:] impulse, bool normalize=True):
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
     cdef int _normalize = 1 if normalize else 0
@@ -328,7 +335,7 @@ cpdef SoundBuffer go(SoundBuffer snd,
     cdef SoundBuffer out = SoundBuffer(length=outlen, channels=snd.channels, samplerate=snd.samplerate)
     cdef wavetables.Wavetable window
     if win is None:
-        window = wavetables.Wavetable(initwin=wavetables.HANN)
+        window = wavetables.Wavetable(wavetables.HANN)
     else:
         window = wavetables.Wavetable(win)
 

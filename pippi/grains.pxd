@@ -1,48 +1,33 @@
-from pippi.soundbuffer cimport SoundBuffer
-from pippi cimport wavetables
+#from pippi.ugens.core cimport ugen_t
+from pippi.soundpipe cimport *
 
-cdef double[:,:] _play(GrainCloud cloud, double[:,:] out, int framelength, double length)
+cdef class Cloud:
+    cdef float** snd
+    cdef unsigned int framelength
+    cdef double length
+    cdef unsigned int channels
+    cdef unsigned int samplerate
 
-cdef class GrainCloud:
-    cdef public SoundBuffer buf
-    cdef public double amp
-    cdef public int channels
-    cdef public int samplerate
-    cdef public double[:] win
-    cdef public int win_length
+    cdef unsigned int wtsize
 
-    cdef public int[:] mask
+    cdef double[:] window
+    cdef double[:] position
+    cdef double[:] amp
+    cdef double[:] speed
+    cdef double[:] spread
+    cdef double[:] jitter
+    cdef double[:] grainlength
+    cdef double[:] grid
 
-    cdef public double freeze
-    cdef public double[:] read_lfo
-    cdef public int read_lfo_length
-    cdef public double read_lfo_speed
-    cdef public double read_jitter
+    cdef double[:] lpf
+    cdef bint has_lpf
 
-    cdef public double[:] speed_lfo
-    cdef public int speed_lfo_length
-    cdef public double speed
-    cdef public double minspeed
-    cdef public double maxspeed
+    cdef double[:] hpf
+    cdef bint has_hpf
 
-    cdef public double spread
-    cdef public double jitter
-    cdef public double density
-    cdef public double mindensity
-    cdef public double maxdensity
-    cdef public double grains_per_sec
+    cdef double[:] bpf
+    cdef bint has_bpf
 
-    cdef public double[:] density_lfo
-    cdef public int density_lfo_length
-    cdef public double density_lfo_speed
-    cdef public double density_jitter
-
-    cdef public double grainlength
-    cdef public double[:] grainlength_lfo
-    cdef public int grainlength_lfo_length
-    cdef public double grainlength_lfo_speed
-    cdef public double minlength
-    cdef public double maxlength
-
-    cpdef SoundBuffer play(GrainCloud self, double length=*)
+    cdef int[:] mask
+    cdef bint has_mask
 

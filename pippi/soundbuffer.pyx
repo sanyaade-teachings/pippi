@@ -9,10 +9,11 @@ import numpy as np
 cimport cython
 from libc cimport math
 
-from pippi cimport wavetables
+from pippi.wavetables cimport CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr 
 from pippi cimport interpolation
-from pippi cimport grains
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
+from pippi cimport grains
+from pippi cimport soundpipe
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -33,28 +34,28 @@ cdef double[:,:] _cut(double[:,:] snd, int snd_length, int start, int length) no
     return snd[start:end]
 
 cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method):
-    if method == wavetables.CONSTANT:
+    if method == CONSTANT:
         for channel in range(channels):
             if channel % 2 == 0:
                 out.base[:,channel] *= math.sqrt(pos)
             else:
                 out.base[:,channel] *= math.sqrt(1 - pos)
 
-    elif method == wavetables.LINEAR:
+    elif method == LINEAR:
         for channel in range(channels):
             if channel % 2 == 0:
                 out.base[:,channel] *= pos
             else:
                 out.base[:,channel] *= 1 - pos
 
-    elif method == wavetables.SINE:
+    elif method == SINE:
         for channel in range(channels):
             if channel % 2 == 0:
                 out.base[:,channel] *= math.sin(pos * (math.pi / 2))
             else:
                 out.base[:,channel] *= math.cos(pos * (math.pi / 2))
 
-    elif method == wavetables.GOGINS:
+    elif method == GOGINS:
         for channel in range(channels):
             if channel % 2 == 0:
                 out.base[:,channel] *= math.sin((pos + 0.5) * (math.pi / 2))
@@ -88,21 +89,17 @@ cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil:
     return snd
 
 cdef double[:,:] _remix(double[:,:] values, int framelength, int channels):
-    if <int>len(values) == framelength and values.shape[1] == channels:
+    if values.shape[1] == channels:
         return values
 
     cdef double[:,:] out = None
     cdef int i = 0
     cdef int channel = 0
 
-    if values.shape[1] == channels:
-        for channel in range(channels):
-            out[:,channel] = interpolation._linear(values[:,channel], framelength)
-        return out
-
-    elif channels <= 1:
+    if channels <= 1:
         return np.sum(values, 1).reshape(len(values), 1)
-
+    elif values.shape[1] == 1:
+        return np.hstack([ values for _ in range(channels) ])
     else:
         out = np.zeros((framelength, channels))
         for i in range(framelength):
@@ -132,7 +129,7 @@ cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cdef double[:,:] _adsr(double[:,:] frames, int framelength, int channels, double samplerate, double attack, double decay, double sustain, double release) nogil:
+cdef double[:,:] sb_adsr(double[:,:] frames, int framelength, int channels, double samplerate, double attack, double decay, double sustain, double release) nogil:
     cdef double length = <double>(framelength / samplerate)
     sustain = min(max(0, sustain), 1)
     attack = max(0, attack)
@@ -334,7 +331,7 @@ cdef class SoundBuffer:
         return self + value
 
     cpdef SoundBuffer adsr(SoundBuffer self, double a=0, double d=0, double s=1, double r=0):
-        self.frames = _adsr(self.frames, <int>len(self), <int>self.channels, <double>self.samplerate, a, d, s, r)
+        self.frames = sb_adsr(self.frames, <int>len(self), <int>self.channels, <double>self.samplerate, a, d, s, r)
         return self
 
     ########################
@@ -561,15 +558,10 @@ cdef class SoundBuffer:
         else:
             self.frames = np.zeros((length, self.channels))
 
-    cdef SoundBuffer _cloud(SoundBuffer self, grains.GrainCloud cloud, double length):
-        if length <= 0:
-            length = <double>self.dur
-        return cloud.play(length)
-
     def cloud(SoundBuffer self, double length=-1, *args, **kwargs):
-        """ Create a new GrainCloud from this SoundBuffer
+        """ Create a new Cloud from this SoundBuffer
         """
-        return self._cloud(grains.GrainCloud(self, *args, **kwargs), length)
+        return grains.Cloud(self, *args, **kwargs).play(length)
 
     def copy(self):
         """ Return a new copy of this SoundBuffer.
@@ -683,7 +675,7 @@ cdef class SoundBuffer:
         """
         cdef int length = len(self)
         cdef double[:] wavetable = None
-        wavetable = wavetables._window(window_type, length)
+        wavetable = _window(window_type, length)
 
         if wavetable is None:
             raise TypeError('Invalid envelope type')
@@ -798,7 +790,7 @@ cdef class SoundBuffer:
                 which uses a different part of the sinewave.
         """
         if method < 0:
-            method = wavetables.CONSTANT
+            method = CONSTANT
 
         cdef double[:,:] out = self.frames
         cdef int length = len(self)
@@ -807,13 +799,13 @@ cdef class SoundBuffer:
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     def remix(self, int channels):
-        return SoundBuffer(_remix(self.frames, len(self.frames), channels), self.samplerate, channels)
+        return SoundBuffer(_remix(self.frames, len(self.frames), channels), samplerate=self.samplerate, channels=channels)
 
     def repeat(self, int reps=2):
         if reps <= 1:
-            return SoundBuffer(self.frames)
+            return SoundBuffer(self.frames, samplerate=self.samplerate, channels=self.channels)
 
-        out = SoundBuffer(self.frames)
+        out = SoundBuffer(self.frames, samplerate=self.samplerate, channels=self.channels)
         for _ in range(reps-1):
             out += self
 
@@ -825,7 +817,7 @@ cdef class SoundBuffer:
     def reversed(self):
         return SoundBuffer(np.flip(self.frames, 0), channels=self.channels, samplerate=self.samplerate)
 
-    def speed(self, double speed, int scheme=wavetables.LINEAR):
+    def speed(self, double speed, int scheme=LINEAR):
         """ Change the speed of the sound
         """
         cdef int framelength = len(self)
@@ -844,22 +836,23 @@ cdef class SoundBuffer:
         """ Change the length of the sound without changing the pitch.
             Granular-only implementation at the moment.
         """
-        return grains.GrainCloud(self, grainlength=grainlength).play(length)
+        return grains.Cloud(self, grainlength=grainlength).play(length)
 
     def taper(self, double length):
         cdef int framelength = <int>(self.samplerate * length)
-        return self * wavetables._adsr(len(self), framelength, 0, 1, framelength)
+        return self * _adsr(len(self), framelength, 0, 1, framelength)
 
-    def transpose(self, double speed, double grainlength=60):
+    def transpose(self, double speed, double grainlength=0.06):
         """ Change the pitch of the sound without changing the length.
-            This is just a wrapper for `GrainCloud` with `speed` and `grainlength` 
+            This is just a wrapper for `grains.Cloud` with `speed` and `grainlength` 
             settings exposed, returning a cloud equal in length to the source sound.
 
             TODO accept: from/to hz, notes, midi notes, intervals
         """
-        return grains.GrainCloud(self, 
+        return grains.Cloud(self, 
                 speed=speed, 
                 grainlength=grainlength, 
+                grid=grainlength * 0.5,
             ).play(self.dur)
 
     def write(self, unicode filename=None):
@@ -869,82 +862,7 @@ cdef class SoundBuffer:
         return soundfile.write(filename, self.frames, self.samplerate)
 
 
-cdef class RingBuffer:
-    """ Simple fixed-length ring buffer, lacking 
-        the transformations and operator 
-        overloading found in SoundBuffer but 
-        useful for loopers, delay lines, etc.
-        Also, this always speaks in frame lengths rather 
-        than time units expressed in seconds.
-        It's mostly just for the astrid input sampler right now.
-    """
-    def __cinit__(self, int length, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE, double[:,:] frames=None):
-        self.samplerate = samplerate
-        self.channels = channels
-        self.length = length
-
-        if frames is not None:
-            self.frames = frames
-        else:
-            self.frames = np.zeros((length, channels))
-
-        self.copyout = np.zeros((length, channels))
-        self.write_head = 0
-
-    def __reduce__(self):
-        return (rebuild_ringbuffer, (self.length, self.channels, self.samplerate, self.frames))
-
-    def __len__(self):
-        return self.length
-
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    cdef double[:,:] _read(self, int length, int offset):
-        """ Read a length of frames from the buffer
-            where length is at maximum the length of 
-            the buffer, always returning most recently 
-            written frames.
-        """
-        cdef int i = 0
-        cdef int read_head = 0
-
-        if length > self.length:
-            length = self.length
-
-        read_head = (self.write_head - length + offset) % self.length
-        for i in range(length):
-            self.copyout[i] = self.frames[read_head]
-            read_head = (read_head + 1) % self.length
-
-        return self.copyout[:length]
-
-    def read(self, int length, int offset=0):
-        return self._read(length, offset)
-
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    cdef void _write(self, double[:,:] frames):
-        """ Write given frames into the buffer, advancing 
-            the write head and wrapping as needed.
-        """
-        cdef int i = 0
-        cdef int inputlength = len(frames)
-        
-        # write forward in the buffer, from the current
-        # write head position, until all frames are written
-        # wrapping the write head at the boundry of the buffer
-        for i in range(inputlength):
-            self.frames[self.write_head] = frames[i]
-            self.write_head = (self.write_head + 1) % self.length
-
-    def write(self, double[:,:] frames):
-        self._write(frames)
-
-
 cpdef object rebuild_buffer(double[:,:] frames, int channels, int samplerate):
     return SoundBuffer(frames, channels=channels, samplerate=samplerate)
-
-cpdef object rebuild_ringbuffer(int length, int channels, int samplerate, double[:,:] frames):
-    return RingBuffer(length, channels=channels, samplerate=samplerate, frames=frames)
 
 

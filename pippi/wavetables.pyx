@@ -2,9 +2,12 @@ import collections
 import random
 import numbers
 
-import soundfile
+#import soundfile
+cimport numpy as np
 import numpy as np
 import re
+
+from cpython.array cimport array, clone
 
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc.stdlib cimport rand
@@ -19,7 +22,6 @@ cdef int SINEOUT = 18
 cdef int COS = 1
 cdef int TRI = 2
 cdef int SAW = 3
-cdef int PHASOR = SAW
 cdef int RSAW = 4
 cdef int HANN = 5
 cdef int HANNIN = 21
@@ -32,6 +34,8 @@ cdef int BARTLETT = 8
 cdef int KAISER = 9
 cdef int SQUARE = 10
 cdef int RND = 11
+cdef int LINE = SAW
+cdef int PHASOR = SAW
 
 cdef int LINEAR = 12
 cdef int TRUNC = 13
@@ -60,7 +64,7 @@ cdef dict wtype_flags = {
 }
 
 cdef int LEN_WINDOWS = 9
-cdef int *ALL_WINDOWS = [
+cdef int* ALL_WINDOWS = [
             SINE, 
             SINEIN, 
             SINEOUT, 
@@ -78,7 +82,7 @@ cdef int *ALL_WINDOWS = [
         ]
 
 cdef int LEN_WAVETABLES = 6
-cdef int *ALL_WAVETABLES = [
+cdef int* ALL_WAVETABLES = [
             SINE, 
             COS,
             TRI,
@@ -96,27 +100,16 @@ cdef int wtypentf(str wtype_name):
 
 
 cdef class Wavetable:
-    def __cinit__(self, list values=None, int initwt=-1, int initwin=-1, int length=-1):
-        if length < 0:
-            length = 4096
-
-        if values is not None:
-            self.data = np.array(values)
-        elif initwt >= 0:
-            self.data = _wavetable(initwt, length)
-        elif initwin >= 0:
-            self.data = _window(initwin, length)
+    def __cinit__(self, object values, int wtsize=4096, bint window=True):
+        if window:
+            self.data = to_window(values, wtsize)
         else:
-            self.data = None
-
+            self.data = to_wavetable(values, wtsize)
 
     #############################################
     # (+) Addition & concatenation operator (+) #
     #############################################
     def __add__(self, value):
-        """ Add a number to every sample in this SoundBuffer or concatenate with another 
-            SoundBuffer or iterable with compatible dimensions
-        """
         cdef int length = len(self.data)
         cdef double[:] out = np.zeros(length)
 
@@ -125,8 +118,6 @@ cdef class Wavetable:
         elif isinstance(value, Wavetable):
             out = np.add(self.data, value.data)
             pass
-        elif isinstance(value, SoundBuffer):
-            out = np.add(self.data, value.tomono().frames)
         else:
             try:
                 self.data = np.hstack((self.data, value))
@@ -157,15 +148,6 @@ cdef class Wavetable:
     # (&) Mix operator (&) #
     ########################
     def __and__(self, value):
-        """ Mix two SoundBuffers or two 2d arrays with compatible dimensions
-
-            >>> wt = Wavetable()
-            >>> wt2 = Wavetable(list(range(20)))
-            >>> wto = wt2 & wt
-            >>> len(wto)
-            20            
-        """
-
         cdef double[:] out
 
         try:
@@ -175,8 +157,6 @@ cdef class Wavetable:
             return NotImplemented
 
     def __iand__(self, value):
-        """ Mix in place two SoundBuffers or two 2d arrays with compatible dimensions
-        """
         self.data = np.add(self.data, value[:len(self.data)])
         return self
 
@@ -212,9 +192,6 @@ cdef class Wavetable:
         elif isinstance(value, Wavetable):
             out = np.multiply(self.data, value.data)
 
-        elif isinstance(value, SoundBuffer):
-            out = np.multiply(self.data, value.frames)
-
         elif isinstance(value, list):
             out = np.multiply(self.data, np.array(value))
 
@@ -227,16 +204,11 @@ cdef class Wavetable:
         return Wavetable(out)
 
     def __imul__(self, value):
-        """ Multiply a SoundBuffer in place by a number, iterable or SoundBuffer
-        """
         if isinstance(value, numbers.Real):
             self.data = np.multiply(self.data, value)
 
         elif isinstance(value, Wavetable):
             self.data = np.multiply(self.data, value.data)
-
-        elif isinstance(value, SoundBuffer):
-            self.data = np.multiply(self.data, value.frames)
 
         elif isinstance(value, list):
             self.data = np.multiply(self.data, np.array(value))
@@ -257,15 +229,11 @@ cdef class Wavetable:
     # (-) Subtraction operator (-) #
     ################################
     def __sub__(self, value):
-        """ Subtract a number from every sample in this SoundBuffer or  
-            from another SoundBuffer or iterable with compatible dimensions
-        """
         cdef double[:,:] out
 
         if isinstance(value, numbers.Real):
             out = np.subtract(self.data, value)
-        if isinstance(value, SoundBuffer):
-            out = np.subtract(self.data, value.frames)
+
         if isinstance(value, Wavetable):
             out = np.subtract(self.data, value.data)
         else:
@@ -274,17 +242,11 @@ cdef class Wavetable:
             except TypeError as e:
                 return NotImplemented
 
-        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+        return Wavetable(out)
 
     def __isub__(self, value):
-        """ In place subtract a number from every sample in this SoundBuffer or  
-            from another SoundBuffer or iterable with compatible dimensions
-        """
         if isinstance(value, numbers.Real):
             self.data = np.subtract(self.data, value)
-
-        if isinstance(value, SoundBuffer):
-            self.data = np.subtract(self.data, value.frames)
 
         if isinstance(value, Wavetable):
             self.data = np.subtract(self.data, value.data)
@@ -305,17 +267,6 @@ cdef class Wavetable:
         return Wavetable(np.clip(self.data, minval, maxval))
         
     def env(self, int window_type=-1):
-        """ Apply an amplitude envelope 
-            to the sound of the given type.
-
-            To modulate a sound with an arbitrary 
-            iterable, simply do:
-
-            >>> snd * iterable
-
-            Where iterable is a list, array, or SoundBuffer with 
-            the same # of channels and of any length
-        """
         cdef int length = len(self)
         cdef double[:] wavetable = None
         wavetable = _window(window_type, length)
@@ -371,9 +322,7 @@ cdef tuple _parse_polyseg(str score, int length, int wtlength):
         segment_wtype = SINE
         segment_length = wtlength
 
-        print(segment)
         match = SEGMENT_RE.match(segment)
-        print(match)
         
         length = match.group('length')
         if length is not None:
@@ -393,8 +342,6 @@ cdef tuple _parse_polyseg(str score, int length, int wtlength):
 
         segments += (segment_length, segment_wtype, segment_start, segment_end)
         total_segment_length += segment_length
-
-    print(segments)
 
     return segments, total_segment_length
 
@@ -422,9 +369,9 @@ cpdef double[:] polyseg(list segments, int length):
     return out
 
 
-cpdef double[:] randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):
-    points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
-    return interpolation._linear(points, wtsize)
+cpdef Wavetable randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):
+    cdef double[:] points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
+    return Wavetable(interpolation._linear(points, wtsize), wtsize)
 
 cdef double[:] _window(int window_type, int length):
     cdef double[:] wt
@@ -561,11 +508,57 @@ cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=None):
 
     return _wavetable(wavetable_type, length)
 
-cpdef double[:] fromfile(unicode filename, int length):
-    wt, _ = soundfile.read(filename, dtype='d')
-    if len(wt) == length:
-        return wt
+# FIXME -- circ import issue?
+#cpdef double[:] fromfile(unicode filename, int length):
+#    wt, _ = soundfile.read(filename, dtype='d')
+#    if len(wt) == length:
+#        return wt
+#
+#    return interpolation._linear(wt, length)
 
-    return interpolation._linear(wt, length)
+cpdef double[:] to_window(object w, int wtsize=4096):
+    cdef double[:] wt
 
+    if w is None:
+        return None
+
+    if isinstance(w, numbers.Integral):
+        wt = _window(w, wtsize)
+
+    elif isinstance(w, numbers.Real):
+        wt = np.full(1, w, dtype='d')
+
+    elif isinstance(w, Wavetable):
+        wt = w.data
+
+    else:
+        wt = array('d', w)
+
+    return wt
+
+cpdef double[:] to_wavetable(object w, int wtsize=4096):
+    cdef double[:] wt
+
+    if w is None:
+        return None
+
+    if isinstance(w, numbers.Integral):
+        wt = _wavetable(w, wtsize)
+
+    elif isinstance(w, numbers.Real):
+        wt = np.full(1, w, dtype='d')
+
+    elif isinstance(w, SoundBuffer):
+        wt = np.ravel(w.remix(1).frames)
+
+    elif isinstance(w, Wavetable):
+        wt = w.data
+
+    else:
+        wt = array('d', w)
+
+    return wt
+
+cpdef list to_lfostack(list lfos, int wtsize=4096):
+    return [ interpolation._linear(to_wavetable(wt, wtsize), wtsize) for wt in lfos ]
 
