@@ -12,7 +12,7 @@ The 3.5.x branch of python might work too, but is untested.
 
 ### Install from pip
 
-To use the most recent release from pip, just:
+To use the most recent release from pip (currently `2.0.0 beta 3`) just:
 
     pip install pippi
 
