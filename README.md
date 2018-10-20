@@ -18,8 +18,7 @@ To use the most recent release from pip (currently `2.0.0 beta 3`) just:
 
 ### Install from source
 
-Or to install the most recent development version, clone this repo 
-and install with the `-e` / 'editable' option. (Also note the `.` pointing to the current working directory.)
+Or to install the most recent development version. Install deps:
 
     pip install -r requirements.txt
 
