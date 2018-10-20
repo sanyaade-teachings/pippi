@@ -23,15 +23,12 @@ class TestSoundpipe(TestCase):
     def test_mincer(self):
         snd = dsp.read('examples/sounds/linus.wav')
         length = 20
-        time = wavetables.randline(10) * 2 + 0.5
-        #time = dsp.PHASOR
         amp = 1
+        time = wavetables.randline(10) * 2 + 0.5
         pitch = wavetables.randline(10)
-        #pitch = 1.0
 
-        snd.frames = soundpipe.mincer(snd, snd.dur, time, amp, pitch, samplerate=snd.samplerate)
+        snd.frames = soundpipe.mincer(snd.frames, snd.dur, time.data, amp, pitch.data, samplerate=snd.samplerate)
         snd.write('tests/renders/soundpipe_mincer.wav')
-
 
     def test_saturator_nodc(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
@@ -58,7 +55,6 @@ class TestSoundpipe(TestCase):
 
         snd.frames = soundpipe.butlp(snd.frames, freq)
         snd.write('tests/renders/soundpipe_butlp.wav')
-
 
     def test_buthp(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')

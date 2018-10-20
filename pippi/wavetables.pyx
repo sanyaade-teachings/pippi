@@ -14,6 +14,7 @@ from libc.stdlib cimport rand
 from libc cimport math
 
 from pippi cimport interpolation
+from pippi.soundbuffer cimport SoundBuffer
 
 cdef int SINE = 0
 cdef int SINEIN = 17
@@ -321,9 +322,7 @@ cdef tuple _parse_polyseg(str score, int length, int wtlength):
         segment_wtype = SINE
         segment_length = wtlength
 
-        print(segment)
         match = SEGMENT_RE.match(segment)
-        print(match)
         
         length = match.group('length')
         if length is not None:
@@ -343,8 +342,6 @@ cdef tuple _parse_polyseg(str score, int length, int wtlength):
 
         segments += (segment_length, segment_wtype, segment_start, segment_end)
         total_segment_length += segment_length
-
-    print(segments)
 
     return segments, total_segment_length
 
@@ -550,6 +547,9 @@ cpdef double[:] to_wavetable(object w, int wtsize=4096):
 
     elif isinstance(w, numbers.Real):
         wt = np.full(1, w, dtype='d')
+
+    elif isinstance(w, SoundBuffer):
+        wt = np.ravel(w.remix(1).frames)
 
     elif isinstance(w, Wavetable):
         wt = w.data

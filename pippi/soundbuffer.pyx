@@ -12,6 +12,8 @@ from libc cimport math
 from pippi.wavetables cimport CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr 
 from pippi cimport interpolation
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
+from pippi cimport grains
+from pippi cimport soundpipe
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -556,17 +558,10 @@ cdef class SoundBuffer:
         else:
             self.frames = np.zeros((length, self.channels))
 
-    cdef SoundBuffer _cloud(SoundBuffer self, double length):
-        if length <= 0:
-            length = <double>self.dur
-        #return cloud.play(length)
-        return self
-
     def cloud(SoundBuffer self, double length=-1, *args, **kwargs):
-        """ Create a new GrainCloud from this SoundBuffer
+        """ Create a new Cloud from this SoundBuffer
         """
-        #return self._cloud(grains.GrainCloud(self, *args, **kwargs), length)
-        return self._cloud(length)
+        return grains.Cloud(self, *args, **kwargs).play(length)
 
     def copy(self):
         """ Return a new copy of this SoundBuffer.
@@ -841,27 +836,24 @@ cdef class SoundBuffer:
         """ Change the length of the sound without changing the pitch.
             Granular-only implementation at the moment.
         """
-        #return grains.GrainCloud(self, grainlength=grainlength).play(length)
-        return self
+        return grains.Cloud(self, grainlength=grainlength).play(length)
 
     def taper(self, double length):
         cdef int framelength = <int>(self.samplerate * length)
         return self * _adsr(len(self), framelength, 0, 1, framelength)
 
-    def transpose(self, double speed, double grainlength=60):
+    def transpose(self, double speed, double grainlength=0.06):
         """ Change the pitch of the sound without changing the length.
-            This is just a wrapper for `GrainCloud` with `speed` and `grainlength` 
+            This is just a wrapper for `grains.Cloud` with `speed` and `grainlength` 
             settings exposed, returning a cloud equal in length to the source sound.
 
             TODO accept: from/to hz, notes, midi notes, intervals
         """
-        """
-        return grains.GrainCloud(self, 
+        return grains.Cloud(self, 
                 speed=speed, 
                 grainlength=grainlength, 
+                grid=grainlength * 0.5,
             ).play(self.dur)
-        """
-        return self
 
     def write(self, unicode filename=None):
         """ Write the contents of this buffer to disk 

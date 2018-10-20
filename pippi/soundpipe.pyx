@@ -285,7 +285,7 @@ cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, float a
     cdef int framelength = <int>(samplerate * length)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')
-    return _mincer(snd, out, snd.dur, <int>len(snd), wtsize, framelength, channels, time, amp, pitch)
+    return _mincer(snd, out, length, <int>len(snd), wtsize, framelength, channels, time, amp, pitch)
 
 cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, float drive, float dcoffset, int length, int channels, bint dcblock):
     cdef sp_data* sp

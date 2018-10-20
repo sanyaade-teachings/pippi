@@ -8,7 +8,6 @@ cimport cython
 
 from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
-from pippi cimport grains
 from pippi cimport wavetables as wts
 
 # Expose some C flags / constants to python

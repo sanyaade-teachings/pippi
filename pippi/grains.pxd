@@ -1,4 +1,5 @@
 #from pippi.ugens.core cimport ugen_t
+from pippi.soundpipe cimport *
 
 cdef class Cloud:
     cdef float** snd

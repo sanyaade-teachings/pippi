@@ -3,7 +3,7 @@ cdef double[:] _window(int, int)
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
 
 cdef class Wavetable:
-    cdef double[:] data
+    cdef public double[:] data
 
 cdef int SINE
 cdef int SINEIN 
