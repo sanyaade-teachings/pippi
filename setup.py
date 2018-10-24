@@ -26,15 +26,9 @@ ext_modules = cythonize([
             library_dirs=['/usr/local/lib'],
             include_dirs=['/usr/local/include']
         ), 
-        Extension('pippi.wavetables', ['pippi/wavetables.pyx']),
-        #Extension('pippi.ugens.core', ['pippi/ugens/core.pyx'], include_dirs=['.']),
-        #Extension('pippi.ugens.lpf_ugen', ['pippi/ugens/lpf_ugen.pyx'], include_dirs=['.']),
-        #Extension('pippi.ugens.val_ugen', ['pippi/ugens/val_ugen.pyx'], include_dirs=['.']),
-    ], 
-    include_path=[
-        np.get_include(), 
-        '/usr/include/sndfile.h'
-        '/usr/local/include/soundpipe.h', 
+        Extension('pippi.wavetables', ['pippi/wavetables.pyx'],
+            include_dirs=[np.get_include()], 
+        ),
     ], 
     annotate=True
 ) 

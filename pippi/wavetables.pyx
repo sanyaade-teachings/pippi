@@ -2,7 +2,7 @@ import collections
 import random
 import numbers
 
-#import soundfile
+import soundfile
 cimport numpy as np
 import numpy as np
 import re
@@ -508,13 +508,12 @@ cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=None):
 
     return _wavetable(wavetable_type, length)
 
-# FIXME -- circ import issue?
-#cpdef double[:] fromfile(unicode filename, int length):
-#    wt, _ = soundfile.read(filename, dtype='d')
-#    if len(wt) == length:
-#        return wt
-#
-#    return interpolation._linear(wt, length)
+cpdef double[:] fromfile(unicode filename, int length):
+    wt, _ = soundfile.read(filename, dtype='d')
+    if len(wt) == length:
+        return wt
+
+    return interpolation._linear(wt, length)
 
 cpdef double[:] to_window(object w, int wtsize=4096):
     cdef double[:] wt
