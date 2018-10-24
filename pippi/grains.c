@@ -978,7 +978,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_window {
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
  * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, int wtsize=?, double lowvalue=?, double highvalue=?)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
  */
 struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
   int __pyx_n;
@@ -989,7 +989,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_lfostack(list lfos, int wtsize=?)             # <<<<<<<<<<<<<<
- * cpdef Wavetable randline(int numpoints, int wtsize=?, double lowvalue=?, double highvalue=?)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
  * cdef double[:] _window(int window_type, int length)
  */
 struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
@@ -1000,15 +1000,15 @@ struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
 /* "pippi/wavetables.pxd":42
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, int wtsize=?, double lowvalue=?, double highvalue=?)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
  * cdef double[:] _window(int window_type, int length)
  * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
  */
 struct __pyx_opt_args_5pippi_10wavetables_randline {
   int __pyx_n;
-  int wtsize;
   double lowvalue;
   double highvalue;
+  int wtsize;
 };
 
 /* "pippi/wavetables.pxd":47
@@ -1914,9 +1914,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_unsigned_int(unsigned int value)
 static CYTHON_INLINE PyObject *__pyx_memview_get_int(const char *itemp);
 static CYTHON_INLINE int __pyx_memview_set_int(const char *itemp, PyObject *obj);
 
-/* CIntToPy.proto */
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
-
 /* MemviewSliceCopyTemplate.proto */
 static __Pyx_memviewslice
 __pyx_memoryview_copy_new_contig(const __Pyx_memviewslice *from_mvs,
@@ -1932,6 +1929,9 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE long __Pyx_PyInt_As_long(PyObject *);
+
+/* CIntToPy.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
 
 /* CIntFromPy.proto */
 static CYTHON_INLINE char __Pyx_PyInt_As_char(PyObject *);
@@ -3670,7 +3670,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
   PyObject *__pyx_v_pans = NULL;
   PyObject *__pyx_v_c = NULL;
   PyObject *__pyx_v_i = NULL;
-  PyObject *__pyx_v_write_jitter = NULL;
+  int __pyx_v_write_jitter;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3694,7 +3694,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
   Py_ssize_t __pyx_t_19;
   Py_ssize_t __pyx_t_20;
   long __pyx_t_21;
-  unsigned int __pyx_t_22;
+  long __pyx_t_22;
   __Pyx_RefNannySetupContext("play", 0);
 
   /* "pippi/grains.pyx":89
@@ -4390,7 +4390,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
  *                 sp_mincer_destroy(&mincer)
  *                 sp_ftbl_destroy(&tbl)             # <<<<<<<<<<<<<<
  * 
- *             write_pos = <unsigned int>(read_pos - interpolation._linear_point(self.grid, pos) * self.samplerate)
+ *             write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
  */
       (void)(sp_ftbl_destroy((&__pyx_v_tbl)));
 
@@ -4407,18 +4407,18 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
     /* "pippi/grains.pyx":150
  *                 sp_ftbl_destroy(&tbl)
  * 
- *             write_pos = <unsigned int>(read_pos - interpolation._linear_point(self.grid, pos) * self.samplerate)             # <<<<<<<<<<<<<<
+ *             write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)             # <<<<<<<<<<<<<<
  *             write_jitter = <int>(interpolation._linear_point(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
- *             write_pos = <unsigned int>max(0, write_pos + write_jitter)
+ *             write_pos += max(0, write_jitter)
  */
     if (unlikely(!__pyx_v_self->grid.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 150, __pyx_L1_error)}
-    __pyx_v_write_pos = ((unsigned int)(__pyx_v_read_pos - (__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->grid, __pyx_v_pos) * __pyx_v_self->samplerate)));
+    __pyx_v_write_pos = (__pyx_v_write_pos + ((unsigned int)(__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->grid, __pyx_v_pos) * __pyx_v_self->samplerate)));
 
     /* "pippi/grains.pyx":151
  * 
- *             write_pos = <unsigned int>(read_pos - interpolation._linear_point(self.grid, pos) * self.samplerate)
+ *             write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
  *             write_jitter = <int>(interpolation._linear_point(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)             # <<<<<<<<<<<<<<
- *             write_pos = <unsigned int>max(0, write_pos + write_jitter)
+ *             write_pos += max(0, write_jitter)
  *             pos = <double>write_pos / <double>outframelength
  */
     if (unlikely(!__pyx_v_self->jitter.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 151, __pyx_L1_error)}
@@ -4427,47 +4427,27 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
       __PYX_ERR(0, 151, __pyx_L1_error)
     }
-    __pyx_t_3 = __Pyx_PyInt_From_int(((int)((__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->jitter, __pyx_v_pos) * (((double)__pyx_t_10) / ((double)RAND_MAX))) * __pyx_v_self->samplerate))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 151, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_XDECREF_SET(__pyx_v_write_jitter, __pyx_t_3);
-    __pyx_t_3 = 0;
+    __pyx_v_write_jitter = ((int)((__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->jitter, __pyx_v_pos) * (((double)__pyx_t_10) / ((double)RAND_MAX))) * __pyx_v_self->samplerate));
 
     /* "pippi/grains.pyx":152
- *             write_pos = <unsigned int>(read_pos - interpolation._linear_point(self.grid, pos) * self.samplerate)
+ *             write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
  *             write_jitter = <int>(interpolation._linear_point(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
- *             write_pos = <unsigned int>max(0, write_pos + write_jitter)             # <<<<<<<<<<<<<<
+ *             write_pos += max(0, write_jitter)             # <<<<<<<<<<<<<<
  *             pos = <double>write_pos / <double>outframelength
  *             count += 1
  */
-    __pyx_t_3 = __Pyx_PyInt_From_unsigned_int(__pyx_v_write_pos); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 152, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PyNumber_Add(__pyx_t_3, __pyx_v_write_jitter); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 152, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_10 = __pyx_v_write_jitter;
     __pyx_t_21 = 0;
-    __pyx_t_4 = __Pyx_PyInt_From_long(__pyx_t_21); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 152, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_16 = PyObject_RichCompare(__pyx_t_1, __pyx_t_4, Py_GT); __Pyx_XGOTREF(__pyx_t_16); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 152, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_16); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 152, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-    if (__pyx_t_6) {
-      __Pyx_INCREF(__pyx_t_1);
-      __pyx_t_3 = __pyx_t_1;
+    if (((__pyx_t_10 > __pyx_t_21) != 0)) {
+      __pyx_t_22 = __pyx_t_10;
     } else {
-      __pyx_t_16 = __Pyx_PyInt_From_long(__pyx_t_21); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 152, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_16);
-      __pyx_t_3 = __pyx_t_16;
-      __pyx_t_16 = 0;
+      __pyx_t_22 = __pyx_t_21;
     }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_22 = __Pyx_PyInt_As_unsigned_int(__pyx_t_3); if (unlikely((__pyx_t_22 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 152, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_v_write_pos = ((unsigned int)__pyx_t_22);
+    __pyx_v_write_pos = (__pyx_v_write_pos + __pyx_t_22);
 
     /* "pippi/grains.pyx":153
  *             write_jitter = <int>(interpolation._linear_point(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
- *             write_pos = <unsigned int>max(0, write_pos + write_jitter)
+ *             write_pos += max(0, write_jitter)
  *             pos = <double>write_pos / <double>outframelength             # <<<<<<<<<<<<<<
  *             count += 1
  * 
@@ -4479,7 +4459,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
     __pyx_v_pos = (((double)__pyx_v_write_pos) / ((double)__pyx_v_outframelength));
 
     /* "pippi/grains.pyx":154
- *             write_pos = <unsigned int>max(0, write_pos + write_jitter)
+ *             write_pos += max(0, write_jitter)
  *             pos = <double>write_pos / <double>outframelength
  *             count += 1             # <<<<<<<<<<<<<<
  * 
@@ -4515,20 +4495,20 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
   __pyx_t_3 = 0;
   __pyx_t_3 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_16 = __Pyx_PyInt_From_unsigned_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 158, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_16);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_channels, __pyx_t_16) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __pyx_t_16 = __Pyx_PyInt_From_unsigned_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 158, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_16);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_samplerate, __pyx_t_16) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-  __pyx_t_16 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 158, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_16);
+  __pyx_t_4 = __Pyx_PyInt_From_unsigned_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_channels, __pyx_t_4) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyInt_From_unsigned_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_samplerate, __pyx_t_4) < 0) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 158, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_r = __pyx_t_16;
-  __pyx_t_16 = 0;
+  __pyx_r = __pyx_t_4;
+  __pyx_t_4 = 0;
   goto __pyx_L0;
 
   /* "pippi/grains.pyx":88
@@ -4554,7 +4534,6 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
   __Pyx_XDECREF(__pyx_v_pans);
   __Pyx_XDECREF(__pyx_v_c);
   __Pyx_XDECREF(__pyx_v_i);
-  __Pyx_XDECREF(__pyx_v_write_jitter);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
@@ -22492,37 +22471,6 @@ static CYTHON_INLINE int __pyx_memview_set_int(const char *itemp, PyObject *obj)
     return 1;
 }
 
-/* CIntToPy */
-      static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
-    const long neg_one = (long) -1, const_zero = (long) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(long) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(long) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-#endif
-        }
-    } else {
-        if (sizeof(long) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-#ifdef HAVE_LONG_LONG
-        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-#endif
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(long),
-                                     little, !is_unsigned);
-    }
-}
-
 /* MemviewSliceCopyTemplate */
       static __Pyx_memviewslice
 __pyx_memoryview_copy_new_contig(const __Pyx_memviewslice *from_mvs,
@@ -23155,6 +23103,37 @@ raise_neg_overflow:
     PyErr_SetString(PyExc_OverflowError,
         "can't convert negative value to long");
     return (long) -1;
+}
+
+/* CIntToPy */
+      static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
+    const long neg_one = (long) -1, const_zero = (long) 0;
+    const int is_unsigned = neg_one > const_zero;
+    if (is_unsigned) {
+        if (sizeof(long) < sizeof(long)) {
+            return PyInt_FromLong((long) value);
+        } else if (sizeof(long) <= sizeof(unsigned long)) {
+            return PyLong_FromUnsignedLong((unsigned long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(unsigned PY_LONG_LONG)) {
+            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
+#endif
+        }
+    } else {
+        if (sizeof(long) <= sizeof(long)) {
+            return PyInt_FromLong((long) value);
+#ifdef HAVE_LONG_LONG
+        } else if (sizeof(long) <= sizeof(PY_LONG_LONG)) {
+            return PyLong_FromLongLong((PY_LONG_LONG) value);
+#endif
+        }
+    }
+    {
+        int one = 1; int little = (int)*(unsigned char *)&one;
+        unsigned char *bytes = (unsigned char *)&value;
+        return _PyLong_FromByteArray(bytes, sizeof(long),
+                                     little, !is_unsigned);
+    }
 }
 
 /* CIntFromPy */

@@ -147,9 +147,9 @@ cdef class Cloud:
                 sp_mincer_destroy(&mincer)
                 sp_ftbl_destroy(&tbl)
 
-            write_pos = <unsigned int>(read_pos - interpolation._linear_point(self.grid, pos) * self.samplerate)
+            write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
             write_jitter = <int>(interpolation._linear_point(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
-            write_pos = <unsigned int>max(0, write_pos + write_jitter)
+            write_pos += max(0, write_jitter)
             pos = <double>write_pos / <double>outframelength
             count += 1
 

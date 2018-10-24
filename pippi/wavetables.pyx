@@ -369,7 +369,7 @@ cpdef double[:] polyseg(list segments, int length):
     return out
 
 
-cpdef Wavetable randline(int numpoints, int wtsize=4096, double lowvalue=0, double highvalue=1):
+cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
     cdef double[:] points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
     return Wavetable(interpolation._linear(points, wtsize), wtsize)
 

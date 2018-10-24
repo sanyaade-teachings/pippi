@@ -84,6 +84,9 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
 
     return out
     
+cpdef wts.Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
+    return wts.randline(numpoints, lowvalue, highvalue, wtsize)
+
 cpdef wts.Wavetable wt(object values, int wtsize=4096, bint window=True):
     return wts.Wavetable(values, wtsize, window)
 

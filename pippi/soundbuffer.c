@@ -934,7 +934,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_window {
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
  * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, int wtsize=?, double lowvalue=?, double highvalue=?)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
  */
 struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
   int __pyx_n;
@@ -945,7 +945,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_lfostack(list lfos, int wtsize=?)             # <<<<<<<<<<<<<<
- * cpdef Wavetable randline(int numpoints, int wtsize=?, double lowvalue=?, double highvalue=?)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
  * cdef double[:] _window(int window_type, int length)
  */
 struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
@@ -956,15 +956,15 @@ struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
 /* "pippi/wavetables.pxd":42
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, int wtsize=?, double lowvalue=?, double highvalue=?)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
  * cdef double[:] _window(int window_type, int length)
  * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
  */
 struct __pyx_opt_args_5pippi_10wavetables_randline {
   int __pyx_n;
-  int wtsize;
   double lowvalue;
   double highvalue;
+  int wtsize;
 };
 
 /* "pippi/wavetables.pxd":47

@@ -298,40 +298,24 @@ cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, float drive, float
 
     sp_create(&sp)
 
-    if dcblock:
-        for c in range(channels):
-            sp_saturator_create(&saturator)
-            sp_saturator_init(sp, saturator)
+    for c in range(channels):
+        sp_saturator_create(&saturator)
+        sp_saturator_init(sp, saturator)
 
-            saturator.drive = drive
-            saturator.dcoffset = dcoffset
+        saturator.drive = drive
+        saturator.dcoffset = dcoffset
 
-            sp_dcblock_create(&dcblocker)
-            sp_dcblock_init(sp, dcblocker)
+        sp_dcblock_create(&dcblocker)
+        sp_dcblock_init(sp, dcblocker)
 
-            for i in range(length):
-                sample = <float>snd[i,c]
-                sp_saturator_compute(sp, saturator, &sample, &output)
-                sp_dcblock_compute(sp, dcblocker, &sample, &output)
-                out[i,c] = <double>output
+        for i in range(length):
+            sample = <float>snd[i,c]
+            sp_saturator_compute(sp, saturator, &sample, &output)
+            sp_dcblock_compute(sp, dcblocker, &sample, &output)
+            out[i,c] = <double>output
 
-            sp_saturator_destroy(&saturator)
-            sp_dcblock_destroy(&dcblocker)
-
-    else:
-        for c in range(channels):
-            sp_saturator_create(&saturator)
-            sp_saturator_init(sp, saturator)
-
-            saturator.drive = drive
-            saturator.dcoffset = dcoffset
-
-            for i in range(length):
-                sample = <float>snd[i,c]
-                sp_saturator_compute(sp, saturator, &sample, &output)
-                out[i,c] = <double>output
-
-            sp_saturator_destroy(&saturator)
+        sp_saturator_destroy(&saturator)
+        sp_dcblock_destroy(&dcblocker)
 
     sp_destroy(&sp)
 

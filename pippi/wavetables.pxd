@@ -39,7 +39,7 @@ cdef int* ALL_WAVETABLES
 cpdef double[:] to_window(object w, int wtsize=?)
 cpdef double[:] to_wavetable(object w, int wtsize=?)
 cpdef list to_lfostack(list lfos, int wtsize=?)
-cpdef Wavetable randline(int numpoints, int wtsize=?, double lowvalue=?, double highvalue=?)
+cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
 cdef double[:] _window(int window_type, int length)
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
 cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
