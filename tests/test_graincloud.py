@@ -14,18 +14,6 @@ class TestCloud(TestCase):
     def tearDown(self):
         shutil.rmtree(self.soundfiles)
 
-    def test_newcloud(self):
-        sound = SoundBuffer(filename='examples/sounds/linus.wav')
-        cloud = grains.Cloud(sound, 
-                window=dsp.HANN,
-                grainlength=dsp.wt(dsp.SINE) * 0.05 + 0.001,
-                spread=dsp.PHASOR,
-                grid=0.04,
-                )
-                #mask=[0,1,0,1,1])
-        out = cloud.play(10)
-        out.write('tests/renders/cloud_new.wav')
-
     def test_unmodulated_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         cloud = grains.Cloud(sound)
@@ -36,72 +24,69 @@ class TestCloud(TestCase):
         out = cloud.play(length)
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/test_unmodulated_graincloud.flac')
+        out.write('tests/renders/test_unmodulated_graincloud.wav')
 
-    def test_minspeed_graincloud(self):
+    def test_pulsed_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        cloud = grains.Cloud(sound, speed=0)
+        out = sound.cloud(10, grainlength=0.06, grid=0.12)
+        out.write('tests/renders/test_pulsed_graincloud.wav')
 
-        length = random.triangular(1, 4)
+    def test_long_graincloud(self):
+        sound = SoundBuffer(filename='examples/sounds/linus.wav')
+        length = 90
+        grainlength = dsp.wt(dsp.HANN) * 0.08 + 0.01
+        grid = dsp.wt(dsp.HANN) * 0.1 + 0.01
+
+        out = sound.cloud(length, 
+                grainlength=grainlength,
+                grid=grid,
+                spread=0.5,
+        )
+
         framelength = int(length * sound.samplerate)
-
-        out = cloud.play(length)
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/test_minspeed_graincloud.flac')
-
-    def test_maxspeed_graincloud(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        cloud = grains.Cloud(sound, speed=99)
-
-        length = random.triangular(1, 4)
-        framelength = int(length * sound.samplerate)
-
-        out = cloud.play(length)
-        self.assertEqual(len(out), framelength)
-
-        out.write('tests/renders/test_maxspeed_graincloud.flac')
+        out.write('tests/renders/test_long_graincloud.wav')
 
     def test_graincloud_with_length_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        grainlength = dsp.wt(dsp.RND) * 0.3 + 0.01
-        cloud = grains.Cloud(sound, grainlength=grainlength)
-
-        length = random.triangular(1, 4)
+        grainlength = dsp.wt(dsp.HANN) * 0.1 + 0.01
+        length = 10
         framelength = int(length * sound.samplerate)
 
-        out = cloud.play(length)
+        out = sound.cloud(length, grainlength=grainlength)
+
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/test_graincloud_with_length_lfo.flac')
+        out.write('tests/renders/test_graincloud_with_length_lfo.wav')
 
     def test_graincloud_with_speed_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        minspeed = random.triangular(0.5, 1)
-        maxspeed = minspeed + random.triangular(0.5, 1)
+        minspeed = random.triangular(0.05, 1)
+        maxspeed = minspeed + random.triangular(0.5, 10)
         speed = dsp.wt(dsp.RND) * (maxspeed - minspeed) + minspeed
-        cloud = grains.Cloud(sound, speed=speed)
+        cloud = grains.Cloud(sound, grainlength=0.04, speed=speed)
 
-        length = random.triangular(1, 4)
+        length = 30
         framelength = int(length * sound.samplerate)
 
         out = cloud.play(length)
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/test_graincloud_with_speed_lfo.flac')
+        out.write('tests/renders/test_graincloud_with_speed_lfo.wav')
 
     def test_graincloud_with_read_lfo(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='examples/sounds/linus.wav')
         cloud = grains.Cloud(sound, 
-                            position=dsp.RND, 
+                            position=dsp.wt(dsp.HANN) * sound.dur, 
                         )
 
-        length = random.triangular(1, 4)
+        length = 30
         framelength = int(length * sound.samplerate)
 
         out = cloud.play(length)
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/test_graincloud_with_read_lfo.flac')
+        out.write('tests/renders/test_graincloud_with_read_lfo.wav')
 
 

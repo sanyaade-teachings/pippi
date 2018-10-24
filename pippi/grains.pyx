@@ -9,15 +9,6 @@ import numpy as np
 from cpython cimport array
 import array
 
-DEF MIN_DENSITY = 0.000001
-DEF MIN_ED = 0.000001
-DEF MIN_GRAIN_FRAMELENGTH = 441
-DEF DEFAULT_WTSIZE = 4096
-DEF DEFAULT_GRAINLENGTH = 60
-DEF DEFAULT_MAXGRAINLENGTH = 80
-DEF DEFAULT_ED = 1
-DEF DEFAULT_MAXED = 2
-
 cdef class Cloud:
     def __cinit__(self, 
             SoundBuffer snd, 
@@ -49,36 +40,38 @@ cdef class Cloud:
         self.window = to_window(window)
 
         if position is None:
-            position = PHASOR
-        self.position = to_window(position)
+            self.position = np.multiply(to_window(PHASOR), snd.dur)
+        else:
+            self.position = to_window(position)
 
-        self.amp = to_wavetable(amp)
-        self.speed = to_wavetable(speed)
-        self.spread = to_wavetable(spread)
+        self.amp = to_window(amp)
+        self.speed = to_window(speed)
+        self.spread = to_window(spread)
         self.jitter = to_wavetable(jitter)
-        self.grainlength = to_wavetable(grainlength)
+        self.grainlength = to_window(grainlength)
 
         if grid is None:
-            grid = np.multiply(self.grainlength, 0.5)
-        self.grid = to_wavetable(grid)
+            self.grid = np.multiply(to_window(grainlength), 0.5)
+        else:
+            self.grid = to_window(grid)
 
         if lpf is None:
             self.has_lpf = False
         else:
             self.has_lpf = True
-            self.lpf = to_wavetable(lpf)
+            self.lpf = to_window(lpf)
 
         if hpf is None:
             self.has_hpf = False
         else:
             self.has_hpf = True
-            self.hpf = to_wavetable(hpf)
+            self.hpf = to_window(hpf)
 
         if bpf is None:
             self.has_bpf = False
         else:
             self.has_bpf = True
-            self.bpf = to_wavetable(bpf)
+            self.bpf = to_window(bpf)
 
         if mask is None:
             self.has_mask = False
@@ -96,7 +89,7 @@ cdef class Cloud:
         cdef unsigned int outframelength = <unsigned int>(self.samplerate * length)
         cdef double[:,:] out = np.zeros((outframelength, self.channels), dtype='d')
         cdef unsigned int write_pos = 0
-        cdef unsigned int read_pos = 0
+        cdef double read_pos = 0
         cdef unsigned int grainlength = 4410
         cdef unsigned int grainincrement = grainlength // 2
         cdef double pos = 0
@@ -105,6 +98,7 @@ cdef class Cloud:
         cdef double sample = 0
         cdef float fsample = 0
         cdef double spread = 0
+        cdef double inc = 0
         cdef unsigned int masklength = 0
         cdef unsigned int count = 0
         cdef sp_data* sp
@@ -116,7 +110,6 @@ cdef class Cloud:
         if self.has_mask:
             masklength = <unsigned int>len(self.mask)
 
-        #while write_pos < outframelength - grainlength: 
         while pos <= 1: 
             if self.has_mask and self.mask[<int>(count % masklength)] == 0:
                 write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
@@ -125,7 +118,7 @@ cdef class Cloud:
                 continue
 
             grainlength = <unsigned int>(interpolation._linear_point(self.grainlength, pos) * self.samplerate)
-            read_pos = <unsigned int>(interpolation._linear_point(self.position, pos) * self.framelength)
+            read_pos = interpolation._linear_point(self.position, pos)
 
             spread = interpolation._linear_point(self.spread, pos)
             panpos = (rand()/<double>RAND_MAX) * spread + (0.5 - (spread * 0.5))
@@ -140,8 +133,9 @@ cdef class Cloud:
 
                 for i in range(grainlength):
                     grainpos = <double>i / grainlength
-                    if read_pos+i < self.framelength and write_pos+i < outframelength:
-                        mincer.time = <float>(<float>(read_pos+i)/<float>self.samplerate)
+                    if write_pos+i < outframelength:
+                        inc = <double>i / self.samplerate
+                        mincer.time = <float>read_pos + inc
                         mincer.pitch = <float>interpolation._linear_point(self.speed, pos)
                         mincer.amp = <float>interpolation._linear_point(self.amp, pos)
 
@@ -153,8 +147,9 @@ cdef class Cloud:
                 sp_mincer_destroy(&mincer)
                 sp_ftbl_destroy(&tbl)
 
-            #print(write_pos, pos, count)
-            write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
+            write_pos = <unsigned int>(read_pos - interpolation._linear_point(self.grid, pos) * self.samplerate)
+            write_jitter = <int>(interpolation._linear_point(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
+            write_pos = <unsigned int>max(0, write_pos + write_jitter)
             pos = <double>write_pos / <double>outframelength
             count += 1
 

@@ -63,6 +63,8 @@ cdef double[:] _linear(double[:] data, int length):
 @cython.wraparound(False)
 cdef double _linear_point(double[:] data, double pos) nogil:
     cdef int length = <int>len(data)
+    if length == 0:
+        return 0
     pos = pos * <double>(length-1)
     cdef double frac = pos - <int>pos
     cdef int i = <int>pos % length
