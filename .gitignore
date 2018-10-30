@@ -9,6 +9,7 @@
 docs/build/
 
 pippi/*.so
+pippi/*.html
 
 examples/*.wav
 examples/*.mp3
