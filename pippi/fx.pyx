@@ -125,7 +125,7 @@ cdef double[:,:] _vdelay(double[:,:] snd,
     cdef int delayframes = 0
 
     """
-        float interp_delay(float n, float buffer[], int L, current) {
+        double interp_delay(double n, double buffer[], int L, current) {
             int t1, t2;
             t1 = current + n;
             t1 %= L
@@ -285,19 +285,19 @@ cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bool normalize=True):
     cdef int _normalize = 1 if normalize else 0
     return SoundBuffer(_fir(snd.frames, out, impulsewt, normalize), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer lpf(SoundBuffer snd, float freq):
+cpdef SoundBuffer lpf(SoundBuffer snd, double freq):
     return SoundBuffer(soundpipe.butlp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer hpf(SoundBuffer snd, float freq):
+cpdef SoundBuffer hpf(SoundBuffer snd, double freq):
     return SoundBuffer(soundpipe.buthp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer bpf(SoundBuffer snd, float freq):
+cpdef SoundBuffer bpf(SoundBuffer snd, double freq):
     return SoundBuffer(soundpipe.butbp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer brf(SoundBuffer snd, float freq):
+cpdef SoundBuffer brf(SoundBuffer snd, double freq):
     return SoundBuffer(soundpipe.butbr(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer compressor(SoundBuffer snd, float ratio=4, float threshold=-30, float attack=0.2, float release=0.2):
+cpdef SoundBuffer compressor(SoundBuffer snd, double ratio=4, double threshold=-30, double attack=0.2, double release=0.2):
     return SoundBuffer(soundpipe.compressor(snd.frames, ratio, threshold, attack, release), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer saturator(SoundBuffer snd, double drive=10, double offset=0, bint dcblock=True):

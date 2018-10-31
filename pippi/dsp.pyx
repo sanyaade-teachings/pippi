@@ -166,7 +166,7 @@ def find(pattern, channels=2, samplerate=44100):
         that will `yield` each file as a `SoundBuffer`
     """
     for filename in glob.iglob(pattern, recursive=True):
-        yield SoundBuffer(filename, channels=channels, samplerate=samplerate)
+        yield SoundBuffer(channels=channels, samplerate=samplerate, filename=filename)
 
 def pool(callback, reps=10, params=None, processes=4):
     out = []

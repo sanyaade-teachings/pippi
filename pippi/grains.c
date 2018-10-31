@@ -933,10 +933,10 @@ struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
 
 /* "pippi/soundpipe.pxd":159
  * 
- * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, float amp, double[:] pitch)
- * cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, float amp, double[:] pitch, int wtsize=?, int samplerate=?)             # <<<<<<<<<<<<<<
+ * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, double amp, double[:] pitch)
+ * cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=?, int samplerate=?)             # <<<<<<<<<<<<<<
  * 
- * cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, float drive, float dcoffset, int length, int channels, bint dcblock)
+ * cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, double drive, double dcoffset, int length, int channels, bint dcblock)
  */
 struct __pyx_opt_args_5pippi_9soundpipe_mincer {
   int __pyx_n;
@@ -946,8 +946,8 @@ struct __pyx_opt_args_5pippi_9soundpipe_mincer {
 
 /* "pippi/soundpipe.pxd":168
  * 
- * cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, float windowsize, float stretch, int length, int outlength, int channels)
- * cpdef double[:,:] paulstretch(double[:,:] snd, float windowsize, float stretch, int samplerate=?)             # <<<<<<<<<<<<<<
+ * cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
+ * cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)             # <<<<<<<<<<<<<<
  * 
  * cdef double[:,:] _filterbank(double[:,:] snd, double[:,:] out, list freqs, list lfos, int length, int channels)
  */
@@ -1021,12 +1021,13 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable {
   __Pyx_memviewslice data;
 };
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose;
 
 /* "soundbuffer.pxd":15
  *     cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos)
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)             # <<<<<<<<<<<<<<
- * 
+ *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, object amp=*)
  * 
  */
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
@@ -1035,6 +1036,20 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
   double d;
   double s;
   double r;
+};
+
+/* "soundbuffer.pxd":16
+ *     cdef void _fill(SoundBuffer self, double[:,:] frames)
+ *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
+ *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, object amp=*)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
+  int __pyx_n;
+  PyObject *length;
+  PyObject *position;
+  PyObject *amp;
 };
 
 /* "pippi/wavetables.pxd":5
@@ -1098,12 +1113,12 @@ struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer {
  * from pippi.soundpipe cimport *
  * 
  * cdef class Cloud:             # <<<<<<<<<<<<<<
- *     cdef float** snd
+ *     cdef double** snd
  *     cdef unsigned int framelength
  */
 struct __pyx_obj_5pippi_6grains_Cloud {
   PyObject_HEAD
-  float **snd;
+  double **snd;
   unsigned int framelength;
   double length;
   unsigned int channels;
@@ -1231,6 +1246,7 @@ struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
   void (*_dub)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int);
   void (*_fill)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, __Pyx_memviewslice);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*adsr)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr *__pyx_optional_args);
+  struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*transpose)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer;
 
@@ -2009,7 +2025,7 @@ static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memo
 /* Module declarations from 'libc.stdint' */
 
 /* Module declarations from 'pippi.soundpipe' */
-static float **(*__pyx_f_5pippi_9soundpipe_memoryview2ftbls)(__Pyx_memviewslice); /*proto*/
+static double **(*__pyx_f_5pippi_9soundpipe_memoryview2ftbls)(__Pyx_memviewslice); /*proto*/
 
 /* Module declarations from 'pippi.wavetables' */
 static PyTypeObject *__pyx_ptype_5pippi_10wavetables_Wavetable = 0;
@@ -3659,7 +3675,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
   double __pyx_v_grainpos;
   double __pyx_v_panpos;
   double __pyx_v_sample;
-  float __pyx_v_fsample;
+  double __pyx_v_fsample;
   double __pyx_v_spread;
   double __pyx_v_inc;
   unsigned int __pyx_v_masklength;
@@ -3808,7 +3824,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
  *         cdef double grainpos = 0
  *         cdef double panpos = 0             # <<<<<<<<<<<<<<
  *         cdef double sample = 0
- *         cdef float fsample = 0
+ *         cdef double fsample = 0
  */
   __pyx_v_panpos = 0.0;
 
@@ -3816,7 +3832,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
  *         cdef double grainpos = 0
  *         cdef double panpos = 0
  *         cdef double sample = 0             # <<<<<<<<<<<<<<
- *         cdef float fsample = 0
+ *         cdef double fsample = 0
  *         cdef double spread = 0
  */
   __pyx_v_sample = 0.0;
@@ -3824,7 +3840,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
   /* "pippi/grains.pyx":99
  *         cdef double panpos = 0
  *         cdef double sample = 0
- *         cdef float fsample = 0             # <<<<<<<<<<<<<<
+ *         cdef double fsample = 0             # <<<<<<<<<<<<<<
  *         cdef double spread = 0
  *         cdef double inc = 0
  */
@@ -3832,7 +3848,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
 
   /* "pippi/grains.pyx":100
  *         cdef double sample = 0
- *         cdef float fsample = 0
+ *         cdef double fsample = 0
  *         cdef double spread = 0             # <<<<<<<<<<<<<<
  *         cdef double inc = 0
  *         cdef unsigned int masklength = 0
@@ -3840,7 +3856,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
   __pyx_v_spread = 0.0;
 
   /* "pippi/grains.pyx":101
- *         cdef float fsample = 0
+ *         cdef double fsample = 0
  *         cdef double spread = 0
  *         cdef double inc = 0             # <<<<<<<<<<<<<<
  *         cdef unsigned int masklength = 0
@@ -4238,7 +4254,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
  *                     grainpos = <double>i / grainlength
  *                     if write_pos+i < outframelength:             # <<<<<<<<<<<<<<
  *                         inc = <double>i / self.samplerate
- *                         mincer.time = <float>read_pos + inc
+ *                         mincer.time = <double>read_pos + inc
  */
         __pyx_t_4 = __Pyx_PyInt_From_unsigned_int(__pyx_v_write_pos); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 136, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
@@ -4258,8 +4274,8 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
  *                     grainpos = <double>i / grainlength
  *                     if write_pos+i < outframelength:
  *                         inc = <double>i / self.samplerate             # <<<<<<<<<<<<<<
- *                         mincer.time = <float>read_pos + inc
- *                         mincer.pitch = <float>interpolation._linear_point(self.speed, pos)
+ *                         mincer.time = <double>read_pos + inc
+ *                         mincer.pitch = <double>interpolation._linear_point(self.speed, pos)
  */
           __pyx_t_14 = __pyx_PyFloat_AsDouble(__pyx_v_i); if (unlikely((__pyx_t_14 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 137, __pyx_L1_error)
           if (unlikely(__pyx_v_self->samplerate == 0)) {
@@ -4271,34 +4287,34 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
           /* "pippi/grains.pyx":138
  *                     if write_pos+i < outframelength:
  *                         inc = <double>i / self.samplerate
- *                         mincer.time = <float>read_pos + inc             # <<<<<<<<<<<<<<
- *                         mincer.pitch = <float>interpolation._linear_point(self.speed, pos)
- *                         mincer.amp = <float>interpolation._linear_point(self.amp, pos)
+ *                         mincer.time = <double>read_pos + inc             # <<<<<<<<<<<<<<
+ *                         mincer.pitch = <double>interpolation._linear_point(self.speed, pos)
+ *                         mincer.amp = <double>interpolation._linear_point(self.amp, pos)
  */
-          __pyx_v_mincer->time = (((float)__pyx_v_read_pos) + __pyx_v_inc);
+          __pyx_v_mincer->time = (((double)__pyx_v_read_pos) + __pyx_v_inc);
 
           /* "pippi/grains.pyx":139
  *                         inc = <double>i / self.samplerate
- *                         mincer.time = <float>read_pos + inc
- *                         mincer.pitch = <float>interpolation._linear_point(self.speed, pos)             # <<<<<<<<<<<<<<
- *                         mincer.amp = <float>interpolation._linear_point(self.amp, pos)
+ *                         mincer.time = <double>read_pos + inc
+ *                         mincer.pitch = <double>interpolation._linear_point(self.speed, pos)             # <<<<<<<<<<<<<<
+ *                         mincer.amp = <double>interpolation._linear_point(self.amp, pos)
  * 
  */
           if (unlikely(!__pyx_v_self->speed.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 139, __pyx_L1_error)}
-          __pyx_v_mincer->pitch = ((float)__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->speed, __pyx_v_pos));
+          __pyx_v_mincer->pitch = ((double)__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->speed, __pyx_v_pos));
 
           /* "pippi/grains.pyx":140
- *                         mincer.time = <float>read_pos + inc
- *                         mincer.pitch = <float>interpolation._linear_point(self.speed, pos)
- *                         mincer.amp = <float>interpolation._linear_point(self.amp, pos)             # <<<<<<<<<<<<<<
+ *                         mincer.time = <double>read_pos + inc
+ *                         mincer.pitch = <double>interpolation._linear_point(self.speed, pos)
+ *                         mincer.amp = <double>interpolation._linear_point(self.amp, pos)             # <<<<<<<<<<<<<<
  * 
  *                         sp_mincer_compute(sp, mincer, NULL, &fsample)
  */
           if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 140, __pyx_L1_error)}
-          __pyx_v_mincer->amp = ((float)__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->amp, __pyx_v_pos));
+          __pyx_v_mincer->amp = ((double)__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->amp, __pyx_v_pos));
 
           /* "pippi/grains.pyx":142
- *                         mincer.amp = <float>interpolation._linear_point(self.amp, pos)
+ *                         mincer.amp = <double>interpolation._linear_point(self.amp, pos)
  * 
  *                         sp_mincer_compute(sp, mincer, NULL, &fsample)             # <<<<<<<<<<<<<<
  *                         sample = <double>fsample * interpolation._linear_point(self.window, grainpos)
@@ -4362,7 +4378,7 @@ static PyObject *__pyx_pf_5pippi_6grains_5Cloud_4play(struct __pyx_obj_5pippi_6g
  *                     grainpos = <double>i / grainlength
  *                     if write_pos+i < outframelength:             # <<<<<<<<<<<<<<
  *                         inc = <double>i / self.samplerate
- *                         mincer.time = <float>read_pos + inc
+ *                         mincer.time = <double>read_pos + inc
  */
         }
 
@@ -19688,7 +19704,7 @@ static int __Pyx_modinit_function_import_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_import_code", 0);
   /*--- Function import code ---*/
   __pyx_t_1 = __Pyx_ImportModule("pippi.soundpipe"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "memoryview2ftbls", (void (**)(void))&__pyx_f_5pippi_9soundpipe_memoryview2ftbls, "float **(__Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "memoryview2ftbls", (void (**)(void))&__pyx_f_5pippi_9soundpipe_memoryview2ftbls, "double **(__Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_2 = __Pyx_ImportModule("pippi.wavetables"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_2, "to_window", (void (**)(void))&__pyx_f_5pippi_10wavetables_to_window, "__Pyx_memviewslice (PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_window *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)

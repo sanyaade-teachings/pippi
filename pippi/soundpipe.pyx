@@ -2,29 +2,29 @@ from pippi cimport interpolation
 from libc.stdlib cimport malloc, free
 import numpy as np
 
-cdef float** memoryview2ftbls(double[:,:] snd):
+cdef double** memoryview2ftbls(double[:,:] snd):
     cdef int length = snd.shape[0]
     cdef int channels = snd.shape[1]
     cdef int i = 0
     cdef int c = 0
-    cdef float** tbls = <float**>malloc(channels * sizeof(float*))
-    cdef float* tbl
+    cdef double** tbls = <double**>malloc(channels * sizeof(double*))
+    cdef double* tbl
 
     for c in range(channels):
-        tbl = <float*>malloc(length * sizeof(float))
+        tbl = <double*>malloc(length * sizeof(double))
         for i in range(length):
-            tbl[i] = <float>snd[i,c]
+            tbl[i] = <double>snd[i,c]
         tbls[c] = tbl
 
     return tbls
 
-cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
+cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_butbp* butbp
     cdef sp_bal* bal 
-    cdef float sample = 0
-    cdef float filtered = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double filtered = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
 
@@ -38,7 +38,7 @@ cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length
         butbp.freq = freq
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_butbp_compute(sp, butbp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
             out[i,c] = <double>output
@@ -50,19 +50,19 @@ cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, float freq, int length
 
     return out
 
-cpdef double[:,:] butbp(double[:,:] snd, float freq):
+cpdef double[:,:] butbp(double[:,:] snd, double freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _butbp(snd, out, freq, length, channels)
 
-cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
+cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_butbr* butbr
     cdef sp_bal* bal 
-    cdef float sample = 0
-    cdef float filtered = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double filtered = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
 
@@ -76,7 +76,7 @@ cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length
         butbr.freq = freq
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_butbr_compute(sp, butbr, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
             out[i,c] = <double>output
@@ -88,19 +88,19 @@ cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, float freq, int length
 
     return out
 
-cpdef double[:,:] butbr(double[:,:] snd, float freq):
+cpdef double[:,:] butbr(double[:,:] snd, double freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _butbr(snd, out, freq, length, channels)
 
-cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
+cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_buthp* buthp
     cdef sp_bal* bal 
-    cdef float sample = 0
-    cdef float filtered = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double filtered = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
 
@@ -114,7 +114,7 @@ cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, float freq, int length
         buthp.freq = freq
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_buthp_compute(sp, buthp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
             out[i,c] = <double>output
@@ -126,19 +126,19 @@ cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, float freq, int length
 
     return out
 
-cpdef double[:,:] buthp(double[:,:] snd, float freq):
+cpdef double[:,:] buthp(double[:,:] snd, double freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _buthp(snd, out, freq, length, channels)
 
-cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, float freq, int length, int channels):
+cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_butlp* butlp
     cdef sp_bal* bal 
-    cdef float sample = 0
-    cdef float filtered = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double filtered = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
 
@@ -152,7 +152,7 @@ cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, float freq, int length
         butlp.freq = freq
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_butlp_compute(sp, butlp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
             out[i,c] = <double>output
@@ -164,17 +164,17 @@ cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, float freq, int length
 
     return out
 
-cpdef double[:,:] butlp(double[:,:] snd, float freq):
+cpdef double[:,:] butlp(double[:,:] snd, double freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _butlp(snd, out, freq, length, channels)
 
-cdef double[:,:] _compressor(double[:,:] snd, double[:,:] out, float ratio, float thresh, float atk, float rel, int length, int channels):
+cdef double[:,:] _compressor(double[:,:] snd, double[:,:] out, double ratio, double thresh, double atk, double rel, int length, int channels):
     cdef sp_data* sp
     cdef sp_compressor* compressor
-    cdef float sample = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
 
@@ -190,7 +190,7 @@ cdef double[:,:] _compressor(double[:,:] snd, double[:,:] out, float ratio, floa
         compressor.rel = &rel
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_compressor_compute(sp, compressor, &sample, &output)
             out[i,c] = <double>output
 
@@ -200,7 +200,7 @@ cdef double[:,:] _compressor(double[:,:] snd, double[:,:] out, float ratio, floa
 
     return out
 
-cpdef double[:,:] compressor(double[:,:] snd, float ratio, float thresh, float atk, float rel):
+cpdef double[:,:] compressor(double[:,:] snd, double ratio, double thresh, double atk, double rel):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
@@ -209,8 +209,8 @@ cpdef double[:,:] compressor(double[:,:] snd, float ratio, float thresh, float a
 cdef double[:,:] _dcblock(double[:,:] snd, double[:,:] out, int length, int channels):
     cdef sp_data* sp
     cdef sp_dcblock* dcblock
-    cdef float sample = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
 
@@ -221,7 +221,7 @@ cdef double[:,:] _dcblock(double[:,:] snd, double[:,:] out, int length, int chan
         sp_dcblock_init(sp, dcblock)
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_dcblock_compute(sp, dcblock, &sample, &output)
             out[i,c] = <double>output
 
@@ -245,14 +245,14 @@ cdef double[:,:] _mincer(double[:,:] snd,
                          int length, 
                          int channels, 
                          double[:] time, 
-                         float amp, 
+                         double amp, 
                          double[:] pitch):
     cdef sp_data* sp
     cdef sp_mincer* mincer
-    cdef float output = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
-    cdef float** tbls = memoryview2ftbls(snd)
+    cdef double** tbls = memoryview2ftbls(snd)
     cdef double pos = 0
     cdef sp_ftbl* tbl
 
@@ -267,8 +267,8 @@ cdef double[:,:] _mincer(double[:,:] snd,
 
         for i in range(length):
             pos = <double>i/<double>length
-            mincer.time = <float>interpolation._linear_point(time, pos) * sndlength
-            mincer.pitch = <float>interpolation._linear_point(pitch, pos)
+            mincer.time = <double>interpolation._linear_point(time, pos) * sndlength
+            mincer.pitch = <double>interpolation._linear_point(pitch, pos)
             sp_mincer_compute(sp, mincer, NULL, &output)
             out[i,c] = <double>output
 
@@ -281,18 +281,18 @@ cdef double[:,:] _mincer(double[:,:] snd,
 
     return out
 
-cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, float amp, double[:] pitch, int wtsize=4096, int samplerate=44100):
+cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=4096, int samplerate=44100):
     cdef int framelength = <int>(samplerate * length)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')
     return _mincer(snd, out, length, <int>len(snd), wtsize, framelength, channels, time, amp, pitch)
 
-cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, float drive, float dcoffset, int length, int channels, bint dcblock):
+cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, double drive, double dcoffset, int length, int channels, bint dcblock):
     cdef sp_data* sp
     cdef sp_saturator* saturator
     cdef sp_dcblock* dcblocker
-    cdef float sample = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
 
@@ -309,7 +309,7 @@ cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, float drive, float
         sp_dcblock_init(sp, dcblocker)
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_saturator_compute(sp, saturator, &sample, &output)
             sp_dcblock_compute(sp, dcblocker, &sample, &output)
             out[i,c] = <double>output
@@ -321,20 +321,20 @@ cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, float drive, float
 
     return out
 
-cpdef double[:,:] saturator(double[:,:] snd, float drive, float dcoffset, bint dcblock):
+cpdef double[:,:] saturator(double[:,:] snd, double drive, double dcoffset, bint dcblock):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _saturator(snd, out, drive, dcoffset, length, channels, dcblock)
 
-cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, float windowsize, float stretch, int length, int outlength, int channels):
+cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels):
     cdef sp_data* sp
     cdef sp_paulstretch* paulstretch
-    cdef float sample = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
-    cdef float** tbls = memoryview2ftbls(snd)
+    cdef double** tbls = memoryview2ftbls(snd)
     cdef sp_ftbl* tbl
 
     sp_create(&sp)
@@ -357,7 +357,7 @@ cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, float windowsize
 
     return out
 
-cpdef double[:,:] paulstretch(double[:,:] snd, float windowsize, float stretch, int samplerate=44100):
+cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=44100):
     cdef int length = <int>len(snd)
     cdef int outlength = <int>(stretch * samplerate)
     cdef int channels = <int>snd.shape[1]
@@ -367,11 +367,11 @@ cpdef double[:,:] paulstretch(double[:,:] snd, float windowsize, float stretch, 
 cdef double[:,:] _filterbank(double[:,:] snd, double[:,:] out, list freqs, list lfos, int length, int channels):
     cdef sp_data* sp
     cdef sp_butbp* butbp
-    cdef float sample = 0
-    cdef float output = 0
+    cdef double sample = 0
+    cdef double output = 0
     cdef int i = 0
     cdef int c = 0
-    cdef float freq = 440
+    cdef double freq = 440
 
     sp_create(&sp)
 
@@ -381,7 +381,7 @@ cdef double[:,:] _filterbank(double[:,:] snd, double[:,:] out, list freqs, list 
         butbp.freq = freq
 
         for i in range(length):
-            sample = <float>snd[i,c]
+            sample = <double>snd[i,c]
             sp_butbp_compute(sp, butbp, &sample, &output)
             out[i,c] = <double>output
 

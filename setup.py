@@ -17,6 +17,11 @@ ext_modules = cythonize([
             library_dirs=['/usr/local/lib'],
             include_dirs=['/usr/local/include']
         ),
+        Extension('pippi.sampler', ['pippi/sampler.pyx'],
+            libraries=['soundpipe'], 
+            library_dirs=['/usr/local/lib'],
+            include_dirs=['/usr/local/include']
+        ),
         Extension('pippi.graph', ['pippi/graph.pyx']), 
         Extension('pippi.interpolation', ['pippi/interpolation.pyx']),
         Extension('pippi.oscs', ['pippi/oscs.pyx']), 

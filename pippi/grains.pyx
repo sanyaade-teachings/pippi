@@ -96,7 +96,7 @@ cdef class Cloud:
         cdef double grainpos = 0
         cdef double panpos = 0
         cdef double sample = 0
-        cdef float fsample = 0
+        cdef double fsample = 0
         cdef double spread = 0
         cdef double inc = 0
         cdef unsigned int masklength = 0
@@ -135,9 +135,9 @@ cdef class Cloud:
                     grainpos = <double>i / grainlength
                     if write_pos+i < outframelength:
                         inc = <double>i / self.samplerate
-                        mincer.time = <float>read_pos + inc
-                        mincer.pitch = <float>interpolation._linear_point(self.speed, pos)
-                        mincer.amp = <float>interpolation._linear_point(self.amp, pos)
+                        mincer.time = <double>read_pos + inc
+                        mincer.pitch = <double>interpolation._linear_point(self.speed, pos)
+                        mincer.amp = <double>interpolation._linear_point(self.amp, pos)
 
                         sp_mincer_compute(sp, mincer, NULL, &fsample)
                         sample = <double>fsample * interpolation._linear_point(self.window, grainpos)

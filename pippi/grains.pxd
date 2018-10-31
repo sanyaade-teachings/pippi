@@ -2,7 +2,7 @@
 from pippi.soundpipe cimport *
 
 cdef class Cloud:
-    cdef float** snd
+    cdef double** snd
     cdef unsigned int framelength
     cdef double length
     cdef unsigned int channels

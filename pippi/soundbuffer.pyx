@@ -9,7 +9,7 @@ import numpy as np
 cimport cython
 from libc cimport math
 
-from pippi.wavetables cimport CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr 
+from pippi.wavetables cimport Wavetable, PHASOR, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window
 from pippi cimport interpolation
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
 from pippi cimport grains
@@ -842,18 +842,20 @@ cdef class SoundBuffer:
         cdef int framelength = <int>(self.samplerate * length)
         return self * _adsr(len(self), framelength, 0, 1, framelength)
 
-    def transpose(self, double speed, double grainlength=0.06):
+    cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=None, object position=None, object amp=1.0):
         """ Change the pitch of the sound without changing the length.
-            This is just a wrapper for `grains.Cloud` with `speed` and `grainlength` 
-            settings exposed, returning a cloud equal in length to the source sound.
-
             TODO accept: from/to hz, notes, midi notes, intervals
         """
-        return grains.Cloud(self, 
-                speed=speed, 
-                grainlength=grainlength, 
-                grid=grainlength * 0.5,
-            ).play(self.dur)
+        if length is None:
+            length = self.dur
+
+        if position is None:
+            position = Wavetable(PHASOR) * length
+
+        cdef double[:] time_lfo = to_window(position)
+        cdef double[:] pitch_lfo = to_window(speed)
+
+        return SoundBuffer(soundpipe.mincer(self.frames, length, time_lfo, amp, pitch_lfo, 4096, self.samplerate), channels=self.channels, samplerate=self.samplerate)
 
     def write(self, unicode filename=None):
         """ Write the contents of this buffer to disk 
