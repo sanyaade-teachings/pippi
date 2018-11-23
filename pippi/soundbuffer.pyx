@@ -832,18 +832,25 @@ cdef class SoundBuffer:
         out = _speed(self.frames, out, chan, outchan, <int>self.channels)
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-    def stretch(self, double length, double grainlength=60):
-        """ Change the length of the sound without changing the pitch.
-            Granular-only implementation at the moment.
+    cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=None, double amp=1.0):
+        """ Change the length of the sound without changing the pitch. 
+            Uses the csound `mincer` phase vocoder implementation from soundpipe.
         """
-        return grains.Cloud(self, grainlength=grainlength).play(length)
+        if position is None:
+            position = Wavetable(PHASOR) * self.dur
+
+        cdef double[:] time_lfo = to_window(position)
+        cdef double[:] pitch_lfo = to_window(1.0)
+
+        return SoundBuffer(soundpipe.mincer(self.frames, length, time_lfo, amp, pitch_lfo, 4096, self.samplerate), channels=self.channels, samplerate=self.samplerate)
 
     def taper(self, double length):
         cdef int framelength = <int>(self.samplerate * length)
         return self * _adsr(len(self), framelength, 0, 1, framelength)
 
-    cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=None, object position=None, object amp=1.0):
+    cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=None, object position=None, double amp=1.0):
         """ Change the pitch of the sound without changing the length.
+            Uses the csound `mincer` phase vocoder implementation from soundpipe.
             TODO accept: from/to hz, notes, midi notes, intervals
         """
         if length is None:

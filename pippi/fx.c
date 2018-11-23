@@ -800,9 +800,9 @@ static const char *__pyx_f[] = {
   "pippi/grains.pxd",
   "pippi/oscs.pxd",
   "pippi/wavetables.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/type.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/bool.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/complex.pxd",
+  "type.pxd",
+  "bool.pxd",
+  "complex.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -923,14 +923,15 @@ struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose;
 
 /* "pippi/soundbuffer.pxd":15
  *     cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos)
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)             # <<<<<<<<<<<<<<
- *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, object amp=*)
- * 
+ *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
+ *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
  */
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
   int __pyx_n;
@@ -943,7 +944,20 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
 /* "pippi/soundbuffer.pxd":16
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
- *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, object amp=*)             # <<<<<<<<<<<<<<
+ *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)             # <<<<<<<<<<<<<<
+ *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
+ * 
+ */
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch {
+  int __pyx_n;
+  PyObject *position;
+  double amp;
+};
+
+/* "pippi/soundbuffer.pxd":17
+ *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
+ *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
+ *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)             # <<<<<<<<<<<<<<
  * 
  * 
  */
@@ -951,7 +965,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
   int __pyx_n;
   PyObject *length;
   PyObject *position;
-  PyObject *amp;
+  double amp;
 };
 struct __pyx_opt_args_5pippi_9soundpipe_mincer;
 struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
@@ -1331,6 +1345,7 @@ struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
   void (*_dub)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int);
   void (*_fill)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, __Pyx_memviewslice);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*adsr)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr *__pyx_optional_args);
+  struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*stretch)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch *__pyx_optional_args);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*transpose)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer;

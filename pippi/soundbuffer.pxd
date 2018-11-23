@@ -13,6 +13,7 @@ cdef class SoundBuffer:
     cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos)
     cdef void _fill(SoundBuffer self, double[:,:] frames)
     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
-    cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, object amp=*)
+    cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
+    cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
 
 
