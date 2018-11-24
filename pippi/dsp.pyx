@@ -9,6 +9,7 @@ cimport cython
 from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables as wts
+from pippi cimport rand as _rand
 
 # Expose some C flags / constants to python
 # FIXME might be faster to use newish cpdef enum defs? donno
@@ -152,14 +153,14 @@ def read(frames, channels=2, samplerate=44100):
 
     return SoundBuffer(frames, channels=channels, samplerate=samplerate)
 
-cpdef double rand(object lowvalue, object highvalue):
-    if isinstance(lowvalue, tuple):
-        lowvalue = rand(lowvalue[0], lowvalue[1])
+cpdef double rand(double low=0, double high=1):
+    return _rand.rand(low, high)
 
-    if isinstance(highvalue, tuple):
-        highvalue = rand(highvalue[0], highvalue[1])
+cpdef int randint(int low=0, int high=1):
+    return _rand.randint(low, high)
 
-    return <double>random.triangular(lowvalue, highvalue)
+cpdef object choice(list choices):
+    return _rand.choice(choices)
 
 def find(pattern, channels=2, samplerate=44100):
     """ Glob for files matching a given pattern and return a generator 

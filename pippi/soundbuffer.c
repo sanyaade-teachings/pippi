@@ -976,6 +976,33 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable {
   int __pyx_n;
   __Pyx_memviewslice data;
 };
+struct __pyx_opt_args_5pippi_3dsp_rand;
+struct __pyx_opt_args_5pippi_3dsp_randint;
+
+/* "dsp.pxd":2
+ * cdef double _mag(double[:,:] snd)
+ * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ */
+struct __pyx_opt_args_5pippi_3dsp_rand {
+  int __pyx_n;
+  double low;
+  double high;
+};
+
+/* "dsp.pxd":3
+ * cdef double _mag(double[:,:] snd)
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
+ * cpdef object choice(list choices)
+ * 
+ */
+struct __pyx_opt_args_5pippi_3dsp_randint {
+  int __pyx_n;
+  int low;
+  int high;
+};
 struct __pyx_opt_args_5pippi_9soundpipe_mincer;
 struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
 

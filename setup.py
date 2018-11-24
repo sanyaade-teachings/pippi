@@ -25,6 +25,7 @@ ext_modules = cythonize([
         Extension('pippi.graph', ['pippi/graph.pyx']), 
         Extension('pippi.interpolation', ['pippi/interpolation.pyx']),
         Extension('pippi.oscs', ['pippi/oscs.pyx']), 
+        Extension('pippi.rand', ['pippi/rand.pyx']), 
         Extension('pippi.soundbuffer', ['pippi/soundbuffer.pyx']), 
         Extension('pippi.soundpipe', ['pippi/soundpipe.pyx'], 
             libraries=['soundpipe'], 

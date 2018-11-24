@@ -800,9 +800,9 @@ static const char *__pyx_f[] = {
   "pippi/grains.pxd",
   "pippi/oscs.pxd",
   "pippi/wavetables.pxd",
-  "type.pxd",
-  "bool.pxd",
-  "complex.pxd",
+  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/type.pxd",
+  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/bool.pxd",
+  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/complex.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -966,6 +966,33 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
   PyObject *length;
   PyObject *position;
   double amp;
+};
+struct __pyx_opt_args_5pippi_3dsp_rand;
+struct __pyx_opt_args_5pippi_3dsp_randint;
+
+/* "dsp.pxd":2
+ * cdef double _mag(double[:,:] snd)
+ * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ */
+struct __pyx_opt_args_5pippi_3dsp_rand {
+  int __pyx_n;
+  double low;
+  double high;
+};
+
+/* "dsp.pxd":3
+ * cdef double _mag(double[:,:] snd)
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
+ * cpdef object choice(list choices)
+ * 
+ */
+struct __pyx_opt_args_5pippi_3dsp_randint {
+  int __pyx_n;
+  int low;
+  int high;
 };
 struct __pyx_opt_args_5pippi_9soundpipe_mincer;
 struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
