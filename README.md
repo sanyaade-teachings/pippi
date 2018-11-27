@@ -2,6 +2,14 @@
 
 v2.0.0 - Beta 4 (In Development)
 
+## What is this?
+
+This is the python library that [I use to write music](http://hecanjog.com). I think python is a wonderful language for music. 
+I try to make the API for this library as nice to use as the language itself; which I consider to be a very comfortable 
+environment that lets me think about the composition I'm working on more than its fiddly implementation bits.
+
+I hope this library can be useful for your creative projects too.
+
 ## Installation and setup
 
 Pippi requires python 3.6+ which can be found here:

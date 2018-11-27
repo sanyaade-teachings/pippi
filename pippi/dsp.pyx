@@ -144,14 +144,14 @@ def join(sounds, overlap=None, channels=None, samplerate=None):
 cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, int samplerate=44100):
     return SoundBuffer.__new__(SoundBuffer, frames=frames, length=length, channels=channels, samplerate=samplerate)
 
-def read(frames, channels=2, samplerate=44100):
-    """ Read a soundfile from disk and return a `SoundBuffer` with its contents
-        Equiv to `snd = SoundBuffer(filename)`
-    """
-    if isinstance(frames, str):
-        return SoundBuffer(filename=frames, channels=channels, samplerate=samplerate)
+cpdef SoundBuffer read(object filename, double length=-1, double start=0):
+    """ Read a soundfile from disk and return a `SoundBuffer` with its contents.
+        May include a start position and length in seconds to read a segment from a large file.
 
-    return SoundBuffer(frames, channels=channels, samplerate=samplerate)
+        The `filename` param is always converted to a string, so it is safe to pass a 
+        `Path` instance from the standard library `pathlib` module.
+    """
+    return SoundBuffer(filename=str(filename), length=length, start=start)
 
 cpdef double rand(double low=0, double high=1):
     return _rand.rand(low, high)
