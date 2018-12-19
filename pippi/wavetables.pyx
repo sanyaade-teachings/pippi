@@ -1,5 +1,4 @@
 import collections
-import random
 import numbers
 
 import soundfile
@@ -10,10 +9,9 @@ import re
 from cpython.array cimport array, clone
 
 from libc.stdlib cimport malloc, realloc, calloc, free
-from libc.stdlib cimport rand
 from libc cimport math
 
-from pippi cimport interpolation
+from pippi cimport interpolation, rand
 from pippi.soundbuffer cimport SoundBuffer
 
 cdef int SINE = 0
@@ -100,11 +98,14 @@ cdef int wtypentf(str wtype_name):
 
 
 cdef class Wavetable:
-    def __cinit__(self, object values, int wtsize=4096, bint window=True):
+    def __cinit__(self, object values, int wtsize=4096, bint window=True, bint pad=False):
         if window:
             self.data = to_window(values, wtsize)
         else:
             self.data = to_wavetable(values, wtsize)
+
+        if pad:
+            self.pad()
 
     #############################################
     # (+) Addition & concatenation operator (+) #
@@ -265,6 +266,25 @@ cdef class Wavetable:
 
     def clip(self, minval=-1, maxval=1):
         return Wavetable(np.clip(self.data, minval, maxval))
+
+    def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):
+        if minval is None:
+            minval = np.min(self.data)
+
+        if maxval is None:
+            maxval = np.max(self.data)
+
+        if indexes is None:
+            indexes = list(range(len(self.data)))
+
+        for i in indexes:
+            self.data[i] = max(minval, min(self.data[i] + rand.rand(-width, width), maxval))
+
+        if wrap:
+            self.data[len(self.data)-1] = self.data[0]
+
+    def pad(self, numzeros=1):
+        self.data = np.pad(self.data, (numzeros, numzeros), 'constant', constant_values=(0,0))
         
     def env(self, int window_type=-1):
         cdef int length = len(self)
@@ -370,14 +390,14 @@ cpdef double[:] polyseg(list segments, int length):
 
 
 cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
-    cdef double[:] points = np.array([ random.triangular(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
+    cdef double[:] points = np.array([ rand.rand(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
     return Wavetable(interpolation._linear(points, wtsize), wtsize)
 
 cdef double[:] _window(int window_type, int length):
     cdef double[:] wt
 
     if window_type == RND:
-        window_type = ALL_WINDOWS[rand() % LEN_WINDOWS]
+        window_type = ALL_WINDOWS[rand.randint(0, LEN_WINDOWS-1)]
         wt = _window(window_type, length)
 
     elif window_type == SINE:
@@ -470,7 +490,7 @@ cdef double[:] _wavetable(int wavetable_type, int length):
     cdef double[:] wt
 
     if wavetable_type == RND:
-        wavetable_type = ALL_WAVETABLES[rand() % LEN_WAVETABLES]
+        wavetable_type = ALL_WAVETABLES[rand.randint(0, LEN_WAVETABLES-1)]
         wt = _wavetable(wavetable_type, length)
 
     elif wavetable_type == SINE:
