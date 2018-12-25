@@ -994,7 +994,7 @@ struct __pyx_obj_5pippi_5pluck_PluckedString {
   struct __pyx_obj_5pippi_5pluck_DelayLine *upper_rail;
   struct __pyx_obj_5pippi_5pluck_DelayLine *lower_rail;
   double amp;
-  double pitch;
+  double freq;
   double pick;
   double pickup;
   short state;
@@ -1853,6 +1853,7 @@ static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_dict[] = "__dict__";
+static const char __pyx_k_freq[] = "freq";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_mode[] = "mode";
 static const char __pyx_k_name[] = "name";
@@ -1871,7 +1872,6 @@ static const char __pyx_k_error[] = "error";
 static const char __pyx_k_flags[] = "flags";
 static const char __pyx_k_int16[] = "int16";
 static const char __pyx_k_numpy[] = "numpy";
-static const char __pyx_k_pitch[] = "pitch";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_start[] = "start";
@@ -1943,7 +1943,7 @@ static const char __pyx_k_Cannot_create_writable_memory_vi[] = "Cannot create wr
 static const char __pyx_k_Empty_shape_tuple_for_cython_arr[] = "Empty shape tuple for cython.array";
 static const char __pyx_k_Incompatible_checksums_s_vs_0x1c[] = "Incompatible checksums (%s vs 0x1c61ce4 = (buf, end, length, position))";
 static const char __pyx_k_Incompatible_checksums_s_vs_0xb0[] = "Incompatible checksums (%s vs 0xb068931 = (name))";
-static const char __pyx_k_Incompatible_checksums_s_vs_0xcc[] = "Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))";
+static const char __pyx_k_Incompatible_checksums_s_vs_0xb5[] = "Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))";
 static const char __pyx_k_Indirect_dimensions_not_supporte[] = "Indirect dimensions not supported";
 static const char __pyx_k_Invalid_mode_expected_c_or_fortr[] = "Invalid mode, expected 'c' or 'fortran', got %s";
 static const char __pyx_k_Out_of_bounds_on_buffer_access_a[] = "Out of bounds on buffer access (axis %d)";
@@ -1961,7 +1961,7 @@ static PyObject *__pyx_n_s_Ellipsis;
 static PyObject *__pyx_kp_s_Empty_shape_tuple_for_cython_arr;
 static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0x1c;
 static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0xb0;
-static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0xcc;
+static PyObject *__pyx_kp_s_Incompatible_checksums_s_vs_0xb5;
 static PyObject *__pyx_n_s_IndexError;
 static PyObject *__pyx_kp_s_Indirect_dimensions_not_supporte;
 static PyObject *__pyx_kp_s_Invalid_mode_expected_c_or_fortr;
@@ -1998,6 +1998,7 @@ static PyObject *__pyx_n_s_flags;
 static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fortran;
 static PyObject *__pyx_n_u_fortran;
+static PyObject *__pyx_n_s_freq;
 static PyObject *__pyx_n_s_get_sample;
 static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
@@ -2024,7 +2025,6 @@ static PyObject *__pyx_n_s_pick;
 static PyObject *__pyx_n_s_pickle;
 static PyObject *__pyx_n_s_pickup;
 static PyObject *__pyx_n_s_pippi_pluck;
-static PyObject *__pyx_n_s_pitch;
 static PyObject *__pyx_n_s_position;
 static PyObject *__pyx_n_s_pyx_PickleError;
 static PyObject *__pyx_n_s_pyx_capi;
@@ -2064,7 +2064,7 @@ static PyObject *__pyx_n_s_zeros;
 static int __pyx_pf_5pippi_5pluck_9DelayLine___init__(struct __pyx_obj_5pippi_5pluck_DelayLine *__pyx_v_self, int __pyx_v_length); /* proto */
 static PyObject *__pyx_pf_5pippi_5pluck_9DelayLine_2__reduce_cython__(struct __pyx_obj_5pippi_5pluck_DelayLine *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_5pippi_5pluck_9DelayLine_4__setstate_cython__(struct __pyx_obj_5pippi_5pluck_DelayLine *__pyx_v_self, PyObject *__pyx_v___pyx_state); /* proto */
-static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pippi_5pluck_PluckedString *__pyx_v_self, double __pyx_v_pitch, double __pyx_v_pick, double __pyx_v_pickup, double __pyx_v_amp, int __pyx_v_samplerate, int __pyx_v_channels); /* proto */
+static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pippi_5pluck_PluckedString *__pyx_v_self, double __pyx_v_freq, double __pyx_v_pick, double __pyx_v_pickup, double __pyx_v_amp, int __pyx_v_samplerate, int __pyx_v_channels); /* proto */
 static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_2get_sample(struct __pyx_obj_5pippi_5pluck_PluckedString *__pyx_v_self, struct __pyx_obj_5pippi_5pluck_DelayLine *__pyx_v_dline, int __pyx_v_position); /* proto */
 static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_4next_sample(struct __pyx_obj_5pippi_5pluck_PluckedString *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5pippi_5pluck_PluckedString *__pyx_v_self, double __pyx_v_length); /* proto */
@@ -2124,7 +2124,7 @@ static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_29760740;
 static PyObject *__pyx_int_184977713;
-static PyObject *__pyx_int_214681947;
+static PyObject *__pyx_int_190144090;
 static PyObject *__pyx_int_neg_1;
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
@@ -2661,15 +2661,15 @@ static PyObject *__pyx_pf_5pippi_5pluck_9DelayLine_4__setstate_cython__(struct _
 /* "pippi/pluck.pyx":34
  *     cdef int channels
  * 
- *     def __init__(self, double pitch=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):             # <<<<<<<<<<<<<<
+ *     def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):             # <<<<<<<<<<<<<<
  *         self.state = 0
- *         self.pitch = pitch
+ *         self.freq = freq
  */
 
 /* Python wrapper */
 static int __pyx_pw_5pippi_5pluck_13PluckedString_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static int __pyx_pw_5pippi_5pluck_13PluckedString_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  double __pyx_v_pitch;
+  double __pyx_v_freq;
   double __pyx_v_pick;
   double __pyx_v_pickup;
   double __pyx_v_amp;
@@ -2679,7 +2679,7 @@ static int __pyx_pw_5pippi_5pluck_13PluckedString_1__init__(PyObject *__pyx_v_se
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_pitch,&__pyx_n_s_pick,&__pyx_n_s_pickup,&__pyx_n_s_amp,&__pyx_n_s_samplerate,&__pyx_n_s_channels,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_freq,&__pyx_n_s_pick,&__pyx_n_s_pickup,&__pyx_n_s_amp,&__pyx_n_s_samplerate,&__pyx_n_s_channels,0};
     PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
@@ -2704,7 +2704,7 @@ static int __pyx_pw_5pippi_5pluck_13PluckedString_1__init__(PyObject *__pyx_v_se
       switch (pos_args) {
         case  0:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pitch);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_freq);
           if (value) { values[0] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
@@ -2760,9 +2760,9 @@ static int __pyx_pw_5pippi_5pluck_13PluckedString_1__init__(PyObject *__pyx_v_se
       }
     }
     if (values[0]) {
-      __pyx_v_pitch = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_pitch == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
+      __pyx_v_freq = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_freq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
     } else {
-      __pyx_v_pitch = ((double)220.0);
+      __pyx_v_freq = ((double)220.0);
     }
     if (values[1]) {
       __pyx_v_pick = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pick == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
@@ -2798,14 +2798,14 @@ static int __pyx_pw_5pippi_5pluck_13PluckedString_1__init__(PyObject *__pyx_v_se
   __Pyx_RefNannyFinishContext();
   return -1;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_5pluck_13PluckedString___init__(((struct __pyx_obj_5pippi_5pluck_PluckedString *)__pyx_v_self), __pyx_v_pitch, __pyx_v_pick, __pyx_v_pickup, __pyx_v_amp, __pyx_v_samplerate, __pyx_v_channels);
+  __pyx_r = __pyx_pf_5pippi_5pluck_13PluckedString___init__(((struct __pyx_obj_5pippi_5pluck_PluckedString *)__pyx_v_self), __pyx_v_freq, __pyx_v_pick, __pyx_v_pickup, __pyx_v_amp, __pyx_v_samplerate, __pyx_v_channels);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pippi_5pluck_PluckedString *__pyx_v_self, double __pyx_v_pitch, double __pyx_v_pick, double __pyx_v_pickup, double __pyx_v_amp, int __pyx_v_samplerate, int __pyx_v_channels) {
+static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pippi_5pluck_PluckedString *__pyx_v_self, double __pyx_v_freq, double __pyx_v_pick, double __pyx_v_pickup, double __pyx_v_amp, int __pyx_v_samplerate, int __pyx_v_channels) {
   int __pyx_v_rail_length;
   int __pyx_v_pickSample;
   double __pyx_v_upslope;
@@ -2837,25 +2837,25 @@ static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pip
 
   /* "pippi/pluck.pyx":35
  * 
- *     def __init__(self, double pitch=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):
+ *     def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):
  *         self.state = 0             # <<<<<<<<<<<<<<
- *         self.pitch = pitch
+ *         self.freq = freq
  *         self.pick = pick
  */
   __pyx_v_self->state = 0;
 
   /* "pippi/pluck.pyx":36
- *     def __init__(self, double pitch=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):
+ *     def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):
  *         self.state = 0
- *         self.pitch = pitch             # <<<<<<<<<<<<<<
+ *         self.freq = freq             # <<<<<<<<<<<<<<
  *         self.pick = pick
  *         self.pickup = pickup
  */
-  __pyx_v_self->pitch = __pyx_v_pitch;
+  __pyx_v_self->freq = __pyx_v_freq;
 
   /* "pippi/pluck.pyx":37
  *         self.state = 0
- *         self.pitch = pitch
+ *         self.freq = freq
  *         self.pick = pick             # <<<<<<<<<<<<<<
  *         self.pickup = pickup
  *         self.amp = amp
@@ -2863,7 +2863,7 @@ static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pip
   __pyx_v_self->pick = __pyx_v_pick;
 
   /* "pippi/pluck.pyx":38
- *         self.pitch = pitch
+ *         self.freq = freq
  *         self.pick = pick
  *         self.pickup = pickup             # <<<<<<<<<<<<<<
  *         self.amp = amp
@@ -2894,25 +2894,25 @@ static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pip
  *         self.samplerate = samplerate
  *         self.channels = channels             # <<<<<<<<<<<<<<
  * 
- *         cdef int rail_length = <int>(<double>samplerate / pitch / 2.0 + 1.0)
+ *         cdef int rail_length = <int>(<double>samplerate / freq / 2.0 + 1.0)
  */
   __pyx_v_self->channels = __pyx_v_channels;
 
   /* "pippi/pluck.pyx":43
  *         self.channels = channels
  * 
- *         cdef int rail_length = <int>(<double>samplerate / pitch / 2.0 + 1.0)             # <<<<<<<<<<<<<<
+ *         cdef int rail_length = <int>(<double>samplerate / freq / 2.0 + 1.0)             # <<<<<<<<<<<<<<
  * 
  *         self.upper_rail = DelayLine(rail_length)
  */
-  if (unlikely(__pyx_v_pitch == 0)) {
+  if (unlikely(__pyx_v_freq == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
     __PYX_ERR(0, 43, __pyx_L1_error)
   }
-  __pyx_v_rail_length = ((int)(((((double)__pyx_v_samplerate) / __pyx_v_pitch) / 2.0) + 1.0));
+  __pyx_v_rail_length = ((int)(((((double)__pyx_v_samplerate) / __pyx_v_freq) / 2.0) + 1.0));
 
   /* "pippi/pluck.pyx":45
- *         cdef int rail_length = <int>(<double>samplerate / pitch / 2.0 + 1.0)
+ *         cdef int rail_length = <int>(<double>samplerate / freq / 2.0 + 1.0)
  * 
  *         self.upper_rail = DelayLine(rail_length)             # <<<<<<<<<<<<<<
  *         self.lower_rail = DelayLine(rail_length)
@@ -3429,9 +3429,9 @@ static int __pyx_pf_5pippi_5pluck_13PluckedString___init__(struct __pyx_obj_5pip
   /* "pippi/pluck.pyx":34
  *     cdef int channels
  * 
- *     def __init__(self, double pitch=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):             # <<<<<<<<<<<<<<
+ *     def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):             # <<<<<<<<<<<<<<
  *         self.state = 0
- *         self.pitch = pitch
+ *         self.freq = freq
  */
 
   /* function exit code */
@@ -3742,9 +3742,9 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "pippi/pluck.pyx":87
+  /* "pippi/pluck.pyx":86
+ *         # Returns sample "position" samples into delay-line's past.
  *         # Position "0" points to the most recently inserted sample.
- *         #outsamp = self.upper_rail.buf[self.upper_rail.position % self.upper_rail.length]
  *         outsamp = self.get_sample(self.upper_rail, self.pickup_location)             # <<<<<<<<<<<<<<
  * 
  *         # Returns spatial sample at location "position", where position zero
@@ -3754,9 +3754,9 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
   __pyx_v_outsamp = ((struct __pyx_vtabstruct_5pippi_5pluck_PluckedString *)__pyx_v_self->__pyx_vtab)->get_sample(__pyx_v_self, ((struct __pyx_obj_5pippi_5pluck_DelayLine *)__pyx_t_1), __pyx_v_self->pickup_location, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pippi/pluck.pyx":94
+  /* "pippi/pluck.pyx":92
+ *         # In a left-going delay-line, position increases to the right, and
  *         # delay DEcreases to the right => left = future and right = past.
- *         #outsamp1 = self.lower_rail.buf[self.lower_rail.position % self.lower_rail.length]
  *         outsamp1 = self.get_sample(self.lower_rail, self.pickup_location)             # <<<<<<<<<<<<<<
  * 
  *         outsamp += outsamp1
@@ -3766,31 +3766,31 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
   __pyx_v_outsamp1 = ((struct __pyx_vtabstruct_5pippi_5pluck_PluckedString *)__pyx_v_self->__pyx_vtab)->get_sample(__pyx_v_self, ((struct __pyx_obj_5pippi_5pluck_DelayLine *)__pyx_t_1), __pyx_v_self->pickup_location, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pippi/pluck.pyx":96
+  /* "pippi/pluck.pyx":94
  *         outsamp1 = self.get_sample(self.lower_rail, self.pickup_location)
  * 
  *         outsamp += outsamp1             # <<<<<<<<<<<<<<
  * 
- *         #ym0 = self.lower_rail.buf[1]      # Sample traveling into "bridge"
+ *         ym0 = self.get_sample(self.lower_rail, 1) # Sample traveling into "bridge"
  */
   __pyx_v_outsamp = (__pyx_v_outsamp + __pyx_v_outsamp1);
 
-  /* "pippi/pluck.pyx":99
+  /* "pippi/pluck.pyx":96
+ *         outsamp += outsamp1
  * 
- *         #ym0 = self.lower_rail.buf[1]      # Sample traveling into "bridge"
- *         ym0 = self.get_sample(self.lower_rail, 1)             # <<<<<<<<<<<<<<
- *         #ypM = self.upper_rail.buf[self.upper_rail.length - 2] # Sample to "nut"
- *         ypM = self.get_sample(self.upper_rail, self.upper_rail.length - 2)
+ *         ym0 = self.get_sample(self.lower_rail, 1) # Sample traveling into "bridge"             # <<<<<<<<<<<<<<
+ *         ypM = self.get_sample(self.upper_rail, self.upper_rail.length - 2) # Sample to "nut"
+ * 
  */
   __pyx_t_1 = ((PyObject *)__pyx_v_self->lower_rail);
   __Pyx_INCREF(__pyx_t_1);
   __pyx_v_ym0 = ((struct __pyx_vtabstruct_5pippi_5pluck_PluckedString *)__pyx_v_self->__pyx_vtab)->get_sample(__pyx_v_self, ((struct __pyx_obj_5pippi_5pluck_DelayLine *)__pyx_t_1), 1, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pippi/pluck.pyx":101
- *         ym0 = self.get_sample(self.lower_rail, 1)
- *         #ypM = self.upper_rail.buf[self.upper_rail.length - 2] # Sample to "nut"
- *         ypM = self.get_sample(self.upper_rail, self.upper_rail.length - 2)             # <<<<<<<<<<<<<<
+  /* "pippi/pluck.pyx":97
+ * 
+ *         ym0 = self.get_sample(self.lower_rail, 1) # Sample traveling into "bridge"
+ *         ypM = self.get_sample(self.upper_rail, self.upper_rail.length - 2) # Sample to "nut"             # <<<<<<<<<<<<<<
  * 
  *         ymM = -ypM                    # Inverting reflection at rigid nut
  */
@@ -3799,8 +3799,8 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
   __pyx_v_ypM = ((struct __pyx_vtabstruct_5pippi_5pluck_PluckedString *)__pyx_v_self->__pyx_vtab)->get_sample(__pyx_v_self, ((struct __pyx_obj_5pippi_5pluck_DelayLine *)__pyx_t_1), (__pyx_v_self->upper_rail->length - 2), 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pippi/pluck.pyx":103
- *         ypM = self.get_sample(self.upper_rail, self.upper_rail.length - 2)
+  /* "pippi/pluck.pyx":99
+ *         ypM = self.get_sample(self.upper_rail, self.upper_rail.length - 2) # Sample to "nut"
  * 
  *         ymM = -ypM                    # Inverting reflection at rigid nut             # <<<<<<<<<<<<<<
  * 
@@ -3808,7 +3808,7 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
  */
   __pyx_v_ymM = (-__pyx_v_ypM);
 
-  /* "pippi/pluck.pyx":107
+  /* "pippi/pluck.pyx":103
  *         # Implement a one-pole lowpass with feedback coefficient = 0.5
  *         # outsamp = 0.5 * outsamp + 0.5 * insamp
  *         self.state = (self.state >> 1) + (ym0 >> 1)             # <<<<<<<<<<<<<<
@@ -3817,7 +3817,7 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
  */
   __pyx_v_self->state = ((__pyx_v_self->state >> 1) + (__pyx_v_ym0 >> 1));
 
-  /* "pippi/pluck.pyx":109
+  /* "pippi/pluck.pyx":105
  *         self.state = (self.state >> 1) + (ym0 >> 1)
  * 
  *         yp0 = -self.state  # Reflection at yielding bridge             # <<<<<<<<<<<<<<
@@ -3826,7 +3826,7 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
  */
   __pyx_v_yp0 = (-__pyx_v_self->state);
 
-  /* "pippi/pluck.pyx":120
+  /* "pippi/pluck.pyx":116
  * 
  *         # Decrement pointer and then update
  *         self.upper_rail.position -= 1             # <<<<<<<<<<<<<<
@@ -3838,17 +3838,17 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
   __pyx_t_6->position = (__pyx_t_6->position - 1);
   __Pyx_DECREF(((PyObject *)__pyx_t_6)); __pyx_t_6 = 0;
 
-  /* "pippi/pluck.pyx":121
+  /* "pippi/pluck.pyx":117
  *         # Decrement pointer and then update
  *         self.upper_rail.position -= 1
  *         self.upper_rail.buf[self.upper_rail.position % self.upper_rail.length] = yp0             # <<<<<<<<<<<<<<
  * 
  *         # Places "nut-reflected" sample from upper delay-line into
  */
-  if (unlikely(!__pyx_v_self->upper_rail->buf.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 121, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->upper_rail->buf.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 117, __pyx_L1_error)}
   if (unlikely(__pyx_v_self->upper_rail->length == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-    __PYX_ERR(0, 121, __pyx_L1_error)
+    __PYX_ERR(0, 117, __pyx_L1_error)
   }
   __pyx_t_7 = __Pyx_mod_int(__pyx_v_self->upper_rail->position, __pyx_v_self->upper_rail->length);
   __pyx_t_8 = -1;
@@ -3858,21 +3858,21 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
   } else if (unlikely(__pyx_t_7 >= __pyx_v_self->upper_rail->buf.shape[0])) __pyx_t_8 = 0;
   if (unlikely(__pyx_t_8 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_8);
-    __PYX_ERR(0, 121, __pyx_L1_error)
+    __PYX_ERR(0, 117, __pyx_L1_error)
   }
   *((short *) ( /* dim=0 */ (__pyx_v_self->upper_rail->buf.data + __pyx_t_7 * __pyx_v_self->upper_rail->buf.strides[0]) )) = __pyx_v_yp0;
 
-  /* "pippi/pluck.pyx":131
+  /* "pippi/pluck.pyx":127
  * 
  *         # Update and then increment pointer
  *         self.lower_rail.buf[self.lower_rail.position % self.lower_rail.length] = ymM             # <<<<<<<<<<<<<<
  *         self.lower_rail.position += 1
  * 
  */
-  if (unlikely(!__pyx_v_self->lower_rail->buf.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 131, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->lower_rail->buf.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 127, __pyx_L1_error)}
   if (unlikely(__pyx_v_self->lower_rail->length == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-    __PYX_ERR(0, 131, __pyx_L1_error)
+    __PYX_ERR(0, 127, __pyx_L1_error)
   }
   __pyx_t_9 = __Pyx_mod_int(__pyx_v_self->lower_rail->position, __pyx_v_self->lower_rail->length);
   __pyx_t_8 = -1;
@@ -3882,11 +3882,11 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
   } else if (unlikely(__pyx_t_9 >= __pyx_v_self->lower_rail->buf.shape[0])) __pyx_t_8 = 0;
   if (unlikely(__pyx_t_8 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_8);
-    __PYX_ERR(0, 131, __pyx_L1_error)
+    __PYX_ERR(0, 127, __pyx_L1_error)
   }
   *((short *) ( /* dim=0 */ (__pyx_v_self->lower_rail->buf.data + __pyx_t_9 * __pyx_v_self->lower_rail->buf.strides[0]) )) = __pyx_v_ymM;
 
-  /* "pippi/pluck.pyx":132
+  /* "pippi/pluck.pyx":128
  *         # Update and then increment pointer
  *         self.lower_rail.buf[self.lower_rail.position % self.lower_rail.length] = ymM
  *         self.lower_rail.position += 1             # <<<<<<<<<<<<<<
@@ -3898,7 +3898,7 @@ static double __pyx_f_5pippi_5pluck_13PluckedString_next_sample(struct __pyx_obj
   __pyx_t_6->position = (__pyx_t_6->position + 1);
   __Pyx_DECREF(((PyObject *)__pyx_t_6)); __pyx_t_6 = 0;
 
-  /* "pippi/pluck.pyx":134
+  /* "pippi/pluck.pyx":130
  *         self.lower_rail.position += 1
  * 
  *         return <double>(outsamp / 32768.0)             # <<<<<<<<<<<<<<
@@ -3966,7 +3966,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_4next_sample(struct __py
   return __pyx_r;
 }
 
-/* "pippi/pluck.pyx":137
+/* "pippi/pluck.pyx":133
  * 
  * 
  *     def play(self, double length):             # <<<<<<<<<<<<<<
@@ -3982,7 +3982,7 @@ static PyObject *__pyx_pw_5pippi_5pluck_13PluckedString_7play(PyObject *__pyx_v_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("play (wrapper)", 0);
   assert(__pyx_arg_length); {
-    __pyx_v_length = __pyx_PyFloat_AsDouble(__pyx_arg_length); if (unlikely((__pyx_v_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 137, __pyx_L3_error)
+    __pyx_v_length = __pyx_PyFloat_AsDouble(__pyx_arg_length); if (unlikely((__pyx_v_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 133, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -4019,44 +4019,44 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
   int __pyx_t_12;
   __Pyx_RefNannySetupContext("play", 0);
 
-  /* "pippi/pluck.pyx":138
+  /* "pippi/pluck.pyx":134
  * 
  *     def play(self, double length):
  *         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=<int>self.samplerate)             # <<<<<<<<<<<<<<
  *         cdef int framelength = len(out)
  *         cdef double sample = 0
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_length, __pyx_t_2) < 0) __PYX_ERR(0, 138, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_length, __pyx_t_2) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_2) < 0) __PYX_ERR(0, 138, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_2) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(((int)__pyx_v_self->samplerate)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(((int)__pyx_v_self->samplerate)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_2) < 0) __PYX_ERR(0, 138, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_2) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_out = ((struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "pippi/pluck.pyx":139
+  /* "pippi/pluck.pyx":135
  *     def play(self, double length):
  *         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=<int>self.samplerate)
  *         cdef int framelength = len(out)             # <<<<<<<<<<<<<<
  *         cdef double sample = 0
  * 
  */
-  __pyx_t_3 = PyObject_Length(((PyObject *)__pyx_v_out)); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 139, __pyx_L1_error)
+  __pyx_t_3 = PyObject_Length(((PyObject *)__pyx_v_out)); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 135, __pyx_L1_error)
   __pyx_v_framelength = __pyx_t_3;
 
-  /* "pippi/pluck.pyx":140
+  /* "pippi/pluck.pyx":136
  *         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=<int>self.samplerate)
  *         cdef int framelength = len(out)
  *         cdef double sample = 0             # <<<<<<<<<<<<<<
@@ -4065,7 +4065,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
  */
   __pyx_v_sample = 0.0;
 
-  /* "pippi/pluck.pyx":142
+  /* "pippi/pluck.pyx":138
  *         cdef double sample = 0
  * 
  *         for i in range(framelength):             # <<<<<<<<<<<<<<
@@ -4077,7 +4077,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
   for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
     __pyx_v_i = __pyx_t_6;
 
-    /* "pippi/pluck.pyx":143
+    /* "pippi/pluck.pyx":139
  * 
  *         for i in range(framelength):
  *             sample = self.next_sample()             # <<<<<<<<<<<<<<
@@ -4086,7 +4086,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
  */
     __pyx_v_sample = ((struct __pyx_vtabstruct_5pippi_5pluck_PluckedString *)__pyx_v_self->__pyx_vtab)->next_sample(__pyx_v_self, 0);
 
-    /* "pippi/pluck.pyx":144
+    /* "pippi/pluck.pyx":140
  *         for i in range(framelength):
  *             sample = self.next_sample()
  *             for c in range(self.channels):             # <<<<<<<<<<<<<<
@@ -4098,14 +4098,14 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
       __pyx_v_c = __pyx_t_9;
 
-      /* "pippi/pluck.pyx":145
+      /* "pippi/pluck.pyx":141
  *             sample = self.next_sample()
  *             for c in range(self.channels):
  *                 out.frames[i][c] = sample             # <<<<<<<<<<<<<<
  * 
  *         return out
  */
-      if (unlikely(!__pyx_v_out->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 145, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_out->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 141, __pyx_L1_error)}
       __pyx_t_10 = __pyx_v_i;
       __pyx_t_11 = __pyx_v_c;
       __pyx_t_12 = -1;
@@ -4119,13 +4119,13 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
       } else if (unlikely(__pyx_t_11 >= __pyx_v_out->frames.shape[1])) __pyx_t_12 = 1;
       if (unlikely(__pyx_t_12 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_12);
-        __PYX_ERR(0, 145, __pyx_L1_error)
+        __PYX_ERR(0, 141, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out->frames.data + __pyx_t_10 * __pyx_v_out->frames.strides[0]) ) + __pyx_t_11 * __pyx_v_out->frames.strides[1]) )) = __pyx_v_sample;
     }
   }
 
-  /* "pippi/pluck.pyx":147
+  /* "pippi/pluck.pyx":143
  *                 out.frames[i][c] = sample
  * 
  *         return out             # <<<<<<<<<<<<<<
@@ -4135,7 +4135,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
   __pyx_r = ((PyObject *)__pyx_v_out);
   goto __pyx_L0;
 
-  /* "pippi/pluck.pyx":137
+  /* "pippi/pluck.pyx":133
  * 
  * 
  *     def play(self, double length):             # <<<<<<<<<<<<<<
@@ -4159,7 +4159,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_6play(struct __pyx_obj_5
 /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     cdef bint use_setstate
- *     state = (self.amp, self.channels, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.pitch, self.samplerate, self.state, self.upper_rail)
+ *     state = (self.amp, self.channels, self.freq, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.samplerate, self.state, self.upper_rail)
  */
 
 /* Python wrapper */
@@ -4198,7 +4198,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
  *     cdef bint use_setstate
- *     state = (self.amp, self.channels, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.pitch, self.samplerate, self.state, self.upper_rail)             # <<<<<<<<<<<<<<
+ *     state = (self.amp, self.channels, self.freq, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.samplerate, self.state, self.upper_rail)             # <<<<<<<<<<<<<<
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:
  */
@@ -4206,13 +4206,13 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->pick); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->freq); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_self->pickup); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_self->pick); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->pickup_location); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_self->pickup); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_v_self->pitch); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 3, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->pickup_location); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 3, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
@@ -4224,11 +4224,11 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_9, 2, __pyx_t_3);
   __Pyx_INCREF(((PyObject *)__pyx_v_self->lower_rail));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_self->lower_rail));
-  PyTuple_SET_ITEM(__pyx_t_9, 2, ((PyObject *)__pyx_v_self->lower_rail));
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_9, 3, __pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_9, 3, ((PyObject *)__pyx_v_self->lower_rail));
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_9, 4, __pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_5);
@@ -4255,7 +4255,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
 
   /* "(tree fragment)":4
  *     cdef bint use_setstate
- *     state = (self.amp, self.channels, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.pitch, self.samplerate, self.state, self.upper_rail)
+ *     state = (self.amp, self.channels, self.freq, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.samplerate, self.state, self.upper_rail)
  *     _dict = getattr(self, '__dict__', None)             # <<<<<<<<<<<<<<
  *     if _dict is not None:
  *         state += (_dict,)
@@ -4266,7 +4266,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
   __pyx_t_9 = 0;
 
   /* "(tree fragment)":5
- *     state = (self.amp, self.channels, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.pitch, self.samplerate, self.state, self.upper_rail)
+ *     state = (self.amp, self.channels, self.freq, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.samplerate, self.state, self.upper_rail)
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
@@ -4304,7 +4304,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
     __pyx_v_use_setstate = 1;
 
     /* "(tree fragment)":5
- *     state = (self.amp, self.channels, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.pitch, self.samplerate, self.state, self.upper_rail)
+ *     state = (self.amp, self.channels, self.freq, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.samplerate, self.state, self.upper_rail)
  *     _dict = getattr(self, '__dict__', None)
  *     if _dict is not None:             # <<<<<<<<<<<<<<
  *         state += (_dict,)
@@ -4318,7 +4318,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
  *     else:
  *         use_setstate = self.lower_rail is not None or self.upper_rail is not None             # <<<<<<<<<<<<<<
  *     if use_setstate:
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, None), state
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, None), state
  */
   /*else*/ {
     __pyx_t_10 = (((PyObject *)__pyx_v_self->lower_rail) != Py_None);
@@ -4340,7 +4340,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
  *     else:
  *         use_setstate = self.lower_rail is not None or self.upper_rail is not None
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, None), state
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, None), state
  *     else:
  */
   __pyx_t_11 = (__pyx_v_use_setstate != 0);
@@ -4349,9 +4349,9 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
     /* "(tree fragment)":11
  *         use_setstate = self.lower_rail is not None or self.upper_rail is not None
  *     if use_setstate:
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, None), state             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, None), state             # <<<<<<<<<<<<<<
  *     else:
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, state)
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, state)
  */
     __Pyx_XDECREF(__pyx_r);
     __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_pyx_unpickle_PluckedString); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 11, __pyx_L1_error)
@@ -4361,9 +4361,9 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     PyTuple_SET_ITEM(__pyx_t_9, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    __Pyx_INCREF(__pyx_int_214681947);
-    __Pyx_GIVEREF(__pyx_int_214681947);
-    PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_int_214681947);
+    __Pyx_INCREF(__pyx_int_190144090);
+    __Pyx_GIVEREF(__pyx_int_190144090);
+    PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_int_190144090);
     __Pyx_INCREF(Py_None);
     __Pyx_GIVEREF(Py_None);
     PyTuple_SET_ITEM(__pyx_t_9, 2, Py_None);
@@ -4386,15 +4386,15 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
  *     else:
  *         use_setstate = self.lower_rail is not None or self.upper_rail is not None
  *     if use_setstate:             # <<<<<<<<<<<<<<
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, None), state
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, None), state
  *     else:
  */
   }
 
   /* "(tree fragment)":13
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, None), state
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, None), state
  *     else:
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, state)             # <<<<<<<<<<<<<<
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, state)             # <<<<<<<<<<<<<<
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_PluckedString__set_state(self, __pyx_state)
  */
@@ -4407,9 +4407,9 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
     __Pyx_INCREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     __Pyx_GIVEREF(((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
     PyTuple_SET_ITEM(__pyx_t_9, 0, ((PyObject *)Py_TYPE(((PyObject *)__pyx_v_self))));
-    __Pyx_INCREF(__pyx_int_214681947);
-    __Pyx_GIVEREF(__pyx_int_214681947);
-    PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_int_214681947);
+    __Pyx_INCREF(__pyx_int_190144090);
+    __Pyx_GIVEREF(__pyx_int_190144090);
+    PyTuple_SET_ITEM(__pyx_t_9, 1, __pyx_int_190144090);
     __Pyx_INCREF(__pyx_v_state);
     __Pyx_GIVEREF(__pyx_v_state);
     PyTuple_SET_ITEM(__pyx_t_9, 2, __pyx_v_state);
@@ -4429,7 +4429,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
  *     cdef bint use_setstate
- *     state = (self.amp, self.channels, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.pitch, self.samplerate, self.state, self.upper_rail)
+ *     state = (self.amp, self.channels, self.freq, self.lower_rail, self.pick, self.pickup, self.pickup_location, self.samplerate, self.state, self.upper_rail)
  */
 
   /* function exit code */
@@ -4455,7 +4455,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_8__reduce_cython__(struc
 
 /* "(tree fragment)":14
  *     else:
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, state)
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_PluckedString__set_state(self, __pyx_state)
  */
@@ -4480,7 +4480,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_10__setstate_cython__(st
   __Pyx_RefNannySetupContext("__setstate_cython__", 0);
 
   /* "(tree fragment)":15
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, state)
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, state)
  * def __setstate_cython__(self, __pyx_state):
  *     __pyx_unpickle_PluckedString__set_state(self, __pyx_state)             # <<<<<<<<<<<<<<
  */
@@ -4491,7 +4491,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_13PluckedString_10__setstate_cython__(st
 
   /* "(tree fragment)":14
  *     else:
- *         return __pyx_unpickle_PluckedString, (type(self), 0xccbc95b, state)
+ *         return __pyx_unpickle_PluckedString, (type(self), 0xb555e5a, state)
  * def __setstate_cython__(self, __pyx_state):             # <<<<<<<<<<<<<<
  *     __pyx_unpickle_PluckedString__set_state(self, __pyx_state)
  */
@@ -5020,7 +5020,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_DelayLine__set_state(struc
 
 /* "(tree fragment)":1
  * def __pyx_unpickle_PluckedString(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
- *     if __pyx_checksum != 0xccbc95b:
+ *     if __pyx_checksum != 0xb555e5a:
  *         from pickle import PickleError as __pyx_PickleError
  */
 
@@ -5113,18 +5113,18 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
 
   /* "(tree fragment)":2
  * def __pyx_unpickle_PluckedString(__pyx_type, long __pyx_checksum, __pyx_state):
- *     if __pyx_checksum != 0xccbc95b:             # <<<<<<<<<<<<<<
+ *     if __pyx_checksum != 0xb555e5a:             # <<<<<<<<<<<<<<
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))" % __pyx_checksum)
  */
-  __pyx_t_1 = ((__pyx_v___pyx_checksum != 0xccbc95b) != 0);
+  __pyx_t_1 = ((__pyx_v___pyx_checksum != 0xb555e5a) != 0);
   if (__pyx_t_1) {
 
     /* "(tree fragment)":3
  * def __pyx_unpickle_PluckedString(__pyx_type, long __pyx_checksum, __pyx_state):
- *     if __pyx_checksum != 0xccbc95b:
+ *     if __pyx_checksum != 0xb555e5a:
  *         from pickle import PickleError as __pyx_PickleError             # <<<<<<<<<<<<<<
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))" % __pyx_checksum)
  *     __pyx_result = PluckedString.__new__(__pyx_type)
  */
     __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 3, __pyx_L1_error)
@@ -5143,15 +5143,15 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "(tree fragment)":4
- *     if __pyx_checksum != 0xccbc95b:
+ *     if __pyx_checksum != 0xb555e5a:
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))" % __pyx_checksum)             # <<<<<<<<<<<<<<
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))" % __pyx_checksum)             # <<<<<<<<<<<<<<
  *     __pyx_result = PluckedString.__new__(__pyx_type)
  *     if __pyx_state is not None:
  */
     __pyx_t_2 = __Pyx_PyInt_From_long(__pyx_v___pyx_checksum); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 4, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyString_Format(__pyx_kp_s_Incompatible_checksums_s_vs_0xcc, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 4, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyString_Format(__pyx_kp_s_Incompatible_checksums_s_vs_0xb5, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 4, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_INCREF(__pyx_v___pyx_PickleError);
@@ -5207,15 +5207,15 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
 
     /* "(tree fragment)":2
  * def __pyx_unpickle_PluckedString(__pyx_type, long __pyx_checksum, __pyx_state):
- *     if __pyx_checksum != 0xccbc95b:             # <<<<<<<<<<<<<<
+ *     if __pyx_checksum != 0xb555e5a:             # <<<<<<<<<<<<<<
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))" % __pyx_checksum)
  */
   }
 
   /* "(tree fragment)":5
  *         from pickle import PickleError as __pyx_PickleError
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))" % __pyx_checksum)
  *     __pyx_result = PluckedString.__new__(__pyx_type)             # <<<<<<<<<<<<<<
  *     if __pyx_state is not None:
  *         __pyx_unpickle_PluckedString__set_state(<PluckedString> __pyx_result, __pyx_state)
@@ -5269,7 +5269,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
   __pyx_t_3 = 0;
 
   /* "(tree fragment)":6
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))" % __pyx_checksum)
  *     __pyx_result = PluckedString.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_PluckedString__set_state(<PluckedString> __pyx_result, __pyx_state)
@@ -5292,7 +5292,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
     /* "(tree fragment)":6
- *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xccbc95b = (amp, channels, lower_rail, pick, pickup, pickup_location, pitch, samplerate, state, upper_rail))" % __pyx_checksum)
+ *         raise __pyx_PickleError("Incompatible checksums (%s vs 0xb555e5a = (amp, channels, freq, lower_rail, pick, pickup, pickup_location, samplerate, state, upper_rail))" % __pyx_checksum)
  *     __pyx_result = PluckedString.__new__(__pyx_type)
  *     if __pyx_state is not None:             # <<<<<<<<<<<<<<
  *         __pyx_unpickle_PluckedString__set_state(<PluckedString> __pyx_result, __pyx_state)
@@ -5305,7 +5305,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
  *         __pyx_unpickle_PluckedString__set_state(<PluckedString> __pyx_result, __pyx_state)
  *     return __pyx_result             # <<<<<<<<<<<<<<
  * cdef __pyx_unpickle_PluckedString__set_state(PluckedString __pyx_result, tuple __pyx_state):
- *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.lower_rail = __pyx_state[2]; __pyx_result.pick = __pyx_state[3]; __pyx_result.pickup = __pyx_state[4]; __pyx_result.pickup_location = __pyx_state[5]; __pyx_result.pitch = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
+ *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.freq = __pyx_state[2]; __pyx_result.lower_rail = __pyx_state[3]; __pyx_result.pick = __pyx_state[4]; __pyx_result.pickup = __pyx_state[5]; __pyx_result.pickup_location = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_INCREF(__pyx_v___pyx_result);
@@ -5314,7 +5314,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_PluckedString(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
- *     if __pyx_checksum != 0xccbc95b:
+ *     if __pyx_checksum != 0xb555e5a:
  *         from pickle import PickleError as __pyx_PickleError
  */
 
@@ -5339,7 +5339,7 @@ static PyObject *__pyx_pf_5pippi_5pluck_2__pyx_unpickle_PluckedString(CYTHON_UNU
  *         __pyx_unpickle_PluckedString__set_state(<PluckedString> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_PluckedString__set_state(PluckedString __pyx_result, tuple __pyx_state):             # <<<<<<<<<<<<<<
- *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.lower_rail = __pyx_state[2]; __pyx_result.pick = __pyx_state[3]; __pyx_result.pickup = __pyx_state[4]; __pyx_result.pickup_location = __pyx_state[5]; __pyx_result.pitch = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
+ *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.freq = __pyx_state[2]; __pyx_result.lower_rail = __pyx_state[3]; __pyx_result.pick = __pyx_state[4]; __pyx_result.pickup = __pyx_state[5]; __pyx_result.pickup_location = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
  *     if len(__pyx_state) > 10 and hasattr(__pyx_result, '__dict__'):
  */
 
@@ -5363,7 +5363,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
   /* "(tree fragment)":10
  *     return __pyx_result
  * cdef __pyx_unpickle_PluckedString__set_state(PluckedString __pyx_result, tuple __pyx_state):
- *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.lower_rail = __pyx_state[2]; __pyx_result.pick = __pyx_state[3]; __pyx_result.pickup = __pyx_state[4]; __pyx_result.pickup_location = __pyx_state[5]; __pyx_result.pitch = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]             # <<<<<<<<<<<<<<
+ *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.freq = __pyx_state[2]; __pyx_result.lower_rail = __pyx_state[3]; __pyx_result.pick = __pyx_state[4]; __pyx_result.pickup = __pyx_state[5]; __pyx_result.pickup_location = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]             # <<<<<<<<<<<<<<
  *     if len(__pyx_state) > 10 and hasattr(__pyx_result, '__dict__'):
  *         __pyx_result.__dict__.update(__pyx_state[10])
  */
@@ -5391,6 +5391,15 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
   }
   __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 2, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 10, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v___pyx_result->freq = __pyx_t_2;
+  if (unlikely(__pyx_v___pyx_state == Py_None)) {
+    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+    __PYX_ERR(1, 10, __pyx_L1_error)
+  }
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5pippi_5pluck_DelayLine))))) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v___pyx_result->lower_rail);
@@ -5401,7 +5410,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(1, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 3, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 4, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5410,7 +5419,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(1, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 4, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 5, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -5419,20 +5428,11 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(1, 10, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 5, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 6, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v___pyx_result->pickup_location = __pyx_t_3;
-  if (unlikely(__pyx_v___pyx_state == Py_None)) {
-    PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(1, 10, __pyx_L1_error)
-  }
-  __pyx_t_1 = __Pyx_GetItemInt_Tuple(__pyx_v___pyx_state, 6, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 10, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 10, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v___pyx_result->pitch = __pyx_t_2;
   if (unlikely(__pyx_v___pyx_state == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
     __PYX_ERR(1, 10, __pyx_L1_error)
@@ -5466,7 +5466,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
 
   /* "(tree fragment)":11
  * cdef __pyx_unpickle_PluckedString__set_state(PluckedString __pyx_result, tuple __pyx_state):
- *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.lower_rail = __pyx_state[2]; __pyx_result.pick = __pyx_state[3]; __pyx_result.pickup = __pyx_state[4]; __pyx_result.pickup_location = __pyx_state[5]; __pyx_result.pitch = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
+ *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.freq = __pyx_state[2]; __pyx_result.lower_rail = __pyx_state[3]; __pyx_result.pick = __pyx_state[4]; __pyx_result.pickup = __pyx_state[5]; __pyx_result.pickup_location = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
  *     if len(__pyx_state) > 10 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
  *         __pyx_result.__dict__.update(__pyx_state[10])
  */
@@ -5488,7 +5488,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
   if (__pyx_t_5) {
 
     /* "(tree fragment)":12
- *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.lower_rail = __pyx_state[2]; __pyx_result.pick = __pyx_state[3]; __pyx_result.pickup = __pyx_state[4]; __pyx_result.pickup_location = __pyx_state[5]; __pyx_result.pitch = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
+ *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.freq = __pyx_state[2]; __pyx_result.lower_rail = __pyx_state[3]; __pyx_result.pick = __pyx_state[4]; __pyx_result.pickup = __pyx_state[5]; __pyx_result.pickup_location = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
  *     if len(__pyx_state) > 10 and hasattr(__pyx_result, '__dict__'):
  *         __pyx_result.__dict__.update(__pyx_state[10])             # <<<<<<<<<<<<<<
  */
@@ -5553,7 +5553,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
 
     /* "(tree fragment)":11
  * cdef __pyx_unpickle_PluckedString__set_state(PluckedString __pyx_result, tuple __pyx_state):
- *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.lower_rail = __pyx_state[2]; __pyx_result.pick = __pyx_state[3]; __pyx_result.pickup = __pyx_state[4]; __pyx_result.pickup_location = __pyx_state[5]; __pyx_result.pitch = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
+ *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.freq = __pyx_state[2]; __pyx_result.lower_rail = __pyx_state[3]; __pyx_result.pick = __pyx_state[4]; __pyx_result.pickup = __pyx_state[5]; __pyx_result.pickup_location = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
  *     if len(__pyx_state) > 10 and hasattr(__pyx_result, '__dict__'):             # <<<<<<<<<<<<<<
  *         __pyx_result.__dict__.update(__pyx_state[10])
  */
@@ -5563,7 +5563,7 @@ static PyObject *__pyx_f_5pippi_5pluck___pyx_unpickle_PluckedString__set_state(s
  *         __pyx_unpickle_PluckedString__set_state(<PluckedString> __pyx_result, __pyx_state)
  *     return __pyx_result
  * cdef __pyx_unpickle_PluckedString__set_state(PluckedString __pyx_result, tuple __pyx_state):             # <<<<<<<<<<<<<<
- *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.lower_rail = __pyx_state[2]; __pyx_result.pick = __pyx_state[3]; __pyx_result.pickup = __pyx_state[4]; __pyx_result.pickup_location = __pyx_state[5]; __pyx_result.pitch = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
+ *     __pyx_result.amp = __pyx_state[0]; __pyx_result.channels = __pyx_state[1]; __pyx_result.freq = __pyx_state[2]; __pyx_result.lower_rail = __pyx_state[3]; __pyx_result.pick = __pyx_state[4]; __pyx_result.pickup = __pyx_state[5]; __pyx_result.pickup_location = __pyx_state[6]; __pyx_result.samplerate = __pyx_state[7]; __pyx_result.state = __pyx_state[8]; __pyx_result.upper_rail = __pyx_state[9]
  *     if len(__pyx_state) > 10 and hasattr(__pyx_result, '__dict__'):
  */
 
@@ -19429,7 +19429,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Empty_shape_tuple_for_cython_arr, __pyx_k_Empty_shape_tuple_for_cython_arr, sizeof(__pyx_k_Empty_shape_tuple_for_cython_arr), 0, 0, 1, 0},
   {&__pyx_kp_s_Incompatible_checksums_s_vs_0x1c, __pyx_k_Incompatible_checksums_s_vs_0x1c, sizeof(__pyx_k_Incompatible_checksums_s_vs_0x1c), 0, 0, 1, 0},
   {&__pyx_kp_s_Incompatible_checksums_s_vs_0xb0, __pyx_k_Incompatible_checksums_s_vs_0xb0, sizeof(__pyx_k_Incompatible_checksums_s_vs_0xb0), 0, 0, 1, 0},
-  {&__pyx_kp_s_Incompatible_checksums_s_vs_0xcc, __pyx_k_Incompatible_checksums_s_vs_0xcc, sizeof(__pyx_k_Incompatible_checksums_s_vs_0xcc), 0, 0, 1, 0},
+  {&__pyx_kp_s_Incompatible_checksums_s_vs_0xb5, __pyx_k_Incompatible_checksums_s_vs_0xb5, sizeof(__pyx_k_Incompatible_checksums_s_vs_0xb5), 0, 0, 1, 0},
   {&__pyx_n_s_IndexError, __pyx_k_IndexError, sizeof(__pyx_k_IndexError), 0, 0, 1, 1},
   {&__pyx_kp_s_Indirect_dimensions_not_supporte, __pyx_k_Indirect_dimensions_not_supporte, sizeof(__pyx_k_Indirect_dimensions_not_supporte), 0, 0, 1, 0},
   {&__pyx_kp_s_Invalid_mode_expected_c_or_fortr, __pyx_k_Invalid_mode_expected_c_or_fortr, sizeof(__pyx_k_Invalid_mode_expected_c_or_fortr), 0, 0, 1, 0},
@@ -19466,6 +19466,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
   {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
   {&__pyx_n_u_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 1, 0, 1},
+  {&__pyx_n_s_freq, __pyx_k_freq, sizeof(__pyx_k_freq), 0, 0, 1, 1},
   {&__pyx_n_s_get_sample, __pyx_k_get_sample, sizeof(__pyx_k_get_sample), 0, 0, 1, 1},
   {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
@@ -19492,7 +19493,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
   {&__pyx_n_s_pickup, __pyx_k_pickup, sizeof(__pyx_k_pickup), 0, 0, 1, 1},
   {&__pyx_n_s_pippi_pluck, __pyx_k_pippi_pluck, sizeof(__pyx_k_pippi_pluck), 0, 0, 1, 1},
-  {&__pyx_n_s_pitch, __pyx_k_pitch, sizeof(__pyx_k_pitch), 0, 0, 1, 1},
   {&__pyx_n_s_position, __pyx_k_position, sizeof(__pyx_k_position), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_PickleError, __pyx_k_pyx_PickleError, sizeof(__pyx_k_pyx_PickleError), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_capi, __pyx_k_pyx_capi, sizeof(__pyx_k_pyx_capi), 0, 0, 1, 1},
@@ -19865,7 +19865,7 @@ static int __Pyx_InitGlobals(void) {
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_29760740 = PyInt_FromLong(29760740L); if (unlikely(!__pyx_int_29760740)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_184977713 = PyInt_FromLong(184977713L); if (unlikely(!__pyx_int_184977713)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __pyx_int_214681947 = PyInt_FromLong(214681947L); if (unlikely(!__pyx_int_214681947)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_190144090 = PyInt_FromLong(190144090L); if (unlikely(!__pyx_int_190144090)) __PYX_ERR(0, 1, __pyx_L1_error)
   __pyx_int_neg_1 = PyInt_FromLong(-1); if (unlikely(!__pyx_int_neg_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;

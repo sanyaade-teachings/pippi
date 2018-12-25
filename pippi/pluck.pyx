@@ -21,7 +21,7 @@ cdef class PluckedString:
     cdef DelayLine lower_rail
 
     cdef double amp
-    cdef double pitch
+    cdef double freq
     cdef double pick
     cdef double pickup
 
@@ -31,16 +31,16 @@ cdef class PluckedString:
     cdef int samplerate
     cdef int channels
 
-    def __init__(self, double pitch=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):
+    def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):
         self.state = 0
-        self.pitch = pitch
+        self.freq = freq
         self.pick = pick
         self.pickup = pickup
         self.amp = amp
         self.samplerate = samplerate
         self.channels = channels
 
-        cdef int rail_length = <int>(<double>samplerate / pitch / 2.0 + 1.0)
+        cdef int rail_length = <int>(<double>samplerate / freq / 2.0 + 1.0)
 
         self.upper_rail = DelayLine(rail_length)
         self.lower_rail = DelayLine(rail_length)
