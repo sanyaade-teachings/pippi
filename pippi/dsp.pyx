@@ -88,8 +88,8 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
 cpdef wts.Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
     return wts.randline(numpoints, lowvalue, highvalue, wtsize)
 
-cpdef wts.Wavetable wt(object values, int wtsize=4096, bint window=True):
-    return wts.Wavetable(values, wtsize, window)
+cpdef wts.Wavetable wt(object values, double lowvalue=0, double highvalue=1, int wtsize=4096, bint window=True):
+    return wts.Wavetable(values, wtsize, window) * (highvalue-lowvalue) + lowvalue
 
 cpdef SoundBuffer stack(list sounds):
     cdef int channels = 0
@@ -169,10 +169,17 @@ def find(pattern, channels=2, samplerate=44100):
     for filename in glob.iglob(pattern, recursive=True):
         yield SoundBuffer(channels=channels, samplerate=samplerate, filename=filename)
 
-def pool(callback, reps=10, params=None, processes=4):
+def pool(callback, reps=None, params=None, processes=None):
     out = []
     if params is None:
-        params = [None]
+        params = [(None,)]
+
+    if reps is None:
+        reps = len(params)
+
+    if processes is None:
+        processes = mp.cpu_count()
+
     with mp.Pool(processes=processes) as process_pool:
         for result in [ process_pool.apply_async(callback, params[i % len(params)]) for i in range(reps) ]:
             out += [ result.get() ]

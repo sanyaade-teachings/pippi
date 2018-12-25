@@ -3,7 +3,6 @@ from pippi cimport dsp
 from pippi cimport fx
 from pippi cimport grains
 from pippi cimport interpolation
-from pippi cimport oscs
 from pippi cimport soundbuffer
 from pippi cimport soundpipe
 from pippi cimport wavetables

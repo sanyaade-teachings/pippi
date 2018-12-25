@@ -790,7 +790,6 @@ static const char *__pyx_f[] = {
   "stringsource",
   "pippi/wavetables.pxd",
   "pippi/grains.pxd",
-  "pippi/oscs.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -904,7 +903,6 @@ typedef struct {
 /*--- Type declarations ---*/
 struct __pyx_obj_5pippi_10wavetables_Wavetable;
 struct __pyx_obj_5pippi_6grains_Cloud;
-struct __pyx_obj_5pippi_4oscs_Osc;
 struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer;
 struct __pyx_obj_5pippi_11soundbuffer___pyx_scope_struct__grains;
 struct __pyx_array_obj;
@@ -1123,34 +1121,6 @@ struct __pyx_obj_5pippi_6grains_Cloud {
 };
 
 
-/* "oscs.pxd":1
- * cdef class Osc:             # <<<<<<<<<<<<<<
- *     cdef public double freq
- *     cdef public double amp
- */
-struct __pyx_obj_5pippi_4oscs_Osc {
-  PyObject_HEAD
-  struct __pyx_vtabstruct_5pippi_4oscs_Osc *__pyx_vtab;
-  double freq;
-  double amp;
-  __Pyx_memviewslice wavetable;
-  PyObject *wavetables;
-  double lfo_freq;
-  PyObject *lfo;
-  __Pyx_memviewslice window;
-  double pulsewidth;
-  __Pyx_memviewslice mod;
-  double mod_range;
-  double mod_freq;
-  double phase;
-  double win_phase;
-  double mod_phase;
-  int channels;
-  int samplerate;
-  int wtsize;
-};
-
-
 /* "pippi/soundbuffer.pxd":8
  * cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil
  * 
@@ -1263,19 +1233,6 @@ struct __pyx_memoryviewslice_obj {
   int (*to_dtype_func)(char *, PyObject *);
 };
 
-
-
-/* "oscs.pxd":1
- * cdef class Osc:             # <<<<<<<<<<<<<<
- *     cdef public double freq
- *     cdef public double amp
- */
-
-struct __pyx_vtabstruct_5pippi_4oscs_Osc {
-  PyObject *(*_play)(struct __pyx_obj_5pippi_4oscs_Osc *, int);
-  PyObject *(*_play2d)(struct __pyx_obj_5pippi_4oscs_Osc *, int);
-};
-static struct __pyx_vtabstruct_5pippi_4oscs_Osc *__pyx_vtabptr_5pippi_4oscs_Osc;
 
 
 /* "pippi/soundbuffer.pyx":195
@@ -1812,9 +1769,6 @@ static int __Pyx_SetVtable(PyObject *dict, void *vtable);
 /* SetupReduce.proto */
 static int __Pyx_setup_reduce(PyObject* type_obj);
 
-/* GetVTable.proto */
-static void* __Pyx_GetVtable(PyObject *dict);
-
 /* CLineInTraceback.proto */
 #ifdef CYTHON_CLINE_IN_TRACEBACK
 #define __Pyx_CLineForTraceback(tstate, c_line)  (((CYTHON_CLINE_IN_TRACEBACK)) ? c_line : 0)
@@ -2154,9 +2108,6 @@ static PyTypeObject *__pyx_ptype_5pippi_6grains_Cloud = 0;
 static __Pyx_memviewslice (*__pyx_f_5pippi_13interpolation__linear)(__Pyx_memviewslice, int); /*proto*/
 static __Pyx_memviewslice (*__pyx_f_5pippi_13interpolation__linear_inner)(__Pyx_memviewslice, __Pyx_memviewslice, int); /*proto*/
 static double (*__pyx_f_5pippi_13interpolation__linear_point)(__Pyx_memviewslice, double); /*proto*/
-
-/* Module declarations from 'pippi.oscs' */
-static PyTypeObject *__pyx_ptype_5pippi_4oscs_Osc = 0;
 
 /* Module declarations from 'pippi' */
 
@@ -32429,8 +32380,6 @@ static int __Pyx_modinit_type_import_code(void) {
   /*--- Type import code ---*/
   __pyx_ptype_5pippi_10wavetables_Wavetable = __Pyx_ImportType("pippi.wavetables", "Wavetable", sizeof(struct __pyx_obj_5pippi_10wavetables_Wavetable), 1); if (unlikely(!__pyx_ptype_5pippi_10wavetables_Wavetable)) __PYX_ERR(3, 5, __pyx_L1_error)
   __pyx_ptype_5pippi_6grains_Cloud = __Pyx_ImportType("pippi.grains", "Cloud", sizeof(struct __pyx_obj_5pippi_6grains_Cloud), 1); if (unlikely(!__pyx_ptype_5pippi_6grains_Cloud)) __PYX_ERR(4, 4, __pyx_L1_error)
-  __pyx_ptype_5pippi_4oscs_Osc = __Pyx_ImportType("pippi.oscs", "Osc", sizeof(struct __pyx_obj_5pippi_4oscs_Osc), 1); if (unlikely(!__pyx_ptype_5pippi_4oscs_Osc)) __PYX_ERR(5, 1, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_4oscs_Osc = (struct __pyx_vtabstruct_5pippi_4oscs_Osc*)__Pyx_GetVtable(__pyx_ptype_5pippi_4oscs_Osc->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_4oscs_Osc)) __PYX_ERR(5, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -35176,26 +35125,6 @@ GOOD:
     Py_XDECREF(setstate);
     Py_XDECREF(setstate_cython);
     return ret;
-}
-
-/* GetVTable */
-        static void* __Pyx_GetVtable(PyObject *dict) {
-    void* ptr;
-    PyObject *ob = PyObject_GetItem(dict, __pyx_n_s_pyx_vtable);
-    if (!ob)
-        goto bad;
-#if PY_VERSION_HEX >= 0x02070000
-    ptr = PyCapsule_GetPointer(ob, 0);
-#else
-    ptr = PyCObject_AsVoidPtr(ob);
-#endif
-    if (!ptr && !PyErr_Occurred())
-        PyErr_SetString(PyExc_RuntimeError, "invalid vtable found for imported type");
-    Py_DECREF(ob);
-    return ptr;
-bad:
-    Py_XDECREF(ob);
-    return NULL;
 }
 
 /* CLineInTraceback */

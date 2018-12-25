@@ -823,7 +823,6 @@ static const char *__pyx_f[] = {
   "venv/lib/python3.6/site-packages/Cython/Includes/cpython/array.pxd",
   "venv/lib/python3.6/site-packages/Cython/Includes/cpython/type.pxd",
   "pippi/grains.pxd",
-  "pippi/oscs.pxd",
   "pippi/soundbuffer.pxd",
 };
 /* MemviewSliceStruct.proto */
@@ -1154,7 +1153,6 @@ struct arrayobject;
 typedef struct arrayobject arrayobject;
 #endif
 struct __pyx_obj_5pippi_6grains_Cloud;
-struct __pyx_obj_5pippi_4oscs_Osc;
 struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer;
 struct __pyx_obj_5pippi_10wavetables_Wavetable;
 struct __pyx_array_obj;
@@ -1421,34 +1419,6 @@ struct __pyx_obj_5pippi_6grains_Cloud {
 };
 
 
-/* "oscs.pxd":1
- * cdef class Osc:             # <<<<<<<<<<<<<<
- *     cdef public double freq
- *     cdef public double amp
- */
-struct __pyx_obj_5pippi_4oscs_Osc {
-  PyObject_HEAD
-  struct __pyx_vtabstruct_5pippi_4oscs_Osc *__pyx_vtab;
-  double freq;
-  double amp;
-  __Pyx_memviewslice wavetable;
-  PyObject *wavetables;
-  double lfo_freq;
-  PyObject *lfo;
-  __Pyx_memviewslice window;
-  double pulsewidth;
-  __Pyx_memviewslice mod;
-  double mod_range;
-  double mod_freq;
-  double phase;
-  double win_phase;
-  double mod_phase;
-  int channels;
-  int samplerate;
-  int wtsize;
-};
-
-
 /* "soundbuffer.pxd":8
  * cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil
  * 
@@ -1554,19 +1524,6 @@ struct __pyx_memoryviewslice_obj {
   int (*to_dtype_func)(char *, PyObject *);
 };
 
-
-
-/* "oscs.pxd":1
- * cdef class Osc:             # <<<<<<<<<<<<<<
- *     cdef public double freq
- *     cdef public double amp
- */
-
-struct __pyx_vtabstruct_5pippi_4oscs_Osc {
-  PyObject *(*_play)(struct __pyx_obj_5pippi_4oscs_Osc *, int);
-  PyObject *(*_play2d)(struct __pyx_obj_5pippi_4oscs_Osc *, int);
-};
-static struct __pyx_vtabstruct_5pippi_4oscs_Osc *__pyx_vtabptr_5pippi_4oscs_Osc;
 
 
 /* "soundbuffer.pxd":8
@@ -2612,9 +2569,6 @@ static __Pyx_memviewslice (*__pyx_f_5pippi_13interpolation__linear)(__Pyx_memvie
 static double (*__pyx_f_5pippi_13interpolation__linear_point)(__Pyx_memviewslice, double); /*proto*/
 static double (*__pyx_f_5pippi_13interpolation__trunc_point)(__Pyx_memviewslice, double); /*proto*/
 
-/* Module declarations from 'pippi.oscs' */
-static PyTypeObject *__pyx_ptype_5pippi_4oscs_Osc = 0;
-
 /* Module declarations from 'pippi.soundbuffer' */
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
 
@@ -3186,7 +3140,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_28__isub__(struct __pyx
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_30__rsub__(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, PyObject *__pyx_v_value); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_32__repr__(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, PyObject *__pyx_v_minval, PyObject *__pyx_v_maxval); /* proto */
-static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, PyObject *__pyx_v_width, PyObject *__pyx_v_wrap, PyObject *__pyx_v_minval, PyObject *__pyx_v_maxval, PyObject *__pyx_v_indexes); /* proto */
+static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, PyObject *__pyx_v_width, PyObject *__pyx_v_minval, PyObject *__pyx_v_maxval, PyObject *__pyx_v_indexes, PyObject *__pyx_v_wrap); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_38pad(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, PyObject *__pyx_v_numzeros); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_40env(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, int __pyx_v_window_type); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_42max(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self); /* proto */
@@ -7778,7 +7732,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj
  *     def clip(self, minval=-1, maxval=1):
  *         return Wavetable(np.clip(self.data, minval, maxval))             # <<<<<<<<<<<<<<
  * 
- *     def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):
+ *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 268, __pyx_L1_error)
@@ -7872,7 +7826,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj
 /* "pippi/wavetables.pyx":270
  *         return Wavetable(np.clip(self.data, minval, maxval))
  * 
- *     def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):             # <<<<<<<<<<<<<<
+ *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):             # <<<<<<<<<<<<<<
  *         if minval is None:
  *             minval = np.min(self.data)
  */
@@ -7881,21 +7835,21 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj
 static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_37drink(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_37drink(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_width = 0;
-  PyObject *__pyx_v_wrap = 0;
   PyObject *__pyx_v_minval = 0;
   PyObject *__pyx_v_maxval = 0;
   PyObject *__pyx_v_indexes = 0;
+  PyObject *__pyx_v_wrap = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("drink (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_width,&__pyx_n_s_wrap,&__pyx_n_s_minval,&__pyx_n_s_maxval,&__pyx_n_s_indexes,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_width,&__pyx_n_s_minval,&__pyx_n_s_maxval,&__pyx_n_s_indexes,&__pyx_n_s_wrap,0};
     PyObject* values[5] = {0,0,0,0,0};
     values[0] = ((PyObject *)__pyx_float_0_1);
-    values[1] = ((PyObject *)Py_True);
+    values[1] = ((PyObject *)Py_None);
     values[2] = ((PyObject *)Py_None);
     values[3] = ((PyObject *)Py_None);
-    values[4] = ((PyObject *)Py_None);
+    values[4] = ((PyObject *)Py_False);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
@@ -7923,25 +7877,25 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_37drink(PyObject *__pyx
         CYTHON_FALLTHROUGH;
         case  1:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_wrap);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_minval);
           if (value) { values[1] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_minval);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_maxval);
           if (value) { values[2] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_maxval);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_indexes);
           if (value) { values[3] = value; kw_args--; }
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_indexes);
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_wrap);
           if (value) { values[4] = value; kw_args--; }
         }
       }
@@ -7965,10 +7919,10 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_37drink(PyObject *__pyx
       }
     }
     __pyx_v_width = values[0];
-    __pyx_v_wrap = values[1];
-    __pyx_v_minval = values[2];
-    __pyx_v_maxval = values[3];
-    __pyx_v_indexes = values[4];
+    __pyx_v_minval = values[1];
+    __pyx_v_maxval = values[2];
+    __pyx_v_indexes = values[3];
+    __pyx_v_wrap = values[4];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -7978,14 +7932,14 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_37drink(PyObject *__pyx
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_10wavetables_9Wavetable_36drink(((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_v_self), __pyx_v_width, __pyx_v_wrap, __pyx_v_minval, __pyx_v_maxval, __pyx_v_indexes);
+  __pyx_r = __pyx_pf_5pippi_10wavetables_9Wavetable_36drink(((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_v_self), __pyx_v_width, __pyx_v_minval, __pyx_v_maxval, __pyx_v_indexes, __pyx_v_wrap);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, PyObject *__pyx_v_width, PyObject *__pyx_v_wrap, PyObject *__pyx_v_minval, PyObject *__pyx_v_maxval, PyObject *__pyx_v_indexes) {
+static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, PyObject *__pyx_v_width, PyObject *__pyx_v_minval, PyObject *__pyx_v_maxval, PyObject *__pyx_v_indexes, PyObject *__pyx_v_wrap) {
   PyObject *__pyx_v_i = NULL;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -8016,7 +7970,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_ob
 
   /* "pippi/wavetables.pyx":271
  * 
- *     def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):
+ *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
  *         if minval is None:             # <<<<<<<<<<<<<<
  *             minval = np.min(self.data)
  * 
@@ -8026,7 +7980,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_ob
   if (__pyx_t_2) {
 
     /* "pippi/wavetables.pyx":272
- *     def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):
+ *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
  *         if minval is None:
  *             minval = np.min(self.data)             # <<<<<<<<<<<<<<
  * 
@@ -8091,7 +8045,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_ob
 
     /* "pippi/wavetables.pyx":271
  * 
- *     def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):
+ *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
  *         if minval is None:             # <<<<<<<<<<<<<<
  *             minval = np.min(self.data)
  * 
@@ -8416,7 +8370,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_ob
   /* "pippi/wavetables.pyx":270
  *         return Wavetable(np.clip(self.data, minval, maxval))
  * 
- *     def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):             # <<<<<<<<<<<<<<
+ *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):             # <<<<<<<<<<<<<<
  *         if minval is None:
  *             minval = np.min(self.data)
  */
@@ -33483,10 +33437,8 @@ static int __Pyx_modinit_type_import_code(void) {
   __pyx_ptype_5numpy_ufunc = __Pyx_ImportType("numpy", "ufunc", sizeof(PyUFuncObject), 0); if (unlikely(!__pyx_ptype_5numpy_ufunc)) __PYX_ERR(3, 872, __pyx_L1_error)
   __pyx_ptype_7cpython_5array_array = __Pyx_ImportType("array", "array", sizeof(arrayobject), 0); if (unlikely(!__pyx_ptype_7cpython_5array_array)) __PYX_ERR(4, 58, __pyx_L1_error)
   __pyx_ptype_5pippi_6grains_Cloud = __Pyx_ImportType("pippi.grains", "Cloud", sizeof(struct __pyx_obj_5pippi_6grains_Cloud), 1); if (unlikely(!__pyx_ptype_5pippi_6grains_Cloud)) __PYX_ERR(6, 4, __pyx_L1_error)
-  __pyx_ptype_5pippi_4oscs_Osc = __Pyx_ImportType("pippi.oscs", "Osc", sizeof(struct __pyx_obj_5pippi_4oscs_Osc), 1); if (unlikely(!__pyx_ptype_5pippi_4oscs_Osc)) __PYX_ERR(7, 1, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_4oscs_Osc = (struct __pyx_vtabstruct_5pippi_4oscs_Osc*)__Pyx_GetVtable(__pyx_ptype_5pippi_4oscs_Osc->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_4oscs_Osc)) __PYX_ERR(7, 1, __pyx_L1_error)
-  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType("pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(8, 8, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(8, 8, __pyx_L1_error)
+  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType("pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(7, 8, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(7, 8, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

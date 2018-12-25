@@ -267,7 +267,7 @@ cdef class Wavetable:
     def clip(self, minval=-1, maxval=1):
         return Wavetable(np.clip(self.data, minval, maxval))
 
-    def drink(self, width=0.1, wrap=True, minval=None, maxval=None, indexes=None):
+    def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
         if minval is None:
             minval = np.min(self.data)
 
