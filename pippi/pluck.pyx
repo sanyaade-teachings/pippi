@@ -1,3 +1,11 @@
+""" This is a port of Julius O Smith's `pluck.c` -- an implementation of digital waveguide synthesis.
+    I've tried to preserve his original comments inline.
+
+    The original can be found here: https://ccrma.stanford.edu/~jos/pmudw/pluck.c
+
+    pluck.c - elementary waveguide simulation of plucked strings - JOS 6/6/92
+"""
+
 from pippi.soundbuffer cimport SoundBuffer
 import numpy as np
 
