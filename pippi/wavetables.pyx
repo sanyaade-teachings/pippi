@@ -551,7 +551,7 @@ cpdef double[:] to_window(object w, int wtsize=4096):
         wt = w.data
 
     else:
-        wt = array('d', w)
+        wt = interpolation._linear(array('d', w), wtsize)
 
     return wt
 
@@ -574,7 +574,7 @@ cpdef double[:] to_wavetable(object w, int wtsize=4096):
         wt = w.data
 
     else:
-        wt = array('d', w)
+        wt = interpolation._linear(array('d', w), wtsize)
 
     return wt
 

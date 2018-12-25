@@ -7,6 +7,8 @@
 """
 
 from pippi.soundbuffer cimport SoundBuffer
+from pippi.wavetables cimport to_window, to_wavetable
+from pippi cimport interpolation
 import numpy as np
 
 cdef inline short DOUBLE_TO_SHORT(double x):
@@ -14,15 +16,11 @@ cdef inline short DOUBLE_TO_SHORT(double x):
 
 cdef class DelayLine:
     cdef short[:] buf
-    cdef int length
     cdef int position
-    cdef int end
 
     def __init__(self, int length):
-        self.length = length
         self.buf = np.zeros(length, dtype='int16')
         self.position = 0
-        self.end = length - 1
 
 cdef class PluckedString:
     cdef DelayLine upper_rail
@@ -35,11 +33,13 @@ cdef class PluckedString:
 
     cdef short state
     cdef int pickup_location
+    cdef int rail_length
+    cdef double[:] seed
 
     cdef int samplerate
     cdef int channels
 
-    def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, int samplerate=44100, int channels=2):
+    def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, object seed=None, int samplerate=44100, int channels=2):
         self.state = 0
         self.freq = freq
         self.pick = pick
@@ -48,36 +48,40 @@ cdef class PluckedString:
         self.samplerate = samplerate
         self.channels = channels
 
-        cdef int rail_length = <int>(<double>samplerate / freq / 2.0 + 1.0)
+        self.rail_length = <int>(<double>samplerate / freq / 2.0 + 1.0)
 
-        self.upper_rail = DelayLine(rail_length)
-        self.lower_rail = DelayLine(rail_length)
+        self.upper_rail = DelayLine(self.rail_length)
+        self.lower_rail = DelayLine(self.rail_length)
 
         # Round pick position to nearest spatial sample.
         # A pick position at x = 0 is not allowed. 
-        cdef int pickSample = <int>max(rail_length * pick, 1)
+        cdef int pickSample = <int>max(self.rail_length * pick, 1)
         cdef double upslope = amp/pickSample
-        cdef double downslope = amp/(rail_length - pickSample - 1)
-        cdef double[:] initial_shape = np.zeros(rail_length, dtype='d')
+        cdef double downslope = amp/(self.rail_length - pickSample - 1)
 
-        for i in range(pickSample):
-            initial_shape[i] = upslope * i
+        if seed is None:
+            self.seed = np.zeros(self.rail_length, dtype='d')
 
-        for i in range(pickSample, rail_length):
-            initial_shape[i] = downslope * (rail_length - 1 - i)
+            for i in range(pickSample):
+                self.seed[i] = upslope * i
+
+            for i in range(pickSample, self.rail_length):
+                self.seed[i] = downslope * (self.rail_length - 1 - i)
+        else:
+            self.seed = to_window(seed, self.rail_length)
 
         # Initial conditions for the ideal plucked string.
         # "Past history" is measured backward from the end of the array.
-        for i in range(self.lower_rail.length):
-            self.lower_rail.buf[i] = DOUBLE_TO_SHORT(0.5 * initial_shape[i])
+        for i in range(self.rail_length):
+            self.lower_rail.buf[i] = DOUBLE_TO_SHORT(0.5 * self.seed[i])
 
-        for i in range(self.upper_rail.length):
-            self.upper_rail.buf[i] = DOUBLE_TO_SHORT(0.5 * initial_shape[i])
+        for i in range(self.rail_length):
+            self.upper_rail.buf[i] = DOUBLE_TO_SHORT(0.5 * self.seed[i])
 
-        self.pickup_location = <int>(pickup * rail_length)
+        self.pickup_location = <int>(self.pickup * self.rail_length)
 
     cpdef short get_sample(PluckedString self, DelayLine dline, int position):
-        return dline.buf[(dline.position + position) % dline.length]
+        return dline.buf[(dline.position + position) % self.rail_length]
 
     cpdef double next_sample(PluckedString self):
         cdef short yp0, ym0, ypM, ymM
@@ -102,7 +106,7 @@ cdef class PluckedString:
         outsamp += outsamp1
 
         ym0 = self.get_sample(self.lower_rail, 1) # Sample traveling into "bridge"
-        ypM = self.get_sample(self.upper_rail, self.upper_rail.length - 2) # Sample to "nut"
+        ypM = self.get_sample(self.upper_rail, self.rail_length - 2) # Sample to "nut"
 
         ymM = -ypM                    # Inverting reflection at rigid nut 
 
@@ -122,7 +126,7 @@ cdef class PluckedString:
 
         # Decrement pointer and then update 
         self.upper_rail.position -= 1
-        self.upper_rail.buf[self.upper_rail.position % self.upper_rail.length] = yp0
+        self.upper_rail.buf[self.upper_rail.position % self.rail_length] = yp0
 
         # Places "nut-reflected" sample from upper delay-line into
         # current lower delay-line pointer location (which represents
@@ -132,7 +136,7 @@ cdef class PluckedString:
         # iteration.
 
         # Update and then increment pointer
-        self.lower_rail.buf[self.lower_rail.position % self.lower_rail.length] = ymM
+        self.lower_rail.buf[self.lower_rail.position % self.rail_length] = ymM
         self.lower_rail.position += 1
 
         return <double>(outsamp / 32768.0)
