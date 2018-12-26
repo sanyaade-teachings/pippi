@@ -14,9 +14,8 @@ out = dsp.buffer(length=length)
 pos = 0
 count = 0
 
-seed = dsp.wt(dsp.RND) + dsp.wt(dsp.RND)
-
 while pos < length:
+    seed = dsp.wt(dsp.RND) + dsp.wt(dsp.RND)
     p = oscs.Pluck(
             freq=freqs[count % len(freqs)] * 2**dsp.randint(-1,4), 
             seed=seed,
