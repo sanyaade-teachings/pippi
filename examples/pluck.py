@@ -6,7 +6,6 @@ PATH = os.path.dirname(os.path.realpath(__file__))
 print(__file__)
 start_time = time.time()
 
-
 freqs = tune.chord('I11', octave=2)
 
 length = 60
@@ -28,6 +27,8 @@ while pos < length:
 
     pos += 0.25
     count += 1
+
+out = fx.norm(out, 0.8)
 
 out.write('%s/pluck.wav' % PATH)
 

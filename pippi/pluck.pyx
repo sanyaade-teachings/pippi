@@ -51,6 +51,8 @@ cdef class Pluck:
         else:
             self.seed = to_window(seed, self.rail_length)
 
+        self.seed = np.interp(self.seed, (np.max(self.seed), np.min(self.seed)), (0, amp))
+
         # Initial conditions for the ideal plucked string.
         # "Past history" is measured backward from the end of the array.
         for i in range(self.rail_length):
