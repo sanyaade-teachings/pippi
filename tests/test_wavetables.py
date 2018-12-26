@@ -27,7 +27,7 @@ class TestWavetables(TestCase):
     def test_wtclass(self):
         wt1 = dsp.wt(dsp.RND, 4096)
         wt2 = dsp.wt(dsp.TRI, 4096)
-        wt3 = dsp.wt([ random.random()+0.001 for _ in range(1000) ])
+        wt3 = dsp.wt([ random.random()+0.001 for _ in range(1000) ], 1000)
 
         self.assertTrue(max(wt1) > 0)
         self.assertTrue(max(wt2) > 0)

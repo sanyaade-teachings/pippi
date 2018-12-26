@@ -1,4 +1,11 @@
-from pippi import dsp, pluck, tune, fx
+from pippi import dsp, oscs, tune, fx
+import os
+import time
+
+PATH = os.path.dirname(os.path.realpath(__file__))
+print(__file__)
+start_time = time.time()
+
 
 freqs = tune.chord('I11', octave=2)
 
@@ -7,21 +14,23 @@ out = dsp.buffer(length=length)
 
 pos = 0
 count = 0
+
+seed = dsp.wt(dsp.RND) + dsp.wt(dsp.RND)
+
 while pos < length:
-    p = pluck.PluckedString(
+    p = oscs.Pluck(
             freq=freqs[count % len(freqs)] * 2**dsp.randint(-1,4), 
-            pick=dsp.rand(0.1, 0.9), 
-            #seed=[0, 0.3, 0.1, 0.35, 0.05, 0.35, 0.1, 0], 
-            seed=dsp.wt(dsp.SQUARE) + dsp.wt(dsp.SQUARE),
-            pickup=dsp.rand(0.1, 0.9), 
-            amp=0.35).play(dsp.rand(0.5, 1)).taper(dsp.MS*2)
+            seed=seed,
+            pickup=dsp.rand(0, 1), 
+            amp=0.35).play(dsp.rand(0.5, 3)).taper(dsp.MS*2)
 
     out.dub(p.pan(dsp.rand()), pos)
 
     pos += 0.25
     count += 1
 
-out = fx.norm(out, 0.8)
+out.write('%s/pluck.wav' % PATH)
 
-out.write('pluck.wav')
-
+elapsed_time = time.time() - start_time
+print('Render time: %s seconds' % round(elapsed_time, 2))
+print('Output length: %s seconds' % out.dur)

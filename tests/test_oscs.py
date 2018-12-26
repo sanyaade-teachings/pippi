@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase
 
-from pippi.oscs import Osc
+from pippi.oscs import Osc, Osc2d
 from pippi.soundbuffer import SoundBuffer
 from pippi import dsp
 
@@ -35,7 +35,7 @@ class TestOscs(TestCase):
         wtB = dsp.wt([ random.random() for _ in range(random.randint(10, 1000)) ])
         wtC = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         stack = [dsp.RND, wtA, wtB, wtC] * 10
-        osc = Osc(stack=stack, freq=random.triangular(20, 20000))
+        osc = Osc2d(stack, freq=random.triangular(20, 20000))
         length = random.triangular(0.01, 1)
         out = osc.play(length)
 

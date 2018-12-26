@@ -15,30 +15,11 @@ cdef inline short DOUBLE_TO_SHORT(double x):
     return <int>(x*32768.0)
 
 cdef class DelayLine:
-    cdef short[:] buf
-    cdef int position
-
     def __init__(self, int length):
         self.buf = np.zeros(length, dtype='int16')
         self.position = 0
 
-cdef class PluckedString:
-    cdef DelayLine upper_rail
-    cdef DelayLine lower_rail
-
-    cdef double amp
-    cdef double freq
-    cdef double pick
-    cdef double pickup
-
-    cdef short state
-    cdef int pickup_location
-    cdef int rail_length
-    cdef double[:] seed
-
-    cdef int samplerate
-    cdef int channels
-
+cdef class Pluck:
     def __init__(self, double freq=220.0, double pick=0.1, double pickup=0.2, double amp=1, object seed=None, int samplerate=44100, int channels=2):
         self.state = 0
         self.freq = freq
@@ -56,8 +37,8 @@ cdef class PluckedString:
         # Round pick position to nearest spatial sample.
         # A pick position at x = 0 is not allowed. 
         cdef int pickSample = <int>max(self.rail_length * pick, 1)
-        cdef double upslope = amp/pickSample
-        cdef double downslope = amp/(self.rail_length - pickSample - 1)
+        cdef double upslope = <double>pickSample
+        cdef double downslope = <double>(self.rail_length - pickSample - 1)
 
         if seed is None:
             self.seed = np.zeros(self.rail_length, dtype='d')
@@ -80,10 +61,10 @@ cdef class PluckedString:
 
         self.pickup_location = <int>(self.pickup * self.rail_length)
 
-    cpdef short get_sample(PluckedString self, DelayLine dline, int position):
+    cpdef short get_sample(Pluck self, DelayLine dline, int position):
         return dline.buf[(dline.position + position) % self.rail_length]
 
-    cpdef double next_sample(PluckedString self):
+    cpdef double next_sample(Pluck self):
         cdef short yp0, ym0, ypM, ymM
         cdef short outsamp, outsamp1
 
@@ -139,10 +120,10 @@ cdef class PluckedString:
         self.lower_rail.buf[self.lower_rail.position % self.rail_length] = ymM
         self.lower_rail.position += 1
 
-        return <double>(outsamp / 32768.0)
+        return <double>(outsamp / 32768.0) * self.amp
 
 
-    def play(self, double length):
+    cpdef SoundBuffer play(Pluck self, double length):
         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=<int>self.samplerate)
         cdef int framelength = len(out)
         cdef double sample = 0
