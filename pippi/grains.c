@@ -959,7 +959,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_lfostack;
 struct __pyx_opt_args_5pippi_10wavetables_randline;
 struct __pyx_opt_args_5pippi_10wavetables_wavetable;
 
-/* "pippi/wavetables.pxd":39
+/* "pippi/wavetables.pxd":42
  * cdef int* ALL_WAVETABLES
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -971,7 +971,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_window {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":40
+/* "pippi/wavetables.pxd":43
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -983,7 +983,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":41
+/* "pippi/wavetables.pxd":44
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_lfostack(list lfos, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -995,7 +995,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":42
+/* "pippi/wavetables.pxd":45
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_lfostack(list lfos, int wtsize=?)
  * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1009,7 +1009,7 @@ struct __pyx_opt_args_5pippi_10wavetables_randline {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":47
+/* "pippi/wavetables.pxd":50
  * cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)             # <<<<<<<<<<<<<<
@@ -1096,11 +1096,14 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
  * 
  * cdef class Wavetable:             # <<<<<<<<<<<<<<
  *     cdef public double[:] data
- * 
+ *     cdef public double lowvalue
  */
 struct __pyx_obj_5pippi_10wavetables_Wavetable {
   PyObject_HEAD
   __Pyx_memviewslice data;
+  double lowvalue;
+  double highvalue;
+  int length;
 };
 
 

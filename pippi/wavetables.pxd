@@ -4,6 +4,9 @@ cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int
 
 cdef class Wavetable:
     cdef public double[:] data
+    cdef public double lowvalue
+    cdef public double highvalue
+    cdef public int length
 
 cdef int SINE
 cdef int SINEIN 

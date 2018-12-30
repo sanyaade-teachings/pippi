@@ -73,8 +73,13 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
     """
     cdef double maxlength = 0
     cdef int maxchannels = 1
-    cdef SoundBuffer out = SoundBuffer(length=maxlength, channels=maxchannels)
     cdef SoundBuffer sound
+
+    for sound in sounds:
+        maxlength = max(maxlength, sound.dur)
+        maxchannels = max(maxchannels, sound.channels)
+
+    cdef SoundBuffer out = SoundBuffer(length=maxlength, channels=maxchannels)
 
     if align_end:
         for sound in sounds:
@@ -88,8 +93,13 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
 cpdef wts.Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
     return wts.randline(numpoints, lowvalue, highvalue, wtsize)
 
-cpdef wts.Wavetable wt(object values, double lowvalue=0, double highvalue=1, int wtsize=4096, bint window=True):
-    return wts.Wavetable(values, wtsize, window) * (highvalue-lowvalue) + lowvalue
+cpdef wts.Wavetable wt(object values, 
+        double lowvalue=0, 
+        double highvalue=1, 
+        int wtsize=4096, 
+        bint window=True
+    ):
+    return wts.Wavetable(values, lowvalue, highvalue, wtsize, window)
 
 cpdef SoundBuffer stack(list sounds):
     cdef int channels = 0

@@ -864,6 +864,9 @@ cdef class SoundBuffer:
 
         return SoundBuffer(soundpipe.mincer(self.frames, length, time_lfo, amp, pitch_lfo, 4096, self.samplerate), channels=self.channels, samplerate=self.samplerate)
 
+    def to_wavetable(SoundBuffer self, *args, **kwargs):
+        return Wavetable(self, *args, **kwargs)
+
     def write(self, unicode filename=None):
         """ Write the contents of this buffer to disk 
             in the given audio file format. (WAV, AIFF, AU)
