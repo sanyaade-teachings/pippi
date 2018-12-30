@@ -4012,7 +4012,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_2__add__(PyObject *__py
  *             except TypeError as e:
  *                 return NotImplemented             # <<<<<<<<<<<<<<
  * 
- *         return Wavetable(out)
+ *         return Wavetable(out, length)
  */
         __Pyx_XDECREF(__pyx_r);
         __Pyx_INCREF(__pyx_builtin_NotImplemented);
@@ -4051,16 +4051,26 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_2__add__(PyObject *__py
   /* "pippi/wavetables.pyx":128
  *                 return NotImplemented
  * 
- *         return Wavetable(out)             # <<<<<<<<<<<<<<
+ *         return Wavetable(out, length)             # <<<<<<<<<<<<<<
  * 
  *     def __iadd__(self, value):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_6 = __pyx_memoryview_fromslice(__pyx_v_out, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_11 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_6); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_6);
+  __Pyx_GIVEREF(__pyx_t_11);
+  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_11);
+  __pyx_t_6 = 0;
+  __pyx_t_11 = 0;
+  __pyx_t_11 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_4, NULL); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_11);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_r = __pyx_t_11;
   __pyx_t_11 = 0;
   goto __pyx_L0;
@@ -4093,7 +4103,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_2__add__(PyObject *__py
 }
 
 /* "pippi/wavetables.pyx":130
- *         return Wavetable(out)
+ *         return Wavetable(out, length)
  * 
  *     def __iadd__(self, value):             # <<<<<<<<<<<<<<
  *         """ In place add either adding number to every value without copy, or
@@ -4415,7 +4425,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_4__iadd__(struct __pyx_
   goto __pyx_L0;
 
   /* "pippi/wavetables.pyx":130
- *         return Wavetable(out)
+ *         return Wavetable(out, length)
  * 
  *     def __iadd__(self, value):             # <<<<<<<<<<<<<<
  *         """ In place add either adding number to every value without copy, or
@@ -4544,7 +4554,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_8__and__(PyObject *__py
  * 
  *         try:             # <<<<<<<<<<<<<<
  *             out = np.add(self.data, value[:len(self.data)])
- *             return Wavetable(out)
+ *             return Wavetable(out, len(self.data))
  */
   {
     __Pyx_PyThreadState_declare
@@ -4559,7 +4569,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_8__and__(PyObject *__py
  * 
  *         try:
  *             out = np.add(self.data, value[:len(self.data)])             # <<<<<<<<<<<<<<
- *             return Wavetable(out)
+ *             return Wavetable(out, len(self.data))
  *         except TypeError as e:
  */
       __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 155, __pyx_L3_error)
@@ -4633,16 +4643,30 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_8__and__(PyObject *__py
       /* "pippi/wavetables.pyx":156
  *         try:
  *             out = np.add(self.data, value[:len(self.data)])
- *             return Wavetable(out)             # <<<<<<<<<<<<<<
+ *             return Wavetable(out, len(self.data))             # <<<<<<<<<<<<<<
  *         except TypeError as e:
  *             return NotImplemented
  */
       __Pyx_XDECREF(__pyx_r);
       __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 156, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 156, __pyx_L3_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 156, __pyx_L3_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __pyx_t_8 = PyObject_Length(__pyx_t_6); if (unlikely(__pyx_t_8 == ((Py_ssize_t)-1))) __PYX_ERR(0, 156, __pyx_L3_error)
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __pyx_t_6 = PyInt_FromSsize_t(__pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 156, __pyx_L3_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __pyx_t_11 = PyTuple_New(2); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 156, __pyx_L3_error)
+      __Pyx_GOTREF(__pyx_t_11);
+      __Pyx_GIVEREF(__pyx_t_4);
+      PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_4);
+      __Pyx_GIVEREF(__pyx_t_6);
+      PyTuple_SET_ITEM(__pyx_t_11, 1, __pyx_t_6);
+      __pyx_t_4 = 0;
+      __pyx_t_6 = 0;
+      __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_11, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 156, __pyx_L3_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
       __pyx_r = __pyx_t_6;
       __pyx_t_6 = 0;
       goto __pyx_L7_try_return;
@@ -4652,21 +4676,21 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_8__and__(PyObject *__py
  * 
  *         try:             # <<<<<<<<<<<<<<
  *             out = np.add(self.data, value[:len(self.data)])
- *             return Wavetable(out)
+ *             return Wavetable(out, len(self.data))
  */
     }
     __pyx_L3_error:;
     __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF(__pyx_t_11); __pyx_t_11 = 0;
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __PYX_XDEC_MEMVIEW(&__pyx_t_12, 1);
 
     /* "pippi/wavetables.pyx":157
  *             out = np.add(self.data, value[:len(self.data)])
- *             return Wavetable(out)
+ *             return Wavetable(out, len(self.data))
  *         except TypeError as e:             # <<<<<<<<<<<<<<
  *             return NotImplemented
  * 
@@ -4674,15 +4698,15 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_8__and__(PyObject *__py
     __pyx_t_10 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_TypeError);
     if (__pyx_t_10) {
       __Pyx_AddTraceback("pippi.wavetables.Wavetable.__and__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-      if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_4, &__pyx_t_11) < 0) __PYX_ERR(0, 157, __pyx_L5_except_error)
+      if (__Pyx_GetException(&__pyx_t_6, &__pyx_t_11, &__pyx_t_4) < 0) __PYX_ERR(0, 157, __pyx_L5_except_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GOTREF(__pyx_t_11);
-      __Pyx_INCREF(__pyx_t_4);
-      __pyx_v_e = __pyx_t_4;
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_11);
+      __pyx_v_e = __pyx_t_11;
 
       /* "pippi/wavetables.pyx":158
- *             return Wavetable(out)
+ *             return Wavetable(out, len(self.data))
  *         except TypeError as e:
  *             return NotImplemented             # <<<<<<<<<<<<<<
  * 
@@ -4704,7 +4728,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_8__and__(PyObject *__py
  * 
  *         try:             # <<<<<<<<<<<<<<
  *             out = np.add(self.data, value[:len(self.data)])
- *             return Wavetable(out)
+ *             return Wavetable(out, len(self.data))
  */
     __Pyx_XGIVEREF(__pyx_t_1);
     __Pyx_XGIVEREF(__pyx_t_2);
@@ -5839,7 +5863,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_20__mul__(PyObject *__p
  *             except TypeError:
  *                 return NotImplemented             # <<<<<<<<<<<<<<
  * 
- *         return Wavetable(out)
+ *         return Wavetable(out, length)
  */
         __Pyx_XDECREF(__pyx_r);
         __Pyx_INCREF(__pyx_builtin_NotImplemented);
@@ -5878,16 +5902,26 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_20__mul__(PyObject *__p
   /* "pippi/wavetables.pyx":205
  *                 return NotImplemented
  * 
- *         return Wavetable(out)             # <<<<<<<<<<<<<<
+ *         return Wavetable(out, length)             # <<<<<<<<<<<<<<
  * 
  *     def __imul__(self, value):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_6 = __pyx_memoryview_fromslice(__pyx_v_out, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 205, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_12 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_6); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 205, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_12);
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_6);
+  __Pyx_GIVEREF(__pyx_t_12);
+  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_12);
+  __pyx_t_6 = 0;
+  __pyx_t_12 = 0;
+  __pyx_t_12 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_4, NULL); if (unlikely(!__pyx_t_12)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_12);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_r = __pyx_t_12;
   __pyx_t_12 = 0;
   goto __pyx_L0;
@@ -5920,7 +5954,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_20__mul__(PyObject *__p
 }
 
 /* "pippi/wavetables.pyx":207
- *         return Wavetable(out)
+ *         return Wavetable(out, length)
  * 
  *     def __imul__(self, value):             # <<<<<<<<<<<<<<
  *         if isinstance(value, numbers.Real):
@@ -6516,7 +6550,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_22__imul__(struct __pyx
   goto __pyx_L0;
 
   /* "pippi/wavetables.pyx":207
- *         return Wavetable(out)
+ *         return Wavetable(out, length)
  * 
  *     def __imul__(self, value):             # <<<<<<<<<<<<<<
  *         if isinstance(value, numbers.Real):
@@ -6640,6 +6674,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_26__sub__(PyObject *__p
   PyObject *__pyx_t_11 = NULL;
   PyObject *__pyx_t_12 = NULL;
   PyObject *__pyx_t_13 = NULL;
+  Py_ssize_t __pyx_t_14;
   __Pyx_RefNannySetupContext("__sub__", 0);
 
   /* "pippi/wavetables.pyx":235
@@ -6960,7 +6995,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_26__sub__(PyObject *__p
  *             except TypeError as e:
  *                 return NotImplemented             # <<<<<<<<<<<<<<
  * 
- *         return Wavetable(out)
+ *         return Wavetable(out, len(self.data))
  */
         __Pyx_XDECREF(__pyx_r);
         __Pyx_INCREF(__pyx_builtin_NotImplemented);
@@ -6999,16 +7034,30 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_26__sub__(PyObject *__p
   /* "pippi/wavetables.pyx":246
  *                 return NotImplemented
  * 
- *         return Wavetable(out)             # <<<<<<<<<<<<<<
+ *         return Wavetable(out, len(self.data))             # <<<<<<<<<<<<<<
  * 
  *     def __isub__(self, value):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_6 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_10 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_6); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_data); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+  __pyx_t_14 = PyObject_Length(__pyx_t_10); if (unlikely(__pyx_t_14 == ((Py_ssize_t)-1))) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __pyx_t_10 = PyInt_FromSsize_t(__pyx_t_14); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_6);
+  __Pyx_GIVEREF(__pyx_t_10);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_t_10);
+  __pyx_t_6 = 0;
+  __pyx_t_10 = 0;
+  __pyx_t_10 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_2, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_10);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_10;
   __pyx_t_10 = 0;
   goto __pyx_L0;
@@ -7041,7 +7090,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_26__sub__(PyObject *__p
 }
 
 /* "pippi/wavetables.pyx":248
- *         return Wavetable(out)
+ *         return Wavetable(out, len(self.data))
  * 
  *     def __isub__(self, value):             # <<<<<<<<<<<<<<
  *         if isinstance(value, numbers.Real):
@@ -7435,7 +7484,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_28__isub__(struct __pyx
   __pyx_L4:;
 
   /* "pippi/wavetables.pyx":248
- *         return Wavetable(out)
+ *         return Wavetable(out, len(self.data))
  * 
  *     def __isub__(self, value):             # <<<<<<<<<<<<<<
  *         if isinstance(value, numbers.Real):
@@ -7643,7 +7692,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_32__repr__(struct __pyx
  *         return 'Wavetable({})'.format(self.data)
  * 
  *     def clip(self, minval=-1, maxval=1):             # <<<<<<<<<<<<<<
- *         return Wavetable(np.clip(self.data, minval, maxval))
+ *         return Wavetable(np.clip(self.data, minval, maxval), len(self.data))
  * 
  */
 
@@ -7725,12 +7774,13 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj
   PyObject *__pyx_t_4 = NULL;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
+  size_t __pyx_t_7;
   __Pyx_RefNannySetupContext("clip", 0);
 
   /* "pippi/wavetables.pyx":268
  * 
  *     def clip(self, minval=-1, maxval=1):
- *         return Wavetable(np.clip(self.data, minval, maxval))             # <<<<<<<<<<<<<<
+ *         return Wavetable(np.clip(self.data, minval, maxval), len(self.data))             # <<<<<<<<<<<<<<
  * 
  *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
  */
@@ -7793,9 +7843,21 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 268, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 268, __pyx_L1_error)}
+  __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->data); 
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 268, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_3);
+  __pyx_t_1 = 0;
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_6, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 268, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
@@ -7804,7 +7866,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj
  *         return 'Wavetable({})'.format(self.data)
  * 
  *     def clip(self, minval=-1, maxval=1):             # <<<<<<<<<<<<<<
- *         return Wavetable(np.clip(self.data, minval, maxval))
+ *         return Wavetable(np.clip(self.data, minval, maxval), len(self.data))
  * 
  */
 
@@ -7824,7 +7886,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_34clip(struct __pyx_obj
 }
 
 /* "pippi/wavetables.pyx":270
- *         return Wavetable(np.clip(self.data, minval, maxval))
+ *         return Wavetable(np.clip(self.data, minval, maxval), len(self.data))
  * 
  *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):             # <<<<<<<<<<<<<<
  *         if minval is None:
@@ -8368,7 +8430,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_36drink(struct __pyx_ob
   }
 
   /* "pippi/wavetables.pyx":270
- *         return Wavetable(np.clip(self.data, minval, maxval))
+ *         return Wavetable(np.clip(self.data, minval, maxval), len(self.data))
  * 
  *     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):             # <<<<<<<<<<<<<<
  *         if minval is None:
@@ -8854,7 +8916,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_42max(struct __pyx_obj_
  * 
  *     def repeat(self, int reps=2):             # <<<<<<<<<<<<<<
  *         if reps <= 1:
- *             return Wavetable(self.data)
+ *             return self
  */
 
 /* Python wrapper */
@@ -8923,13 +8985,14 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_44repeat(struct __pyx_o
   PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
+  size_t __pyx_t_5;
   __Pyx_RefNannySetupContext("repeat", 0);
 
   /* "pippi/wavetables.pyx":303
  * 
  *     def repeat(self, int reps=2):
  *         if reps <= 1:             # <<<<<<<<<<<<<<
- *             return Wavetable(self.data)
+ *             return self
  * 
  */
   __pyx_t_1 = ((__pyx_v_reps <= 1) != 0);
@@ -8938,55 +9001,61 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_44repeat(struct __pyx_o
     /* "pippi/wavetables.pyx":304
  *     def repeat(self, int reps=2):
  *         if reps <= 1:
- *             return Wavetable(self.data)             # <<<<<<<<<<<<<<
+ *             return self             # <<<<<<<<<<<<<<
  * 
- *         return Wavetable(list(self.data) * reps)
+ *         return Wavetable(list(self.data) * reps, len(self.data) * reps)
  */
     __Pyx_XDECREF(__pyx_r);
-    if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 304, __pyx_L1_error)}
-    __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_self->data, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 304, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 304, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_r = __pyx_t_3;
-    __pyx_t_3 = 0;
+    __Pyx_INCREF(((PyObject *)__pyx_v_self));
+    __pyx_r = ((PyObject *)__pyx_v_self);
     goto __pyx_L0;
 
     /* "pippi/wavetables.pyx":303
  * 
  *     def repeat(self, int reps=2):
  *         if reps <= 1:             # <<<<<<<<<<<<<<
- *             return Wavetable(self.data)
+ *             return self
  * 
  */
   }
 
   /* "pippi/wavetables.pyx":306
- *             return Wavetable(self.data)
+ *             return self
  * 
- *         return Wavetable(list(self.data) * reps)             # <<<<<<<<<<<<<<
+ *         return Wavetable(list(self.data) * reps, len(self.data) * reps)             # <<<<<<<<<<<<<<
  * 
  *     def reverse(self):
  */
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 306, __pyx_L1_error)}
-  __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_self->data, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_v_self->data, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PySequence_List(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 306, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PySequence_List(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_reps); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = PyNumber_Multiply(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 306, __pyx_L1_error)}
+  __pyx_t_5 = __Pyx_MemoryView_Len(__pyx_v_self->data); 
+  __pyx_t_2 = PyInt_FromSsize_t((__pyx_t_5 * __pyx_v_reps)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
+  __pyx_t_4 = 0;
+  __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 306, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_reps); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 306, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyNumber_Multiply(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 306, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 306, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_r = __pyx_t_3;
-  __pyx_t_3 = 0;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
   goto __pyx_L0;
 
   /* "pippi/wavetables.pyx":302
@@ -8994,7 +9063,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_44repeat(struct __pyx_o
  * 
  *     def repeat(self, int reps=2):             # <<<<<<<<<<<<<<
  *         if reps <= 1:
- *             return Wavetable(self.data)
+ *             return self
  */
 
   /* function exit code */
@@ -9011,7 +9080,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_44repeat(struct __pyx_o
 }
 
 /* "pippi/wavetables.pyx":308
- *         return Wavetable(list(self.data) * reps)
+ *         return Wavetable(list(self.data) * reps, len(self.data) * reps)
  * 
  *     def reverse(self):             # <<<<<<<<<<<<<<
  *         self.data = np.flip(self.data, 0)
@@ -9113,7 +9182,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_46reverse(struct __pyx_
   __pyx_t_7.data = NULL;
 
   /* "pippi/wavetables.pyx":308
- *         return Wavetable(list(self.data) * reps)
+ *         return Wavetable(list(self.data) * reps, len(self.data) * reps)
  * 
  *     def reverse(self):             # <<<<<<<<<<<<<<
  *         self.data = np.flip(self.data, 0)
@@ -9142,7 +9211,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_46reverse(struct __pyx_
  *         self.data = np.flip(self.data, 0)
  * 
  *     def reversed(self):             # <<<<<<<<<<<<<<
- *         return Wavetable(np.flip(self.data, 0))
+ *         return Wavetable(np.flip(self.data, 0), len(self.data))
  * 
  */
 
@@ -9168,12 +9237,13 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_48reversed(struct __pyx
   PyObject *__pyx_t_4 = NULL;
   int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
+  size_t __pyx_t_7;
   __Pyx_RefNannySetupContext("reversed", 0);
 
   /* "pippi/wavetables.pyx":312
  * 
  *     def reversed(self):
- *         return Wavetable(np.flip(self.data, 0))             # <<<<<<<<<<<<<<
+ *         return Wavetable(np.flip(self.data, 0), len(self.data))             # <<<<<<<<<<<<<<
  * 
  *     def taper(self, int length):
  */
@@ -9233,9 +9303,21 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_48reversed(struct __pyx
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 312, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 312, __pyx_L1_error)}
+  __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->data); 
+  __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 312, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 312, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_1);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_3);
+  __pyx_t_1 = 0;
+  __pyx_t_3 = 0;
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_6, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 312, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
@@ -9244,7 +9326,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_48reversed(struct __pyx
  *         self.data = np.flip(self.data, 0)
  * 
  *     def reversed(self):             # <<<<<<<<<<<<<<
- *         return Wavetable(np.flip(self.data, 0))
+ *         return Wavetable(np.flip(self.data, 0), len(self.data))
  * 
  */
 
@@ -9264,7 +9346,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_48reversed(struct __pyx
 }
 
 /* "pippi/wavetables.pyx":314
- *         return Wavetable(np.flip(self.data, 0))
+ *         return Wavetable(np.flip(self.data, 0), len(self.data))
  * 
  *     def taper(self, int length):             # <<<<<<<<<<<<<<
  *         return self * _adsr(len(self), length, 0, 1, length)
@@ -9326,7 +9408,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_50taper(struct __pyx_ob
   goto __pyx_L0;
 
   /* "pippi/wavetables.pyx":314
- *         return Wavetable(np.flip(self.data, 0))
+ *         return Wavetable(np.flip(self.data, 0), len(self.data))
  * 
  *     def taper(self, int length):             # <<<<<<<<<<<<<<
  *         return self * _adsr(len(self), length, 0, 1, length)

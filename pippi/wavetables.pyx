@@ -125,7 +125,7 @@ cdef class Wavetable:
             except TypeError as e:
                 return NotImplemented
 
-        return Wavetable(out)
+        return Wavetable(out, length)
 
     def __iadd__(self, value):
         """ In place add either adding number to every value without copy, or 
@@ -153,7 +153,7 @@ cdef class Wavetable:
 
         try:
             out = np.add(self.data, value[:len(self.data)])
-            return Wavetable(out)
+            return Wavetable(out, len(self.data))
         except TypeError as e:
             return NotImplemented
 
@@ -202,7 +202,7 @@ cdef class Wavetable:
             except TypeError:
                 return NotImplemented
 
-        return Wavetable(out)
+        return Wavetable(out, length)
 
     def __imul__(self, value):
         if isinstance(value, numbers.Real):
@@ -243,7 +243,7 @@ cdef class Wavetable:
             except TypeError as e:
                 return NotImplemented
 
-        return Wavetable(out)
+        return Wavetable(out, len(self.data))
 
     def __isub__(self, value):
         if isinstance(value, numbers.Real):
@@ -265,7 +265,7 @@ cdef class Wavetable:
         return 'Wavetable({})'.format(self.data)
 
     def clip(self, minval=-1, maxval=1):
-        return Wavetable(np.clip(self.data, minval, maxval))
+        return Wavetable(np.clip(self.data, minval, maxval), len(self.data))
 
     def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
         if minval is None:
@@ -301,15 +301,15 @@ cdef class Wavetable:
  
     def repeat(self, int reps=2):
         if reps <= 1:
-            return Wavetable(self.data)
+            return self
 
-        return Wavetable(list(self.data) * reps)
+        return Wavetable(list(self.data) * reps, len(self.data) * reps)
 
     def reverse(self):
         self.data = np.flip(self.data, 0)
 
     def reversed(self):
-        return Wavetable(np.flip(self.data, 0))
+        return Wavetable(np.flip(self.data, 0), len(self.data))
 
     def taper(self, int length):
         return self * _adsr(len(self), length, 0, 1, length)
