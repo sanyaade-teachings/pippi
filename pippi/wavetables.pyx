@@ -108,7 +108,10 @@ cdef class Wavetable:
         cdef bint resized = False
 
         if wtsize is None:
-            self.length = <int>len(values)
+            if isinstance(values, numbers.Real):
+                self.length = 1
+            else:
+                self.length = <int>len(values)
         else:
             self.length = <int>wtsize
             resized = True
