@@ -146,14 +146,14 @@ cdef extern from "soundpipe.h":
     int sp_bal_compute(sp_data*, sp_bal*, double*, double*, double*)
 
 
-cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double freq, int length, int channels)
-cpdef double[:,:] butbr(double[:,:] snd, double freq)
-cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double freq, int length, int channels)
-cpdef double[:,:] butbp(double[:,:] snd, double freq)
-cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double freq, int length, int channels)
-cpdef double[:,:] buthp(double[:,:] snd, double freq)
-cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double freq, int length, int channels)
-cpdef double[:,:] butlp(double[:,:] snd, double freq)
+cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels)
+cpdef double[:,:] butbr(double[:,:] snd, double[:] freq)
+cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels)
+cpdef double[:,:] butbp(double[:,:] snd, double[:] freq)
+cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels)
+cpdef double[:,:] buthp(double[:,:] snd, double[:] freq)
+cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels)
+cpdef double[:,:] butlp(double[:,:] snd, double[:] freq)
 
 cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, double amp, double[:] pitch)
 cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=?, int samplerate=?)
@@ -166,8 +166,5 @@ cpdef double[:,:] compressor(double[:,:] snd, double ratio, double thresh, doubl
 
 cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
 cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)
-
-cdef double[:,:] _filterbank(double[:,:] snd, double[:,:] out, list freqs, list lfos, int length, int channels)
-cpdef double[:,:] filterbank(double[:,:] snd, list freqs, list lfos)
 
 cdef double** memoryview2ftbls(double[:,:] snd)

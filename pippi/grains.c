@@ -947,7 +947,7 @@ struct __pyx_opt_args_5pippi_9soundpipe_mincer {
  * cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
  * cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)             # <<<<<<<<<<<<<<
  * 
- * cdef double[:,:] _filterbank(double[:,:] snd, double[:,:] out, list freqs, list lfos, int length, int channels)
+ * cdef double** memoryview2ftbls(double[:,:] snd)
  */
 struct __pyx_opt_args_5pippi_9soundpipe_paulstretch {
   int __pyx_n;

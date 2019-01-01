@@ -285,17 +285,21 @@ cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bool normalize=True):
     cdef int _normalize = 1 if normalize else 0
     return SoundBuffer(_fir(snd.frames, out, impulsewt, normalize), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer lpf(SoundBuffer snd, double freq):
-    return SoundBuffer(soundpipe.butlp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
+cpdef SoundBuffer lpf(SoundBuffer snd, object freq):
+    cdef double[:] _freq = wavetables.to_window(freq)
+    return SoundBuffer(soundpipe.butlp(snd.frames, _freq), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer hpf(SoundBuffer snd, double freq):
-    return SoundBuffer(soundpipe.buthp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
+cpdef SoundBuffer hpf(SoundBuffer snd, object freq):
+    cdef double[:] _freq = wavetables.to_window(freq)
+    return SoundBuffer(soundpipe.buthp(snd.frames, _freq), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer bpf(SoundBuffer snd, double freq):
-    return SoundBuffer(soundpipe.butbp(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
+cpdef SoundBuffer bpf(SoundBuffer snd, object freq):
+    cdef double[:] _freq = wavetables.to_window(freq)
+    return SoundBuffer(soundpipe.butbp(snd.frames, _freq), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer brf(SoundBuffer snd, double freq):
-    return SoundBuffer(soundpipe.butbr(snd.frames, freq), channels=snd.channels, samplerate=snd.samplerate)
+cpdef SoundBuffer brf(SoundBuffer snd, object freq):
+    cdef double[:] _freq = wavetables.to_window(freq)
+    return SoundBuffer(soundpipe.butbr(snd.frames, _freq), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer compressor(SoundBuffer snd, double ratio=4, double threshold=-30, double attack=0.2, double release=0.2):
     return SoundBuffer(soundpipe.compressor(snd.frames, ratio, threshold, attack, release), channels=snd.channels, samplerate=snd.samplerate)

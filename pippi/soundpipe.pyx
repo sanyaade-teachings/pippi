@@ -18,7 +18,7 @@ cdef double** memoryview2ftbls(double[:,:] snd):
 
     return tbls
 
-cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
+cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_butbp* butbp
     cdef sp_bal* bal 
@@ -27,6 +27,7 @@ cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double freq, int lengt
     cdef double output = 0
     cdef int i = 0
     cdef int c = 0
+    cdef double pos = 0
 
     sp_create(&sp)
 
@@ -35,9 +36,10 @@ cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double freq, int lengt
         sp_bal_init(sp, bal)
         sp_butbp_create(&butbp)
         sp_butbp_init(sp, butbp)
-        butbp.freq = freq
 
         for i in range(length):
+            pos = <double>i / <double>length
+            butbp.freq = interpolation._linear_point(freq, pos)
             sample = <double>snd[i,c]
             sp_butbp_compute(sp, butbp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -50,13 +52,13 @@ cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double freq, int lengt
 
     return out
 
-cpdef double[:,:] butbp(double[:,:] snd, double freq):
+cpdef double[:,:] butbp(double[:,:] snd, double[:] freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _butbp(snd, out, freq, length, channels)
 
-cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
+cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_butbr* butbr
     cdef sp_bal* bal 
@@ -65,6 +67,7 @@ cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double freq, int lengt
     cdef double output = 0
     cdef int i = 0
     cdef int c = 0
+    cdef double pos = 0
 
     sp_create(&sp)
 
@@ -73,9 +76,10 @@ cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double freq, int lengt
         sp_bal_init(sp, bal)
         sp_butbr_create(&butbr)
         sp_butbr_init(sp, butbr)
-        butbr.freq = freq
 
         for i in range(length):
+            pos = <double>i / <double>length
+            butbr.freq = interpolation._linear_point(freq, pos)
             sample = <double>snd[i,c]
             sp_butbr_compute(sp, butbr, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -88,13 +92,13 @@ cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double freq, int lengt
 
     return out
 
-cpdef double[:,:] butbr(double[:,:] snd, double freq):
+cpdef double[:,:] butbr(double[:,:] snd, double[:] freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _butbr(snd, out, freq, length, channels)
 
-cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
+cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_buthp* buthp
     cdef sp_bal* bal 
@@ -103,6 +107,7 @@ cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double freq, int lengt
     cdef double output = 0
     cdef int i = 0
     cdef int c = 0
+    cdef double pos = 0
 
     sp_create(&sp)
 
@@ -111,9 +116,10 @@ cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double freq, int lengt
         sp_bal_init(sp, bal)
         sp_buthp_create(&buthp)
         sp_buthp_init(sp, buthp)
-        buthp.freq = freq
 
         for i in range(length):
+            pos = <double>i / <double>length
+            buthp.freq = interpolation._linear_point(freq, pos)
             sample = <double>snd[i,c]
             sp_buthp_compute(sp, buthp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -126,13 +132,13 @@ cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double freq, int lengt
 
     return out
 
-cpdef double[:,:] buthp(double[:,:] snd, double freq):
+cpdef double[:,:] buthp(double[:,:] snd, double[:] freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
     return _buthp(snd, out, freq, length, channels)
 
-cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double freq, int length, int channels):
+cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_butlp* butlp
     cdef sp_bal* bal 
@@ -141,6 +147,7 @@ cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double freq, int lengt
     cdef double output = 0
     cdef int i = 0
     cdef int c = 0
+    cdef double pos = 0
 
     sp_create(&sp)
 
@@ -149,9 +156,10 @@ cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double freq, int lengt
         sp_bal_init(sp, bal)
         sp_butlp_create(&butlp)
         sp_butlp_init(sp, butlp)
-        butlp.freq = freq
 
         for i in range(length):
+            pos = <double>i / <double>length
+            butlp.freq = interpolation._linear_point(freq, pos)
             sample = <double>snd[i,c]
             sp_butlp_compute(sp, butlp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -164,7 +172,7 @@ cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double freq, int lengt
 
     return out
 
-cpdef double[:,:] butlp(double[:,:] snd, double freq):
+cpdef double[:,:] butlp(double[:,:] snd, double[:] freq):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
@@ -363,39 +371,5 @@ cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((outlength, channels), dtype='d')
     return _paulstretch(snd, out, windowsize, stretch, length, outlength, channels)
-
-cdef double[:,:] _filterbank(double[:,:] snd, double[:,:] out, list freqs, list lfos, int length, int channels):
-    cdef sp_data* sp
-    cdef sp_butbp* butbp
-    cdef double sample = 0
-    cdef double output = 0
-    cdef int i = 0
-    cdef int c = 0
-    cdef double freq = 440
-
-    sp_create(&sp)
-
-    for c in range(channels):
-        sp_butbp_create(&butbp)
-        sp_butbp_init(sp, butbp)
-        butbp.freq = freq
-
-        for i in range(length):
-            sample = <double>snd[i,c]
-            sp_butbp_compute(sp, butbp, &sample, &output)
-            out[i,c] = <double>output
-
-        sp_butbp_destroy(&butbp)
-
-    sp_destroy(&sp)
-
-    return out
-
-
-cpdef double[:,:] filterbank(double[:,:] snd, list freqs, list lfos):
-    cdef int length = <int>len(snd)
-    cdef int channels = <int>snd.shape[1]
-    cdef double[:,:] out = np.zeros((length, channels), dtype='d')
-    return _filterbank(snd, out, freqs, lfos, length, channels)
 
 
