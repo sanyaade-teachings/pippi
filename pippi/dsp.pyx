@@ -10,6 +10,7 @@ from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables as wts
 from pippi cimport rand as _rand
+from pippi import drummachine as dm
 
 # Expose some C flags / constants to python
 # FIXME might be faster to use newish cpdef enum defs? donno
@@ -171,6 +172,9 @@ cpdef int randint(int low=0, int high=1):
 
 cpdef object choice(list choices):
     return _rand.choice(choices)
+
+def redrum(*args, **kwargs):
+    return dm.DrumMachine(*args, **kwargs)
 
 def find(pattern, channels=2, samplerate=44100):
     """ Glob for files matching a given pattern and return a generator 

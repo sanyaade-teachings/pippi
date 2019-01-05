@@ -10,24 +10,28 @@ class TestOscs(TestCase):
         osc = Osc(dsp.SINE, freq=random.triangular(20, 20000))
         length = random.triangular(0.01, 1)
         out = osc.play(length)
+        out.write('tests/renders/osc_sinewave.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
         wtA = [ random.random() for _ in range(random.randint(10, 1000)) ]
         osc = Osc(wtA, freq=random.triangular(20, 20000))
         length = random.triangular(0.01, 1)
         out = osc.play(length)
+        out.write('tests/renders/osc_rand_list_wt.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
         wtB = dsp.wt([ random.random() for _ in range(random.randint(10, 1000)) ])
         osc = Osc(wtB, freq=random.triangular(20, 20000))
         length = random.triangular(0.01, 1)
         out = osc.play(length)
+        out.write('tests/renders/osc_rand_wt_wt.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
         wtC = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         osc = Osc(wtC, freq=random.triangular(20, 20000))
         length = random.triangular(0.01, 1)
         out = osc.play(length)
+        out.write('tests/renders/osc_guitar_wt.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
     def test_create_wt_stack(self):
@@ -38,6 +42,7 @@ class TestOscs(TestCase):
         osc = Osc2d(stack, freq=random.triangular(20, 20000))
         length = random.triangular(0.01, 1)
         out = osc.play(length)
+        out.write('tests/renders/osc2d_RND_randlist_randwt_guitar_10x.wav')
 
         self.assertEqual(len(out), int(length * out.samplerate))
 

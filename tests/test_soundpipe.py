@@ -1,5 +1,6 @@
 from unittest import TestCase
 from pippi import soundpipe, dsp, fx, wavetables
+import numpy as np
 
 class TestSoundpipe(TestCase):
     def test_compressor(self):
@@ -51,28 +52,28 @@ class TestSoundpipe(TestCase):
 
     def test_butlp(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
-        freq = 100
+        freq = np.array([100], dtype='d')
 
         snd.frames = soundpipe.butlp(snd.frames, freq)
         snd.write('tests/renders/soundpipe_butlp.wav')
 
     def test_buthp(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
-        freq = 1000
+        freq = np.array([1000], dtype='d')
 
         snd.frames = soundpipe.buthp(snd.frames, freq)
         snd.write('tests/renders/soundpipe_buthp.wav')
 
     def test_butbp(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
-        freq = 500
+        freq = np.array([500], dtype='d')
 
         snd.frames = soundpipe.butbp(snd.frames, freq)
         snd.write('tests/renders/soundpipe_butbp.wav')
 
     def test_butbr(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
-        freq = 500
+        freq = np.array([500], dtype='d')
 
         snd.frames = soundpipe.butbr(snd.frames, freq)
         snd.write('tests/renders/soundpipe_butbr.wav')

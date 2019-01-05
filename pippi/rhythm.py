@@ -17,28 +17,21 @@ CLAVE = {
 
 
 def pattern(
-    p,              # Pattern
-    beat=0.25,      # Beat length in seconds
+    pattern,        # Pattern
+    bpm=120.0,      # Tempo in beats per minute
     length=1,       # Output length in seconds 
-    bpm=None,       # Tempo in beats per minute
-    hz=None,        # Or tempo in hz (overrides bpm)
     swing=0,        # MPC swing amount 0-1
     lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
     lfo_tempo=None, # Lfo frequency in BPM string or Hz
     lfo_depth=None, # Fractional multiplier from original tempo
-    delay=False     # Fixed delay in seconds added to each onset
+    delay=False,    # Fixed delay in seconds added to each onset
 ):
     """ Onsets from ascii
     """
+    bpm = bpm if bpm > 0 else np.nextafter(0, 1)
+    beat = 60 / bpm
 
-    if bpm is not None:
-        bpm = bpm if bpm > 0 else np.nextafter(0, 1)
-        beat = 60 / bpm
-    elif hz is not None:
-        hz = hz if hz > 0 else np.nextafter(0, 1)
-        beat = 1 / hz  
-
-    positions = topositions(p, beat, length)
+    positions = topositions(pattern, beat, length)
     positions = onsetswing(onsets, swing, beat)
 
     if delay:

@@ -37,9 +37,9 @@ cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double[:] freq, int le
         sp_butbp_create(&butbp)
         sp_butbp_init(sp, butbp)
 
+        pos = 0
         for i in range(length):
-            pos = <double>i / <double>length
-            butbp.freq = interpolation._linear_point(freq, pos)
+            butbp.freq = interpolation._linear_pos(freq, pos)
             sample = <double>snd[i,c]
             sp_butbp_compute(sp, butbp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -79,7 +79,7 @@ cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double[:] freq, int le
 
         for i in range(length):
             pos = <double>i / <double>length
-            butbr.freq = interpolation._linear_point(freq, pos)
+            butbr.freq = interpolation._linear_pos(freq, pos)
             sample = <double>snd[i,c]
             sp_butbr_compute(sp, butbr, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -119,7 +119,7 @@ cdef double[:,:] _buthp(double[:,:] snd, double[:,:] out, double[:] freq, int le
 
         for i in range(length):
             pos = <double>i / <double>length
-            buthp.freq = interpolation._linear_point(freq, pos)
+            buthp.freq = interpolation._linear_pos(freq, pos)
             sample = <double>snd[i,c]
             sp_buthp_compute(sp, buthp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -159,7 +159,7 @@ cdef double[:,:] _butlp(double[:,:] snd, double[:,:] out, double[:] freq, int le
 
         for i in range(length):
             pos = <double>i / <double>length
-            butlp.freq = interpolation._linear_point(freq, pos)
+            butlp.freq = interpolation._linear_pos(freq, pos)
             sample = <double>snd[i,c]
             sp_butlp_compute(sp, butlp, &sample, &filtered)
             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -275,8 +275,8 @@ cdef double[:,:] _mincer(double[:,:] snd,
 
         for i in range(length):
             pos = <double>i/<double>length
-            mincer.time = <double>interpolation._linear_point(time, pos) * sndlength
-            mincer.pitch = <double>interpolation._linear_point(pitch, pos)
+            mincer.time = <double>interpolation._linear_pos(time, pos) * sndlength
+            mincer.pitch = <double>interpolation._linear_pos(pitch, pos)
             sp_mincer_compute(sp, mincer, NULL, &output)
             out[i,c] = <double>output
 

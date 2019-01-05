@@ -18,12 +18,15 @@ cdef class Pulsar:
     def __cinit__(
             self, 
             object wavetable=None, 
+            object window=None, 
+
             object freq=440.0, 
-            object amp=1, 
             object pulsewidth=1,
+            object amp=1, 
             double phase=0, 
 
-            object window=None, 
+            object window_freq=None,
+            object wavetable_freq=None,
 
             int wtsize=4096,
             int channels=DEFAULT_CHANNELS,
@@ -31,7 +34,7 @@ cdef class Pulsar:
         ):
 
         self.freq = wavetables.to_wavetable(freq, self.wtsize)
-        self.amp = amp
+        self.amp = wavetables.to_window(amp, self.wtsize)
         self.phase = phase
 
         self.channels = channels
@@ -52,15 +55,11 @@ cdef class Pulsar:
         return self._play(framelength)
 
     cdef object _play(self, int length):
-        cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
-
         cdef int i = 0
-        cdef int wtsize = self.wtsize
-        cdef double sample
-        cdef double pulsewidth
-        cdef double freq
+        cdef double sample, pulsewidth, freq
 
-        cdef double phase_inc = (1.0 / self.samplerate) * wtsize
+        cdef double phase_inc = (1.0 / self.samplerate) * self.wtsize
+        cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
         for i in range(length):
             freq = interpolation._linear_point(self.freq, self.phase)

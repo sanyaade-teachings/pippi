@@ -26,9 +26,10 @@ cdef double[:] _hermite(double[:] data, int length):
     cdef int datalen = len(data)
     cdef int i0, i1, i2 = 0
     cdef int pos = 0
+    cdef double x = 0
 
     for fi in range(length):
-        x = fi / float(length)
+        x = fi / <double>length
         pos = <int>(x * datalen)
 
         i0 = (pos - 1) % datalen
@@ -41,62 +42,45 @@ cdef double[:] _hermite(double[:] data, int length):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double[:] _linear_inner(double[:] data, double[:] out, int length) nogil:
-    cdef Py_ssize_t i
-    cdef int inputlength = len(data)
+cdef double _linear_point(double[:] data, double phase) nogil:
+    cdef int dlength = <int>len(data)
+    if dlength == 1:
+        return data[0]
 
-    if inputlength <= 1:
-        return out
-
-    for i in range(length):
-        out[i] = _linear_point(data, <double>i/(length-1))
-
-    return out
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef double[:] _linear(double[:] data, int length):
-    cdef double[:] out = np.zeros(length) 
-    return _linear_inner(data, out, length)
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef double _linear_point(double[:] data, double pos) nogil:
-    cdef int length = <int>len(data)
-    if length == 0:
+    elif dlength < 1:
         return 0
-    pos = pos * <double>(length-1)
-    cdef double frac = pos - <int>pos
-    cdef int i = <int>pos % length
-    cdef int n
+
+    cdef double frac = phase - <int>phase
+    cdef int i = <int>phase % (len(data)-1)
     cdef double a, b
 
     a = data[i]
-    n = i+1
-    if n < length:
-        b = data[n]
-    else:
-        b = a
+    b = data[i+1]
 
     return (1.0 - frac) * a + (frac * b)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double _trunc_point(double[:] data, double pos) nogil:
-    cdef int length = <int>len(data)
-    cdef int i = <int>(pos*length)
-    return data[i]
+cdef double _linear_pos(double[:] data, double pos) nogil:
+    return _linear_point(data, pos * <double>(len(data)-1))
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double[:] _linear(double[:] data, int length):
+    cdef double[:] out = np.zeros(length)
+    cdef Py_ssize_t i
+
+    for i in range(length-1):
+        out[i] = _linear_point(data, <double>i/<double>(length-1))
+
+    return out
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _trunc_point(double[:] data, double phase) nogil:
+    return data[<int>phase % (len(data)-1)]
 
 cpdef double linear_point(double[:] data, double pos):
     return _linear_point(data, pos)
 
-cpdef double[:] linear(data, int length):
-    if isinstance(data, list):
-        data = np.asarray(data, dtype='d')
-    return _linear(data, length)
-
-def hermite(data, int length):
-    if isinstance(data, list):
-        data = np.asarray(data, dtype='d')
-    return _hermite(data, length)
 

@@ -112,15 +112,15 @@ cdef class Cloud:
 
         while pos <= 1: 
             if self.has_mask and self.mask[<int>(count % masklength)] == 0:
-                write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
+                write_pos += <unsigned int>(interpolation._linear_pos(self.grid, pos) * self.samplerate)
                 pos = <double>write_pos / <double>outframelength
                 count += 1
                 continue
 
-            grainlength = <unsigned int>(interpolation._linear_point(self.grainlength, pos) * self.samplerate)
-            read_pos = interpolation._linear_point(self.position, pos)
+            grainlength = <unsigned int>(interpolation._linear_pos(self.grainlength, pos) * self.samplerate)
+            read_pos = interpolation._linear_pos(self.position, pos)
 
-            spread = interpolation._linear_point(self.spread, pos)
+            spread = interpolation._linear_pos(self.spread, pos)
             panpos = (rand()/<double>RAND_MAX) * spread + (0.5 - (spread * 0.5))
             pans = [panpos, 1-panpos]
 
@@ -136,19 +136,19 @@ cdef class Cloud:
                     if write_pos+i < outframelength:
                         inc = <double>i / self.samplerate
                         mincer.time = <double>read_pos + inc
-                        mincer.pitch = <double>interpolation._linear_point(self.speed, pos)
-                        mincer.amp = <double>interpolation._linear_point(self.amp, pos)
+                        mincer.pitch = <double>interpolation._linear_pos(self.speed, pos)
+                        mincer.amp = <double>interpolation._linear_pos(self.amp, pos)
 
                         sp_mincer_compute(sp, mincer, NULL, &fsample)
-                        sample = <double>fsample * interpolation._linear_point(self.window, grainpos)
+                        sample = <double>fsample * interpolation._linear_pos(self.window, grainpos)
                         sample *= panpos
                         out[i+write_pos,c] += sample
 
                 sp_mincer_destroy(&mincer)
                 sp_ftbl_destroy(&tbl)
 
-            write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
-            write_jitter = <int>(interpolation._linear_point(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
+            write_pos += <unsigned int>(interpolation._linear_pos(self.grid, pos) * self.samplerate)
+            write_jitter = <int>(interpolation._linear_pos(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
             write_pos += max(0, write_jitter)
             pos = <double>write_pos / <double>outframelength
             count += 1

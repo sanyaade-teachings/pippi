@@ -26,13 +26,6 @@ cdef double[:,:] _dub(double[:,:] target, int target_length, double[:,:] todub, 
 
     return target
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef double[:,:] _cut(double[:,:] snd, int snd_length, int start, int length) nogil:
-    cdef int end = min(start+length, snd_length)
-    start = max(start, 0)
-    return snd[start:end]
-
 cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method):
     if method == CONSTANT:
         for channel in range(channels):
@@ -64,37 +57,12 @@ cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int
 
     return out
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil:
-    cdef int i = 0
-    cdef int c = 0
-    cdef int count = 0
-    cdef double pos = 0
-    cdef int framelength = len(snd)
-    cdef int blocksize = 64
-    cdef double mult = win[0]
-
-    for i in range(framelength):
-        pos = i / <double>framelength
-        for c in range(channels):
-            snd[i,c] *= mult
-
-        if count >= blocksize:
-            mult = interpolation._linear_point(win, pos)
-            count = 0
-
-        count += 1
-
-    return snd
-
 cdef double[:,:] _remix(double[:,:] values, int framelength, int channels):
     if values.shape[1] == channels:
         return values
 
     cdef double[:,:] out = None
     cdef int i = 0
-    cdef int channel = 0
 
     if channels <= 1:
         return np.sum(values, 1).reshape(len(values), 1)
@@ -185,7 +153,10 @@ cdef double[:,:] _speed(double[:,:] frames,
     for c in range(channels):
         for i in range(framelength):
             chan[i] = frames[i,c]
-        outchan = interpolation._linear_inner(chan, outchan, length)
+
+        for i in range(length):
+            outchan[i] = interpolation._linear_point(chan, <double>i/<double>(length-1))
+
         for i in range(length):
             out[i,c] = outchan[i]
 

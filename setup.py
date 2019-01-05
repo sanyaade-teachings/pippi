@@ -7,6 +7,7 @@ import numpy as np
 ext_modules = cythonize([
         Extension('pippi.defaults', ['pippi/defaults.pyx']), 
         Extension('pippi.dsp', ['pippi/dsp.pyx']), 
+        Extension('pippi.drummachine', ['pippi/drummachine.pyx']), 
         Extension('pippi.fx', ['pippi/fx.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],

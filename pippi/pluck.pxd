@@ -16,7 +16,7 @@ cdef class Pluck:
     cdef short state
     cdef int pickup_location
     cdef int rail_length
-    cdef double[:] seed
+    cdef public double[:] seed
 
     cdef int samplerate
     cdef int channels
@@ -24,4 +24,4 @@ cdef class Pluck:
 
     cpdef short get_sample(Pluck self, DelayLine dline, int position)
     cpdef double next_sample(Pluck self)
-    cpdef SoundBuffer play(Pluck self, double length)
+    cpdef SoundBuffer play(Pluck self, double length, object seed=*)

@@ -125,10 +125,20 @@ cdef class Pluck:
         return <double>(outsamp / 32768.0) * self.amp
 
 
-    cpdef SoundBuffer play(Pluck self, double length):
+    cpdef SoundBuffer play(Pluck self, double length, object seed=None):
         cdef SoundBuffer out = SoundBuffer(length=length, channels=self.channels, samplerate=<int>self.samplerate)
         cdef int framelength = len(out)
         cdef double sample = 0
+        cdef double[:] _seed
+
+        if seed is not None:
+            _seed = to_window(seed, self.rail_length)
+
+            for i in range(self.rail_length):
+                self.lower_rail.buf[i] += DOUBLE_TO_SHORT(0.5 * _seed[i])
+
+            for i in range(self.rail_length):
+                self.upper_rail.buf[i] += DOUBLE_TO_SHORT(0.5 * _seed[i])
 
         for i in range(framelength):
             sample = self.next_sample()

@@ -950,7 +950,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose;
 
-/* "soundbuffer.pxd":15
+/* "soundbuffer.pxd":13
  *     cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos)
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)             # <<<<<<<<<<<<<<
@@ -965,7 +965,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
   double r;
 };
 
-/* "soundbuffer.pxd":16
+/* "soundbuffer.pxd":14
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)             # <<<<<<<<<<<<<<
@@ -978,7 +978,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch {
   double amp;
 };
 
-/* "soundbuffer.pxd":17
+/* "soundbuffer.pxd":15
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
  *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)             # <<<<<<<<<<<<<<
@@ -1118,8 +1118,8 @@ struct __pyx_obj_5pippi_6grains_Cloud {
 };
 
 
-/* "soundbuffer.pxd":8
- * cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil
+/* "soundbuffer.pxd":6
+ * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method)
  * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
  *     cdef public int samplerate
@@ -1228,8 +1228,8 @@ struct __pyx_memoryviewslice_obj {
 
 
 
-/* "soundbuffer.pxd":8
- * cdef double[:,:] _env(double[:,:] snd, int channels, double[:] win) nogil
+/* "soundbuffer.pxd":6
+ * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method)
  * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
  *     cdef public int samplerate
@@ -1902,7 +1902,7 @@ static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 static PyTypeObject *__pyx_ptype_5pippi_6grains_Cloud = 0;
 
 /* Module declarations from 'pippi.interpolation' */
-static double (*__pyx_f_5pippi_13interpolation__linear_point)(__Pyx_memviewslice, double); /*proto*/
+static double (*__pyx_f_5pippi_13interpolation__linear_pos)(__Pyx_memviewslice, double); /*proto*/
 
 /* Module declarations from 'pippi.soundbuffer' */
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
@@ -2665,47 +2665,43 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
  *         sp_butbp_create(&butbp)
  *         sp_butbp_init(sp, butbp)             # <<<<<<<<<<<<<<
  * 
- *         for i in range(length):
+ *         pos = 0
  */
     (void)(sp_butbp_init(__pyx_v_sp, __pyx_v_butbp));
 
     /* "pippi/soundpipe.pyx":40
  *         sp_butbp_init(sp, butbp)
  * 
+ *         pos = 0             # <<<<<<<<<<<<<<
+ *         for i in range(length):
+ *             butbp.freq = interpolation._linear_pos(freq, pos)
+ */
+    __pyx_v_pos = 0.0;
+
+    /* "pippi/soundpipe.pyx":41
+ * 
+ *         pos = 0
  *         for i in range(length):             # <<<<<<<<<<<<<<
- *             pos = <double>i / <double>length
- *             butbp.freq = interpolation._linear_point(freq, pos)
+ *             butbp.freq = interpolation._linear_pos(freq, pos)
+ *             sample = <double>snd[i,c]
  */
     __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
       __pyx_v_i = __pyx_t_6;
 
-      /* "pippi/soundpipe.pyx":41
- * 
- *         for i in range(length):
- *             pos = <double>i / <double>length             # <<<<<<<<<<<<<<
- *             butbp.freq = interpolation._linear_point(freq, pos)
- *             sample = <double>snd[i,c]
- */
-      if (unlikely(((double)__pyx_v_length) == 0)) {
-        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 41, __pyx_L1_error)
-      }
-      __pyx_v_pos = (((double)__pyx_v_i) / ((double)__pyx_v_length));
-
       /* "pippi/soundpipe.pyx":42
+ *         pos = 0
  *         for i in range(length):
- *             pos = <double>i / <double>length
- *             butbp.freq = interpolation._linear_point(freq, pos)             # <<<<<<<<<<<<<<
+ *             butbp.freq = interpolation._linear_pos(freq, pos)             # <<<<<<<<<<<<<<
  *             sample = <double>snd[i,c]
  *             sp_butbp_compute(sp, butbp, &sample, &filtered)
  */
-      __pyx_v_butbp->freq = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_freq, __pyx_v_pos);
+      __pyx_v_butbp->freq = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_freq, __pyx_v_pos);
 
       /* "pippi/soundpipe.pyx":43
- *             pos = <double>i / <double>length
- *             butbp.freq = interpolation._linear_point(freq, pos)
+ *         for i in range(length):
+ *             butbp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]             # <<<<<<<<<<<<<<
  *             sp_butbp_compute(sp, butbp, &sample, &filtered)
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -2728,7 +2724,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbp(__Pyx_memviewslice __
       __pyx_v_sample = ((double)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
       /* "pippi/soundpipe.pyx":44
- *             butbp.freq = interpolation._linear_point(freq, pos)
+ *             butbp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]
  *             sp_butbp_compute(sp, butbp, &sample, &filtered)             # <<<<<<<<<<<<<<
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -3204,7 +3200,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
  *             pos = <double>i / <double>length
- *             butbr.freq = interpolation._linear_point(freq, pos)
+ *             butbr.freq = interpolation._linear_pos(freq, pos)
  */
     __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
@@ -3215,7 +3211,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
  * 
  *         for i in range(length):
  *             pos = <double>i / <double>length             # <<<<<<<<<<<<<<
- *             butbr.freq = interpolation._linear_point(freq, pos)
+ *             butbr.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]
  */
       if (unlikely(((double)__pyx_v_length) == 0)) {
@@ -3227,15 +3223,15 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
       /* "pippi/soundpipe.pyx":82
  *         for i in range(length):
  *             pos = <double>i / <double>length
- *             butbr.freq = interpolation._linear_point(freq, pos)             # <<<<<<<<<<<<<<
+ *             butbr.freq = interpolation._linear_pos(freq, pos)             # <<<<<<<<<<<<<<
  *             sample = <double>snd[i,c]
  *             sp_butbr_compute(sp, butbr, &sample, &filtered)
  */
-      __pyx_v_butbr->freq = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_freq, __pyx_v_pos);
+      __pyx_v_butbr->freq = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_freq, __pyx_v_pos);
 
       /* "pippi/soundpipe.pyx":83
  *             pos = <double>i / <double>length
- *             butbr.freq = interpolation._linear_point(freq, pos)
+ *             butbr.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]             # <<<<<<<<<<<<<<
  *             sp_butbr_compute(sp, butbr, &sample, &filtered)
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -3258,7 +3254,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butbr(__Pyx_memviewslice __
       __pyx_v_sample = ((double)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
       /* "pippi/soundpipe.pyx":84
- *             butbr.freq = interpolation._linear_point(freq, pos)
+ *             butbr.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]
  *             sp_butbr_compute(sp, butbr, &sample, &filtered)             # <<<<<<<<<<<<<<
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -3734,7 +3730,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
  *             pos = <double>i / <double>length
- *             buthp.freq = interpolation._linear_point(freq, pos)
+ *             buthp.freq = interpolation._linear_pos(freq, pos)
  */
     __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
@@ -3745,7 +3741,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
  * 
  *         for i in range(length):
  *             pos = <double>i / <double>length             # <<<<<<<<<<<<<<
- *             buthp.freq = interpolation._linear_point(freq, pos)
+ *             buthp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]
  */
       if (unlikely(((double)__pyx_v_length) == 0)) {
@@ -3757,15 +3753,15 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
       /* "pippi/soundpipe.pyx":122
  *         for i in range(length):
  *             pos = <double>i / <double>length
- *             buthp.freq = interpolation._linear_point(freq, pos)             # <<<<<<<<<<<<<<
+ *             buthp.freq = interpolation._linear_pos(freq, pos)             # <<<<<<<<<<<<<<
  *             sample = <double>snd[i,c]
  *             sp_buthp_compute(sp, buthp, &sample, &filtered)
  */
-      __pyx_v_buthp->freq = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_freq, __pyx_v_pos);
+      __pyx_v_buthp->freq = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_freq, __pyx_v_pos);
 
       /* "pippi/soundpipe.pyx":123
  *             pos = <double>i / <double>length
- *             buthp.freq = interpolation._linear_point(freq, pos)
+ *             buthp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]             # <<<<<<<<<<<<<<
  *             sp_buthp_compute(sp, buthp, &sample, &filtered)
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -3788,7 +3784,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__buthp(__Pyx_memviewslice __
       __pyx_v_sample = ((double)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
       /* "pippi/soundpipe.pyx":124
- *             buthp.freq = interpolation._linear_point(freq, pos)
+ *             buthp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]
  *             sp_buthp_compute(sp, buthp, &sample, &filtered)             # <<<<<<<<<<<<<<
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -4264,7 +4260,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
  *             pos = <double>i / <double>length
- *             butlp.freq = interpolation._linear_point(freq, pos)
+ *             butlp.freq = interpolation._linear_pos(freq, pos)
  */
     __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
@@ -4275,7 +4271,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
  * 
  *         for i in range(length):
  *             pos = <double>i / <double>length             # <<<<<<<<<<<<<<
- *             butlp.freq = interpolation._linear_point(freq, pos)
+ *             butlp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]
  */
       if (unlikely(((double)__pyx_v_length) == 0)) {
@@ -4287,15 +4283,15 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
       /* "pippi/soundpipe.pyx":162
  *         for i in range(length):
  *             pos = <double>i / <double>length
- *             butlp.freq = interpolation._linear_point(freq, pos)             # <<<<<<<<<<<<<<
+ *             butlp.freq = interpolation._linear_pos(freq, pos)             # <<<<<<<<<<<<<<
  *             sample = <double>snd[i,c]
  *             sp_butlp_compute(sp, butlp, &sample, &filtered)
  */
-      __pyx_v_butlp->freq = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_freq, __pyx_v_pos);
+      __pyx_v_butlp->freq = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_freq, __pyx_v_pos);
 
       /* "pippi/soundpipe.pyx":163
  *             pos = <double>i / <double>length
- *             butlp.freq = interpolation._linear_point(freq, pos)
+ *             butlp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]             # <<<<<<<<<<<<<<
  *             sp_butlp_compute(sp, butlp, &sample, &filtered)
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -4318,7 +4314,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__butlp(__Pyx_memviewslice __
       __pyx_v_sample = ((double)(*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_7 * __pyx_v_snd.strides[0]) ) + __pyx_t_8 * __pyx_v_snd.strides[1]) ))));
 
       /* "pippi/soundpipe.pyx":164
- *             butlp.freq = interpolation._linear_point(freq, pos)
+ *             butlp.freq = interpolation._linear_pos(freq, pos)
  *             sample = <double>snd[i,c]
  *             sp_butlp_compute(sp, butlp, &sample, &filtered)             # <<<<<<<<<<<<<<
  *             sp_bal_compute(sp, bal, &filtered, &sample, &output)
@@ -5723,7 +5719,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__mincer(__Pyx_memviewslice _
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
  *             pos = <double>i/<double>length
- *             mincer.time = <double>interpolation._linear_point(time, pos) * sndlength
+ *             mincer.time = <double>interpolation._linear_pos(time, pos) * sndlength
  */
     __pyx_t_4 = __pyx_v_length;
     __pyx_t_5 = __pyx_t_4;
@@ -5734,8 +5730,8 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__mincer(__Pyx_memviewslice _
  * 
  *         for i in range(length):
  *             pos = <double>i/<double>length             # <<<<<<<<<<<<<<
- *             mincer.time = <double>interpolation._linear_point(time, pos) * sndlength
- *             mincer.pitch = <double>interpolation._linear_point(pitch, pos)
+ *             mincer.time = <double>interpolation._linear_pos(time, pos) * sndlength
+ *             mincer.pitch = <double>interpolation._linear_pos(pitch, pos)
  */
       if (unlikely(((double)__pyx_v_length) == 0)) {
         PyErr_SetString(PyExc_ZeroDivisionError, "float division");
@@ -5746,24 +5742,24 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__mincer(__Pyx_memviewslice _
       /* "pippi/soundpipe.pyx":278
  *         for i in range(length):
  *             pos = <double>i/<double>length
- *             mincer.time = <double>interpolation._linear_point(time, pos) * sndlength             # <<<<<<<<<<<<<<
- *             mincer.pitch = <double>interpolation._linear_point(pitch, pos)
+ *             mincer.time = <double>interpolation._linear_pos(time, pos) * sndlength             # <<<<<<<<<<<<<<
+ *             mincer.pitch = <double>interpolation._linear_pos(pitch, pos)
  *             sp_mincer_compute(sp, mincer, NULL, &output)
  */
-      __pyx_v_mincer->time = (((double)__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_time, __pyx_v_pos)) * __pyx_v_sndlength);
+      __pyx_v_mincer->time = (((double)__pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_time, __pyx_v_pos)) * __pyx_v_sndlength);
 
       /* "pippi/soundpipe.pyx":279
  *             pos = <double>i/<double>length
- *             mincer.time = <double>interpolation._linear_point(time, pos) * sndlength
- *             mincer.pitch = <double>interpolation._linear_point(pitch, pos)             # <<<<<<<<<<<<<<
+ *             mincer.time = <double>interpolation._linear_pos(time, pos) * sndlength
+ *             mincer.pitch = <double>interpolation._linear_pos(pitch, pos)             # <<<<<<<<<<<<<<
  *             sp_mincer_compute(sp, mincer, NULL, &output)
  *             out[i,c] = <double>output
  */
-      __pyx_v_mincer->pitch = ((double)__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_pitch, __pyx_v_pos));
+      __pyx_v_mincer->pitch = ((double)__pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_pitch, __pyx_v_pos));
 
       /* "pippi/soundpipe.pyx":280
- *             mincer.time = <double>interpolation._linear_point(time, pos) * sndlength
- *             mincer.pitch = <double>interpolation._linear_point(pitch, pos)
+ *             mincer.time = <double>interpolation._linear_pos(time, pos) * sndlength
+ *             mincer.pitch = <double>interpolation._linear_pos(pitch, pos)
  *             sp_mincer_compute(sp, mincer, NULL, &output)             # <<<<<<<<<<<<<<
  *             out[i,c] = <double>output
  * 
@@ -5771,7 +5767,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundpipe__mincer(__Pyx_memviewslice _
       (void)(sp_mincer_compute(__pyx_v_sp, __pyx_v_mincer, NULL, (&__pyx_v_output)));
 
       /* "pippi/soundpipe.pyx":281
- *             mincer.pitch = <double>interpolation._linear_point(pitch, pos)
+ *             mincer.pitch = <double>interpolation._linear_pos(pitch, pos)
  *             sp_mincer_compute(sp, mincer, NULL, &output)
  *             out[i,c] = <double>output             # <<<<<<<<<<<<<<
  * 
@@ -21410,8 +21406,8 @@ static int __Pyx_modinit_type_import_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
   __pyx_ptype_5pippi_6grains_Cloud = __Pyx_ImportType("pippi.grains", "Cloud", sizeof(struct __pyx_obj_5pippi_6grains_Cloud), 1); if (unlikely(!__pyx_ptype_5pippi_6grains_Cloud)) __PYX_ERR(2, 4, __pyx_L1_error)
-  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType("pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(3, 8, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(3, 8, __pyx_L1_error)
+  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType("pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), 1); if (unlikely(!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(3, 6, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(3, 6, __pyx_L1_error)
   __pyx_ptype_5pippi_10wavetables_Wavetable = __Pyx_ImportType("pippi.wavetables", "Wavetable", sizeof(struct __pyx_obj_5pippi_10wavetables_Wavetable), 1); if (unlikely(!__pyx_ptype_5pippi_10wavetables_Wavetable)) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -21477,7 +21473,7 @@ static int __Pyx_modinit_function_import_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_import_code", 0);
   /*--- Function import code ---*/
   __pyx_t_1 = __Pyx_ImportModule("pippi.interpolation"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "_linear_point", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_point, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "_linear_pos", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_pos, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
