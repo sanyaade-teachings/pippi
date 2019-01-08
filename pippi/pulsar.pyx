@@ -25,9 +25,6 @@ cdef class Pulsar:
             object amp=1, 
             double phase=0, 
 
-            object window_freq=None,
-            object wavetable_freq=None,
-
             int wtsize=4096,
             int channels=DEFAULT_CHANNELS,
             int samplerate=DEFAULT_SAMPLERATE,
