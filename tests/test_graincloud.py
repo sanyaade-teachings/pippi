@@ -35,7 +35,7 @@ class TestCloud(TestCase):
         sound = SoundBuffer(filename='examples/sounds/linus.wav')
         length = 90
         grainlength = dsp.wt(dsp.HANN) * 0.08 + 0.01
-        grid = dsp.wt(dsp.HANN) * 0.1 + 0.01
+        grid = dsp.wt(dsp.HANN) * 0.05 + 0.01
 
         out = sound.cloud(length, 
                 grainlength=grainlength,

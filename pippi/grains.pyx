@@ -99,6 +99,7 @@ cdef class Cloud:
         cdef double fsample = 0
         cdef double spread = 0
         cdef double inc = 0
+        cdef double write_boundry = <double>(outframelength-1)
         cdef unsigned int masklength = 0
         cdef unsigned int count = 0
         cdef sp_data* sp
@@ -110,10 +111,10 @@ cdef class Cloud:
         if self.has_mask:
             masklength = <unsigned int>len(self.mask)
 
-        while pos <= 1: 
+        while write_pos <= write_boundry: 
             if self.has_mask and self.mask[<int>(count % masklength)] == 0:
                 write_pos += <unsigned int>(interpolation._linear_pos(self.grid, pos) * self.samplerate)
-                pos = <double>write_pos / <double>outframelength
+                pos = write_pos / write_boundry
                 count += 1
                 continue
 
@@ -147,10 +148,12 @@ cdef class Cloud:
                 sp_mincer_destroy(&mincer)
                 sp_ftbl_destroy(&tbl)
 
-            write_pos += <unsigned int>(interpolation._linear_pos(self.grid, pos) * self.samplerate)
+            write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
+
             write_jitter = <int>(interpolation._linear_pos(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
             write_pos += max(0, write_jitter)
-            pos = <double>write_pos / <double>outframelength
+
+            pos = write_pos / write_boundry
             count += 1
 
         sp_destroy(&sp)
