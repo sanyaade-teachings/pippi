@@ -34,11 +34,12 @@ Build the cython extensions from source & run the test suite
 
 Please let me know if you run into problems!
 
-## Run examples
+## Tutorials
 
-    make examples
+There are annotated example scripts in the `tutorials` directory which introduce some of pippi's functionality.
 
-Which will run every example in the `examples` directory, creating audio file renders in the same directory.
+Beyond arriving at a good-enough stable API for the 2.x series of releases (and fixing bugs), my goal during the 
+beta phase of development is to deal with the lack of documentation for this project.
 
 ## To run tests
 

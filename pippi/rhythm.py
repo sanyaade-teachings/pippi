@@ -184,20 +184,11 @@ def eu(length, numbeats, offset=0, reps=None, reverse=False):
 
     return pattern
 
-def curve(numbeats=16, wintype=None, length=44100, reverse=False, wavetable=None):
-    """ FIXME -- use seconds, rework api
-    """
-    wintype = wintype or dsp.RND
-
-    if wavetable is None:
-        win = wavetables.window(wintype, numbeats * 2)
-    else:
-        win = interpolation.linear(wavetable, numbeats)
+def curve(numbeats=16, wavetable=None, reverse=False):
+    win = dsp.wt(wavetable or dsp.HANN, numbeats)
 
     if reverse:
-        win = win[numbeats:]
-    else:
-        win = win[:numbeats]
+        win = win.reversed()
 
     return [ int(onset * length) for onset in win ]
 

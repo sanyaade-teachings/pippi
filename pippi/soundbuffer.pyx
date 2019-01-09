@@ -155,7 +155,7 @@ cdef double[:,:] _speed(double[:,:] frames,
             chan[i] = frames[i,c]
 
         for i in range(length):
-            outchan[i] = interpolation._linear_point(chan, <double>i/<double>(length-1))
+            outchan[i] = interpolation._linear_pos(chan, <double>i/(length-1))
 
         for i in range(length):
             out[i,c] = outchan[i]
@@ -319,12 +319,31 @@ cdef class SoundBuffer:
         """
 
         cdef double[:,:] out
+        cdef double[:,:] a, b
+        cdef int i, c
 
-        try:
-            out = np.add(self.frames, value[:len(self.frames)])
-            return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
-        except TypeError as e:
-            return NotImplemented
+        if isinstance(value, SoundBuffer):
+            if len(self.frames) > len(value.frames):
+                a = self.frames
+                b = value.frames
+            else:
+                a = value.frames
+                b = self.frames
+
+        else:
+            if len(self.frames) > len(value):
+                a = self.frames
+                b = np.array(value, dtype='d')
+            else:
+                a = np.array(value, dtype='d')
+                b = self.frames
+
+        out = a.copy()
+        for i in range(len(b)):
+            for c in range(self.channels):
+                out[i,c] += b[i,c]
+
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     def __iand__(SoundBuffer self, object value):
         """ Mix in place two SoundBuffers or two 2d arrays with compatible dimensions

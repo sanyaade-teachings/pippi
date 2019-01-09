@@ -8,8 +8,5 @@ clean:
 	rm -rf pippi/*.c
 	rm -rf pippi/*.so
 
-examples:
-	ls examples/*.py | xargs -n 1 -P `nproc --all` python
-
 build:
 	python setup.py develop
