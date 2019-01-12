@@ -21,18 +21,17 @@ def pattern(
     bpm=120.0,      # Tempo in beats per minute
     length=1,       # Output length in seconds 
     swing=0,        # MPC swing amount 0-1
+    div=1,          # Beat subdivision
     lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
-    lfo_tempo=None, # Lfo frequency in BPM string or Hz
-    lfo_depth=None, # Fractional multiplier from original tempo
     delay=False,    # Fixed delay in seconds added to each onset
 ):
     """ Onsets from ascii
     """
     bpm = bpm if bpm > 0 else np.nextafter(0, 1)
-    beat = 60 / bpm
+    beat = (60 / bpm) / div
 
     positions = topositions(pattern, beat, length)
-    positions = onsetswing(onsets, swing, beat)
+    positions = onsetswing(positions, swing, beat)
 
     if delay:
         positions = [ pos + delay for pos in positions ]
@@ -112,7 +111,7 @@ def onsetswing(onsets, amount, beat):
     if amount <= 0:
         return onsets
 
-    delay_amount = int(beat * amount * 0.75)
+    delay_amount = beat * amount * 0.75
     for i, onset in enumerate(onsets):
         if i % 2 == 1:
             onsets[i] += delay_amount

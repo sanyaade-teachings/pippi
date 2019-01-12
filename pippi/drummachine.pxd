@@ -2,17 +2,16 @@ from pippi.soundbuffer cimport SoundBuffer
 
 cdef class DrumMachine:
     cdef double bpm
-    cdef dict drums
+    cdef public dict drums
 
     cpdef void add(DrumMachine self, 
             str name, 
             object pattern=*, 
-            SoundBuffer sound=*, 
+            list sounds=*, 
             object callback=*, 
             double swing=*, 
+            double div=*, 
             object lfo=*,
-            double lfo_tempo=*, 
-            double lfo_depth=*, 
             double delay=*
         )
 

@@ -1,4 +1,5 @@
 from pippi.soundbuffer cimport SoundBuffer
+from pippi cimport rand
 from pippi import rhythm
 
 cdef class DrumMachine:
@@ -15,24 +16,23 @@ cdef class DrumMachine:
     cpdef void add(DrumMachine self, 
             str name, 
             object pattern=None, 
-            SoundBuffer sound=None, 
+            list sounds=None, 
             object callback=None, 
             double swing=0, 
+            double div=1, 
             object lfo=None,
-            double lfo_tempo=1, 
-            double lfo_depth=0, 
             double delay=0
         ):
-        self.drums[name] = self.drums.get(name, {}).update(dict(
+        self.drums[name] = dict(
             name=name, 
             pattern=pattern, 
-            sound=sound, 
+            sounds=sounds, 
             callback=callback, 
+            div=div, 
             swing=swing, 
             lfo=lfo, 
-            lfo_tempo=lfo_tempo, 
-            lfo_depth=lfo_depth, 
-            delay=delay))
+            delay=delay
+        )
 
     cpdef void update(DrumMachine self, str name, str param, object value):
         self.drums[name] = self.drums.get(name, {}).update({param:value})
@@ -45,21 +45,20 @@ cdef class DrumMachine:
         cdef SoundBuffer clang
         cdef int count
 
-        for drum in self.drums:
+        for k, drum in self.drums.items():
             onsets = rhythm.pattern(
                         pattern=drum['pattern'], 
                         bpm=self.bpm, 
+                        div=drum['div'], 
                         length=length, 
                         swing=drum.get('swing', None), 
                         lfo=drum.get('lfo', None), 
-                        lfo_tempo=drum.get('lfo_tempo', 1), 
-                        lfo_depth=drum.get('lfo_depth', 0), 
                         delay=drum.get('delay', False),
                     )
 
             count = 0
             for onset in onsets:
-                clang = drum.get('sound', None)
+                clang = SoundBuffer(filename=str(rand.choice(drum['sounds'])))
                 if drum.get('callback', None) is not None:
                     clang = drum['callback'](clang, onset, count)
                 out.dub(clang, onset)
