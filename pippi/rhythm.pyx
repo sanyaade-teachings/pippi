@@ -18,13 +18,13 @@ CLAVE = {
 
 
 cpdef list pattern(
-    pat,            # Pattern
-    bpm=120.0,      # Tempo in beats per minute
-    length=1,       # Output length in seconds 
-    swing=0,        # MPC swing amount 0-1
-    div=1,          # Beat subdivision
-    lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
-    delay=0,        # Fixed delay in seconds added to each onset
+    object pat,            # Pattern
+    double bpm=120.0,      # Tempo in beats per minute
+    double length=1,       # Output length in seconds 
+    double swing=0,        # MPC swing amount 0-1
+    double div=1,          # Beat subdivision
+    object lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
+    double delay=0,        # Fixed delay in seconds added to each onset
 ):
     """ Onsets from ascii
     """
@@ -39,7 +39,7 @@ cpdef list pattern(
 
     return positions
 
-cdef list topositions(list p, double beat, double length, wavetables.Wavetable lfo=None):
+cpdef list topositions(object p, double beat, double length, wavetables.Wavetable lfo=None):
     cdef double pos = 0
     cdef int count = 0
     cdef double delay = 0

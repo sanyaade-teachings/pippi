@@ -22,7 +22,7 @@ class TestSoundpipe(TestCase):
         snd.write('tests/renders/soundpipe_paulstretch.wav')
 
     def test_mincer(self):
-        snd = dsp.read('examples/sounds/linus.wav')
+        snd = dsp.read('tests/sounds/linux.wav')
         length = 20
         amp = 1
         time = wavetables.randline(10) * 2 + 0.5

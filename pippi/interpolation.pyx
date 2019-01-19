@@ -3,6 +3,7 @@
 import numpy as np
 cimport cython
 from libc cimport math
+from pippi.wavetables cimport to_wavetable
 
 ctypedef double (*get_sample_t)(double x, double y0, double y1, double y2, double y3)
 
@@ -75,8 +76,8 @@ cdef double[:] _linear(double[:] data, int length):
 
     return out
 
-cpdef double[:] linear(double[:] data, int length):
-    return _linear(data, length)
+cpdef double[:] linear(object data, int length):
+    return to_wavetable(data, length)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

@@ -32,7 +32,7 @@ class TestCloud(TestCase):
         out.write('tests/renders/test_pulsed_graincloud.wav')
 
     def test_long_graincloud(self):
-        sound = SoundBuffer(filename='examples/sounds/linus.wav')
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
         length = 90
         grainlength = dsp.wt(dsp.HANN) * 0.08 + 0.01
         grid = dsp.wt(dsp.HANN) * 0.05 + 0.01
@@ -76,7 +76,7 @@ class TestCloud(TestCase):
         out.write('tests/renders/test_graincloud_with_speed_lfo.wav')
 
     def test_graincloud_with_read_lfo(self):
-        sound = SoundBuffer(filename='examples/sounds/linus.wav')
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
         cloud = grains.Cloud(sound, 
                             position=dsp.wt(dsp.HANN) * sound.dur, 
                         )
