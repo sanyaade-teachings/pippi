@@ -34,6 +34,7 @@ ext_modules = cythonize([
         Extension('pippi.pulsar', ['pippi/pulsar.pyx']), 
         Extension('pippi.pluck', ['pippi/pluck.pyx']), 
 
+        Extension('pippi.rhythm', ['pippi/rhythm.pyx']), 
         Extension('pippi.rand', ['pippi/rand.pyx']), 
         Extension('pippi.soundbuffer', ['pippi/soundbuffer.pyx']), 
         Extension('pippi.soundpipe', ['pippi/soundpipe.pyx'], 

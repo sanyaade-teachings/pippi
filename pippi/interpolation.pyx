@@ -75,6 +75,9 @@ cdef double[:] _linear(double[:] data, int length):
 
     return out
 
+cpdef double[:] linear(double[:] data, int length):
+    return _linear(data, length)
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef double _trunc_point(double[:] data, double phase) nogil:

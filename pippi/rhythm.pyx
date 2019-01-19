@@ -1,10 +1,11 @@
 """ Some helpers for building and transforming onset lists
 """
 
-from . import wavetables
-from . import interpolation
-from . import dsp
+from pippi cimport wavetables
+from pippi cimport interpolation
+from pippi cimport dsp
 import pyparsing
+import numpy as np
 
 REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
 
@@ -16,37 +17,42 @@ CLAVE = {
 }
 
 
-def pattern(
-    pattern,        # Pattern
+cpdef list pattern(
+    pat,            # Pattern
     bpm=120.0,      # Tempo in beats per minute
     length=1,       # Output length in seconds 
     swing=0,        # MPC swing amount 0-1
     div=1,          # Beat subdivision
     lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
-    delay=False,    # Fixed delay in seconds added to each onset
+    delay=0,        # Fixed delay in seconds added to each onset
 ):
     """ Onsets from ascii
     """
     bpm = bpm if bpm > 0 else np.nextafter(0, 1)
     beat = (60 / bpm) / div
 
-    positions = topositions(pattern, beat, length)
+    positions = topositions(pat, beat, length, lfo)
     positions = onsetswing(positions, swing, beat)
 
-    if delay:
+    if delay > 0:
         positions = [ pos + delay for pos in positions ]
 
     return positions
 
-def topositions(p, beat=0.25, length=1):
-    pos = 0
-    count = 0
-    div = 1
-    out = []
+cdef list topositions(list p, double beat, double length, wavetables.Wavetable lfo=None):
+    cdef double pos = 0
+    cdef int count = 0
+    cdef double delay = 0
+    cdef double div = 1
+    cdef list out = []
 
     while pos < length:
         index = count % len(p)
         event = p[index]
+
+        if lfo is not None:
+            delay += interpolation._linear_pos(lfo.data, pos/length)
+            pos += delay
 
         if event in REST_SYMBOLS:
             count += 1
@@ -189,7 +195,7 @@ def curve(numbeats=16, wavetable=None, reverse=False):
     if reverse:
         win = win.reversed()
 
-    return [ int(onset * length) for onset in win ]
+    return win
 
 def rotate(pattern, offset=0):
     """ Rotate a pattern list by a given offset

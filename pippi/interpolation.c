@@ -1715,6 +1715,8 @@ static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
 static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice, double); /*proto*/
 static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewslice, int); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_linear(__Pyx_memviewslice, int, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_5pippi_13interpolation_hermite_get_sample(double, double, double, double, double); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
@@ -1794,6 +1796,7 @@ static const char __pyx_k_zeros[] = "zeros";
 static const char __pyx_k_encode[] = "encode";
 static const char __pyx_k_format[] = "format";
 static const char __pyx_k_import[] = "__import__";
+static const char __pyx_k_length[] = "length";
 static const char __pyx_k_name_2[] = "__name__";
 static const char __pyx_k_pickle[] = "pickle";
 static const char __pyx_k_reduce[] = "__reduce__";
@@ -1899,6 +1902,7 @@ static PyObject *__pyx_n_s_id;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
+static PyObject *__pyx_n_s_length;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_memview;
 static PyObject *__pyx_n_s_mode;
@@ -1943,7 +1947,8 @@ static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_5pippi_13interpolation_linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_linear(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, int __pyx_v_length); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -2700,7 +2705,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
- * @cython.boundscheck(False)
+ * cpdef double[:] linear(double[:] data, int length):
  */
   __PYX_INC_MEMVIEW(&__pyx_v_out, 0);
   __pyx_r = __pyx_v_out;
@@ -2735,7 +2740,151 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":80
+/* "pippi/interpolation.pyx":78
+ *     return out
+ * 
+ * cpdef double[:] linear(double[:] data, int length):             # <<<<<<<<<<<<<<
+ *     return _linear(data, length)
+ * 
+ */
+
+static PyObject *__pyx_pw_5pippi_13interpolation_1linear(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_linear(__Pyx_memviewslice __pyx_v_data, int __pyx_v_length, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_RefNannyDeclarations
+  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_RefNannySetupContext("linear", 0);
+
+  /* "pippi/interpolation.pyx":79
+ * 
+ * cpdef double[:] linear(double[:] data, int length):
+ *     return _linear(data, length)             # <<<<<<<<<<<<<<
+ * 
+ * @cython.boundscheck(False)
+ */
+  __pyx_t_1 = __pyx_f_5pippi_13interpolation__linear(__pyx_v_data, __pyx_v_length); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+  goto __pyx_L0;
+
+  /* "pippi/interpolation.pyx":78
+ *     return out
+ * 
+ * cpdef double[:] linear(double[:] data, int length):             # <<<<<<<<<<<<<<
+ *     return _linear(data, length)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __pyx_r.data = NULL;
+  __pyx_r.memview = NULL;
+  __Pyx_AddTraceback("pippi.interpolation.linear", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  goto __pyx_L2;
+  __pyx_L0:;
+  if (unlikely(!__pyx_r.memview)) {
+    PyErr_SetString(PyExc_TypeError, "Memoryview return value is not initialized");
+  }
+  __pyx_L2:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5pippi_13interpolation_1linear(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_1linear(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_v_length;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("linear (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_length,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_data)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_length)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("linear", 1, 2, 2, 1); __PYX_ERR(0, 78, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear") < 0)) __PYX_ERR(0, 78, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    }
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 78, __pyx_L3_error)
+    __pyx_v_length = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("linear", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 78, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("pippi.interpolation.linear", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5pippi_13interpolation_linear(__pyx_self, __pyx_v_data, __pyx_v_length);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5pippi_13interpolation_linear(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, int __pyx_v_length) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_2 = NULL;
+  __Pyx_RefNannySetupContext("linear", 0);
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 78, __pyx_L1_error) }
+  __pyx_t_1 = __pyx_f_5pippi_13interpolation_linear(__pyx_v_data, __pyx_v_length, 0); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("pippi.interpolation.linear", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_data, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/interpolation.pyx":83
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
@@ -2749,7 +2898,7 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
   Py_ssize_t __pyx_t_2;
   Py_ssize_t __pyx_t_3;
 
-  /* "pippi/interpolation.pyx":81
+  /* "pippi/interpolation.pyx":84
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:
  *     return data[<int>phase % (len(data)-1)]             # <<<<<<<<<<<<<<
@@ -2766,13 +2915,13 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
     #ifdef WITH_THREAD
     __Pyx_PyGILState_Release(__pyx_gilstate_save);
     #endif
-    __PYX_ERR(0, 81, __pyx_L1_error)
+    __PYX_ERR(0, 84, __pyx_L1_error)
   }
   __pyx_t_3 = __Pyx_mod_Py_ssize_t(((int)__pyx_v_phase), __pyx_t_2);
   __pyx_r = (*((double *) ( /* dim=0 */ (__pyx_v_data.data + __pyx_t_3 * __pyx_v_data.strides[0]) )));
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":80
+  /* "pippi/interpolation.pyx":83
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
@@ -2788,7 +2937,7 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":83
+/* "pippi/interpolation.pyx":86
  *     return data[<int>phase % (len(data)-1)]
  * 
  * cpdef double linear_point(double[:] data, double pos):             # <<<<<<<<<<<<<<
@@ -2796,13 +2945,13 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
  * 
  */
 
-static PyObject *__pyx_pw_5pippi_13interpolation_1linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __pyx_v_data, double __pyx_v_pos, CYTHON_UNUSED int __pyx_skip_dispatch) {
   double __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("linear_point", 0);
 
-  /* "pippi/interpolation.pyx":84
+  /* "pippi/interpolation.pyx":87
  * 
  * cpdef double linear_point(double[:] data, double pos):
  *     return _linear_point(data, pos)             # <<<<<<<<<<<<<<
@@ -2812,7 +2961,7 @@ static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __p
   __pyx_r = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_data, __pyx_v_pos);
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":83
+  /* "pippi/interpolation.pyx":86
  *     return data[<int>phase % (len(data)-1)]
  * 
  * cpdef double linear_point(double[:] data, double pos):             # <<<<<<<<<<<<<<
@@ -2827,8 +2976,8 @@ static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __p
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5pippi_13interpolation_1linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_5pippi_13interpolation_1linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_pos;
   PyObject *__pyx_r = 0;
@@ -2857,11 +3006,11 @@ static PyObject *__pyx_pw_5pippi_13interpolation_1linear_point(PyObject *__pyx_s
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pos)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("linear_point", 1, 2, 2, 1); __PYX_ERR(0, 83, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("linear_point", 1, 2, 2, 1); __PYX_ERR(0, 86, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_point") < 0)) __PYX_ERR(0, 83, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_point") < 0)) __PYX_ERR(0, 86, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2869,32 +3018,32 @@ static PyObject *__pyx_pw_5pippi_13interpolation_1linear_point(PyObject *__pyx_s
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 83, __pyx_L3_error)
-    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 83, __pyx_L3_error)
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 86, __pyx_L3_error)
+    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("linear_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 83, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("linear_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 86, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.interpolation.linear_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_13interpolation_linear_point(__pyx_self, __pyx_v_data, __pyx_v_pos);
+  __pyx_r = __pyx_pf_5pippi_13interpolation_2linear_point(__pyx_self, __pyx_v_data, __pyx_v_pos);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_13interpolation_linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos) {
+static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("linear_point", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 83, __pyx_L1_error) }
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_linear_point(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 83, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 86, __pyx_L1_error) }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_linear_point(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -16358,7 +16507,8 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 };
 
 static PyMethodDef __pyx_methods[] = {
-  {"linear_point", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_1linear_point, METH_VARARGS|METH_KEYWORDS, 0},
+  {"linear", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_1linear, METH_VARARGS|METH_KEYWORDS, 0},
+  {"linear_point", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_3linear_point, METH_VARARGS|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
@@ -16451,6 +16601,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
+  {&__pyx_n_s_length, __pyx_k_length, sizeof(__pyx_k_length), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_memview, __pyx_k_memview, sizeof(__pyx_k_memview), 0, 0, 1, 1},
   {&__pyx_n_s_mode, __pyx_k_mode, sizeof(__pyx_k_mode), 0, 0, 1, 1},
@@ -16826,6 +16977,7 @@ static int __Pyx_modinit_function_export_code(void) {
   if (__Pyx_ExportFunction("linear_point", (void (*)(void))__pyx_f_5pippi_13interpolation_linear_point, "double (__Pyx_memviewslice, double, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("_linear_pos", (void (*)(void))__pyx_f_5pippi_13interpolation__linear_pos, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("_linear", (void (*)(void))__pyx_f_5pippi_13interpolation__linear, "__Pyx_memviewslice (__Pyx_memviewslice, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("linear", (void (*)(void))__pyx_f_5pippi_13interpolation_linear, "__Pyx_memviewslice (__Pyx_memviewslice, int, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("_trunc_point", (void (*)(void))__pyx_f_5pippi_13interpolation__trunc_point, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -20278,6 +20430,28 @@ __pyx_fail:
     return result;
 }
 
+/* CIntFromPyVerify */
+  #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
+    __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 0)
+#define __PYX_VERIFY_RETURN_INT_EXC(target_type, func_type, func_value)\
+    __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 1)
+#define __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, exc)\
+    {\
+        func_type value = func_value;\
+        if (sizeof(target_type) < sizeof(func_type)) {\
+            if (unlikely(value != (func_type) (target_type) value)) {\
+                func_type zero = 0;\
+                if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
+                    return (target_type) -1;\
+                if (is_unsigned && unlikely(value < zero))\
+                    goto raise_neg_overflow;\
+                else\
+                    goto raise_overflow;\
+            }\
+        }\
+        return (target_type) value;\
+    }
+
 /* CIntToPy */
   static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value) {
     const int neg_one = (int) ((int) 0 - (int) 1), const_zero = (int) 0;
@@ -20320,28 +20494,6 @@ static CYTHON_INLINE int __pyx_memview_set_double(const char *itemp, PyObject *o
     *(double *) itemp = value;
     return 1;
 }
-
-/* CIntFromPyVerify */
-  #define __PYX_VERIFY_RETURN_INT(target_type, func_type, func_value)\
-    __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 0)
-#define __PYX_VERIFY_RETURN_INT_EXC(target_type, func_type, func_value)\
-    __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, 1)
-#define __PYX__VERIFY_RETURN_INT(target_type, func_type, func_value, exc)\
-    {\
-        func_type value = func_value;\
-        if (sizeof(target_type) < sizeof(func_type)) {\
-            if (unlikely(value != (func_type) (target_type) value)) {\
-                func_type zero = 0;\
-                if (exc && unlikely(value == (func_type)-1 && PyErr_Occurred()))\
-                    return (target_type) -1;\
-                if (is_unsigned && unlikely(value < zero))\
-                    goto raise_neg_overflow;\
-                else\
-                    goto raise_overflow;\
-            }\
-        }\
-        return (target_type) value;\
-    }
 
 /* CIntToPy */
   static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {

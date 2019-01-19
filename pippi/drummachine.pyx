@@ -3,21 +3,18 @@ from pippi cimport rand
 from pippi import rhythm
 
 cdef class DrumMachine:
-    def __init__(DrumMachine self, object bpm=None, dict drums=None):
+    def __init__(DrumMachine self, object bpm=None):
         if bpm is None:
             bpm = 120.0
         self.bpm = bpm
-
-        if drums is None:
-            drums = {}
-
-        self.drums = drums
+        self.drums = {}
 
     cpdef void add(DrumMachine self, 
             str name, 
             object pattern=None, 
-            list sounds=None, 
+            object sounds=None, 
             object callback=None, 
+            object barcallback=None, 
             double swing=0, 
             double div=1, 
             object lfo=None,
@@ -26,19 +23,18 @@ cdef class DrumMachine:
         self.drums[name] = dict(
             name=name, 
             pattern=pattern, 
-            sounds=sounds, 
+            sounds=list(sounds), 
             callback=callback, 
+            barcallback=barcallback, 
             div=div, 
             swing=swing, 
             lfo=lfo, 
             delay=delay
         )
 
-    cpdef void update(DrumMachine self, str name, str param, object value):
-        self.drums[name] = self.drums.get(name, {}).update({param:value})
-
     cpdef SoundBuffer play(DrumMachine self, double length):
         cdef SoundBuffer out = SoundBuffer(length=length)
+        cdef SoundBuffer bar
         cdef dict drum
         cdef list onsets
         cdef double onset
@@ -46,14 +42,15 @@ cdef class DrumMachine:
         cdef int count
 
         for k, drum in self.drums.items():
+            bar = SoundBuffer(length=length)
             onsets = rhythm.pattern(
-                        pattern=drum['pattern'], 
+                        drum['pattern'], 
                         bpm=self.bpm, 
                         div=drum['div'], 
                         length=length, 
-                        swing=drum.get('swing', None), 
-                        lfo=drum.get('lfo', None), 
-                        delay=drum.get('delay', False),
+                        swing=drum['swing'], 
+                        lfo=drum['lfo'], 
+                        delay=drum['delay'],
                     )
 
             count = 0
@@ -61,7 +58,11 @@ cdef class DrumMachine:
                 clang = SoundBuffer(filename=str(rand.choice(drum['sounds'])))
                 if drum.get('callback', None) is not None:
                     clang = drum['callback'](clang, onset, count)
-                out.dub(clang, onset)
+                bar.dub(clang, onset)
                 count += 1
+
+            if drum.get('barcallback', None) is not None:
+                bar = drum['barcallback'](bar)
+            out.dub(bar)
 
         return out
