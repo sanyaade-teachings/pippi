@@ -34,8 +34,8 @@ class TestCloud(TestCase):
     def test_long_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         length = 90
-        grainlength = dsp.wt(dsp.HANN) * 0.08 + 0.01
-        grid = dsp.wt(dsp.HANN) * 0.05 + 0.01
+        grainlength = dsp.wt(dsp.HANN, 0.01, 0.08)
+        grid = dsp.wt(dsp.HANN, 0.01, 0.05)
 
         out = sound.cloud(length, 
                 grainlength=grainlength,
@@ -50,7 +50,7 @@ class TestCloud(TestCase):
 
     def test_graincloud_with_length_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        grainlength = dsp.wt(dsp.HANN) * 0.1 + 0.01
+        grainlength = dsp.wt(dsp.HANN, 0.01, 0.1)
         length = 10
         framelength = int(length * sound.samplerate)
 
@@ -64,7 +64,7 @@ class TestCloud(TestCase):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         minspeed = random.triangular(0.05, 1)
         maxspeed = minspeed + random.triangular(0.5, 10)
-        speed = dsp.wt(dsp.RND) * (maxspeed - minspeed) + minspeed
+        speed = dsp.wt(dsp.RND, minspeed, maxspeed)
         cloud = grains.Cloud(sound, grainlength=0.04, speed=speed)
 
         length = 30
@@ -88,5 +88,4 @@ class TestCloud(TestCase):
         self.assertEqual(len(out), framelength)
 
         out.write('tests/renders/test_graincloud_with_read_lfo.wav')
-
 

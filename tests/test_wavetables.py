@@ -3,7 +3,7 @@ import random
 import re
 
 from unittest import TestCase
-from pippi import wavetables, dsp, graph
+from pippi import wavetables, dsp
 
 class TestWavetables(TestCase):
     def test_random_window(self):
@@ -25,9 +25,9 @@ class TestWavetables(TestCase):
         self.assertRaises(TypeError, wavetables.wavetable, 'this is not a wavetable type', length)
 
     def test_wtclass(self):
-        wt1 = dsp.wt(dsp.RND, 4096)
-        wt2 = dsp.wt(dsp.TRI, 4096)
-        wt3 = dsp.wt([ random.random()+0.001 for _ in range(1000) ], 1000)
+        wt1 = dsp.wt(dsp.RND, wtsize=4096)
+        wt2 = dsp.wt(dsp.TRI, wtsize=4096)
+        wt3 = dsp.wt([ random.random()+0.001 for _ in range(1000) ], wtsize=1000)
 
         self.assertTrue(max(wt1) > 0)
         self.assertTrue(max(wt2) > 0)
@@ -67,5 +67,9 @@ class TestWavetables(TestCase):
         self.assertEqual(len(wt), wtsize)
         self.assertTrue(max(wt) <= highvalue)
         self.assertTrue(min(wt) >= lowvalue)
+
+    def test_graph_wavetable(self):
+        wt = dsp.wt(dsp.SINE)
+        wt.graph('tests/renders/graph_wavetable.png', stroke=3)
 
 

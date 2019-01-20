@@ -11,6 +11,7 @@ from libc cimport math
 
 from pippi.wavetables cimport Wavetable, PHASOR, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window
 from pippi cimport interpolation
+from pippi cimport graph
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
 from pippi cimport grains
 from pippi cimport soundpipe
@@ -722,6 +723,17 @@ cdef class SoundBuffer:
             yield self[framesread:framesread+grainlength]
 
             framesread += grainlength
+
+    def graph(SoundBuffer self,
+        str filename=None, 
+        int width=800, 
+        int height=600, 
+        double offset=1, 
+        double mult=0.5, 
+        int stroke=1, 
+        int upsample_mult=5, 
+        bint show_axis=True):
+        graph.write(self, filename, width, height, offset, mult, stroke, upsample_mult, show_axis)
 
     def max(self):
         return np.amax(self.frames)

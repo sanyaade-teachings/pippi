@@ -11,7 +11,7 @@ from cpython.array cimport array, clone
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc cimport math
 
-from pippi cimport interpolation, rand
+from pippi cimport interpolation, rand, graph
 from pippi.soundbuffer cimport SoundBuffer
 
 cdef int SINE = 0
@@ -102,24 +102,30 @@ cdef class Wavetable:
             object lowvalue=None, 
             object highvalue=None,
             object wtsize=None, 
-            bint window=True, 
+            bint window=False, 
             bint pad=False):
         cdef bint scaled = False
         cdef bint resized = False
 
-        if wtsize is None:
-            if isinstance(values, numbers.Real):
-                self.length = 1
+        if isinstance(values, numbers.Integral):
+            if wtsize is None:
+                wtsize = 4096
+            if window:
+                self.data = _window(values, wtsize)
             else:
-                self.length = <int>len(values)
-        else:
-            self.length = <int>wtsize
-            resized = True
+                self.data = _wavetable(values, wtsize)
 
-        if window:
-            self.data = to_window(values, self.length)
+        elif isinstance(values, numbers.Real):
+            self.data = np.full(1, values, dtype='d')
+
+        elif isinstance(values, Wavetable):
+            self.data = values.data
+
+        elif isinstance(values, SoundBuffer):
+            self.data = np.ravel(np.array(values.remix(1).frames, dtype='d'))
+
         else:
-            self.data = to_wavetable(values, self.length)
+            self.data = np.ravel(np.array(values, dtype='d'))
 
         if lowvalue is None:
             self.lowvalue = np.min(self.data)
@@ -133,11 +139,14 @@ cdef class Wavetable:
             scaled = True
             self.highvalue = <double>highvalue
 
-        if resized:
-            self.data = interpolation._linear(self.data, self.length)
-
         if scaled:
             self.data = np.interp(self.data, (np.min(self.data), np.max(self.data)), (lowvalue, highvalue))
+
+        if wtsize is not None and len(self.data) != wtsize:
+            self.length = wtsize
+            self.data = interpolation._linear(self.data, self.length)
+        else:
+            self.length = len(self.data)
 
         if pad:
             self.pad()
@@ -316,9 +325,6 @@ cdef class Wavetable:
         if wrap:
             self.data[len(self.data)-1] = self.data[0]
 
-    def pad(self, numzeros=1):
-        self.data = np.pad(self.data, (numzeros, numzeros), 'constant', constant_values=(0,0))
-        
     def env(self, int window_type=-1):
         cdef int length = len(self)
         cdef double[:] wavetable = None
@@ -329,8 +335,22 @@ cdef class Wavetable:
 
         return self * wavetable
 
+    def graph(Wavetable self,
+        str filename=None, 
+        int width=400, 
+        int height=300, 
+        double offset=1, 
+        double mult=0.5, 
+        int stroke=3, 
+        int upsample_mult=5, 
+        bint show_axis=True):
+        graph.write(self, filename, width, height, offset, mult, stroke, upsample_mult, show_axis)
+
     def max(self):
         return np.amax(self.data)
+
+    def pad(self, numzeros=1):
+        self.data = np.pad(self.data, (numzeros, numzeros), 'constant', constant_values=(0,0))
  
     def repeat(self, int reps=2):
         if reps <= 1:

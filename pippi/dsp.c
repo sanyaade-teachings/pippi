@@ -1183,14 +1183,14 @@ struct __pyx_opt_args_5pippi_3dsp_randline {
  *     return wts.randline(numpoints, lowvalue, highvalue, wtsize)
  * 
  * cpdef wts.Wavetable wt(object values,             # <<<<<<<<<<<<<<
- *         double lowvalue=0,
- *         double highvalue=1,
+ *         object lowvalue=None,
+ *         object highvalue=None,
  */
 struct __pyx_opt_args_5pippi_3dsp_wt {
   int __pyx_n;
-  double lowvalue;
-  double highvalue;
-  int wtsize;
+  PyObject *lowvalue;
+  PyObject *highvalue;
+  PyObject *wtsize;
   int window;
 };
 
@@ -2699,7 +2699,7 @@ static PyObject *__pyx_n_s_wtsize;
 static PyObject *__pyx_pf_5pippi_3dsp_mag(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_v_snd); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_2mix(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_sounds, PyObject *__pyx_v_align_end); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_4randline(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_numpoints, double __pyx_v_lowvalue, double __pyx_v_highvalue, int __pyx_v_wtsize); /* proto */
-static PyObject *__pyx_pf_5pippi_3dsp_6wt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_values, double __pyx_v_lowvalue, double __pyx_v_highvalue, int __pyx_v_wtsize, int __pyx_v_window); /* proto */
+static PyObject *__pyx_pf_5pippi_3dsp_6wt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_values, PyObject *__pyx_v_lowvalue, PyObject *__pyx_v_highvalue, PyObject *__pyx_v_wtsize, int __pyx_v_window); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_8stack(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_sounds); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_10join(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_sounds, PyObject *__pyx_v_overlap, PyObject *__pyx_v_channels, PyObject *__pyx_v_samplerate); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_12buffer(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_frames, double __pyx_v_length, int __pyx_v_channels, int __pyx_v_samplerate); /* proto */
@@ -3735,31 +3735,52 @@ static PyObject *__pyx_pf_5pippi_3dsp_4randline(CYTHON_UNUSED PyObject *__pyx_se
  *     return wts.randline(numpoints, lowvalue, highvalue, wtsize)
  * 
  * cpdef wts.Wavetable wt(object values,             # <<<<<<<<<<<<<<
- *         double lowvalue=0,
- *         double highvalue=1,
+ *         object lowvalue=None,
+ *         object highvalue=None,
  */
 
 static PyObject *__pyx_pw_5pippi_3dsp_7wt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_3dsp_wt(PyObject *__pyx_v_values, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_wt *__pyx_optional_args) {
-  double __pyx_v_lowvalue = ((double)0.0);
-  double __pyx_v_highvalue = ((double)1.0);
-  int __pyx_v_wtsize = ((int)0x1000);
+
+  /* "pippi/dsp.pyx":98
+ * 
+ * cpdef wts.Wavetable wt(object values,
+ *         object lowvalue=None,             # <<<<<<<<<<<<<<
+ *         object highvalue=None,
+ *         object wtsize=None,
+ */
+  PyObject *__pyx_v_lowvalue = ((PyObject *)Py_None);
+
+  /* "pippi/dsp.pyx":99
+ * cpdef wts.Wavetable wt(object values,
+ *         object lowvalue=None,
+ *         object highvalue=None,             # <<<<<<<<<<<<<<
+ *         object wtsize=None,
+ *         bint window=False
+ */
+  PyObject *__pyx_v_highvalue = ((PyObject *)Py_None);
+
+  /* "pippi/dsp.pyx":100
+ *         object lowvalue=None,
+ *         object highvalue=None,
+ *         object wtsize=None,             # <<<<<<<<<<<<<<
+ *         bint window=False
+ *     ):
+ */
+  PyObject *__pyx_v_wtsize = ((PyObject *)Py_None);
 
   /* "pippi/dsp.pyx":101
- *         double highvalue=1,
- *         int wtsize=4096,
- *         bint window=True             # <<<<<<<<<<<<<<
+ *         object highvalue=None,
+ *         object wtsize=None,
+ *         bint window=False             # <<<<<<<<<<<<<<
  *     ):
  *     return wts.Wavetable(values, lowvalue, highvalue, wtsize, window)
  */
-  int __pyx_v_window = ((int)1);
+  int __pyx_v_window = ((int)0);
   struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
   __Pyx_RefNannySetupContext("wt", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -3777,60 +3798,51 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_3dsp_wt(Py
   }
 
   /* "pippi/dsp.pyx":103
- *         bint window=True
+ *         bint window=False
  *     ):
  *     return wts.Wavetable(values, lowvalue, highvalue, wtsize, window)             # <<<<<<<<<<<<<<
  * 
  * cpdef SoundBuffer stack(list sounds):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_lowvalue); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_window); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_highvalue); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_wtsize); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyBool_FromLong(__pyx_v_window); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
   __Pyx_INCREF(__pyx_v_values);
   __Pyx_GIVEREF(__pyx_v_values);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_v_values);
+  PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_values);
+  __Pyx_INCREF(__pyx_v_lowvalue);
+  __Pyx_GIVEREF(__pyx_v_lowvalue);
+  PyTuple_SET_ITEM(__pyx_t_2, 1, __pyx_v_lowvalue);
+  __Pyx_INCREF(__pyx_v_highvalue);
+  __Pyx_GIVEREF(__pyx_v_highvalue);
+  PyTuple_SET_ITEM(__pyx_t_2, 2, __pyx_v_highvalue);
+  __Pyx_INCREF(__pyx_v_wtsize);
+  __Pyx_GIVEREF(__pyx_v_wtsize);
+  PyTuple_SET_ITEM(__pyx_t_2, 3, __pyx_v_wtsize);
   __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_5, 3, __pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_5, 4, __pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_2, 4, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_3 = 0;
-  __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_r = ((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_t_4);
-  __pyx_t_4 = 0;
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_r = ((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_t_1);
+  __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* "pippi/dsp.pyx":97
  *     return wts.randline(numpoints, lowvalue, highvalue, wtsize)
  * 
  * cpdef wts.Wavetable wt(object values,             # <<<<<<<<<<<<<<
- *         double lowvalue=0,
- *         double highvalue=1,
+ *         object lowvalue=None,
+ *         object highvalue=None,
  */
 
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_AddTraceback("pippi.dsp.wt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
@@ -3843,9 +3855,9 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_3dsp_wt(Py
 static PyObject *__pyx_pw_5pippi_3dsp_7wt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_5pippi_3dsp_7wt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_values = 0;
-  double __pyx_v_lowvalue;
-  double __pyx_v_highvalue;
-  int __pyx_v_wtsize;
+  PyObject *__pyx_v_lowvalue = 0;
+  PyObject *__pyx_v_highvalue = 0;
+  PyObject *__pyx_v_wtsize = 0;
   int __pyx_v_window;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
@@ -3853,6 +3865,33 @@ static PyObject *__pyx_pw_5pippi_3dsp_7wt(PyObject *__pyx_self, PyObject *__pyx_
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_values,&__pyx_n_s_lowvalue,&__pyx_n_s_highvalue,&__pyx_n_s_wtsize,&__pyx_n_s_window,0};
     PyObject* values[5] = {0,0,0,0,0};
+
+    /* "pippi/dsp.pyx":98
+ * 
+ * cpdef wts.Wavetable wt(object values,
+ *         object lowvalue=None,             # <<<<<<<<<<<<<<
+ *         object highvalue=None,
+ *         object wtsize=None,
+ */
+    values[1] = ((PyObject *)Py_None);
+
+    /* "pippi/dsp.pyx":99
+ * cpdef wts.Wavetable wt(object values,
+ *         object lowvalue=None,
+ *         object highvalue=None,             # <<<<<<<<<<<<<<
+ *         object wtsize=None,
+ *         bint window=False
+ */
+    values[2] = ((PyObject *)Py_None);
+
+    /* "pippi/dsp.pyx":100
+ *         object lowvalue=None,
+ *         object highvalue=None,
+ *         object wtsize=None,             # <<<<<<<<<<<<<<
+ *         bint window=False
+ *     ):
+ */
+    values[3] = ((PyObject *)Py_None);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
@@ -3919,33 +3958,21 @@ static PyObject *__pyx_pw_5pippi_3dsp_7wt(PyObject *__pyx_self, PyObject *__pyx_
       }
     }
     __pyx_v_values = values[0];
-    if (values[1]) {
-      __pyx_v_lowvalue = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_lowvalue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
-    } else {
-      __pyx_v_lowvalue = ((double)0.0);
-    }
-    if (values[2]) {
-      __pyx_v_highvalue = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_highvalue == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L3_error)
-    } else {
-      __pyx_v_highvalue = ((double)1.0);
-    }
-    if (values[3]) {
-      __pyx_v_wtsize = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_wtsize == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 100, __pyx_L3_error)
-    } else {
-      __pyx_v_wtsize = ((int)0x1000);
-    }
+    __pyx_v_lowvalue = values[1];
+    __pyx_v_highvalue = values[2];
+    __pyx_v_wtsize = values[3];
     if (values[4]) {
       __pyx_v_window = __Pyx_PyObject_IsTrue(values[4]); if (unlikely((__pyx_v_window == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
     } else {
 
       /* "pippi/dsp.pyx":101
- *         double highvalue=1,
- *         int wtsize=4096,
- *         bint window=True             # <<<<<<<<<<<<<<
+ *         object highvalue=None,
+ *         object wtsize=None,
+ *         bint window=False             # <<<<<<<<<<<<<<
  *     ):
  *     return wts.Wavetable(values, lowvalue, highvalue, wtsize, window)
  */
-      __pyx_v_window = ((int)1);
+      __pyx_v_window = ((int)0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
@@ -3962,8 +3989,8 @@ static PyObject *__pyx_pw_5pippi_3dsp_7wt(PyObject *__pyx_self, PyObject *__pyx_
  *     return wts.randline(numpoints, lowvalue, highvalue, wtsize)
  * 
  * cpdef wts.Wavetable wt(object values,             # <<<<<<<<<<<<<<
- *         double lowvalue=0,
- *         double highvalue=1,
+ *         object lowvalue=None,
+ *         object highvalue=None,
  */
 
   /* function exit code */
@@ -3971,7 +3998,7 @@ static PyObject *__pyx_pw_5pippi_3dsp_7wt(PyObject *__pyx_self, PyObject *__pyx_
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_3dsp_6wt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_values, double __pyx_v_lowvalue, double __pyx_v_highvalue, int __pyx_v_wtsize, int __pyx_v_window) {
+static PyObject *__pyx_pf_5pippi_3dsp_6wt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_values, PyObject *__pyx_v_lowvalue, PyObject *__pyx_v_highvalue, PyObject *__pyx_v_wtsize, int __pyx_v_window) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;

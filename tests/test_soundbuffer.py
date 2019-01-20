@@ -32,6 +32,9 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
 
+    def test_graph_soundfile(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound.graph('tests/renders/graph_soundbuffer.png')
 
     def test_create_mono_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
@@ -45,7 +48,7 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), 228554)
 
     def test_create_mono_buffer_from_wavetable(self):
-        wt = dsp.wt(dsp.SINE, 4096)
+        wt = dsp.wt(dsp.SINE, wtsize=4096)
         self.assertTrue(len(wt) == 4096)
 
         snd = dsp.buffer(wt)

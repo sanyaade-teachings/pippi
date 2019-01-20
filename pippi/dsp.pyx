@@ -95,10 +95,10 @@ cpdef wts.Wavetable randline(int numpoints, double lowvalue=0, double highvalue=
     return wts.randline(numpoints, lowvalue, highvalue, wtsize)
 
 cpdef wts.Wavetable wt(object values, 
-        double lowvalue=0, 
-        double highvalue=1, 
-        int wtsize=4096, 
-        bint window=True
+        object lowvalue=None, 
+        object highvalue=None, 
+        object wtsize=None, 
+        bint window=False
     ):
     return wts.Wavetable(values, lowvalue, highvalue, wtsize, window)
 
