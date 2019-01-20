@@ -84,6 +84,7 @@ cdef double[:,:] _mul2d(double[:,:] output, double[:,:] values):
 @cython.wraparound(False)
 cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
     cdef int channel = 0
+    cdef int i = 0
     cdef int channels = output.shape[1]
     cdef int framelength = len(output)
 
@@ -91,7 +92,8 @@ cdef double[:,:] _mul1d(double[:,:] output, double[:] values):
         values = interpolation._linear(values, framelength)
 
     for channel in range(channels):
-        output.base[:,channel] *= values
+        for i in range(framelength):
+            output[i][channel] *= values[i]
 
     return output
 
