@@ -444,7 +444,7 @@ cpdef double[:] polyseg(list segments, int length):
 
 cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
     cdef double[:] points = np.array([ rand.rand(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
-    return Wavetable(interpolation._linear(points, wtsize), wtsize=wtsize)
+    return Wavetable(points, wtsize=wtsize)
 
 cdef double[:] _window(int window_type, int length):
     cdef double[:] wt

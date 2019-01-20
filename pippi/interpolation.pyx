@@ -72,7 +72,7 @@ cdef double[:] _linear(double[:] data, int length):
     cdef Py_ssize_t i
 
     for i in range(length-1):
-        out[i] = _linear_point(data, <double>i/<double>(length-1))
+        out[i] = _linear_pos(data, <double>i/<double>(length-1))
 
     return out
 

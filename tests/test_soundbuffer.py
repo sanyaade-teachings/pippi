@@ -34,7 +34,7 @@ class TestSoundBuffer(TestCase):
 
     def test_graph_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        sound.graph('tests/renders/graph_soundbuffer.png')
+        sound.graph('tests/renders/graph_soundbuffer.png', width=1280, height=800)
 
     def test_create_mono_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')

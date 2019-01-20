@@ -1877,6 +1877,7 @@ static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
 static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice, double); /*proto*/
 static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
+static double __pyx_f_5pippi_13interpolation__linear_pos(__Pyx_memviewslice, double); /*proto*/
 static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_linear(PyObject *, int, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_5pippi_13interpolation_hermite_get_sample(double, double, double, double, double); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
@@ -2837,7 +2838,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
  *     cdef Py_ssize_t i
  * 
  *     for i in range(length-1):             # <<<<<<<<<<<<<<
- *         out[i] = _linear_point(data, <double>i/<double>(length-1))
+ *         out[i] = _linear_pos(data, <double>i/<double>(length-1))
  * 
  */
   __pyx_t_6 = (__pyx_v_length - 1);
@@ -2848,7 +2849,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
     /* "pippi/interpolation.pyx":75
  * 
  *     for i in range(length-1):
- *         out[i] = _linear_point(data, <double>i/<double>(length-1))             # <<<<<<<<<<<<<<
+ *         out[i] = _linear_pos(data, <double>i/<double>(length-1))             # <<<<<<<<<<<<<<
  * 
  *     return out
  */
@@ -2858,11 +2859,11 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
       __PYX_ERR(0, 75, __pyx_L1_error)
     }
     __pyx_t_10 = __pyx_v_i;
-    *((double *) ( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) )) = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_data, (((double)__pyx_v_i) / __pyx_t_9));
+    *((double *) ( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) )) = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_data, (((double)__pyx_v_i) / __pyx_t_9));
   }
 
   /* "pippi/interpolation.pyx":77
- *         out[i] = _linear_point(data, <double>i/<double>(length-1))
+ *         out[i] = _linear_pos(data, <double>i/<double>(length-1))
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
