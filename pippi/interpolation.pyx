@@ -87,4 +87,7 @@ cdef double _trunc_point(double[:] data, double phase) nogil:
 cpdef double linear_point(double[:] data, double pos):
     return _linear_point(data, pos)
 
+cpdef double linear_pos(double[:] data, double pos):
+    return _linear_pos(data, pos)
+
 
