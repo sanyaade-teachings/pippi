@@ -44,6 +44,18 @@ class TestSoundBuffer(TestCase):
         self.assertTrue(sound.channels == 1)
         self.assertEqual(len(sound), 228554)
 
+    def test_create_mono_buffer_from_wavetable(self):
+        wt = dsp.wt(dsp.SINE, 4096)
+        self.assertTrue(len(wt) == 4096)
+
+        snd = dsp.buffer(wt)
+        self.assertTrue(len(snd) == 4096)
+        self.assertTrue(snd[100][0] != 0)
+
+        snd = SoundBuffer(wt)
+        self.assertTrue(len(snd) == 4096)
+        self.assertTrue(snd[100][0] != 0)
+
     def test_clip_soundbuffer(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
@@ -85,8 +97,6 @@ class TestSoundBuffer(TestCase):
         # Check that the remainder grain is the correct length
         remainderframes = int((sound.dur - sum(durations[:-1])) * sound.samplerate)
         self.assertEqual(int(durations[-1] * sound.samplerate), remainderframes)
-
-        print(durations[-1], remainderframes)
 
         # Check that all the grains add up
         self.assertEqual(sum(durations), sound.dur)

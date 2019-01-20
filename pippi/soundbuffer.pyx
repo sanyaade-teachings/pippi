@@ -171,7 +171,7 @@ cdef class SoundBuffer:
     def __cinit__(SoundBuffer self, 
             object frames=None, 
             double length=-1, 
-               int channels=-1, 
+               int channels=DEFAULT_CHANNELS, 
                int samplerate=DEFAULT_SAMPLERATE, 
            unicode filename=None, 
             double start=0, 
@@ -213,7 +213,7 @@ cdef class SoundBuffer:
             Otherwise an empty SoundBuffer is created with a length of zero.
         """
         self.samplerate = samplerate
-        self.channels = channels
+        self.channels = max(channels, 1)
         cdef int framestart = 0
         cdef int framelength = <int>(length * self.samplerate)
 
@@ -227,17 +227,23 @@ cdef class SoundBuffer:
             self.channels = self.frames.shape[1]
 
         elif frames is not None:
-            if isinstance(frames, list) or len(frames.shape) == 1:
-                if self.channels <= 0:
-                    self.channels = 1
+            if isinstance(frames, Wavetable):
+                self.frames = np.column_stack([ frames.data for _ in range(self.channels) ])
+
+            elif isinstance(frames, list):
                 self.frames = np.column_stack([ frames for _ in range(self.channels) ])
+
+            elif frames.shape == 1:
+                self.frames = np.column_stack([ frames for _ in range(self.channels) ])
+
+            elif frames.shape != self.channels:
+                self.frames = _remix(frames, len(frames), self.channels)
+
             else:
                 self.frames = np.array(frames, dtype='d')
                 self.channels = self.frames.shape[1]
 
         elif length > 0:
-            if self.channels <= 0:
-                self.channels = DEFAULT_CHANNELS
             self.frames = np.zeros((framelength, self.channels))
         else:
             self.frames = None
@@ -390,7 +396,7 @@ cdef class SoundBuffer:
         else:
             out = self.frames[position.start:position.stop]
 
-        return SoundBuffer(out, self.channels, self.samplerate)
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
 
     ###############
@@ -558,10 +564,10 @@ cdef class SoundBuffer:
         """
         if self.frames is None:
             return SoundBuffer(channels=self.channels, samplerate=self.samplerate)
-        return SoundBuffer(np.array(self.frames, copy=True), self.channels, self.samplerate)
+        return SoundBuffer(np.array(self.frames, copy=True), channels=self.channels, samplerate=self.samplerate)
 
     def clip(self, minval=-1, maxval=1):
-        return SoundBuffer(np.clip(self.frames, minval, maxval), self.channels, self.samplerate)
+        return SoundBuffer(np.clip(self.frames, minval, maxval), channels=self.channels, samplerate=self.samplerate)
         
     def cut(self, double start=0, double length=1):
         """ Copy a portion of this soundbuffer, returning 
@@ -587,7 +593,7 @@ cdef class SoundBuffer:
         if readlength >= 0:
             out[0:readlength] = self.frames[readstart:readend]
 
-        return SoundBuffer(out, self.channels, self.samplerate)
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     def rcut(self, double length=1):
         """ Copy a portion of this SoundBuffer of the 
