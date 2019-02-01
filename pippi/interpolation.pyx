@@ -41,19 +41,26 @@ cdef double[:] _hermite(double[:] data, int length):
 
     return out
 
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double _linear_point(double[:] data, double phase) nogil:
+cdef double _linear_point(double[:] data, double phase, double pulsewidth=1) nogil:
     cdef int dlength = <int>len(data)
+
     if dlength == 1:
         return data[0]
 
-    elif dlength < 1:
+    elif dlength < 1 or pulsewidth == 0:
         return 0
 
-    cdef double frac = phase - <int>phase
-    cdef int i = <int>phase % (len(data)-1)
+    phase *= 1.0/pulsewidth
+
+    cdef double frac = phase - <long>phase
+    cdef long i = <long>phase
     cdef double a, b
+
+    if i >= dlength-1:
+        return 0
 
     a = data[i]
     b = data[i+1]
@@ -77,15 +84,16 @@ cdef double[:] _linear(double[:] data, int length):
     return out
 
 cpdef double[:] linear(object data, int length):
-    return to_wavetable(data, length)
+    cdef double[:] _data = to_wavetable(data)
+    return _linear(data, length)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef double _trunc_point(double[:] data, double phase) nogil:
     return data[<int>phase % (len(data)-1)]
 
-cpdef double linear_point(double[:] data, double pos):
-    return _linear_point(data, pos)
+cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):
+    return _linear_point(data, phase, pulsewidth)
 
 cpdef double linear_pos(double[:] data, double pos):
     return _linear_pos(data, pos)

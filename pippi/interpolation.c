@@ -1017,6 +1017,29 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable {
   int __pyx_n;
   __Pyx_memviewslice data;
 };
+struct __pyx_opt_args_5pippi_13interpolation__linear_point;
+struct __pyx_opt_args_5pippi_13interpolation_linear_point;
+
+/* "pippi/interpolation.pxd":1
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)
+ * cdef double _linear_pos(double[:] data, double pos) nogil
+ */
+struct __pyx_opt_args_5pippi_13interpolation__linear_point {
+  int __pyx_n;
+  double pulsewidth;
+};
+
+/* "pippi/interpolation.pxd":2
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)             # <<<<<<<<<<<<<<
+ * cdef double _linear_pos(double[:] data, double pos) nogil
+ * cpdef double linear_pos(double[:] data, double pos)
+ */
+struct __pyx_opt_args_5pippi_13interpolation_linear_point {
+  int __pyx_n;
+  double pulsewidth;
+};
 
 /* "pippi/interpolation.pyx":8
  * from pippi.wavetables cimport to_wavetable
@@ -1343,9 +1366,6 @@ static CYTHON_INLINE int __pyx_sub_acquisition_count_locked(
 static CYTHON_INLINE void __Pyx_INC_MEMVIEW(__Pyx_memviewslice *, int, int);
 static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *, int, int);
 
-/* None.proto */
-static CYTHON_INLINE Py_ssize_t __Pyx_mod_Py_ssize_t(Py_ssize_t, Py_ssize_t);
-
 /* PyThreadStateGet.proto */
 #if CYTHON_FAST_THREAD_STATE
 #define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
@@ -1398,6 +1418,9 @@ static void __Pyx_RaiseDoubleKeywordsError(const char* func_name, PyObject* kw_n
 static int __Pyx_ParseOptionalKeywords(PyObject *kwds, PyObject **argnames[],\
     PyObject *kwds2, PyObject *values[], Py_ssize_t num_pos_args,\
     const char* function_name);
+
+/* None.proto */
+static CYTHON_INLINE Py_ssize_t __Pyx_mod_Py_ssize_t(Py_ssize_t, Py_ssize_t);
 
 /* None.proto */
 static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname);
@@ -1875,10 +1898,11 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
-static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice, double); /*proto*/
-static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
+static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args); /*proto*/
+static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_13interpolation_linear_point *__pyx_optional_args); /*proto*/
 static double __pyx_f_5pippi_13interpolation__linear_pos(__Pyx_memviewslice, double); /*proto*/
 static double __pyx_f_5pippi_13interpolation_linear_pos(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewslice, int); /*proto*/
 static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_linear(PyObject *, int, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_5pippi_13interpolation_hermite_get_sample(double, double, double, double, double); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
@@ -1952,6 +1976,7 @@ static const char __pyx_k_class[] = "__class__";
 static const char __pyx_k_error[] = "error";
 static const char __pyx_k_flags[] = "flags";
 static const char __pyx_k_numpy[] = "numpy";
+static const char __pyx_k_phase[] = "phase";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_start[] = "start";
@@ -1979,6 +2004,7 @@ static const char __pyx_k_pyx_state[] = "__pyx_state";
 static const char __pyx_k_reduce_ex[] = "__reduce_ex__";
 static const char __pyx_k_IndexError[] = "IndexError";
 static const char __pyx_k_ValueError[] = "ValueError";
+static const char __pyx_k_pulsewidth[] = "pulsewidth";
 static const char __pyx_k_pyx_result[] = "__pyx_result";
 static const char __pyx_k_pyx_vtable[] = "__pyx_vtable__";
 static const char __pyx_k_MemoryError[] = "MemoryError";
@@ -2078,8 +2104,10 @@ static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_n_s_obj;
 static PyObject *__pyx_n_s_pack;
+static PyObject *__pyx_n_s_phase;
 static PyObject *__pyx_n_s_pickle;
 static PyObject *__pyx_n_s_pos;
+static PyObject *__pyx_n_s_pulsewidth;
 static PyObject *__pyx_n_s_pyx_PickleError;
 static PyObject *__pyx_n_s_pyx_checksum;
 static PyObject *__pyx_n_s_pyx_getbuffer;
@@ -2111,7 +2139,7 @@ static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_5pippi_13interpolation_linear(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_data, int __pyx_v_length); /* proto */
-static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, double __pyx_v_pulsewidth); /* proto */
 static PyObject *__pyx_pf_5pippi_13interpolation_4linear_pos(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
@@ -2537,7 +2565,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__hermite(__Pyx_memviews
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
- * @cython.boundscheck(False)
+ * 
  */
   __PYX_INC_MEMVIEW(&__pyx_v_out, 0);
   __pyx_r = __pyx_v_out;
@@ -2572,41 +2600,47 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__hermite(__Pyx_memviews
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":46
+/* "pippi/interpolation.pyx":47
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * cdef double _linear_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=1) nogil:             # <<<<<<<<<<<<<<
  *     cdef int dlength = <int>len(data)
- *     if dlength == 1:
+ * 
  */
 
-static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice __pyx_v_data, double __pyx_v_phase) {
+static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args) {
+  double __pyx_v_pulsewidth = ((double)1.0);
   int __pyx_v_dlength;
   double __pyx_v_frac;
-  int __pyx_v_i;
+  long __pyx_v_i;
   double __pyx_v_a;
   double __pyx_v_b;
   double __pyx_r;
   size_t __pyx_t_1;
   int __pyx_t_2;
   Py_ssize_t __pyx_t_3;
-  Py_ssize_t __pyx_t_4;
+  int __pyx_t_4;
   Py_ssize_t __pyx_t_5;
   Py_ssize_t __pyx_t_6;
+  if (__pyx_optional_args) {
+    if (__pyx_optional_args->__pyx_n > 0) {
+      __pyx_v_pulsewidth = __pyx_optional_args->pulsewidth;
+    }
+  }
 
-  /* "pippi/interpolation.pyx":47
+  /* "pippi/interpolation.pyx":48
  * @cython.wraparound(False)
- * cdef double _linear_point(double[:] data, double phase) nogil:
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=1) nogil:
  *     cdef int dlength = <int>len(data)             # <<<<<<<<<<<<<<
+ * 
  *     if dlength == 1:
- *         return data[0]
  */
   __pyx_t_1 = __Pyx_MemoryView_Len(__pyx_v_data); 
   __pyx_v_dlength = ((int)__pyx_t_1);
 
-  /* "pippi/interpolation.pyx":48
- * cdef double _linear_point(double[:] data, double phase) nogil:
+  /* "pippi/interpolation.pyx":50
  *     cdef int dlength = <int>len(data)
+ * 
  *     if dlength == 1:             # <<<<<<<<<<<<<<
  *         return data[0]
  * 
@@ -2614,87 +2648,131 @@ static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice __
   __pyx_t_2 = ((__pyx_v_dlength == 1) != 0);
   if (__pyx_t_2) {
 
-    /* "pippi/interpolation.pyx":49
- *     cdef int dlength = <int>len(data)
+    /* "pippi/interpolation.pyx":51
+ * 
  *     if dlength == 1:
  *         return data[0]             # <<<<<<<<<<<<<<
  * 
- *     elif dlength < 1:
+ *     elif dlength < 1 or pulsewidth == 0:
  */
     __pyx_t_3 = 0;
     __pyx_r = (*((double *) ( /* dim=0 */ (__pyx_v_data.data + __pyx_t_3 * __pyx_v_data.strides[0]) )));
     goto __pyx_L0;
 
-    /* "pippi/interpolation.pyx":48
- * cdef double _linear_point(double[:] data, double phase) nogil:
+    /* "pippi/interpolation.pyx":50
  *     cdef int dlength = <int>len(data)
+ * 
  *     if dlength == 1:             # <<<<<<<<<<<<<<
  *         return data[0]
  * 
  */
   }
 
-  /* "pippi/interpolation.pyx":51
+  /* "pippi/interpolation.pyx":53
  *         return data[0]
  * 
- *     elif dlength < 1:             # <<<<<<<<<<<<<<
+ *     elif dlength < 1 or pulsewidth == 0:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
-  __pyx_t_2 = ((__pyx_v_dlength < 1) != 0);
+  __pyx_t_4 = ((__pyx_v_dlength < 1) != 0);
+  if (!__pyx_t_4) {
+  } else {
+    __pyx_t_2 = __pyx_t_4;
+    goto __pyx_L4_bool_binop_done;
+  }
+  __pyx_t_4 = ((__pyx_v_pulsewidth == 0.0) != 0);
+  __pyx_t_2 = __pyx_t_4;
+  __pyx_L4_bool_binop_done:;
   if (__pyx_t_2) {
 
-    /* "pippi/interpolation.pyx":52
+    /* "pippi/interpolation.pyx":54
  * 
- *     elif dlength < 1:
+ *     elif dlength < 1 or pulsewidth == 0:
  *         return 0             # <<<<<<<<<<<<<<
  * 
- *     cdef double frac = phase - <int>phase
+ *     phase *= 1.0/pulsewidth
  */
     __pyx_r = 0.0;
     goto __pyx_L0;
 
-    /* "pippi/interpolation.pyx":51
+    /* "pippi/interpolation.pyx":53
  *         return data[0]
  * 
- *     elif dlength < 1:             # <<<<<<<<<<<<<<
+ *     elif dlength < 1 or pulsewidth == 0:             # <<<<<<<<<<<<<<
  *         return 0
  * 
  */
   }
 
-  /* "pippi/interpolation.pyx":54
+  /* "pippi/interpolation.pyx":56
  *         return 0
  * 
- *     cdef double frac = phase - <int>phase             # <<<<<<<<<<<<<<
- *     cdef int i = <int>phase % (len(data)-1)
- *     cdef double a, b
- */
-  __pyx_v_frac = (__pyx_v_phase - ((int)__pyx_v_phase));
-
-  /* "pippi/interpolation.pyx":55
+ *     phase *= 1.0/pulsewidth             # <<<<<<<<<<<<<<
  * 
- *     cdef double frac = phase - <int>phase
- *     cdef int i = <int>phase % (len(data)-1)             # <<<<<<<<<<<<<<
- *     cdef double a, b
- * 
+ *     cdef double frac = phase - <long>phase
  */
-  __pyx_t_1 = __Pyx_MemoryView_Len(__pyx_v_data); 
-  __pyx_t_4 = (__pyx_t_1 - 1);
-  if (unlikely(__pyx_t_4 == 0)) {
+  if (unlikely(__pyx_v_pulsewidth == 0)) {
     #ifdef WITH_THREAD
     PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();
     #endif
-    PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
+    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
     #ifdef WITH_THREAD
     __Pyx_PyGILState_Release(__pyx_gilstate_save);
     #endif
-    __PYX_ERR(0, 55, __pyx_L1_error)
+    __PYX_ERR(0, 56, __pyx_L1_error)
   }
-  __pyx_v_i = __Pyx_mod_Py_ssize_t(((int)__pyx_v_phase), __pyx_t_4);
+  __pyx_v_phase = (__pyx_v_phase * (1.0 / __pyx_v_pulsewidth));
 
   /* "pippi/interpolation.pyx":58
+ *     phase *= 1.0/pulsewidth
+ * 
+ *     cdef double frac = phase - <long>phase             # <<<<<<<<<<<<<<
+ *     cdef long i = <long>phase
  *     cdef double a, b
+ */
+  __pyx_v_frac = (__pyx_v_phase - ((long)__pyx_v_phase));
+
+  /* "pippi/interpolation.pyx":59
+ * 
+ *     cdef double frac = phase - <long>phase
+ *     cdef long i = <long>phase             # <<<<<<<<<<<<<<
+ *     cdef double a, b
+ * 
+ */
+  __pyx_v_i = ((long)__pyx_v_phase);
+
+  /* "pippi/interpolation.pyx":62
+ *     cdef double a, b
+ * 
+ *     if i >= dlength-1:             # <<<<<<<<<<<<<<
+ *         return 0
+ * 
+ */
+  __pyx_t_2 = ((__pyx_v_i >= (__pyx_v_dlength - 1)) != 0);
+  if (__pyx_t_2) {
+
+    /* "pippi/interpolation.pyx":63
+ * 
+ *     if i >= dlength-1:
+ *         return 0             # <<<<<<<<<<<<<<
+ * 
+ *     a = data[i]
+ */
+    __pyx_r = 0.0;
+    goto __pyx_L0;
+
+    /* "pippi/interpolation.pyx":62
+ *     cdef double a, b
+ * 
+ *     if i >= dlength-1:             # <<<<<<<<<<<<<<
+ *         return 0
+ * 
+ */
+  }
+
+  /* "pippi/interpolation.pyx":65
+ *         return 0
  * 
  *     a = data[i]             # <<<<<<<<<<<<<<
  *     b = data[i+1]
@@ -2703,7 +2781,7 @@ static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice __
   __pyx_t_5 = __pyx_v_i;
   __pyx_v_a = (*((double *) ( /* dim=0 */ (__pyx_v_data.data + __pyx_t_5 * __pyx_v_data.strides[0]) )));
 
-  /* "pippi/interpolation.pyx":59
+  /* "pippi/interpolation.pyx":66
  * 
  *     a = data[i]
  *     b = data[i+1]             # <<<<<<<<<<<<<<
@@ -2713,7 +2791,7 @@ static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice __
   __pyx_t_6 = (__pyx_v_i + 1);
   __pyx_v_b = (*((double *) ( /* dim=0 */ (__pyx_v_data.data + __pyx_t_6 * __pyx_v_data.strides[0]) )));
 
-  /* "pippi/interpolation.pyx":61
+  /* "pippi/interpolation.pyx":68
  *     b = data[i+1]
  * 
  *     return (1.0 - frac) * a + (frac * b)             # <<<<<<<<<<<<<<
@@ -2723,12 +2801,12 @@ static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice __
   __pyx_r = (((1.0 - __pyx_v_frac) * __pyx_v_a) + (__pyx_v_frac * __pyx_v_b));
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":46
+  /* "pippi/interpolation.pyx":47
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
- * cdef double _linear_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=1) nogil:             # <<<<<<<<<<<<<<
  *     cdef int dlength = <int>len(data)
- *     if dlength == 1:
+ * 
  */
 
   /* function exit code */
@@ -2739,7 +2817,7 @@ static double __pyx_f_5pippi_13interpolation__linear_point(__Pyx_memviewslice __
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":65
+/* "pippi/interpolation.pyx":72
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double _linear_pos(double[:] data, double pos) nogil:             # <<<<<<<<<<<<<<
@@ -2751,7 +2829,7 @@ static double __pyx_f_5pippi_13interpolation__linear_pos(__Pyx_memviewslice __py
   double __pyx_r;
   size_t __pyx_t_1;
 
-  /* "pippi/interpolation.pyx":66
+  /* "pippi/interpolation.pyx":73
  * @cython.wraparound(False)
  * cdef double _linear_pos(double[:] data, double pos) nogil:
  *     return _linear_point(data, pos * <double>(len(data)-1))             # <<<<<<<<<<<<<<
@@ -2759,10 +2837,10 @@ static double __pyx_f_5pippi_13interpolation__linear_pos(__Pyx_memviewslice __py
  * @cython.boundscheck(False)
  */
   __pyx_t_1 = __Pyx_MemoryView_Len(__pyx_v_data); 
-  __pyx_r = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_data, (__pyx_v_pos * ((double)(__pyx_t_1 - 1))));
+  __pyx_r = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_data, (__pyx_v_pos * ((double)(__pyx_t_1 - 1))), NULL);
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":65
+  /* "pippi/interpolation.pyx":72
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double _linear_pos(double[:] data, double pos) nogil:             # <<<<<<<<<<<<<<
@@ -2775,7 +2853,7 @@ static double __pyx_f_5pippi_13interpolation__linear_pos(__Pyx_memviewslice __py
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":70
+/* "pippi/interpolation.pyx":77
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double[:] _linear(double[:] data, int length):             # <<<<<<<<<<<<<<
@@ -2800,19 +2878,19 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
   Py_ssize_t __pyx_t_10;
   __Pyx_RefNannySetupContext("_linear", 0);
 
-  /* "pippi/interpolation.pyx":71
+  /* "pippi/interpolation.pyx":78
  * @cython.wraparound(False)
  * cdef double[:] _linear(double[:] data, int length):
  *     cdef double[:] out = np.zeros(length)             # <<<<<<<<<<<<<<
  *     cdef Py_ssize_t i
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -2827,16 +2905,16 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
   __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2);
   __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_out = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "pippi/interpolation.pyx":74
+  /* "pippi/interpolation.pyx":81
  *     cdef Py_ssize_t i
  * 
  *     for i in range(length-1):             # <<<<<<<<<<<<<<
@@ -2848,7 +2926,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
   for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
     __pyx_v_i = __pyx_t_8;
 
-    /* "pippi/interpolation.pyx":75
+    /* "pippi/interpolation.pyx":82
  * 
  *     for i in range(length-1):
  *         out[i] = _linear_pos(data, <double>i/<double>(length-1))             # <<<<<<<<<<<<<<
@@ -2858,13 +2936,13 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
     __pyx_t_9 = ((double)(__pyx_v_length - 1));
     if (unlikely(__pyx_t_9 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 75, __pyx_L1_error)
+      __PYX_ERR(0, 82, __pyx_L1_error)
     }
     __pyx_t_10 = __pyx_v_i;
     *((double *) ( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) )) = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_data, (((double)__pyx_v_i) / __pyx_t_9));
   }
 
-  /* "pippi/interpolation.pyx":77
+  /* "pippi/interpolation.pyx":84
  *         out[i] = _linear_pos(data, <double>i/<double>(length-1))
  * 
  *     return out             # <<<<<<<<<<<<<<
@@ -2875,7 +2953,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
   __pyx_r = __pyx_v_out;
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":70
+  /* "pippi/interpolation.pyx":77
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double[:] _linear(double[:] data, int length):             # <<<<<<<<<<<<<<
@@ -2904,48 +2982,64 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewsl
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":79
+/* "pippi/interpolation.pyx":86
  *     return out
  * 
  * cpdef double[:] linear(object data, int length):             # <<<<<<<<<<<<<<
- *     return to_wavetable(data, length)
- * 
+ *     cdef double[:] _data = to_wavetable(data)
+ *     return _linear(data, length)
  */
 
 static PyObject *__pyx_pw_5pippi_13interpolation_1linear(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_linear(PyObject *__pyx_v_data, int __pyx_v_length, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  CYTHON_UNUSED __Pyx_memviewslice __pyx_v__data = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannyDeclarations
   __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  struct __pyx_opt_args_5pippi_10wavetables_to_wavetable __pyx_t_2;
+  __Pyx_memviewslice __pyx_t_2 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("linear", 0);
 
-  /* "pippi/interpolation.pyx":80
+  /* "pippi/interpolation.pyx":87
  * 
  * cpdef double[:] linear(object data, int length):
- *     return to_wavetable(data, length)             # <<<<<<<<<<<<<<
+ *     cdef double[:] _data = to_wavetable(data)             # <<<<<<<<<<<<<<
+ *     return _linear(data, length)
+ * 
+ */
+  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_data, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_v__data = __pyx_t_1;
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+
+  /* "pippi/interpolation.pyx":88
+ * cpdef double[:] linear(object data, int length):
+ *     cdef double[:] _data = to_wavetable(data)
+ *     return _linear(data, length)             # <<<<<<<<<<<<<<
  * 
  * @cython.boundscheck(False)
  */
-  __pyx_t_2.__pyx_n = 1;
-  __pyx_t_2.wtsize = __pyx_v_length;
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_data, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 80, __pyx_L1_error)
-  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_data, PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_5pippi_13interpolation__linear(__pyx_t_1, __pyx_v_length); if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 88, __pyx_L1_error)
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2.memview = NULL;
+  __pyx_t_2.data = NULL;
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":79
+  /* "pippi/interpolation.pyx":86
  *     return out
  * 
  * cpdef double[:] linear(object data, int length):             # <<<<<<<<<<<<<<
- *     return to_wavetable(data, length)
- * 
+ *     cdef double[:] _data = to_wavetable(data)
+ *     return _linear(data, length)
  */
 
   /* function exit code */
   __pyx_L1_error:;
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_2, 1);
   __pyx_r.data = NULL;
   __pyx_r.memview = NULL;
   __Pyx_AddTraceback("pippi.interpolation.linear", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -2955,6 +3049,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_linear(PyObject *__pyx_
     PyErr_SetString(PyExc_TypeError, "Memoryview return value is not initialized");
   }
   __pyx_L2:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v__data, 1);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
@@ -2990,11 +3085,11 @@ static PyObject *__pyx_pw_5pippi_13interpolation_1linear(PyObject *__pyx_self, P
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_length)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("linear", 1, 2, 2, 1); __PYX_ERR(0, 79, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("linear", 1, 2, 2, 1); __PYX_ERR(0, 86, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear") < 0)) __PYX_ERR(0, 79, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear") < 0)) __PYX_ERR(0, 86, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3003,11 +3098,11 @@ static PyObject *__pyx_pw_5pippi_13interpolation_1linear(PyObject *__pyx_self, P
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
     __pyx_v_data = values[0];
-    __pyx_v_length = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 79, __pyx_L3_error)
+    __pyx_v_length = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 86, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("linear", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 79, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("linear", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 86, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.interpolation.linear", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3027,8 +3122,8 @@ static PyObject *__pyx_pf_5pippi_13interpolation_linear(CYTHON_UNUSED PyObject *
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("linear", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_5pippi_13interpolation_linear(__pyx_v_data, __pyx_v_length, 0); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 79, __pyx_L1_error)
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_5pippi_13interpolation_linear(__pyx_v_data, __pyx_v_length, 0); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 86, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_t_1.memview = NULL;
@@ -3049,7 +3144,7 @@ static PyObject *__pyx_pf_5pippi_13interpolation_linear(CYTHON_UNUSED PyObject *
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":84
+/* "pippi/interpolation.pyx":92
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
@@ -3063,12 +3158,12 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
   Py_ssize_t __pyx_t_2;
   Py_ssize_t __pyx_t_3;
 
-  /* "pippi/interpolation.pyx":85
+  /* "pippi/interpolation.pyx":93
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:
  *     return data[<int>phase % (len(data)-1)]             # <<<<<<<<<<<<<<
  * 
- * cpdef double linear_point(double[:] data, double pos):
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):
  */
   __pyx_t_1 = __Pyx_MemoryView_Len(__pyx_v_data); 
   __pyx_t_2 = (__pyx_t_1 - 1);
@@ -3080,13 +3175,13 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
     #ifdef WITH_THREAD
     __Pyx_PyGILState_Release(__pyx_gilstate_save);
     #endif
-    __PYX_ERR(0, 85, __pyx_L1_error)
+    __PYX_ERR(0, 93, __pyx_L1_error)
   }
   __pyx_t_3 = __Pyx_mod_Py_ssize_t(((int)__pyx_v_phase), __pyx_t_2);
   __pyx_r = (*((double *) ( /* dim=0 */ (__pyx_v_data.data + __pyx_t_3 * __pyx_v_data.strides[0]) )));
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":84
+  /* "pippi/interpolation.pyx":92
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
@@ -3102,35 +3197,46 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":87
+/* "pippi/interpolation.pyx":95
  *     return data[<int>phase % (len(data)-1)]
  * 
- * cpdef double linear_point(double[:] data, double pos):             # <<<<<<<<<<<<<<
- *     return _linear_point(data, pos)
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):             # <<<<<<<<<<<<<<
+ *     return _linear_point(data, phase, pulsewidth)
  * 
  */
 
 static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __pyx_v_data, double __pyx_v_pos, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_13interpolation_linear_point *__pyx_optional_args) {
+  double __pyx_v_pulsewidth = ((double)1.0);
   double __pyx_r;
   __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  struct __pyx_opt_args_5pippi_13interpolation__linear_point __pyx_t_2;
   __Pyx_RefNannySetupContext("linear_point", 0);
+  if (__pyx_optional_args) {
+    if (__pyx_optional_args->__pyx_n > 0) {
+      __pyx_v_pulsewidth = __pyx_optional_args->pulsewidth;
+    }
+  }
 
-  /* "pippi/interpolation.pyx":88
+  /* "pippi/interpolation.pyx":96
  * 
- * cpdef double linear_point(double[:] data, double pos):
- *     return _linear_point(data, pos)             # <<<<<<<<<<<<<<
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):
+ *     return _linear_point(data, phase, pulsewidth)             # <<<<<<<<<<<<<<
  * 
  * cpdef double linear_pos(double[:] data, double pos):
  */
-  __pyx_r = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_data, __pyx_v_pos);
+  __pyx_t_2.__pyx_n = 1;
+  __pyx_t_2.pulsewidth = __pyx_v_pulsewidth;
+  __pyx_t_1 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_data, __pyx_v_phase, &__pyx_t_2); 
+  __pyx_r = __pyx_t_1;
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":87
+  /* "pippi/interpolation.pyx":95
  *     return data[<int>phase % (len(data)-1)]
  * 
- * cpdef double linear_point(double[:] data, double pos):             # <<<<<<<<<<<<<<
- *     return _linear_point(data, pos)
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):             # <<<<<<<<<<<<<<
+ *     return _linear_point(data, phase, pulsewidth)
  * 
  */
 
@@ -3144,17 +3250,20 @@ static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __p
 static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
-  double __pyx_v_pos;
+  double __pyx_v_phase;
+  double __pyx_v_pulsewidth;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("linear_point (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_pos,0};
-    PyObject* values[2] = {0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_phase,&__pyx_n_s_pulsewidth,0};
+    PyObject* values[3] = {0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
         CYTHON_FALLTHROUGH;
         case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
@@ -3169,54 +3278,74 @@ static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_s
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
-        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pos)) != 0)) kw_args--;
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_phase)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("linear_point", 1, 2, 2, 1); __PYX_ERR(0, 87, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("linear_point", 0, 2, 3, 1); __PYX_ERR(0, 95, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pulsewidth);
+          if (value) { values[2] = value; kw_args--; }
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_point") < 0)) __PYX_ERR(0, 87, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_point") < 0)) __PYX_ERR(0, 95, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
-      goto __pyx_L5_argtuple_error;
     } else {
-      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
     }
-    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 87, __pyx_L3_error)
-    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 87, __pyx_L3_error)
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 95, __pyx_L3_error)
+    __pyx_v_phase = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_phase == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
+    if (values[2]) {
+      __pyx_v_pulsewidth = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_pulsewidth == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
+    } else {
+      __pyx_v_pulsewidth = ((double)1.0);
+    }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("linear_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 87, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("linear_point", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 95, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.interpolation.linear_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_13interpolation_2linear_point(__pyx_self, __pyx_v_data, __pyx_v_pos);
+  __pyx_r = __pyx_pf_5pippi_13interpolation_2linear_point(__pyx_self, __pyx_v_data, __pyx_v_phase, __pyx_v_pulsewidth);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos) {
+static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, double __pyx_v_pulsewidth) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
+  double __pyx_t_1;
+  struct __pyx_opt_args_5pippi_13interpolation_linear_point __pyx_t_2;
+  PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("linear_point", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 87, __pyx_L1_error) }
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_linear_point(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 87, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_r = __pyx_t_1;
-  __pyx_t_1 = 0;
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 95, __pyx_L1_error) }
+  __pyx_t_2.__pyx_n = 1;
+  __pyx_t_2.pulsewidth = __pyx_v_pulsewidth;
+  __pyx_t_1 = __pyx_f_5pippi_13interpolation_linear_point(__pyx_v_data, __pyx_v_phase, 0, &__pyx_t_2); 
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
   goto __pyx_L0;
 
   /* function exit code */
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_AddTraceback("pippi.interpolation.linear_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -3226,8 +3355,8 @@ static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":90
- *     return _linear_point(data, pos)
+/* "pippi/interpolation.pyx":98
+ *     return _linear_point(data, phase, pulsewidth)
  * 
  * cpdef double linear_pos(double[:] data, double pos):             # <<<<<<<<<<<<<<
  *     return _linear_pos(data, pos)
@@ -3240,7 +3369,7 @@ static double __pyx_f_5pippi_13interpolation_linear_pos(__Pyx_memviewslice __pyx
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("linear_pos", 0);
 
-  /* "pippi/interpolation.pyx":91
+  /* "pippi/interpolation.pyx":99
  * 
  * cpdef double linear_pos(double[:] data, double pos):
  *     return _linear_pos(data, pos)             # <<<<<<<<<<<<<<
@@ -3250,8 +3379,8 @@ static double __pyx_f_5pippi_13interpolation_linear_pos(__Pyx_memviewslice __pyx
   __pyx_r = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_data, __pyx_v_pos);
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":90
- *     return _linear_point(data, pos)
+  /* "pippi/interpolation.pyx":98
+ *     return _linear_point(data, phase, pulsewidth)
  * 
  * cpdef double linear_pos(double[:] data, double pos):             # <<<<<<<<<<<<<<
  *     return _linear_pos(data, pos)
@@ -3295,11 +3424,11 @@ static PyObject *__pyx_pw_5pippi_13interpolation_5linear_pos(PyObject *__pyx_sel
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pos)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, 1); __PYX_ERR(0, 90, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, 1); __PYX_ERR(0, 98, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_pos") < 0)) __PYX_ERR(0, 90, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_pos") < 0)) __PYX_ERR(0, 98, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3307,12 +3436,12 @@ static PyObject *__pyx_pw_5pippi_13interpolation_5linear_pos(PyObject *__pyx_sel
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 90, __pyx_L3_error)
-    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 90, __pyx_L3_error)
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 98, __pyx_L3_error)
+    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 90, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 98, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.interpolation.linear_pos", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3331,8 +3460,8 @@ static PyObject *__pyx_pf_5pippi_13interpolation_4linear_pos(CYTHON_UNUSED PyObj
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("linear_pos", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 90, __pyx_L1_error) }
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_linear_pos(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 98, __pyx_L1_error) }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_linear_pos(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -16904,8 +17033,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_n_s_obj, __pyx_k_obj, sizeof(__pyx_k_obj), 0, 0, 1, 1},
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
+  {&__pyx_n_s_phase, __pyx_k_phase, sizeof(__pyx_k_phase), 0, 0, 1, 1},
   {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
   {&__pyx_n_s_pos, __pyx_k_pos, sizeof(__pyx_k_pos), 0, 0, 1, 1},
+  {&__pyx_n_s_pulsewidth, __pyx_k_pulsewidth, sizeof(__pyx_k_pulsewidth), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_PickleError, __pyx_k_pyx_PickleError, sizeof(__pyx_k_pyx_PickleError), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_checksum, __pyx_k_pyx_checksum, sizeof(__pyx_k_pyx_checksum), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_getbuffer, __pyx_k_pyx_getbuffer, sizeof(__pyx_k_pyx_getbuffer), 0, 0, 1, 1},
@@ -17263,8 +17394,8 @@ static int __Pyx_modinit_function_export_code(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_export_code", 0);
   /*--- Function export code ---*/
-  if (__Pyx_ExportFunction("_linear_point", (void (*)(void))__pyx_f_5pippi_13interpolation__linear_point, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ExportFunction("linear_point", (void (*)(void))__pyx_f_5pippi_13interpolation_linear_point, "double (__Pyx_memviewslice, double, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("_linear_point", (void (*)(void))__pyx_f_5pippi_13interpolation__linear_point, "double (__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("linear_point", (void (*)(void))__pyx_f_5pippi_13interpolation_linear_point, "double (__Pyx_memviewslice, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_13interpolation_linear_point *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("_linear_pos", (void (*)(void))__pyx_f_5pippi_13interpolation__linear_pos, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("linear_pos", (void (*)(void))__pyx_f_5pippi_13interpolation_linear_pos, "double (__Pyx_memviewslice, double, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("_linear", (void (*)(void))__pyx_f_5pippi_13interpolation__linear, "__Pyx_memviewslice (__Pyx_memviewslice, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
@@ -18290,13 +18421,6 @@ static CYTHON_INLINE void __Pyx_XDEC_MEMVIEW(__Pyx_memviewslice *memslice,
     }
 }
 
-/* None */
-static CYTHON_INLINE Py_ssize_t __Pyx_mod_Py_ssize_t(Py_ssize_t a, Py_ssize_t b) {
-    Py_ssize_t r = a % b;
-    r += ((r != 0) & ((r ^ b) < 0)) * b;
-    return r;
-}
-
 /* PyErrFetchRestore */
 #if CYTHON_FAST_THREAD_STATE
 static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
@@ -18503,6 +18627,13 @@ invalid_keyword:
     #endif
 bad:
     return -1;
+}
+
+/* None */
+static CYTHON_INLINE Py_ssize_t __Pyx_mod_Py_ssize_t(Py_ssize_t a, Py_ssize_t b) {
+    Py_ssize_t r = a % b;
+    r += ((r != 0) & ((r ^ b) < 0)) * b;
+    return r;
 }
 
 /* None */

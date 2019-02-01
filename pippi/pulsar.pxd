@@ -11,6 +11,5 @@ cdef class Pulsar:
 
     cdef public int channels
     cdef public int samplerate
-    cdef public int wtsize
 
     cdef object _play(self, int length)

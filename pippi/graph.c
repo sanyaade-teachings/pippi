@@ -1011,6 +1011,29 @@ struct __pyx_opt_args_5pippi_9soundpipe_paulstretch {
   int __pyx_n;
   int samplerate;
 };
+struct __pyx_opt_args_5pippi_13interpolation__linear_point;
+struct __pyx_opt_args_5pippi_13interpolation_linear_point;
+
+/* "interpolation.pxd":1
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)
+ * cdef double _linear_pos(double[:] data, double pos) nogil
+ */
+struct __pyx_opt_args_5pippi_13interpolation__linear_point {
+  int __pyx_n;
+  double pulsewidth;
+};
+
+/* "interpolation.pxd":2
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)             # <<<<<<<<<<<<<<
+ * cdef double _linear_pos(double[:] data, double pos) nogil
+ * cpdef double linear_pos(double[:] data, double pos)
+ */
+struct __pyx_opt_args_5pippi_13interpolation_linear_point {
+  int __pyx_n;
+  double pulsewidth;
+};
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose;

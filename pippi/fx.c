@@ -1069,6 +1069,29 @@ struct __pyx_opt_args_5pippi_9soundpipe_paulstretch {
   int __pyx_n;
   int samplerate;
 };
+struct __pyx_opt_args_5pippi_13interpolation__linear_point;
+struct __pyx_opt_args_5pippi_13interpolation_linear_point;
+
+/* "interpolation.pxd":1
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)
+ * cdef double _linear_pos(double[:] data, double pos) nogil
+ */
+struct __pyx_opt_args_5pippi_13interpolation__linear_point {
+  int __pyx_n;
+  double pulsewidth;
+};
+
+/* "interpolation.pxd":2
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)             # <<<<<<<<<<<<<<
+ * cdef double _linear_pos(double[:] data, double pos) nogil
+ * cpdef double linear_pos(double[:] data, double pos)
+ */
+struct __pyx_opt_args_5pippi_13interpolation_linear_point {
+  int __pyx_n;
+  double pulsewidth;
+};
 struct __pyx_opt_args_5pippi_10wavetables_to_window;
 struct __pyx_opt_args_5pippi_10wavetables_to_wavetable;
 struct __pyx_opt_args_5pippi_10wavetables_to_lfostack;
@@ -2114,7 +2137,7 @@ static __Pyx_memviewslice (*__pyx_f_5pippi_9soundpipe_paulstretch)(__Pyx_memview
 static PyTypeObject *__pyx_ptype_5pippi_6grains_Cloud = 0;
 
 /* Module declarations from 'pippi.interpolation' */
-static double (*__pyx_f_5pippi_13interpolation__linear_point)(__Pyx_memviewslice, double); /*proto*/
+static double (*__pyx_f_5pippi_13interpolation__linear_point)(__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args); /*proto*/
 
 /* Module declarations from 'pippi.wavetables' */
 static PyTypeObject *__pyx_ptype_5pippi_10wavetables_Wavetable = 0;
@@ -3203,7 +3226,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__vspeed(__Pyx_memviewslice __pyx_v_
  *             out[i,c] = _linear_point(chan, pos)
  *             pos += posinc * speed
  */
-      __pyx_v_speed = ((__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_lfo, __pyx_v_lfopos) * (__pyx_v_maxspeed - __pyx_v_minspeed)) + __pyx_v_minspeed);
+      __pyx_v_speed = ((__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_lfo, __pyx_v_lfopos, NULL) * (__pyx_v_maxspeed - __pyx_v_minspeed)) + __pyx_v_minspeed);
 
       /* "pippi/fx.pyx":59
  *         for i in range(framelength):
@@ -3214,7 +3237,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__vspeed(__Pyx_memviewslice __pyx_v_
  */
       __pyx_t_11 = __pyx_v_i;
       __pyx_t_12 = __pyx_v_c;
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_11 * __pyx_v_out.strides[0]) ) + __pyx_t_12 * __pyx_v_out.strides[1]) )) = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_chan, __pyx_v_pos);
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_11 * __pyx_v_out.strides[0]) ) + __pyx_t_12 * __pyx_v_out.strides[1]) )) = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_chan, __pyx_v_pos, NULL);
 
       /* "pippi/fx.pyx":60
  *             speed = _linear_point(lfo, lfopos) * (maxspeed - minspeed) + minspeed
@@ -4178,7 +4201,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__vdelay(__Pyx_memviewslice __pyx_v_
  *         delayreadindex = <int>(i - delaytime)
  *         for c in range(channels):
  */
-    __pyx_v_delaytime = (((__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_lfo, __pyx_v_pos) * (__pyx_v_maxdelay - __pyx_v_mindelay)) + __pyx_v_mindelay) * __pyx_v_samplerate);
+    __pyx_v_delaytime = (((__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_lfo, __pyx_v_pos, NULL) * (__pyx_v_maxdelay - __pyx_v_mindelay)) + __pyx_v_mindelay) * __pyx_v_samplerate);
 
     /* "pippi/fx.pyx":166
  *         pos = <double>i / <double>framelength
@@ -23301,7 +23324,7 @@ static int __Pyx_modinit_function_import_code(void) {
   if (__Pyx_ImportFunction(__pyx_t_2, "paulstretch", (void (**)(void))&__pyx_f_5pippi_9soundpipe_paulstretch, "__Pyx_memviewslice (__Pyx_memviewslice, double, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_9soundpipe_paulstretch *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_3 = PyImport_ImportModule("pippi.interpolation"); if (!__pyx_t_3) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_3, "_linear_point", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_point, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_3, "_linear_point", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_point, "double (__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_4 = PyImport_ImportModule("pippi.wavetables"); if (!__pyx_t_4) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_4, "to_window", (void (**)(void))&__pyx_f_5pippi_10wavetables_to_window, "__Pyx_memviewslice (PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_window *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
