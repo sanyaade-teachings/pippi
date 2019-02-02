@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase
 
-from pippi.oscs import Osc, Osc2d, Pulsar
+from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d
 from pippi.soundbuffer import SoundBuffer
 from pippi import dsp
 
@@ -57,6 +57,22 @@ class TestOscs(TestCase):
         length = 10
         out = osc.play(length)
         out.write('tests/renders/osc_pulsar.wav')
+        self.assertEqual(len(out), int(length * out.samplerate))
+
+
+    def test_create_pulsar2d(self):
+        osc = Pulsar2d(
+                [dsp.SINE, dsp.SQUARE, dsp.TRI, dsp.SINE], 
+                windows=[dsp.SINE, dsp.TRI, dsp.HANN], 
+                wt_mod=dsp.wt(dsp.SAW, 0, 1), 
+                win_mod=dsp.wt(dsp.RSAW, 0, 1), 
+                pulsewidth=dsp.wt(dsp.TRI, 0, 1), 
+                freq=200.0, 
+                amp=0.2
+            )
+        length = 30
+        out = osc.play(length)
+        out.write('tests/renders/osc_pulsar2d.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
 

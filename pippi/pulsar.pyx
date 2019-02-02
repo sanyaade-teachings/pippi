@@ -53,11 +53,6 @@ cdef class Pulsar:
 
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
-        cdef int wtlength = len(self.wavetable)
-        cdef int winlength = len(self.window)
-        cdef int wtlength_p = wtlength
-        cdef int winlength_p = winlength
-
         cdef double isamplerate = 1.0 / self.samplerate
         cdef double ilength = 1.0 / length
 
@@ -85,6 +80,10 @@ cdef class Pulsar:
             wt_boundry_p = <int>max((ipulsewidth * wt_length)-1, 1)
             win_boundry_p = <int>max((ipulsewidth * win_length)-1, 1)
 
+            sample = interpolation._linear_point(self.wavetable, self.wt_phase, pulsewidth)
+            sample *= interpolation._linear_point(self.window, self.win_phase, pulsewidth)
+            sample *= amp
+
             self.freq_phase += freq_phase_inc
             self.amp_phase += amp_phase_inc
             self.pw_phase += pw_phase_inc
@@ -105,10 +104,6 @@ cdef class Pulsar:
 
             while self.freq_phase >= freq_boundry:
                 self.freq_phase -= freq_boundry
-
-            sample = interpolation._linear_point(self.wavetable, self.wt_phase, pulsewidth)
-            sample *= interpolation._linear_point(self.window, self.win_phase, pulsewidth)
-            sample *= amp
 
             for channel in range(self.channels):
                 out[i][channel] = sample
