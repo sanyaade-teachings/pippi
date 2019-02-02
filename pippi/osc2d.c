@@ -839,9 +839,9 @@ static const char *__pyx_f[] = {
   "stringsource",
   "pippi/osc2d.pxd",
   "venv/lib/python3.6/site-packages/Cython/Includes/cpython/array.pxd",
+  "pippi/wavetables.pxd",
   "pippi/soundbuffer.pxd",
   "pippi/grains.pxd",
-  "pippi/wavetables.pxd",
   "venv/lib/python3.6/site-packages/Cython/Includes/cpython/type.pxd",
 };
 /* MemviewSliceStruct.proto */
@@ -958,19 +958,85 @@ typedef struct {
 struct arrayobject;
 typedef struct arrayobject arrayobject;
 #endif
+struct __pyx_obj_5pippi_10wavetables_Wavetable;
 struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer;
 struct __pyx_obj_5pippi_6grains_Cloud;
-struct __pyx_obj_5pippi_10wavetables_Wavetable;
 struct __pyx_obj_5pippi_5osc2d_Osc2d;
 struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
+struct __pyx_opt_args_5pippi_10wavetables_to_window;
+struct __pyx_opt_args_5pippi_10wavetables_to_wavetable;
+struct __pyx_opt_args_5pippi_10wavetables_to_lfostack;
+struct __pyx_opt_args_5pippi_10wavetables_randline;
+struct __pyx_opt_args_5pippi_10wavetables_wavetable;
+
+/* "pippi/wavetables.pxd":42
+ * cdef int* ALL_WAVETABLES
+ * 
+ * cpdef double[:] to_window(object w, int wtsize=?)             # <<<<<<<<<<<<<<
+ * cpdef double[:] to_wavetable(object w, int wtsize=?)
+ * cpdef list to_lfostack(list lfos, int wtsize=?)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_to_window {
+  int __pyx_n;
+  int wtsize;
+};
+
+/* "pippi/wavetables.pxd":43
+ * 
+ * cpdef double[:] to_window(object w, int wtsize=?)
+ * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
+ * cpdef list to_lfostack(list lfos, int wtsize=?)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
+  int __pyx_n;
+  int wtsize;
+};
+
+/* "pippi/wavetables.pxd":44
+ * cpdef double[:] to_window(object w, int wtsize=?)
+ * cpdef double[:] to_wavetable(object w, int wtsize=?)
+ * cpdef list to_lfostack(list lfos, int wtsize=?)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
+ * cdef double[:] _window(int window_type, int length)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
+  int __pyx_n;
+  int wtsize;
+};
+
+/* "pippi/wavetables.pxd":45
+ * cpdef double[:] to_wavetable(object w, int wtsize=?)
+ * cpdef list to_lfostack(list lfos, int wtsize=?)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
+ * cdef double[:] _window(int window_type, int length)
+ * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_randline {
+  int __pyx_n;
+  double lowvalue;
+  double highvalue;
+  int wtsize;
+};
+
+/* "pippi/wavetables.pxd":50
+ * cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
+ * cdef double[:] _wavetable(int wavetable_type, int length)
+ * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_5pippi_10wavetables_wavetable {
+  int __pyx_n;
+  __Pyx_memviewslice data;
+};
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose;
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv;
 
-/* "pippi/soundbuffer.pxd":13
+/* "pippi/soundbuffer.pxd":15
  *     cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos)
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)             # <<<<<<<<<<<<<<
@@ -985,12 +1051,12 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
   double r;
 };
 
-/* "pippi/soundbuffer.pxd":14
+/* "pippi/soundbuffer.pxd":16
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)             # <<<<<<<<<<<<<<
  *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
- * 
+ *     cpdef Wavetable toenv(SoundBuffer self, double window=*)
  */
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch {
   int __pyx_n;
@@ -998,11 +1064,11 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch {
   double amp;
 };
 
-/* "pippi/soundbuffer.pxd":15
+/* "pippi/soundbuffer.pxd":17
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
  *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)             # <<<<<<<<<<<<<<
- * 
+ *     cpdef Wavetable toenv(SoundBuffer self, double window=*)
  * 
  */
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
@@ -1010,6 +1076,18 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
   PyObject *length;
   PyObject *position;
   double amp;
+};
+
+/* "pippi/soundbuffer.pxd":18
+ *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
+ *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
+ *     cpdef Wavetable toenv(SoundBuffer self, double window=*)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv {
+  int __pyx_n;
+  double window;
 };
 struct __pyx_opt_args_5pippi_3dsp_rand;
 struct __pyx_opt_args_5pippi_3dsp_randint;
@@ -1037,6 +1115,17 @@ struct __pyx_opt_args_5pippi_3dsp_randint {
   int __pyx_n;
   int low;
   int high;
+};
+struct __pyx_opt_args_5pippi_2fx_envelope_follower;
+
+/* "fx.pxd":6
+ * cdef double[:,:] _norm(double[:,:] snd, double ceiling)
+ * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, int norm)
+ * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_5pippi_2fx_envelope_follower {
+  int __pyx_n;
+  double window;
 };
 struct __pyx_opt_args_5pippi_9soundpipe_mincer;
 struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
@@ -1088,73 +1177,24 @@ struct __pyx_opt_args_5pippi_13interpolation_linear_point {
   int __pyx_n;
   double pulsewidth;
 };
-struct __pyx_opt_args_5pippi_10wavetables_to_window;
-struct __pyx_opt_args_5pippi_10wavetables_to_wavetable;
-struct __pyx_opt_args_5pippi_10wavetables_to_lfostack;
-struct __pyx_opt_args_5pippi_10wavetables_randline;
-struct __pyx_opt_args_5pippi_10wavetables_wavetable;
 
-/* "wavetables.pxd":42
- * cdef int* ALL_WAVETABLES
- * 
- * cpdef double[:] to_window(object w, int wtsize=?)             # <<<<<<<<<<<<<<
- * cpdef double[:] to_wavetable(object w, int wtsize=?)
- * cpdef list to_lfostack(list lfos, int wtsize=?)
- */
-struct __pyx_opt_args_5pippi_10wavetables_to_window {
-  int __pyx_n;
-  int wtsize;
-};
-
-/* "wavetables.pxd":43
- * 
- * cpdef double[:] to_window(object w, int wtsize=?)
- * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
- * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
- */
-struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
-  int __pyx_n;
-  int wtsize;
-};
-
-/* "wavetables.pxd":44
- * cpdef double[:] to_window(object w, int wtsize=?)
- * cpdef double[:] to_wavetable(object w, int wtsize=?)
- * cpdef list to_lfostack(list lfos, int wtsize=?)             # <<<<<<<<<<<<<<
- * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
- * cdef double[:] _window(int window_type, int length)
- */
-struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
-  int __pyx_n;
-  int wtsize;
-};
-
-/* "wavetables.pxd":45
- * cpdef double[:] to_wavetable(object w, int wtsize=?)
- * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
- * cdef double[:] _window(int window_type, int length)
+/* "pippi/wavetables.pxd":5
  * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
+ * 
+ * cdef class Wavetable:             # <<<<<<<<<<<<<<
+ *     cdef public double[:] data
+ *     cdef public double lowvalue
  */
-struct __pyx_opt_args_5pippi_10wavetables_randline {
-  int __pyx_n;
+struct __pyx_obj_5pippi_10wavetables_Wavetable {
+  PyObject_HEAD
+  __Pyx_memviewslice data;
   double lowvalue;
   double highvalue;
-  int wtsize;
+  int length;
 };
 
-/* "wavetables.pxd":50
- * cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
- * cdef double[:] _wavetable(int wavetable_type, int length)
- * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)             # <<<<<<<<<<<<<<
- */
-struct __pyx_opt_args_5pippi_10wavetables_wavetable {
-  int __pyx_n;
-  __Pyx_memviewslice data;
-};
 
-/* "pippi/soundbuffer.pxd":6
+/* "pippi/soundbuffer.pxd":8
  * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method)
  * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
@@ -1201,22 +1241,6 @@ struct __pyx_obj_5pippi_6grains_Cloud {
   int has_bpf;
   __Pyx_memviewslice mask;
   int has_mask;
-};
-
-
-/* "wavetables.pxd":5
- * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
- * 
- * cdef class Wavetable:             # <<<<<<<<<<<<<<
- *     cdef public double[:] data
- *     cdef public double lowvalue
- */
-struct __pyx_obj_5pippi_10wavetables_Wavetable {
-  PyObject_HEAD
-  __Pyx_memviewslice data;
-  double lowvalue;
-  double highvalue;
-  int length;
 };
 
 
@@ -1325,7 +1349,7 @@ struct __pyx_memoryviewslice_obj {
 
 
 
-/* "pippi/soundbuffer.pxd":6
+/* "pippi/soundbuffer.pxd":8
  * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method)
  * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
@@ -1339,6 +1363,7 @@ struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*adsr)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr *__pyx_optional_args);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*stretch)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch *__pyx_optional_args);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*transpose)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose *__pyx_optional_args);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*toenv)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer;
 
@@ -2148,30 +2173,6 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp); /* proto*/
 static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp, PyObject *__pyx_v_value); /* proto*/
 
-/* Module declarations from 'pippi.soundbuffer' */
-static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
-
-/* Module declarations from 'pippi.defaults' */
-static int *__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS = 0;
-#define __pyx_v_5pippi_8defaults_DEFAULT_CHANNELS (*__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS)
-static int *__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE = 0;
-#define __pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE (*__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE)
-static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
-#define __pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE (*__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE)
-
-/* Module declarations from 'pippi.dsp' */
-
-/* Module declarations from 'pippi.fx' */
-
-/* Module declarations from 'libc.stdint' */
-
-/* Module declarations from 'pippi.soundpipe' */
-
-/* Module declarations from 'pippi.grains' */
-static PyTypeObject *__pyx_ptype_5pippi_6grains_Cloud = 0;
-
-/* Module declarations from 'pippi.interpolation' */
-
 /* Module declarations from 'pippi.wavetables' */
 static PyTypeObject *__pyx_ptype_5pippi_10wavetables_Wavetable = 0;
 static int *__pyx_vp_5pippi_10wavetables_SINE = 0;
@@ -2235,6 +2236,30 @@ static int **__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES = 0;
 static __Pyx_memviewslice (*__pyx_f_5pippi_10wavetables__wavetable)(int, int); /*proto*/
 static __Pyx_memviewslice (*__pyx_f_5pippi_10wavetables_to_wavetable)(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_wavetable *__pyx_optional_args); /*proto*/
 static PyObject *(*__pyx_f_5pippi_10wavetables_to_lfostack)(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_lfostack *__pyx_optional_args); /*proto*/
+
+/* Module declarations from 'pippi.soundbuffer' */
+static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
+
+/* Module declarations from 'pippi.defaults' */
+static int *__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS = 0;
+#define __pyx_v_5pippi_8defaults_DEFAULT_CHANNELS (*__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS)
+static int *__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE = 0;
+#define __pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE (*__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE)
+static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
+#define __pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE (*__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE)
+
+/* Module declarations from 'pippi.dsp' */
+
+/* Module declarations from 'pippi.fx' */
+
+/* Module declarations from 'libc.stdint' */
+
+/* Module declarations from 'pippi.soundpipe' */
+
+/* Module declarations from 'pippi.grains' */
+static PyTypeObject *__pyx_ptype_5pippi_6grains_Cloud = 0;
+
+/* Module declarations from 'pippi.interpolation' */
 
 /* Module declarations from 'pippi' */
 
@@ -20321,21 +20346,21 @@ static int __Pyx_modinit_type_import_code(void) {
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_type_import_code", 0);
   /*--- Type import code ---*/
-  __pyx_t_1 = PyImport_ImportModule("pippi.soundbuffer"); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 6, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType(__pyx_t_1, "pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer) __PYX_ERR(4, 6, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(4, 6, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.grains"); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 4, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_5pippi_6grains_Cloud = __Pyx_ImportType(__pyx_t_1, "pippi.grains", "Cloud", sizeof(struct __pyx_obj_5pippi_6grains_Cloud), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_6grains_Cloud) __PYX_ERR(5, 4, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.wavetables"); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 5, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.wavetables"); if (unlikely(!__pyx_t_1)) __PYX_ERR(4, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_5pippi_10wavetables_Wavetable = __Pyx_ImportType(__pyx_t_1, "pippi.wavetables", "Wavetable", sizeof(struct __pyx_obj_5pippi_10wavetables_Wavetable), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_10wavetables_Wavetable) __PYX_ERR(6, 5, __pyx_L1_error)
+   if (!__pyx_ptype_5pippi_10wavetables_Wavetable) __PYX_ERR(4, 5, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule("pippi.soundbuffer"); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 8, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_5pippi_11soundbuffer_SoundBuffer = __Pyx_ImportType(__pyx_t_1, "pippi.soundbuffer", "SoundBuffer", sizeof(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer), __Pyx_ImportType_CheckSize_Warn);
+   if (!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer) __PYX_ERR(5, 8, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(5, 8, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = PyImport_ImportModule("pippi.grains"); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 4, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_ptype_5pippi_6grains_Cloud = __Pyx_ImportType(__pyx_t_1, "pippi.grains", "Cloud", sizeof(struct __pyx_obj_5pippi_6grains_Cloud), __Pyx_ImportType_CheckSize_Warn);
+   if (!__pyx_ptype_5pippi_6grains_Cloud) __PYX_ERR(6, 4, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -20367,41 +20392,41 @@ static int __Pyx_modinit_variable_import_code(void) {
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_variable_import_code", 0);
   /*--- Variable import code ---*/
-  __pyx_t_1 = PyImport_ImportModule("pippi.defaults"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_1, "DEFAULT_CHANNELS", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_1, "DEFAULT_SAMPLERATE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_1, "DEFAULT_SOUNDFILE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE, "PyObject *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.wavetables"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "SINE", (void **)&__pyx_vp_5pippi_10wavetables_SINE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "SINEIN", (void **)&__pyx_vp_5pippi_10wavetables_SINEIN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "SINEOUT", (void **)&__pyx_vp_5pippi_10wavetables_SINEOUT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "COS", (void **)&__pyx_vp_5pippi_10wavetables_COS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "TRI", (void **)&__pyx_vp_5pippi_10wavetables_TRI, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "SAW", (void **)&__pyx_vp_5pippi_10wavetables_SAW, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "PHASOR", (void **)&__pyx_vp_5pippi_10wavetables_PHASOR, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "RSAW", (void **)&__pyx_vp_5pippi_10wavetables_RSAW, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "HANN", (void **)&__pyx_vp_5pippi_10wavetables_HANN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "HANNIN", (void **)&__pyx_vp_5pippi_10wavetables_HANNIN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "HANNOUT", (void **)&__pyx_vp_5pippi_10wavetables_HANNOUT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "HAMM", (void **)&__pyx_vp_5pippi_10wavetables_HAMM, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "BLACK", (void **)&__pyx_vp_5pippi_10wavetables_BLACK, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "BLACKMAN", (void **)&__pyx_vp_5pippi_10wavetables_BLACKMAN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "BART", (void **)&__pyx_vp_5pippi_10wavetables_BART, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "BARTLETT", (void **)&__pyx_vp_5pippi_10wavetables_BARTLETT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "KAISER", (void **)&__pyx_vp_5pippi_10wavetables_KAISER, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "SQUARE", (void **)&__pyx_vp_5pippi_10wavetables_SQUARE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "RND", (void **)&__pyx_vp_5pippi_10wavetables_RND, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "LINEAR", (void **)&__pyx_vp_5pippi_10wavetables_LINEAR, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "LINE", (void **)&__pyx_vp_5pippi_10wavetables_LINE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "TRUNC", (void **)&__pyx_vp_5pippi_10wavetables_TRUNC, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "HERMITE", (void **)&__pyx_vp_5pippi_10wavetables_HERMITE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "CONSTANT", (void **)&__pyx_vp_5pippi_10wavetables_CONSTANT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "GOGINS", (void **)&__pyx_vp_5pippi_10wavetables_GOGINS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "LEN_WINDOWS", (void **)&__pyx_vp_5pippi_10wavetables_LEN_WINDOWS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "ALL_WINDOWS", (void **)&__pyx_vp_5pippi_10wavetables_ALL_WINDOWS, "int *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "LEN_WAVETABLES", (void **)&__pyx_vp_5pippi_10wavetables_LEN_WAVETABLES, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_1, "ALL_WAVETABLES", (void **)&__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES, "int *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_2 = PyImport_ImportModule("pippi.wavetables"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "SINE", (void **)&__pyx_vp_5pippi_10wavetables_SINE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "SINEIN", (void **)&__pyx_vp_5pippi_10wavetables_SINEIN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "SINEOUT", (void **)&__pyx_vp_5pippi_10wavetables_SINEOUT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "COS", (void **)&__pyx_vp_5pippi_10wavetables_COS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "TRI", (void **)&__pyx_vp_5pippi_10wavetables_TRI, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "SAW", (void **)&__pyx_vp_5pippi_10wavetables_SAW, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "PHASOR", (void **)&__pyx_vp_5pippi_10wavetables_PHASOR, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "RSAW", (void **)&__pyx_vp_5pippi_10wavetables_RSAW, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "HANN", (void **)&__pyx_vp_5pippi_10wavetables_HANN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "HANNIN", (void **)&__pyx_vp_5pippi_10wavetables_HANNIN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "HANNOUT", (void **)&__pyx_vp_5pippi_10wavetables_HANNOUT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "HAMM", (void **)&__pyx_vp_5pippi_10wavetables_HAMM, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "BLACK", (void **)&__pyx_vp_5pippi_10wavetables_BLACK, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "BLACKMAN", (void **)&__pyx_vp_5pippi_10wavetables_BLACKMAN, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "BART", (void **)&__pyx_vp_5pippi_10wavetables_BART, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "BARTLETT", (void **)&__pyx_vp_5pippi_10wavetables_BARTLETT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "KAISER", (void **)&__pyx_vp_5pippi_10wavetables_KAISER, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "SQUARE", (void **)&__pyx_vp_5pippi_10wavetables_SQUARE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "RND", (void **)&__pyx_vp_5pippi_10wavetables_RND, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "LINEAR", (void **)&__pyx_vp_5pippi_10wavetables_LINEAR, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "LINE", (void **)&__pyx_vp_5pippi_10wavetables_LINE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "TRUNC", (void **)&__pyx_vp_5pippi_10wavetables_TRUNC, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "HERMITE", (void **)&__pyx_vp_5pippi_10wavetables_HERMITE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "CONSTANT", (void **)&__pyx_vp_5pippi_10wavetables_CONSTANT, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "GOGINS", (void **)&__pyx_vp_5pippi_10wavetables_GOGINS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "LEN_WINDOWS", (void **)&__pyx_vp_5pippi_10wavetables_LEN_WINDOWS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "ALL_WINDOWS", (void **)&__pyx_vp_5pippi_10wavetables_ALL_WINDOWS, "int *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "LEN_WAVETABLES", (void **)&__pyx_vp_5pippi_10wavetables_LEN_WAVETABLES, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportVoidPtr(__pyx_t_2, "ALL_WAVETABLES", (void **)&__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES, "int *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_2 = PyImport_ImportModule("pippi.defaults"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_CHANNELS", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_SAMPLERATE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_SOUNDFILE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE, "PyObject *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;

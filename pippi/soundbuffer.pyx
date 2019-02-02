@@ -11,6 +11,7 @@ from libc cimport math
 
 from pippi.wavetables cimport Wavetable, PHASOR, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window
 from pippi cimport interpolation
+from pippi cimport fx
 from pippi cimport graph
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
 from pippi cimport grains
@@ -451,6 +452,9 @@ cdef class SoundBuffer:
         elif isinstance(value, SoundBuffer):
             out = _mul2d(self.frames, value.frames)
 
+        elif isinstance(value, Wavetable):
+            out = _mul1d(self.frames, value.data)
+
         elif isinstance(value, list):
             out = _mul1d(self.frames, np.array(value))
 
@@ -681,6 +685,7 @@ cdef class SoundBuffer:
 
         return self * wavetable
 
+
     @cython.boundscheck(False)
     @cython.wraparound(False)
     cdef void _fill(self, double[:,:] frames):
@@ -874,7 +879,10 @@ cdef class SoundBuffer:
 
         return SoundBuffer(soundpipe.mincer(self.frames, length, time_lfo, amp, pitch_lfo, 4096, self.samplerate), channels=self.channels, samplerate=self.samplerate)
 
-    def to_wavetable(SoundBuffer self, *args, **kwargs):
+    cpdef Wavetable toenv(SoundBuffer self, double window=0.015):
+        return fx.envelope_follower(self, window)
+
+    def towavetable(SoundBuffer self, *args, **kwargs):
         return Wavetable(self, *args, **kwargs)
 
     def write(self, unicode filename=None):

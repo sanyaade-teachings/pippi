@@ -285,6 +285,28 @@ cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bool normalize=True):
     cdef int _normalize = 1 if normalize else 0
     return SoundBuffer(_fir(snd.frames, out, impulsewt, normalize), channels=snd.channels, samplerate=snd.samplerate)
 
+cpdef Wavetable envelope_follower(SoundBuffer snd, double window=0.015):
+    cdef int blocksize = <int>(window * snd.samplerate)
+    cdef int length = len(snd)
+    cdef int barrier = length - blocksize
+    cdef double[:] flat = np.ravel(np.array(snd.remix(1).frames, dtype='d'))
+    cdef double val = 0
+    cdef int i, j, ei = 0
+    cdef int numblocks = <int>(length / blocksize)
+    cdef double[:] env = np.zeros(numblocks, dtype='d')
+
+    while i < barrier:
+        val = 0
+        for j in range(blocksize):
+            val = max(val, abs(flat[i+j]))
+
+        env[ei] = val
+
+        i += blocksize
+        ei += 1
+
+    return Wavetable(env)
+
 cpdef SoundBuffer lpf(SoundBuffer snd, object freq):
     cdef double[:] _freq = wavetables.to_window(freq)
     return SoundBuffer(soundpipe.butlp(snd.frames, _freq), channels=snd.channels, samplerate=snd.samplerate)
