@@ -3,7 +3,9 @@ cdef class Osc:
     cdef public double[:] amp
     cdef public double[:] wavetable
 
-    cdef public double phase
+    cdef double freq_phase
+    cdef double amp_phase
+    cdef double wt_phase
 
     cdef public int channels
     cdef public int samplerate

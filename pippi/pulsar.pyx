@@ -29,7 +29,12 @@ cdef class Pulsar:
 
         self.freq = wavetables.to_wavetable(freq)
         self.amp = wavetables.to_window(amp)
-        self.phase = phase
+
+        self.wt_phase = phase
+        self.win_phase = phase
+        self.freq_phase = phase
+        self.pw_phase = phase
+        self.amp_phase = phase
 
         self.channels = channels
         self.samplerate = samplerate
@@ -45,12 +50,6 @@ cdef class Pulsar:
     cdef object _play(self, int length):
         cdef int i = 0
         cdef double sample, pulsewidth, freq
-
-        cdef double wt_phase = 0
-        cdef double win_phase = 0
-        cdef double freq_phase = 0
-        cdef double pw_phase = 0
-        cdef double amp_phase = 0
 
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
@@ -78,37 +77,37 @@ cdef class Pulsar:
         cdef double pw_phase_inc = ilength * pw_boundry
 
         for i in range(length):
-            freq = interpolation._linear_point(self.freq, freq_phase)
-            pulsewidth = max(interpolation._linear_point(self.pulsewidth, pw_phase), MIN_PULSEWIDTH)
-            amp = interpolation._linear_point(self.amp, amp_phase)
+            freq = interpolation._linear_point(self.freq, self.freq_phase)
+            pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)
+            amp = interpolation._linear_point(self.amp, self.amp_phase)
 
             ipulsewidth = 1.0/pulsewidth
             wt_boundry_p = <int>max((ipulsewidth * wt_length)-1, 1)
             win_boundry_p = <int>max((ipulsewidth * win_length)-1, 1)
 
-            freq_phase += freq_phase_inc
-            amp_phase += amp_phase_inc
-            pw_phase += pw_phase_inc
-            wt_phase += isamplerate * wt_boundry_p * freq
-            win_phase += isamplerate * win_boundry_p * freq
+            self.freq_phase += freq_phase_inc
+            self.amp_phase += amp_phase_inc
+            self.pw_phase += pw_phase_inc
+            self.wt_phase += isamplerate * wt_boundry_p * freq
+            self.win_phase += isamplerate * win_boundry_p * freq
 
-            while wt_phase >= wt_boundry_p:
-                wt_phase -= wt_boundry_p
+            while self.wt_phase >= wt_boundry_p:
+                self.wt_phase -= wt_boundry_p
 
-            while win_phase >= win_boundry_p:
-                win_phase -= win_boundry_p
+            while self.win_phase >= win_boundry_p:
+                self.win_phase -= win_boundry_p
 
-            while pw_phase >= pw_boundry:
-                pw_phase -= pw_boundry
+            while self.pw_phase >= pw_boundry:
+                self.pw_phase -= pw_boundry
 
-            while amp_phase >= amp_boundry:
-                amp_phase -= amp_boundry
+            while self.amp_phase >= amp_boundry:
+                self.amp_phase -= amp_boundry
 
-            while freq_phase >= freq_boundry:
-                freq_phase -= freq_boundry
+            while self.freq_phase >= freq_boundry:
+                self.freq_phase -= freq_boundry
 
-            sample = interpolation._linear_point(self.wavetable, wt_phase, pulsewidth)
-            sample *= interpolation._linear_point(self.window, win_phase, pulsewidth)
+            sample = interpolation._linear_point(self.wavetable, self.wt_phase, pulsewidth)
+            sample *= interpolation._linear_point(self.window, self.win_phase, pulsewidth)
             sample *= amp
 
             for channel in range(self.channels):

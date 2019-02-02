@@ -1,13 +1,15 @@
 cdef class Pulsar:
     cdef public double[:] freq
     cdef public double[:] amp
-
-    cdef double[:] wavetable
-
-    cdef double[:] window
+    cdef public double[:] wavetable
+    cdef public double[:] window
     cdef public double[:] pulsewidth
 
-    cdef public double phase
+    cdef double wt_phase
+    cdef double win_phase
+    cdef double freq_phase
+    cdef double pw_phase
+    cdef double amp_phase
 
     cdef public int channels
     cdef public int samplerate

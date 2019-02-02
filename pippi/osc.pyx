@@ -28,7 +28,10 @@ cdef class Osc:
 
         self.freq = wavetables.to_wavetable(freq, self.wtsize)
         self.amp = wavetables.to_window(amp, self.wtsize)
-        self.phase = phase
+
+        self.wt_phase = phase
+        self.freq_phase = phase
+        self.amp_phase = phase
 
         self.channels = channels
         self.samplerate = samplerate
@@ -43,11 +46,6 @@ cdef class Osc:
     cdef object _play(self, int length):
         cdef int i = 0
         cdef double sample, freq, amp
-
-        cdef double wt_phase = self.phase
-        cdef double freq_phase = self.phase
-        cdef double amp_phase = self.phase
-
         cdef double ilength = 1.0 / length
 
         cdef int freq_boundry = max(len(self.freq)-1, 1)
@@ -61,22 +59,22 @@ cdef class Osc:
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
         for i in range(length):
-            freq = interpolation._linear_point(self.freq, freq_phase)
-            amp = interpolation._linear_point(self.amp, amp_phase)
-            sample = interpolation._linear_point(self.wavetable, wt_phase) * amp
+            freq = interpolation._linear_point(self.freq, self.freq_phase)
+            amp = interpolation._linear_point(self.amp, self.amp_phase)
+            sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
 
-            freq_phase += freq_phase_inc
-            amp_phase += amp_phase_inc
-            wt_phase += freq * wt_phase_inc
+            self.freq_phase += freq_phase_inc
+            self.amp_phase += amp_phase_inc
+            self.wt_phase += freq * wt_phase_inc
 
-            while wt_phase >= wt_boundry:
-                wt_phase -= wt_boundry
+            while self.wt_phase >= wt_boundry:
+                self.wt_phase -= wt_boundry
 
-            while amp_phase >= amp_boundry:
-                amp_phase -= amp_boundry
+            while self.amp_phase >= amp_boundry:
+                self.amp_phase -= amp_boundry
 
-            while freq_phase >= freq_boundry:
-                freq_phase -= freq_boundry
+            while self.freq_phase >= freq_boundry:
+                self.freq_phase -= freq_boundry
 
             for channel in range(self.channels):
                 out[i][channel] = sample
