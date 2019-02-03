@@ -10,6 +10,7 @@ class TestWavesets(TestCase):
     def test_pulsar_from_waveset(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 1)
         waveset = Waveset(sound, limit=20, modulo=3)
+        waveset.normalize()
         osc = Pulsar2d(
                 waveset,
                 windows=[dsp.SINE], 
@@ -17,7 +18,7 @@ class TestWavesets(TestCase):
                 win_mod=0.0, 
                 pulsewidth=1.0, 
                 freq=200.0, 
-                amp=0.2
+                amp=0.8
             )
 
         length = 30

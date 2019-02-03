@@ -7,3 +7,4 @@ cdef class Waveset:
     cdef public int max_length
     cdef public int min_length
 
+    cpdef void normalize(Waveset self, double ceiling=*)

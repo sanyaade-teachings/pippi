@@ -78,3 +78,16 @@ cdef class Waveset:
     def __len__(self):
         return len(self.sets)
 
+    cpdef void normalize(Waveset self, double ceiling=1):
+        cdef int i = 0
+        cdef int j = 0
+        cdef double normval = 1
+        cdef double maxval = 0 
+        cdef int numsets = len(self.sets)
+
+        for i in range(numsets):
+            maxval = max(abs(self.sets[i])) 
+            normval = ceiling / maxval
+            for j in range(len(self.sets[i])):
+                self.sets[i][j] *= normval
+
