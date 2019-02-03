@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 """ This is a port of Julius O Smith's `pluck.c` -- an implementation of digital waveguide synthesis.
     I've tried to preserve his original comments inline.
 

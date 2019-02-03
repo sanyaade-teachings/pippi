@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 import glob
 import math
 import multiprocessing as mp

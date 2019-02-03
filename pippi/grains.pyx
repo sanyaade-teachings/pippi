@@ -1,4 +1,4 @@
-# cython: language_level=3
+#cython: language_level=3
 
 from pippi.wavetables cimport HANN, PHASOR, to_window, to_wavetable
 from pippi cimport interpolation

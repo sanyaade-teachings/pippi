@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 from pippi.wavetables cimport Wavetable
 
 cdef double[:,:] sb_adsr(double[:,:] frames, int framelength, int channels, double samplerate, double attack, double decay, double sustain, double release) nogil

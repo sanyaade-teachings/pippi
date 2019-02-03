@@ -1380,7 +1380,7 @@ if (!__Pyx_RefNanny) {
   #endif
 
   /* "pippi/defaults.pyx":3
- * # cython: language_level=3
+ * #cython: language_level=3
  * 
  * cdef int DEFAULT_CHANNELS = 2             # <<<<<<<<<<<<<<
  * cdef int DEFAULT_SAMPLERATE = 44100
@@ -1407,7 +1407,7 @@ if (!__Pyx_RefNanny) {
   __Pyx_GIVEREF(__pyx_n_u_wav);
 
   /* "pippi/defaults.pyx":1
- * # cython: language_level=3             # <<<<<<<<<<<<<<
+ * #cython: language_level=3             # <<<<<<<<<<<<<<
  * 
  * cdef int DEFAULT_CHANNELS = 2
  */

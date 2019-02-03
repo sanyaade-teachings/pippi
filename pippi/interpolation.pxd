@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
 cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)
 cdef double _linear_pos(double[:] data, double pos) nogil

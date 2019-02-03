@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 """ Some helpers for building and transforming onset lists
 """
 

@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 #from pippi.ugens.core cimport ugen_t
 from pippi.soundpipe cimport *
 

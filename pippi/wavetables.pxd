@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 cdef double[:] _wavetable(int, int)
 cdef double[:] _window(int, int)
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)

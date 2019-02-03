@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 from pippi cimport interpolation
 from libc.stdlib cimport malloc, free
 import numpy as np

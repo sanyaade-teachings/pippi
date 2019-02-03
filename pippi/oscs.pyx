@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 from pippi.dss import DSS
 from pippi.fold import Fold
 from pippi.osc import Osc

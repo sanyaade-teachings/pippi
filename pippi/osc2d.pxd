@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 cdef class Osc2d:
     cdef public double freq
     cdef public double amp

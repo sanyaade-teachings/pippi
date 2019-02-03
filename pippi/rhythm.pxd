@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 from pippi cimport wavetables
 
 cpdef list topositions(object p, double beat, double length, wavetables.Wavetable lfo=*)

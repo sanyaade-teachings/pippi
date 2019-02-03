@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 from libc.stdlib cimport rand as _rand
 from libc.stdlib cimport RAND_MAX
 

@@ -1,3 +1,5 @@
+#cython: language_level=3
+
 from pippi cimport defaults
 from pippi cimport dsp
 from pippi cimport fx

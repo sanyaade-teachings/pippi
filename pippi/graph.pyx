@@ -1,4 +1,5 @@
-# cython: language_level=3, profile=True
+#cython: language_level=3
+
 import random
 from PIL import Image, ImageDraw
 from pippi cimport interpolation

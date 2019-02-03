@@ -22,7 +22,7 @@ END: Cython Metadata */
 #else
 #define CYTHON_ABI "0_29_2"
 #define CYTHON_HEX_VERSION 0x001D02F0
-#define CYTHON_FUTURE_DIVISION 0
+#define CYTHON_FUTURE_DIVISION 1
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -837,7 +837,9 @@ static const char *__pyx_f[] = {
 struct __pyx_opt_args_5pippi_4rand_rand;
 struct __pyx_opt_args_5pippi_4rand_randint;
 
-/* "pippi/rand.pxd":1
+/* "pippi/rand.pxd":3
+ * #cython: language_level=3
+ * 
  * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
  * cpdef int randint(int low=*, int high=*)
  * cpdef object choice(list choices)
@@ -848,7 +850,8 @@ struct __pyx_opt_args_5pippi_4rand_rand {
   double high;
 };
 
-/* "pippi/rand.pxd":2
+/* "pippi/rand.pxd":4
+ * 
  * cpdef double rand(double low=*, double high=*)
  * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
  * cpdef object choice(list choices)
@@ -1103,7 +1106,7 @@ static PyObject *__pyx_pf_5pippi_4rand_2randint(CYTHON_UNUSED PyObject *__pyx_se
 static PyObject *__pyx_pf_5pippi_4rand_4choice(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_choices); /* proto */
 /* Late includes */
 
-/* "pippi/rand.pyx":4
+/* "pippi/rand.pyx":6
  * from libc.stdlib cimport RAND_MAX
  * 
  * cpdef double rand(double low=0, double high=1):             # <<<<<<<<<<<<<<
@@ -1128,7 +1131,7 @@ static double __pyx_f_5pippi_4rand_rand(CYTHON_UNUSED int __pyx_skip_dispatch, s
     }
   }
 
-  /* "pippi/rand.pyx":5
+  /* "pippi/rand.pyx":7
  * 
  * cpdef double rand(double low=0, double high=1):
  *     return (_rand()/<double>RAND_MAX) * (high-low) + low             # <<<<<<<<<<<<<<
@@ -1138,12 +1141,12 @@ static double __pyx_f_5pippi_4rand_rand(CYTHON_UNUSED int __pyx_skip_dispatch, s
   __pyx_t_1 = rand();
   if (unlikely(((double)RAND_MAX) == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 5, __pyx_L1_error)
+    __PYX_ERR(0, 7, __pyx_L1_error)
   }
-  __pyx_r = (((__pyx_t_1 / ((double)RAND_MAX)) * (__pyx_v_high - __pyx_v_low)) + __pyx_v_low);
+  __pyx_r = (((((double)__pyx_t_1) / ((double)RAND_MAX)) * (__pyx_v_high - __pyx_v_low)) + __pyx_v_low);
   goto __pyx_L0;
 
-  /* "pippi/rand.pyx":4
+  /* "pippi/rand.pyx":6
  * from libc.stdlib cimport RAND_MAX
  * 
  * cpdef double rand(double low=0, double high=1):             # <<<<<<<<<<<<<<
@@ -1197,7 +1200,7 @@ static PyObject *__pyx_pw_5pippi_4rand_1rand(PyObject *__pyx_self, PyObject *__p
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rand") < 0)) __PYX_ERR(0, 4, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "rand") < 0)) __PYX_ERR(0, 6, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1210,19 +1213,19 @@ static PyObject *__pyx_pw_5pippi_4rand_1rand(PyObject *__pyx_self, PyObject *__p
       }
     }
     if (values[0]) {
-      __pyx_v_low = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_low == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 4, __pyx_L3_error)
+      __pyx_v_low = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_low == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 6, __pyx_L3_error)
     } else {
       __pyx_v_low = ((double)0.0);
     }
     if (values[1]) {
-      __pyx_v_high = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_high == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 4, __pyx_L3_error)
+      __pyx_v_high = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_high == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 6, __pyx_L3_error)
     } else {
       __pyx_v_high = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("rand", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 4, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("rand", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 6, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.rand.rand", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1247,7 +1250,7 @@ static PyObject *__pyx_pf_5pippi_4rand_rand(CYTHON_UNUSED PyObject *__pyx_self, 
   __pyx_t_2.low = __pyx_v_low;
   __pyx_t_2.high = __pyx_v_high;
   __pyx_t_1 = __pyx_f_5pippi_4rand_rand(0, &__pyx_t_2); 
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 6, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -1264,7 +1267,7 @@ static PyObject *__pyx_pf_5pippi_4rand_rand(CYTHON_UNUSED PyObject *__pyx_self, 
   return __pyx_r;
 }
 
-/* "pippi/rand.pyx":7
+/* "pippi/rand.pyx":9
  *     return (_rand()/<double>RAND_MAX) * (high-low) + low
  * 
  * cpdef int randint(int low=0, int high=1):             # <<<<<<<<<<<<<<
@@ -1290,7 +1293,7 @@ static int __pyx_f_5pippi_4rand_randint(CYTHON_UNUSED int __pyx_skip_dispatch, s
     }
   }
 
-  /* "pippi/rand.pyx":8
+  /* "pippi/rand.pyx":10
  * 
  * cpdef int randint(int low=0, int high=1):
  *     return <int>rand(low, high)             # <<<<<<<<<<<<<<
@@ -1304,7 +1307,7 @@ static int __pyx_f_5pippi_4rand_randint(CYTHON_UNUSED int __pyx_skip_dispatch, s
   __pyx_r = ((int)__pyx_t_1);
   goto __pyx_L0;
 
-  /* "pippi/rand.pyx":7
+  /* "pippi/rand.pyx":9
  *     return (_rand()/<double>RAND_MAX) * (high-low) + low
  * 
  * cpdef int randint(int low=0, int high=1):             # <<<<<<<<<<<<<<
@@ -1355,7 +1358,7 @@ static PyObject *__pyx_pw_5pippi_4rand_3randint(PyObject *__pyx_self, PyObject *
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "randint") < 0)) __PYX_ERR(0, 7, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "randint") < 0)) __PYX_ERR(0, 9, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1368,19 +1371,19 @@ static PyObject *__pyx_pw_5pippi_4rand_3randint(PyObject *__pyx_self, PyObject *
       }
     }
     if (values[0]) {
-      __pyx_v_low = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_low == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 7, __pyx_L3_error)
+      __pyx_v_low = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_low == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
     } else {
       __pyx_v_low = ((int)0);
     }
     if (values[1]) {
-      __pyx_v_high = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_high == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 7, __pyx_L3_error)
+      __pyx_v_high = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_high == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 9, __pyx_L3_error)
     } else {
       __pyx_v_high = ((int)1);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("randint", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 7, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("randint", 0, 0, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 9, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.rand.randint", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1405,7 +1408,7 @@ static PyObject *__pyx_pf_5pippi_4rand_2randint(CYTHON_UNUSED PyObject *__pyx_se
   __pyx_t_2.low = __pyx_v_low;
   __pyx_t_2.high = __pyx_v_high;
   __pyx_t_1 = __pyx_f_5pippi_4rand_randint(0, &__pyx_t_2); 
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -1422,7 +1425,7 @@ static PyObject *__pyx_pf_5pippi_4rand_2randint(CYTHON_UNUSED PyObject *__pyx_se
   return __pyx_r;
 }
 
-/* "pippi/rand.pyx":10
+/* "pippi/rand.pyx":12
  *     return <int>rand(low, high)
  * 
  * cpdef object choice(list choices):             # <<<<<<<<<<<<<<
@@ -1442,7 +1445,7 @@ static PyObject *__pyx_f_5pippi_4rand_choice(PyObject *__pyx_v_choices, CYTHON_U
   PyObject *__pyx_t_4 = NULL;
   __Pyx_RefNannySetupContext("choice", 0);
 
-  /* "pippi/rand.pyx":11
+  /* "pippi/rand.pyx":13
  * 
  * cpdef object choice(list choices):
  *     cdef int numchoices = <int>len(choices)             # <<<<<<<<<<<<<<
@@ -1451,12 +1454,12 @@ static PyObject *__pyx_f_5pippi_4rand_choice(PyObject *__pyx_v_choices, CYTHON_U
  */
   if (unlikely(__pyx_v_choices == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "object of type 'NoneType' has no len()");
-    __PYX_ERR(0, 11, __pyx_L1_error)
+    __PYX_ERR(0, 13, __pyx_L1_error)
   }
-  __pyx_t_1 = PyList_GET_SIZE(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 11, __pyx_L1_error)
+  __pyx_t_1 = PyList_GET_SIZE(__pyx_v_choices); if (unlikely(__pyx_t_1 == ((Py_ssize_t)-1))) __PYX_ERR(0, 13, __pyx_L1_error)
   __pyx_v_numchoices = ((int)__pyx_t_1);
 
-  /* "pippi/rand.pyx":12
+  /* "pippi/rand.pyx":14
  * cpdef object choice(list choices):
  *     cdef int numchoices = <int>len(choices)
  *     cdef int choice_index = randint(0, numchoices-1)             # <<<<<<<<<<<<<<
@@ -1468,7 +1471,7 @@ static PyObject *__pyx_f_5pippi_4rand_choice(PyObject *__pyx_v_choices, CYTHON_U
   __pyx_t_2 = __pyx_f_5pippi_4rand_randint(0, &__pyx_t_3); 
   __pyx_v_choice_index = __pyx_t_2;
 
-  /* "pippi/rand.pyx":13
+  /* "pippi/rand.pyx":15
  *     cdef int numchoices = <int>len(choices)
  *     cdef int choice_index = randint(0, numchoices-1)
  *     return choices[choice_index]             # <<<<<<<<<<<<<<
@@ -1476,15 +1479,15 @@ static PyObject *__pyx_f_5pippi_4rand_choice(PyObject *__pyx_v_choices, CYTHON_U
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(__pyx_v_choices == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 13, __pyx_L1_error)
+    __PYX_ERR(0, 15, __pyx_L1_error)
   }
-  __pyx_t_4 = __Pyx_GetItemInt_List(__pyx_v_choices, __pyx_v_choice_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt_List(__pyx_v_choices, __pyx_v_choice_index, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "pippi/rand.pyx":10
+  /* "pippi/rand.pyx":12
  *     return <int>rand(low, high)
  * 
  * cpdef object choice(list choices):             # <<<<<<<<<<<<<<
@@ -1509,7 +1512,7 @@ static PyObject *__pyx_pw_5pippi_4rand_5choice(PyObject *__pyx_self, PyObject *_
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("choice (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_choices), (&PyList_Type), 1, "choices", 1))) __PYX_ERR(0, 10, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_choices), (&PyList_Type), 1, "choices", 1))) __PYX_ERR(0, 12, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_4rand_4choice(__pyx_self, ((PyObject*)__pyx_v_choices));
 
   /* function exit code */
@@ -1527,7 +1530,7 @@ static PyObject *__pyx_pf_5pippi_4rand_4choice(CYTHON_UNUSED PyObject *__pyx_sel
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("choice", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_5pippi_4rand_choice(__pyx_v_choices, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_5pippi_4rand_choice(__pyx_v_choices, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -1888,9 +1891,9 @@ if (!__Pyx_RefNanny) {
   #endif
 
   /* "pippi/rand.pyx":1
- * from libc.stdlib cimport rand as _rand             # <<<<<<<<<<<<<<
- * from libc.stdlib cimport RAND_MAX
+ * #cython: language_level=3             # <<<<<<<<<<<<<<
  * 
+ * from libc.stdlib cimport rand as _rand
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

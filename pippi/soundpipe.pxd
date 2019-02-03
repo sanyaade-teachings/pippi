@@ -1,3 +1,4 @@
+#cython: language_level=3
 #clib soundpipe
 
 from libc.stdint cimport uint32_t, int64_t
