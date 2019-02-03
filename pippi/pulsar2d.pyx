@@ -16,8 +16,8 @@ cdef class Pulsar2d:
     """
     def __cinit__(
             self, 
-            list wavetables=None, 
-            list windows=None, 
+            object wavetables=None, 
+            object windows=None, 
 
             object freq=440.0, 
             object pulsewidth=1,

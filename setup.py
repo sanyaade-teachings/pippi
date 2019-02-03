@@ -43,6 +43,7 @@ ext_modules = cythonize([
             library_dirs=['/usr/local/lib'],
             include_dirs=['/usr/local/include']
         ), 
+        Extension('pippi.wavesets', ['pippi/wavesets.pyx']), 
         Extension('pippi.wavetables', ['pippi/wavetables.pyx'],
             include_dirs=[np.get_include()], 
         ),
