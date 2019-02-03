@@ -8,8 +8,8 @@ from pippi import dsp
 
 class TestWavesets(TestCase):
     def test_pulsar_from_waveset(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 0.1)
-        waveset = Waveset(sound, limit=20)
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 1)
+        waveset = Waveset(sound, limit=20, modulo=3)
         osc = Pulsar2d(
                 waveset,
                 windows=[dsp.SINE], 

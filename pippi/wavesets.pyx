@@ -1,4 +1,4 @@
-# cython: language_level=3
+# cython: language_level=3, cdivision=True
 
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable
@@ -10,6 +10,7 @@ cdef class Waveset:
             object values, 
             int crossings=3, 
             int limit=-1, 
+            int modulo=1, 
         ):
         
         if isinstance(values, SoundBuffer):
@@ -28,7 +29,8 @@ cdef class Waveset:
 
         cdef double[:] waveset
         cdef int waveset_length
-        cdef double val, last=0, crossing_count=0, waveset_count=0
+        cdef double val, last=0
+        cdef int crossing_count=0, waveset_count=0, waveset_output_count=0
         cdef int i=0, start=-1, end=-1
         cdef int length = len(self.raw)
 
@@ -43,20 +45,24 @@ cdef class Waveset:
                     start = i
 
                 if crossing_count == crossings:
-                    waveset_length = i-start
-                    waveset = np.zeros(waveset_length, dtype='d')
-                    waveset = self.raw[start:i]
-                    self.sets += [ waveset ]
-
-                    self.max_length = max(self.max_length, waveset_length)
-                    self.min_length = min(self.min_length, waveset_length)
-
-                    crossing_count = 0
-                    start = -1
                     waveset_count += 1
+                    crossing_count = 0
 
-                    if limit == waveset_count:
-                        break
+                    if waveset_count % modulo == 0:
+                        waveset_length = i-start
+                        waveset = np.zeros(waveset_length, dtype='d')
+                        waveset = self.raw[start:i]
+                        self.sets += [ waveset ]
+
+                        self.max_length = max(self.max_length, waveset_length)
+                        self.min_length = min(self.min_length, waveset_length)
+
+                        waveset_output_count += 1
+
+                        if limit == waveset_output_count:
+                            break
+
+                    start = -1
 
             last = self.raw[i]
             i += 1
