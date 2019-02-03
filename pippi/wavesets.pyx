@@ -29,11 +29,12 @@ cdef class Waveset:
 
         cdef double[:] waveset
         cdef int waveset_length
-        cdef double val, last=0
+        cdef double val, last
         cdef int crossing_count=0, waveset_count=0, waveset_output_count=0
-        cdef int i=0, start=-1, end=-1
+        cdef int i=1, start=-1, end=-1
         cdef int length = len(self.raw)
 
+        last = self.raw[0]
         while i < length:
             if (last >= 0 and self.raw[i] <= 0) or (last <= 0 and self.raw[i] >= 0):
                 if last == 0 and self.raw[i] == 0:
