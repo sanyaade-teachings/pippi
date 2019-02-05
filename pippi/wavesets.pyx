@@ -1,8 +1,13 @@
-# cython: language_level=3, cdivision=True, wraparound=False, boundscheck=False, initializedcheck=False
+# cython: language_level=3, cdivision=True
+
+"""
+######## cython: language_level=3, cdivision=True, wraparound=False, boundscheck=False, initializedcheck=False
+"""
 
 from pippi.soundbuffer cimport SoundBuffer
-from pippi.wavetables cimport Wavetable, to_wavetable, to_window
+from pippi.wavetables cimport Wavetable, to_wavetable, to_window, SINE
 from pippi cimport interpolation
+from pippi.rand cimport rand
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 from pippi.fx cimport _norm
 from pippi.dsp cimport _mag
@@ -27,7 +32,7 @@ cdef class Waveset:
         self.load(values)
 
     def __getitem__(self, position):
-        return self.sets[position]
+        return self.wavesets[position]
 
     def __iter__(self):
         return iter(self.wavesets)
@@ -66,7 +71,6 @@ cdef class Waveset:
 
         cdef int length = len(raw)
 
-        self.framelength = 0
         last = raw[0]
         start = 0
         mod_count = 0
@@ -86,7 +90,6 @@ cdef class Waveset:
                         waveset = np.zeros(waveset_length, dtype='d')
                         waveset = raw[start:i]
                         self.wavesets += [ waveset ]
-                        self.framelength += waveset_length
 
                         self.max_length = max(self.max_length, waveset_length)
 
@@ -133,8 +136,31 @@ cdef class Waveset:
 
         return self.render(out)
 
-    cpdef Waveset morph(Waveset self, Waveset target):
-        return self
+    cpdef SoundBuffer morph(Waveset self, Waveset target, object curve=None):
+        if curve is None:
+            curve = SINE
+
+        cdef double[:] wt = to_window(curve)
+        cdef int slength = len(self)
+        cdef int tlength = len(target)
+        cdef int maxlength = max(slength, tlength)
+        cdef int i=0, si=0, ti=0
+        cdef double prob=0, pos=0
+        cdef list out = []
+
+        while i < maxlength:
+            pos = <double>i / maxlength
+            prob = interpolation._linear_pos(wt, pos)
+            if rand(0,1) > prob:
+                si = <int>(pos * slength)
+                out += [ self[si] ]
+            else:
+                ti = <int>(pos * tlength)
+                out += [ target[ti] ]
+
+            i += 1
+
+        return self.render(out)
 
     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1):
         channels = DEFAULT_CHANNELS if channels < 1 else channels
@@ -143,9 +169,13 @@ cdef class Waveset:
         if wavesets is None:
             wavesets = self.wavesets
 
-        cdef double[:,:] out = np.zeros((self.framelength, channels), dtype='d')        
-        cdef int numsets = len(wavesets)
         cdef int i=0, c=0, j=0, oi=0
+        cdef long framelength = 0
+        cdef int numsets = len(wavesets)
+        for i in range(numsets):
+            framelength += len(wavesets[i])
+
+        cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')        
 
         for i in range(numsets):
             for j in range(len(wavesets[i])):
@@ -165,5 +195,5 @@ cdef class Waveset:
             maxval = max(np.abs(self.wavesets[i])) 
             normval = ceiling / maxval
             for j in range(len(self.wavesets[i])):
-                self.sets[i][j] *= normval
+                self.wavesets[i][j] *= normval
 

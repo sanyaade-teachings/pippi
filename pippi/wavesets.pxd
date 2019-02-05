@@ -8,7 +8,6 @@ cdef class Waveset:
     cdef public int crossings
     cdef public int max_length
     cdef public int min_length
-    cdef public int framelength
     cdef public int samplerate
     cdef public int limit
     cdef public int modulo
@@ -19,5 +18,5 @@ cdef class Waveset:
     cpdef void down(Waveset self, int factor=*)
     cpdef void invert(Waveset self)
     cpdef SoundBuffer substitute(Waveset self, object waveform)
-    cpdef Waveset morph(Waveset self, Waveset target)
+    cpdef SoundBuffer morph(Waveset self, Waveset target, object curve=*)
     cpdef SoundBuffer render(Waveset self, list wavesets=*, int channels=*, int samplerate=*)

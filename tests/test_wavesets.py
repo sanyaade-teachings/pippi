@@ -32,6 +32,14 @@ class TestWavesets(TestCase):
         out = waveset.substitute(dsp.SINE)
         out.write('tests/renders/waveset_substitute_sine.wav')
 
+    def test_morph(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        tsound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
+        waveset = Waveset(sound)
+        target = Waveset(tsound)
+        out = waveset.morph(target, dsp.PHASOR)
+        out.write('tests/renders/waveset_morph_phasor.wav')
+
     def test_render(self):
         sound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
         waveset = Waveset(sound)
