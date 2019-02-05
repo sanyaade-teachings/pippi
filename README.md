@@ -60,7 +60,13 @@ In many cases, this will produce a soundfile in the `tests/renders` directory fo
     - `fx.mincer` a phase vocoder with independent control over pitch and speed.
     - `fx.paulstretch`... paulstretch.
     - `fx.saturator` a saturation distortion.
-- A new `Waveset` datatype for Trevor Wishart-style microsound synthesis and easy creation of wavetable stacks for 2d oscs
+- A new `Waveset` datatype for Trevor Wishart-style microsound synthesis and easy creation of wavetable stacks for 2d oscs. Featuring:
+    - Waveset substitution
+    - Waveset normalization
+    - Waveset harmonic distortion (in progress)
+    - Waveset transposition (in progress)
+    - Waveset morphing (in progress)
+    - Waveset inversion (in progress)
 - Broke oscs up into smaller units and added a few new ones consisting of:
     - `Osc` which is a simple wavetable osc
     - `Osc2d` a simple 2d wavetable osc
