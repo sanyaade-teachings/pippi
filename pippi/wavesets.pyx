@@ -1,8 +1,4 @@
-# cython: language_level=3, cdivision=True
-
-"""
-######## cython: language_level=3, cdivision=True, wraparound=False, boundscheck=False, initializedcheck=False
-"""
+# cython: language_level=3, cdivision=True, wraparound=False, boundscheck=False, initializedcheck=False
 
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable, to_wavetable, to_window, SINE
