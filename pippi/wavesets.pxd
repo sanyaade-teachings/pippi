@@ -4,7 +4,7 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable
 
 cdef class Waveset:
-    cdef public list sets
+    cdef public list wavesets
     cdef public int crossings
     cdef public int max_length
     cdef public int min_length
@@ -18,6 +18,6 @@ cdef class Waveset:
     cpdef void up(Waveset self, int factor=*)
     cpdef void down(Waveset self, int factor=*)
     cpdef void invert(Waveset self)
-    cpdef void substitute(Waveset self, Wavetable waveform)
+    cpdef SoundBuffer substitute(Waveset self, object waveform)
     cpdef Waveset morph(Waveset self, Waveset target)
-    cpdef SoundBuffer render(Waveset self, int channels=*, int samplerate=*)
+    cpdef SoundBuffer render(Waveset self, list wavesets=*, int channels=*, int samplerate=*)

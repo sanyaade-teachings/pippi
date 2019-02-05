@@ -1,7 +1,8 @@
 # cython: language_level=3, cdivision=True, wraparound=False, boundscheck=False, initializedcheck=False
 
 from pippi.soundbuffer cimport SoundBuffer
-from pippi.wavetables cimport Wavetable
+from pippi.wavetables cimport Wavetable, to_wavetable, to_window
+from pippi cimport interpolation
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 from pippi.fx cimport _norm
 from pippi.dsp cimport _mag
@@ -29,10 +30,10 @@ cdef class Waveset:
         return self.sets[position]
 
     def __iter__(self):
-        return iter(self.sets)
+        return iter(self.wavesets)
 
     def __len__(self):
-        return len(self.sets)
+        return len(self.wavesets)
 
     cpdef void load(Waveset self, object values):
         cdef double[:] raw
@@ -43,7 +44,7 @@ cdef class Waveset:
         cdef int crossing_count=0, waveset_count=0, waveset_output_count=0, mod_count=0
         cdef int i=1, start=-1, end=-1
 
-        self.sets = []
+        self.wavesets = []
         self.max_length = 0
         self.min_length = 0
 
@@ -84,7 +85,7 @@ cdef class Waveset:
                         waveset_length = i-start
                         waveset = np.zeros(waveset_length, dtype='d')
                         waveset = raw[start:i]
-                        self.sets += [ waveset ]
+                        self.wavesets += [ waveset ]
                         self.framelength += waveset_length
 
                         self.max_length = max(self.max_length, waveset_length)
@@ -113,24 +114,43 @@ cdef class Waveset:
     cpdef void invert(Waveset self):
         pass
 
-    cpdef void substitute(Waveset self, Wavetable waveform):
-        pass
+    cpdef SoundBuffer substitute(Waveset self, object waveform):
+        cdef double[:] wt = to_wavetable(waveform)
+        cdef list out = []
+        cdef int i, length
+        cdef double maxval
+        cdef double[:] replacement
+
+        for i in range(len(self.wavesets)):
+            length = len(self.wavesets[i])
+            maxval = max(np.abs(self.wavesets[i])) 
+            replacement = interpolation._linear(wt, length)
+
+            for j in range(length):
+                replacement[j] *= maxval
+
+            out += [ replacement ]
+
+        return self.render(out)
 
     cpdef Waveset morph(Waveset self, Waveset target):
         return self
 
-    cpdef SoundBuffer render(Waveset self, int channels=-1, int samplerate=-1):
+    cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1):
         channels = DEFAULT_CHANNELS if channels < 1 else channels
         samplerate = self.samplerate if samplerate < 1 else samplerate
 
+        if wavesets is None:
+            wavesets = self.wavesets
+
         cdef double[:,:] out = np.zeros((self.framelength, channels), dtype='d')        
-        cdef int numsets = len(self.sets)
+        cdef int numsets = len(wavesets)
         cdef int i=0, c=0, j=0, oi=0
 
         for i in range(numsets):
-            for j in range(len(self.sets[i])):
+            for j in range(len(wavesets[i])):
                 for c in range(channels):
-                    out[oi][c] = self.sets[i][j]
+                    out[oi][c] = wavesets[i][j]
                 oi += 1
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)
@@ -139,11 +159,11 @@ cdef class Waveset:
         cdef int i=0, j=0
         cdef double normval = 1
         cdef double maxval = 0 
-        cdef int numsets = len(self.sets)
+        cdef int numsets = len(self.wavesets)
 
         for i in range(numsets):
-            maxval = max(np.abs(self.sets[i])) 
+            maxval = max(np.abs(self.wavesets[i])) 
             normval = ceiling / maxval
-            for j in range(len(self.sets[i])):
+            for j in range(len(self.wavesets[i])):
                 self.sets[i][j] *= normval
 

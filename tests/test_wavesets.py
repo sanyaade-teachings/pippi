@@ -26,6 +26,11 @@ class TestWavesets(TestCase):
         out.write('tests/renders/waveset_pulsar2d_wavetables-80hz.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
+    def test_substitute(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        waveset = Waveset(sound)
+        out = waveset.substitute(dsp.SINE)
+        out.write('tests/renders/waveset_substitute_sine.wav')
 
     def test_render(self):
         sound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
