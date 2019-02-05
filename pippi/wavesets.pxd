@@ -4,7 +4,6 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable
 
 cdef class Waveset:
-    cdef public double[:] raw
     cdef public list sets
     cdef public int crossings
     cdef public int max_length
@@ -14,7 +13,7 @@ cdef class Waveset:
     cdef public int limit
     cdef public int modulo
 
-    cpdef void load(Waveset self)
+    cpdef void load(Waveset self, object values)
     cpdef void normalize(Waveset self, double ceiling=*)
     cpdef void up(Waveset self, int factor=*)
     cpdef void down(Waveset self, int factor=*)
