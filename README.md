@@ -53,23 +53,34 @@ In many cases, this will produce a soundfile in the `tests/renders` directory fo
 
 #### Features
 
+- Removed all the old examples and wrote the first tutorial script.
 - The first set of soundpipe modules are now available via the `fx` module!
     - `fx.lpf`, `fx.hpf`, `fx.bpf`, and `fx.brf` butterworth filters.
     - `fx.compressor`... a compressor.
     - `fx.mincer` a phase vocoder with independent control over pitch and speed.
     - `fx.paulstretch`... paulstretch.
     - `fx.saturator` a saturation distortion.
-- Total rewrite of `grains.GrainCloud`, now `grains.Cloud` (and `SoundBuffer.cloud`) (In progress)
+- A new `Waveset` datatype for Trevor Wishart-style microsound synthesis and easy creation of wavetable stacks for 2d oscs
+- Broke oscs up into smaller units and added a few new ones consisting of:
+    - `Osc` which is a simple wavetable osc
+    - `Osc2d` a simple 2d wavetable osc
+    - `Pulsar` a pulsar synthesis implementation (now with pulsewidth modulation!)
+    - `Pulsar2d` the same which accepts optional wavetable stacks for the wavetable and window params
+    - `Fold` an implementation of an infinite wavetable folder
+    - `Pluck` a basic implementation of a plucked string physical model which can be fed with an arbitrary wavetable impulse
+    - `DSS` an implementation of dynamic stochastic synthesis (in progress)
+- Total rewrite of `grains.GrainCloud`, now `grains.Cloud` (and `SoundBuffer.cloud`)
     - Uses `mincer` for pitch shifting
     - Grainlength and grain density are no longer tightly coupled: no more `density` param. It is replaced with a `grainlength` value/wavetable and a `grid` value/wavetable.
     - Grain masking
-    - Optional per-grain butterworth filters (in progress)
-    - Most (all?) params can be given as either a fixed-value float (like `1.3`), a built-in wavetable 
-      flag (like `dsp.HANNOUT` or `dsp.RND`), or a wavetable-like object (a list, numpy array, sound buffer, etc). EG a cloud frozen in time `Cloud(position=0.75)`, advancing linearly through time `Cloud(position=dsp.PHASOR)`, or interpolated through four points in time `Cloud(position=[0, 1, 0.25, 0.75])`.
+- Many params can be given as either a fixed-value float (like `1.3`), a built-in wavetable flag (like `dsp.HANNOUT` or `dsp.RND`), or a wavetable-like object (a list, numpy array, sound buffer, etc). EG a cloud frozen in time `Cloud(position=0.75)`, advancing linearly through time `Cloud(position=dsp.PHASOR)`, or interpolated through four points in time `Cloud(position=[0, 1, 0.25, 0.75])`.
+- A simple envelope follower interface on `SoundBuffer` which produces a `Wavetable` via `SoundBuffer.toenv()`, also available as `fx.envelope_follower()`
+- A `SoundBuffer`-to-`Wavetable` shortcut via `SoundBuffer.towavetable()`
 
 #### Bugfixes
 
-- Some cython extension packaging improvements (in progress)
+- Some cython extension packaging improvements
+- Many misc bugfixes, I lost track... probably also at least a few shiny new bugs as well
 
 ### 2.0.0 - Beta 3
 
