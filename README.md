@@ -8,15 +8,13 @@ Pippi is a computer music system that aims to let you write python scores for of
 `astrid` is the experimental kinda-realtime counterpart to `pippi` -- a DAW/live-coding environment 
 for performance and interactive applications.
 
-## Installation and setup
+## Installation
 
 Pippi requires python 3.6+ which can be found here:
 
     https://www.python.org/downloads/
 
 The 3.5.x branch of python might work too, but is untested.
-
-### Install from pip
 
 To use the most recent release from pip (currently `2.0.0 beta 3`) just:
 
@@ -29,7 +27,7 @@ There are annotated example scripts in the `tutorials` directory which introduce
 Beyond arriving at a good-enough stable API for the 2.x series of releases (and fixing bugs), my goal during the 
 beta phase of development is to deal with the lack of documentation for this project.
 
-### Install from source
+## Install from source
 
 To install the most recent development version, first install python deps:
 
