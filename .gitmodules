@@ -1,0 +1,4 @@
+[submodule "Soundpipe"]
+	path = Soundpipe
+	url = https://github.com/luvsound/Soundpipe.git
+	branch = dev
