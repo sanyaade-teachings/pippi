@@ -22,18 +22,6 @@ To use the most recent release from pip (currently `2.0.0 beta 3`) just:
 
     pip install pippi
 
-### Install from source
-
-Or to install the most recent development version. Install deps:
-
-    pip install -r requirements.txt
-
-Build the cython extensions from source & run the test suite
-
-    make clean build test
-
-Please let me know if you run into problems!
-
 ## Tutorials
 
 There are annotated example scripts in the `tutorials` directory which introduce some of pippi's functionality.
@@ -41,11 +29,44 @@ There are annotated example scripts in the `tutorials` directory which introduce
 Beyond arriving at a good-enough stable API for the 2.x series of releases (and fixing bugs), my goal during the 
 beta phase of development is to deal with the lack of documentation for this project.
 
+### Install from source
+
+To install the most recent development version, first install python deps:
+
+    pip install -r requirements.txt
+
+(This is usually done inside a virtualenv via something like `python3 -m venv venv && source venv/bin/activate` but that's up to you.)
+
+Make sure you have the submodule for Paul Batchelor's `Soundpipe` library checked out:
+
+    git submodule init
+    git submodule update
+
+CD into the `Soundpipe` directory and install Soundpipe:
+
+    make
+    sudo make install
+
+CD back into the parent directory and build pippi's cython extensions:
+
+    make build
+
+Please let me know if you run into problems!
+
 ## To run tests
 
     make test
 
 In many cases, this will produce a soundfile in the `tests/renders` directory for the corresponding test. (Ear-driven regression testing...)
+During the beta I like to keep failing tests in the main repo, so... most tests will be passing but if they *all* are passing, probably you are living in the future and are looking at the first stable release.
+
+## Clean build files
+
+If you're hacking on pippi itself, during development you will sometimes need to build the cython modules completely from scratch. 
+The normal `make build` command will by default only build the extensions whose source files have changed. That usually works fine, but 
+to clean all the build files first just run:
+
+    make clean
 
 ## Release Notes
 
