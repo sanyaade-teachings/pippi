@@ -18,5 +18,6 @@ cdef class Waveset:
     cpdef void down(Waveset self, int factor=*)
     cpdef void invert(Waveset self)
     cpdef SoundBuffer substitute(Waveset self, object waveform)
+    cpdef SoundBuffer harmonic(Waveset self, list harmonics=*, list weights=*)
     cpdef SoundBuffer morph(Waveset self, Waveset target, object curve=*)
     cpdef SoundBuffer render(Waveset self, list wavesets=*, int channels=*, int samplerate=*)

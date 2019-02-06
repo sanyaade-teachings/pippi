@@ -26,6 +26,14 @@ class TestWavesets(TestCase):
         out.write('tests/renders/waveset_pulsar2d_wavetables-80hz.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
+    def test_harmonic(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
+        waveset = Waveset(sound)
+        harmonics = [1, 2, 3]
+        weights = [1, 0.5, 0.25]
+        out = waveset.harmonic(harmonics, weights)
+        out.write('tests/renders/waveset_harmonic_distortion.wav')
+
     def test_substitute(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         waveset = Waveset(sound)

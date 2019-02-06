@@ -113,6 +113,42 @@ cdef class Waveset:
     cpdef void invert(Waveset self):
         pass
 
+    cpdef SoundBuffer harmonic(Waveset self, list harmonics=None, list weights=None):
+        if harmonics is None:
+            harmonics = [1,2,3]
+
+        if weights is None:
+            weights = [1,0.5,0.25]
+
+        cdef list out = []
+        cdef int i, length, j, k, h, plength
+        cdef double maxval
+        cdef double[:] partial
+        cdef double[:] cluster
+
+        for i in range(len(self.wavesets)):
+            length = len(self.wavesets[i])
+            maxval = max(np.abs(self.wavesets[i])) 
+            cluster = np.zeros(length, dtype='d')
+            for h in harmonics:
+                plength = length * h
+                partial = np.zeros(plength, dtype='d')
+                for j in range(h):
+                    for k in range(length):
+                        partial[k*j] = self.wavesets[i][k] * maxval
+
+                partial = interpolation._linear(partial, length)
+
+                for j in range(length):
+                    cluster[j] += partial[j]
+
+            for j in range(length):
+                cluster[j] *= maxval
+
+            out += [ cluster ]
+
+        return self.render(out)
+
     cpdef SoundBuffer substitute(Waveset self, object waveform):
         cdef double[:] wt = to_wavetable(waveform)
         cdef list out = []
