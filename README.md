@@ -94,6 +94,7 @@ to clean all the build files first just run:
     - `Fold` an implementation of an infinite wavetable folder
     - `Pluck` a basic implementation of a plucked string physical model which can be fed with an arbitrary wavetable impulse
     - `DSS` an implementation of dynamic stochastic synthesis (in progress)
+    - `Alias` a single-sample aliasing pulsetrain osc
 - Total rewrite of `grains.GrainCloud`, now `grains.Cloud` (and `SoundBuffer.cloud`)
     - Uses `mincer` for pitch shifting
     - Grainlength and grain density are no longer tightly coupled: no more `density` param. It is replaced with a `grainlength` value/wavetable and a `grid` value/wavetable.

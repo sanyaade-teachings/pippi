@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase
 
-from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d
+from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d, Alias
 from pippi.soundbuffer import SoundBuffer
 from pippi import dsp
 
@@ -75,5 +75,11 @@ class TestOscs(TestCase):
         out.write('tests/renders/osc_pulsar2d.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
+    def test_create_alias(self):
+        osc = Alias(freq=200.0)
+        length = 1
+        out = osc.play(length)
+        out.write('tests/renders/osc_alias.wav')
+        self.assertEqual(len(out), int(length * out.samplerate))
 
 
