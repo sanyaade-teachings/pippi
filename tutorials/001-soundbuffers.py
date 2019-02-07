@@ -11,10 +11,10 @@ slow_guitar = guitar.speed(0.5)
 
 print('I am a slower %s -- %s frames and %.2f seconds long' % (type(slow_guitar), len(slow_guitar), slow_guitar.dur))
 
-slow_guitar.write('guitar-slow.wav')
+slow_guitar.write('renders/001-guitar-slow.wav')
 
 mixed_guitars = slow_guitar & guitar
-mixed_guitars.write('guitar-mixed.wav')
+mixed_guitars.write('renders/001-guitar-mixed.wav')
 
 print('I am a mixed %s -- %s frames and %.2f seconds long' % (type(mixed_guitars), len(mixed_guitars), mixed_guitars.dur))
 
@@ -47,4 +47,4 @@ for speed in speeds:
     pos += beat
 
 # Save this output buffer
-out.write('guitar-chord.wav')
+out.write('renders/001-guitar-chord.wav')

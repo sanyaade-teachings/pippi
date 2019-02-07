@@ -712,17 +712,19 @@ result as a new file.</p>
 
 <p>Save a copy -- this time as a WAV file</p>
 
-<div class="highlight"><pre><span></span><span class="n">slow_guitar</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;guitar-slow.wav&#39;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="n">slow_guitar</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;renders/001-guitar-slow.wav&#39;</span><span class="p">)</span>
 </pre></div>
 
+<p><audio src="renders/001-guitar-slow.wav" controls></audio></p>
 <p>We can mix the sounds together and save the result using the mix (&amp;) operator</p>
 
 <div class="highlight"><pre><span></span><span class="n">mixed_guitars</span> <span class="o">=</span> <span class="n">slow_guitar</span> <span class="o">&amp;</span> <span class="n">guitar</span>
-<span class="n">mixed_guitars</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;guitar-mixed.wav&#39;</span><span class="p">)</span>
+<span class="n">mixed_guitars</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;renders/001-guitar-mixed.wav&#39;</span><span class="p">)</span>
 
 <span class="k">print</span><span class="p">(</span><span class="s1">&#39;I am a mixed </span><span class="si">%s</span><span class="s1"> -- </span><span class="si">%s</span><span class="s1"> frames and </span><span class="si">%.2f</span><span class="s1"> seconds long&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">mixed_guitars</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">mixed_guitars</span><span class="p">),</span> <span class="n">mixed_guitars</span><span class="o">.</span><span class="n">dur</span><span class="p">))</span>
 </pre></div>
 
+<p><audio src="renders/001-guitar-mixed.wav" controls></audio></p>
 <p>Often it's useful to mix many processed segments into a final output buffer. Lets use the <code>dsp.buffer</code> shortcut to create a 
 new empty SoundBuffer.</p>
 
@@ -777,10 +779,10 @@ from the note name:</p>
     <span class="n">pos</span> <span class="o">+=</span> <span class="n">beat</span>
 
 <span class="c1"># Save this output buffer</span>
-<span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;guitar-chord.wav&#39;</span><span class="p">)</span>
+<span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;renders/001-guitar-chord.wav&#39;</span><span class="p">)</span>
 </pre></div>
 
-
+<p><audio src="renders/001-guitar-chord.wav" controls></audio></p>
     <HR/>
     <div class="footer">
       <p>Published from <a href="001-soundbuffers.pmd">001-soundbuffers.pmd</a>

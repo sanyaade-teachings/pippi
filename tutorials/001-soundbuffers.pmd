@@ -55,17 +55,21 @@ print('I am a slower %s -- %s frames and %.2f seconds long' % (type(slow_guitar)
 Save a copy -- this time as a WAV file
 
 ```python
-slow_guitar.write('guitar-slow.wav')
+slow_guitar.write('renders/001-guitar-slow.wav')
 ```
+
+<audio src="renders/001-guitar-slow.wav" controls></audio>
 
 We can mix the sounds together and save the result using the mix (&) operator
 
 ```python
 mixed_guitars = slow_guitar & guitar
-mixed_guitars.write('guitar-mixed.wav')
+mixed_guitars.write('renders/001-guitar-mixed.wav')
 
 print('I am a mixed %s -- %s frames and %.2f seconds long' % (type(mixed_guitars), len(mixed_guitars), mixed_guitars.dur))
 ```
+
+<audio src="renders/001-guitar-mixed.wav" controls></audio>
 
 Often it's useful to mix many processed segments into a final output buffer. Lets use the `dsp.buffer` shortcut to create a 
 new empty SoundBuffer.
@@ -129,5 +133,7 @@ for speed in speeds:
     pos += beat
 
 # Save this output buffer
-out.write('guitar-chord.wav')
+out.write('renders/001-guitar-chord.wav')
 ```
+
+<audio src="renders/001-guitar-chord.wav" controls></audio>
