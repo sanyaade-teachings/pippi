@@ -5,6 +5,7 @@ import numpy as np
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
 from pippi cimport interpolation
+from pippi.rand cimport rand
 
 cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
@@ -24,7 +25,7 @@ cdef class Pulsar:
             double phase=0, 
 
             tuple burst=None,
-            object mask=None,
+            object mask=0.0,
 
             int channels=DEFAULT_CHANNELS,
             int samplerate=DEFAULT_SAMPLERATE,
@@ -32,6 +33,7 @@ cdef class Pulsar:
 
         self.freq = wavetables.to_wavetable(freq)
         self.amp = wavetables.to_window(amp)
+        self.mask = wavetables.to_window(mask)
 
         if burst is not None:
             self.burst_length = burst[0] + burst[1]
@@ -45,6 +47,8 @@ cdef class Pulsar:
         self.freq_phase = phase
         self.pw_phase = phase
         self.amp_phase = phase
+        self.burst_phase = phase
+        self.mask_phase = phase
 
         self.channels = channels
         self.samplerate = samplerate
@@ -59,8 +63,9 @@ cdef class Pulsar:
 
     cdef object _play(self, int length):
         cdef int i = 0
-        cdef long burst = 0
-        cdef double sample, pulsewidth, freq
+        cdef long burst = 1
+        cdef long mask = 1
+        cdef double sample, pulsewidth, freq, mask_prob
 
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
@@ -70,6 +75,7 @@ cdef class Pulsar:
         cdef int freq_boundry = max(len(self.freq)-1, 1)
         cdef int amp_boundry = max(len(self.amp)-1, 1)
         cdef int pw_boundry = max(len(self.pulsewidth)-1, 1)
+        cdef int mask_boundry = max(len(self.mask)-1, 1)
         cdef int burst_boundry = max(len(self.burst)-1, 1)
 
         cdef int wt_length = len(self.wavetable)
@@ -82,11 +88,13 @@ cdef class Pulsar:
         cdef double freq_phase_inc = ilength * freq_boundry
         cdef double amp_phase_inc = ilength * amp_boundry
         cdef double pw_phase_inc = ilength * pw_boundry
+        cdef double mask_phase_inc = ilength * mask_boundry
 
         for i in range(length):
             freq = interpolation._linear_point(self.freq, self.freq_phase)
             pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)
             amp = interpolation._linear_point(self.amp, self.amp_phase)
+            mask_prob = interpolation._linear_point(self.mask, self.mask_phase)
             burst = self.burst[<int>self.burst_phase]
 
             ipulsewidth = 1.0/pulsewidth
@@ -95,16 +103,21 @@ cdef class Pulsar:
 
             sample = interpolation._linear_point(self.wavetable, self.wt_phase, pulsewidth)
             sample *= interpolation._linear_point(self.window, self.win_phase, pulsewidth)
-            sample *= amp * burst
+            sample *= amp * burst * mask
 
             self.freq_phase += freq_phase_inc
             self.amp_phase += amp_phase_inc
             self.pw_phase += pw_phase_inc
+            self.mask_phase += mask_phase_inc
             self.wt_phase += isamplerate * wt_boundry_p * freq
             self.win_phase += isamplerate * win_boundry_p * freq
 
             if self.wt_phase >= wt_boundry_p:
                 self.burst_phase += 1
+                if rand(0,1) < mask_prob:
+                    mask = 0
+                else:
+                    mask = 1
 
             while self.wt_phase >= wt_boundry_p:
                 self.wt_phase -= wt_boundry_p
@@ -120,6 +133,9 @@ cdef class Pulsar:
 
             while self.freq_phase >= freq_boundry:
                 self.freq_phase -= freq_boundry
+
+            while self.mask_phase >= mask_boundry:
+                self.mask_phase -= mask_boundry
 
             while self.burst_phase >= burst_boundry:
                 self.burst_phase -= burst_boundry

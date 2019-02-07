@@ -15,6 +15,7 @@ cdef class Pulsar:
     cdef double freq_phase
     cdef double pw_phase
     cdef double amp_phase
+    cdef double mask_phase
     cdef double burst_phase
     cdef int burst_length
 
