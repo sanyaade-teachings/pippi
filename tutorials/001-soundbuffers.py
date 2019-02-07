@@ -5,7 +5,7 @@ guitar = dsp.read('../tests/sounds/guitar10s.wav')
 
 print('I am a %s -- %s frames and %.2f seconds long' % (type(guitar), len(guitar), guitar.dur))
 
-guitar.write('guitar-unaltered.flac')
+guitar.write('renders/001-guitar-unaltered.flac')
 
 slow_guitar = guitar.speed(0.5)
 

@@ -33,8 +33,10 @@ as a FLAC in the current directory by calling the `write` method available
 to any SoundBuffer.
 
 ```python
-guitar.write('guitar-unaltered.flac')
+guitar.write('renders/001-guitar-unaltered.flac')
 ```
+
+<audio src="renders/001-guitar-unaltered.flac" controls></audio>
 
 Many sound transformations are available directly as methods on the SoundBuffer.
 Lets slow the guitar down to half-speed, print info about it again and then save the 
@@ -46,7 +48,7 @@ slow_guitar = guitar.speed(0.5)
 
 Print the updated information
 
-```python
+```python, results='verbatim'
 print('I am a slower %s -- %s frames and %.2f seconds long' % (type(slow_guitar), len(slow_guitar), slow_guitar.dur))
 ```
 
