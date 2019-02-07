@@ -22,7 +22,7 @@ To use the most recent release from pip (currently `2.0.0 beta 3`) just:
 
 ## Tutorials
 
-There are annotated example scripts in the `tutorials` directory which introduce some of pippi's functionality.
+There are annotated example scripts in the [tutorials](tutorials) directory which introduce some of pippi's functionality.
 
 Beyond arriving at a good-enough stable API for the 2.x series of releases (and fixing bugs), my goal during the 
 beta phase of development is to deal with the lack of documentation for this project.
