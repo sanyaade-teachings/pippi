@@ -59,6 +59,20 @@ class TestOscs(TestCase):
         out.write('tests/renders/osc_pulsar.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
+    def test_pulsar_burst(self):
+        osc = Pulsar(
+                dsp.SINE, 
+                window=dsp.SINE, 
+                pulsewidth=dsp.wt(dsp.TRI, 0, 1), 
+                burst=(3,2),
+                freq=200.0, 
+                amp=0.2
+            )
+        length = 10
+        out = osc.play(length)
+        out.write('tests/renders/osc_pulsar_burst.wav')
+        self.assertEqual(len(out), int(length * out.samplerate))
+
 
     def test_create_pulsar2d(self):
         osc = Pulsar2d(
