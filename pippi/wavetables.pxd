@@ -35,6 +35,7 @@ cdef int TRUNC
 cdef int HERMITE
 cdef int CONSTANT
 cdef int GOGINS
+cdef int SINC
 
 cdef int LEN_WINDOWS
 cdef int* ALL_WINDOWS

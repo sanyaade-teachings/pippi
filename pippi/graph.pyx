@@ -62,7 +62,7 @@ cpdef void write(object data,
     for channel in range(channels):
         color = tuple([random.randint(0, 200) for _ in range(3)] + [200])
 
-        points = (np.array(_data[:,channel], dtype='d') + offset) * height * mult
+        points = ((np.array(_data[:,channel], dtype='d') - offset) * -1) * height * mult
 
         mapped_points = []
         for x in x_axis:

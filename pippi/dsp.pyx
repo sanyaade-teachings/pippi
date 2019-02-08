@@ -41,6 +41,7 @@ TRUNC = wts.TRUNC
 HERMITE = wts.HERMITE
 CONSTANT = wts.CONSTANT
 GOGINS = wts.GOGINS
+SINC = wts.SINC
 
 # Just a shorthand for MS in scripts. 
 # For example:

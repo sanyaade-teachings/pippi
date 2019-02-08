@@ -36,6 +36,7 @@ cdef int SQUARE = 10
 cdef int RND = 11
 cdef int LINE = SAW
 cdef int PHASOR = SAW
+cdef int SINC = 23
 
 cdef int LINEAR = 12
 cdef int TRUNC = 13
@@ -63,7 +64,7 @@ cdef dict wtype_flags = {
     'rnd': RND, 
 }
 
-cdef int LEN_WINDOWS = 9
+cdef int LEN_WINDOWS = 14
 cdef int* ALL_WINDOWS = [
             SINE, 
             SINEIN, 
@@ -459,13 +460,13 @@ cdef double[:] _window(int window_type, int length):
         wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
 
     elif window_type == SINEIN:
-        wt = np.sin(np.linspace(np.pi/2, np.pi, length, dtype='d'))
-
-    elif window_type == SINEOUT:
         wt = np.sin(np.linspace(0, np.pi/2, length, dtype='d'))
 
+    elif window_type == SINEOUT:
+        wt = np.sin(np.linspace(np.pi/2, np.pi, length, dtype='d'))
+
     elif window_type == COS:
-        wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
+        wt = (np.cos(np.linspace(0, np.pi*2, length, dtype='d')) + 1) * 0.5
 
     elif window_type == TRI:
         wt = np.abs(np.abs(np.linspace(0, 2, length, dtype='d') - 1) - 1)
@@ -480,10 +481,10 @@ cdef double[:] _window(int window_type, int length):
         wt = np.hanning(length)
 
     elif window_type == HANNIN:
-        wt = np.hanning(length * 2)[length:]
+        wt = np.hanning(length * 2)[:length]
 
     elif window_type == HANNOUT:
-        wt = np.hanning(length * 2)[:length]
+        wt = np.hanning(length * 2)[length:]
 
     elif window_type == HAMM:
         wt = np.hamming(length)
@@ -495,7 +496,10 @@ cdef double[:] _window(int window_type, int length):
         wt = np.blackman(length)
 
     elif window_type == KAISER:
-        wt = np.kaiser(length, 0)
+        wt = np.kaiser(length, 14)
+        
+    elif window_type == SINC:
+        wt = np.sinc(np.linspace(-15, 15, length, dtype='d'))
 
     else:
         wt = window(SINE, length)
