@@ -49,7 +49,10 @@ class TestWavesets(TestCase):
         out.write('tests/renders/waveset_morph_phasor.wav')
 
     def test_render(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         waveset = Waveset(sound)
         out = waveset.render(channels=1)
         out.write('tests/renders/waveset_render.wav')
+
+        self.assertEqual(len(out), len(sound))
+

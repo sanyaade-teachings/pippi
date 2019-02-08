@@ -40,7 +40,6 @@ cdef class Waveset:
         cdef double[:] raw
         cdef double[:] waveset
         cdef double original_mag = 0
-        cdef int waveset_length
         cdef double val, last
         cdef int crossing_count=0, waveset_count=0, waveset_output_count=0, mod_count=0
         cdef int i=1, start=-1, end=-1
@@ -69,6 +68,7 @@ cdef class Waveset:
 
         last = raw[0]
         start = 0
+        end = 0
         mod_count = 0
 
         while i < length:
@@ -82,18 +82,8 @@ cdef class Waveset:
 
                     if mod_count == self.modulo:
                         mod_count = 0
-                        waveset_length = i-start
-                        waveset = np.zeros(waveset_length, dtype='d')
-                        waveset = raw[start:i]
-                        self.wavesets += [ waveset ]
-
-                        self.max_length = max(self.max_length, waveset_length)
-
-                        if self.min_length == 0:
-                            self.min_length = waveset_length
-                        else:
-                            self.min_length = min(self.min_length, waveset_length)
-
+                        end = i
+                        self._slice(raw, start, end)
                         waveset_output_count += 1
 
                         if self.limit == waveset_output_count:
@@ -103,6 +93,22 @@ cdef class Waveset:
 
             last = raw[i]
             i += 1
+
+        if end < length:
+            self._slice(raw, end, length)
+
+    cdef void _slice(Waveset self, double[:] raw, int start, int end):
+        cdef int waveset_length = end-start
+        waveset = np.zeros(waveset_length, dtype='d')
+        waveset = raw[start:end]
+        self.wavesets += [ waveset ]
+
+        self.max_length = max(self.max_length, waveset_length)
+
+        if self.min_length == 0:
+            self.min_length = waveset_length
+        else:
+            self.min_length = min(self.min_length, waveset_length)
 
     cpdef void up(Waveset self, int factor=2):
         pass
