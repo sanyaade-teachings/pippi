@@ -82,6 +82,7 @@ to clean all the build files first just run:
 - A new `Waveset` datatype for Trevor Wishart-style microsound synthesis and easy creation of wavetable stacks for 2d oscs. Featuring:
     - Waveset substitution
     - Waveset normalization
+    - Waveset time-stretching
     - Waveset harmonic distortion (in progress)
     - Waveset transposition (in progress)
     - Waveset morphing (in progress)

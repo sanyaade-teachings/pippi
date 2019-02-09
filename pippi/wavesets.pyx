@@ -110,11 +110,26 @@ cdef class Waveset:
         else:
             self.min_length = min(self.min_length, waveset_length)
 
-    cpdef void up(Waveset self, int factor=2):
-        pass
+    cpdef SoundBuffer stretch(Waveset self, object factor=2.0):
+        cdef list out = []
+        cdef int i, repeat
+        cdef int numwavesets = len(self.wavesets)
+        cdef double pos = 0
+        cdef double[:] stretched
+        cdef double[:] curve = to_window(factor)
 
-    cpdef void down(Waveset self, int factor=2):
-        pass
+        for i in range(numwavesets):
+            pos = <double>i / numwavesets
+            repeat = <int>interpolation._linear_pos(curve, pos)
+            if repeat == 1:
+                out += [ self.wavesets[i] ]
+            elif repeat < 1:
+                continue
+            else:
+                stretched = np.tile(self.wavesets[i], repeat)
+                out += [ stretched ]
+
+        return self.render(out)
 
     cpdef void invert(Waveset self):
         pass

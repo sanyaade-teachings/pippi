@@ -26,6 +26,13 @@ class TestWavesets(TestCase):
         out.write('tests/renders/waveset_pulsar2d_wavetables-80hz.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
+    def test_stretch(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        waveset = Waveset(sound)
+        factor = dsp.wt(dsp.PHASOR, 1, 10)
+        out = waveset.stretch(factor)
+        out.write('tests/renders/waveset_stretch.wav')
+
     def test_harmonic(self):
         sound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
         waveset = Waveset(sound)

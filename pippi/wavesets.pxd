@@ -14,11 +14,10 @@ cdef class Waveset:
 
     cpdef void load(Waveset self, object values)
     cpdef void normalize(Waveset self, double ceiling=*)
-    cpdef void up(Waveset self, int factor=*)
-    cpdef void down(Waveset self, int factor=*)
     cpdef void invert(Waveset self)
     cdef void _slice(Waveset self, double[:] raw, int start, int end)
     cpdef SoundBuffer substitute(Waveset self, object waveform)
+    cpdef SoundBuffer stretch(Waveset self, object factor=*)
     cpdef SoundBuffer harmonic(Waveset self, list harmonics=*, list weights=*)
     cpdef SoundBuffer morph(Waveset self, Waveset target, object curve=*)
     cpdef SoundBuffer render(Waveset self, list wavesets=*, int channels=*, int samplerate=*)
