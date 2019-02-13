@@ -29,33 +29,33 @@ cdef double[:,:] _dub(double[:,:] target, int target_length, double[:,:] todub, 
     return target
 
 cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method):
+    cdef double left = 0.5
+    cdef double right = 0.5
+    cdef int i = 0
+
     if method == CONSTANT:
-        for channel in range(channels):
-            if channel % 2 == 0:
-                out.base[:,channel] *= math.sqrt(pos)
-            else:
-                out.base[:,channel] *= math.sqrt(1 - pos)
+        left = math.sqrt(pos)
+        right = math.sqrt(1 - pos)
 
     elif method == LINEAR:
-        for channel in range(channels):
-            if channel % 2 == 0:
-                out.base[:,channel] *= pos
-            else:
-                out.base[:,channel] *= 1 - pos
+        left = pos
+        right = 1 - pos
 
     elif method == SINE:
-        for channel in range(channels):
-            if channel % 2 == 0:
-                out.base[:,channel] *= math.sin(pos * (math.pi / 2))
-            else:
-                out.base[:,channel] *= math.cos(pos * (math.pi / 2))
+        left = math.sin(pos * (math.pi / 2))
+        right = math.cos(pos * (math.pi / 2))
 
     elif method == GOGINS:
-        for channel in range(channels):
-            if channel % 2 == 0:
-                out.base[:,channel] *= math.sin((pos + 0.5) * (math.pi / 2))
-            else:
-                out.base[:,channel] *= math.cos((pos + 0.5) * (math.pi / 2))
+        left = math.sin((pos + 0.5) * (math.pi / 2))
+        right = math.cos((pos + 0.5) * (math.pi / 2))
+
+    for channel in range(channels):
+        if channel % 2 == 0:
+            for i in range(length):
+                out[i, channel] *= left
+        else:
+            for i in range(length):
+                out[i, channel] *= right
 
     return out
 

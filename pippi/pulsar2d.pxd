@@ -5,6 +5,9 @@ cdef class Pulsar2d:
     cdef public double[:] amp
     cdef public double[:] pulsewidth
 
+    cdef public double[:] mask
+    cdef public long[:] burst
+
     cdef double[:,:] wavetables
     cdef double[:,:] windows
 
@@ -25,6 +28,9 @@ cdef class Pulsar2d:
     cdef double freq_phase
     cdef double pw_phase
     cdef double amp_phase
+    cdef double mask_phase
+    cdef double burst_phase
+    cdef int burst_length
 
     cdef public int channels
     cdef public int samplerate

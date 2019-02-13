@@ -838,11 +838,11 @@ static const char *__pyx_f[] = {
   "pippi/dss.pyx",
   "stringsource",
   "pippi/dss.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/array.pxd",
+  "array.pxd",
   "pippi/wavetables.pxd",
   "pippi/soundbuffer.pxd",
   "pippi/grains.pxd",
-  "venv/lib/python3.6/site-packages/Cython/Includes/cpython/type.pxd",
+  "type.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;

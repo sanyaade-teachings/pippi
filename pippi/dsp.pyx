@@ -101,9 +101,15 @@ cpdef wts.Wavetable wt(object values,
         object lowvalue=None, 
         object highvalue=None, 
         object wtsize=None, 
-        bint window=False
     ):
-    return wts.Wavetable(values, lowvalue, highvalue, wtsize, window)
+    return wts.Wavetable(values, lowvalue, highvalue, wtsize, False)
+
+cpdef wts.Wavetable win(object values, 
+        object lowvalue=None, 
+        object highvalue=None, 
+        object wtsize=None, 
+    ):
+    return wts.Wavetable(values, lowvalue, highvalue, wtsize, True)
 
 cpdef SoundBuffer stack(list sounds):
     cdef int channels = 0
