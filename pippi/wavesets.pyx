@@ -1,7 +1,7 @@
 # cython: language_level=3, cdivision=True, wraparound=False, boundscheck=False, initializedcheck=False
 
 from pippi.soundbuffer cimport SoundBuffer
-from pippi.wavetables cimport Wavetable, to_wavetable, to_window, SINE
+from pippi.wavetables cimport Wavetable, to_wavetable, to_window, SINE, SINEIN, SINEOUT
 from pippi cimport interpolation
 from pippi.rand cimport rand
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
@@ -280,14 +280,21 @@ cdef class Waveset:
 
         return self.render(out)
 
-    cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1):
+    cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=5):
         channels = DEFAULT_CHANNELS if channels < 1 else channels
         samplerate = self.samplerate if samplerate < 1 else samplerate
+
+        cdef double[:] fadein, fadeout
+
+        if taper > 1:
+            fadein = to_window(SINEIN, taper)
+            fadeout = to_window(SINEOUT, taper)
 
         if wavesets is None:
             wavesets = self.wavesets
 
-        cdef int i=0, c=0, j=0, oi=0
+        cdef double mult = 1
+        cdef int i=0, c=0, j=0, oi=0, wlength=0
         cdef long framelength = 0
         cdef int numsets = len(wavesets)
         for i in range(numsets):
@@ -296,9 +303,17 @@ cdef class Waveset:
         cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')        
 
         for i in range(numsets):
-            for j in range(len(wavesets[i])):
+            wlength = len(wavesets[i])
+            for j in range(wlength):
+                if taper > 1 and j < taper:
+                    mult = fadein[j]
+                elif taper > 1 and j >= wlength - taper:
+                    mult = fadeout[abs(wlength-j-taper)]
+                else:
+                    mult = 1
+
                 for c in range(channels):
-                    out[oi][c] = wavesets[i][j]
+                    out[oi][c] = wavesets[i][j] * mult
                 oi += 1
 
         return SoundBuffer(out, channels=channels, samplerate=samplerate)

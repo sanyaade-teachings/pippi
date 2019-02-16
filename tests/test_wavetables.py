@@ -93,59 +93,59 @@ class TestWavetables(TestCase):
         wt.graph('tests/renders/graph_square_wavetable.png', stroke=3)
 
     def test_graph_sinein_window(self):
-        wt = dsp.wt(dsp.SINEIN, window=True)
+        wt = dsp.win(dsp.SINEIN)
         wt.graph('tests/renders/graph_sinein_window.png', stroke=3)
 
     def test_graph_sineout_window(self):
-        wt = dsp.wt(dsp.SINEOUT, window=True)
+        wt = dsp.win(dsp.SINEOUT)
         wt.graph('tests/renders/graph_sineout_window.png', stroke=3)
 
     def test_graph_cos_window(self):
-        wt = dsp.wt(dsp.COS, window=True)
+        wt = dsp.win(dsp.COS)
         wt.graph('tests/renders/graph_cos_window.png', stroke=3)
 
     def test_graph_tri_window(self):
-        wt = dsp.wt(dsp.TRI, window=True)
+        wt = dsp.win(dsp.TRI)
         wt.graph('tests/renders/graph_tri_window.png', stroke=3)
 
     def test_graph_saw_window(self):
-        wt = dsp.wt(dsp.SAW, window=True)
+        wt = dsp.win(dsp.SAW)
         wt.graph('tests/renders/graph_saw_window.png', stroke=3)
 
     def test_graph_rsaw_window(self):
-        wt = dsp.wt(dsp.RSAW, window=True)
+        wt = dsp.win(dsp.RSAW)
         wt.graph('tests/renders/graph_rsaw_window.png', stroke=3)
 
     def test_graph_hann_window(self):
-        wt = dsp.wt(dsp.HANN, window=True)
+        wt = dsp.win(dsp.HANN)
         wt.graph('tests/renders/graph_hann_window.png', stroke=3)
 
     def test_graph_hannin_window(self):
-        wt = dsp.wt(dsp.HANNIN, window=True)
+        wt = dsp.win(dsp.HANNIN)
         wt.graph('tests/renders/graph_hannin_window.png', stroke=3)
 
     def test_graph_hannout_window(self):
-        wt = dsp.wt(dsp.HANNOUT, window=True)
+        wt = dsp.win(dsp.HANNOUT)
         wt.graph('tests/renders/graph_hannout_window.png', stroke=3)
 
     def test_graph_hamm_window(self):
-        wt = dsp.wt(dsp.HAMM, window=True)
+        wt = dsp.win(dsp.HAMM)
         wt.graph('tests/renders/graph_hamm_window.png', stroke=3)
 
     def test_graph_black_window(self):
-        wt = dsp.wt(dsp.BLACK, window=True)
+        wt = dsp.win(dsp.BLACK)
         wt.graph('tests/renders/graph_black_window.png', stroke=3)
 
     def test_graph_bart_window(self):
-        wt = dsp.wt(dsp.BART, window=True)
+        wt = dsp.win(dsp.BART)
         wt.graph('tests/renders/graph_bart_window.png', stroke=3)
 
     def test_graph_kaiser_window(self):
-        wt = dsp.wt(dsp.KAISER, window=True)
+        wt = dsp.win(dsp.KAISER)
         wt.graph('tests/renders/graph_kaiser_window.png', stroke=3)
 
     def test_graph_sinc_window(self):
-        wt = dsp.wt(dsp.SINC, window=True)
+        wt = dsp.win(dsp.SINC)
         wt.graph('tests/renders/graph_sinc_window.png', stroke=3)
 
 

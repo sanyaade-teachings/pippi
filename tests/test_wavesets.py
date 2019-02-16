@@ -4,7 +4,7 @@ from unittest import TestCase
 from pippi.oscs import Pulsar2d
 from pippi.wavesets import Waveset
 from pippi.soundbuffer import SoundBuffer
-from pippi import dsp
+from pippi import dsp, fx
 
 class TestWavesets(TestCase):
     def test_pulsar_from_waveset(self):
@@ -52,6 +52,7 @@ class TestWavesets(TestCase):
         waveset = Waveset(sound)
         rev = waveset.reversed()
         out = waveset.replace(rev)
+        out = fx.norm(out, 1)
         out.write('tests/renders/waveset_substitute_reversed.wav')
 
     def test_reverse(self):

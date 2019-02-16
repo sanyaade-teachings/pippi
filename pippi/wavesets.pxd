@@ -23,4 +23,4 @@ cdef class Waveset:
     cpdef SoundBuffer stretch(Waveset self, object factor=*)
     cpdef SoundBuffer harmonic(Waveset self, list harmonics=*, list weights=*)
     cpdef SoundBuffer morph(Waveset self, Waveset target, object curve=*)
-    cpdef SoundBuffer render(Waveset self, list wavesets=*, int channels=*, int samplerate=*)
+    cpdef SoundBuffer render(Waveset self, list wavesets=*, int channels=*, int samplerate=*, int taper=*)
