@@ -81,6 +81,9 @@ to clean all the build files first just run:
     - `fx.saturator` a saturation distortion.
 - A new `Waveset` datatype for Trevor Wishart-style microsound synthesis and easy creation of wavetable stacks for 2d oscs. Featuring:
     - Waveset substitution
+        - Single waveform substitution (replace all wavesets with a sinewave, for example)
+        - Waveset collection substitution (replace wavesets with a collection of wavetables or another waveset)
+        - Waveform morph substitution (replace wavesets with an lfo-controlled morph through a wavetable stack) (in progress)
     - Waveset normalization
     - Waveset time-stretching
     - Waveset reversal

@@ -47,6 +47,13 @@ class TestWavesets(TestCase):
         out = waveset.substitute(dsp.SINE)
         out.write('tests/renders/waveset_substitute_sine.wav')
 
+    def test_substitute_reversed(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        waveset = Waveset(sound)
+        rev = waveset.reversed()
+        out = waveset.replace(rev)
+        out.write('tests/renders/waveset_substitute_reversed.wav')
+
     def test_reverse(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         waveset = Waveset(sound)

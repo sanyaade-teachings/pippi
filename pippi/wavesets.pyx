@@ -7,25 +7,28 @@ from pippi.rand cimport rand
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 from pippi.fx cimport _norm
 from pippi.dsp cimport _mag
-import numpy as np
+
 from libc.math cimport signbit
+import numpy as np
 
 cdef class Waveset:
     def __cinit__(
             Waveset self, 
-            object values, 
+            object values=None, 
             int crossings=3, 
             int limit=-1, 
             int modulo=1, 
             int samplerate=-1,
+            list wavesets=None,
         ):
 
         self.samplerate = samplerate
-        self.limit = limit
-        self.modulo = modulo
-        self.crossings = max(crossings, 2)
+        crossings = max(crossings, 2)
 
-        self.load(values)
+        if values is not None:
+            self._load(values, crossings, limit, modulo)
+        elif wavesets is not None:
+            self._import(wavesets)
 
     def __getitem__(self, position):
         return self.wavesets[position]
@@ -36,7 +39,22 @@ cdef class Waveset:
     def __len__(self):
         return len(self.wavesets)
 
-    cpdef void load(Waveset self, object values):
+    cpdef Waveset copy(Waveset self):
+        cdef Waveset copy = Waveset(samplerate=self.samplerate, wavesets=self.wavesets)
+        copy.max_length = self.max_length
+        copy.min_length = self.min_length
+        return copy
+
+    cdef void _import(Waveset self, list wavesets):
+        cdef double[:] copy
+        cdef int num_wavesets = len(wavesets)
+
+        self.wavesets = []
+        for i in range(num_wavesets):
+            copy = np.array(wavesets[i], dtype='d')
+            self.wavesets += [ copy ]
+
+    cdef void _load(Waveset self, object values, int crossings, int limit, int modulo):
         cdef double[:] raw
         cdef double[:] waveset
         cdef double original_mag = 0
@@ -75,18 +93,18 @@ cdef class Waveset:
             if (signbit(last) and not signbit(raw[i])) or (not signbit(last) and signbit(raw[i])):
                 crossing_count += 1
 
-                if crossing_count == self.crossings:
+                if crossing_count == crossings:
                     waveset_count += 1
                     mod_count += 1
                     crossing_count = 0
 
-                    if mod_count == self.modulo:
+                    if mod_count == modulo:
                         mod_count = 0
                         end = i
                         self._slice(raw, start, end)
                         waveset_output_count += 1
 
-                        if self.limit == waveset_output_count:
+                        if limit == waveset_output_count:
                             break
 
                     start = i
@@ -133,6 +151,11 @@ cdef class Waveset:
 
     cpdef void reverse(Waveset self):
         self.wavesets = list(reversed(self.wavesets))
+
+    cpdef Waveset reversed(Waveset self):
+        cdef Waveset out = self.copy()
+        out.reverse()
+        return out
 
     cpdef void retrograde(Waveset self):
         cdef int i, j, b, length
@@ -184,6 +207,31 @@ cdef class Waveset:
                 cluster[j] *= maxval
 
             out += [ cluster ]
+
+        return self.render(out)
+
+    cpdef SoundBuffer replace(Waveset self, object waveforms):
+        cdef double[:] wt
+        cdef list out = []
+        cdef int i, wi, length
+        cdef int numwavesets = len(self.wavesets)
+        cdef int numwaveforms = len(waveforms)
+        cdef double maxval, wmaxval, pos
+        cdef double[:] replacement
+
+        for i in range(numwavesets):
+            pos = <double>i / numwavesets
+            wi = <int>(pos * numwaveforms)
+            length = len(self.wavesets[i])
+            maxval = max(np.abs(self.wavesets[i])) 
+            wt = to_wavetable(waveforms[wi])
+            wmaxval = max(np.abs(wt)) 
+            replacement = interpolation._linear(wt, length)
+
+            for j in range(length):
+                replacement[j] *= (maxval / wmaxval)
+
+            out += [ replacement ]
 
         return self.render(out)
 

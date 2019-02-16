@@ -5,16 +5,17 @@ from pippi.wavetables cimport Wavetable
 
 cdef class Waveset:
     cdef public list wavesets
-    cdef public int crossings
     cdef public int max_length
     cdef public int min_length
     cdef public int samplerate
-    cdef public int limit
-    cdef public int modulo
 
-    cpdef void load(Waveset self, object values)
+    cpdef Waveset copy(Waveset self)
+    cdef void _import(Waveset self, list wavesets)
+    cdef void _load(Waveset self, object values, int crossings, int limit, int modulo)
     cpdef void normalize(Waveset self, double ceiling=*)
     cpdef void reverse(Waveset self)
+    cpdef SoundBuffer replace(Waveset self, object waveforms)
+    cpdef Waveset reversed(Waveset self)
     cpdef void retrograde(Waveset self)
     cpdef void invert(Waveset self)
     cdef void _slice(Waveset self, double[:] raw, int start, int end)
