@@ -83,6 +83,8 @@ to clean all the build files first just run:
     - Waveset substitution
     - Waveset normalization
     - Waveset time-stretching
+    - Waveset reversal
+    - Waveset retrograde (reversing the contents of the wavesets while preserving their order)
     - Waveset harmonic distortion (in progress)
     - Waveset transposition (in progress)
     - Waveset morphing (in progress)

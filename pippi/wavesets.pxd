@@ -14,6 +14,8 @@ cdef class Waveset:
 
     cpdef void load(Waveset self, object values)
     cpdef void normalize(Waveset self, double ceiling=*)
+    cpdef void reverse(Waveset self)
+    cpdef void retrograde(Waveset self)
     cpdef void invert(Waveset self)
     cdef void _slice(Waveset self, double[:] raw, int start, int end)
     cpdef SoundBuffer substitute(Waveset self, object waveform)

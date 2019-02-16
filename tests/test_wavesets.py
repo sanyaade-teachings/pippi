@@ -47,6 +47,21 @@ class TestWavesets(TestCase):
         out = waveset.substitute(dsp.SINE)
         out.write('tests/renders/waveset_substitute_sine.wav')
 
+    def test_reverse(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        waveset = Waveset(sound)
+        waveset.reverse()
+        out = waveset.render()
+        out.write('tests/renders/waveset_reverse.wav')
+
+    def test_retrograde(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        for crossings in [3,30,100,300]:
+            waveset = Waveset(sound, crossings=crossings)
+            waveset.retrograde()
+            out = waveset.render()
+            out.write('tests/renders/waveset_retrograde_%s_crossings.wav' % crossings)
+
     def test_morph(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         tsound = SoundBuffer(filename='tests/sounds/guitar10s.wav')

@@ -131,6 +131,23 @@ cdef class Waveset:
 
         return self.render(out)
 
+    cpdef void reverse(Waveset self):
+        self.wavesets = list(reversed(self.wavesets))
+
+    cpdef void retrograde(Waveset self):
+        cdef int i, j, b, length
+        cdef double[:] reverse
+
+        for i in range(len(self.wavesets)):
+            length = len(self.wavesets[i])
+            reverse = np.zeros(length, dtype='d')
+
+            for j in range(length):
+                b = abs(j+1 - length)
+                reverse[j] = self.wavesets[i][b]
+
+            self.wavesets[i] = reverse
+
     cpdef void invert(Waveset self):
         pass
 
