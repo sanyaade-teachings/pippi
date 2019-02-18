@@ -9,7 +9,7 @@ import numpy as np
 cimport cython
 from libc cimport math
 
-from pippi.wavetables cimport Wavetable, PHASOR, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window
+from pippi.wavetables cimport Wavetable, PHASOR, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window, to_flag
 from pippi cimport interpolation
 from pippi cimport fx
 from pippi cimport graph
@@ -664,7 +664,7 @@ cdef class SoundBuffer:
             except TypeError as e:
                 raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
 
-    def env(self, int window_type=-1):
+    def env(self, object window=None):
         """ Apply an amplitude envelope 
             to the sound of the given type.
 
@@ -676,15 +676,10 @@ cdef class SoundBuffer:
             Where iterable is a list, array, or SoundBuffer with 
             the same # of channels and of any length
         """
+        if window is None:
+            window = 'sine'
         cdef int length = len(self)
-        cdef double[:] wavetable = None
-        wavetable = _window(window_type, length)
-
-        if wavetable is None:
-            raise TypeError('Invalid envelope type')
-
-        return self * wavetable
-
+        return self * to_window(window, length)
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
@@ -780,7 +775,7 @@ cdef class SoundBuffer:
  
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-    def pan(self, double pos=0.5, int method=-1, int start=0):
+    def pan(self, double pos=0.5, str method=None, int start=0):
         """ Pan a stereo sound from pos=0 (hard left) 
             to pos=1 (hard right)
 
@@ -804,13 +799,13 @@ cdef class SoundBuffer:
                 Michael Gogins' variation on the above 
                 which uses a different part of the sinewave.
         """
-        if method < 0:
-            method = CONSTANT
+        if method is None:
+            method = 'constant'
 
         cdef double[:,:] out = self.frames
         cdef int length = len(self)
         cdef int channel = 0
-        out = _pan(out, length, self.channels, pos, method)
+        out = _pan(out, length, self.channels, pos, to_flag(method))
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     def remix(self, int channels):

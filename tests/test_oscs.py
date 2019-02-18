@@ -7,7 +7,7 @@ from pippi import dsp
 
 class TestOscs(TestCase):
     def test_create_sinewave(self):
-        osc = Osc(dsp.SINE, freq=200.0)
+        osc = Osc('sine', freq=200.0)
         length = 1
         out = osc.play(length)
         out.write('tests/renders/osc_sinewave.wav')
@@ -38,7 +38,7 @@ class TestOscs(TestCase):
         wtA = [ random.random() for _ in range(random.randint(10, 1000)) ]
         wtB = dsp.wt([ random.random() for _ in range(random.randint(10, 1000)) ])
         wtC = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        stack = [dsp.RND, wtA, wtB, wtC] * 10
+        stack = ['rnd', wtA, wtB, wtC] * 10
         osc = Osc2d(stack, freq=200.0)
         length = 1
         out = osc.play(length)
@@ -48,9 +48,9 @@ class TestOscs(TestCase):
 
     def test_create_pulsar(self):
         osc = Pulsar(
-                dsp.SINE, 
-                window=dsp.SINE, 
-                pulsewidth=dsp.wt(dsp.TRI, 0, 1), 
+                'sine', 
+                window='sine', 
+                pulsewidth=dsp.wt('tri', 0, 1), 
                 freq=200.0, 
                 amp=0.2
             )
@@ -61,9 +61,9 @@ class TestOscs(TestCase):
 
     def test_pulsar_burst(self):
         osc = Pulsar(
-                dsp.SINE, 
-                window=dsp.SINE, 
-                pulsewidth=dsp.wt(dsp.TRI, 0, 1), 
+                'sine', 
+                window='sine', 
+                pulsewidth=dsp.wt('tri', 0, 1), 
                 burst=(3,2),
                 freq=200.0, 
                 amp=0.2
@@ -75,10 +75,10 @@ class TestOscs(TestCase):
 
     def test_pulsar_mask(self):
         osc = Pulsar(
-                dsp.SINE, 
-                window=dsp.SINE, 
-                pulsewidth=dsp.wt(dsp.TRI, 0, 1), 
-                mask=dsp.wt(dsp.PHASOR, 0, 1), 
+                'sine', 
+                window='sine', 
+                pulsewidth=dsp.wt('tri', 0, 1), 
+                mask=dsp.wt('phasor', 0, 1), 
                 freq=200.0, 
                 amp=0.2
             )
@@ -89,9 +89,9 @@ class TestOscs(TestCase):
 
     def test_pulsar_burst_and_mask(self):
         osc = Pulsar(
-                dsp.SINE, 
-                window=dsp.SINE, 
-                pulsewidth=dsp.wt(dsp.TRI, 0, 1), 
+                'sine', 
+                window='sine', 
+                pulsewidth=dsp.wt('tri', 0, 1), 
                 mask=dsp.randline(30, 0, 1), 
                 burst=(3,2),
                 freq=200.0, 
@@ -104,11 +104,11 @@ class TestOscs(TestCase):
 
     def test_create_pulsar2d(self):
         osc = Pulsar2d(
-                [dsp.SINE, dsp.SQUARE, dsp.TRI, dsp.SINE], 
-                windows=[dsp.SINE, dsp.TRI, dsp.HANN], 
-                wt_mod=dsp.wt(dsp.SAW, 0, 1), 
-                win_mod=dsp.wt(dsp.RSAW, 0, 1), 
-                pulsewidth=dsp.wt(dsp.TRI, 0, 1), 
+                ['sine', 'square', 'tri', 'sine'], 
+                windows=['sine', 'tri', 'hann'], 
+                wt_mod=dsp.wt('saw', 0, 1), 
+                win_mod=dsp.wt('rsaw', 0, 1), 
+                pulsewidth=dsp.wt('tri', 0, 1), 
                 freq=200.0, 
                 amp=0.2
             )

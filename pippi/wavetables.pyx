@@ -44,26 +44,6 @@ cdef int HERMITE = 14
 cdef int CONSTANT = 15
 cdef int GOGINS = 16
 
-
-cdef dict wtype_flags = {
-    'sine': SINE, 
-    'sinein': SINEIN, 
-    'sineout': SINEOUT, 
-    'cos': COS, 
-    'tri': TRI, 
-    'saw': SAW, 
-    'phasor': PHASOR, 
-    'rsaw': RSAW, 
-    'hann': HANN, 
-    'hamm': HAMM, 
-    'black': BLACK, 
-    'blackman': BLACKMAN, 
-    'bart': BART, 
-    'bartlett': BARTLETT, 
-    'kaiser': KAISER, 
-    'rnd': RND, 
-}
-
 cdef int LEN_WINDOWS = 14
 cdef int* ALL_WINDOWS = [
             SINE, 
@@ -96,9 +76,37 @@ cdef double SQUARE_DUTY = 0.5
 
 SEGMENT_RE = re.compile('(?P<length>0?\.?\d+)?,?(?P<wtype>\w+),?(?P<start>0?\.?\d+)?-?(?P<end>0?\.?\d+)?')
 
-cdef int wtypentf(str wtype_name):
-    return wtype_flags[wtype_name]
+cdef int to_flag(str value):
+    cdef dict flags = {
+        'sine': SINE, 
+        'sinein': SINEIN, 
+        'sineout': SINEOUT, 
+        'cos': COS, 
+        'tri': TRI, 
+        'saw': SAW, 
+        'phasor': PHASOR, 
+        'rsaw': RSAW, 
+        'hann': HANN, 
+        'hamm': HAMM, 
+        'black': BLACK, 
+        'blackman': BLACKMAN, 
+        'bart': BART, 
+        'bartlett': BARTLETT, 
+        'kaiser': KAISER, 
+        'rnd': RND, 
+        'line': LINE, 
+        'hannin': HANNIN, 
+        'hannout': HANNOUT, 
+        'square': SQUARE, 
+        'linear': LINEAR, 
+        'trunc': TRUNC, 
+        'hermite': HERMITE, 
+        'constant': CONSTANT, 
+        'gogins': GOGINS, 
+        'sinc': SINC,
+    }
 
+    return flags[value]
 
 cdef class Wavetable:
     def __cinit__(self, object values, 
@@ -110,25 +118,10 @@ cdef class Wavetable:
         cdef bint scaled = False
         cdef bint resized = False
 
-        if isinstance(values, numbers.Integral):
-            if wtsize is None:
-                wtsize = 4096
-            if window:
-                self.data = _window(values, wtsize)
-            else:
-                self.data = _wavetable(values, wtsize)
-
-        elif isinstance(values, numbers.Real):
-            self.data = np.full(1, values, dtype='d')
-
-        elif isinstance(values, Wavetable):
-            self.data = values.data
-
-        elif isinstance(values, SoundBuffer):
-            self.data = np.ravel(np.array(values.remix(1).frames, dtype='d'))
-
+        if window:
+            self.data = to_window(values)
         else:
-            self.data = np.ravel(np.array(values, dtype='d'))
+            self.data = to_wavetable(values)
 
         if lowvalue is None:
             self.lowvalue = np.min(self.data)
@@ -143,7 +136,7 @@ cdef class Wavetable:
             self.highvalue = <double>highvalue
 
         if scaled:
-            self.data = np.interp(self.data, (np.min(self.data), np.max(self.data)), (lowvalue, highvalue))
+            self.data = np.interp(self.data, (np.min(self.data), np.max(self.data)), (self.lowvalue, self.highvalue))
 
         if wtsize is not None and len(self.data) != wtsize:
             self.length = wtsize
@@ -406,7 +399,7 @@ cdef tuple _parse_polyseg(str score, int length, int wtlength):
 
         wtype = match.group('wtype')
         if wtype is not None:
-            segment_wtype = wtypentf(wtype)
+            segment_wtype = to_flag(wtype)
 
         start = match.group('start')
         if start is not None:
@@ -445,7 +438,7 @@ cpdef double[:] polyseg(list segments, int length):
     return out
 
 
-cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
+cpdef Wavetable _randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
     cdef double[:] points = np.array([ rand.rand(lowvalue, highvalue) for _ in range(numpoints) ], dtype='d')
     return Wavetable(points, wtsize=wtsize)
 
@@ -502,7 +495,7 @@ cdef double[:] _window(int window_type, int length):
         wt = np.sinc(np.linspace(-15, 15, length, dtype='d'))
 
     else:
-        wt = window(SINE, length)
+        wt = _window(SINE, length)
 
     return wt
 
@@ -538,12 +531,6 @@ cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int
 
 cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release):
     return _adsr(length, attack, decay, sustain, release)
-
-def window(int window_type, int length, double[:] data=None):
-    if data is not None:
-        return interpolation._linear(data, length)
-
-    return _window(window_type, length)
 
 cdef double[:] _wavetable(int wavetable_type, int length):
     cdef double[:] wt
@@ -600,8 +587,8 @@ cpdef double[:] to_window(object w, int wtsize=4096):
     if w is None:
         return None
 
-    if isinstance(w, numbers.Integral):
-        wt = _window(w, wtsize)
+    if isinstance(w, str):
+        wt = _window(to_flag(w), wtsize)
 
     elif isinstance(w, numbers.Real):
         wt = np.full(1, w, dtype='d')
@@ -623,8 +610,8 @@ cpdef double[:] to_wavetable(object w, int wtsize=4096):
     if w is None:
         return None
 
-    if isinstance(w, numbers.Integral):
-        wt = _wavetable(w, wtsize)
+    if isinstance(w, str):
+        wt = _wavetable(to_flag(w), wtsize)
 
     elif isinstance(w, numbers.Real):
         wt = np.full(1, w, dtype='d')
@@ -643,3 +630,34 @@ cpdef double[:] to_wavetable(object w, int wtsize=4096):
 cpdef list to_lfostack(list lfos, int wtsize=4096):
     return [ interpolation._linear(to_wavetable(wt, wtsize), wtsize) for wt in lfos ]
 
+cdef double[:] _seesaw(double[:] wt, int length, double tip=0.5):
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef int wtlength = len(wt)
+    cdef int i = 0
+    cdef double x = wtlength * tip
+    cdef double phase_inc = (1.0 / length) * wtlength
+    cdef double warp=0, m=0, b=0
+    cdef double phase = 0
+    print('')
+
+    for i in range(length):
+        m = 0.5 / x
+        if(phase < m):
+            warp = m * phase
+        else:
+            m = 0.5 / (1.0 - x)
+            b = 1.0 - m
+            warp = m * phase + b
+
+        out[i] = interpolation._linear_point(wt, phase) 
+        phase += phase_inc
+
+        print('i %02d' % i, 'out %.6f' % out[i], 'm %.6f' % m, 'b %.6f' % b, 'warp %.6f %s' % (warp, wtlength), 'phase %.6f' % phase)
+
+    return out
+
+cpdef Wavetable seesaw(object wt, int length, double tip=0.5):
+    print('WT', wt)
+    cdef double[:] _wt = to_wavetable(wt)
+    cdef double[:] out = _seesaw(_wt, length, tip)
+    return Wavetable(out)

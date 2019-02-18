@@ -62,10 +62,11 @@ cdef double[:,:] _vspeed(double[:,:] snd, double[:] chan, double[:,:] out, doubl
 
     return out
 
-cpdef SoundBuffer vspeed(SoundBuffer snd, double[:] lfo, double minspeed, double maxspeed):
+cpdef SoundBuffer vspeed(SoundBuffer snd, object lfo, double minspeed, double maxspeed):
+    cdef double[:] _lfo = wavetables.to_wavetable(lfo)
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
     cdef double[:] chan = np.zeros(len(snd), dtype='d')
-    snd.frames = _vspeed(snd.frames, chan, out, lfo, minspeed, maxspeed, snd.samplerate)
+    snd.frames = _vspeed(snd.frames, chan, out, _lfo, minspeed, maxspeed, snd.samplerate)
     return snd
 
 

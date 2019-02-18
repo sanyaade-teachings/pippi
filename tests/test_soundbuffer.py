@@ -48,7 +48,7 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), 228554)
 
     def test_create_mono_buffer_from_wavetable(self):
-        wt = dsp.wt(dsp.SINE, wtsize=4096)
+        wt = dsp.wt('sine', wtsize=4096)
         self.assertTrue(len(wt) == 4096)
 
         snd = dsp.buffer(wt)
@@ -119,7 +119,7 @@ class TestSoundBuffer(TestCase):
 
     def test_window(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        for window_type in (dsp.SINE, dsp.SAW, dsp.TRI, dsp.HAMM, dsp.HANN, dsp.BART, dsp.KAISER, dsp.BLACK):
+        for window_type in ('sine', 'saw', 'tri', 'hamm', 'hann', 'bart', 'kaiser', 'black'):
             sound = sound.env(window_type)
             self.assertEqual(sound[0], (0,0))
 
@@ -147,7 +147,7 @@ class TestSoundBuffer(TestCase):
 
     def test_pan(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        for pan_method in (dsp.LINEAR, dsp.CONSTANT, dsp.GOGINS):
+        for pan_method in ('linear', 'constant', 'gogins'):
             # Hard pan smoke test
             pan_left = sound.pan(0, method=pan_method)
             self.assertEqual(pan_left[random.randint(0, len(pan_left))][0], 0)

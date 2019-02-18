@@ -988,15 +988,17 @@ struct __pyx_opt_args_5pippi_3dsp_randint {
 struct __pyx_opt_args_5pippi_10wavetables_to_window;
 struct __pyx_opt_args_5pippi_10wavetables_to_wavetable;
 struct __pyx_opt_args_5pippi_10wavetables_to_lfostack;
-struct __pyx_opt_args_5pippi_10wavetables_randline;
+struct __pyx_opt_args_5pippi_10wavetables__randline;
 struct __pyx_opt_args_5pippi_10wavetables_wavetable;
+struct __pyx_opt_args_5pippi_10wavetables__seesaw;
+struct __pyx_opt_args_5pippi_10wavetables_seesaw;
 
 /* "pippi/wavetables.pxd":45
  * cdef int* ALL_WAVETABLES
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)             # <<<<<<<<<<<<<<
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
- * cpdef list to_lfostack(list lfos, int wtsize=?)
+ * cpdef int to_flag(str value)
  */
 struct __pyx_opt_args_5pippi_10wavetables_to_window {
   int __pyx_n;
@@ -1007,19 +1009,19 @@ struct __pyx_opt_args_5pippi_10wavetables_to_window {
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
+ * cpdef int to_flag(str value)
  * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
  */
 struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
   int __pyx_n;
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":47
- * cpdef double[:] to_window(object w, int wtsize=?)
+/* "pippi/wavetables.pxd":48
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
+ * cpdef int to_flag(str value)
  * cpdef list to_lfostack(list lfos, int wtsize=?)             # <<<<<<<<<<<<<<
- * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
+ * cpdef Wavetable _randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
  * cdef double[:] _window(int window_type, int length)
  */
 struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
@@ -1027,28 +1029,51 @@ struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":48
- * cpdef double[:] to_wavetable(object w, int wtsize=?)
+/* "pippi/wavetables.pxd":49
+ * cpdef int to_flag(str value)
  * cpdef list to_lfostack(list lfos, int wtsize=?)
- * cpdef Wavetable randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable _randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
  * cdef double[:] _window(int window_type, int length)
  * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
  */
-struct __pyx_opt_args_5pippi_10wavetables_randline {
+struct __pyx_opt_args_5pippi_10wavetables__randline {
   int __pyx_n;
   double lowvalue;
   double highvalue;
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":53
+/* "pippi/wavetables.pxd":54
  * cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)             # <<<<<<<<<<<<<<
+ * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)
+ * cpdef Wavetable seesaw(object wt, int length, double tip=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_wavetable {
   int __pyx_n;
   __Pyx_memviewslice data;
+};
+
+/* "pippi/wavetables.pxd":55
+ * cdef double[:] _wavetable(int wavetable_type, int length)
+ * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
+ * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable seesaw(object wt, int length, double tip=*)
+ */
+struct __pyx_opt_args_5pippi_10wavetables__seesaw {
+  int __pyx_n;
+  double tip;
+};
+
+/* "pippi/wavetables.pxd":56
+ * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
+ * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)
+ * cpdef Wavetable seesaw(object wt, int length, double tip=*)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_5pippi_10wavetables_seesaw {
+  int __pyx_n;
+  double tip;
 };
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch;

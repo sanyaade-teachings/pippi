@@ -13,8 +13,8 @@ class TestWavesets(TestCase):
         waveset.normalize()
         osc = Pulsar2d(
                 waveset,
-                windows=[dsp.SINE], 
-                wt_mod=dsp.wt(dsp.SAW, 0, 1), 
+                windows=['sine'], 
+                wt_mod=dsp.wt('saw', 0, 1), 
                 win_mod=0.0, 
                 pulsewidth=1.0, 
                 freq=80.0, 
@@ -29,7 +29,7 @@ class TestWavesets(TestCase):
     def test_stretch(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         waveset = Waveset(sound)
-        factor = dsp.wt(dsp.PHASOR, 1, 10)
+        factor = dsp.wt('phasor', 1, 10)
         out = waveset.stretch(factor)
         out.write('tests/renders/waveset_stretch.wav')
 
@@ -44,7 +44,7 @@ class TestWavesets(TestCase):
     def test_substitute(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         waveset = Waveset(sound)
-        out = waveset.substitute(dsp.SINE)
+        out = waveset.substitute('sine')
         out.write('tests/renders/waveset_substitute_sine.wav')
 
     def test_substitute_reversed(self):
@@ -75,7 +75,7 @@ class TestWavesets(TestCase):
         tsound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
         waveset = Waveset(sound)
         target = Waveset(tsound)
-        out = waveset.morph(target, dsp.PHASOR)
+        out = waveset.morph(target, 'phasor')
         out.write('tests/renders/waveset_morph_phasor.wav')
 
     def test_render(self):

@@ -6,7 +6,7 @@ import random
 class TestFx(TestCase):
     def test_vspeed(self):
         g = dsp.read('tests/sounds/guitar10s.wav')
-        lfo = wavetables.window(dsp.SINE, 4096)
+        lfo = dsp.win('sine', 4096)
         snd = fx.vspeed(g, lfo, 0.5, 1)
         snd = fx.norm(snd, 1)
         g = dsp.read('tests/sounds/guitar10s.wav')
@@ -15,7 +15,7 @@ class TestFx(TestCase):
 
     def test_envelope_follower(self):
         snd = dsp.read('tests/sounds/linux.wav')
-        osc = oscs.Osc(dsp.SINE)
+        osc = oscs.Osc('sine')
         carrier = osc.play(snd.dur)
         out = carrier * snd.toenv()
         out.write('tests/renders/fx_envelope_follower.wav')
@@ -28,8 +28,8 @@ class TestFx(TestCase):
 
     def test_vdelay(self):
         snd = dsp.read('tests/sounds/guitar10s.wav')
-        tlfo = wavetables.randline(3, 30, 0, 1)
-        lfo = wavetables.randline(30, 4096, 0, 1)
+        tlfo = dsp.randline(3, 30, 0, 1)
+        lfo = dsp.randline(30, 4096, 0, 1)
         snd = fx.vdelay(snd, lfo, 0.1, 0.75, 0.5)
         snd = fx.norm(snd, 1)
         snd.write('tests/renders/fx_vdelay.wav')
@@ -61,8 +61,8 @@ class TestFx(TestCase):
     def test_mincer(self):
         snd = dsp.read('tests/sounds/linux.wav')
         length = 20
-        position = wavetables.randline(10) * 2 + 0.5
-        pitch = wavetables.randline(10)
+        position = dsp.randline(10, 0.5, 2)
+        pitch = dsp.randline(10)
 
         out = fx.mincer(snd, length, position, pitch)
         out.write('tests/renders/fx_mincer.wav')

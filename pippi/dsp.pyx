@@ -10,38 +10,9 @@ cimport cython
 
 from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
-from pippi cimport wavetables as wts
+from pippi.wavetables cimport Wavetable, _randline
 from pippi cimport rand as _rand
 from pippi import drummachine as dm
-
-# Expose some C flags / constants to python
-# FIXME might be faster to use newish cpdef enum defs? donno
-SINE = wts.SINE
-SINEIN = wts.SINEIN
-SINEOUT = wts.SINEOUT
-COS = wts.COS
-TRI = wts.TRI
-SAW = wts.SAW
-PHASOR = wts.PHASOR
-LINE = wts.LINE
-RSAW = wts.RSAW
-HANN = wts.HANN
-HANNIN = wts.HANNIN
-HANNOUT = wts.HANNOUT
-HAMM = wts.HAMM
-BLACK = wts.BLACK
-BLACKMAN = wts.BLACK
-BART = wts.BART
-BARTLETT = wts.BARTLETT
-KAISER = wts.KAISER
-SQUARE = wts.SQUARE
-RND = wts.RND
-LINEAR = wts.LINEAR
-TRUNC = wts.TRUNC
-HERMITE = wts.HERMITE
-CONSTANT = wts.CONSTANT
-GOGINS = wts.GOGINS
-SINC = wts.SINC
 
 # Just a shorthand for MS in scripts. 
 # For example:
@@ -94,22 +65,22 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
 
     return out
     
-cpdef wts.Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
-    return wts.randline(numpoints, lowvalue, highvalue, wtsize)
+cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
+    return _randline(numpoints, lowvalue, highvalue, wtsize)
 
-cpdef wts.Wavetable wt(object values, 
+cpdef Wavetable wt(object values, 
         object lowvalue=None, 
         object highvalue=None, 
         object wtsize=None, 
     ):
-    return wts.Wavetable(values, lowvalue, highvalue, wtsize, False)
+    return Wavetable(values, lowvalue, highvalue, wtsize, False)
 
-cpdef wts.Wavetable win(object values, 
+cpdef Wavetable win(object values, 
         object lowvalue=None, 
         object highvalue=None, 
         object wtsize=None, 
     ):
-    return wts.Wavetable(values, lowvalue, highvalue, wtsize, True)
+    return Wavetable(values, lowvalue, highvalue, wtsize, True)
 
 cpdef SoundBuffer stack(list sounds):
     cdef int channels = 0

@@ -25,8 +25,8 @@ class TestSoundpipe(TestCase):
         snd = dsp.read('tests/sounds/linux.wav')
         length = 20
         amp = 1
-        time = wavetables.randline(10) * 2 + 0.5
-        pitch = wavetables.randline(10)
+        time = dsp.randline(10, 0.5, 2)
+        pitch = dsp.randline(10)
 
         snd.frames = soundpipe.mincer(snd.frames, snd.dur, time.data, amp, pitch.data, samplerate=snd.samplerate)
         snd.write('tests/renders/soundpipe_mincer.wav')

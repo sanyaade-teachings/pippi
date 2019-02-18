@@ -70,6 +70,41 @@ to clean all the build files first just run:
 
 ### 2.0.0 - Beta 4
 
+#### Breaking Changes
+
+Flip-flopped back to using strings for name lookups when calling from python. 
+(Internally flags are still used in many places for performance.) 
+
+So use eg `dsp.wt('sine')` instead of `dsp.wt(dsp.SINE)` or `sound.pan(0.1, method='gogins')` etc.
+
+Wavetable / window options are:
+    - `sine`
+    - `sinein`
+    - `sineout`
+    - `cos`
+    - `tri`
+    - `saw`
+    - `phasor`
+    - `rsaw`
+    - `hann`
+    - `hamm`
+    - `black` or `blackman`
+    - `bart` or `bartlett`
+    - `kaiser`
+    - `rnd`
+    - `line`
+    - `hannin`
+    - `hannout`
+    - `square`
+    - `sinc`
+
+And panning / interpolation types: 
+    - `linear`
+    - `trunc`
+    - `hermite`
+    - `constant`
+    - `gogins`
+
 #### Features
 
 - Removed all the old examples and wrote the first tutorial script.

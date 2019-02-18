@@ -8,25 +8,17 @@ from pippi import wavetables, dsp
 class TestWavetables(TestCase):
     def test_random_window(self):
         length = random.randint(1, 1000)
-        win = wavetables.window(dsp.RND, length)
+        win = dsp.win('rnd', wtsize=length)
         self.assertEqual(length, len(win))
-
-    def test_bad_window_type(self):
-        length = random.randint(1, 1000)
-        self.assertRaises(TypeError, wavetables.window, 'this is not a window type', length)
 
     def test_random_wavetable(self):
         length = random.randint(1, 1000)
-        wt = wavetables.wavetable(dsp.RND, length)
+        wt = dsp.wt('rnd', wtsize=length)
         self.assertEqual(length, len(wt))
 
-    def test_bad_wavetable_type(self):
-        length = random.randint(1, 1000)
-        self.assertRaises(TypeError, wavetables.wavetable, 'this is not a wavetable type', length)
-
     def test_wtclass(self):
-        wt1 = dsp.wt(dsp.RND, wtsize=4096)
-        wt2 = dsp.wt(dsp.TRI, wtsize=4096)
+        wt1 = dsp.wt('rnd', wtsize=4096)
+        wt2 = dsp.wt('tri', wtsize=4096)
         wt3 = dsp.wt([ random.random()+0.001 for _ in range(1000) ], wtsize=1000)
 
         self.assertTrue(max(wt1) > 0)
@@ -53,12 +45,12 @@ class TestWavetables(TestCase):
         numpoints = random.randint(1, 10)
         wtsize = random.randint(10, 1000)
 
-        wt = wavetables.randline(numpoints, wtsize=wtsize)
+        wt = dsp.randline(numpoints, wtsize=wtsize)
         self.assertEqual(len(wt), wtsize)
 
         lowvalue = random.triangular(0, 1)
         highvalue = random.triangular(1, 5)
-        wt = wavetables.randline(numpoints, 
+        wt = dsp.randline(numpoints, 
                             lowvalue=lowvalue, 
                             highvalue=highvalue, 
                             wtsize=wtsize
@@ -69,83 +61,87 @@ class TestWavetables(TestCase):
         self.assertTrue(min(wt) >= lowvalue)
 
     def test_graph_sine_wavetable(self):
-        wt = dsp.wt(dsp.SINE)
+        wt = dsp.wt('sine')
         wt.graph('tests/renders/graph_sine_wavetable.png', stroke=3)
 
     def test_graph_cos_wavetable(self):
-        wt = dsp.wt(dsp.COS)
+        wt = dsp.wt('cos')
         wt.graph('tests/renders/graph_cos_wavetable.png', stroke=3)
 
     def test_graph_tri_wavetable(self):
-        wt = dsp.wt(dsp.TRI)
+        wt = dsp.wt('tri')
         wt.graph('tests/renders/graph_tri_wavetable.png', stroke=3)
 
     def test_graph_saw_wavetable(self):
-        wt = dsp.wt(dsp.SAW)
+        wt = dsp.wt('saw')
         wt.graph('tests/renders/graph_saw_wavetable.png', stroke=3)
 
     def test_graph_rsaw_wavetable(self):
-        wt = dsp.wt(dsp.RSAW)
+        wt = dsp.wt('rsaw')
         wt.graph('tests/renders/graph_rsaw_wavetable.png', stroke=3)
 
     def test_graph_square_wavetable(self):
-        wt = dsp.wt(dsp.SQUARE)
+        wt = dsp.wt('square')
         wt.graph('tests/renders/graph_square_wavetable.png', stroke=3)
 
     def test_graph_sinein_window(self):
-        wt = dsp.win(dsp.SINEIN)
+        wt = dsp.win('sinein')
         wt.graph('tests/renders/graph_sinein_window.png', stroke=3)
 
     def test_graph_sineout_window(self):
-        wt = dsp.win(dsp.SINEOUT)
+        wt = dsp.win('sineout')
         wt.graph('tests/renders/graph_sineout_window.png', stroke=3)
 
     def test_graph_cos_window(self):
-        wt = dsp.win(dsp.COS)
+        wt = dsp.win('cos')
         wt.graph('tests/renders/graph_cos_window.png', stroke=3)
 
     def test_graph_tri_window(self):
-        wt = dsp.win(dsp.TRI)
+        wt = dsp.win('tri')
         wt.graph('tests/renders/graph_tri_window.png', stroke=3)
 
     def test_graph_saw_window(self):
-        wt = dsp.win(dsp.SAW)
+        wt = dsp.win('saw')
         wt.graph('tests/renders/graph_saw_window.png', stroke=3)
 
     def test_graph_rsaw_window(self):
-        wt = dsp.win(dsp.RSAW)
+        wt = dsp.win('rsaw')
         wt.graph('tests/renders/graph_rsaw_window.png', stroke=3)
 
     def test_graph_hann_window(self):
-        wt = dsp.win(dsp.HANN)
+        wt = dsp.win('hann')
         wt.graph('tests/renders/graph_hann_window.png', stroke=3)
 
     def test_graph_hannin_window(self):
-        wt = dsp.win(dsp.HANNIN)
+        wt = dsp.win('hannin')
         wt.graph('tests/renders/graph_hannin_window.png', stroke=3)
 
     def test_graph_hannout_window(self):
-        wt = dsp.win(dsp.HANNOUT)
+        wt = dsp.win('hannout')
         wt.graph('tests/renders/graph_hannout_window.png', stroke=3)
 
     def test_graph_hamm_window(self):
-        wt = dsp.win(dsp.HAMM)
+        wt = dsp.win('hamm')
         wt.graph('tests/renders/graph_hamm_window.png', stroke=3)
 
     def test_graph_black_window(self):
-        wt = dsp.win(dsp.BLACK)
+        wt = dsp.win('black')
         wt.graph('tests/renders/graph_black_window.png', stroke=3)
 
     def test_graph_bart_window(self):
-        wt = dsp.win(dsp.BART)
+        wt = dsp.win('bart')
         wt.graph('tests/renders/graph_bart_window.png', stroke=3)
 
     def test_graph_kaiser_window(self):
-        wt = dsp.win(dsp.KAISER)
+        wt = dsp.win('kaiser')
         wt.graph('tests/renders/graph_kaiser_window.png', stroke=3)
 
     def test_graph_sinc_window(self):
-        wt = dsp.win(dsp.SINC)
+        wt = dsp.win('sinc')
         wt.graph('tests/renders/graph_sinc_window.png', stroke=3)
+
+    def test_seesaw(self):
+        wt = wavetables.seesaw('tri', 15, 0.1)
+        wt.graph('tests/renders/graph_seesaw.png', stroke=3)
 
 
