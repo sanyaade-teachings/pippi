@@ -11,8 +11,8 @@ class TestInterpolation(TestCase):
             wt = np.array([ random.random() for _ in range(wtsize) ], dtype='d')
 
             points = []
-            for i in range(npoints-1):
-                points += [ interpolation.linear_pos(wt, i/(npoints-1)) ]
+            for i in range(npoints):
+                points += [ interpolation.linear_pos(wt, i/npoints) ]
 
             lpoints = [ p for p in interpolation.linear(wt, npoints) ]
 

@@ -632,30 +632,25 @@ cdef double[:] _seesaw(double[:] wt, int length, double tip=0.5):
     cdef double[:] out = np.zeros(length, dtype='d')
     cdef int wtlength = len(wt)
     cdef int i = 0
-    cdef double x = wtlength * tip
     cdef double phase_inc = (1.0 / length) * wtlength
-    cdef double warp=0, m=0, b=0
+    cdef double warp=0, m=0, pos=0
     cdef double phase = 0
-    print('')
+    m = 0.5 - tip
 
     for i in range(length):
-        m = 0.5 / x
-        if(phase < m):
-            warp = m * phase
+        pos = <double>i / (length-1)
+        if(pos < tip):
+            warp = m * (pos / tip)
         else:
-            m = 0.5 / (1.0 - x)
-            b = 1.0 - m
-            warp = m * phase + b
+            warp = m * ((1-pos) / (1-tip))
 
-        out[i] = interpolation._linear_point(wt, phase) 
+        warp *= wtlength
+        out[i] = interpolation._linear_point(wt, phase+warp) 
         phase += phase_inc
-
-        print('i %02d' % i, 'out %.6f' % out[i], 'm %.6f' % m, 'b %.6f' % b, 'warp %.6f %s' % (warp, wtlength), 'phase %.6f' % phase)
 
     return out
 
-cpdef Wavetable seesaw(object wt, int length, double tip=0.5):
-    print('WT', wt)
-    cdef double[:] _wt = to_wavetable(wt)
-    cdef double[:] out = _seesaw(_wt, length, tip)
+cpdef Wavetable seesaw(object win, int length, double tip=0.5):
+    cdef double[:] _win = to_window(win)
+    cdef double[:] out = _seesaw(_win, length, tip)
     return Wavetable(out)

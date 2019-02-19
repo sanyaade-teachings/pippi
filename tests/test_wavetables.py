@@ -141,7 +141,10 @@ class TestWavetables(TestCase):
         wt.graph('tests/renders/graph_sinc_window.png', stroke=3)
 
     def test_seesaw(self):
-        wt = wavetables.seesaw('tri', 15, 0.1)
-        wt.graph('tests/renders/graph_seesaw.png', stroke=3)
+        wt = wavetables.seesaw('tri', 15, 0.85)
+        wt.graph('tests/renders/graph_seesaw_tri.png', stroke=3)
+
+        wt = wavetables.seesaw('sine', 15, 0.85)
+        wt.graph('tests/renders/graph_seesaw_sine.png', stroke=3)
 
 
