@@ -462,7 +462,7 @@ cdef double[:] _window(int window_type, int length):
         wt = (np.cos(np.linspace(0, np.pi*2, length, dtype='d')) + 1) * 0.5
 
     elif window_type == TRI:
-        wt = np.abs(np.abs(np.linspace(0, 2, length, dtype='d') - 1) - 1)
+        wt = np.bartlett(length)
 
     elif window_type == SAW:
         wt = np.linspace(0, 1, length, dtype='d')
@@ -546,9 +546,7 @@ cdef double[:] _wavetable(int wavetable_type, int length):
         wt = np.cos(np.linspace(-np.pi, np.pi, length, dtype='d', endpoint=False))
 
     elif wavetable_type == TRI:
-        tmp = np.abs(np.linspace(-1, 1, length, dtype='d', endpoint=False))
-        tmp = np.abs(tmp)
-        wt = (tmp - tmp.mean()) * 2
+        wt = np.bartlett(length+1)[0:length] * 2 - 1
 
     elif wavetable_type == SAW:
         wt = np.linspace(-1, 1, length, dtype='d', endpoint=False)
