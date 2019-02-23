@@ -12,7 +12,7 @@ from libc cimport math
 from pippi.wavetables cimport Wavetable, PHASOR, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window, to_flag
 from pippi cimport interpolation
 from pippi cimport fx
-from pippi cimport graph
+from pippi import graph
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
 from pippi cimport grains
 from pippi cimport soundpipe

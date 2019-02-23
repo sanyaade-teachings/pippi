@@ -9,7 +9,7 @@ from pippi.wavetables cimport Wavetable
 import sys
 import numpy as np
 
-cpdef void write(object data, 
+def write(object data, 
         object filename=None, 
         int width=400, 
         int height=300, 
@@ -17,7 +17,9 @@ cpdef void write(object data,
         double mult=0.5, 
         int stroke=50, 
         int upsample_mult=5, 
-        bint show_axis=True):
+        bint show_axis=True,
+        list insets=None, 
+        list notes=None):
 
     cdef int i = 0
     cdef int channels
@@ -75,8 +77,17 @@ cpdef void write(object data,
     if show_axis:
         draw.line((0, height/2, width, height/2), fill=(0,0,0,255), width=stroke//4)
 
+    if insets is not None:
+        inset_width = width / len(insets)
+        inset_height = height / 10
+        for i, inset in enumerate(insets):
+            inset.thumbnail((inset_width, inset_height))
+            img.paste(inset, (inset_width * i, inset_width * (i+1), inset_height * (i+1), inset_width * (i+2)))
+
     img.thumbnail((width//upsample_mult, height//upsample_mult))
     img.save(filename)
+
+    return img
 
 # FIXME use `write` interface everywhere
 cpdef void waveform(object sound, 

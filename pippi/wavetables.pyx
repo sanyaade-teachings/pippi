@@ -13,7 +13,8 @@ from cpython.array cimport array, clone
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc cimport math
 
-from pippi cimport interpolation, rand, graph
+from pippi cimport interpolation, rand
+from pippi import graph
 from pippi.soundbuffer cimport SoundBuffer
 
 cdef int SINE = 0
