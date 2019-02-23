@@ -83,7 +83,6 @@ def write(object data,
         inset_height = height//3 - gutter//2
         new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
         new.paste(img, (0, inset_height))
-        print(width, height, inset_width, inset_height)
         for i, inset in enumerate(insets):
             inset = inset.resize((inset_width, inset_height))
             new.paste(inset, (inset_width*i + gutter//2, 0))
