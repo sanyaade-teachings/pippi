@@ -726,16 +726,8 @@ cdef class SoundBuffer:
 
             framesread += grainlength
 
-    def graph(SoundBuffer self,
-        str filename=None, 
-        int width=800, 
-        int height=600, 
-        double offset=1, 
-        double mult=0.5, 
-        int stroke=1, 
-        int upsample_mult=5, 
-        bint show_axis=True):
-        graph.write(self, filename, width, height, offset, mult, stroke, upsample_mult, show_axis)
+    def graph(SoundBuffer self, *args, **kwargs):
+        return graph.write(self, *args, **kwargs)
 
     def max(self):
         return np.amax(self.frames)

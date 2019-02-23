@@ -332,16 +332,8 @@ cdef class Wavetable:
 
         return self * wavetable
 
-    def graph(Wavetable self,
-        str filename=None, 
-        int width=400, 
-        int height=300, 
-        double offset=1, 
-        double mult=0.5, 
-        int stroke=3, 
-        int upsample_mult=5, 
-        bint show_axis=True):
-        graph.write(self, filename, width, height, offset, mult, stroke, upsample_mult, show_axis)
+    def graph(Wavetable self, *args, **kwargs):
+        return graph.write(self, *args, **kwargs)
 
     def max(self):
         return np.amax(self.data)
