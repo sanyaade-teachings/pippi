@@ -280,7 +280,7 @@ cdef class Waveset:
 
         return self.render(out)
 
-    cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=5):
+    cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=0):
         channels = DEFAULT_CHANNELS if channels < 1 else channels
         samplerate = self.samplerate if samplerate < 1 else samplerate
 

@@ -7355,7 +7355,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_8wavese
  * 
  *         return self.render(out)             # <<<<<<<<<<<<<<
  * 
- *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=5):
+ *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=0):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
   __pyx_t_15.__pyx_n = 1;
@@ -7492,7 +7492,7 @@ static PyObject *__pyx_pf_5pippi_8wavesets_7Waveset_26morph(struct __pyx_obj_5pi
 /* "pippi/wavesets.pyx":283
  *         return self.render(out)
  * 
- *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=5):             # <<<<<<<<<<<<<<
+ *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=0):             # <<<<<<<<<<<<<<
  *         channels = DEFAULT_CHANNELS if channels < 1 else channels
  *         samplerate = self.samplerate if samplerate < 1 else samplerate
  */
@@ -7502,7 +7502,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_8wavese
   PyObject *__pyx_v_wavesets = ((PyObject*)Py_None);
   int __pyx_v_channels = ((int)-1);
   int __pyx_v_samplerate = ((int)-1);
-  int __pyx_v_taper = ((int)5);
+  int __pyx_v_taper = ((int)0);
   __Pyx_memviewslice __pyx_v_fadein = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_fadeout = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_mult;
@@ -7659,7 +7659,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_8wavese
 
   /* "pippi/wavesets.pyx":284
  * 
- *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=5):
+ *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=0):
  *         channels = DEFAULT_CHANNELS if channels < 1 else channels             # <<<<<<<<<<<<<<
  *         samplerate = self.samplerate if samplerate < 1 else samplerate
  * 
@@ -7672,7 +7672,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_8wavese
   __pyx_v_channels = __pyx_t_8;
 
   /* "pippi/wavesets.pyx":285
- *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=5):
+ *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=0):
  *         channels = DEFAULT_CHANNELS if channels < 1 else channels
  *         samplerate = self.samplerate if samplerate < 1 else samplerate             # <<<<<<<<<<<<<<
  * 
@@ -8103,7 +8103,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_8wavese
   /* "pippi/wavesets.pyx":283
  *         return self.render(out)
  * 
- *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=5):             # <<<<<<<<<<<<<<
+ *     cpdef SoundBuffer render(Waveset self, list wavesets=None, int channels=-1, int samplerate=-1, int taper=0):             # <<<<<<<<<<<<<<
  *         channels = DEFAULT_CHANNELS if channels < 1 else channels
  *         samplerate = self.samplerate if samplerate < 1 else samplerate
  */
@@ -8218,7 +8218,7 @@ static PyObject *__pyx_pw_5pippi_8wavesets_7Waveset_29render(PyObject *__pyx_v_s
     if (values[3]) {
       __pyx_v_taper = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_taper == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 283, __pyx_L3_error)
     } else {
-      __pyx_v_taper = ((int)5);
+      __pyx_v_taper = ((int)0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
