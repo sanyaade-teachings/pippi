@@ -147,4 +147,17 @@ class TestWavetables(TestCase):
         wt = wavetables.seesaw('sine', 15, 0.85)
         wt.graph('tests/renders/graph_seesaw_sine.png', stroke=3)
 
+    def test_insets(self):
+        wt1 = wavetables.seesaw('rnd', 4096, dsp.rand(0, 1))
+        wt1_graph = wt1.graph(stroke=10)
+
+        wt2 = wavetables.seesaw('rnd', 4096, dsp.rand(0, 1))
+        wt2_graph = wt2.graph(stroke=10)
+
+        wt3 = wavetables.seesaw('rnd', 4096, dsp.rand(0, 1))
+        wt3_graph = wt3.graph(stroke=10)
+
+        snd = dsp.read('tests/sounds/linux.wav')
+        snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=1200, height=500)
+
 

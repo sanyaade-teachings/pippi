@@ -15,7 +15,7 @@ def write(object data,
         int height=300, 
         double offset=1, 
         double mult=0.5, 
-        int stroke=50, 
+        int stroke=2, 
         int upsample_mult=5, 
         bint show_axis=True,
         list insets=None, 
@@ -77,15 +77,23 @@ def write(object data,
     if show_axis:
         draw.line((0, height/2, width, height/2), fill=(0,0,0,255), width=stroke//4)
 
+    cdef int gutter = stroke
     if insets is not None:
-        inset_width = width // len(insets)
-        inset_height = height // 10
+        inset_width = width//len(insets) - gutter//2
+        inset_height = height//3 - gutter//2
+        new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
+        new.paste(img, (0, inset_height))
+        print(width, height, inset_width, inset_height)
         for i, inset in enumerate(insets):
-            inset.thumbnail((inset_width, inset_height))
-            img.paste(inset, (inset_width * i, inset_width * (i+1), inset_height * (i+1), inset_width * (i+2)))
+            inset = inset.resize((inset_width, inset_height))
+            new.paste(inset, (inset_width*i + gutter//2, 0))
+
+        img = new
 
     img.thumbnail((width//upsample_mult, height//upsample_mult))
-    img.save(filename)
+
+    if filename is not None:
+        img.save(filename)
 
     return img
 
