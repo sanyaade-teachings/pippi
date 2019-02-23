@@ -78,8 +78,8 @@ def write(object data,
         draw.line((0, height/2, width, height/2), fill=(0,0,0,255), width=stroke//4)
 
     if insets is not None:
-        inset_width = width / len(insets)
-        inset_height = height / 10
+        inset_width = width // len(insets)
+        inset_height = height // 10
         for i, inset in enumerate(insets):
             inset.thumbnail((inset_width, inset_height))
             img.paste(inset, (inset_width * i, inset_width * (i+1), inset_height * (i+1), inset_width * (i+2)))
