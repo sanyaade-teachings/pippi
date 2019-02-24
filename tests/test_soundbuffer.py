@@ -131,7 +131,7 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(out), int(len(sound) * (1/speed)))
 
     def test_vpeed(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
         speed = dsp.win('hann', 0.5, 2)
         out = sound.vspeed(speed)
         out.write('tests/renders/soundbuffer_vspeed.wav')
