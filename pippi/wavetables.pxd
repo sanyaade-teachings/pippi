@@ -12,6 +12,7 @@ cdef class Wavetable:
 
     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)
+    cpdef Wavetable harmonics(Wavetable self, list harmonics=*)
     cpdef Wavetable env(Wavetable self, str window_type=*)
     cpdef double max(Wavetable self)
     cpdef void pad(Wavetable self, int numzeros=*)

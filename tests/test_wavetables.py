@@ -4,6 +4,7 @@ import re
 
 from unittest import TestCase
 from pippi import wavetables, dsp
+from pippi.oscs import Osc
 
 class TestWavetables(TestCase):
     def test_random_window(self):
@@ -146,6 +147,14 @@ class TestWavetables(TestCase):
         wt.crush(10)
         wt.normalize(1)
         wt.graph('tests/renders/graph_skewed_crushed_normalized_sinc_window.png', stroke=3)
+
+    def test_harmonics(self):
+        wt = dsp.wt('sine')
+        wt = wt.harmonics()
+        wt.graph('tests/renders/graph_harmonics.png', stroke=3)
+        osc = Osc(wt, freq=80)
+        out = osc.play(10)
+        out.write('tests/renders/osc_harmonics.wav')
 
     def test_seesaw(self):
         wt = wavetables.seesaw('tri', 15, 0.85)

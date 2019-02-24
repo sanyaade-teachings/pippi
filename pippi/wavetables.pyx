@@ -353,6 +353,39 @@ cdef class Wavetable:
         if wrap:
             self.data[len(self.data)-1] = self.data[0]
 
+    cpdef Wavetable harmonics(Wavetable self, list harmonics=None):
+        if harmonics is None:
+            harmonics = [(1, 1), (0.5, 2), (0.25, 3)]
+
+        cdef tuple harmonic
+        cdef double weight
+        cdef int rank
+        cdef int length = len(self)
+        cdef int i = 0
+
+        cdef double harmonic_phase = 0
+        cdef int harmonic_boundry = max(len(self.data)-1, 1)
+        cdef double harmonic_phase_inc = (1.0/length) * harmonic_boundry
+        cdef double[:] out = np.zeros(length, dtype='d')
+        cdef double original_mag = _mag(self.data)
+
+        for harmonic in harmonics:
+            weight = <double>harmonic[0]
+            rank = <int>harmonic[1]
+
+            harmonic_phase = 0
+            for i in range(length):
+                out[i] += interpolation._linear_point(self.data, harmonic_phase) * weight
+                harmonic_phase += rank * harmonic_phase_inc
+
+                while harmonic_phase >= harmonic_boundry:
+                    harmonic_phase -= harmonic_boundry
+
+        out = _normalize(out, original_mag)
+
+        return Wavetable(out)
+
+
     cpdef Wavetable env(Wavetable self, str window_type=None):
         if window_type is None:
             window_type = 'sine'
