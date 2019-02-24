@@ -18,6 +18,8 @@ from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDF
 from pippi cimport grains
 from pippi cimport soundpipe
 
+cdef double VSPEED_MIN = 0.0001
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef double[:,:] _dub(double[:,:] target, int target_length, double[:,:] todub, int todub_length, int channels, int framepos) nogil:
@@ -837,23 +839,29 @@ cdef class SoundBuffer:
 
     cpdef SoundBuffer vspeed(SoundBuffer self, object speed):
         cdef double[:] _s = to_window(speed)
+        cdef double min_speed = max(min(_s), VSPEED_MIN)
+        cdef int total_length = <int>(len(self.frames) * (1.0/min_speed))
         cdef np.ndarray frames = np.ndarray((len(self), self.channels), dtype='d', buffer=self.frames)
-        cdef double[:,:] out = np.zeros((len(self), self.channels), dtype='d')
+        cdef double[:,:] out = np.zeros((total_length, self.channels), dtype='d')
         cdef long framelength = len(self.frames)
         cdef int i = 0
         cdef double pos = 0
         cdef double phase = 0
         cdef double phase_inc = (1.0/framelength) * (framelength-1)
 
-        for i in range(framelength):
-            pos = <double>i / framelength
+        for i in range(total_length):
+            pos = phase / framelength
             for c in range(self.channels):
                 out[i,c] = interpolation._linear_point(frames[:,c], phase)
 
             speed = interpolation._linear_pos(_s, pos)
             phase += phase_inc * speed
+            if phase >= framelength:
+                break
 
-        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+        phase -= phase_inc * speed
+
+        return SoundBuffer(out[0:i], channels=self.channels, samplerate=self.samplerate)
 
     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=None, double amp=1.0):
         """ Change the length of the sound without changing the pitch. 

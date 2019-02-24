@@ -134,7 +134,15 @@ class TestSoundBuffer(TestCase):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         speed = dsp.win('hann', 0.5, 2)
         out = sound.vspeed(speed)
-        out.write('tests/renders/soundbuffer_vspeed.wav')
+        out.write('tests/renders/soundbuffer_vspeed_0.5_2.wav')
+
+        speed = dsp.win('hann', 0.15, 0.5)
+        out = sound.vspeed(speed)
+        out.write('tests/renders/soundbuffer_vspeed_0.15_0.5.wav')
+
+        speed = dsp.win('hann', 5, 50)
+        out = sound.vspeed(speed)
+        out.write('tests/renders/soundbuffer_vspeed_5_50.wav')
 
 
     def test_transpose(self):
