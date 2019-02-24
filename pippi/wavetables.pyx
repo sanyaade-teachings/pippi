@@ -353,15 +353,20 @@ cdef class Wavetable:
         if wrap:
             self.data[len(self.data)-1] = self.data[0]
 
-    cpdef Wavetable harmonics(Wavetable self, list harmonics=None):
+    cpdef Wavetable harmonics(Wavetable self, object harmonics=None, object weights=None):
         if harmonics is None:
-            harmonics = [(1, 1), (0.5, 2), (0.25, 3)]
+            harmonics = [1, 2, 3]
 
-        cdef tuple harmonic
+        if weights is None:
+            weights = [1, 0.5, 0.25]
+
+        cdef int[:] _harmonics = np.array(harmonics, dtype='i')
+        cdef double[:] _weights = np.array(weights, dtype='d')
+
         cdef double weight
         cdef int rank
         cdef int length = len(self)
-        cdef int i = 0
+        cdef int i = 0, j = 0
 
         cdef double harmonic_phase = 0
         cdef int harmonic_boundry = max(len(self.data)-1, 1)
@@ -369,13 +374,18 @@ cdef class Wavetable:
         cdef double[:] out = np.zeros(length, dtype='d')
         cdef double original_mag = _mag(self.data)
 
-        for harmonic in harmonics:
-            weight = <double>harmonic[0]
-            rank = <int>harmonic[1]
+        cdef int num_partials = max(len(_harmonics), len(_weights))
+        cdef int wi = 0, ri = 0
+
+        for i in range(num_partials):
+            wi = i % len(_weights)
+            ri = i % len(_harmonics)
+            weight = _weights[wi]
+            rank = _harmonics[ri]
 
             harmonic_phase = 0
-            for i in range(length):
-                out[i] += interpolation._linear_point(self.data, harmonic_phase) * weight
+            for j in range(length):
+                out[j] += interpolation._linear_point(self.data, harmonic_phase) * weight
                 harmonic_phase += rank * harmonic_phase_inc
 
                 while harmonic_phase >= harmonic_boundry:
@@ -708,14 +718,15 @@ cpdef double[:] to_wavetable(object w, int wtsize=4096):
 
     return wt
 
-cpdef list to_lfostack(list lfos, int wtsize=4096):
-    return [ interpolation._linear(to_wavetable(wt, wtsize), wtsize) for wt in lfos ]
+cpdef list to_stack(list wavetables, int wtsize=4096):
+    cdef object wt
+    return [ interpolation._linear(to_wavetable(wt, wtsize), wtsize) for wt in wavetables ]
 
 cdef double[:] _seesaw(double[:] wt, int length, double tip=0.5):
     cdef double[:] out = np.zeros(length, dtype='d')
     cdef int wtlength = len(wt)
     cdef int i = 0
-    cdef double phase_inc = (1.0 / length) * wtlength
+    cdef double phase_inc = (1.0 / length) * (wtlength-1)
     cdef double warp=0, m=0, pos=0
     cdef double phase = 0
     m = 0.5 - tip

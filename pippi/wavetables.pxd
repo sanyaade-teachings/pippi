@@ -12,7 +12,7 @@ cdef class Wavetable:
 
     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)
-    cpdef Wavetable harmonics(Wavetable self, list harmonics=*)
+    cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)
     cpdef Wavetable env(Wavetable self, str window_type=*)
     cpdef double max(Wavetable self)
     cpdef void pad(Wavetable self, int numzeros=*)
@@ -66,7 +66,7 @@ cdef int* ALL_WAVETABLES
 
 cpdef double[:] to_window(object w, int wtsize=?)
 cpdef double[:] to_wavetable(object w, int wtsize=?)
-cpdef list to_lfostack(list lfos, int wtsize=?)
+cpdef list to_stack(list wavetables, int wtsize=?)
 cdef int to_flag(str value)
 cpdef Wavetable _randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)
 cdef double[:] _window(int window_type, int length)

@@ -157,10 +157,10 @@ class TestWavetables(TestCase):
         out.write('tests/renders/osc_harmonics.wav')
 
     def test_seesaw(self):
-        wt = wavetables.seesaw('tri', 15, 0.85)
+        wt = wavetables.seesaw('tri', 4096, 0.85)
         wt.graph('tests/renders/graph_seesaw_tri.png', stroke=3)
 
-        wt = wavetables.seesaw('sine', 15, 0.85)
+        wt = wavetables.seesaw('sine', 4096, 0.85)
         wt.graph('tests/renders/graph_seesaw_sine.png', stroke=3)
 
     def test_insets(self):

@@ -6,6 +6,7 @@ import reprlib
 
 import soundfile
 import numpy as np
+cimport numpy as np
 cimport cython
 from libc cimport math
 
@@ -832,6 +833,26 @@ cdef class SoundBuffer:
         cdef double[:] outchan = np.zeros(length, dtype='d')
 
         out = _speed(self.frames, out, chan, outchan, <int>self.channels)
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+
+    cpdef SoundBuffer vspeed(SoundBuffer self, object speed):
+        cdef double[:] _s = to_window(speed)
+        cdef np.ndarray frames = np.ndarray((len(self), self.channels), dtype='d', buffer=self.frames)
+        cdef double[:,:] out = np.zeros((len(self), self.channels), dtype='d')
+        cdef long framelength = len(self.frames)
+        cdef int i = 0
+        cdef double pos = 0
+        cdef double phase = 0
+        cdef double phase_inc = (1.0/framelength) * (framelength-1)
+
+        for i in range(framelength):
+            pos = <double>i / framelength
+            for c in range(self.channels):
+                out[i,c] = interpolation._linear_point(frames[:,c], phase)
+
+            speed = interpolation._linear_pos(_s, pos)
+            phase += phase_inc * speed
+
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=None, double amp=1.0):

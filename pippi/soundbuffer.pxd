@@ -18,5 +18,6 @@ cdef class SoundBuffer:
     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
     cpdef Wavetable toenv(SoundBuffer self, double window=*)
+    cpdef SoundBuffer vspeed(SoundBuffer self, object speed)
 
 

@@ -50,7 +50,7 @@ cdef class Osc2d:
         self.wtsize = wtsize
 
         self.pulsewidth = pulsewidth if pulsewidth >= MIN_PULSEWIDTH else MIN_PULSEWIDTH
-        self.wavetables = wavetables.to_lfostack(stack, self.wtsize)
+        self.wavetables = wavetables.to_stack(stack, self.wtsize)
 
         self.window = wavetables.to_wavetable(window, self.wtsize)
 
