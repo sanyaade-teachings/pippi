@@ -20,6 +20,8 @@ To use the most recent release from pip (currently `2.0.0 beta 3`) just:
 
     pip install pippi
 
+*But!* Please see below about installing the latest version from source, there are a lot of new features in the most recent beta.
+
 ## Tutorials
 
 There are annotated example scripts in the [tutorials](tutorials) directory which introduce some of pippi's functionality.
