@@ -3,6 +3,7 @@
 import collections
 import numbers
 
+cimport cython
 import soundfile
 cimport numpy as np
 import numpy as np
@@ -108,6 +109,36 @@ cdef int to_flag(str value):
     }
 
     return flags[value]
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double _mag(double[:] data):
+    cdef int i = 0
+    cdef int framelength = len(data)
+    cdef double maxval = 0
+
+    for i in range(framelength):
+        maxval = max(maxval, abs(data[i]))
+
+    return maxval
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:] _normalize(double[:] data, double ceiling):
+    cdef int i = 0
+    cdef int framelength = len(data)
+    cdef int channels = data.shape[1]
+    cdef double normval = 1
+    cdef double maxval = _mag(data)
+
+    normval = ceiling / maxval
+    for i in range(framelength):
+        data[i] *= normval
+
+    return data
+
 
 cdef class Wavetable:
     def __cinit__(self, object values, 
@@ -303,10 +334,10 @@ cdef class Wavetable:
     def __repr__(self):
         return 'Wavetable({})'.format(self.data)
 
-    def clip(self, minval=-1, maxval=1):
+    cpdef Wavetable clip(Wavetable self, double minval=-1, double maxval=1):
         return Wavetable(np.clip(self.data, minval, maxval))
 
-    def drink(self, width=0.1, minval=None, maxval=None, indexes=None, wrap=False):
+    cpdef void drink(Wavetable self, double width=0.1, object minval=None, object maxval=None, list indexes=None, bint wrap=False):
         if minval is None:
             minval = np.min(self.data)
 
@@ -322,45 +353,71 @@ cdef class Wavetable:
         if wrap:
             self.data[len(self.data)-1] = self.data[0]
 
-    def env(self, int window_type=-1):
-        cdef int length = len(self)
-        cdef double[:] wavetable = None
-        wavetable = _window(window_type, length)
-
-        if wavetable is None:
-            raise TypeError('Invalid envelope type')
-
-        return self * wavetable
+    cpdef Wavetable env(Wavetable self, str window_type=None):
+        if window_type is None:
+            window_type = 'sine'
+        return self * to_window(window_type, len(self))
 
     def graph(Wavetable self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
 
-    def max(self):
+    cpdef double max(Wavetable self):
         return np.amax(self.data)
 
-    def pad(self, numzeros=1):
+    cpdef void pad(Wavetable self, int numzeros=1):
         self.data = np.pad(self.data, (numzeros, numzeros), 'constant', constant_values=(0,0))
+
+    cpdef Wavetable padded(Wavetable self, int numzeros=1):
+        return Wavetable(np.pad(self.data, (numzeros, numzeros), 'constant', constant_values=(0,0)))
  
-    def repeat(self, int reps=2):
+    cpdef void repeat(Wavetable self, int reps=2):
+        if reps > 1:
+            self.data = np.tile(self.data, reps)
+
+    cpdef Wavetable repeated(Wavetable self, int reps=2):
         if reps <= 1:
             return self
+        return Wavetable(np.tile(self.data, reps))
 
-        return Wavetable(list(self.data) * reps, wtsize=len(self.data) * reps)
-
-    def reverse(self):
+    cpdef void reverse(Wavetable self):
         self.data = np.flip(self.data, 0)
 
-    def reversed(self):
+    cpdef Wavetable reversed(Wavetable self):
         return Wavetable(np.flip(self.data, 0))
 
-    def taper(self, int length):
+    cpdef Wavetable taper(Wavetable self, int length):
         return self * _adsr(len(self), length, 0, 1, length)
 
-    def interp(self, pos, method=LINEAR):
-        if method == LINEAR:
+    cpdef void skew(Wavetable self, double tip):
+        self.data = _seesaw(self.data, len(self.data), tip)
+
+    cpdef Wavetable skewed(Wavetable self, double tip):
+        return Wavetable(_seesaw(self.data, len(self.data), tip))
+
+    cpdef void normalize(Wavetable self, double amount=1):
+        self.data = _normalize(self.data, amount)
+
+    cpdef void crush(Wavetable self, int steps):
+        cdef double[:] out = interpolation._linear(self.data, steps)
+        self.data = interpolation._trunc(out, <int>len(self))
+
+    cpdef Wavetable crushed(Wavetable self, int steps):
+        cdef double[:] out = np.zeros(len(self), dtype='d')
+        out = interpolation._linear(self.data, steps)
+        out = interpolation._trunc(out, len(self))
+        return Wavetable(out)
+
+    cpdef double interp(Wavetable self, double pos, str method=None):
+        if method is None:
+            method = 'linear'
+
+        cdef int _method = to_flag(method)
+        if _method == LINEAR:
             return interpolation._linear_point(self.data, pos)
-        else:
+        elif _method == TRUNC:
             return interpolation._trunc_point(self.data, pos)
+        else:
+            raise ValueError('%s is not a valid interpolation method' % method)
 
 
 cdef tuple _parse_polyseg(str score, int length, int wtlength):

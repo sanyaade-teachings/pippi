@@ -140,6 +140,13 @@ class TestWavetables(TestCase):
         wt = dsp.win('sinc')
         wt.graph('tests/renders/graph_sinc_window.png', stroke=3)
 
+    def test_crushed(self):
+        wt = dsp.win('sinc')
+        wt.skew(0.65)
+        wt.crush(10)
+        wt.normalize(1)
+        wt.graph('tests/renders/graph_skewed_crushed_normalized_sinc_window.png', stroke=3)
+
     def test_seesaw(self):
         wt = wavetables.seesaw('tri', 15, 0.85)
         wt.graph('tests/renders/graph_seesaw_tri.png', stroke=3)

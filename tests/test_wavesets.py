@@ -62,6 +62,13 @@ class TestWavesets(TestCase):
         out = waveset.render()
         out.write('tests/renders/waveset_reverse.wav')
 
+    def test_normalize(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        waveset = Waveset(sound)
+        waveset.normalize()
+        out = waveset.render()
+        out.write('tests/renders/waveset_normalize.wav')
+
     def test_retrograde(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         for crossings in [3,30,100,300]:

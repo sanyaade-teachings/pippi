@@ -10,6 +10,27 @@ cdef class Wavetable:
     cdef public double highvalue
     cdef public int length
 
+    cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
+    cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)
+    cpdef Wavetable env(Wavetable self, str window_type=*)
+    cpdef double max(Wavetable self)
+    cpdef void pad(Wavetable self, int numzeros=*)
+    cpdef Wavetable padded(Wavetable self, int numzeros=*)
+    cpdef void repeat(Wavetable self, int reps=*)
+    cpdef Wavetable repeated(Wavetable self, int reps=*)
+    cpdef void reverse(Wavetable self)
+    cpdef Wavetable reversed(Wavetable self)
+    cpdef Wavetable taper(Wavetable self, int length)
+    cpdef void skew(Wavetable self, double tip)
+    cpdef Wavetable skewed(Wavetable self, double tip)
+    cpdef void normalize(Wavetable self, double amount=*)
+    cpdef void crush(Wavetable self, int steps)
+    cpdef Wavetable crushed(Wavetable self, int steps)
+    cpdef double interp(Wavetable self, double pos, str method=*)
+
+cdef double _mag(double[:] data)
+cdef double[:] _normalize(double[:] data, double ceiling)
+
 cdef int SINE
 cdef int SINEIN 
 cdef int SINEOUT

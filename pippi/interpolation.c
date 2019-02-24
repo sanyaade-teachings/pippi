@@ -952,6 +952,15 @@ struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_clip;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_drink;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_env;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_pad;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_padded;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeat;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeated;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_normalize;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_interp;
 struct __pyx_opt_args_5pippi_10wavetables_to_window;
 struct __pyx_opt_args_5pippi_10wavetables_to_wavetable;
 struct __pyx_opt_args_5pippi_10wavetables_to_lfostack;
@@ -960,7 +969,120 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable;
 struct __pyx_opt_args_5pippi_10wavetables__seesaw;
 struct __pyx_opt_args_5pippi_10wavetables_seesaw;
 
-/* "pippi/wavetables.pxd":45
+/* "pippi/wavetables.pxd":13
+ *     cdef public int length
+ * 
+ *     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)             # <<<<<<<<<<<<<<
+ *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)
+ *     cpdef Wavetable env(Wavetable self, str window_type=*)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_clip {
+  int __pyx_n;
+  double minval;
+  double maxval;
+};
+
+/* "pippi/wavetables.pxd":14
+ * 
+ *     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
+ *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable env(Wavetable self, str window_type=*)
+ *     cpdef double max(Wavetable self)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_drink {
+  int __pyx_n;
+  double width;
+  PyObject *minval;
+  PyObject *maxval;
+  PyObject *indexes;
+  int wrap;
+};
+
+/* "pippi/wavetables.pxd":15
+ *     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
+ *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)
+ *     cpdef Wavetable env(Wavetable self, str window_type=*)             # <<<<<<<<<<<<<<
+ *     cpdef double max(Wavetable self)
+ *     cpdef void pad(Wavetable self, int numzeros=*)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_env {
+  int __pyx_n;
+  PyObject *window_type;
+};
+
+/* "pippi/wavetables.pxd":17
+ *     cpdef Wavetable env(Wavetable self, str window_type=*)
+ *     cpdef double max(Wavetable self)
+ *     cpdef void pad(Wavetable self, int numzeros=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable padded(Wavetable self, int numzeros=*)
+ *     cpdef void repeat(Wavetable self, int reps=*)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_pad {
+  int __pyx_n;
+  int numzeros;
+};
+
+/* "pippi/wavetables.pxd":18
+ *     cpdef double max(Wavetable self)
+ *     cpdef void pad(Wavetable self, int numzeros=*)
+ *     cpdef Wavetable padded(Wavetable self, int numzeros=*)             # <<<<<<<<<<<<<<
+ *     cpdef void repeat(Wavetable self, int reps=*)
+ *     cpdef Wavetable repeated(Wavetable self, int reps=*)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_padded {
+  int __pyx_n;
+  int numzeros;
+};
+
+/* "pippi/wavetables.pxd":19
+ *     cpdef void pad(Wavetable self, int numzeros=*)
+ *     cpdef Wavetable padded(Wavetable self, int numzeros=*)
+ *     cpdef void repeat(Wavetable self, int reps=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable repeated(Wavetable self, int reps=*)
+ *     cpdef void reverse(Wavetable self)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeat {
+  int __pyx_n;
+  int reps;
+};
+
+/* "pippi/wavetables.pxd":20
+ *     cpdef Wavetable padded(Wavetable self, int numzeros=*)
+ *     cpdef void repeat(Wavetable self, int reps=*)
+ *     cpdef Wavetable repeated(Wavetable self, int reps=*)             # <<<<<<<<<<<<<<
+ *     cpdef void reverse(Wavetable self)
+ *     cpdef Wavetable reversed(Wavetable self)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeated {
+  int __pyx_n;
+  int reps;
+};
+
+/* "pippi/wavetables.pxd":26
+ *     cpdef void skew(Wavetable self, double tip)
+ *     cpdef Wavetable skewed(Wavetable self, double tip)
+ *     cpdef void normalize(Wavetable self, double amount=*)             # <<<<<<<<<<<<<<
+ *     cpdef void crush(Wavetable self, int steps)
+ *     cpdef Wavetable crushed(Wavetable self, int steps)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_normalize {
+  int __pyx_n;
+  double amount;
+};
+
+/* "pippi/wavetables.pxd":29
+ *     cpdef void crush(Wavetable self, int steps)
+ *     cpdef Wavetable crushed(Wavetable self, int steps)
+ *     cpdef double interp(Wavetable self, double pos, str method=*)             # <<<<<<<<<<<<<<
+ * 
+ * cdef double _mag(double[:] data)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_interp {
+  int __pyx_n;
+  PyObject *method;
+};
+
+/* "pippi/wavetables.pxd":66
  * cdef int* ALL_WAVETABLES
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -972,7 +1094,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_window {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":46
+/* "pippi/wavetables.pxd":67
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -984,7 +1106,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":47
+/* "pippi/wavetables.pxd":68
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_lfostack(list lfos, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -996,7 +1118,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_lfostack {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":49
+/* "pippi/wavetables.pxd":70
  * cpdef list to_lfostack(list lfos, int wtsize=?)
  * cdef int to_flag(str value)
  * cpdef Wavetable _randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1010,7 +1132,7 @@ struct __pyx_opt_args_5pippi_10wavetables__randline {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":54
+/* "pippi/wavetables.pxd":75
  * cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)             # <<<<<<<<<<<<<<
@@ -1022,7 +1144,7 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable {
   __Pyx_memviewslice data;
 };
 
-/* "pippi/wavetables.pxd":55
+/* "pippi/wavetables.pxd":76
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
  * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)             # <<<<<<<<<<<<<<
@@ -1033,7 +1155,7 @@ struct __pyx_opt_args_5pippi_10wavetables__seesaw {
   double tip;
 };
 
-/* "pippi/wavetables.pxd":56
+/* "pippi/wavetables.pxd":77
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
  * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)
  * cpdef Wavetable seesaw(object wt, int length, double tip=*)             # <<<<<<<<<<<<<<
@@ -1087,6 +1209,7 @@ typedef double (*__pyx_t_5pippi_13interpolation_get_sample_t)(double, double, do
  */
 struct __pyx_obj_5pippi_10wavetables_Wavetable {
   PyObject_HEAD
+  struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable *__pyx_vtab;
   __Pyx_memviewslice data;
   double lowvalue;
   double highvalue;
@@ -1170,6 +1293,36 @@ struct __pyx_memoryviewslice_obj {
   int (*to_dtype_func)(char *, PyObject *);
 };
 
+
+
+/* "pippi/wavetables.pxd":7
+ * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
+ * 
+ * cdef class Wavetable:             # <<<<<<<<<<<<<<
+ *     cdef public double[:] data
+ *     cdef public double lowvalue
+ */
+
+struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable {
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*clip)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_clip *__pyx_optional_args);
+  void (*drink)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_drink *__pyx_optional_args);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*env)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_env *__pyx_optional_args);
+  double (*max)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch);
+  void (*pad)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_pad *__pyx_optional_args);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*padded)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_padded *__pyx_optional_args);
+  void (*repeat)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeat *__pyx_optional_args);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*repeated)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeated *__pyx_optional_args);
+  void (*reverse)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*reversed)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*taper)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int, int __pyx_skip_dispatch);
+  void (*skew)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, double, int __pyx_skip_dispatch);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*skewed)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, double, int __pyx_skip_dispatch);
+  void (*normalize)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_normalize *__pyx_optional_args);
+  void (*crush)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int, int __pyx_skip_dispatch);
+  struct __pyx_obj_5pippi_10wavetables_Wavetable *(*crushed)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int, int __pyx_skip_dispatch);
+  double (*interp)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_interp *__pyx_optional_args);
+};
+static struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable *__pyx_vtabptr_5pippi_10wavetables_Wavetable;
 
 
 /* "View.MemoryView":105
@@ -1706,6 +1859,9 @@ enum __Pyx_ImportType_CheckSize {
 static PyTypeObject *__Pyx_ImportType(PyObject* module, const char *module_name, const char *class_name, size_t size, enum __Pyx_ImportType_CheckSize check_size);
 #endif
 
+/* GetVTable.proto */
+static void* __Pyx_GetVtable(PyObject *dict);
+
 /* CLineInTraceback.proto */
 #ifdef CYTHON_CLINE_IN_TRACEBACK
 #define __Pyx_CLineForTraceback(tstate, c_line)  (((CYTHON_CLINE_IN_TRACEBACK)) ? c_line : 0)
@@ -1934,6 +2090,12 @@ static double __pyx_f_5pippi_13interpolation__linear_pos(__Pyx_memviewslice, dou
 static double __pyx_f_5pippi_13interpolation_linear_pos(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
 static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__linear(__Pyx_memviewslice, int); /*proto*/
 static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_linear(PyObject *, int, int __pyx_skip_dispatch); /*proto*/
+static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice, double); /*proto*/
+static double __pyx_f_5pippi_13interpolation_trunc_point(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
+static double __pyx_f_5pippi_13interpolation__trunc_pos(__Pyx_memviewslice, double); /*proto*/
+static double __pyx_f_5pippi_13interpolation_trunc_pos(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__trunc(__Pyx_memviewslice, int); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_trunc(PyObject *, int, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_5pippi_13interpolation_hermite_get_sample(double, double, double, double, double); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
@@ -2169,8 +2331,11 @@ static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_5pippi_13interpolation_linear(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_data, int __pyx_v_length); /* proto */
-static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, double __pyx_v_pulsewidth); /* proto */
-static PyObject *__pyx_pf_5pippi_13interpolation_4linear_pos(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_2trunc(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_data, int __pyx_v_length); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_4trunc_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_6trunc_pos(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_8linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, double __pyx_v_pulsewidth); /* proto */
+static PyObject *__pyx_pf_5pippi_13interpolation_10linear_pos(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -3177,6 +3342,297 @@ static PyObject *__pyx_pf_5pippi_13interpolation_linear(CYTHON_UNUSED PyObject *
 /* "pippi/interpolation.pyx":92
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
+ * cdef double[:] _trunc(double[:] data, int length):             # <<<<<<<<<<<<<<
+ *     cdef double[:] out = np.zeros(length)
+ *     cdef Py_ssize_t i
+ */
+
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation__trunc(__Pyx_memviewslice __pyx_v_data, int __pyx_v_length) {
+  __Pyx_memviewslice __pyx_v_out = { 0, 0, { 0 }, { 0 }, { 0 } };
+  Py_ssize_t __pyx_v_i;
+  __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_memviewslice __pyx_t_5 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  long __pyx_t_6;
+  long __pyx_t_7;
+  Py_ssize_t __pyx_t_8;
+  double __pyx_t_9;
+  Py_ssize_t __pyx_t_10;
+  __Pyx_RefNannySetupContext("_trunc", 0);
+
+  /* "pippi/interpolation.pyx":93
+ * @cython.wraparound(False)
+ * cdef double[:] _trunc(double[:] data, int length):
+ *     cdef double[:] out = np.zeros(length)             # <<<<<<<<<<<<<<
+ *     cdef Py_ssize_t i
+ * 
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_4 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_4)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  __pyx_t_1 = (__pyx_t_4) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_4, __pyx_t_2) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 93, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_out = __pyx_t_5;
+  __pyx_t_5.memview = NULL;
+  __pyx_t_5.data = NULL;
+
+  /* "pippi/interpolation.pyx":96
+ *     cdef Py_ssize_t i
+ * 
+ *     for i in range(length-1):             # <<<<<<<<<<<<<<
+ *         out[i] = _trunc_pos(data, <double>i/<double>(length-1))
+ * 
+ */
+  __pyx_t_6 = (__pyx_v_length - 1);
+  __pyx_t_7 = __pyx_t_6;
+  for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+    __pyx_v_i = __pyx_t_8;
+
+    /* "pippi/interpolation.pyx":97
+ * 
+ *     for i in range(length-1):
+ *         out[i] = _trunc_pos(data, <double>i/<double>(length-1))             # <<<<<<<<<<<<<<
+ * 
+ *     return out
+ */
+    __pyx_t_9 = ((double)(__pyx_v_length - 1));
+    if (unlikely(__pyx_t_9 == 0)) {
+      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+      __PYX_ERR(0, 97, __pyx_L1_error)
+    }
+    __pyx_t_10 = __pyx_v_i;
+    *((double *) ( /* dim=0 */ (__pyx_v_out.data + __pyx_t_10 * __pyx_v_out.strides[0]) )) = __pyx_f_5pippi_13interpolation__trunc_pos(__pyx_v_data, (((double)__pyx_v_i) / __pyx_t_9));
+  }
+
+  /* "pippi/interpolation.pyx":99
+ *         out[i] = _trunc_pos(data, <double>i/<double>(length-1))
+ * 
+ *     return out             # <<<<<<<<<<<<<<
+ * 
+ * cpdef double[:] trunc(object data, int length):
+ */
+  __PYX_INC_MEMVIEW(&__pyx_v_out, 0);
+  __pyx_r = __pyx_v_out;
+  goto __pyx_L0;
+
+  /* "pippi/interpolation.pyx":92
+ * @cython.boundscheck(False)
+ * @cython.wraparound(False)
+ * cdef double[:] _trunc(double[:] data, int length):             # <<<<<<<<<<<<<<
+ *     cdef double[:] out = np.zeros(length)
+ *     cdef Py_ssize_t i
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
+  __pyx_r.data = NULL;
+  __pyx_r.memview = NULL;
+  __Pyx_AddTraceback("pippi.interpolation._trunc", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  goto __pyx_L2;
+  __pyx_L0:;
+  if (unlikely(!__pyx_r.memview)) {
+    PyErr_SetString(PyExc_TypeError, "Memoryview return value is not initialized");
+  }
+  __pyx_L2:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_out, 1);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/interpolation.pyx":101
+ *     return out
+ * 
+ * cpdef double[:] trunc(object data, int length):             # <<<<<<<<<<<<<<
+ *     cdef double[:] _data = to_wavetable(data)
+ *     return _trunc(data, length)
+ */
+
+static PyObject *__pyx_pw_5pippi_13interpolation_3trunc(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_13interpolation_trunc(PyObject *__pyx_v_data, int __pyx_v_length, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  CYTHON_UNUSED __Pyx_memviewslice __pyx_v__data = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_RefNannyDeclarations
+  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_t_2 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_RefNannySetupContext("trunc", 0);
+
+  /* "pippi/interpolation.pyx":102
+ * 
+ * cpdef double[:] trunc(object data, int length):
+ *     cdef double[:] _data = to_wavetable(data)             # <<<<<<<<<<<<<<
+ *     return _trunc(data, length)
+ * 
+ */
+  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_data, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_v__data = __pyx_t_1;
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+
+  /* "pippi/interpolation.pyx":103
+ * cpdef double[:] trunc(object data, int length):
+ *     cdef double[:] _data = to_wavetable(data)
+ *     return _trunc(data, length)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_data, PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_5pippi_13interpolation__trunc(__pyx_t_1, __pyx_v_length); if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 103, __pyx_L1_error)
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2.memview = NULL;
+  __pyx_t_2.data = NULL;
+  goto __pyx_L0;
+
+  /* "pippi/interpolation.pyx":101
+ *     return out
+ * 
+ * cpdef double[:] trunc(object data, int length):             # <<<<<<<<<<<<<<
+ *     cdef double[:] _data = to_wavetable(data)
+ *     return _trunc(data, length)
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_2, 1);
+  __pyx_r.data = NULL;
+  __pyx_r.memview = NULL;
+  __Pyx_AddTraceback("pippi.interpolation.trunc", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  goto __pyx_L2;
+  __pyx_L0:;
+  if (unlikely(!__pyx_r.memview)) {
+    PyErr_SetString(PyExc_TypeError, "Memoryview return value is not initialized");
+  }
+  __pyx_L2:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v__data, 1);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5pippi_13interpolation_3trunc(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_3trunc(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_data = 0;
+  int __pyx_v_length;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("trunc (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_length,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_data)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_length)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("trunc", 1, 2, 2, 1); __PYX_ERR(0, 101, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "trunc") < 0)) __PYX_ERR(0, 101, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    }
+    __pyx_v_data = values[0];
+    __pyx_v_length = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_length == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 101, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("trunc", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 101, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("pippi.interpolation.trunc", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5pippi_13interpolation_2trunc(__pyx_self, __pyx_v_data, __pyx_v_length);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5pippi_13interpolation_2trunc(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_data, int __pyx_v_length) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_2 = NULL;
+  __Pyx_RefNannySetupContext("trunc", 0);
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_f_5pippi_13interpolation_trunc(__pyx_v_data, __pyx_v_length, 0); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 101, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("pippi.interpolation.trunc", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/interpolation.pyx":108
+ * @cython.boundscheck(False)
+ * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
  *     return data[<int>phase % (len(data)-1)]
  * 
@@ -3188,12 +3644,12 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
   Py_ssize_t __pyx_t_2;
   Py_ssize_t __pyx_t_3;
 
-  /* "pippi/interpolation.pyx":93
+  /* "pippi/interpolation.pyx":109
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:
  *     return data[<int>phase % (len(data)-1)]             # <<<<<<<<<<<<<<
  * 
- * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):
+ * @cython.boundscheck(False)
  */
   __pyx_t_1 = __Pyx_MemoryView_Len(__pyx_v_data); 
   __pyx_t_2 = (__pyx_t_1 - 1);
@@ -3205,13 +3661,13 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
     #ifdef WITH_THREAD
     __Pyx_PyGILState_Release(__pyx_gilstate_save);
     #endif
-    __PYX_ERR(0, 93, __pyx_L1_error)
+    __PYX_ERR(0, 109, __pyx_L1_error)
   }
   __pyx_t_3 = __Pyx_mod_Py_ssize_t(((int)__pyx_v_phase), __pyx_t_2);
   __pyx_r = (*((double *) ( /* dim=0 */ (__pyx_v_data.data + __pyx_t_3 * __pyx_v_data.strides[0]) )));
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":92
+  /* "pippi/interpolation.pyx":108
  * @cython.boundscheck(False)
  * @cython.wraparound(False)
  * cdef double _trunc_point(double[:] data, double phase) nogil:             # <<<<<<<<<<<<<<
@@ -3227,15 +3683,299 @@ static double __pyx_f_5pippi_13interpolation__trunc_point(__Pyx_memviewslice __p
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":95
- *     return data[<int>phase % (len(data)-1)]
+/* "pippi/interpolation.pyx":113
+ * @cython.boundscheck(False)
+ * @cython.wraparound(False)
+ * cdef double _trunc_pos(double[:] data, double pos) nogil:             # <<<<<<<<<<<<<<
+ *     return _trunc_point(data, pos * <double>(len(data)-1))
+ * 
+ */
+
+static double __pyx_f_5pippi_13interpolation__trunc_pos(__Pyx_memviewslice __pyx_v_data, double __pyx_v_pos) {
+  double __pyx_r;
+  size_t __pyx_t_1;
+
+  /* "pippi/interpolation.pyx":114
+ * @cython.wraparound(False)
+ * cdef double _trunc_pos(double[:] data, double pos) nogil:
+ *     return _trunc_point(data, pos * <double>(len(data)-1))             # <<<<<<<<<<<<<<
+ * 
+ * cpdef double trunc_point(double[:] data, double phase):
+ */
+  __pyx_t_1 = __Pyx_MemoryView_Len(__pyx_v_data); 
+  __pyx_r = __pyx_f_5pippi_13interpolation__trunc_point(__pyx_v_data, (__pyx_v_pos * ((double)(__pyx_t_1 - 1))));
+  goto __pyx_L0;
+
+  /* "pippi/interpolation.pyx":113
+ * @cython.boundscheck(False)
+ * @cython.wraparound(False)
+ * cdef double _trunc_pos(double[:] data, double pos) nogil:             # <<<<<<<<<<<<<<
+ *     return _trunc_point(data, pos * <double>(len(data)-1))
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  return __pyx_r;
+}
+
+/* "pippi/interpolation.pyx":116
+ *     return _trunc_point(data, pos * <double>(len(data)-1))
+ * 
+ * cpdef double trunc_point(double[:] data, double phase):             # <<<<<<<<<<<<<<
+ *     return _trunc_point(data, phase)
+ * 
+ */
+
+static PyObject *__pyx_pw_5pippi_13interpolation_5trunc_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static double __pyx_f_5pippi_13interpolation_trunc_point(__Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  double __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("trunc_point", 0);
+
+  /* "pippi/interpolation.pyx":117
+ * 
+ * cpdef double trunc_point(double[:] data, double phase):
+ *     return _trunc_point(data, phase)             # <<<<<<<<<<<<<<
+ * 
+ * cpdef double trunc_pos(double[:] data, double pos):
+ */
+  __pyx_r = __pyx_f_5pippi_13interpolation__trunc_point(__pyx_v_data, __pyx_v_phase);
+  goto __pyx_L0;
+
+  /* "pippi/interpolation.pyx":116
+ *     return _trunc_point(data, pos * <double>(len(data)-1))
+ * 
+ * cpdef double trunc_point(double[:] data, double phase):             # <<<<<<<<<<<<<<
+ *     return _trunc_point(data, phase)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5pippi_13interpolation_5trunc_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_5trunc_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
+  double __pyx_v_phase;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("trunc_point (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_phase,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_data)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_phase)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("trunc_point", 1, 2, 2, 1); __PYX_ERR(0, 116, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "trunc_point") < 0)) __PYX_ERR(0, 116, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    }
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 116, __pyx_L3_error)
+    __pyx_v_phase = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_phase == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 116, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("trunc_point", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 116, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("pippi.interpolation.trunc_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5pippi_13interpolation_4trunc_point(__pyx_self, __pyx_v_data, __pyx_v_phase);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5pippi_13interpolation_4trunc_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("trunc_point", 0);
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 116, __pyx_L1_error) }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_trunc_point(__pyx_v_data, __pyx_v_phase, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 116, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pippi.interpolation.trunc_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_data, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/interpolation.pyx":119
+ *     return _trunc_point(data, phase)
+ * 
+ * cpdef double trunc_pos(double[:] data, double pos):             # <<<<<<<<<<<<<<
+ *     return _trunc_pos(data, pos)
+ * 
+ */
+
+static PyObject *__pyx_pw_5pippi_13interpolation_7trunc_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static double __pyx_f_5pippi_13interpolation_trunc_pos(__Pyx_memviewslice __pyx_v_data, double __pyx_v_pos, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  double __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("trunc_pos", 0);
+
+  /* "pippi/interpolation.pyx":120
+ * 
+ * cpdef double trunc_pos(double[:] data, double pos):
+ *     return _trunc_pos(data, pos)             # <<<<<<<<<<<<<<
+ * 
+ * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):
+ */
+  __pyx_r = __pyx_f_5pippi_13interpolation__trunc_pos(__pyx_v_data, __pyx_v_pos);
+  goto __pyx_L0;
+
+  /* "pippi/interpolation.pyx":119
+ *     return _trunc_point(data, phase)
+ * 
+ * cpdef double trunc_pos(double[:] data, double pos):             # <<<<<<<<<<<<<<
+ *     return _trunc_pos(data, pos)
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5pippi_13interpolation_7trunc_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_7trunc_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
+  double __pyx_v_pos;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("trunc_pos (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_pos,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_data)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pos)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("trunc_pos", 1, 2, 2, 1); __PYX_ERR(0, 119, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "trunc_pos") < 0)) __PYX_ERR(0, 119, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    }
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 119, __pyx_L3_error)
+    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 119, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("trunc_pos", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 119, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("pippi.interpolation.trunc_pos", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5pippi_13interpolation_6trunc_pos(__pyx_self, __pyx_v_data, __pyx_v_pos);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5pippi_13interpolation_6trunc_pos(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  __Pyx_RefNannySetupContext("trunc_pos", 0);
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 119, __pyx_L1_error) }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_trunc_pos(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("pippi.interpolation.trunc_pos", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_data, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "pippi/interpolation.pyx":122
+ *     return _trunc_pos(data, pos)
  * 
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):             # <<<<<<<<<<<<<<
  *     return _linear_point(data, phase, pulsewidth)
  * 
  */
 
-static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_9linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_13interpolation_linear_point *__pyx_optional_args) {
   double __pyx_v_pulsewidth = ((double)1.0);
   double __pyx_r;
@@ -3249,7 +3989,7 @@ static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __p
     }
   }
 
-  /* "pippi/interpolation.pyx":96
+  /* "pippi/interpolation.pyx":123
  * 
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):
  *     return _linear_point(data, phase, pulsewidth)             # <<<<<<<<<<<<<<
@@ -3262,8 +4002,8 @@ static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __p
   __pyx_r = __pyx_t_1;
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":95
- *     return data[<int>phase % (len(data)-1)]
+  /* "pippi/interpolation.pyx":122
+ *     return _trunc_pos(data, pos)
  * 
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):             # <<<<<<<<<<<<<<
  *     return _linear_point(data, phase, pulsewidth)
@@ -3277,8 +4017,8 @@ static double __pyx_f_5pippi_13interpolation_linear_point(__Pyx_memviewslice __p
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_5pippi_13interpolation_9linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_9linear_point(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_phase;
   double __pyx_v_pulsewidth;
@@ -3310,7 +4050,7 @@ static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_s
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_phase)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("linear_point", 0, 2, 3, 1); __PYX_ERR(0, 95, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("linear_point", 0, 2, 3, 1); __PYX_ERR(0, 122, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -3320,7 +4060,7 @@ static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_s
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_point") < 0)) __PYX_ERR(0, 95, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_point") < 0)) __PYX_ERR(0, 122, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3332,30 +4072,30 @@ static PyObject *__pyx_pw_5pippi_13interpolation_3linear_point(PyObject *__pyx_s
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 95, __pyx_L3_error)
-    __pyx_v_phase = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_phase == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 122, __pyx_L3_error)
+    __pyx_v_phase = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_phase == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L3_error)
     if (values[2]) {
-      __pyx_v_pulsewidth = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_pulsewidth == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
+      __pyx_v_pulsewidth = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_pulsewidth == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 122, __pyx_L3_error)
     } else {
       __pyx_v_pulsewidth = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("linear_point", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 95, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("linear_point", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 122, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.interpolation.linear_point", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_13interpolation_2linear_point(__pyx_self, __pyx_v_data, __pyx_v_phase, __pyx_v_pulsewidth);
+  __pyx_r = __pyx_pf_5pippi_13interpolation_8linear_point(__pyx_self, __pyx_v_data, __pyx_v_phase, __pyx_v_pulsewidth);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, double __pyx_v_pulsewidth) {
+static PyObject *__pyx_pf_5pippi_13interpolation_8linear_point(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_phase, double __pyx_v_pulsewidth) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -3363,11 +4103,11 @@ static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyO
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("linear_point", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 95, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 122, __pyx_L1_error) }
   __pyx_t_2.__pyx_n = 1;
   __pyx_t_2.pulsewidth = __pyx_v_pulsewidth;
   __pyx_t_1 = __pyx_f_5pippi_13interpolation_linear_point(__pyx_v_data, __pyx_v_phase, 0, &__pyx_t_2); 
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
@@ -3385,7 +4125,7 @@ static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyO
   return __pyx_r;
 }
 
-/* "pippi/interpolation.pyx":98
+/* "pippi/interpolation.pyx":125
  *     return _linear_point(data, phase, pulsewidth)
  * 
  * cpdef double linear_pos(double[:] data, double pos):             # <<<<<<<<<<<<<<
@@ -3393,13 +4133,13 @@ static PyObject *__pyx_pf_5pippi_13interpolation_2linear_point(CYTHON_UNUSED PyO
  * 
  */
 
-static PyObject *__pyx_pw_5pippi_13interpolation_5linear_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_11linear_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static double __pyx_f_5pippi_13interpolation_linear_pos(__Pyx_memviewslice __pyx_v_data, double __pyx_v_pos, CYTHON_UNUSED int __pyx_skip_dispatch) {
   double __pyx_r;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("linear_pos", 0);
 
-  /* "pippi/interpolation.pyx":99
+  /* "pippi/interpolation.pyx":126
  * 
  * cpdef double linear_pos(double[:] data, double pos):
  *     return _linear_pos(data, pos)             # <<<<<<<<<<<<<<
@@ -3409,7 +4149,7 @@ static double __pyx_f_5pippi_13interpolation_linear_pos(__Pyx_memviewslice __pyx
   __pyx_r = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_data, __pyx_v_pos);
   goto __pyx_L0;
 
-  /* "pippi/interpolation.pyx":98
+  /* "pippi/interpolation.pyx":125
  *     return _linear_point(data, phase, pulsewidth)
  * 
  * cpdef double linear_pos(double[:] data, double pos):             # <<<<<<<<<<<<<<
@@ -3424,8 +4164,8 @@ static double __pyx_f_5pippi_13interpolation_linear_pos(__Pyx_memviewslice __pyx
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5pippi_13interpolation_5linear_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_pw_5pippi_13interpolation_5linear_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_5pippi_13interpolation_11linear_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_5pippi_13interpolation_11linear_pos(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_data = { 0, 0, { 0 }, { 0 }, { 0 } };
   double __pyx_v_pos;
   PyObject *__pyx_r = 0;
@@ -3454,11 +4194,11 @@ static PyObject *__pyx_pw_5pippi_13interpolation_5linear_pos(PyObject *__pyx_sel
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pos)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, 1); __PYX_ERR(0, 98, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, 1); __PYX_ERR(0, 125, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_pos") < 0)) __PYX_ERR(0, 98, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "linear_pos") < 0)) __PYX_ERR(0, 125, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3466,32 +4206,32 @@ static PyObject *__pyx_pw_5pippi_13interpolation_5linear_pos(PyObject *__pyx_sel
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 98, __pyx_L3_error)
-    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 98, __pyx_L3_error)
+    __pyx_v_data = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_data.memview)) __PYX_ERR(0, 125, __pyx_L3_error)
+    __pyx_v_pos = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_pos == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 125, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 98, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("linear_pos", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 125, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.interpolation.linear_pos", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_13interpolation_4linear_pos(__pyx_self, __pyx_v_data, __pyx_v_pos);
+  __pyx_r = __pyx_pf_5pippi_13interpolation_10linear_pos(__pyx_self, __pyx_v_data, __pyx_v_pos);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_13interpolation_4linear_pos(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos) {
+static PyObject *__pyx_pf_5pippi_13interpolation_10linear_pos(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_data, double __pyx_v_pos) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("linear_pos", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 98, __pyx_L1_error) }
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_linear_pos(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 98, __pyx_L1_error)
+  if (unlikely(!__pyx_v_data.memview)) { __Pyx_RaiseUnboundLocalError("data"); __PYX_ERR(0, 125, __pyx_L1_error) }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_5pippi_13interpolation_linear_pos(__pyx_v_data, __pyx_v_pos, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -16956,8 +17696,11 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 
 static PyMethodDef __pyx_methods[] = {
   {"linear", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_1linear, METH_VARARGS|METH_KEYWORDS, 0},
-  {"linear_point", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_3linear_point, METH_VARARGS|METH_KEYWORDS, 0},
-  {"linear_pos", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_5linear_pos, METH_VARARGS|METH_KEYWORDS, 0},
+  {"trunc", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_3trunc, METH_VARARGS|METH_KEYWORDS, 0},
+  {"trunc_point", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_5trunc_point, METH_VARARGS|METH_KEYWORDS, 0},
+  {"trunc_pos", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_7trunc_pos, METH_VARARGS|METH_KEYWORDS, 0},
+  {"linear_point", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_9linear_point, METH_VARARGS|METH_KEYWORDS, 0},
+  {"linear_pos", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_13interpolation_11linear_pos, METH_VARARGS|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
@@ -17431,6 +18174,11 @@ static int __Pyx_modinit_function_export_code(void) {
   if (__Pyx_ExportFunction("_linear", (void (*)(void))__pyx_f_5pippi_13interpolation__linear, "__Pyx_memviewslice (__Pyx_memviewslice, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("linear", (void (*)(void))__pyx_f_5pippi_13interpolation_linear, "__Pyx_memviewslice (PyObject *, int, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("_trunc_point", (void (*)(void))__pyx_f_5pippi_13interpolation__trunc_point, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("trunc_point", (void (*)(void))__pyx_f_5pippi_13interpolation_trunc_point, "double (__Pyx_memviewslice, double, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("_trunc_pos", (void (*)(void))__pyx_f_5pippi_13interpolation__trunc_pos, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("trunc_pos", (void (*)(void))__pyx_f_5pippi_13interpolation_trunc_pos, "double (__Pyx_memviewslice, double, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("_trunc", (void (*)(void))__pyx_f_5pippi_13interpolation__trunc, "__Pyx_memviewslice (__Pyx_memviewslice, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("trunc", (void (*)(void))__pyx_f_5pippi_13interpolation_trunc, "__Pyx_memviewslice (PyObject *, int, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -17501,6 +18249,7 @@ static int __Pyx_modinit_type_import_code(void) {
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_5pippi_10wavetables_Wavetable = __Pyx_ImportType(__pyx_t_1, "pippi.wavetables", "Wavetable", sizeof(struct __pyx_obj_5pippi_10wavetables_Wavetable), __Pyx_ImportType_CheckSize_Warn);
    if (!__pyx_ptype_5pippi_10wavetables_Wavetable) __PYX_ERR(2, 7, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_10wavetables_Wavetable = (struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable*)__Pyx_GetVtable(__pyx_ptype_5pippi_10wavetables_Wavetable->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_10wavetables_Wavetable)) __PYX_ERR(2, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -19940,6 +20689,26 @@ bad:
     return NULL;
 }
 #endif
+
+/* GetVTable */
+static void* __Pyx_GetVtable(PyObject *dict) {
+    void* ptr;
+    PyObject *ob = PyObject_GetItem(dict, __pyx_n_s_pyx_vtable);
+    if (!ob)
+        goto bad;
+#if PY_VERSION_HEX >= 0x02070000
+    ptr = PyCapsule_GetPointer(ob, 0);
+#else
+    ptr = PyCObject_AsVoidPtr(ob);
+#endif
+    if (!ptr && !PyErr_Occurred())
+        PyErr_SetString(PyExc_RuntimeError, "invalid vtable found for imported type");
+    Py_DECREF(ob);
+    return ptr;
+bad:
+    Py_XDECREF(ob);
+    return NULL;
+}
 
 /* CLineInTraceback */
 #ifndef CYTHON_CLINE_IN_TRACEBACK

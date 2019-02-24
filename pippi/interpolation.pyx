@@ -89,8 +89,35 @@ cpdef double[:] linear(object data, int length):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+cdef double[:] _trunc(double[:] data, int length):
+    cdef double[:] out = np.zeros(length)
+    cdef Py_ssize_t i
+
+    for i in range(length-1):
+        out[i] = _trunc_pos(data, <double>i/<double>(length-1))
+
+    return out
+
+cpdef double[:] trunc(object data, int length):
+    cdef double[:] _data = to_wavetable(data)
+    return _trunc(data, length)
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef double _trunc_point(double[:] data, double phase) nogil:
     return data[<int>phase % (len(data)-1)]
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _trunc_pos(double[:] data, double pos) nogil:
+    return _trunc_point(data, pos * <double>(len(data)-1))
+
+cpdef double trunc_point(double[:] data, double phase):
+    return _trunc_point(data, phase)
+
+cpdef double trunc_pos(double[:] data, double pos):
+    return _trunc_pos(data, pos)
 
 cpdef double linear_point(double[:] data, double phase, double pulsewidth=1):
     return _linear_point(data, phase, pulsewidth)
