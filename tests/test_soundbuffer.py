@@ -59,6 +59,17 @@ class TestSoundBuffer(TestCase):
         self.assertTrue(len(snd) == 4096)
         self.assertTrue(snd[100][0] != 0)
 
+    def test_convolve_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+
+        impulse = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+        out = sound.convolve(impulse)
+        out.write('tests/renders/soundbuffer_convolve_guitar_littletikes.wav')
+
+        impulse = dsp.win('sinc')
+        out = sound.convolve(impulse)
+        out.write('tests/renders/soundbuffer_convolve_guitar_sinc.wav')
+
     def test_clip_soundbuffer(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
