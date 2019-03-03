@@ -248,42 +248,33 @@ cpdef SoundBuffer mdelay(SoundBuffer snd, list delays, double feedback):
     snd.frames = _mdelay(snd.frames, out, delayframes, feedback)
     return snd
 
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, int norm):
-    cdef int i = 0
-    cdef int c = 0
-    cdef int j = 0
+cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=True):
+    cdef int i=0, c=0, j=0
     cdef int framelength = len(snd)
     cdef int channels = snd.shape[1]
     cdef int impulselength = len(impulse)
-    cdef double sample = 0
-    cdef int delayindex = 0
     cdef double maxval     
 
-    if norm > 0:
+    if norm:
         maxval = _mag(snd)
 
     for i in range(framelength):
         for c in range(channels):
-            sample = 0
             for j in range(impulselength):
-                delayindex = i - j
-                if delayindex > 0:
-                    sample += impulse[j] * snd[delayindex,c]
+                out[i+j,c] += snd[i,c] * impulse[j]
 
-            out[i,c] = sample
-
-    if norm > 0:
+    if norm:
         return _norm(out, maxval)
     else:
         return out
 
-cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bool normalize=True):
+cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=True):
     cdef double[:] impulsewt = wavetables.to_window(impulse)
-    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
-    cdef int _normalize = 1 if normalize else 0
+    cdef double[:,:] out = np.zeros((len(snd)+len(impulsewt)-1, snd.channels), dtype='d')
     return SoundBuffer(_fir(snd.frames, out, impulsewt, normalize), channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef Wavetable envelope_follower(SoundBuffer snd, double window=0.015):

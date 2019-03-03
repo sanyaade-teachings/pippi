@@ -579,6 +579,11 @@ cdef class SoundBuffer:
     def clip(self, minval=-1, maxval=1):
         return SoundBuffer(np.clip(self.frames, minval, maxval), channels=self.channels, samplerate=self.samplerate)
         
+    cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=True):
+        cdef double[:] impulsewt = to_window(impulse)
+        cdef double[:,:] out = np.zeros((len(self)+len(impulsewt)-1, self.channels), dtype='d')
+        return SoundBuffer(fx._fir(self.frames, out, impulsewt, norm), channels=self.channels, samplerate=self.samplerate)
+
     def cut(self, double start=0, double length=1):
         """ Copy a portion of this soundbuffer, returning 
             a new soundbuffer with the selected slice.

@@ -1,8 +1,11 @@
 #cython: language_level=3
 
+cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
+cdef double[:] _fir(double[:] data, double[:] impulse, bint norm=*)
+cdef double _mag(double[:] data)
+cdef double[:] _normalize(double[:] data, double ceiling)
 cdef double[:] _wavetable(int, int)
 cdef double[:] _window(int, int)
-cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
 
 cdef class Wavetable:
     cdef public double[:] data
@@ -11,6 +14,7 @@ cdef class Wavetable:
     cdef public int length
 
     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
+    cpdef Wavetable convolve(Wavetable self, object impulse, bint norm=*)
     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)
     cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)
     cpdef Wavetable env(Wavetable self, str window_type=*)
@@ -28,9 +32,6 @@ cdef class Wavetable:
     cpdef void crush(Wavetable self, int steps)
     cpdef Wavetable crushed(Wavetable self, int steps)
     cpdef double interp(Wavetable self, double pos, str method=*)
-
-cdef double _mag(double[:] data)
-cdef double[:] _normalize(double[:] data, double ceiling)
 
 cdef int SINE
 cdef int SINEIN 

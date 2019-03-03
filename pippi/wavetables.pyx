@@ -113,6 +113,29 @@ cdef int to_flag(str value):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
+cdef double[:] _fir(double[:] data, double[:] impulse, bint norm=True):
+    cdef int datlength = len(data)
+    cdef int implength = len(impulse)
+    cdef int outlength = datlength + implength - 1
+    cdef double[:] out = np.zeros(outlength, dtype='d')
+    cdef double maxval = 1
+    cdef int i=0, j=0
+
+    if norm:
+        maxval = _mag(data)
+
+    for i in range(datlength):
+        for j in range(implength):
+            out[i+j] += data[i] * impulse[j]
+
+    if norm:
+        return _normalize(out, maxval)
+    else:
+        return out
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
 cdef double _mag(double[:] data):
     cdef int i = 0
     cdef int framelength = len(data)
@@ -336,6 +359,10 @@ cdef class Wavetable:
 
     cpdef Wavetable clip(Wavetable self, double minval=-1, double maxval=1):
         return Wavetable(np.clip(self.data, minval, maxval))
+
+    cpdef Wavetable convolve(Wavetable self, object impulse, bint norm=True):
+        cdef double[:] _impulse = to_window(impulse)
+        return Wavetable(_fir(self.data, _impulse, norm))
 
     cpdef void drink(Wavetable self, double width=0.1, object minval=None, object maxval=None, list indexes=None, bint wrap=False):
         if minval is None:
