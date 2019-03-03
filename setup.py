@@ -38,7 +38,9 @@ ext_modules = cythonize([
 
         Extension('pippi.rhythm', ['pippi/rhythm.pyx']), 
         Extension('pippi.rand', ['pippi/rand.pyx']), 
-        Extension('pippi.soundbuffer', ['pippi/soundbuffer.pyx']), 
+        Extension('pippi.soundbuffer', ['pippi/soundbuffer.pyx'], 
+            include_dirs=[np.get_include()], 
+        ), 
         Extension('pippi.soundpipe', ['pippi/soundpipe.pyx'], 
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
