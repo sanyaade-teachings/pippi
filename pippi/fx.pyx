@@ -4,6 +4,7 @@ import numpy as np
 import numbers
 import random
 cimport cython
+from cython.parallel cimport prange
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
 from pippi.interpolation cimport _linear_point
@@ -264,7 +265,7 @@ cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint 
 
     for i in range(framelength):
         for c in range(channels):
-            for j in range(impulselength):
+            for j in prange(impulselength, nogil=True):
                 out[i+j,c] += snd[i,c] * impulse[j]
 
     if norm:
