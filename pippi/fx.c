@@ -8,7 +8,8 @@
             "/usr/local/include"
         ],
         "libraries": [
-            "soundpipe"
+            "soundpipe",
+            "omp"
         ],
         "library_dirs": [
             "/usr/local/lib"
@@ -5810,9 +5811,9 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__fir(__Pyx_memviewslice __pyx_v_snd
   int __pyx_v_i;
   int __pyx_v_c;
   int __pyx_v_j;
-  int __pyx_v_framelength;
+  CYTHON_UNUSED int __pyx_v_framelength;
   int __pyx_v_channels;
-  CYTHON_UNUSED int __pyx_v_impulselength;
+  int __pyx_v_impulselength;
   double __pyx_v_maxval;
   __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannyDeclarations
@@ -5895,7 +5896,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__fir(__Pyx_memviewslice __pyx_v_snd
  *     if norm:
  *         maxval = _mag(snd)             # <<<<<<<<<<<<<<
  * 
- *     for i in range(framelength):
+ *     for i in prange(framelength, nogil=True):
  */
     __pyx_v_maxval = __pyx_f_5pippi_3dsp__mag(__pyx_v_snd);
 
@@ -5911,67 +5912,70 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__fir(__Pyx_memviewslice __pyx_v_snd
   /* "pippi/fx.pyx":266
  *         maxval = _mag(snd)
  * 
- *     for i in range(framelength):             # <<<<<<<<<<<<<<
+ *     for i in prange(framelength, nogil=True):             # <<<<<<<<<<<<<<
  *         for c in range(channels):
- *             for j in prange(impulselength, nogil=True):
+ *             for j in range(impulselength):
  */
-  __pyx_t_3 = __pyx_v_framelength;
-  __pyx_t_4 = __pyx_t_3;
-  for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
-    __pyx_v_i = __pyx_t_5;
-
-    /* "pippi/fx.pyx":267
- * 
- *     for i in range(framelength):
- *         for c in range(channels):             # <<<<<<<<<<<<<<
- *             for j in prange(impulselength, nogil=True):
- *                 out[i+j,c] += snd[i,c] * impulse[j]
- */
-    __pyx_t_6 = __pyx_v_channels;
-    __pyx_t_7 = __pyx_t_6;
-    for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
-      __pyx_v_c = __pyx_t_8;
-
-      /* "pippi/fx.pyx":268
- *     for i in range(framelength):
- *         for c in range(channels):
- *             for j in prange(impulselength, nogil=True):             # <<<<<<<<<<<<<<
- *                 out[i+j,c] += snd[i,c] * impulse[j]
- * 
- */
-      {
-          #ifdef WITH_THREAD
-          PyThreadState *_save;
-          Py_UNBLOCK_THREADS
-          __Pyx_FastGIL_Remember();
-          #endif
-          /*try:*/ {
-            __pyx_t_9 = __pyx_v_impulselength;
-            if (1 == 0) abort();
+  {
+      #ifdef WITH_THREAD
+      PyThreadState *_save;
+      Py_UNBLOCK_THREADS
+      __Pyx_FastGIL_Remember();
+      #endif
+      /*try:*/ {
+        __pyx_t_3 = __pyx_v_framelength;
+        if (1 == 0) abort();
+        {
+            #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+                #undef likely
+                #undef unlikely
+                #define likely(x)   (x)
+                #define unlikely(x) (x)
+            #endif
+            __pyx_t_5 = (__pyx_t_3 - 0 + 1 - 1/abs(1)) / 1;
+            if (__pyx_t_5 > 0)
             {
-                #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
-                    #undef likely
-                    #undef unlikely
-                    #define likely(x)   (x)
-                    #define unlikely(x) (x)
-                #endif
-                __pyx_t_11 = (__pyx_t_9 - 0 + 1 - 1/abs(1)) / 1;
-                if (__pyx_t_11 > 0)
+                #ifdef _OPENMP
+                #pragma omp parallel private(__pyx_t_10, __pyx_t_11, __pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9)
+                #endif /* _OPENMP */
                 {
                     #ifdef _OPENMP
-                    #pragma omp parallel private(__pyx_t_12, __pyx_t_13, __pyx_t_14, __pyx_t_15, __pyx_t_16)
+                    #pragma omp for lastprivate(__pyx_v_c) firstprivate(__pyx_v_i) lastprivate(__pyx_v_i) lastprivate(__pyx_v_j)
                     #endif /* _OPENMP */
-                    {
-                        #ifdef _OPENMP
-                        #pragma omp for firstprivate(__pyx_v_j) lastprivate(__pyx_v_j)
-                        #endif /* _OPENMP */
-                        for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_11; __pyx_t_10++){
-                            {
-                                __pyx_v_j = (int)(0 + 1 * __pyx_t_10);
+                    for (__pyx_t_4 = 0; __pyx_t_4 < __pyx_t_5; __pyx_t_4++){
+                        {
+                            __pyx_v_i = (int)(0 + 1 * __pyx_t_4);
+                            /* Initialize private variables to invalid values */
+                            __pyx_v_c = ((int)0xbad0bad0);
+                            __pyx_v_j = ((int)0xbad0bad0);
+
+                            /* "pippi/fx.pyx":267
+ * 
+ *     for i in prange(framelength, nogil=True):
+ *         for c in range(channels):             # <<<<<<<<<<<<<<
+ *             for j in range(impulselength):
+ *                 out[i+j,c] += snd[i,c] * impulse[j]
+ */
+                            __pyx_t_6 = __pyx_v_channels;
+                            __pyx_t_7 = __pyx_t_6;
+                            for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
+                              __pyx_v_c = __pyx_t_8;
+
+                              /* "pippi/fx.pyx":268
+ *     for i in prange(framelength, nogil=True):
+ *         for c in range(channels):
+ *             for j in range(impulselength):             # <<<<<<<<<<<<<<
+ *                 out[i+j,c] += snd[i,c] * impulse[j]
+ * 
+ */
+                              __pyx_t_9 = __pyx_v_impulselength;
+                              __pyx_t_10 = __pyx_t_9;
+                              for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
+                                __pyx_v_j = __pyx_t_11;
 
                                 /* "pippi/fx.pyx":269
  *         for c in range(channels):
- *             for j in prange(impulselength, nogil=True):
+ *             for j in range(impulselength):
  *                 out[i+j,c] += snd[i,c] * impulse[j]             # <<<<<<<<<<<<<<
  * 
  *     if norm:
@@ -5982,38 +5986,38 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__fir(__Pyx_memviewslice __pyx_v_snd
                                 __pyx_t_15 = (__pyx_v_i + __pyx_v_j);
                                 __pyx_t_16 = __pyx_v_c;
                                 *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_15 * __pyx_v_out.strides[0]) ) + __pyx_t_16 * __pyx_v_out.strides[1]) )) += ((*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_snd.data + __pyx_t_12 * __pyx_v_snd.strides[0]) ) + __pyx_t_13 * __pyx_v_snd.strides[1]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_impulse.data + __pyx_t_14 * __pyx_v_impulse.strides[0]) ))));
+                              }
                             }
                         }
                     }
                 }
             }
-            #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
-                #undef likely
-                #undef unlikely
-                #define likely(x)   __builtin_expect(!!(x), 1)
-                #define unlikely(x) __builtin_expect(!!(x), 0)
-            #endif
-          }
-
-          /* "pippi/fx.pyx":268
- *     for i in range(framelength):
- *         for c in range(channels):
- *             for j in prange(impulselength, nogil=True):             # <<<<<<<<<<<<<<
- *                 out[i+j,c] += snd[i,c] * impulse[j]
- * 
- */
-          /*finally:*/ {
-            /*normal exit:*/{
-              #ifdef WITH_THREAD
-              __Pyx_FastGIL_Forget();
-              Py_BLOCK_THREADS
-              #endif
-              goto __pyx_L12;
-            }
-            __pyx_L12:;
-          }
+        }
+        #if ((defined(__APPLE__) || defined(__OSX__)) && (defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && (__GNUC_MINOR__ > 95)))))
+            #undef likely
+            #undef unlikely
+            #define likely(x)   __builtin_expect(!!(x), 1)
+            #define unlikely(x) __builtin_expect(!!(x), 0)
+        #endif
       }
-    }
+
+      /* "pippi/fx.pyx":266
+ *         maxval = _mag(snd)
+ * 
+ *     for i in prange(framelength, nogil=True):             # <<<<<<<<<<<<<<
+ *         for c in range(channels):
+ *             for j in range(impulselength):
+ */
+      /*finally:*/ {
+        /*normal exit:*/{
+          #ifdef WITH_THREAD
+          __Pyx_FastGIL_Forget();
+          Py_BLOCK_THREADS
+          #endif
+          goto __pyx_L6;
+        }
+        __pyx_L6:;
+      }
   }
 
   /* "pippi/fx.pyx":271

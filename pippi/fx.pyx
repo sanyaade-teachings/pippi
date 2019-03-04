@@ -263,9 +263,9 @@ cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint 
     if norm:
         maxval = _mag(snd)
 
-    for i in range(framelength):
+    for i in prange(framelength, nogil=True):
         for c in range(channels):
-            for j in prange(impulselength, nogil=True):
+            for j in range(impulselength):
                 out[i+j,c] += snd[i,c] * impulse[j]
 
     if norm:
