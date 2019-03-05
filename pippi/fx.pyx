@@ -4,7 +4,7 @@ import numpy as np
 import numbers
 import random
 cimport cython
-from cython.parallel cimport prange
+from cython.parallel import prange
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
 from pippi.interpolation cimport _linear_point
