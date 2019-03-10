@@ -19,8 +19,15 @@ cdef class Wavetable:
     cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)
     cpdef Wavetable env(Wavetable self, str window_type=*)
     cpdef double max(Wavetable self)
-    cpdef void pad(Wavetable self, int numzeros=*)
-    cpdef Wavetable padded(Wavetable self, int numzeros=*)
+
+    cdef double[:] _pad(Wavetable self, object value=*, object length=*)
+    cpdef void leftpad(Wavetable self, object value=*, int length=*)
+    cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*)
+    cpdef void rightpad(Wavetable self, object value=*, int length=*)
+    cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*)
+    cpdef void pad(Wavetable self, object value=*, object length=*)
+    cpdef Wavetable padded(Wavetable self, object value=*, object length=*)
+
     cpdef void repeat(Wavetable self, int reps=*)
     cpdef Wavetable repeated(Wavetable self, int reps=*)
     cpdef void reverse(Wavetable self)

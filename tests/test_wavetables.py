@@ -176,4 +176,9 @@ class TestWavetables(TestCase):
         snd = dsp.read('tests/sounds/linux.wav')
         snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=1200, height=500)
 
+    def test_pong(self):
+        win = dsp.win('hann', 0, 0.75).skewed(0.08).rightpadded(0, length=4096*4)
+        win = win + dsp.win('hannout', 0, 0.25, len(win))
+        win.graph('tests/renders/graph_pong.png', stroke=3)
+
 
