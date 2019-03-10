@@ -430,13 +430,48 @@ cdef class Wavetable:
     cpdef double max(Wavetable self):
         return np.amax(self.data)
 
-    cdef double[:] _pad(Wavetable self, object value=None, object length=None):
-        cdef double left_value, right_value
+    cdef double[:] _leftpad(Wavetable self, object value=None, int length=-1, double mult=-1):
+        cdef int _length = len(self.data)
+        cdef double _value
+
+        if value is None:
+            _value = self.data[0]
+        else:
+            _value = <double>value
+
+        if mult >= 0:
+            length = <int>(mult * _length)
+
+        elif length < 0:
+            length = 1
+
+        return np.pad(self.data, (length, 0), 'constant', constant_values=(value, 0))
+
+    cdef double[:] _rightpad(Wavetable self, object value=None, int length=-1, double mult=-1):
+        cdef int _length = len(self.data)
+        cdef double _value
+
+        if value is None:
+            _value = self.data[_length-1]
+        else:
+            _value = <double>value
+
+        if mult >= 0:
+            length = <int>(mult * _length)
+
+        elif length < 0:
+            length = 1
+
+        return np.pad(self.data, (0, length), 'constant', constant_values=(0, value))
+
+    cdef double[:] _pad(Wavetable self, object value=None, object length=None, object mult=None):
+        cdef double left_value, right_value, left_mult, right_mult
         cdef int left_length, right_length
+        cdef int _length = len(self.data)
 
         if value is None:
             left_value = self.data[0]
-            right_value = self.data[len(self.data)-1]
+            right_value = self.data[_length-1]
 
         elif isinstance(value, tuple):
             if value[0] is None:
@@ -445,7 +480,7 @@ cdef class Wavetable:
                 left_value = <double>value[0]
 
             if value[1] is None:
-                right_value = self.data[len(self.data)-1]
+                right_value = self.data[_length-1]
             else:
                 right_value = <double>value[1]
 
@@ -453,35 +488,44 @@ cdef class Wavetable:
             left_value = <double>value
             right_value = <double>value
 
-        if length is None:
-            left_length = 1
-            right_length = 1
+        if mult is not None:
+            if isinstance(mult, tuple):
+                left_length = <int>(<double>mult[0] * _length)
+                right_length = <int>(<double>mult[1] * _length)
+            else:
+                left_length = <int>(<double>mult * _length)
+                right_length = <int>(<double>mult * _length)
 
-        elif isinstance(length, tuple):
-            left_length, right_length = length
         else:
-            left_length = length
-            right_length = length
+            if length is None:
+                left_length = 1
+                right_length = 1
+
+            elif isinstance(length, tuple):
+                left_length, right_length = length
+            else:
+                left_length = length
+                right_length = length
 
         return np.pad(self.data, (left_length, right_length), 'constant', constant_values=(left_value, right_value))
 
-    cpdef void leftpad(Wavetable self, object value=None, int length=1):
-        self.data = self._pad((value, None), (length, 0))
+    cpdef void leftpad(Wavetable self, object value=None, int length=-1, double mult=-1):
+        self.data = self._leftpad(value, length, mult)
 
-    cpdef Wavetable leftpadded(Wavetable self, object value=None, int length=1):
-        return Wavetable(self._pad((value, None), (length, 0)))
+    cpdef Wavetable leftpadded(Wavetable self, object value=None, int length=-1, double mult=-1):
+        return Wavetable(self._leftpad(value, length, mult))
 
-    cpdef void rightpad(Wavetable self, object value=None, int length=1):
-        self.data = self._pad((None, value), (0, length))
+    cpdef void rightpad(Wavetable self, object value=None, int length=-1, double mult=-1):
+        self.data = self._rightpad(value, length, mult)
 
-    cpdef Wavetable rightpadded(Wavetable self, object value=None, int length=1):
-        return Wavetable(self._pad((None, value), (0, length)))
+    cpdef Wavetable rightpadded(Wavetable self, object value=None, int length=-1, double mult=-1):
+        return Wavetable(self._rightpad(value, length, mult))
 
-    cpdef void pad(Wavetable self, object value=None, object length=None):
-        self.data = self._pad(value, length)
+    cpdef void pad(Wavetable self, object value=None, object length=None, object mult=None):
+        self.data = self._pad(value, length, mult)
 
-    cpdef Wavetable padded(Wavetable self, object value=None, object length=None):
-        return Wavetable(self._pad(value, length))
+    cpdef Wavetable padded(Wavetable self, object value=None, object length=None, object mult=None):
+        return Wavetable(self._pad(value, length, mult))
 
     cpdef void repeat(Wavetable self, int reps=2):
         if reps > 1:

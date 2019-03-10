@@ -966,6 +966,8 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_drink;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_harmonics;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_env;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__pad;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__leftpad;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__rightpad;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_leftpad;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_leftpadded;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_rightpad;
@@ -1065,85 +1067,119 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_env {
 /* "pippi/wavetables.pxd":23
  *     cpdef double max(Wavetable self)
  * 
- *     cdef double[:] _pad(Wavetable self, object value=*, object length=*)             # <<<<<<<<<<<<<<
- *     cpdef void leftpad(Wavetable self, object value=*, int length=*)
- *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*)
+ *     cdef double[:] _pad(Wavetable self, object value=*, object length=*, object mult=*)             # <<<<<<<<<<<<<<
+ *     cdef double[:] _leftpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cdef double[:] _rightpad(Wavetable self, object value=*, int length=*, double mult=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__pad {
   int __pyx_n;
   PyObject *value;
   PyObject *length;
+  PyObject *mult;
 };
 
 /* "pippi/wavetables.pxd":24
  * 
- *     cdef double[:] _pad(Wavetable self, object value=*, object length=*)
- *     cpdef void leftpad(Wavetable self, object value=*, int length=*)             # <<<<<<<<<<<<<<
- *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*)
- *     cpdef void rightpad(Wavetable self, object value=*, int length=*)
+ *     cdef double[:] _pad(Wavetable self, object value=*, object length=*, object mult=*)
+ *     cdef double[:] _leftpad(Wavetable self, object value=*, int length=*, double mult=*)             # <<<<<<<<<<<<<<
+ *     cdef double[:] _rightpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void leftpad(Wavetable self, object value=*, int length=*, double mult=*)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__leftpad {
+  int __pyx_n;
+  PyObject *value;
+  int length;
+  double mult;
+};
+
+/* "pippi/wavetables.pxd":25
+ *     cdef double[:] _pad(Wavetable self, object value=*, object length=*, object mult=*)
+ *     cdef double[:] _leftpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cdef double[:] _rightpad(Wavetable self, object value=*, int length=*, double mult=*)             # <<<<<<<<<<<<<<
+ *     cpdef void leftpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*, double mult=*)
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__rightpad {
+  int __pyx_n;
+  PyObject *value;
+  int length;
+  double mult;
+};
+
+/* "pippi/wavetables.pxd":26
+ *     cdef double[:] _leftpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cdef double[:] _rightpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void leftpad(Wavetable self, object value=*, int length=*, double mult=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void rightpad(Wavetable self, object value=*, int length=*, double mult=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_leftpad {
   int __pyx_n;
   PyObject *value;
   int length;
+  double mult;
 };
 
-/* "pippi/wavetables.pxd":25
- *     cdef double[:] _pad(Wavetable self, object value=*, object length=*)
- *     cpdef void leftpad(Wavetable self, object value=*, int length=*)
- *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*)             # <<<<<<<<<<<<<<
- *     cpdef void rightpad(Wavetable self, object value=*, int length=*)
- *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*)
+/* "pippi/wavetables.pxd":27
+ *     cdef double[:] _rightpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void leftpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*, double mult=*)             # <<<<<<<<<<<<<<
+ *     cpdef void rightpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*, double mult=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_leftpadded {
   int __pyx_n;
   PyObject *value;
   int length;
+  double mult;
 };
 
-/* "pippi/wavetables.pxd":26
- *     cpdef void leftpad(Wavetable self, object value=*, int length=*)
- *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*)
- *     cpdef void rightpad(Wavetable self, object value=*, int length=*)             # <<<<<<<<<<<<<<
- *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*)
- *     cpdef void pad(Wavetable self, object value=*, object length=*)
+/* "pippi/wavetables.pxd":28
+ *     cpdef void leftpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void rightpad(Wavetable self, object value=*, int length=*, double mult=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void pad(Wavetable self, object value=*, object length=*, object mult=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_rightpad {
   int __pyx_n;
   PyObject *value;
   int length;
+  double mult;
 };
 
-/* "pippi/wavetables.pxd":27
- *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*)
- *     cpdef void rightpad(Wavetable self, object value=*, int length=*)
- *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*)             # <<<<<<<<<<<<<<
- *     cpdef void pad(Wavetable self, object value=*, object length=*)
- *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*)
+/* "pippi/wavetables.pxd":29
+ *     cpdef Wavetable leftpadded(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void rightpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*, double mult=*)             # <<<<<<<<<<<<<<
+ *     cpdef void pad(Wavetable self, object value=*, object length=*, object mult=*)
+ *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*, object mult=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_rightpadded {
   int __pyx_n;
   PyObject *value;
   int length;
+  double mult;
 };
 
-/* "pippi/wavetables.pxd":28
- *     cpdef void rightpad(Wavetable self, object value=*, int length=*)
- *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*)
- *     cpdef void pad(Wavetable self, object value=*, object length=*)             # <<<<<<<<<<<<<<
- *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*)
+/* "pippi/wavetables.pxd":30
+ *     cpdef void rightpad(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void pad(Wavetable self, object value=*, object length=*, object mult=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*, object mult=*)
  * 
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_pad {
   int __pyx_n;
   PyObject *value;
   PyObject *length;
+  PyObject *mult;
 };
 
-/* "pippi/wavetables.pxd":29
- *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*)
- *     cpdef void pad(Wavetable self, object value=*, object length=*)
- *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*)             # <<<<<<<<<<<<<<
+/* "pippi/wavetables.pxd":31
+ *     cpdef Wavetable rightpadded(Wavetable self, object value=*, int length=*, double mult=*)
+ *     cpdef void pad(Wavetable self, object value=*, object length=*, object mult=*)
+ *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*, object mult=*)             # <<<<<<<<<<<<<<
  * 
  *     cpdef void repeat(Wavetable self, int reps=*)
  */
@@ -1151,10 +1187,11 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_padded {
   int __pyx_n;
   PyObject *value;
   PyObject *length;
+  PyObject *mult;
 };
 
-/* "pippi/wavetables.pxd":31
- *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*)
+/* "pippi/wavetables.pxd":33
+ *     cpdef Wavetable padded(Wavetable self, object value=*, object length=*, object mult=*)
  * 
  *     cpdef void repeat(Wavetable self, int reps=*)             # <<<<<<<<<<<<<<
  *     cpdef Wavetable repeated(Wavetable self, int reps=*)
@@ -1165,7 +1202,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeat {
   int reps;
 };
 
-/* "pippi/wavetables.pxd":32
+/* "pippi/wavetables.pxd":34
  * 
  *     cpdef void repeat(Wavetable self, int reps=*)
  *     cpdef Wavetable repeated(Wavetable self, int reps=*)             # <<<<<<<<<<<<<<
@@ -1177,7 +1214,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeated {
   int reps;
 };
 
-/* "pippi/wavetables.pxd":38
+/* "pippi/wavetables.pxd":40
  *     cpdef void skew(Wavetable self, double tip)
  *     cpdef Wavetable skewed(Wavetable self, double tip)
  *     cpdef void normalize(Wavetable self, double amount=*)             # <<<<<<<<<<<<<<
@@ -1189,7 +1226,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_normalize {
   double amount;
 };
 
-/* "pippi/wavetables.pxd":41
+/* "pippi/wavetables.pxd":43
  *     cpdef void crush(Wavetable self, int steps)
  *     cpdef Wavetable crushed(Wavetable self, int steps)
  *     cpdef double interp(Wavetable self, double pos, str method=*)             # <<<<<<<<<<<<<<
@@ -1201,7 +1238,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_interp {
   PyObject *method;
 };
 
-/* "pippi/wavetables.pxd":75
+/* "pippi/wavetables.pxd":77
  * cdef int* ALL_WAVETABLES
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1213,7 +1250,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_window {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":76
+/* "pippi/wavetables.pxd":78
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1225,7 +1262,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":77
+/* "pippi/wavetables.pxd":79
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_stack(list wavetables, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1237,7 +1274,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_stack {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":79
+/* "pippi/wavetables.pxd":81
  * cpdef list to_stack(list wavetables, int wtsize=?)
  * cdef int to_flag(str value)
  * cpdef Wavetable _randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1251,7 +1288,7 @@ struct __pyx_opt_args_5pippi_10wavetables__randline {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":84
+/* "pippi/wavetables.pxd":86
  * cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)             # <<<<<<<<<<<<<<
@@ -1263,7 +1300,7 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable {
   __Pyx_memviewslice data;
 };
 
-/* "pippi/wavetables.pxd":85
+/* "pippi/wavetables.pxd":87
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
  * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)             # <<<<<<<<<<<<<<
@@ -1274,7 +1311,7 @@ struct __pyx_opt_args_5pippi_10wavetables__seesaw {
   double tip;
 };
 
-/* "pippi/wavetables.pxd":86
+/* "pippi/wavetables.pxd":88
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
  * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)
  * cpdef Wavetable seesaw(object wt, int length, double tip=*)             # <<<<<<<<<<<<<<
@@ -1696,6 +1733,8 @@ struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable {
   struct __pyx_obj_5pippi_10wavetables_Wavetable *(*env)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_env *__pyx_optional_args);
   double (*max)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch);
   __Pyx_memviewslice (*_pad)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__pad *__pyx_optional_args);
+  __Pyx_memviewslice (*_leftpad)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__leftpad *__pyx_optional_args);
+  __Pyx_memviewslice (*_rightpad)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable__rightpad *__pyx_optional_args);
   void (*leftpad)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_leftpad *__pyx_optional_args);
   struct __pyx_obj_5pippi_10wavetables_Wavetable *(*leftpadded)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_leftpadded *__pyx_optional_args);
   void (*rightpad)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_rightpad *__pyx_optional_args);
