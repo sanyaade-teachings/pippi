@@ -16,6 +16,7 @@ cdef class Waveset:
             Waveset self, 
             object values=None, 
             int crossings=3, 
+            int offset=-1,
             int limit=-1, 
             int modulo=1, 
             int samplerate=-1,
@@ -26,7 +27,7 @@ cdef class Waveset:
         crossings = max(crossings, 2)
 
         if values is not None:
-            self._load(values, crossings, limit, modulo)
+            self._load(values, crossings, offset, limit, modulo)
         elif wavesets is not None:
             self._import(wavesets)
 
@@ -54,13 +55,13 @@ cdef class Waveset:
             copy = np.array(wavesets[i], dtype='d')
             self.wavesets += [ copy ]
 
-    cdef void _load(Waveset self, object values, int crossings, int limit, int modulo):
+    cdef void _load(Waveset self, object values, int crossings, int offset, int limit, int modulo):
         cdef double[:] raw
         cdef double[:] waveset
         cdef double original_mag = 0
         cdef double val, last
-        cdef int crossing_count=0, waveset_count=0, waveset_output_count=0, mod_count=0
-        cdef int i=1, start=-1, end=-1
+        cdef int crossing_count=0, waveset_count=0, mod_count=0, waveset_output_count=0, offset_count=0
+        cdef int i=1, start=0, end=0
 
         self.wavesets = []
         self.max_length = 0
@@ -83,11 +84,7 @@ cdef class Waveset:
             self.samplerate = DEFAULT_SAMPLERATE
 
         cdef int length = len(raw)
-
         last = raw[0]
-        start = 0
-        end = 0
-        mod_count = 0
 
         while i < length:
             if (signbit(last) and not signbit(raw[i])) or (not signbit(last) and signbit(raw[i])):
@@ -101,6 +98,11 @@ cdef class Waveset:
                     if mod_count == modulo:
                         mod_count = 0
                         end = i
+
+                        if offset_count <= offset:
+                            offset_count += 1
+                            continue
+
                         self._slice(raw, start, end)
                         waveset_output_count += 1
 
@@ -112,7 +114,7 @@ cdef class Waveset:
             last = raw[i]
             i += 1
 
-        if end < length:
+        if end < length and limit < waveset_output_count:
             self._slice(raw, end, length)
 
     cdef void _slice(Waveset self, double[:] raw, int start, int end):

@@ -11,7 +11,7 @@ cdef class Waveset:
 
     cpdef Waveset copy(Waveset self)
     cdef void _import(Waveset self, list wavesets)
-    cdef void _load(Waveset self, object values, int crossings, int limit, int modulo)
+    cdef void _load(Waveset self, object values, int crossings, int offset, int limit, int modulo)
     cpdef void normalize(Waveset self, double ceiling=*)
     cpdef void reverse(Waveset self)
     cpdef SoundBuffer replace(Waveset self, object waveforms)
