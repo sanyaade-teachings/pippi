@@ -1394,14 +1394,15 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv {
   double window;
 };
 struct __pyx_opt_args_5pippi_3dsp_rand;
+struct __pyx_opt_args_5pippi_3dsp_seed;
 struct __pyx_opt_args_5pippi_3dsp_randint;
 
 /* "dsp.pxd":4
  * 
  * cdef double _mag(double[:,:] snd)
  * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
+ * cpdef void seed(object value=*)
  * cpdef int randint(int low=*, int high=*)
- * cpdef object choice(list choices)
  */
 struct __pyx_opt_args_5pippi_3dsp_rand {
   int __pyx_n;
@@ -1412,6 +1413,18 @@ struct __pyx_opt_args_5pippi_3dsp_rand {
 /* "dsp.pxd":5
  * cdef double _mag(double[:,:] snd)
  * cpdef double rand(double low=*, double high=*)
+ * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ */
+struct __pyx_opt_args_5pippi_3dsp_seed {
+  int __pyx_n;
+  PyObject *value;
+};
+
+/* "dsp.pxd":6
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef void seed(object value=*)
  * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
  * cpdef object choice(list choices)
  * 
@@ -1510,12 +1523,25 @@ struct __pyx_opt_args_5pippi_13interpolation_linear_point {
   int __pyx_n;
   double pulsewidth;
 };
+struct __pyx_opt_args_5pippi_4rand_seed;
 struct __pyx_opt_args_5pippi_4rand_rand;
 struct __pyx_opt_args_5pippi_4rand_randint;
 
 /* "pippi/rand.pxd":3
  * #cython: language_level=3
  * 
+ * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)
+ */
+struct __pyx_opt_args_5pippi_4rand_seed {
+  int __pyx_n;
+  PyObject *value;
+};
+
+/* "pippi/rand.pxd":4
+ * 
+ * cpdef void seed(object value=*)
  * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
  * cpdef int randint(int low=*, int high=*)
  * cpdef object choice(list choices)
@@ -1526,8 +1552,8 @@ struct __pyx_opt_args_5pippi_4rand_rand {
   double high;
 };
 
-/* "pippi/rand.pxd":4
- * 
+/* "pippi/rand.pxd":5
+ * cpdef void seed(object value=*)
  * cpdef double rand(double low=*, double high=*)
  * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
  * cpdef object choice(list choices)

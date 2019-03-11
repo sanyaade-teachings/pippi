@@ -153,6 +153,9 @@ cpdef int randint(int low=0, int high=1):
 cpdef object choice(list choices):
     return _rand.choice(choices)
 
+cpdef void seed(object value=None):
+    _rand.seed(value)
+
 def redrum(*args, **kwargs):
     return dm.DrumMachine(*args, **kwargs)
 

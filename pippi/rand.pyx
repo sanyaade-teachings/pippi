@@ -1,7 +1,14 @@
 #cython: language_level=3
 
 from libc.stdlib cimport rand as _rand
-from libc.stdlib cimport RAND_MAX
+from libc.stdlib cimport RAND_MAX, srand
+from libc.time cimport time
+
+cpdef void seed(object value=None):
+    if value is None:
+        srand(time(NULL))
+    else:
+        srand(<unsigned int>value)
 
 cpdef double rand(double low=0, double high=1):
     return (_rand()/<double>RAND_MAX) * (high-low) + low
