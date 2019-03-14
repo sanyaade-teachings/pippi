@@ -6,7 +6,7 @@ import random
 cimport cython
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
-from pippi.interpolation cimport _linear_point
+from pippi.interpolation cimport _linear_point, _linear_pos
 from pippi.dsp cimport _mag
 from pippi cimport soundpipe
 from cpython cimport bool
@@ -69,6 +69,31 @@ cpdef SoundBuffer vspeed(SoundBuffer snd, object lfo, double minspeed, double ma
     snd.frames = _vspeed(snd.frames, chan, out, _lfo, minspeed, maxspeed, snd.samplerate)
     return snd
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:,:] _widen(double[:,:] snd, double[:,:] out, double[:] width):
+    cdef double mid, w, pos
+    cdef int channels = snd.shape[1]
+    cdef int length = len(snd)
+    cdef int i, c, d=0
+
+    for i in range(length-1):
+        pos = <double>i / length
+        w = _linear_pos(width, pos)
+        mid = (1.0-w) / (1.0 + w)
+        for c in range(channels):
+            d = c + 1
+            while d > channels:
+                d -= channels
+            out[i,c] = snd[i+1,c] + mid * snd[i+1,d]
+
+    return out
+
+cpdef SoundBuffer widen(SoundBuffer snd, object width=1):
+    cdef double[:] _width = wavetables.to_window(width)
+    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
+    return SoundBuffer(_widen(snd.frames, out, _width), samplerate=snd.samplerate, channels=snd.channels)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

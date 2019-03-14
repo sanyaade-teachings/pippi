@@ -20,6 +20,16 @@ class TestFx(TestCase):
         out = carrier * snd.toenv()
         out.write('tests/renders/fx_envelope_follower.wav')
 
+    def test_widen(self):
+        snd = dsp.read('tests/sounds/linux.wav')
+        out = fx.widen(snd, dsp.win('phasor', 0, 1))
+        out.write('tests/renders/fx_widen_linux.wav')
+
+        osc = oscs.Osc('sine', amp=0.2)
+        out = osc.play(snd.dur)
+        out = fx.widen(out, dsp.win('phasor', 0, 1))
+        out.write('tests/renders/fx_widen_sine.wav')
+
     def test_delay(self):
         snd = dsp.read('tests/sounds/guitar10s.wav')
         snd = fx.delay(snd, 1, 0.5)
