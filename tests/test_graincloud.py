@@ -77,9 +77,7 @@ class TestCloud(TestCase):
 
     def test_graincloud_with_read_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
-        cloud = grains.Cloud(sound, 
-                            position=dsp.wt('hann') * sound.dur, 
-                        )
+        cloud = grains.Cloud(sound, position=dsp.win('hann', 0, 1))
 
         length = 30
         framelength = int(length * sound.samplerate)

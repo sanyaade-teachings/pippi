@@ -1,7 +1,10 @@
-.PHONY: test examples build
+.PHONY: test test-grains examples build
 
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
+
+test-grains:
+	python -m unittest tests/test_graincloud.py -v
 
 clean:
 	rm -rf build/

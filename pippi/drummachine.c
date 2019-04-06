@@ -1392,14 +1392,15 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv {
   double window;
 };
 struct __pyx_opt_args_5pippi_3dsp_rand;
+struct __pyx_opt_args_5pippi_3dsp_seed;
 struct __pyx_opt_args_5pippi_3dsp_randint;
 
 /* "dsp.pxd":4
  * 
  * cdef double _mag(double[:,:] snd)
  * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
+ * cpdef void seed(object value=*)
  * cpdef int randint(int low=*, int high=*)
- * cpdef object choice(list choices)
  */
 struct __pyx_opt_args_5pippi_3dsp_rand {
   int __pyx_n;
@@ -1410,6 +1411,18 @@ struct __pyx_opt_args_5pippi_3dsp_rand {
 /* "dsp.pxd":5
  * cdef double _mag(double[:,:] snd)
  * cpdef double rand(double low=*, double high=*)
+ * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ */
+struct __pyx_opt_args_5pippi_3dsp_seed {
+  int __pyx_n;
+  PyObject *value;
+};
+
+/* "dsp.pxd":6
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef void seed(object value=*)
  * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
  * cpdef object choice(list choices)
  * 
@@ -1422,6 +1435,7 @@ struct __pyx_opt_args_5pippi_3dsp_randint {
 struct __pyx_opt_args_5pippi_2fx__fir;
 struct __pyx_opt_args_5pippi_2fx_fir;
 struct __pyx_opt_args_5pippi_2fx_envelope_follower;
+struct __pyx_opt_args_5pippi_2fx_widen;
 
 /* "fx.pxd":7
  * 
@@ -1440,6 +1454,7 @@ struct __pyx_opt_args_5pippi_2fx__fir {
  * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=*)
  * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)             # <<<<<<<<<<<<<<
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
+ * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
  */
 struct __pyx_opt_args_5pippi_2fx_fir {
   int __pyx_n;
@@ -1450,37 +1465,21 @@ struct __pyx_opt_args_5pippi_2fx_fir {
  * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=*)
  * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
  */
 struct __pyx_opt_args_5pippi_2fx_envelope_follower {
   int __pyx_n;
   double window;
 };
-struct __pyx_opt_args_5pippi_9soundpipe_mincer;
-struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
 
-/* "pippi/soundpipe.pxd":160
- * 
- * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, double amp, double[:] pitch)
- * cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=?, int samplerate=?)             # <<<<<<<<<<<<<<
- * 
- * cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, double drive, double dcoffset, int length, int channels, bint dcblock)
+/* "fx.pxd":10
+ * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
+ * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
+ * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)             # <<<<<<<<<<<<<<
  */
-struct __pyx_opt_args_5pippi_9soundpipe_mincer {
+struct __pyx_opt_args_5pippi_2fx_widen {
   int __pyx_n;
-  int wtsize;
-  int samplerate;
-};
-
-/* "pippi/soundpipe.pxd":169
- * 
- * cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
- * cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)             # <<<<<<<<<<<<<<
- * 
- * cdef double** memoryview2ftbls(double[:,:] snd)
- */
-struct __pyx_opt_args_5pippi_9soundpipe_paulstretch {
-  int __pyx_n;
-  int samplerate;
+  PyObject *width;
 };
 struct __pyx_opt_args_5pippi_13interpolation__linear_point;
 struct __pyx_opt_args_5pippi_13interpolation_linear_point;
@@ -1508,12 +1507,52 @@ struct __pyx_opt_args_5pippi_13interpolation_linear_point {
   int __pyx_n;
   double pulsewidth;
 };
+struct __pyx_opt_args_5pippi_9soundpipe_mincer;
+struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
+
+/* "soundpipe.pxd":160
+ * 
+ * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, double amp, double[:] pitch)
+ * cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=?, int samplerate=?)             # <<<<<<<<<<<<<<
+ * 
+ * cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, double drive, double dcoffset, int length, int channels, bint dcblock)
+ */
+struct __pyx_opt_args_5pippi_9soundpipe_mincer {
+  int __pyx_n;
+  int wtsize;
+  int samplerate;
+};
+
+/* "soundpipe.pxd":169
+ * 
+ * cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
+ * cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)             # <<<<<<<<<<<<<<
+ * 
+ * cdef double** memoryview2ftbls(double[:,:] snd)
+ */
+struct __pyx_opt_args_5pippi_9soundpipe_paulstretch {
+  int __pyx_n;
+  int samplerate;
+};
+struct __pyx_opt_args_5pippi_4rand_seed;
 struct __pyx_opt_args_5pippi_4rand_rand;
 struct __pyx_opt_args_5pippi_4rand_randint;
 
 /* "rand.pxd":3
  * #cython: language_level=3
  * 
+ * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)
+ */
+struct __pyx_opt_args_5pippi_4rand_seed {
+  int __pyx_n;
+  PyObject *value;
+};
+
+/* "rand.pxd":4
+ * 
+ * cpdef void seed(object value=*)
  * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
  * cpdef int randint(int low=*, int high=*)
  * cpdef object choice(list choices)
@@ -1524,8 +1563,8 @@ struct __pyx_opt_args_5pippi_4rand_rand {
   double high;
 };
 
-/* "rand.pxd":4
- * 
+/* "rand.pxd":5
+ * cpdef void seed(object value=*)
  * cpdef double rand(double low=*, double high=*)
  * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
  * cpdef object choice(list choices)
@@ -1590,16 +1629,16 @@ struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer {
 };
 
 
-/* "grains.pxd":6
- * from pippi.soundpipe cimport *
+/* "grains.pxd":5
+ * #from pippi.ugens.core cimport ugen_t
  * 
  * cdef class Cloud:             # <<<<<<<<<<<<<<
- *     cdef double** snd
+ *     cdef double[:,:] snd
  *     cdef unsigned int framelength
  */
 struct __pyx_obj_5pippi_6grains_Cloud {
   PyObject_HEAD
-  double **snd;
+  __Pyx_memviewslice snd;
   unsigned int framelength;
   double length;
   unsigned int channels;
@@ -1613,12 +1652,6 @@ struct __pyx_obj_5pippi_6grains_Cloud {
   __Pyx_memviewslice jitter;
   __Pyx_memviewslice grainlength;
   __Pyx_memviewslice grid;
-  __Pyx_memviewslice lpf;
-  int has_lpf;
-  __Pyx_memviewslice hpf;
-  int has_hpf;
-  __Pyx_memviewslice bpf;
-  int has_bpf;
   __Pyx_memviewslice mask;
   int has_mask;
 };
@@ -2584,14 +2617,14 @@ static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 
 /* Module declarations from 'pippi.fx' */
 
-/* Module declarations from 'libc.stdint' */
-
-/* Module declarations from 'pippi.soundpipe' */
-
 /* Module declarations from 'pippi.grains' */
 static PyTypeObject *__pyx_ptype_5pippi_6grains_Cloud = 0;
 
 /* Module declarations from 'pippi.interpolation' */
+
+/* Module declarations from 'libc.stdint' */
+
+/* Module declarations from 'pippi.soundpipe' */
 
 /* Module declarations from 'pippi' */
 
@@ -19398,10 +19431,10 @@ static int __Pyx_modinit_type_import_code(void) {
    if (!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer) __PYX_ERR(4, 10, __pyx_L1_error)
   __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer->tp_dict); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(4, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.grains"); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 6, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.grains"); if (unlikely(!__pyx_t_1)) __PYX_ERR(5, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_5pippi_6grains_Cloud = __Pyx_ImportType(__pyx_t_1, "pippi.grains", "Cloud", sizeof(struct __pyx_obj_5pippi_6grains_Cloud), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_6grains_Cloud) __PYX_ERR(5, 6, __pyx_L1_error)
+   if (!__pyx_ptype_5pippi_6grains_Cloud) __PYX_ERR(5, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
