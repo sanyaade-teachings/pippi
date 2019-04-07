@@ -6,6 +6,9 @@ test:
 test-grains:
 	python -m unittest tests/test_graincloud.py -v
 
+test-wavesets:
+	python -m unittest tests/test_wavesets.py -v
+
 clean:
 	rm -rf build/
 	rm -rf pippi/*.c

@@ -130,6 +130,14 @@ cdef class Waveset:
         else:
             self.min_length = min(self.min_length, waveset_length)
 
+    cpdef void interleave(Waveset self, Waveset source):
+        cdef int i = 0
+        cdef list interleaved = []
+        cdef int shortest = min(len(self), len(source))
+        for i in range(shortest):
+            interleaved += [ self.wavesets[i], source.wavesets[i] ]
+        self.wavesets = interleaved
+
     cpdef SoundBuffer stretch(Waveset self, object factor=2.0):
         cdef list out = []
         cdef int i, repeat
