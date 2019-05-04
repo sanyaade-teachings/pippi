@@ -81,32 +81,32 @@ So use eg `dsp.wt('sine')` instead of `dsp.wt(dsp.SINE)` or `sound.pan(0.1, meth
 
 Wavetable / window options are:
 
-    - `sine`
-    - `sinein`
-    - `sineout`
-    - `cos`
-    - `tri`
-    - `saw`
-    - `phasor`
-    - `rsaw`
-    - `hann`
-    - `hamm`
-    - `black` or `blackman`
-    - `bart` or `bartlett`
-    - `kaiser`
-    - `rnd`
-    - `line`
-    - `hannin`
-    - `hannout`
-    - `square`
-    - `sinc`
+- `sine`
+- `sinein`
+- `sineout`
+- `cos`
+- `tri`
+- `saw`
+- `phasor`
+- `rsaw`
+- `hann`
+- `hamm`
+- `black` or `blackman`
+- `bart` or `bartlett`
+- `kaiser`
+- `rnd`
+- `line`
+- `hannin`
+- `hannout`
+- `square`
+- `sinc`
 
 Panning types: 
 
-    - `constant`
-    - `linear`
-    - `sine`
-    - `gogins`
+- `constant`
+- `linear`
+- `sine`
+- `gogins`
 
 
 #### Features
