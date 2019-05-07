@@ -38,7 +38,7 @@ cdef class Cloud:
             object speed=1.0, 
             object spread=0.0, 
             object jitter=0.0, 
-            object grainlength=0.082, 
+            object grainlength=0.2, 
             object grid=None,
             object mask=None,
             unsigned int wtsize=4096,
@@ -68,7 +68,7 @@ cdef class Cloud:
         self.grainlength = to_window(grainlength)
 
         if grid is None:
-            self.grid = np.multiply(to_window(grainlength), 0.5)
+            self.grid = np.multiply(self.grainlength, 0.3)
         else:
             self.grid = to_window(grid)
 
@@ -79,6 +79,7 @@ cdef class Cloud:
             self.mask = array.array('i', mask)
 
     def play(self, double length):
+        cdef double[:] grid = np.divide(self.grid, length)
         cdef unsigned int outframelength = <unsigned int>(self.samplerate * length)
         cdef double[:,:] out = np.zeros((outframelength, self.channels), dtype='d')
         cdef unsigned int write_pos=0
@@ -104,11 +105,13 @@ cdef class Cloud:
         if self.has_mask:
             masklength = <unsigned int>len(self.mask)
 
-        while write_pos <= write_boundry: 
-            pos = <double>write_pos / write_boundry
+        while pos <= 1:
+            write_pos = <unsigned int>(pos * write_boundry)
+            write_jitter = <int>(interpolation._linear_pos(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
+            write_pos += max(-write_jitter, write_jitter)
 
             if self.has_mask and self.mask[<int>(count % masklength)] == 0:
-                write_pos += <unsigned int>(interpolation._linear_pos(self.grid, pos) * self.samplerate)
+                pos += interpolation._linear_pos(grid, pos)
                 count += 1
                 continue
 
@@ -150,10 +153,8 @@ cdef class Cloud:
                     for c in range(self.channels):
                         out[write_pos+i, c] += grain[i,c]
 
-            write_pos += <unsigned int>(interpolation._linear_point(self.grid, pos) * self.samplerate)
+            pos += interpolation._linear_pos(grid, pos)
             count += 1
-            write_jitter = <int>(interpolation._linear_pos(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
-            write_pos += max(-write_jitter, write_jitter)
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
