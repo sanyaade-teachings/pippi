@@ -30,6 +30,19 @@ class TestFx(TestCase):
         out = fx.widen(out, dsp.win('phasor', 0, 1))
         out.write('tests/renders/fx_widen_sine.wav')
 
+    def test_crossover(self):
+        snd = dsp.read('tests/sounds/linux.wav')
+        amount = dsp.win('phasor', 0, 1)
+        smooth = 0.3
+        fade = dsp.win('rsaw', 0, 1)
+        out = fx.crossover(snd, amount, smooth, fade)
+        out.write('tests/renders/fx_crossover_linux.wav')
+
+        osc = oscs.Osc('sine', amp=0.2)
+        out = osc.play(snd.dur)
+        out = fx.crossover(out, amount, smooth, fade)
+        out.write('tests/renders/fx_crossover_sine.wav')
+
     def test_delay(self):
         snd = dsp.read('tests/sounds/guitar10s.wav')
         snd = fx.delay(snd, 1, 0.5)

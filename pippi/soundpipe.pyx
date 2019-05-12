@@ -41,6 +41,7 @@ cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double[:] freq, int le
 
         pos = 0
         for i in range(length):
+            pos = <double>i / <double>length
             butbp.freq = interpolation._linear_pos(freq, pos)
             sample = <double>snd[i,c]
             sp_butbp_compute(sp, butbp, &sample, &filtered)

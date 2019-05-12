@@ -2831,13 +2831,13 @@ static const char __pyx_k_snd[] = "snd";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_grid[] = "grid";
-static const char __pyx_k_hann[] = "hann";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_mask[] = "mask";
 static const char __pyx_k_mode[] = "mode";
 static const char __pyx_k_name[] = "name";
 static const char __pyx_k_ndim[] = "ndim";
 static const char __pyx_k_pack[] = "pack";
+static const char __pyx_k_sine[] = "sine";
 static const char __pyx_k_size[] = "size";
 static const char __pyx_k_step[] = "step";
 static const char __pyx_k_stop[] = "stop";
@@ -2978,7 +2978,6 @@ static PyObject *__pyx_n_s_getstate;
 static PyObject *__pyx_kp_s_got_differing_extents_in_dimensi;
 static PyObject *__pyx_n_s_grainlength;
 static PyObject *__pyx_n_s_grid;
-static PyObject *__pyx_n_u_hann;
 static PyObject *__pyx_n_u_i;
 static PyObject *__pyx_n_s_id;
 static PyObject *__pyx_n_s_import;
@@ -3020,6 +3019,7 @@ static PyObject *__pyx_n_s_samplerate;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_shape;
+static PyObject *__pyx_n_u_sine;
 static PyObject *__pyx_n_s_size;
 static PyObject *__pyx_n_s_snd;
 static PyObject *__pyx_n_s_speed;
@@ -3669,7 +3669,7 @@ static int __pyx_pf_5pippi_6grains_5Cloud___cinit__(struct __pyx_obj_5pippi_6gra
  *         self.wtsize = wtsize
  * 
  *         if window is None:             # <<<<<<<<<<<<<<
- *             window = 'hann'
+ *             window = 'sine'
  *         self.window = to_window(window)
  */
   __pyx_t_3 = (__pyx_v_window == Py_None);
@@ -3679,25 +3679,25 @@ static int __pyx_pf_5pippi_6grains_5Cloud___cinit__(struct __pyx_obj_5pippi_6gra
     /* "pippi/grains.pyx":56
  * 
  *         if window is None:
- *             window = 'hann'             # <<<<<<<<<<<<<<
+ *             window = 'sine'             # <<<<<<<<<<<<<<
  *         self.window = to_window(window)
  * 
  */
-    __Pyx_INCREF(__pyx_n_u_hann);
-    __Pyx_DECREF_SET(__pyx_v_window, __pyx_n_u_hann);
+    __Pyx_INCREF(__pyx_n_u_sine);
+    __Pyx_DECREF_SET(__pyx_v_window, __pyx_n_u_sine);
 
     /* "pippi/grains.pyx":55
  *         self.wtsize = wtsize
  * 
  *         if window is None:             # <<<<<<<<<<<<<<
- *             window = 'hann'
+ *             window = 'sine'
  *         self.window = to_window(window)
  */
   }
 
   /* "pippi/grains.pyx":57
  *         if window is None:
- *             window = 'hann'
+ *             window = 'sine'
  *         self.window = to_window(window)             # <<<<<<<<<<<<<<
  * 
  *         if position is None:
@@ -19945,7 +19945,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_got_differing_extents_in_dimensi, __pyx_k_got_differing_extents_in_dimensi, sizeof(__pyx_k_got_differing_extents_in_dimensi), 0, 0, 1, 0},
   {&__pyx_n_s_grainlength, __pyx_k_grainlength, sizeof(__pyx_k_grainlength), 0, 0, 1, 1},
   {&__pyx_n_s_grid, __pyx_k_grid, sizeof(__pyx_k_grid), 0, 0, 1, 1},
-  {&__pyx_n_u_hann, __pyx_k_hann, sizeof(__pyx_k_hann), 0, 1, 0, 1},
   {&__pyx_n_u_i, __pyx_k_i, sizeof(__pyx_k_i), 0, 1, 0, 1},
   {&__pyx_n_s_id, __pyx_k_id, sizeof(__pyx_k_id), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
@@ -19987,6 +19986,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
+  {&__pyx_n_u_sine, __pyx_k_sine, sizeof(__pyx_k_sine), 0, 1, 0, 1},
   {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
   {&__pyx_n_s_snd, __pyx_k_snd, sizeof(__pyx_k_snd), 0, 0, 1, 1},
   {&__pyx_n_s_speed, __pyx_k_speed, sizeof(__pyx_k_speed), 0, 0, 1, 1},

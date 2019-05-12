@@ -53,7 +53,7 @@ cdef class Cloud:
         self.wtsize = wtsize
 
         if window is None:
-            window = 'hann'
+            window = 'sine'
         self.window = to_window(window)
 
         if position is None:
