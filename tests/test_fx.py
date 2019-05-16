@@ -30,6 +30,15 @@ class TestFx(TestCase):
         out = fx.widen(out, dsp.win('phasor', 0, 1))
         out.write('tests/renders/fx_widen_sine.wav')
 
+    def test_crush(self):
+        snd = dsp.read('tests/sounds/linux.wav')
+        out = fx.crush(snd)
+        out.write('tests/renders/fx_crush_linux.wav')
+
+        snd = dsp.read('tests/sounds/guitar1s.wav')
+        out = fx.crush(snd)
+        out.write('tests/renders/fx_crush_guitar.wav')
+
     def test_crossover(self):
         snd = dsp.read('tests/sounds/linux.wav')
         amount = dsp.win('phasor', 0, 1)

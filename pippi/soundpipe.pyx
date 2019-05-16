@@ -20,6 +20,37 @@ cdef double** memoryview2ftbls(double[:,:] snd):
 
     return tbls
 
+cdef double[:,:] _bitcrush(double[:,:] snd, double[:,:] out, double bitdepth, double samplerate, int length, int channels):
+    cdef sp_data* sp
+    cdef sp_bitcrush* bitcrush
+    cdef double sample = 0
+    cdef double crushed = 0
+    cdef int i=0, c=0
+
+    sp_create(&sp)
+
+    for c in range(channels):
+        sp_bitcrush_create(&bitcrush)
+        sp_bitcrush_init(sp, bitcrush)
+        bitcrush.bitdepth = bitdepth
+        bitcrush.srate = samplerate
+
+        for i in range(length):
+            sp_bitcrush_compute(sp, bitcrush, &snd[i,c], &crushed)
+            out[i,c] = crushed
+
+        sp_bitcrush_destroy(&bitcrush)
+
+    sp_destroy(&sp)
+
+    return out
+
+cpdef double[:,:] bitcrush(double[:,:] snd, double bitdepth, double samplerate):
+    cdef int length = <int>len(snd)
+    cdef int channels = <int>snd.shape[1]
+    cdef double[:,:] out = np.zeros((length, channels), dtype='d')
+    return _bitcrush(snd, out, bitdepth, samplerate, length, channels)
+
 cdef double[:,:] _butbp(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels):
     cdef sp_data* sp
     cdef sp_butbp* butbp

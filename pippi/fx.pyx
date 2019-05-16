@@ -4,6 +4,7 @@ import numpy as np
 import numbers
 import random
 cimport cython
+import math
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
 from pippi.interpolation cimport _linear_point, _linear_pos
@@ -12,6 +13,15 @@ from pippi cimport soundpipe
 from cpython cimport bool
 
 cdef double MINDENSITY = 0.001
+
+
+cpdef SoundBuffer crush(SoundBuffer snd, object bitdepth=None, object samplerate=None):
+    if bitdepth is None:
+        bitdepth = random.triangular(0, 16)
+    if samplerate is None:
+        samplerate = random.triangular(0, snd.samplerate)
+    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
+    return SoundBuffer(soundpipe._bitcrush(snd.frames, out, <double>bitdepth, <double>samplerate, len(snd), snd.channels))
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

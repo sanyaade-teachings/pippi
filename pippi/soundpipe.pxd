@@ -93,6 +93,19 @@ cdef extern from "soundpipe.h":
     int sp_mincer_init(sp_data*, sp_mincer*, sp_ftbl*, int)
     int sp_mincer_compute(sp_data*, sp_mincer*, double*, double*)
 
+    ctypedef struct sp_fold:
+        pass
+
+    ctypedef struct sp_bitcrush:
+        double bitdepth
+        double srate
+        sp_fold* fold
+
+    int sp_bitcrush_create(sp_bitcrush**)
+    int sp_bitcrush_destroy(sp_bitcrush**)
+    int sp_bitcrush_init(sp_data*, sp_bitcrush*)
+    int sp_bitcrush_compute(sp_data*, sp_bitcrush*, double*, double*)
+
     ctypedef struct sp_butlp:
         double sr, freq, istor
         double lkf
@@ -146,6 +159,9 @@ cdef extern from "soundpipe.h":
     int sp_bal_init(sp_data*, sp_bal*)
     int sp_bal_compute(sp_data*, sp_bal*, double*, double*, double*)
 
+
+cdef double[:,:] _bitcrush(double[:,:] snd, double[:,:] out, double bitdepth, double samplerate, int length, int channels)
+cpdef double[:,:] bitcrush(double[:,:] snd, double bitdepth, double samplerate)
 
 cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels)
 cpdef double[:,:] butbr(double[:,:] snd, double[:] freq)
