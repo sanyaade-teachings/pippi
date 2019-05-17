@@ -12,6 +12,9 @@ test-wavesets:
 test-fx:
 	python -m unittest tests/test_fx.py -v
 
+test-noise:
+	python -m unittest tests/test_noise.py -v
+
 clean:
 	rm -rf build/
 	rm -rf pippi/*.c

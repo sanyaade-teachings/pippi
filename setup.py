@@ -25,7 +25,9 @@ ext_modules = cythonize([
         ),
         Extension('pippi.graph', ['pippi/graph.pyx']), 
         Extension('pippi.interpolation', ['pippi/interpolation.pyx']),
-
+        Extension('pippi.noise', ['pippi/noise.pyx'], 
+            include_dirs=[np.get_include()], 
+        ), 
         Extension('pippi.oscs', ['pippi/oscs.pyx']), 
         Extension('pippi.dss', ['pippi/dss.pyx']), 
         Extension('pippi.fold', ['pippi/fold.pyx']), 
