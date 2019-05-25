@@ -25,8 +25,8 @@ cdef class Pulsar2d:
             object amp=1.0, 
             double phase=0, 
 
-            object wt_mod=0, 
-            object win_mod=0, 
+            object wt_mod=None, 
+            object win_mod=None, 
 
             tuple burst=None,
             object mask=0.0,
@@ -34,6 +34,12 @@ cdef class Pulsar2d:
             int channels=DEFAULT_CHANNELS,
             int samplerate=DEFAULT_SAMPLERATE,
         ):
+
+        if wt_mod is None:
+            wt_mod = 'saw'
+
+        if win_mod is None:
+            win_mod = 'saw'
 
         self.freq = wts.to_wavetable(freq)
         self.amp = wts.to_window(amp)

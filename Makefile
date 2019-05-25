@@ -15,6 +15,9 @@ test-fx:
 test-noise:
 	python -m unittest tests/test_noise.py -v
 
+test-oscs:
+	python -m unittest tests/test_oscs.py -v
+
 clean:
 	rm -rf build/
 	rm -rf pippi/*.c

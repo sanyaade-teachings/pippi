@@ -2682,6 +2682,7 @@ static const char __pyx_k_np[] = "np";
 static const char __pyx_k_amp[] = "amp";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
+static const char __pyx_k_saw[] = "saw";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_freq[] = "freq";
@@ -2865,6 +2866,7 @@ static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
 static PyObject *__pyx_n_s_samplerate;
+static PyObject *__pyx_n_u_saw;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_shape;
@@ -3041,11 +3043,27 @@ static int __pyx_pw_5pippi_8pulsar2d_8Pulsar2d_1__cinit__(PyObject *__pyx_v_self
     values[2] = ((PyObject *)__pyx_float_440_0);
     values[3] = ((PyObject *)__pyx_int_1);
     values[4] = ((PyObject *)__pyx_float_1_0);
-    values[6] = ((PyObject *)__pyx_int_0);
-    values[7] = ((PyObject *)__pyx_int_0);
+
+    /* "pippi/pulsar2d.pyx":28
+ *             double phase=0,
+ * 
+ *             object wt_mod=None,             # <<<<<<<<<<<<<<
+ *             object win_mod=None,
+ * 
+ */
+    values[6] = ((PyObject *)Py_None);
+
+    /* "pippi/pulsar2d.pyx":29
+ * 
+ *             object wt_mod=None,
+ *             object win_mod=None,             # <<<<<<<<<<<<<<
+ * 
+ *             tuple burst=None,
+ */
+    values[7] = ((PyObject *)Py_None);
 
     /* "pippi/pulsar2d.pyx":31
- *             object win_mod=0,
+ *             object win_mod=None,
  * 
  *             tuple burst=None,             # <<<<<<<<<<<<<<
  *             object mask=0.0,
@@ -3254,9 +3272,9 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   PyObject *__pyx_v_window = NULL;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
-  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_t_1;
   int __pyx_t_2;
-  int __pyx_t_3;
+  __Pyx_memviewslice __pyx_t_3 = { 0, 0, { 0 }, { 0 }, { 0 } };
   PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
@@ -3285,84 +3303,146 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   __Pyx_RefNannySetupContext("__cinit__", 0);
   __Pyx_INCREF(__pyx_v_wavetables);
   __Pyx_INCREF(__pyx_v_windows);
+  __Pyx_INCREF(__pyx_v_wt_mod);
+  __Pyx_INCREF(__pyx_v_win_mod);
 
   /* "pippi/pulsar2d.pyx":38
  *         ):
+ * 
+ *         if wt_mod is None:             # <<<<<<<<<<<<<<
+ *             wt_mod = 'saw'
+ * 
+ */
+  __pyx_t_1 = (__pyx_v_wt_mod == Py_None);
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "pippi/pulsar2d.pyx":39
+ * 
+ *         if wt_mod is None:
+ *             wt_mod = 'saw'             # <<<<<<<<<<<<<<
+ * 
+ *         if win_mod is None:
+ */
+    __Pyx_INCREF(__pyx_n_u_saw);
+    __Pyx_DECREF_SET(__pyx_v_wt_mod, __pyx_n_u_saw);
+
+    /* "pippi/pulsar2d.pyx":38
+ *         ):
+ * 
+ *         if wt_mod is None:             # <<<<<<<<<<<<<<
+ *             wt_mod = 'saw'
+ * 
+ */
+  }
+
+  /* "pippi/pulsar2d.pyx":41
+ *             wt_mod = 'saw'
+ * 
+ *         if win_mod is None:             # <<<<<<<<<<<<<<
+ *             win_mod = 'saw'
+ * 
+ */
+  __pyx_t_2 = (__pyx_v_win_mod == Py_None);
+  __pyx_t_1 = (__pyx_t_2 != 0);
+  if (__pyx_t_1) {
+
+    /* "pippi/pulsar2d.pyx":42
+ * 
+ *         if win_mod is None:
+ *             win_mod = 'saw'             # <<<<<<<<<<<<<<
+ * 
+ *         self.freq = wts.to_wavetable(freq)
+ */
+    __Pyx_INCREF(__pyx_n_u_saw);
+    __Pyx_DECREF_SET(__pyx_v_win_mod, __pyx_n_u_saw);
+
+    /* "pippi/pulsar2d.pyx":41
+ *             wt_mod = 'saw'
+ * 
+ *         if win_mod is None:             # <<<<<<<<<<<<<<
+ *             win_mod = 'saw'
+ * 
+ */
+  }
+
+  /* "pippi/pulsar2d.pyx":44
+ *             win_mod = 'saw'
  * 
  *         self.freq = wts.to_wavetable(freq)             # <<<<<<<<<<<<<<
  *         self.amp = wts.to_window(amp)
  *         self.wt_mod = wts.to_window(wt_mod)
  */
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_freq, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_freq, 0, NULL); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 44, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->freq, 0);
-  __pyx_v_self->freq = __pyx_t_1;
-  __pyx_t_1.memview = NULL;
-  __pyx_t_1.data = NULL;
+  __pyx_v_self->freq = __pyx_t_3;
+  __pyx_t_3.memview = NULL;
+  __pyx_t_3.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":39
+  /* "pippi/pulsar2d.pyx":45
  * 
  *         self.freq = wts.to_wavetable(freq)
  *         self.amp = wts.to_window(amp)             # <<<<<<<<<<<<<<
  *         self.wt_mod = wts.to_window(wt_mod)
  *         self.win_mod = wts.to_window(win_mod)
  */
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_amp, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_amp, 0, NULL); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 45, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->amp, 0);
-  __pyx_v_self->amp = __pyx_t_1;
-  __pyx_t_1.memview = NULL;
-  __pyx_t_1.data = NULL;
+  __pyx_v_self->amp = __pyx_t_3;
+  __pyx_t_3.memview = NULL;
+  __pyx_t_3.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":40
+  /* "pippi/pulsar2d.pyx":46
  *         self.freq = wts.to_wavetable(freq)
  *         self.amp = wts.to_window(amp)
  *         self.wt_mod = wts.to_window(wt_mod)             # <<<<<<<<<<<<<<
  *         self.win_mod = wts.to_window(win_mod)
  *         self.mask = wts.to_window(mask)
  */
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_wt_mod, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_wt_mod, 0, NULL); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 46, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->wt_mod, 0);
-  __pyx_v_self->wt_mod = __pyx_t_1;
-  __pyx_t_1.memview = NULL;
-  __pyx_t_1.data = NULL;
+  __pyx_v_self->wt_mod = __pyx_t_3;
+  __pyx_t_3.memview = NULL;
+  __pyx_t_3.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":41
+  /* "pippi/pulsar2d.pyx":47
  *         self.amp = wts.to_window(amp)
  *         self.wt_mod = wts.to_window(wt_mod)
  *         self.win_mod = wts.to_window(win_mod)             # <<<<<<<<<<<<<<
  *         self.mask = wts.to_window(mask)
  * 
  */
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_win_mod, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 41, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_win_mod, 0, NULL); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 47, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->win_mod, 0);
-  __pyx_v_self->win_mod = __pyx_t_1;
-  __pyx_t_1.memview = NULL;
-  __pyx_t_1.data = NULL;
+  __pyx_v_self->win_mod = __pyx_t_3;
+  __pyx_t_3.memview = NULL;
+  __pyx_t_3.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":42
+  /* "pippi/pulsar2d.pyx":48
  *         self.wt_mod = wts.to_window(wt_mod)
  *         self.win_mod = wts.to_window(win_mod)
  *         self.mask = wts.to_window(mask)             # <<<<<<<<<<<<<<
  * 
  *         if burst is not None:
  */
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_mask, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_mask, 0, NULL); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 48, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->mask, 0);
-  __pyx_v_self->mask = __pyx_t_1;
-  __pyx_t_1.memview = NULL;
-  __pyx_t_1.data = NULL;
+  __pyx_v_self->mask = __pyx_t_3;
+  __pyx_t_3.memview = NULL;
+  __pyx_t_3.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":44
+  /* "pippi/pulsar2d.pyx":50
  *         self.mask = wts.to_window(mask)
  * 
  *         if burst is not None:             # <<<<<<<<<<<<<<
  *             self.burst_length = burst[0] + burst[1]
  *             self.burst = np.array(([1]*burst[0]) + ([0]*burst[1]), dtype='long')
  */
-  __pyx_t_2 = (__pyx_v_burst != ((PyObject*)Py_None));
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
+  __pyx_t_1 = (__pyx_v_burst != ((PyObject*)Py_None));
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
 
-    /* "pippi/pulsar2d.pyx":45
+    /* "pippi/pulsar2d.pyx":51
  * 
  *         if burst is not None:
  *             self.burst_length = burst[0] + burst[1]             # <<<<<<<<<<<<<<
@@ -3371,48 +3451,48 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
     if (unlikely(__pyx_v_burst == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 45, __pyx_L1_error)
+      __PYX_ERR(0, 51, __pyx_L1_error)
     }
-    __pyx_t_4 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 51, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     if (unlikely(__pyx_v_burst == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 45, __pyx_L1_error)
+      __PYX_ERR(0, 51, __pyx_L1_error)
     }
-    __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 51, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = PyNumber_Add(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Add(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 51, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 51, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_v_self->burst_length = __pyx_t_7;
 
-    /* "pippi/pulsar2d.pyx":46
+    /* "pippi/pulsar2d.pyx":52
  *         if burst is not None:
  *             self.burst_length = burst[0] + burst[1]
  *             self.burst = np.array(([1]*burst[0]) + ([0]*burst[1]), dtype='long')             # <<<<<<<<<<<<<<
  *         else:
  *             self.burst_length = 1
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (unlikely(__pyx_v_burst == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 46, __pyx_L1_error)
+      __PYX_ERR(0, 52, __pyx_L1_error)
     }
-    __pyx_t_6 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_int_1);
     __Pyx_GIVEREF(__pyx_int_1);
     PyList_SET_ITEM(__pyx_t_4, 0, __pyx_int_1);
-    { PyObject* __pyx_temp = PyNumber_InPlaceMultiply(__pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_temp)) __PYX_ERR(0, 46, __pyx_L1_error)
+    { PyObject* __pyx_temp = PyNumber_InPlaceMultiply(__pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_temp)) __PYX_ERR(0, 52, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_temp);
       __Pyx_DECREF(__pyx_t_4);
       __pyx_t_4 = __pyx_temp;
@@ -3420,56 +3500,56 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (unlikely(__pyx_v_burst == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 46, __pyx_L1_error)
+      __PYX_ERR(0, 52, __pyx_L1_error)
     }
-    __pyx_t_6 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_GetItemInt_Tuple(__pyx_v_burst, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_8 = PyList_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_8 = PyList_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_INCREF(__pyx_int_0);
     __Pyx_GIVEREF(__pyx_int_0);
     PyList_SET_ITEM(__pyx_t_8, 0, __pyx_int_0);
-    { PyObject* __pyx_temp = PyNumber_InPlaceMultiply(__pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_temp)) __PYX_ERR(0, 46, __pyx_L1_error)
+    { PyObject* __pyx_temp = PyNumber_InPlaceMultiply(__pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_temp)) __PYX_ERR(0, 52, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_temp);
       __Pyx_DECREF(__pyx_t_8);
       __pyx_t_8 = __pyx_temp;
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = PyNumber_Add(__pyx_t_4, __pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_6 = PyNumber_Add(__pyx_t_4, __pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-    __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_u_long) < 0) __PYX_ERR(0, 46, __pyx_L1_error)
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_n_u_long) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_9 = __Pyx_PyObject_to_MemoryviewSlice_ds_long(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_9.memview)) __PYX_ERR(0, 46, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_to_MemoryviewSlice_ds_long(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_9.memview)) __PYX_ERR(0, 52, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->burst, 0);
     __pyx_v_self->burst = __pyx_t_9;
     __pyx_t_9.memview = NULL;
     __pyx_t_9.data = NULL;
 
-    /* "pippi/pulsar2d.pyx":44
+    /* "pippi/pulsar2d.pyx":50
  *         self.mask = wts.to_window(mask)
  * 
  *         if burst is not None:             # <<<<<<<<<<<<<<
  *             self.burst_length = burst[0] + burst[1]
  *             self.burst = np.array(([1]*burst[0]) + ([0]*burst[1]), dtype='long')
  */
-    goto __pyx_L3;
+    goto __pyx_L5;
   }
 
-  /* "pippi/pulsar2d.pyx":48
+  /* "pippi/pulsar2d.pyx":54
  *             self.burst = np.array(([1]*burst[0]) + ([0]*burst[1]), dtype='long')
  *         else:
  *             self.burst_length = 1             # <<<<<<<<<<<<<<
@@ -3479,46 +3559,46 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   /*else*/ {
     __pyx_v_self->burst_length = 1;
 
-    /* "pippi/pulsar2d.pyx":49
+    /* "pippi/pulsar2d.pyx":55
  *         else:
  *             self.burst_length = 1
  *             self.burst = np.array([1], dtype='long')             # <<<<<<<<<<<<<<
  * 
  *         self.wt_phase = phase
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_int_1);
     __Pyx_GIVEREF(__pyx_int_1);
     PyList_SET_ITEM(__pyx_t_4, 0, __pyx_int_1);
-    __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_4);
     __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_u_long) < 0) __PYX_ERR(0, 49, __pyx_L1_error)
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_u_long) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_9 = __Pyx_PyObject_to_MemoryviewSlice_ds_long(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_9.memview)) __PYX_ERR(0, 49, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_to_MemoryviewSlice_ds_long(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_9.memview)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __PYX_XDEC_MEMVIEW(&__pyx_v_self->burst, 0);
     __pyx_v_self->burst = __pyx_t_9;
     __pyx_t_9.memview = NULL;
     __pyx_t_9.data = NULL;
   }
-  __pyx_L3:;
+  __pyx_L5:;
 
-  /* "pippi/pulsar2d.pyx":51
+  /* "pippi/pulsar2d.pyx":57
  *             self.burst = np.array([1], dtype='long')
  * 
  *         self.wt_phase = phase             # <<<<<<<<<<<<<<
@@ -3527,7 +3607,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->wt_phase = __pyx_v_phase;
 
-  /* "pippi/pulsar2d.pyx":52
+  /* "pippi/pulsar2d.pyx":58
  * 
  *         self.wt_phase = phase
  *         self.win_phase = phase             # <<<<<<<<<<<<<<
@@ -3536,7 +3616,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->win_phase = __pyx_v_phase;
 
-  /* "pippi/pulsar2d.pyx":53
+  /* "pippi/pulsar2d.pyx":59
  *         self.wt_phase = phase
  *         self.win_phase = phase
  *         self.freq_phase = phase             # <<<<<<<<<<<<<<
@@ -3545,7 +3625,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->freq_phase = __pyx_v_phase;
 
-  /* "pippi/pulsar2d.pyx":54
+  /* "pippi/pulsar2d.pyx":60
  *         self.win_phase = phase
  *         self.freq_phase = phase
  *         self.pw_phase = phase             # <<<<<<<<<<<<<<
@@ -3554,7 +3634,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->pw_phase = __pyx_v_phase;
 
-  /* "pippi/pulsar2d.pyx":55
+  /* "pippi/pulsar2d.pyx":61
  *         self.freq_phase = phase
  *         self.pw_phase = phase
  *         self.amp_phase = phase             # <<<<<<<<<<<<<<
@@ -3563,7 +3643,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->amp_phase = __pyx_v_phase;
 
-  /* "pippi/pulsar2d.pyx":56
+  /* "pippi/pulsar2d.pyx":62
  *         self.pw_phase = phase
  *         self.amp_phase = phase
  *         self.burst_phase = phase             # <<<<<<<<<<<<<<
@@ -3572,7 +3652,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->burst_phase = __pyx_v_phase;
 
-  /* "pippi/pulsar2d.pyx":57
+  /* "pippi/pulsar2d.pyx":63
  *         self.amp_phase = phase
  *         self.burst_phase = phase
  *         self.mask_phase = phase             # <<<<<<<<<<<<<<
@@ -3581,7 +3661,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->mask_phase = __pyx_v_phase;
 
-  /* "pippi/pulsar2d.pyx":59
+  /* "pippi/pulsar2d.pyx":65
  *         self.mask_phase = phase
  * 
  *         self.channels = channels             # <<<<<<<<<<<<<<
@@ -3590,7 +3670,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->channels = __pyx_v_channels;
 
-  /* "pippi/pulsar2d.pyx":60
+  /* "pippi/pulsar2d.pyx":66
  * 
  *         self.channels = channels
  *         self.samplerate = samplerate             # <<<<<<<<<<<<<<
@@ -3599,38 +3679,38 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->samplerate = __pyx_v_samplerate;
 
-  /* "pippi/pulsar2d.pyx":62
+  /* "pippi/pulsar2d.pyx":68
  *         self.samplerate = samplerate
  * 
  *         self.pulsewidth = wts.to_wavetable(pulsewidth)             # <<<<<<<<<<<<<<
  * 
  *         cdef double[:] wt
  */
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_pulsewidth, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 62, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_pulsewidth, 0, NULL); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 68, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->pulsewidth, 0);
-  __pyx_v_self->pulsewidth = __pyx_t_1;
-  __pyx_t_1.memview = NULL;
-  __pyx_t_1.data = NULL;
+  __pyx_v_self->pulsewidth = __pyx_t_3;
+  __pyx_t_3.memview = NULL;
+  __pyx_t_3.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":70
+  /* "pippi/pulsar2d.pyx":76
  *         cdef int j
  * 
  *         if wavetables is None:             # <<<<<<<<<<<<<<
  *             wavetables = ['sine']
  * 
  */
-  __pyx_t_3 = (__pyx_v_wavetables == Py_None);
-  __pyx_t_2 = (__pyx_t_3 != 0);
-  if (__pyx_t_2) {
+  __pyx_t_2 = (__pyx_v_wavetables == Py_None);
+  __pyx_t_1 = (__pyx_t_2 != 0);
+  if (__pyx_t_1) {
 
-    /* "pippi/pulsar2d.pyx":71
+    /* "pippi/pulsar2d.pyx":77
  * 
  *         if wavetables is None:
  *             wavetables = ['sine']             # <<<<<<<<<<<<<<
  * 
  *         self.wt_length = 0
  */
-    __pyx_t_5 = PyList_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 71, __pyx_L1_error)
+    __pyx_t_5 = PyList_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 77, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_n_u_sine);
     __Pyx_GIVEREF(__pyx_n_u_sine);
@@ -3638,7 +3718,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __Pyx_DECREF_SET(__pyx_v_wavetables, __pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "pippi/pulsar2d.pyx":70
+    /* "pippi/pulsar2d.pyx":76
  *         cdef int j
  * 
  *         if wavetables is None:             # <<<<<<<<<<<<<<
@@ -3647,7 +3727,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/pulsar2d.pyx":73
+  /* "pippi/pulsar2d.pyx":79
  *             wavetables = ['sine']
  * 
  *         self.wt_length = 0             # <<<<<<<<<<<<<<
@@ -3656,7 +3736,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->wt_length = 0;
 
-  /* "pippi/pulsar2d.pyx":74
+  /* "pippi/pulsar2d.pyx":80
  * 
  *         self.wt_length = 0
  *         for wavetable in wavetables:             # <<<<<<<<<<<<<<
@@ -3667,26 +3747,26 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __pyx_t_5 = __pyx_v_wavetables; __Pyx_INCREF(__pyx_t_5); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
   } else {
-    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_wavetables); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 74, __pyx_L1_error)
+    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_wavetables); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 80, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 74, __pyx_L1_error)
+    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 80, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_11)) {
       if (likely(PyList_CheckExact(__pyx_t_5))) {
         if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 74, __pyx_L1_error)
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       } else {
         if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 74, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       }
@@ -3696,7 +3776,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 74, __pyx_L1_error)
+          else __PYX_ERR(0, 80, __pyx_L1_error)
         }
         break;
       }
@@ -3705,7 +3785,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __Pyx_XDECREF_SET(__pyx_v_wavetable, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "pippi/pulsar2d.pyx":75
+    /* "pippi/pulsar2d.pyx":81
  *         self.wt_length = 0
  *         for wavetable in wavetables:
  *             try:             # <<<<<<<<<<<<<<
@@ -3721,7 +3801,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __Pyx_XGOTREF(__pyx_t_14);
       /*try:*/ {
 
-        /* "pippi/pulsar2d.pyx":76
+        /* "pippi/pulsar2d.pyx":82
  *         for wavetable in wavetables:
  *             try:
  *                 self.wt_length = max(len(wavetable), self.wt_length)             # <<<<<<<<<<<<<<
@@ -3729,7 +3809,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  *                 self.wt_length = max(DEFAULT_WT_LENGTH, self.wt_length)
  */
         __pyx_t_7 = __pyx_v_self->wt_length;
-        __pyx_t_15 = PyObject_Length(__pyx_v_wavetable); if (unlikely(__pyx_t_15 == ((Py_ssize_t)-1))) __PYX_ERR(0, 76, __pyx_L7_error)
+        __pyx_t_15 = PyObject_Length(__pyx_v_wavetable); if (unlikely(__pyx_t_15 == ((Py_ssize_t)-1))) __PYX_ERR(0, 82, __pyx_L9_error)
         if (((__pyx_t_7 > __pyx_t_15) != 0)) {
           __pyx_t_16 = __pyx_t_7;
         } else {
@@ -3737,7 +3817,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         }
         __pyx_v_self->wt_length = __pyx_t_16;
 
-        /* "pippi/pulsar2d.pyx":75
+        /* "pippi/pulsar2d.pyx":81
  *         self.wt_length = 0
  *         for wavetable in wavetables:
  *             try:             # <<<<<<<<<<<<<<
@@ -3748,15 +3828,15 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
       __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
       __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
-      goto __pyx_L14_try_end;
-      __pyx_L7_error:;
-      __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+      goto __pyx_L16_try_end;
+      __pyx_L9_error:;
+      __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
       __PYX_XDEC_MEMVIEW(&__pyx_t_9, 1);
 
-      /* "pippi/pulsar2d.pyx":77
+      /* "pippi/pulsar2d.pyx":83
  *             try:
  *                 self.wt_length = max(len(wavetable), self.wt_length)
  *             except TypeError:             # <<<<<<<<<<<<<<
@@ -3766,12 +3846,12 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __pyx_t_7 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_TypeError);
       if (__pyx_t_7) {
         __Pyx_AddTraceback("pippi.pulsar2d.Pulsar2d.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_8, &__pyx_t_6) < 0) __PYX_ERR(0, 77, __pyx_L9_except_error)
+        if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_8, &__pyx_t_6) < 0) __PYX_ERR(0, 83, __pyx_L11_except_error)
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_GOTREF(__pyx_t_6);
 
-        /* "pippi/pulsar2d.pyx":78
+        /* "pippi/pulsar2d.pyx":84
  *                 self.wt_length = max(len(wavetable), self.wt_length)
  *             except TypeError:
  *                 self.wt_length = max(DEFAULT_WT_LENGTH, self.wt_length)             # <<<<<<<<<<<<<<
@@ -3789,12 +3869,12 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-        goto __pyx_L8_exception_handled;
+        goto __pyx_L10_exception_handled;
       }
-      goto __pyx_L9_except_error;
-      __pyx_L9_except_error:;
+      goto __pyx_L11_except_error;
+      __pyx_L11_except_error:;
 
-      /* "pippi/pulsar2d.pyx":75
+      /* "pippi/pulsar2d.pyx":81
  *         self.wt_length = 0
  *         for wavetable in wavetables:
  *             try:             # <<<<<<<<<<<<<<
@@ -3806,15 +3886,15 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __Pyx_XGIVEREF(__pyx_t_14);
       __Pyx_ExceptionReset(__pyx_t_12, __pyx_t_13, __pyx_t_14);
       goto __pyx_L1_error;
-      __pyx_L8_exception_handled:;
+      __pyx_L10_exception_handled:;
       __Pyx_XGIVEREF(__pyx_t_12);
       __Pyx_XGIVEREF(__pyx_t_13);
       __Pyx_XGIVEREF(__pyx_t_14);
       __Pyx_ExceptionReset(__pyx_t_12, __pyx_t_13, __pyx_t_14);
-      __pyx_L14_try_end:;
+      __pyx_L16_try_end:;
     }
 
-    /* "pippi/pulsar2d.pyx":74
+    /* "pippi/pulsar2d.pyx":80
  * 
  *         self.wt_length = 0
  *         for wavetable in wavetables:             # <<<<<<<<<<<<<<
@@ -3824,33 +3904,33 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "pippi/pulsar2d.pyx":80
+  /* "pippi/pulsar2d.pyx":86
  *                 self.wt_length = max(DEFAULT_WT_LENGTH, self.wt_length)
  * 
  *         self.wt_count = len(wavetables)             # <<<<<<<<<<<<<<
  *         self.wavetables = np.zeros((self.wt_count, self.wt_length), dtype='d')
  * 
  */
-  __pyx_t_10 = PyObject_Length(__pyx_v_wavetables); if (unlikely(__pyx_t_10 == ((Py_ssize_t)-1))) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_10 = PyObject_Length(__pyx_v_wavetables); if (unlikely(__pyx_t_10 == ((Py_ssize_t)-1))) __PYX_ERR(0, 86, __pyx_L1_error)
   __pyx_v_self->wt_count = __pyx_t_10;
 
-  /* "pippi/pulsar2d.pyx":81
+  /* "pippi/pulsar2d.pyx":87
  * 
  *         self.wt_count = len(wavetables)
  *         self.wavetables = np.zeros((self.wt_count, self.wt_length), dtype='d')             # <<<<<<<<<<<<<<
  * 
  *         for i, wavetable in enumerate(wavetables):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->wt_count); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->wt_count); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_self->wt_length); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_self->wt_length); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
@@ -3858,27 +3938,27 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_8);
   __pyx_t_5 = 0;
   __pyx_t_8 = 0;
-  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 81, __pyx_L1_error)
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 81, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 87, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_8, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_19 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_19.memview)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_19 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_19.memview)) __PYX_ERR(0, 87, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->wavetables, 0);
   __pyx_v_self->wavetables = __pyx_t_19;
   __pyx_t_19.memview = NULL;
   __pyx_t_19.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":83
+  /* "pippi/pulsar2d.pyx":89
  *         self.wavetables = np.zeros((self.wt_count, self.wt_length), dtype='d')
  * 
  *         for i, wavetable in enumerate(wavetables):             # <<<<<<<<<<<<<<
@@ -3890,26 +3970,26 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __pyx_t_5 = __pyx_v_wavetables; __Pyx_INCREF(__pyx_t_5); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
   } else {
-    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_wavetables); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 83, __pyx_L1_error)
+    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_wavetables); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 89, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 83, __pyx_L1_error)
+    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 89, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_11)) {
       if (likely(PyList_CheckExact(__pyx_t_5))) {
         if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 83, __pyx_L1_error)
+        __pyx_t_4 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 89, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 83, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       } else {
         if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 83, __pyx_L1_error)
+        __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 89, __pyx_L1_error)
         #else
-        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 83, __pyx_L1_error)
+        __pyx_t_4 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
         #endif
       }
@@ -3919,7 +3999,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 83, __pyx_L1_error)
+          else __PYX_ERR(0, 89, __pyx_L1_error)
         }
         break;
       }
@@ -3930,7 +4010,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __pyx_v_i = __pyx_t_18;
     __pyx_t_18 = (__pyx_t_18 + 1);
 
-    /* "pippi/pulsar2d.pyx":84
+    /* "pippi/pulsar2d.pyx":90
  * 
  *         for i, wavetable in enumerate(wavetables):
  *             wt = wts.to_wavetable(wavetable, self.wt_length)             # <<<<<<<<<<<<<<
@@ -3939,13 +4019,13 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
     __pyx_t_20.__pyx_n = 1;
     __pyx_t_20.wtsize = __pyx_v_self->wt_length;
-    __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_wavetable, 0, &__pyx_t_20); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 84, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_wavetable, 0, &__pyx_t_20); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 90, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_wt, 1);
-    __pyx_v_wt = __pyx_t_1;
-    __pyx_t_1.memview = NULL;
-    __pyx_t_1.data = NULL;
+    __pyx_v_wt = __pyx_t_3;
+    __pyx_t_3.memview = NULL;
+    __pyx_t_3.data = NULL;
 
-    /* "pippi/pulsar2d.pyx":85
+    /* "pippi/pulsar2d.pyx":91
  *         for i, wavetable in enumerate(wavetables):
  *             wt = wts.to_wavetable(wavetable, self.wt_length)
  *             if len(wt) < self.wt_length:             # <<<<<<<<<<<<<<
@@ -3953,23 +4033,23 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  * 
  */
     __pyx_t_21 = __Pyx_MemoryView_Len(__pyx_v_wt); 
-    __pyx_t_2 = ((__pyx_t_21 < __pyx_v_self->wt_length) != 0);
-    if (__pyx_t_2) {
+    __pyx_t_1 = ((__pyx_t_21 < __pyx_v_self->wt_length) != 0);
+    if (__pyx_t_1) {
 
-      /* "pippi/pulsar2d.pyx":86
+      /* "pippi/pulsar2d.pyx":92
  *             wt = wts.to_wavetable(wavetable, self.wt_length)
  *             if len(wt) < self.wt_length:
  *                 wt = interpolation._linear(wt, self.wt_length)             # <<<<<<<<<<<<<<
  * 
  *             for j, val in enumerate(wt):
  */
-      __pyx_t_1 = __pyx_f_5pippi_13interpolation__linear(__pyx_v_wt, __pyx_v_self->wt_length); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 86, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_5pippi_13interpolation__linear(__pyx_v_wt, __pyx_v_self->wt_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 92, __pyx_L1_error)
       __PYX_XDEC_MEMVIEW(&__pyx_v_wt, 1);
-      __pyx_v_wt = __pyx_t_1;
-      __pyx_t_1.memview = NULL;
-      __pyx_t_1.data = NULL;
+      __pyx_v_wt = __pyx_t_3;
+      __pyx_t_3.memview = NULL;
+      __pyx_t_3.data = NULL;
 
-      /* "pippi/pulsar2d.pyx":85
+      /* "pippi/pulsar2d.pyx":91
  *         for i, wavetable in enumerate(wavetables):
  *             wt = wts.to_wavetable(wavetable, self.wt_length)
  *             if len(wt) < self.wt_length:             # <<<<<<<<<<<<<<
@@ -3978,7 +4058,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
     }
 
-    /* "pippi/pulsar2d.pyx":88
+    /* "pippi/pulsar2d.pyx":94
  *                 wt = interpolation._linear(wt, self.wt_length)
  * 
  *             for j, val in enumerate(wt):             # <<<<<<<<<<<<<<
@@ -3986,15 +4066,15 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  * 
  */
     __pyx_t_7 = 0;
-    __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_wt, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
+    __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_wt, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 94, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     if (likely(PyList_CheckExact(__pyx_t_4)) || PyTuple_CheckExact(__pyx_t_4)) {
       __pyx_t_8 = __pyx_t_4; __Pyx_INCREF(__pyx_t_8); __pyx_t_16 = 0;
       __pyx_t_22 = NULL;
     } else {
-      __pyx_t_16 = -1; __pyx_t_8 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 88, __pyx_L1_error)
+      __pyx_t_16 = -1; __pyx_t_8 = PyObject_GetIter(__pyx_t_4); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 94, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
-      __pyx_t_22 = Py_TYPE(__pyx_t_8)->tp_iternext; if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 88, __pyx_L1_error)
+      __pyx_t_22 = Py_TYPE(__pyx_t_8)->tp_iternext; if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 94, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     for (;;) {
@@ -4002,17 +4082,17 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         if (likely(PyList_CheckExact(__pyx_t_8))) {
           if (__pyx_t_16 >= PyList_GET_SIZE(__pyx_t_8)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_4 = PyList_GET_ITEM(__pyx_t_8, __pyx_t_16); __Pyx_INCREF(__pyx_t_4); __pyx_t_16++; if (unlikely(0 < 0)) __PYX_ERR(0, 88, __pyx_L1_error)
+          __pyx_t_4 = PyList_GET_ITEM(__pyx_t_8, __pyx_t_16); __Pyx_INCREF(__pyx_t_4); __pyx_t_16++; if (unlikely(0 < 0)) __PYX_ERR(0, 94, __pyx_L1_error)
           #else
-          __pyx_t_4 = PySequence_ITEM(__pyx_t_8, __pyx_t_16); __pyx_t_16++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
+          __pyx_t_4 = PySequence_ITEM(__pyx_t_8, __pyx_t_16); __pyx_t_16++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 94, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
           #endif
         } else {
           if (__pyx_t_16 >= PyTuple_GET_SIZE(__pyx_t_8)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_8, __pyx_t_16); __Pyx_INCREF(__pyx_t_4); __pyx_t_16++; if (unlikely(0 < 0)) __PYX_ERR(0, 88, __pyx_L1_error)
+          __pyx_t_4 = PyTuple_GET_ITEM(__pyx_t_8, __pyx_t_16); __Pyx_INCREF(__pyx_t_4); __pyx_t_16++; if (unlikely(0 < 0)) __PYX_ERR(0, 94, __pyx_L1_error)
           #else
-          __pyx_t_4 = PySequence_ITEM(__pyx_t_8, __pyx_t_16); __pyx_t_16++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
+          __pyx_t_4 = PySequence_ITEM(__pyx_t_8, __pyx_t_16); __pyx_t_16++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 94, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_4);
           #endif
         }
@@ -4022,26 +4102,26 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 88, __pyx_L1_error)
+            else __PYX_ERR(0, 94, __pyx_L1_error)
           }
           break;
         }
         __Pyx_GOTREF(__pyx_t_4);
       }
-      __pyx_t_23 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_23 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 88, __pyx_L1_error)
+      __pyx_t_23 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_23 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __pyx_v_val = __pyx_t_23;
       __pyx_v_j = __pyx_t_7;
       __pyx_t_7 = (__pyx_t_7 + 1);
 
-      /* "pippi/pulsar2d.pyx":89
+      /* "pippi/pulsar2d.pyx":95
  * 
  *             for j, val in enumerate(wt):
  *                 self.wavetables[i][j] = val             # <<<<<<<<<<<<<<
  * 
  *         if windows is None:
  */
-      if (unlikely(!__pyx_v_self->wavetables.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 89, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->wavetables.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 95, __pyx_L1_error)}
       __pyx_t_24 = __pyx_v_i;
       __pyx_t_25 = __pyx_v_j;
       __pyx_t_17 = -1;
@@ -4055,11 +4135,11 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       } else if (unlikely(__pyx_t_25 >= __pyx_v_self->wavetables.shape[1])) __pyx_t_17 = 1;
       if (unlikely(__pyx_t_17 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_17);
-        __PYX_ERR(0, 89, __pyx_L1_error)
+        __PYX_ERR(0, 95, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_self->wavetables.data + __pyx_t_24 * __pyx_v_self->wavetables.strides[0]) ) + __pyx_t_25 * __pyx_v_self->wavetables.strides[1]) )) = __pyx_v_val;
 
-      /* "pippi/pulsar2d.pyx":88
+      /* "pippi/pulsar2d.pyx":94
  *                 wt = interpolation._linear(wt, self.wt_length)
  * 
  *             for j, val in enumerate(wt):             # <<<<<<<<<<<<<<
@@ -4069,7 +4149,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     }
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-    /* "pippi/pulsar2d.pyx":83
+    /* "pippi/pulsar2d.pyx":89
  *         self.wavetables = np.zeros((self.wt_count, self.wt_length), dtype='d')
  * 
  *         for i, wavetable in enumerate(wavetables):             # <<<<<<<<<<<<<<
@@ -4079,25 +4159,25 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "pippi/pulsar2d.pyx":91
+  /* "pippi/pulsar2d.pyx":97
  *                 self.wavetables[i][j] = val
  * 
  *         if windows is None:             # <<<<<<<<<<<<<<
  *             windows = ['sine']
  * 
  */
-  __pyx_t_2 = (__pyx_v_windows == Py_None);
-  __pyx_t_3 = (__pyx_t_2 != 0);
-  if (__pyx_t_3) {
+  __pyx_t_1 = (__pyx_v_windows == Py_None);
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
 
-    /* "pippi/pulsar2d.pyx":92
+    /* "pippi/pulsar2d.pyx":98
  * 
  *         if windows is None:
  *             windows = ['sine']             # <<<<<<<<<<<<<<
  * 
  *         self.win_length = 0
  */
-    __pyx_t_5 = PyList_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 92, __pyx_L1_error)
+    __pyx_t_5 = PyList_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 98, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_INCREF(__pyx_n_u_sine);
     __Pyx_GIVEREF(__pyx_n_u_sine);
@@ -4105,7 +4185,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __Pyx_DECREF_SET(__pyx_v_windows, __pyx_t_5);
     __pyx_t_5 = 0;
 
-    /* "pippi/pulsar2d.pyx":91
+    /* "pippi/pulsar2d.pyx":97
  *                 self.wavetables[i][j] = val
  * 
  *         if windows is None:             # <<<<<<<<<<<<<<
@@ -4114,7 +4194,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   }
 
-  /* "pippi/pulsar2d.pyx":94
+  /* "pippi/pulsar2d.pyx":100
  *             windows = ['sine']
  * 
  *         self.win_length = 0             # <<<<<<<<<<<<<<
@@ -4123,7 +4203,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
   __pyx_v_self->win_length = 0;
 
-  /* "pippi/pulsar2d.pyx":95
+  /* "pippi/pulsar2d.pyx":101
  * 
  *         self.win_length = 0
  *         for window in windows:             # <<<<<<<<<<<<<<
@@ -4134,26 +4214,26 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __pyx_t_5 = __pyx_v_windows; __Pyx_INCREF(__pyx_t_5); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
   } else {
-    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_windows); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_windows); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 101, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 95, __pyx_L1_error)
+    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 101, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_11)) {
       if (likely(PyList_CheckExact(__pyx_t_5))) {
         if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_8 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_8 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 101, __pyx_L1_error)
         #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 101, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         #endif
       } else {
         if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 101, __pyx_L1_error)
         #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 95, __pyx_L1_error)
+        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 101, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         #endif
       }
@@ -4163,7 +4243,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 95, __pyx_L1_error)
+          else __PYX_ERR(0, 101, __pyx_L1_error)
         }
         break;
       }
@@ -4172,7 +4252,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __Pyx_XDECREF_SET(__pyx_v_window, __pyx_t_8);
     __pyx_t_8 = 0;
 
-    /* "pippi/pulsar2d.pyx":96
+    /* "pippi/pulsar2d.pyx":102
  *         self.win_length = 0
  *         for window in windows:
  *             try:             # <<<<<<<<<<<<<<
@@ -4188,7 +4268,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __Pyx_XGOTREF(__pyx_t_12);
       /*try:*/ {
 
-        /* "pippi/pulsar2d.pyx":97
+        /* "pippi/pulsar2d.pyx":103
  *         for window in windows:
  *             try:
  *                 self.win_length = max(len(window), self.win_length)             # <<<<<<<<<<<<<<
@@ -4196,7 +4276,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  *                 self.win_length = max(DEFAULT_WT_LENGTH, self.win_length)
  */
         __pyx_t_18 = __pyx_v_self->win_length;
-        __pyx_t_16 = PyObject_Length(__pyx_v_window); if (unlikely(__pyx_t_16 == ((Py_ssize_t)-1))) __PYX_ERR(0, 97, __pyx_L25_error)
+        __pyx_t_16 = PyObject_Length(__pyx_v_window); if (unlikely(__pyx_t_16 == ((Py_ssize_t)-1))) __PYX_ERR(0, 103, __pyx_L27_error)
         if (((__pyx_t_18 > __pyx_t_16) != 0)) {
           __pyx_t_15 = __pyx_t_18;
         } else {
@@ -4204,7 +4284,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         }
         __pyx_v_self->win_length = __pyx_t_15;
 
-        /* "pippi/pulsar2d.pyx":96
+        /* "pippi/pulsar2d.pyx":102
  *         self.win_length = 0
  *         for window in windows:
  *             try:             # <<<<<<<<<<<<<<
@@ -4215,16 +4295,16 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
       __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
       __Pyx_XDECREF(__pyx_t_12); __pyx_t_12 = 0;
-      goto __pyx_L32_try_end;
-      __pyx_L25_error:;
-      __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+      goto __pyx_L34_try_end;
+      __pyx_L27_error:;
       __PYX_XDEC_MEMVIEW(&__pyx_t_19, 1);
+      __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
       __PYX_XDEC_MEMVIEW(&__pyx_t_9, 1);
 
-      /* "pippi/pulsar2d.pyx":98
+      /* "pippi/pulsar2d.pyx":104
  *             try:
  *                 self.win_length = max(len(window), self.win_length)
  *             except TypeError:             # <<<<<<<<<<<<<<
@@ -4234,12 +4314,12 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __pyx_t_18 = __Pyx_PyErr_ExceptionMatches(__pyx_builtin_TypeError);
       if (__pyx_t_18) {
         __Pyx_AddTraceback("pippi.pulsar2d.Pulsar2d.__cinit__", __pyx_clineno, __pyx_lineno, __pyx_filename);
-        if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_4, &__pyx_t_6) < 0) __PYX_ERR(0, 98, __pyx_L27_except_error)
+        if (__Pyx_GetException(&__pyx_t_8, &__pyx_t_4, &__pyx_t_6) < 0) __PYX_ERR(0, 104, __pyx_L29_except_error)
         __Pyx_GOTREF(__pyx_t_8);
         __Pyx_GOTREF(__pyx_t_4);
         __Pyx_GOTREF(__pyx_t_6);
 
-        /* "pippi/pulsar2d.pyx":99
+        /* "pippi/pulsar2d.pyx":105
  *                 self.win_length = max(len(window), self.win_length)
  *             except TypeError:
  *                 self.win_length = max(DEFAULT_WT_LENGTH, self.win_length)             # <<<<<<<<<<<<<<
@@ -4257,12 +4337,12 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
-        goto __pyx_L26_exception_handled;
+        goto __pyx_L28_exception_handled;
       }
-      goto __pyx_L27_except_error;
-      __pyx_L27_except_error:;
+      goto __pyx_L29_except_error;
+      __pyx_L29_except_error:;
 
-      /* "pippi/pulsar2d.pyx":96
+      /* "pippi/pulsar2d.pyx":102
  *         self.win_length = 0
  *         for window in windows:
  *             try:             # <<<<<<<<<<<<<<
@@ -4274,15 +4354,15 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       __Pyx_XGIVEREF(__pyx_t_12);
       __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
       goto __pyx_L1_error;
-      __pyx_L26_exception_handled:;
+      __pyx_L28_exception_handled:;
       __Pyx_XGIVEREF(__pyx_t_14);
       __Pyx_XGIVEREF(__pyx_t_13);
       __Pyx_XGIVEREF(__pyx_t_12);
       __Pyx_ExceptionReset(__pyx_t_14, __pyx_t_13, __pyx_t_12);
-      __pyx_L32_try_end:;
+      __pyx_L34_try_end:;
     }
 
-    /* "pippi/pulsar2d.pyx":95
+    /* "pippi/pulsar2d.pyx":101
  * 
  *         self.win_length = 0
  *         for window in windows:             # <<<<<<<<<<<<<<
@@ -4292,33 +4372,33 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "pippi/pulsar2d.pyx":101
+  /* "pippi/pulsar2d.pyx":107
  *                 self.win_length = max(DEFAULT_WT_LENGTH, self.win_length)
  * 
  *         self.win_count = len(windows)             # <<<<<<<<<<<<<<
  *         self.windows = np.zeros((self.win_count, self.win_length), dtype='d')
  * 
  */
-  __pyx_t_10 = PyObject_Length(__pyx_v_windows); if (unlikely(__pyx_t_10 == ((Py_ssize_t)-1))) __PYX_ERR(0, 101, __pyx_L1_error)
+  __pyx_t_10 = PyObject_Length(__pyx_v_windows); if (unlikely(__pyx_t_10 == ((Py_ssize_t)-1))) __PYX_ERR(0, 107, __pyx_L1_error)
   __pyx_v_self->win_count = __pyx_t_10;
 
-  /* "pippi/pulsar2d.pyx":102
+  /* "pippi/pulsar2d.pyx":108
  * 
  *         self.win_count = len(windows)
  *         self.windows = np.zeros((self.win_count, self.win_length), dtype='d')             # <<<<<<<<<<<<<<
  * 
  *         for i, window in enumerate(windows):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->win_count); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->win_count); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->win_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->win_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_5);
@@ -4326,27 +4406,27 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   PyTuple_SET_ITEM(__pyx_t_8, 1, __pyx_t_4);
   __pyx_t_5 = 0;
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_8);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_8);
   __pyx_t_8 = 0;
-  __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 102, __pyx_L1_error)
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_4, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 102, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_4, __pyx_t_8); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_19 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_19.memview)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_19 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_19.memview)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->windows, 0);
   __pyx_v_self->windows = __pyx_t_19;
   __pyx_t_19.memview = NULL;
   __pyx_t_19.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":104
+  /* "pippi/pulsar2d.pyx":110
  *         self.windows = np.zeros((self.win_count, self.win_length), dtype='d')
  * 
  *         for i, window in enumerate(windows):             # <<<<<<<<<<<<<<
@@ -4358,26 +4438,26 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __pyx_t_5 = __pyx_v_windows; __Pyx_INCREF(__pyx_t_5); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
   } else {
-    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_windows); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_10 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_v_windows); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 110, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 104, __pyx_L1_error)
+    __pyx_t_11 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 110, __pyx_L1_error)
   }
   for (;;) {
     if (likely(!__pyx_t_11)) {
       if (likely(PyList_CheckExact(__pyx_t_5))) {
         if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_8 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 104, __pyx_L1_error)
+        __pyx_t_8 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 110, __pyx_L1_error)
         #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 104, __pyx_L1_error)
+        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 110, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         #endif
       } else {
         if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 104, __pyx_L1_error)
+        __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_10); __Pyx_INCREF(__pyx_t_8); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 110, __pyx_L1_error)
         #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 104, __pyx_L1_error)
+        __pyx_t_8 = PySequence_ITEM(__pyx_t_5, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 110, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_8);
         #endif
       }
@@ -4387,7 +4467,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 104, __pyx_L1_error)
+          else __PYX_ERR(0, 110, __pyx_L1_error)
         }
         break;
       }
@@ -4398,7 +4478,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     __pyx_v_i = __pyx_t_17;
     __pyx_t_17 = (__pyx_t_17 + 1);
 
-    /* "pippi/pulsar2d.pyx":105
+    /* "pippi/pulsar2d.pyx":111
  * 
  *         for i, window in enumerate(windows):
  *             win = wts.to_window(window, self.win_length)             # <<<<<<<<<<<<<<
@@ -4407,38 +4487,38 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
     __pyx_t_26.__pyx_n = 1;
     __pyx_t_26.wtsize = __pyx_v_self->win_length;
-    __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_window, 0, &__pyx_t_26); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 105, __pyx_L1_error)
+    __pyx_t_3 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_window, 0, &__pyx_t_26); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 111, __pyx_L1_error)
     __PYX_XDEC_MEMVIEW(&__pyx_v_win, 1);
-    __pyx_v_win = __pyx_t_1;
-    __pyx_t_1.memview = NULL;
-    __pyx_t_1.data = NULL;
+    __pyx_v_win = __pyx_t_3;
+    __pyx_t_3.memview = NULL;
+    __pyx_t_3.data = NULL;
 
-    /* "pippi/pulsar2d.pyx":106
+    /* "pippi/pulsar2d.pyx":112
  *         for i, window in enumerate(windows):
  *             win = wts.to_window(window, self.win_length)
  *             if len(wt) < self.wt_length:             # <<<<<<<<<<<<<<
  *                 win = interpolation._linear(win, self.win_length)
  * 
  */
-    if (unlikely(!__pyx_v_wt.memview)) { __Pyx_RaiseUnboundLocalError("wt"); __PYX_ERR(0, 106, __pyx_L1_error) }
+    if (unlikely(!__pyx_v_wt.memview)) { __Pyx_RaiseUnboundLocalError("wt"); __PYX_ERR(0, 112, __pyx_L1_error) }
     __pyx_t_21 = __Pyx_MemoryView_Len(__pyx_v_wt); 
-    __pyx_t_3 = ((__pyx_t_21 < __pyx_v_self->wt_length) != 0);
-    if (__pyx_t_3) {
+    __pyx_t_2 = ((__pyx_t_21 < __pyx_v_self->wt_length) != 0);
+    if (__pyx_t_2) {
 
-      /* "pippi/pulsar2d.pyx":107
+      /* "pippi/pulsar2d.pyx":113
  *             win = wts.to_window(window, self.win_length)
  *             if len(wt) < self.wt_length:
  *                 win = interpolation._linear(win, self.win_length)             # <<<<<<<<<<<<<<
  * 
  *             for j, val in enumerate(win):
  */
-      __pyx_t_1 = __pyx_f_5pippi_13interpolation__linear(__pyx_v_win, __pyx_v_self->win_length); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 107, __pyx_L1_error)
+      __pyx_t_3 = __pyx_f_5pippi_13interpolation__linear(__pyx_v_win, __pyx_v_self->win_length); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 113, __pyx_L1_error)
       __PYX_XDEC_MEMVIEW(&__pyx_v_win, 1);
-      __pyx_v_win = __pyx_t_1;
-      __pyx_t_1.memview = NULL;
-      __pyx_t_1.data = NULL;
+      __pyx_v_win = __pyx_t_3;
+      __pyx_t_3.memview = NULL;
+      __pyx_t_3.data = NULL;
 
-      /* "pippi/pulsar2d.pyx":106
+      /* "pippi/pulsar2d.pyx":112
  *         for i, window in enumerate(windows):
  *             win = wts.to_window(window, self.win_length)
  *             if len(wt) < self.wt_length:             # <<<<<<<<<<<<<<
@@ -4447,7 +4527,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  */
     }
 
-    /* "pippi/pulsar2d.pyx":109
+    /* "pippi/pulsar2d.pyx":115
  *                 win = interpolation._linear(win, self.win_length)
  * 
  *             for j, val in enumerate(win):             # <<<<<<<<<<<<<<
@@ -4455,15 +4535,15 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  * 
  */
     __pyx_t_18 = 0;
-    __pyx_t_8 = __pyx_memoryview_fromslice(__pyx_v_win, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 109, __pyx_L1_error)
+    __pyx_t_8 = __pyx_memoryview_fromslice(__pyx_v_win, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     if (likely(PyList_CheckExact(__pyx_t_8)) || PyTuple_CheckExact(__pyx_t_8)) {
       __pyx_t_4 = __pyx_t_8; __Pyx_INCREF(__pyx_t_4); __pyx_t_15 = 0;
       __pyx_t_22 = NULL;
     } else {
-      __pyx_t_15 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_8); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __pyx_t_15 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_8); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_22 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __pyx_t_22 = Py_TYPE(__pyx_t_4)->tp_iternext; if (unlikely(!__pyx_t_22)) __PYX_ERR(0, 115, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     for (;;) {
@@ -4471,17 +4551,17 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
         if (likely(PyList_CheckExact(__pyx_t_4))) {
           if (__pyx_t_15 >= PyList_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_15); __Pyx_INCREF(__pyx_t_8); __pyx_t_15++; if (unlikely(0 < 0)) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_8 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_15); __Pyx_INCREF(__pyx_t_8); __pyx_t_15++; if (unlikely(0 < 0)) __PYX_ERR(0, 115, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 115, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         } else {
           if (__pyx_t_15 >= PyTuple_GET_SIZE(__pyx_t_4)) break;
           #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_15); __Pyx_INCREF(__pyx_t_8); __pyx_t_15++; if (unlikely(0 < 0)) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_15); __Pyx_INCREF(__pyx_t_8); __pyx_t_15++; if (unlikely(0 < 0)) __PYX_ERR(0, 115, __pyx_L1_error)
           #else
-          __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 109, __pyx_L1_error)
+          __pyx_t_8 = PySequence_ITEM(__pyx_t_4, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 115, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_8);
           #endif
         }
@@ -4491,26 +4571,26 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else __PYX_ERR(0, 109, __pyx_L1_error)
+            else __PYX_ERR(0, 115, __pyx_L1_error)
           }
           break;
         }
         __Pyx_GOTREF(__pyx_t_8);
       }
-      __pyx_t_23 = __pyx_PyFloat_AsDouble(__pyx_t_8); if (unlikely((__pyx_t_23 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 109, __pyx_L1_error)
+      __pyx_t_23 = __pyx_PyFloat_AsDouble(__pyx_t_8); if (unlikely((__pyx_t_23 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 115, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       __pyx_v_val = __pyx_t_23;
       __pyx_v_j = __pyx_t_18;
       __pyx_t_18 = (__pyx_t_18 + 1);
 
-      /* "pippi/pulsar2d.pyx":110
+      /* "pippi/pulsar2d.pyx":116
  * 
  *             for j, val in enumerate(win):
  *                 self.windows[i][j] = val             # <<<<<<<<<<<<<<
  * 
  * 
  */
-      if (unlikely(!__pyx_v_self->windows.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 110, __pyx_L1_error)}
+      if (unlikely(!__pyx_v_self->windows.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 116, __pyx_L1_error)}
       __pyx_t_27 = __pyx_v_i;
       __pyx_t_28 = __pyx_v_j;
       __pyx_t_7 = -1;
@@ -4524,11 +4604,11 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       } else if (unlikely(__pyx_t_28 >= __pyx_v_self->windows.shape[1])) __pyx_t_7 = 1;
       if (unlikely(__pyx_t_7 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_7);
-        __PYX_ERR(0, 110, __pyx_L1_error)
+        __PYX_ERR(0, 116, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_self->windows.data + __pyx_t_27 * __pyx_v_self->windows.strides[0]) ) + __pyx_t_28 * __pyx_v_self->windows.strides[1]) )) = __pyx_v_val;
 
-      /* "pippi/pulsar2d.pyx":109
+      /* "pippi/pulsar2d.pyx":115
  *                 win = interpolation._linear(win, self.win_length)
  * 
  *             for j, val in enumerate(win):             # <<<<<<<<<<<<<<
@@ -4538,7 +4618,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     }
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-    /* "pippi/pulsar2d.pyx":104
+    /* "pippi/pulsar2d.pyx":110
  *         self.windows = np.zeros((self.win_count, self.win_length), dtype='d')
  * 
  *         for i, window in enumerate(windows):             # <<<<<<<<<<<<<<
@@ -4560,7 +4640,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   __pyx_r = 0;
   goto __pyx_L0;
   __pyx_L1_error:;
-  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
@@ -4576,11 +4656,13 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
   __Pyx_XDECREF(__pyx_v_window);
   __Pyx_XDECREF(__pyx_v_wavetables);
   __Pyx_XDECREF(__pyx_v_windows);
+  __Pyx_XDECREF(__pyx_v_wt_mod);
+  __Pyx_XDECREF(__pyx_v_win_mod);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "pippi/pulsar2d.pyx":113
+/* "pippi/pulsar2d.pyx":119
  * 
  * 
  *     def play(self, length):             # <<<<<<<<<<<<<<
@@ -4610,23 +4692,23 @@ static PyObject *__pyx_pf_5pippi_8pulsar2d_8Pulsar2d_2play(struct __pyx_obj_5pip
   int __pyx_t_3;
   __Pyx_RefNannySetupContext("play", 0);
 
-  /* "pippi/pulsar2d.pyx":114
+  /* "pippi/pulsar2d.pyx":120
  * 
  *     def play(self, length):
  *         framelength = <int>(length * self.samplerate)             # <<<<<<<<<<<<<<
  *         return self._play(framelength)
  * 
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 114, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyNumber_Multiply(__pyx_v_length, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
+  __pyx_t_2 = PyNumber_Multiply(__pyx_v_length, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 114, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_framelength = ((int)__pyx_t_3);
 
-  /* "pippi/pulsar2d.pyx":115
+  /* "pippi/pulsar2d.pyx":121
  *     def play(self, length):
  *         framelength = <int>(length * self.samplerate)
  *         return self._play(framelength)             # <<<<<<<<<<<<<<
@@ -4634,13 +4716,13 @@ static PyObject *__pyx_pf_5pippi_8pulsar2d_8Pulsar2d_2play(struct __pyx_obj_5pip
  *     cdef object _play(self, int length):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = ((struct __pyx_vtabstruct_5pippi_8pulsar2d_Pulsar2d *)__pyx_v_self->__pyx_vtab)->_play(__pyx_v_self, __pyx_v_framelength); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
+  __pyx_t_2 = ((struct __pyx_vtabstruct_5pippi_8pulsar2d_Pulsar2d *)__pyx_v_self->__pyx_vtab)->_play(__pyx_v_self, __pyx_v_framelength); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "pippi/pulsar2d.pyx":113
+  /* "pippi/pulsar2d.pyx":119
  * 
  * 
  *     def play(self, length):             # <<<<<<<<<<<<<<
@@ -4660,7 +4742,7 @@ static PyObject *__pyx_pf_5pippi_8pulsar2d_8Pulsar2d_2play(struct __pyx_obj_5pip
   return __pyx_r;
 }
 
-/* "pippi/pulsar2d.pyx":117
+/* "pippi/pulsar2d.pyx":123
  *         return self._play(framelength)
  * 
  *     cdef object _play(self, int length):             # <<<<<<<<<<<<<<
@@ -4738,7 +4820,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   int __pyx_t_28;
   __Pyx_RefNannySetupContext("_play", 0);
 
-  /* "pippi/pulsar2d.pyx":118
+  /* "pippi/pulsar2d.pyx":124
  * 
  *     cdef object _play(self, int length):
  *         cdef int i = 0             # <<<<<<<<<<<<<<
@@ -4747,7 +4829,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_i = 0;
 
-  /* "pippi/pulsar2d.pyx":119
+  /* "pippi/pulsar2d.pyx":125
  *     cdef object _play(self, int length):
  *         cdef int i = 0
  *         cdef long burst = 1             # <<<<<<<<<<<<<<
@@ -4756,7 +4838,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_burst = 1;
 
-  /* "pippi/pulsar2d.pyx":120
+  /* "pippi/pulsar2d.pyx":126
  *         cdef int i = 0
  *         cdef long burst = 1
  *         cdef long mask = 1             # <<<<<<<<<<<<<<
@@ -4765,23 +4847,23 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_mask = 1;
 
-  /* "pippi/pulsar2d.pyx":123
+  /* "pippi/pulsar2d.pyx":129
  *         cdef double sample, pulsewidth, freq, mask_prob
  * 
  *         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')             # <<<<<<<<<<<<<<
  * 
  *         cdef double isamplerate = 1.0 / self.samplerate
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
@@ -4789,26 +4871,26 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
   __pyx_t_1 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 123, __pyx_L1_error)
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 129, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_5.memview)) __PYX_ERR(0, 129, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_out = __pyx_t_5;
   __pyx_t_5.memview = NULL;
   __pyx_t_5.data = NULL;
 
-  /* "pippi/pulsar2d.pyx":125
+  /* "pippi/pulsar2d.pyx":131
  *         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
  * 
  *         cdef double isamplerate = 1.0 / self.samplerate             # <<<<<<<<<<<<<<
@@ -4817,11 +4899,11 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   if (unlikely(__pyx_v_self->samplerate == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 125, __pyx_L1_error)
+    __PYX_ERR(0, 131, __pyx_L1_error)
   }
   __pyx_v_isamplerate = (1.0 / ((double)__pyx_v_self->samplerate));
 
-  /* "pippi/pulsar2d.pyx":126
+  /* "pippi/pulsar2d.pyx":132
  * 
  *         cdef double isamplerate = 1.0 / self.samplerate
  *         cdef double ilength = 1.0 / length             # <<<<<<<<<<<<<<
@@ -4830,11 +4912,11 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   if (unlikely(__pyx_v_length == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 126, __pyx_L1_error)
+    __PYX_ERR(0, 132, __pyx_L1_error)
   }
   __pyx_v_ilength = (1.0 / ((double)__pyx_v_length));
 
-  /* "pippi/pulsar2d.pyx":128
+  /* "pippi/pulsar2d.pyx":134
  *         cdef double ilength = 1.0 / length
  * 
  *         cdef int freq_boundry = max(len(self.freq)-1, 1)             # <<<<<<<<<<<<<<
@@ -4842,7 +4924,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  *         cdef int pw_boundry = max(len(self.pulsewidth)-1, 1)
  */
   __pyx_t_6 = 1;
-  if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 128, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 134, __pyx_L1_error)}
   __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->freq); 
   __pyx_t_8 = (__pyx_t_7 - 1);
   if (((__pyx_t_6 > __pyx_t_8) != 0)) {
@@ -4852,7 +4934,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_freq_boundry = __pyx_t_9;
 
-  /* "pippi/pulsar2d.pyx":129
+  /* "pippi/pulsar2d.pyx":135
  * 
  *         cdef int freq_boundry = max(len(self.freq)-1, 1)
  *         cdef int amp_boundry = max(len(self.amp)-1, 1)             # <<<<<<<<<<<<<<
@@ -4860,7 +4942,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  *         cdef int wt_mod_boundry = max(len(self.wt_mod)-1, 1)
  */
   __pyx_t_6 = 1;
-  if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 129, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 135, __pyx_L1_error)}
   __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->amp); 
   __pyx_t_9 = (__pyx_t_7 - 1);
   if (((__pyx_t_6 > __pyx_t_9) != 0)) {
@@ -4870,7 +4952,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_amp_boundry = __pyx_t_8;
 
-  /* "pippi/pulsar2d.pyx":130
+  /* "pippi/pulsar2d.pyx":136
  *         cdef int freq_boundry = max(len(self.freq)-1, 1)
  *         cdef int amp_boundry = max(len(self.amp)-1, 1)
  *         cdef int pw_boundry = max(len(self.pulsewidth)-1, 1)             # <<<<<<<<<<<<<<
@@ -4878,7 +4960,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  *         cdef int win_mod_boundry = max(len(self.win_mod)-1, 1)
  */
   __pyx_t_6 = 1;
-  if (unlikely(!__pyx_v_self->pulsewidth.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 130, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->pulsewidth.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 136, __pyx_L1_error)}
   __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->pulsewidth); 
   __pyx_t_8 = (__pyx_t_7 - 1);
   if (((__pyx_t_6 > __pyx_t_8) != 0)) {
@@ -4888,7 +4970,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_pw_boundry = __pyx_t_9;
 
-  /* "pippi/pulsar2d.pyx":131
+  /* "pippi/pulsar2d.pyx":137
  *         cdef int amp_boundry = max(len(self.amp)-1, 1)
  *         cdef int pw_boundry = max(len(self.pulsewidth)-1, 1)
  *         cdef int wt_mod_boundry = max(len(self.wt_mod)-1, 1)             # <<<<<<<<<<<<<<
@@ -4896,7 +4978,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  *         cdef int mask_boundry = max(len(self.mask)-1, 1)
  */
   __pyx_t_6 = 1;
-  if (unlikely(!__pyx_v_self->wt_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 131, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->wt_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 137, __pyx_L1_error)}
   __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->wt_mod); 
   __pyx_t_9 = (__pyx_t_7 - 1);
   if (((__pyx_t_6 > __pyx_t_9) != 0)) {
@@ -4906,7 +4988,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_wt_mod_boundry = __pyx_t_8;
 
-  /* "pippi/pulsar2d.pyx":132
+  /* "pippi/pulsar2d.pyx":138
  *         cdef int pw_boundry = max(len(self.pulsewidth)-1, 1)
  *         cdef int wt_mod_boundry = max(len(self.wt_mod)-1, 1)
  *         cdef int win_mod_boundry = max(len(self.win_mod)-1, 1)             # <<<<<<<<<<<<<<
@@ -4914,7 +4996,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  *         cdef int burst_boundry = max(len(self.burst)-1, 1)
  */
   __pyx_t_6 = 1;
-  if (unlikely(!__pyx_v_self->win_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 132, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->win_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 138, __pyx_L1_error)}
   __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->win_mod); 
   __pyx_t_8 = (__pyx_t_7 - 1);
   if (((__pyx_t_6 > __pyx_t_8) != 0)) {
@@ -4924,7 +5006,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_win_mod_boundry = __pyx_t_9;
 
-  /* "pippi/pulsar2d.pyx":133
+  /* "pippi/pulsar2d.pyx":139
  *         cdef int wt_mod_boundry = max(len(self.wt_mod)-1, 1)
  *         cdef int win_mod_boundry = max(len(self.win_mod)-1, 1)
  *         cdef int mask_boundry = max(len(self.mask)-1, 1)             # <<<<<<<<<<<<<<
@@ -4932,7 +5014,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  * 
  */
   __pyx_t_6 = 1;
-  if (unlikely(!__pyx_v_self->mask.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 133, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->mask.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 139, __pyx_L1_error)}
   __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->mask); 
   __pyx_t_9 = (__pyx_t_7 - 1);
   if (((__pyx_t_6 > __pyx_t_9) != 0)) {
@@ -4942,7 +5024,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_mask_boundry = __pyx_t_8;
 
-  /* "pippi/pulsar2d.pyx":134
+  /* "pippi/pulsar2d.pyx":140
  *         cdef int win_mod_boundry = max(len(self.win_mod)-1, 1)
  *         cdef int mask_boundry = max(len(self.mask)-1, 1)
  *         cdef int burst_boundry = max(len(self.burst)-1, 1)             # <<<<<<<<<<<<<<
@@ -4950,7 +5032,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  *         cdef int wt_boundry = max(self.wt_length-1, 1)
  */
   __pyx_t_6 = 1;
-  if (unlikely(!__pyx_v_self->burst.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 134, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->burst.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 140, __pyx_L1_error)}
   __pyx_t_7 = __Pyx_MemoryView_Len(__pyx_v_self->burst); 
   __pyx_t_8 = (__pyx_t_7 - 1);
   if (((__pyx_t_6 > __pyx_t_8) != 0)) {
@@ -4960,7 +5042,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_burst_boundry = __pyx_t_9;
 
-  /* "pippi/pulsar2d.pyx":136
+  /* "pippi/pulsar2d.pyx":142
  *         cdef int burst_boundry = max(len(self.burst)-1, 1)
  * 
  *         cdef int wt_boundry = max(self.wt_length-1, 1)             # <<<<<<<<<<<<<<
@@ -4976,7 +5058,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_wt_boundry = __pyx_t_11;
 
-  /* "pippi/pulsar2d.pyx":137
+  /* "pippi/pulsar2d.pyx":143
  * 
  *         cdef int wt_boundry = max(self.wt_length-1, 1)
  *         cdef int win_boundry = max(self.win_length-1, 1)             # <<<<<<<<<<<<<<
@@ -4992,7 +5074,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   }
   __pyx_v_win_boundry = __pyx_t_10;
 
-  /* "pippi/pulsar2d.pyx":138
+  /* "pippi/pulsar2d.pyx":144
  *         cdef int wt_boundry = max(self.wt_length-1, 1)
  *         cdef int win_boundry = max(self.win_length-1, 1)
  *         cdef int wt_boundry_p = wt_boundry             # <<<<<<<<<<<<<<
@@ -5001,7 +5083,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_wt_boundry_p = __pyx_v_wt_boundry;
 
-  /* "pippi/pulsar2d.pyx":139
+  /* "pippi/pulsar2d.pyx":145
  *         cdef int win_boundry = max(self.win_length-1, 1)
  *         cdef int wt_boundry_p = wt_boundry
  *         cdef int win_boundry_p = win_boundry             # <<<<<<<<<<<<<<
@@ -5010,7 +5092,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_win_boundry_p = __pyx_v_win_boundry;
 
-  /* "pippi/pulsar2d.pyx":141
+  /* "pippi/pulsar2d.pyx":147
  *         cdef int win_boundry_p = win_boundry
  * 
  *         cdef double freq_phase_inc = ilength * freq_boundry             # <<<<<<<<<<<<<<
@@ -5019,7 +5101,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_freq_phase_inc = (__pyx_v_ilength * __pyx_v_freq_boundry);
 
-  /* "pippi/pulsar2d.pyx":142
+  /* "pippi/pulsar2d.pyx":148
  * 
  *         cdef double freq_phase_inc = ilength * freq_boundry
  *         cdef double amp_phase_inc = ilength * amp_boundry             # <<<<<<<<<<<<<<
@@ -5028,7 +5110,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_amp_phase_inc = (__pyx_v_ilength * __pyx_v_amp_boundry);
 
-  /* "pippi/pulsar2d.pyx":143
+  /* "pippi/pulsar2d.pyx":149
  *         cdef double freq_phase_inc = ilength * freq_boundry
  *         cdef double amp_phase_inc = ilength * amp_boundry
  *         cdef double pw_phase_inc = ilength * pw_boundry             # <<<<<<<<<<<<<<
@@ -5037,7 +5119,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_pw_phase_inc = (__pyx_v_ilength * __pyx_v_pw_boundry);
 
-  /* "pippi/pulsar2d.pyx":144
+  /* "pippi/pulsar2d.pyx":150
  *         cdef double amp_phase_inc = ilength * amp_boundry
  *         cdef double pw_phase_inc = ilength * pw_boundry
  *         cdef double wt_mod_phase_inc = ilength * wt_mod_boundry             # <<<<<<<<<<<<<<
@@ -5046,7 +5128,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_wt_mod_phase_inc = (__pyx_v_ilength * __pyx_v_wt_mod_boundry);
 
-  /* "pippi/pulsar2d.pyx":145
+  /* "pippi/pulsar2d.pyx":151
  *         cdef double pw_phase_inc = ilength * pw_boundry
  *         cdef double wt_mod_phase_inc = ilength * wt_mod_boundry
  *         cdef double win_mod_phase_inc = ilength * win_mod_boundry             # <<<<<<<<<<<<<<
@@ -5055,7 +5137,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_win_mod_phase_inc = (__pyx_v_ilength * __pyx_v_win_mod_boundry);
 
-  /* "pippi/pulsar2d.pyx":146
+  /* "pippi/pulsar2d.pyx":152
  *         cdef double wt_mod_phase_inc = ilength * wt_mod_boundry
  *         cdef double win_mod_phase_inc = ilength * win_mod_boundry
  *         cdef double mask_phase_inc = ilength * mask_boundry             # <<<<<<<<<<<<<<
@@ -5064,7 +5146,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_mask_phase_inc = (__pyx_v_ilength * __pyx_v_mask_boundry);
 
-  /* "pippi/pulsar2d.pyx":148
+  /* "pippi/pulsar2d.pyx":154
  *         cdef double mask_phase_inc = ilength * mask_boundry
  * 
  *         cdef int wi = 0             # <<<<<<<<<<<<<<
@@ -5073,7 +5155,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_wi = 0;
 
-  /* "pippi/pulsar2d.pyx":149
+  /* "pippi/pulsar2d.pyx":155
  * 
  *         cdef int wi = 0
  *         cdef double wi_phase = 0             # <<<<<<<<<<<<<<
@@ -5082,7 +5164,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_wi_phase = 0.0;
 
-  /* "pippi/pulsar2d.pyx":150
+  /* "pippi/pulsar2d.pyx":156
  *         cdef int wi = 0
  *         cdef double wi_phase = 0
  *         cdef double wi_frac = 0             # <<<<<<<<<<<<<<
@@ -5091,7 +5173,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_wi_frac = 0.0;
 
-  /* "pippi/pulsar2d.pyx":151
+  /* "pippi/pulsar2d.pyx":157
  *         cdef double wi_phase = 0
  *         cdef double wi_frac = 0
  *         cdef double wt_out_a = 0             # <<<<<<<<<<<<<<
@@ -5100,7 +5182,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_wt_out_a = 0.0;
 
-  /* "pippi/pulsar2d.pyx":152
+  /* "pippi/pulsar2d.pyx":158
  *         cdef double wi_frac = 0
  *         cdef double wt_out_a = 0
  *         cdef double wt_out_b = 0             # <<<<<<<<<<<<<<
@@ -5109,7 +5191,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_wt_out_b = 0.0;
 
-  /* "pippi/pulsar2d.pyx":153
+  /* "pippi/pulsar2d.pyx":159
  *         cdef double wt_out_a = 0
  *         cdef double wt_out_b = 0
  *         cdef double win_out_a = 0             # <<<<<<<<<<<<<<
@@ -5118,7 +5200,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_win_out_a = 0.0;
 
-  /* "pippi/pulsar2d.pyx":154
+  /* "pippi/pulsar2d.pyx":160
  *         cdef double wt_out_b = 0
  *         cdef double win_out_a = 0
  *         cdef double win_out_b = 0             # <<<<<<<<<<<<<<
@@ -5127,7 +5209,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
   __pyx_v_win_out_b = 0.0;
 
-  /* "pippi/pulsar2d.pyx":156
+  /* "pippi/pulsar2d.pyx":162
  *         cdef double win_out_b = 0
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
@@ -5139,17 +5221,17 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
   for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
     __pyx_v_i = __pyx_t_14;
 
-    /* "pippi/pulsar2d.pyx":157
+    /* "pippi/pulsar2d.pyx":163
  * 
  *         for i in range(length):
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)             # <<<<<<<<<<<<<<
  *             pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)
  */
-    if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 157, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 163, __pyx_L1_error)}
     __pyx_v_freq = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->freq, __pyx_v_self->freq_phase, NULL);
 
-    /* "pippi/pulsar2d.pyx":158
+    /* "pippi/pulsar2d.pyx":164
  *         for i in range(length):
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)
  *             pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)             # <<<<<<<<<<<<<<
@@ -5157,7 +5239,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  *             self.wt_pos = interpolation._linear_point(self.wt_mod, self.wt_mod_phase)
  */
     __pyx_t_15 = __pyx_v_5pippi_8pulsar2d_MIN_PULSEWIDTH;
-    if (unlikely(!__pyx_v_self->pulsewidth.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 158, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->pulsewidth.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 164, __pyx_L1_error)}
     __pyx_t_16 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->pulsewidth, __pyx_v_self->pw_phase, NULL);
     if (((__pyx_t_15 > __pyx_t_16) != 0)) {
       __pyx_t_17 = __pyx_t_15;
@@ -5166,54 +5248,54 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
     }
     __pyx_v_pulsewidth = __pyx_t_17;
 
-    /* "pippi/pulsar2d.pyx":159
+    /* "pippi/pulsar2d.pyx":165
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)
  *             pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)             # <<<<<<<<<<<<<<
  *             self.wt_pos = interpolation._linear_point(self.wt_mod, self.wt_mod_phase)
  *             self.win_pos = interpolation._linear_point(self.win_mod, self.win_mod_phase)
  */
-    if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 159, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 165, __pyx_L1_error)}
     __pyx_v_amp = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->amp, __pyx_v_self->amp_phase, NULL);
 
-    /* "pippi/pulsar2d.pyx":160
+    /* "pippi/pulsar2d.pyx":166
  *             pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)
  *             self.wt_pos = interpolation._linear_point(self.wt_mod, self.wt_mod_phase)             # <<<<<<<<<<<<<<
  *             self.win_pos = interpolation._linear_point(self.win_mod, self.win_mod_phase)
  *             mask_prob = interpolation._linear_point(self.mask, self.mask_phase)
  */
-    if (unlikely(!__pyx_v_self->wt_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 160, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->wt_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 166, __pyx_L1_error)}
     __pyx_v_self->wt_pos = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->wt_mod, __pyx_v_self->wt_mod_phase, NULL);
 
-    /* "pippi/pulsar2d.pyx":161
+    /* "pippi/pulsar2d.pyx":167
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)
  *             self.wt_pos = interpolation._linear_point(self.wt_mod, self.wt_mod_phase)
  *             self.win_pos = interpolation._linear_point(self.win_mod, self.win_mod_phase)             # <<<<<<<<<<<<<<
  *             mask_prob = interpolation._linear_point(self.mask, self.mask_phase)
  *             burst = self.burst[<int>self.burst_phase]
  */
-    if (unlikely(!__pyx_v_self->win_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 161, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->win_mod.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 167, __pyx_L1_error)}
     __pyx_v_self->win_pos = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->win_mod, __pyx_v_self->win_mod_phase, NULL);
 
-    /* "pippi/pulsar2d.pyx":162
+    /* "pippi/pulsar2d.pyx":168
  *             self.wt_pos = interpolation._linear_point(self.wt_mod, self.wt_mod_phase)
  *             self.win_pos = interpolation._linear_point(self.win_mod, self.win_mod_phase)
  *             mask_prob = interpolation._linear_point(self.mask, self.mask_phase)             # <<<<<<<<<<<<<<
  *             burst = self.burst[<int>self.burst_phase]
  * 
  */
-    if (unlikely(!__pyx_v_self->mask.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 162, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->mask.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 168, __pyx_L1_error)}
     __pyx_v_mask_prob = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->mask, __pyx_v_self->mask_phase, NULL);
 
-    /* "pippi/pulsar2d.pyx":163
+    /* "pippi/pulsar2d.pyx":169
  *             self.win_pos = interpolation._linear_point(self.win_mod, self.win_mod_phase)
  *             mask_prob = interpolation._linear_point(self.mask, self.mask_phase)
  *             burst = self.burst[<int>self.burst_phase]             # <<<<<<<<<<<<<<
  * 
  *             ipulsewidth = 1.0/pulsewidth
  */
-    if (unlikely(!__pyx_v_self->burst.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 163, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->burst.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 169, __pyx_L1_error)}
     __pyx_t_18 = ((int)__pyx_v_self->burst_phase);
     __pyx_t_19 = -1;
     if (__pyx_t_18 < 0) {
@@ -5222,11 +5304,11 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
     } else if (unlikely(__pyx_t_18 >= __pyx_v_self->burst.shape[0])) __pyx_t_19 = 0;
     if (unlikely(__pyx_t_19 != -1)) {
       __Pyx_RaiseBufferIndexError(__pyx_t_19);
-      __PYX_ERR(0, 163, __pyx_L1_error)
+      __PYX_ERR(0, 169, __pyx_L1_error)
     }
     __pyx_v_burst = (*((long *) ( /* dim=0 */ (__pyx_v_self->burst.data + __pyx_t_18 * __pyx_v_self->burst.strides[0]) )));
 
-    /* "pippi/pulsar2d.pyx":165
+    /* "pippi/pulsar2d.pyx":171
  *             burst = self.burst[<int>self.burst_phase]
  * 
  *             ipulsewidth = 1.0/pulsewidth             # <<<<<<<<<<<<<<
@@ -5235,11 +5317,11 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
  */
     if (unlikely(__pyx_v_pulsewidth == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 165, __pyx_L1_error)
+      __PYX_ERR(0, 171, __pyx_L1_error)
     }
     __pyx_v_ipulsewidth = (1.0 / __pyx_v_pulsewidth);
 
-    /* "pippi/pulsar2d.pyx":166
+    /* "pippi/pulsar2d.pyx":172
  * 
  *             ipulsewidth = 1.0/pulsewidth
  *             wt_boundry_p = <int>max((ipulsewidth * self.wt_length)-1, 1)             # <<<<<<<<<<<<<<
@@ -5255,7 +5337,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
     }
     __pyx_v_wt_boundry_p = ((int)__pyx_t_15);
 
-    /* "pippi/pulsar2d.pyx":167
+    /* "pippi/pulsar2d.pyx":173
  *             ipulsewidth = 1.0/pulsewidth
  *             wt_boundry_p = <int>max((ipulsewidth * self.wt_length)-1, 1)
  *             win_boundry_p = <int>max((ipulsewidth * self.win_length)-1, 1)             # <<<<<<<<<<<<<<
@@ -5271,7 +5353,7 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
     }
     __pyx_v_win_boundry_p = ((int)__pyx_t_17);
 
-    /* "pippi/pulsar2d.pyx":169
+    /* "pippi/pulsar2d.pyx":175
  *             win_boundry_p = <int>max((ipulsewidth * self.win_length)-1, 1)
  * 
  *             if self.wt_count == 1:             # <<<<<<<<<<<<<<
@@ -5281,131 +5363,19 @@ static PyObject *__pyx_f_5pippi_8pulsar2d_8Pulsar2d__play(struct __pyx_obj_5pipp
     __pyx_t_20 = ((__pyx_v_self->wt_count == 1) != 0);
     if (__pyx_t_20) {
 
-      /* "pippi/pulsar2d.pyx":170
+      /* "pippi/pulsar2d.pyx":176
  * 
  *             if self.wt_count == 1:
  *                 sample = interpolation._linear_point(self.wavetables[0], self.wt_phase, pulsewidth)             # <<<<<<<<<<<<<<
  *             else:
  *                 wi_phase = self.wt_pos * (self.wt_count-2)
  */
-      if (unlikely(!__pyx_v_self->wavetables.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 170, __pyx_L1_error)}
-      __pyx_t_21.data = __pyx_v_self->wavetables.data;
-      __pyx_t_21.memview = __pyx_v_self->wavetables.memview;
-      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
-      {
-    Py_ssize_t __pyx_tmp_idx = 0;
-        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->wavetables.shape[0];
-    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->wavetables.strides[0];
-        if (__pyx_tmp_idx < 0)
-            __pyx_tmp_idx += __pyx_tmp_shape;
-        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
-            PyErr_SetString(PyExc_IndexError,
-                            "Index out of bounds (axis 0)");
-            __PYX_ERR(0, 170, __pyx_L1_error)
-        }
-        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
-}
-
-__pyx_t_21.shape[0] = __pyx_v_self->wavetables.shape[1];
-__pyx_t_21.strides[0] = __pyx_v_self->wavetables.strides[1];
-    __pyx_t_21.suboffsets[0] = -1;
-
-__pyx_t_22.__pyx_n = 1;
-      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
-      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->wt_phase, &__pyx_t_22); 
-      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
-      __pyx_t_21.memview = NULL;
-      __pyx_t_21.data = NULL;
-      __pyx_v_sample = __pyx_t_17;
-
-      /* "pippi/pulsar2d.pyx":169
- *             win_boundry_p = <int>max((ipulsewidth * self.win_length)-1, 1)
- * 
- *             if self.wt_count == 1:             # <<<<<<<<<<<<<<
- *                 sample = interpolation._linear_point(self.wavetables[0], self.wt_phase, pulsewidth)
- *             else:
- */
-      goto __pyx_L5;
-    }
-
-    /* "pippi/pulsar2d.pyx":172
- *                 sample = interpolation._linear_point(self.wavetables[0], self.wt_phase, pulsewidth)
- *             else:
- *                 wi_phase = self.wt_pos * (self.wt_count-2)             # <<<<<<<<<<<<<<
- *                 wi = <int>wi_phase
- *                 wi_frac = wi_phase - wi
- */
-    /*else*/ {
-      __pyx_v_wi_phase = (__pyx_v_self->wt_pos * (__pyx_v_self->wt_count - 2));
-
-      /* "pippi/pulsar2d.pyx":173
- *             else:
- *                 wi_phase = self.wt_pos * (self.wt_count-2)
- *                 wi = <int>wi_phase             # <<<<<<<<<<<<<<
- *                 wi_frac = wi_phase - wi
- *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
- */
-      __pyx_v_wi = ((int)__pyx_v_wi_phase);
-
-      /* "pippi/pulsar2d.pyx":174
- *                 wi_phase = self.wt_pos * (self.wt_count-2)
- *                 wi = <int>wi_phase
- *                 wi_frac = wi_phase - wi             # <<<<<<<<<<<<<<
- *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
- *                 wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)
- */
-      __pyx_v_wi_frac = (__pyx_v_wi_phase - __pyx_v_wi);
-
-      /* "pippi/pulsar2d.pyx":175
- *                 wi = <int>wi_phase
- *                 wi_frac = wi_phase - wi
- *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)             # <<<<<<<<<<<<<<
- *                 wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)
- *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
- */
-      if (unlikely(!__pyx_v_self->wavetables.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 175, __pyx_L1_error)}
-      __pyx_t_21.data = __pyx_v_self->wavetables.data;
-      __pyx_t_21.memview = __pyx_v_self->wavetables.memview;
-      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
-      {
-    Py_ssize_t __pyx_tmp_idx = __pyx_v_wi;
-        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->wavetables.shape[0];
-    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->wavetables.strides[0];
-        if (__pyx_tmp_idx < 0)
-            __pyx_tmp_idx += __pyx_tmp_shape;
-        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
-            PyErr_SetString(PyExc_IndexError,
-                            "Index out of bounds (axis 0)");
-            __PYX_ERR(0, 175, __pyx_L1_error)
-        }
-        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
-}
-
-__pyx_t_21.shape[0] = __pyx_v_self->wavetables.shape[1];
-__pyx_t_21.strides[0] = __pyx_v_self->wavetables.strides[1];
-    __pyx_t_21.suboffsets[0] = -1;
-
-__pyx_t_22.__pyx_n = 1;
-      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
-      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->wt_phase, &__pyx_t_22); 
-      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
-      __pyx_t_21.memview = NULL;
-      __pyx_t_21.data = NULL;
-      __pyx_v_wt_out_a = __pyx_t_17;
-
-      /* "pippi/pulsar2d.pyx":176
- *                 wi_frac = wi_phase - wi
- *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
- *                 wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)             # <<<<<<<<<<<<<<
- *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
- * 
- */
       if (unlikely(!__pyx_v_self->wavetables.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 176, __pyx_L1_error)}
       __pyx_t_21.data = __pyx_v_self->wavetables.data;
       __pyx_t_21.memview = __pyx_v_self->wavetables.memview;
       __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
       {
-    Py_ssize_t __pyx_tmp_idx = (__pyx_v_wi + 1);
+    Py_ssize_t __pyx_tmp_idx = 0;
         Py_ssize_t __pyx_tmp_shape = __pyx_v_self->wavetables.shape[0];
     Py_ssize_t __pyx_tmp_stride = __pyx_v_self->wavetables.strides[0];
         if (__pyx_tmp_idx < 0)
@@ -5428,9 +5398,121 @@ __pyx_t_22.__pyx_n = 1;
       __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
       __pyx_t_21.memview = NULL;
       __pyx_t_21.data = NULL;
+      __pyx_v_sample = __pyx_t_17;
+
+      /* "pippi/pulsar2d.pyx":175
+ *             win_boundry_p = <int>max((ipulsewidth * self.win_length)-1, 1)
+ * 
+ *             if self.wt_count == 1:             # <<<<<<<<<<<<<<
+ *                 sample = interpolation._linear_point(self.wavetables[0], self.wt_phase, pulsewidth)
+ *             else:
+ */
+      goto __pyx_L5;
+    }
+
+    /* "pippi/pulsar2d.pyx":178
+ *                 sample = interpolation._linear_point(self.wavetables[0], self.wt_phase, pulsewidth)
+ *             else:
+ *                 wi_phase = self.wt_pos * (self.wt_count-2)             # <<<<<<<<<<<<<<
+ *                 wi = <int>wi_phase
+ *                 wi_frac = wi_phase - wi
+ */
+    /*else*/ {
+      __pyx_v_wi_phase = (__pyx_v_self->wt_pos * (__pyx_v_self->wt_count - 2));
+
+      /* "pippi/pulsar2d.pyx":179
+ *             else:
+ *                 wi_phase = self.wt_pos * (self.wt_count-2)
+ *                 wi = <int>wi_phase             # <<<<<<<<<<<<<<
+ *                 wi_frac = wi_phase - wi
+ *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
+ */
+      __pyx_v_wi = ((int)__pyx_v_wi_phase);
+
+      /* "pippi/pulsar2d.pyx":180
+ *                 wi_phase = self.wt_pos * (self.wt_count-2)
+ *                 wi = <int>wi_phase
+ *                 wi_frac = wi_phase - wi             # <<<<<<<<<<<<<<
+ *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
+ *                 wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)
+ */
+      __pyx_v_wi_frac = (__pyx_v_wi_phase - __pyx_v_wi);
+
+      /* "pippi/pulsar2d.pyx":181
+ *                 wi = <int>wi_phase
+ *                 wi_frac = wi_phase - wi
+ *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)             # <<<<<<<<<<<<<<
+ *                 wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)
+ *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
+ */
+      if (unlikely(!__pyx_v_self->wavetables.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 181, __pyx_L1_error)}
+      __pyx_t_21.data = __pyx_v_self->wavetables.data;
+      __pyx_t_21.memview = __pyx_v_self->wavetables.memview;
+      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
+      {
+    Py_ssize_t __pyx_tmp_idx = __pyx_v_wi;
+        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->wavetables.shape[0];
+    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->wavetables.strides[0];
+        if (__pyx_tmp_idx < 0)
+            __pyx_tmp_idx += __pyx_tmp_shape;
+        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
+            PyErr_SetString(PyExc_IndexError,
+                            "Index out of bounds (axis 0)");
+            __PYX_ERR(0, 181, __pyx_L1_error)
+        }
+        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
+}
+
+__pyx_t_21.shape[0] = __pyx_v_self->wavetables.shape[1];
+__pyx_t_21.strides[0] = __pyx_v_self->wavetables.strides[1];
+    __pyx_t_21.suboffsets[0] = -1;
+
+__pyx_t_22.__pyx_n = 1;
+      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
+      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->wt_phase, &__pyx_t_22); 
+      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
+      __pyx_t_21.memview = NULL;
+      __pyx_t_21.data = NULL;
+      __pyx_v_wt_out_a = __pyx_t_17;
+
+      /* "pippi/pulsar2d.pyx":182
+ *                 wi_frac = wi_phase - wi
+ *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
+ *                 wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)             # <<<<<<<<<<<<<<
+ *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
+ * 
+ */
+      if (unlikely(!__pyx_v_self->wavetables.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 182, __pyx_L1_error)}
+      __pyx_t_21.data = __pyx_v_self->wavetables.data;
+      __pyx_t_21.memview = __pyx_v_self->wavetables.memview;
+      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
+      {
+    Py_ssize_t __pyx_tmp_idx = (__pyx_v_wi + 1);
+        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->wavetables.shape[0];
+    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->wavetables.strides[0];
+        if (__pyx_tmp_idx < 0)
+            __pyx_tmp_idx += __pyx_tmp_shape;
+        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
+            PyErr_SetString(PyExc_IndexError,
+                            "Index out of bounds (axis 0)");
+            __PYX_ERR(0, 182, __pyx_L1_error)
+        }
+        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
+}
+
+__pyx_t_21.shape[0] = __pyx_v_self->wavetables.shape[1];
+__pyx_t_21.strides[0] = __pyx_v_self->wavetables.strides[1];
+    __pyx_t_21.suboffsets[0] = -1;
+
+__pyx_t_22.__pyx_n = 1;
+      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
+      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->wt_phase, &__pyx_t_22); 
+      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
+      __pyx_t_21.memview = NULL;
+      __pyx_t_21.data = NULL;
       __pyx_v_wt_out_b = __pyx_t_17;
 
-      /* "pippi/pulsar2d.pyx":177
+      /* "pippi/pulsar2d.pyx":183
  *                 wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
  *                 wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)
  *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)             # <<<<<<<<<<<<<<
@@ -5441,7 +5523,7 @@ __pyx_t_22.__pyx_n = 1;
     }
     __pyx_L5:;
 
-    /* "pippi/pulsar2d.pyx":179
+    /* "pippi/pulsar2d.pyx":185
  *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
  * 
  *             if self.win_count == 1:             # <<<<<<<<<<<<<<
@@ -5451,131 +5533,19 @@ __pyx_t_22.__pyx_n = 1;
     __pyx_t_20 = ((__pyx_v_self->win_count == 1) != 0);
     if (__pyx_t_20) {
 
-      /* "pippi/pulsar2d.pyx":180
+      /* "pippi/pulsar2d.pyx":186
  * 
  *             if self.win_count == 1:
  *                 sample *= interpolation._linear_point(self.windows[0], self.win_phase, pulsewidth)             # <<<<<<<<<<<<<<
  *             else:
  *                 wi_phase = self.win_pos * (self.win_count-2)
  */
-      if (unlikely(!__pyx_v_self->windows.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 180, __pyx_L1_error)}
-      __pyx_t_21.data = __pyx_v_self->windows.data;
-      __pyx_t_21.memview = __pyx_v_self->windows.memview;
-      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
-      {
-    Py_ssize_t __pyx_tmp_idx = 0;
-        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->windows.shape[0];
-    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->windows.strides[0];
-        if (__pyx_tmp_idx < 0)
-            __pyx_tmp_idx += __pyx_tmp_shape;
-        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
-            PyErr_SetString(PyExc_IndexError,
-                            "Index out of bounds (axis 0)");
-            __PYX_ERR(0, 180, __pyx_L1_error)
-        }
-        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
-}
-
-__pyx_t_21.shape[0] = __pyx_v_self->windows.shape[1];
-__pyx_t_21.strides[0] = __pyx_v_self->windows.strides[1];
-    __pyx_t_21.suboffsets[0] = -1;
-
-__pyx_t_22.__pyx_n = 1;
-      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
-      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->win_phase, &__pyx_t_22); 
-      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
-      __pyx_t_21.memview = NULL;
-      __pyx_t_21.data = NULL;
-      __pyx_v_sample = (__pyx_v_sample * __pyx_t_17);
-
-      /* "pippi/pulsar2d.pyx":179
- *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
- * 
- *             if self.win_count == 1:             # <<<<<<<<<<<<<<
- *                 sample *= interpolation._linear_point(self.windows[0], self.win_phase, pulsewidth)
- *             else:
- */
-      goto __pyx_L6;
-    }
-
-    /* "pippi/pulsar2d.pyx":182
- *                 sample *= interpolation._linear_point(self.windows[0], self.win_phase, pulsewidth)
- *             else:
- *                 wi_phase = self.win_pos * (self.win_count-2)             # <<<<<<<<<<<<<<
- *                 wi = <int>wi_phase
- *                 wi_frac = wi_phase - wi
- */
-    /*else*/ {
-      __pyx_v_wi_phase = (__pyx_v_self->win_pos * (__pyx_v_self->win_count - 2));
-
-      /* "pippi/pulsar2d.pyx":183
- *             else:
- *                 wi_phase = self.win_pos * (self.win_count-2)
- *                 wi = <int>wi_phase             # <<<<<<<<<<<<<<
- *                 wi_frac = wi_phase - wi
- *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
- */
-      __pyx_v_wi = ((int)__pyx_v_wi_phase);
-
-      /* "pippi/pulsar2d.pyx":184
- *                 wi_phase = self.win_pos * (self.win_count-2)
- *                 wi = <int>wi_phase
- *                 wi_frac = wi_phase - wi             # <<<<<<<<<<<<<<
- *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
- *                 win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)
- */
-      __pyx_v_wi_frac = (__pyx_v_wi_phase - __pyx_v_wi);
-
-      /* "pippi/pulsar2d.pyx":185
- *                 wi = <int>wi_phase
- *                 wi_frac = wi_phase - wi
- *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)             # <<<<<<<<<<<<<<
- *                 win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)
- *                 sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)
- */
-      if (unlikely(!__pyx_v_self->windows.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 185, __pyx_L1_error)}
-      __pyx_t_21.data = __pyx_v_self->windows.data;
-      __pyx_t_21.memview = __pyx_v_self->windows.memview;
-      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
-      {
-    Py_ssize_t __pyx_tmp_idx = __pyx_v_wi;
-        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->windows.shape[0];
-    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->windows.strides[0];
-        if (__pyx_tmp_idx < 0)
-            __pyx_tmp_idx += __pyx_tmp_shape;
-        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
-            PyErr_SetString(PyExc_IndexError,
-                            "Index out of bounds (axis 0)");
-            __PYX_ERR(0, 185, __pyx_L1_error)
-        }
-        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
-}
-
-__pyx_t_21.shape[0] = __pyx_v_self->windows.shape[1];
-__pyx_t_21.strides[0] = __pyx_v_self->windows.strides[1];
-    __pyx_t_21.suboffsets[0] = -1;
-
-__pyx_t_22.__pyx_n = 1;
-      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
-      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->win_phase, &__pyx_t_22); 
-      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
-      __pyx_t_21.memview = NULL;
-      __pyx_t_21.data = NULL;
-      __pyx_v_win_out_a = __pyx_t_17;
-
-      /* "pippi/pulsar2d.pyx":186
- *                 wi_frac = wi_phase - wi
- *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
- *                 win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)             # <<<<<<<<<<<<<<
- *                 sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)
- * 
- */
       if (unlikely(!__pyx_v_self->windows.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 186, __pyx_L1_error)}
       __pyx_t_21.data = __pyx_v_self->windows.data;
       __pyx_t_21.memview = __pyx_v_self->windows.memview;
       __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
       {
-    Py_ssize_t __pyx_tmp_idx = (__pyx_v_wi + 1);
+    Py_ssize_t __pyx_tmp_idx = 0;
         Py_ssize_t __pyx_tmp_shape = __pyx_v_self->windows.shape[0];
     Py_ssize_t __pyx_tmp_stride = __pyx_v_self->windows.strides[0];
         if (__pyx_tmp_idx < 0)
@@ -5598,9 +5568,121 @@ __pyx_t_22.__pyx_n = 1;
       __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
       __pyx_t_21.memview = NULL;
       __pyx_t_21.data = NULL;
+      __pyx_v_sample = (__pyx_v_sample * __pyx_t_17);
+
+      /* "pippi/pulsar2d.pyx":185
+ *                 sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
+ * 
+ *             if self.win_count == 1:             # <<<<<<<<<<<<<<
+ *                 sample *= interpolation._linear_point(self.windows[0], self.win_phase, pulsewidth)
+ *             else:
+ */
+      goto __pyx_L6;
+    }
+
+    /* "pippi/pulsar2d.pyx":188
+ *                 sample *= interpolation._linear_point(self.windows[0], self.win_phase, pulsewidth)
+ *             else:
+ *                 wi_phase = self.win_pos * (self.win_count-2)             # <<<<<<<<<<<<<<
+ *                 wi = <int>wi_phase
+ *                 wi_frac = wi_phase - wi
+ */
+    /*else*/ {
+      __pyx_v_wi_phase = (__pyx_v_self->win_pos * (__pyx_v_self->win_count - 2));
+
+      /* "pippi/pulsar2d.pyx":189
+ *             else:
+ *                 wi_phase = self.win_pos * (self.win_count-2)
+ *                 wi = <int>wi_phase             # <<<<<<<<<<<<<<
+ *                 wi_frac = wi_phase - wi
+ *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
+ */
+      __pyx_v_wi = ((int)__pyx_v_wi_phase);
+
+      /* "pippi/pulsar2d.pyx":190
+ *                 wi_phase = self.win_pos * (self.win_count-2)
+ *                 wi = <int>wi_phase
+ *                 wi_frac = wi_phase - wi             # <<<<<<<<<<<<<<
+ *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
+ *                 win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)
+ */
+      __pyx_v_wi_frac = (__pyx_v_wi_phase - __pyx_v_wi);
+
+      /* "pippi/pulsar2d.pyx":191
+ *                 wi = <int>wi_phase
+ *                 wi_frac = wi_phase - wi
+ *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)             # <<<<<<<<<<<<<<
+ *                 win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)
+ *                 sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)
+ */
+      if (unlikely(!__pyx_v_self->windows.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 191, __pyx_L1_error)}
+      __pyx_t_21.data = __pyx_v_self->windows.data;
+      __pyx_t_21.memview = __pyx_v_self->windows.memview;
+      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
+      {
+    Py_ssize_t __pyx_tmp_idx = __pyx_v_wi;
+        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->windows.shape[0];
+    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->windows.strides[0];
+        if (__pyx_tmp_idx < 0)
+            __pyx_tmp_idx += __pyx_tmp_shape;
+        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
+            PyErr_SetString(PyExc_IndexError,
+                            "Index out of bounds (axis 0)");
+            __PYX_ERR(0, 191, __pyx_L1_error)
+        }
+        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
+}
+
+__pyx_t_21.shape[0] = __pyx_v_self->windows.shape[1];
+__pyx_t_21.strides[0] = __pyx_v_self->windows.strides[1];
+    __pyx_t_21.suboffsets[0] = -1;
+
+__pyx_t_22.__pyx_n = 1;
+      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
+      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->win_phase, &__pyx_t_22); 
+      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
+      __pyx_t_21.memview = NULL;
+      __pyx_t_21.data = NULL;
+      __pyx_v_win_out_a = __pyx_t_17;
+
+      /* "pippi/pulsar2d.pyx":192
+ *                 wi_frac = wi_phase - wi
+ *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
+ *                 win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)             # <<<<<<<<<<<<<<
+ *                 sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)
+ * 
+ */
+      if (unlikely(!__pyx_v_self->windows.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 192, __pyx_L1_error)}
+      __pyx_t_21.data = __pyx_v_self->windows.data;
+      __pyx_t_21.memview = __pyx_v_self->windows.memview;
+      __PYX_INC_MEMVIEW(&__pyx_t_21, 0);
+      {
+    Py_ssize_t __pyx_tmp_idx = (__pyx_v_wi + 1);
+        Py_ssize_t __pyx_tmp_shape = __pyx_v_self->windows.shape[0];
+    Py_ssize_t __pyx_tmp_stride = __pyx_v_self->windows.strides[0];
+        if (__pyx_tmp_idx < 0)
+            __pyx_tmp_idx += __pyx_tmp_shape;
+        if (!__Pyx_is_valid_index(__pyx_tmp_idx, __pyx_tmp_shape)) {
+            PyErr_SetString(PyExc_IndexError,
+                            "Index out of bounds (axis 0)");
+            __PYX_ERR(0, 192, __pyx_L1_error)
+        }
+        __pyx_t_21.data += __pyx_tmp_idx * __pyx_tmp_stride;
+}
+
+__pyx_t_21.shape[0] = __pyx_v_self->windows.shape[1];
+__pyx_t_21.strides[0] = __pyx_v_self->windows.strides[1];
+    __pyx_t_21.suboffsets[0] = -1;
+
+__pyx_t_22.__pyx_n = 1;
+      __pyx_t_22.pulsewidth = __pyx_v_pulsewidth;
+      __pyx_t_17 = __pyx_f_5pippi_13interpolation__linear_point(__pyx_t_21, __pyx_v_self->win_phase, &__pyx_t_22); 
+      __PYX_XDEC_MEMVIEW(&__pyx_t_21, 1);
+      __pyx_t_21.memview = NULL;
+      __pyx_t_21.data = NULL;
       __pyx_v_win_out_b = __pyx_t_17;
 
-      /* "pippi/pulsar2d.pyx":187
+      /* "pippi/pulsar2d.pyx":193
  *                 win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
  *                 win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)
  *                 sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)             # <<<<<<<<<<<<<<
@@ -5611,7 +5693,7 @@ __pyx_t_22.__pyx_n = 1;
     }
     __pyx_L6:;
 
-    /* "pippi/pulsar2d.pyx":189
+    /* "pippi/pulsar2d.pyx":195
  *                 sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)
  * 
  *             sample *= amp * burst * mask             # <<<<<<<<<<<<<<
@@ -5620,7 +5702,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_sample = (__pyx_v_sample * ((__pyx_v_amp * __pyx_v_burst) * __pyx_v_mask));
 
-    /* "pippi/pulsar2d.pyx":191
+    /* "pippi/pulsar2d.pyx":197
  *             sample *= amp * burst * mask
  * 
  *             self.freq_phase += freq_phase_inc             # <<<<<<<<<<<<<<
@@ -5629,7 +5711,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->freq_phase = (__pyx_v_self->freq_phase + __pyx_v_freq_phase_inc);
 
-    /* "pippi/pulsar2d.pyx":192
+    /* "pippi/pulsar2d.pyx":198
  * 
  *             self.freq_phase += freq_phase_inc
  *             self.amp_phase += amp_phase_inc             # <<<<<<<<<<<<<<
@@ -5638,7 +5720,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->amp_phase = (__pyx_v_self->amp_phase + __pyx_v_amp_phase_inc);
 
-    /* "pippi/pulsar2d.pyx":193
+    /* "pippi/pulsar2d.pyx":199
  *             self.freq_phase += freq_phase_inc
  *             self.amp_phase += amp_phase_inc
  *             self.pw_phase += pw_phase_inc             # <<<<<<<<<<<<<<
@@ -5647,7 +5729,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->pw_phase = (__pyx_v_self->pw_phase + __pyx_v_pw_phase_inc);
 
-    /* "pippi/pulsar2d.pyx":194
+    /* "pippi/pulsar2d.pyx":200
  *             self.amp_phase += amp_phase_inc
  *             self.pw_phase += pw_phase_inc
  *             self.mask_phase += mask_phase_inc             # <<<<<<<<<<<<<<
@@ -5656,7 +5738,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->mask_phase = (__pyx_v_self->mask_phase + __pyx_v_mask_phase_inc);
 
-    /* "pippi/pulsar2d.pyx":195
+    /* "pippi/pulsar2d.pyx":201
  *             self.pw_phase += pw_phase_inc
  *             self.mask_phase += mask_phase_inc
  *             self.wt_mod_phase += wt_mod_phase_inc             # <<<<<<<<<<<<<<
@@ -5665,7 +5747,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->wt_mod_phase = (__pyx_v_self->wt_mod_phase + __pyx_v_wt_mod_phase_inc);
 
-    /* "pippi/pulsar2d.pyx":196
+    /* "pippi/pulsar2d.pyx":202
  *             self.mask_phase += mask_phase_inc
  *             self.wt_mod_phase += wt_mod_phase_inc
  *             self.win_mod_phase += win_mod_phase_inc             # <<<<<<<<<<<<<<
@@ -5674,7 +5756,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->win_mod_phase = (__pyx_v_self->win_mod_phase + __pyx_v_win_mod_phase_inc);
 
-    /* "pippi/pulsar2d.pyx":197
+    /* "pippi/pulsar2d.pyx":203
  *             self.wt_mod_phase += wt_mod_phase_inc
  *             self.win_mod_phase += win_mod_phase_inc
  *             self.wt_phase += isamplerate * wt_boundry_p * freq             # <<<<<<<<<<<<<<
@@ -5683,7 +5765,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->wt_phase = (__pyx_v_self->wt_phase + ((__pyx_v_isamplerate * __pyx_v_wt_boundry_p) * __pyx_v_freq));
 
-    /* "pippi/pulsar2d.pyx":198
+    /* "pippi/pulsar2d.pyx":204
  *             self.win_mod_phase += win_mod_phase_inc
  *             self.wt_phase += isamplerate * wt_boundry_p * freq
  *             self.win_phase += isamplerate * win_boundry_p * freq             # <<<<<<<<<<<<<<
@@ -5692,7 +5774,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     __pyx_v_self->win_phase = (__pyx_v_self->win_phase + ((__pyx_v_isamplerate * __pyx_v_win_boundry_p) * __pyx_v_freq));
 
-    /* "pippi/pulsar2d.pyx":200
+    /* "pippi/pulsar2d.pyx":206
  *             self.win_phase += isamplerate * win_boundry_p * freq
  * 
  *             if self.wt_phase >= wt_boundry_p:             # <<<<<<<<<<<<<<
@@ -5702,7 +5784,7 @@ __pyx_t_22.__pyx_n = 1;
     __pyx_t_20 = ((__pyx_v_self->wt_phase >= __pyx_v_wt_boundry_p) != 0);
     if (__pyx_t_20) {
 
-      /* "pippi/pulsar2d.pyx":201
+      /* "pippi/pulsar2d.pyx":207
  * 
  *             if self.wt_phase >= wt_boundry_p:
  *                 self.burst_phase += 1             # <<<<<<<<<<<<<<
@@ -5711,7 +5793,7 @@ __pyx_t_22.__pyx_n = 1;
  */
       __pyx_v_self->burst_phase = (__pyx_v_self->burst_phase + 1.0);
 
-      /* "pippi/pulsar2d.pyx":202
+      /* "pippi/pulsar2d.pyx":208
  *             if self.wt_phase >= wt_boundry_p:
  *                 self.burst_phase += 1
  *                 if rand(0,1) < mask_prob:             # <<<<<<<<<<<<<<
@@ -5725,7 +5807,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_t_17 < __pyx_v_mask_prob) != 0);
       if (__pyx_t_20) {
 
-        /* "pippi/pulsar2d.pyx":203
+        /* "pippi/pulsar2d.pyx":209
  *                 self.burst_phase += 1
  *                 if rand(0,1) < mask_prob:
  *                     mask = 0             # <<<<<<<<<<<<<<
@@ -5734,7 +5816,7 @@ __pyx_t_22.__pyx_n = 1;
  */
         __pyx_v_mask = 0;
 
-        /* "pippi/pulsar2d.pyx":202
+        /* "pippi/pulsar2d.pyx":208
  *             if self.wt_phase >= wt_boundry_p:
  *                 self.burst_phase += 1
  *                 if rand(0,1) < mask_prob:             # <<<<<<<<<<<<<<
@@ -5744,7 +5826,7 @@ __pyx_t_22.__pyx_n = 1;
         goto __pyx_L8;
       }
 
-      /* "pippi/pulsar2d.pyx":205
+      /* "pippi/pulsar2d.pyx":211
  *                     mask = 0
  *                 else:
  *                     mask = 1             # <<<<<<<<<<<<<<
@@ -5756,7 +5838,7 @@ __pyx_t_22.__pyx_n = 1;
       }
       __pyx_L8:;
 
-      /* "pippi/pulsar2d.pyx":200
+      /* "pippi/pulsar2d.pyx":206
  *             self.win_phase += isamplerate * win_boundry_p * freq
  * 
  *             if self.wt_phase >= wt_boundry_p:             # <<<<<<<<<<<<<<
@@ -5765,7 +5847,7 @@ __pyx_t_22.__pyx_n = 1;
  */
     }
 
-    /* "pippi/pulsar2d.pyx":207
+    /* "pippi/pulsar2d.pyx":213
  *                     mask = 1
  * 
  *             while self.wt_phase >= wt_boundry_p:             # <<<<<<<<<<<<<<
@@ -5776,7 +5858,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->wt_phase >= __pyx_v_wt_boundry_p) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":208
+      /* "pippi/pulsar2d.pyx":214
  * 
  *             while self.wt_phase >= wt_boundry_p:
  *                 self.wt_phase -= wt_boundry_p             # <<<<<<<<<<<<<<
@@ -5786,7 +5868,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->wt_phase = (__pyx_v_self->wt_phase - __pyx_v_wt_boundry_p);
     }
 
-    /* "pippi/pulsar2d.pyx":210
+    /* "pippi/pulsar2d.pyx":216
  *                 self.wt_phase -= wt_boundry_p
  * 
  *             while self.win_phase >= win_boundry_p:             # <<<<<<<<<<<<<<
@@ -5797,7 +5879,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->win_phase >= __pyx_v_win_boundry_p) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":211
+      /* "pippi/pulsar2d.pyx":217
  * 
  *             while self.win_phase >= win_boundry_p:
  *                 self.win_phase -= win_boundry_p             # <<<<<<<<<<<<<<
@@ -5807,7 +5889,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->win_phase = (__pyx_v_self->win_phase - __pyx_v_win_boundry_p);
     }
 
-    /* "pippi/pulsar2d.pyx":213
+    /* "pippi/pulsar2d.pyx":219
  *                 self.win_phase -= win_boundry_p
  * 
  *             while self.wt_mod_phase >= wt_mod_boundry:             # <<<<<<<<<<<<<<
@@ -5818,7 +5900,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->wt_mod_phase >= __pyx_v_wt_mod_boundry) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":214
+      /* "pippi/pulsar2d.pyx":220
  * 
  *             while self.wt_mod_phase >= wt_mod_boundry:
  *                 self.wt_mod_phase -= wt_mod_boundry             # <<<<<<<<<<<<<<
@@ -5828,7 +5910,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->wt_mod_phase = (__pyx_v_self->wt_mod_phase - __pyx_v_wt_mod_boundry);
     }
 
-    /* "pippi/pulsar2d.pyx":216
+    /* "pippi/pulsar2d.pyx":222
  *                 self.wt_mod_phase -= wt_mod_boundry
  * 
  *             while self.win_mod_phase >= win_mod_boundry:             # <<<<<<<<<<<<<<
@@ -5839,7 +5921,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->win_mod_phase >= __pyx_v_win_mod_boundry) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":217
+      /* "pippi/pulsar2d.pyx":223
  * 
  *             while self.win_mod_phase >= win_mod_boundry:
  *                 self.win_mod_phase -= win_mod_boundry             # <<<<<<<<<<<<<<
@@ -5849,7 +5931,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->win_mod_phase = (__pyx_v_self->win_mod_phase - __pyx_v_win_mod_boundry);
     }
 
-    /* "pippi/pulsar2d.pyx":219
+    /* "pippi/pulsar2d.pyx":225
  *                 self.win_mod_phase -= win_mod_boundry
  * 
  *             while self.pw_phase >= pw_boundry:             # <<<<<<<<<<<<<<
@@ -5860,7 +5942,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->pw_phase >= __pyx_v_pw_boundry) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":220
+      /* "pippi/pulsar2d.pyx":226
  * 
  *             while self.pw_phase >= pw_boundry:
  *                 self.pw_phase -= pw_boundry             # <<<<<<<<<<<<<<
@@ -5870,7 +5952,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->pw_phase = (__pyx_v_self->pw_phase - __pyx_v_pw_boundry);
     }
 
-    /* "pippi/pulsar2d.pyx":222
+    /* "pippi/pulsar2d.pyx":228
  *                 self.pw_phase -= pw_boundry
  * 
  *             while self.amp_phase >= amp_boundry:             # <<<<<<<<<<<<<<
@@ -5881,7 +5963,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->amp_phase >= __pyx_v_amp_boundry) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":223
+      /* "pippi/pulsar2d.pyx":229
  * 
  *             while self.amp_phase >= amp_boundry:
  *                 self.amp_phase -= amp_boundry             # <<<<<<<<<<<<<<
@@ -5891,7 +5973,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->amp_phase = (__pyx_v_self->amp_phase - __pyx_v_amp_boundry);
     }
 
-    /* "pippi/pulsar2d.pyx":225
+    /* "pippi/pulsar2d.pyx":231
  *                 self.amp_phase -= amp_boundry
  * 
  *             while self.freq_phase >= freq_boundry:             # <<<<<<<<<<<<<<
@@ -5902,7 +5984,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->freq_phase >= __pyx_v_freq_boundry) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":226
+      /* "pippi/pulsar2d.pyx":232
  * 
  *             while self.freq_phase >= freq_boundry:
  *                 self.freq_phase -= freq_boundry             # <<<<<<<<<<<<<<
@@ -5912,7 +5994,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->freq_phase = (__pyx_v_self->freq_phase - __pyx_v_freq_boundry);
     }
 
-    /* "pippi/pulsar2d.pyx":228
+    /* "pippi/pulsar2d.pyx":234
  *                 self.freq_phase -= freq_boundry
  * 
  *             while self.mask_phase >= mask_boundry:             # <<<<<<<<<<<<<<
@@ -5923,7 +6005,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->mask_phase >= __pyx_v_mask_boundry) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":229
+      /* "pippi/pulsar2d.pyx":235
  * 
  *             while self.mask_phase >= mask_boundry:
  *                 self.mask_phase -= mask_boundry             # <<<<<<<<<<<<<<
@@ -5933,7 +6015,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->mask_phase = (__pyx_v_self->mask_phase - __pyx_v_mask_boundry);
     }
 
-    /* "pippi/pulsar2d.pyx":231
+    /* "pippi/pulsar2d.pyx":237
  *                 self.mask_phase -= mask_boundry
  * 
  *             while self.burst_phase >= burst_boundry:             # <<<<<<<<<<<<<<
@@ -5944,7 +6026,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_t_20 = ((__pyx_v_self->burst_phase >= __pyx_v_burst_boundry) != 0);
       if (!__pyx_t_20) break;
 
-      /* "pippi/pulsar2d.pyx":232
+      /* "pippi/pulsar2d.pyx":238
  * 
  *             while self.burst_phase >= burst_boundry:
  *                 self.burst_phase -= burst_boundry             # <<<<<<<<<<<<<<
@@ -5954,7 +6036,7 @@ __pyx_t_22.__pyx_n = 1;
       __pyx_v_self->burst_phase = (__pyx_v_self->burst_phase - __pyx_v_burst_boundry);
     }
 
-    /* "pippi/pulsar2d.pyx":234
+    /* "pippi/pulsar2d.pyx":240
  *                 self.burst_phase -= burst_boundry
  * 
  *             for channel in range(self.channels):             # <<<<<<<<<<<<<<
@@ -5966,7 +6048,7 @@ __pyx_t_22.__pyx_n = 1;
     for (__pyx_t_25 = 0; __pyx_t_25 < __pyx_t_24; __pyx_t_25+=1) {
       __pyx_v_channel = __pyx_t_25;
 
-      /* "pippi/pulsar2d.pyx":235
+      /* "pippi/pulsar2d.pyx":241
  * 
  *             for channel in range(self.channels):
  *                 out[i][channel] = sample             # <<<<<<<<<<<<<<
@@ -5986,37 +6068,37 @@ __pyx_t_22.__pyx_n = 1;
       } else if (unlikely(__pyx_t_27 >= __pyx_v_out.shape[1])) __pyx_t_28 = 1;
       if (unlikely(__pyx_t_28 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
-        __PYX_ERR(0, 235, __pyx_L1_error)
+        __PYX_ERR(0, 241, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_26 * __pyx_v_out.strides[0]) ) + __pyx_t_27 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
     }
   }
 
-  /* "pippi/pulsar2d.pyx":237
+  /* "pippi/pulsar2d.pyx":243
  *                 out[i][channel] = sample
  * 
  *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 237, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 237, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 243, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -6024,7 +6106,7 @@ __pyx_t_22.__pyx_n = 1;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "pippi/pulsar2d.pyx":117
+  /* "pippi/pulsar2d.pyx":123
  *         return self._play(framelength)
  * 
  *     cdef object _play(self, int length):             # <<<<<<<<<<<<<<
@@ -20519,6 +20601,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
   {&__pyx_n_s_samplerate, __pyx_k_samplerate, sizeof(__pyx_k_samplerate), 0, 0, 1, 1},
+  {&__pyx_n_u_saw, __pyx_k_saw, sizeof(__pyx_k_saw), 0, 1, 0, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
@@ -20545,9 +20628,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 77, __pyx_L1_error)
-  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 83, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 156, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 83, __pyx_L1_error)
+  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(0, 89, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 162, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(2, 133, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(2, 148, __pyx_L1_error)
   __pyx_builtin_Ellipsis = __Pyx_GetBuiltinName(__pyx_n_s_Ellipsis); if (!__pyx_builtin_Ellipsis) __PYX_ERR(2, 400, __pyx_L1_error)

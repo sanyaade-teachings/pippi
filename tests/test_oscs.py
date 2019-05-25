@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d, Alias
 from pippi.soundbuffer import SoundBuffer
+from pippi.wavesets import Waveset
 from pippi import dsp
 
 class TestOscs(TestCase):
@@ -116,6 +117,18 @@ class TestOscs(TestCase):
         out = osc.play(length)
         out.write('tests/renders/osc_pulsar2d.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
+
+    def test_waveset_pulsar2d(self):
+        rain = dsp.read('tests/sounds/rain.wav').cut(0, 10)
+        ws = Waveset(rain)
+        ws.normalize()
+        osc = Pulsar2d(ws,
+                windows=['sine'], 
+                freq=200.0, 
+                amp=0.2
+            )
+        out = osc.play(60)
+        out.write('tests/renders/osc_waveset_pulsar2d.wav')
 
     def test_create_alias(self):
         osc = Alias(freq=200.0)
