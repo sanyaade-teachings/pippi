@@ -28,9 +28,11 @@ cdef double[:,:] _crossfade(double[:,:] out, double[:,:] a, double[:,:] b, doubl
 
     return out
 
-cpdef SoundBuffer crossfade(SoundBuffer a, SoundBuffer b, object curve):
+cpdef SoundBuffer crossfade(SoundBuffer a, SoundBuffer b, object curve=None):
     if len(a) != len(b):
         raise TypeError('Lengths do not match')
+    if curve is None:
+        curve = 'saw'
     cdef double[:] _curve = wavetables.Wavetable(curve, 0, 1).data
     cdef double[:,:] out = np.zeros((len(a), a.channels), dtype='d')
     return SoundBuffer(_crossfade(out, a.frames, b.frames, _curve), channels=a.channels, samplerate=a.samplerate)
