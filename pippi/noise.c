@@ -4,11 +4,11 @@
 {
     "distutils": {
         "depends": [
-            "/home/hecanjog/sessions/amber/venv/lib/python3.7/site-packages/numpy/core/include/numpy/arrayobject.h",
-            "/home/hecanjog/sessions/amber/venv/lib/python3.7/site-packages/numpy/core/include/numpy/ufuncobject.h"
+            "/home/hecanjog/code/pippi/venv/lib/python3.7/site-packages/numpy/core/include/numpy/arrayobject.h",
+            "/home/hecanjog/code/pippi/venv/lib/python3.7/site-packages/numpy/core/include/numpy/ufuncobject.h"
         ],
         "include_dirs": [
-            "/home/hecanjog/sessions/amber/venv/lib/python3.7/site-packages/numpy/core/include"
+            "/home/hecanjog/code/pippi/venv/lib/python3.7/site-packages/numpy/core/include"
         ],
         "name": "pippi.noise",
         "sources": [
@@ -845,11 +845,11 @@ static const char *__pyx_filename;
 
 static const char *__pyx_f[] = {
   "pippi/noise.pyx",
-  "__init__.pxd",
+  "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd",
   "stringsource",
   "pippi/wavetables.pxd",
   "pippi/soundbuffer.pxd",
-  "type.pxd",
+  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/type.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -960,7 +960,7 @@ typedef struct {
 } __Pyx_BufFmt_Context;
 
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":776
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":776
  * # in Cython to enable them only on the right systems.
  * 
  * ctypedef npy_int8       int8_t             # <<<<<<<<<<<<<<
@@ -969,7 +969,7 @@ typedef struct {
  */
 typedef npy_int8 __pyx_t_5numpy_int8_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":777
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":777
  * 
  * ctypedef npy_int8       int8_t
  * ctypedef npy_int16      int16_t             # <<<<<<<<<<<<<<
@@ -978,7 +978,7 @@ typedef npy_int8 __pyx_t_5numpy_int8_t;
  */
 typedef npy_int16 __pyx_t_5numpy_int16_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":778
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":778
  * ctypedef npy_int8       int8_t
  * ctypedef npy_int16      int16_t
  * ctypedef npy_int32      int32_t             # <<<<<<<<<<<<<<
@@ -987,7 +987,7 @@ typedef npy_int16 __pyx_t_5numpy_int16_t;
  */
 typedef npy_int32 __pyx_t_5numpy_int32_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":779
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":779
  * ctypedef npy_int16      int16_t
  * ctypedef npy_int32      int32_t
  * ctypedef npy_int64      int64_t             # <<<<<<<<<<<<<<
@@ -996,7 +996,7 @@ typedef npy_int32 __pyx_t_5numpy_int32_t;
  */
 typedef npy_int64 __pyx_t_5numpy_int64_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":783
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":783
  * #ctypedef npy_int128     int128_t
  * 
  * ctypedef npy_uint8      uint8_t             # <<<<<<<<<<<<<<
@@ -1005,7 +1005,7 @@ typedef npy_int64 __pyx_t_5numpy_int64_t;
  */
 typedef npy_uint8 __pyx_t_5numpy_uint8_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":784
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":784
  * 
  * ctypedef npy_uint8      uint8_t
  * ctypedef npy_uint16     uint16_t             # <<<<<<<<<<<<<<
@@ -1014,7 +1014,7 @@ typedef npy_uint8 __pyx_t_5numpy_uint8_t;
  */
 typedef npy_uint16 __pyx_t_5numpy_uint16_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":785
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":785
  * ctypedef npy_uint8      uint8_t
  * ctypedef npy_uint16     uint16_t
  * ctypedef npy_uint32     uint32_t             # <<<<<<<<<<<<<<
@@ -1023,7 +1023,7 @@ typedef npy_uint16 __pyx_t_5numpy_uint16_t;
  */
 typedef npy_uint32 __pyx_t_5numpy_uint32_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":786
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":786
  * ctypedef npy_uint16     uint16_t
  * ctypedef npy_uint32     uint32_t
  * ctypedef npy_uint64     uint64_t             # <<<<<<<<<<<<<<
@@ -1032,7 +1032,7 @@ typedef npy_uint32 __pyx_t_5numpy_uint32_t;
  */
 typedef npy_uint64 __pyx_t_5numpy_uint64_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":790
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":790
  * #ctypedef npy_uint128    uint128_t
  * 
  * ctypedef npy_float32    float32_t             # <<<<<<<<<<<<<<
@@ -1041,7 +1041,7 @@ typedef npy_uint64 __pyx_t_5numpy_uint64_t;
  */
 typedef npy_float32 __pyx_t_5numpy_float32_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":791
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":791
  * 
  * ctypedef npy_float32    float32_t
  * ctypedef npy_float64    float64_t             # <<<<<<<<<<<<<<
@@ -1050,7 +1050,7 @@ typedef npy_float32 __pyx_t_5numpy_float32_t;
  */
 typedef npy_float64 __pyx_t_5numpy_float64_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":800
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":800
  * # The int types are mapped a bit surprising --
  * # numpy.int corresponds to 'l' and numpy.long to 'q'
  * ctypedef npy_long       int_t             # <<<<<<<<<<<<<<
@@ -1059,7 +1059,7 @@ typedef npy_float64 __pyx_t_5numpy_float64_t;
  */
 typedef npy_long __pyx_t_5numpy_int_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":801
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":801
  * # numpy.int corresponds to 'l' and numpy.long to 'q'
  * ctypedef npy_long       int_t
  * ctypedef npy_longlong   long_t             # <<<<<<<<<<<<<<
@@ -1068,7 +1068,7 @@ typedef npy_long __pyx_t_5numpy_int_t;
  */
 typedef npy_longlong __pyx_t_5numpy_long_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":802
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":802
  * ctypedef npy_long       int_t
  * ctypedef npy_longlong   long_t
  * ctypedef npy_longlong   longlong_t             # <<<<<<<<<<<<<<
@@ -1077,7 +1077,7 @@ typedef npy_longlong __pyx_t_5numpy_long_t;
  */
 typedef npy_longlong __pyx_t_5numpy_longlong_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":804
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":804
  * ctypedef npy_longlong   longlong_t
  * 
  * ctypedef npy_ulong      uint_t             # <<<<<<<<<<<<<<
@@ -1086,7 +1086,7 @@ typedef npy_longlong __pyx_t_5numpy_longlong_t;
  */
 typedef npy_ulong __pyx_t_5numpy_uint_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":805
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":805
  * 
  * ctypedef npy_ulong      uint_t
  * ctypedef npy_ulonglong  ulong_t             # <<<<<<<<<<<<<<
@@ -1095,7 +1095,7 @@ typedef npy_ulong __pyx_t_5numpy_uint_t;
  */
 typedef npy_ulonglong __pyx_t_5numpy_ulong_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":806
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":806
  * ctypedef npy_ulong      uint_t
  * ctypedef npy_ulonglong  ulong_t
  * ctypedef npy_ulonglong  ulonglong_t             # <<<<<<<<<<<<<<
@@ -1104,7 +1104,7 @@ typedef npy_ulonglong __pyx_t_5numpy_ulong_t;
  */
 typedef npy_ulonglong __pyx_t_5numpy_ulonglong_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":808
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":808
  * ctypedef npy_ulonglong  ulonglong_t
  * 
  * ctypedef npy_intp       intp_t             # <<<<<<<<<<<<<<
@@ -1113,7 +1113,7 @@ typedef npy_ulonglong __pyx_t_5numpy_ulonglong_t;
  */
 typedef npy_intp __pyx_t_5numpy_intp_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":809
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":809
  * 
  * ctypedef npy_intp       intp_t
  * ctypedef npy_uintp      uintp_t             # <<<<<<<<<<<<<<
@@ -1122,7 +1122,7 @@ typedef npy_intp __pyx_t_5numpy_intp_t;
  */
 typedef npy_uintp __pyx_t_5numpy_uintp_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":811
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":811
  * ctypedef npy_uintp      uintp_t
  * 
  * ctypedef npy_double     float_t             # <<<<<<<<<<<<<<
@@ -1131,7 +1131,7 @@ typedef npy_uintp __pyx_t_5numpy_uintp_t;
  */
 typedef npy_double __pyx_t_5numpy_float_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":812
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":812
  * 
  * ctypedef npy_double     float_t
  * ctypedef npy_double     double_t             # <<<<<<<<<<<<<<
@@ -1140,7 +1140,7 @@ typedef npy_double __pyx_t_5numpy_float_t;
  */
 typedef npy_double __pyx_t_5numpy_double_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":813
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":813
  * ctypedef npy_double     float_t
  * ctypedef npy_double     double_t
  * ctypedef npy_longdouble longdouble_t             # <<<<<<<<<<<<<<
@@ -1680,7 +1680,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv {
   double window;
 };
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":815
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":815
  * ctypedef npy_longdouble longdouble_t
  * 
  * ctypedef npy_cfloat      cfloat_t             # <<<<<<<<<<<<<<
@@ -1689,7 +1689,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv {
  */
 typedef npy_cfloat __pyx_t_5numpy_cfloat_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":816
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":816
  * 
  * ctypedef npy_cfloat      cfloat_t
  * ctypedef npy_cdouble     cdouble_t             # <<<<<<<<<<<<<<
@@ -1698,7 +1698,7 @@ typedef npy_cfloat __pyx_t_5numpy_cfloat_t;
  */
 typedef npy_cdouble __pyx_t_5numpy_cdouble_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":817
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":817
  * ctypedef npy_cfloat      cfloat_t
  * ctypedef npy_cdouble     cdouble_t
  * ctypedef npy_clongdouble clongdouble_t             # <<<<<<<<<<<<<<
@@ -1707,7 +1707,7 @@ typedef npy_cdouble __pyx_t_5numpy_cdouble_t;
  */
 typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":819
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":819
  * ctypedef npy_clongdouble clongdouble_t
  * 
  * ctypedef npy_cdouble     complex_t             # <<<<<<<<<<<<<<
@@ -1717,12 +1717,12 @@ typedef npy_clongdouble __pyx_t_5numpy_clongdouble_t;
 typedef npy_cdouble __pyx_t_5numpy_complex_t;
 struct __pyx_opt_args_5pippi_5noise_bln;
 
-/* "pippi/noise.pyx":36
+/* "pippi/noise.pyx":42
  *     return out
  * 
- * cpdef SoundBuffer bln(object wt, double length, double minfreq, double maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer bln(object wt, double length, object minfreq, object maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
  *     cdef double[:] _wt = to_wavetable(wt)
- *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
+ *     cdef double[:] _minfreq = to_window(minfreq)
  */
 struct __pyx_opt_args_5pippi_5noise_bln {
   int __pyx_n;
@@ -2784,10 +2784,12 @@ static int *__pyx_vp_5pippi_10wavetables_LEN_WAVETABLES = 0;
 #define __pyx_v_5pippi_10wavetables_LEN_WAVETABLES (*__pyx_vp_5pippi_10wavetables_LEN_WAVETABLES)
 static int **__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES = 0;
 #define __pyx_v_5pippi_10wavetables_ALL_WAVETABLES (*__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES)
+static __Pyx_memviewslice (*__pyx_f_5pippi_10wavetables_to_window)(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_window *__pyx_optional_args); /*proto*/
 static __Pyx_memviewslice (*__pyx_f_5pippi_10wavetables_to_wavetable)(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_wavetable *__pyx_optional_args); /*proto*/
 
 /* Module declarations from 'pippi.interpolation' */
 static double (*__pyx_f_5pippi_13interpolation__linear_point)(__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args); /*proto*/
+static double (*__pyx_f_5pippi_13interpolation__linear_pos)(__Pyx_memviewslice, double); /*proto*/
 
 /* Module declarations from 'pippi.soundbuffer' */
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
@@ -2833,8 +2835,8 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
-static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice, __Pyx_memviewslice, unsigned int, double, double, int, int); /*proto*/
-static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_bln(PyObject *, double, double, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_5noise_bln *__pyx_optional_args); /*proto*/
+static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice, __Pyx_memviewslice, unsigned int, __Pyx_memviewslice, __Pyx_memviewslice, int, int); /*proto*/
+static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_bln(PyObject *, double, PyObject *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_5noise_bln *__pyx_optional_args); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -3096,7 +3098,7 @@ static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
 static PyObject *__pyx_n_s_wt;
 static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_5pippi_5noise_bln(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wt, double __pyx_v_length, double __pyx_v_minfreq, double __pyx_v_maxfreq, PyObject *__pyx_v_channels, PyObject *__pyx_v_samplerate); /* proto */
+static PyObject *__pyx_pf_5pippi_5noise_bln(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wt, double __pyx_v_length, PyObject *__pyx_v_minfreq, PyObject *__pyx_v_maxfreq, PyObject *__pyx_v_channels, PyObject *__pyx_v_samplerate); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
@@ -3188,12 +3190,12 @@ static PyObject *__pyx_codeobj__34;
 /* "pippi/noise.pyx":12
  * cimport numpy as np
  * 
- * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double minfreq, double maxfreq, int channels, int samplerate):             # <<<<<<<<<<<<<<
+ * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double[:] minfreq, double[:] maxfreq, int channels, int samplerate):             # <<<<<<<<<<<<<<
  *     cdef double phase=0, sample=0
  *     cdef int i=0, c=0
  */
 
-static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_out, __Pyx_memviewslice __pyx_v_wt, unsigned int __pyx_v_length, double __pyx_v_minfreq, double __pyx_v_maxfreq, int __pyx_v_channels, int __pyx_v_samplerate) {
+static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_out, __Pyx_memviewslice __pyx_v_wt, unsigned int __pyx_v_length, __Pyx_memviewslice __pyx_v_minfreq, __Pyx_memviewslice __pyx_v_maxfreq, int __pyx_v_channels, int __pyx_v_samplerate) {
   double __pyx_v_phase;
   double __pyx_v_sample;
   int __pyx_v_i;
@@ -3202,29 +3204,34 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
   double __pyx_v_freq;
   int __pyx_v_wt_length;
   int __pyx_v_wt_boundry;
+  double __pyx_v_pos;
+  double __pyx_v_maxf;
+  double __pyx_v_minf;
   __Pyx_memviewslice __pyx_r = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannyDeclarations
-  double __pyx_t_1;
-  struct __pyx_opt_args_5pippi_3dsp_rand __pyx_t_2;
-  size_t __pyx_t_3;
-  long __pyx_t_4;
-  long __pyx_t_5;
-  long __pyx_t_6;
-  unsigned int __pyx_t_7;
-  unsigned int __pyx_t_8;
-  int __pyx_t_9;
-  int __pyx_t_10;
-  int __pyx_t_11;
+  Py_ssize_t __pyx_t_1;
+  int __pyx_t_2;
+  Py_ssize_t __pyx_t_3;
+  double __pyx_t_4;
+  struct __pyx_opt_args_5pippi_3dsp_rand __pyx_t_5;
+  size_t __pyx_t_6;
+  long __pyx_t_7;
+  long __pyx_t_8;
+  long __pyx_t_9;
+  unsigned int __pyx_t_10;
+  unsigned int __pyx_t_11;
   int __pyx_t_12;
-  Py_ssize_t __pyx_t_13;
-  Py_ssize_t __pyx_t_14;
-  int __pyx_t_15;
-  int __pyx_t_16;
+  int __pyx_t_13;
+  int __pyx_t_14;
+  Py_ssize_t __pyx_t_15;
+  Py_ssize_t __pyx_t_16;
+  int __pyx_t_17;
+  int __pyx_t_18;
   __Pyx_RefNannySetupContext("_bln", 0);
 
   /* "pippi/noise.pyx":13
  * 
- * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double minfreq, double maxfreq, int channels, int samplerate):
+ * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double[:] minfreq, double[:] maxfreq, int channels, int samplerate):
  *     cdef double phase=0, sample=0             # <<<<<<<<<<<<<<
  *     cdef int i=0, c=0
  *     cdef double isamplerate = 1.0/samplerate
@@ -3233,11 +3240,11 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
   __pyx_v_sample = 0.0;
 
   /* "pippi/noise.pyx":14
- * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double minfreq, double maxfreq, int channels, int samplerate):
+ * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double[:] minfreq, double[:] maxfreq, int channels, int samplerate):
  *     cdef double phase=0, sample=0
  *     cdef int i=0, c=0             # <<<<<<<<<<<<<<
  *     cdef double isamplerate = 1.0/samplerate
- *     cdef double freq = rand(minfreq, maxfreq)
+ *     cdef double freq = rand(minfreq[0], maxfreq[0])
  */
   __pyx_v_i = 0;
   __pyx_v_c = 0;
@@ -3246,7 +3253,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
  *     cdef double phase=0, sample=0
  *     cdef int i=0, c=0
  *     cdef double isamplerate = 1.0/samplerate             # <<<<<<<<<<<<<<
- *     cdef double freq = rand(minfreq, maxfreq)
+ *     cdef double freq = rand(minfreq[0], maxfreq[0])
  *     cdef int wt_length = len(wt)
  */
   if (unlikely(__pyx_v_samplerate == 0)) {
@@ -3258,101 +3265,179 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
   /* "pippi/noise.pyx":16
  *     cdef int i=0, c=0
  *     cdef double isamplerate = 1.0/samplerate
- *     cdef double freq = rand(minfreq, maxfreq)             # <<<<<<<<<<<<<<
+ *     cdef double freq = rand(minfreq[0], maxfreq[0])             # <<<<<<<<<<<<<<
  *     cdef int wt_length = len(wt)
  *     cdef int wt_boundry = max(wt_length-1, 1)
  */
-  __pyx_t_2.__pyx_n = 2;
-  __pyx_t_2.low = __pyx_v_minfreq;
-  __pyx_t_2.high = __pyx_v_maxfreq;
-  __pyx_t_1 = __pyx_f_5pippi_3dsp_rand(0, &__pyx_t_2); 
-  __pyx_v_freq = __pyx_t_1;
+  __pyx_t_1 = 0;
+  __pyx_t_2 = -1;
+  if (__pyx_t_1 < 0) {
+    __pyx_t_1 += __pyx_v_minfreq.shape[0];
+    if (unlikely(__pyx_t_1 < 0)) __pyx_t_2 = 0;
+  } else if (unlikely(__pyx_t_1 >= __pyx_v_minfreq.shape[0])) __pyx_t_2 = 0;
+  if (unlikely(__pyx_t_2 != -1)) {
+    __Pyx_RaiseBufferIndexError(__pyx_t_2);
+    __PYX_ERR(0, 16, __pyx_L1_error)
+  }
+  __pyx_t_3 = 0;
+  __pyx_t_2 = -1;
+  if (__pyx_t_3 < 0) {
+    __pyx_t_3 += __pyx_v_maxfreq.shape[0];
+    if (unlikely(__pyx_t_3 < 0)) __pyx_t_2 = 0;
+  } else if (unlikely(__pyx_t_3 >= __pyx_v_maxfreq.shape[0])) __pyx_t_2 = 0;
+  if (unlikely(__pyx_t_2 != -1)) {
+    __Pyx_RaiseBufferIndexError(__pyx_t_2);
+    __PYX_ERR(0, 16, __pyx_L1_error)
+  }
+  __pyx_t_5.__pyx_n = 2;
+  __pyx_t_5.low = (*((double *) ( /* dim=0 */ (__pyx_v_minfreq.data + __pyx_t_1 * __pyx_v_minfreq.strides[0]) )));
+  __pyx_t_5.high = (*((double *) ( /* dim=0 */ (__pyx_v_maxfreq.data + __pyx_t_3 * __pyx_v_maxfreq.strides[0]) )));
+  __pyx_t_4 = __pyx_f_5pippi_3dsp_rand(0, &__pyx_t_5); 
+  __pyx_v_freq = __pyx_t_4;
 
   /* "pippi/noise.pyx":17
  *     cdef double isamplerate = 1.0/samplerate
- *     cdef double freq = rand(minfreq, maxfreq)
+ *     cdef double freq = rand(minfreq[0], maxfreq[0])
  *     cdef int wt_length = len(wt)             # <<<<<<<<<<<<<<
  *     cdef int wt_boundry = max(wt_length-1, 1)
- * 
+ *     cdef double pos = 0
  */
-  __pyx_t_3 = __Pyx_MemoryView_Len(__pyx_v_wt); 
-  __pyx_v_wt_length = __pyx_t_3;
+  __pyx_t_6 = __Pyx_MemoryView_Len(__pyx_v_wt); 
+  __pyx_v_wt_length = __pyx_t_6;
 
   /* "pippi/noise.pyx":18
- *     cdef double freq = rand(minfreq, maxfreq)
+ *     cdef double freq = rand(minfreq[0], maxfreq[0])
  *     cdef int wt_length = len(wt)
  *     cdef int wt_boundry = max(wt_length-1, 1)             # <<<<<<<<<<<<<<
- * 
- *     for i in range(length):
+ *     cdef double pos = 0
+ *     cdef double maxf = 0
  */
-  __pyx_t_4 = 1;
-  __pyx_t_5 = (__pyx_v_wt_length - 1);
-  if (((__pyx_t_4 > __pyx_t_5) != 0)) {
-    __pyx_t_6 = __pyx_t_4;
+  __pyx_t_7 = 1;
+  __pyx_t_8 = (__pyx_v_wt_length - 1);
+  if (((__pyx_t_7 > __pyx_t_8) != 0)) {
+    __pyx_t_9 = __pyx_t_7;
   } else {
-    __pyx_t_6 = __pyx_t_5;
+    __pyx_t_9 = __pyx_t_8;
   }
-  __pyx_v_wt_boundry = __pyx_t_6;
+  __pyx_v_wt_boundry = __pyx_t_9;
+
+  /* "pippi/noise.pyx":19
+ *     cdef int wt_length = len(wt)
+ *     cdef int wt_boundry = max(wt_length-1, 1)
+ *     cdef double pos = 0             # <<<<<<<<<<<<<<
+ *     cdef double maxf = 0
+ *     cdef double minf = 0
+ */
+  __pyx_v_pos = 0.0;
 
   /* "pippi/noise.pyx":20
  *     cdef int wt_boundry = max(wt_length-1, 1)
+ *     cdef double pos = 0
+ *     cdef double maxf = 0             # <<<<<<<<<<<<<<
+ *     cdef double minf = 0
+ * 
+ */
+  __pyx_v_maxf = 0.0;
+
+  /* "pippi/noise.pyx":21
+ *     cdef double pos = 0
+ *     cdef double maxf = 0
+ *     cdef double minf = 0             # <<<<<<<<<<<<<<
+ * 
+ *     for i in range(length):
+ */
+  __pyx_v_minf = 0.0;
+
+  /* "pippi/noise.pyx":23
+ *     cdef double minf = 0
  * 
  *     for i in range(length):             # <<<<<<<<<<<<<<
+ *         pos = <double>i / <double>length
+ *         minf = _linear_pos(minfreq, pos)
+ */
+  __pyx_t_10 = __pyx_v_length;
+  __pyx_t_11 = __pyx_t_10;
+  for (__pyx_t_2 = 0; __pyx_t_2 < __pyx_t_11; __pyx_t_2+=1) {
+    __pyx_v_i = __pyx_t_2;
+
+    /* "pippi/noise.pyx":24
+ * 
+ *     for i in range(length):
+ *         pos = <double>i / <double>length             # <<<<<<<<<<<<<<
+ *         minf = _linear_pos(minfreq, pos)
+ *         maxf = _linear_pos(maxfreq, pos)
+ */
+    if (unlikely(((double)__pyx_v_length) == 0)) {
+      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+      __PYX_ERR(0, 24, __pyx_L1_error)
+    }
+    __pyx_v_pos = (((double)__pyx_v_i) / ((double)__pyx_v_length));
+
+    /* "pippi/noise.pyx":25
+ *     for i in range(length):
+ *         pos = <double>i / <double>length
+ *         minf = _linear_pos(minfreq, pos)             # <<<<<<<<<<<<<<
+ *         maxf = _linear_pos(maxfreq, pos)
+ *         sample = _linear_point(wt, phase)
+ */
+    __pyx_v_minf = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_minfreq, __pyx_v_pos);
+
+    /* "pippi/noise.pyx":26
+ *         pos = <double>i / <double>length
+ *         minf = _linear_pos(minfreq, pos)
+ *         maxf = _linear_pos(maxfreq, pos)             # <<<<<<<<<<<<<<
  *         sample = _linear_point(wt, phase)
  * 
  */
-  __pyx_t_7 = __pyx_v_length;
-  __pyx_t_8 = __pyx_t_7;
-  for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
-    __pyx_v_i = __pyx_t_9;
+    __pyx_v_maxf = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_maxfreq, __pyx_v_pos);
 
-    /* "pippi/noise.pyx":21
- * 
- *     for i in range(length):
+    /* "pippi/noise.pyx":27
+ *         minf = _linear_pos(minfreq, pos)
+ *         maxf = _linear_pos(maxfreq, pos)
  *         sample = _linear_point(wt, phase)             # <<<<<<<<<<<<<<
  * 
  *         for c in range(channels):
  */
     __pyx_v_sample = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_wt, __pyx_v_phase, NULL);
 
-    /* "pippi/noise.pyx":23
+    /* "pippi/noise.pyx":29
  *         sample = _linear_point(wt, phase)
  * 
  *         for c in range(channels):             # <<<<<<<<<<<<<<
  *             out[i,c] = sample
  * 
  */
-    __pyx_t_10 = __pyx_v_channels;
-    __pyx_t_11 = __pyx_t_10;
-    for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_11; __pyx_t_12+=1) {
-      __pyx_v_c = __pyx_t_12;
+    __pyx_t_12 = __pyx_v_channels;
+    __pyx_t_13 = __pyx_t_12;
+    for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_13; __pyx_t_14+=1) {
+      __pyx_v_c = __pyx_t_14;
 
-      /* "pippi/noise.pyx":24
+      /* "pippi/noise.pyx":30
  * 
  *         for c in range(channels):
  *             out[i,c] = sample             # <<<<<<<<<<<<<<
  * 
  *         phase += isamplerate * wt_boundry * freq
  */
-      __pyx_t_13 = __pyx_v_i;
-      __pyx_t_14 = __pyx_v_c;
-      __pyx_t_15 = -1;
-      if (__pyx_t_13 < 0) {
-        __pyx_t_13 += __pyx_v_out.shape[0];
-        if (unlikely(__pyx_t_13 < 0)) __pyx_t_15 = 0;
-      } else if (unlikely(__pyx_t_13 >= __pyx_v_out.shape[0])) __pyx_t_15 = 0;
-      if (__pyx_t_14 < 0) {
-        __pyx_t_14 += __pyx_v_out.shape[1];
-        if (unlikely(__pyx_t_14 < 0)) __pyx_t_15 = 1;
-      } else if (unlikely(__pyx_t_14 >= __pyx_v_out.shape[1])) __pyx_t_15 = 1;
-      if (unlikely(__pyx_t_15 != -1)) {
-        __Pyx_RaiseBufferIndexError(__pyx_t_15);
-        __PYX_ERR(0, 24, __pyx_L1_error)
+      __pyx_t_15 = __pyx_v_i;
+      __pyx_t_16 = __pyx_v_c;
+      __pyx_t_17 = -1;
+      if (__pyx_t_15 < 0) {
+        __pyx_t_15 += __pyx_v_out.shape[0];
+        if (unlikely(__pyx_t_15 < 0)) __pyx_t_17 = 0;
+      } else if (unlikely(__pyx_t_15 >= __pyx_v_out.shape[0])) __pyx_t_17 = 0;
+      if (__pyx_t_16 < 0) {
+        __pyx_t_16 += __pyx_v_out.shape[1];
+        if (unlikely(__pyx_t_16 < 0)) __pyx_t_17 = 1;
+      } else if (unlikely(__pyx_t_16 >= __pyx_v_out.shape[1])) __pyx_t_17 = 1;
+      if (unlikely(__pyx_t_17 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_17);
+        __PYX_ERR(0, 30, __pyx_L1_error)
       }
-      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_13 * __pyx_v_out.strides[0]) ) + __pyx_t_14 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
+      *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_15 * __pyx_v_out.strides[0]) ) + __pyx_t_16 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
     }
 
-    /* "pippi/noise.pyx":26
+    /* "pippi/noise.pyx":32
  *             out[i,c] = sample
  * 
  *         phase += isamplerate * wt_boundry * freq             # <<<<<<<<<<<<<<
@@ -3361,50 +3446,50 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
  */
     __pyx_v_phase = (__pyx_v_phase + ((__pyx_v_isamplerate * __pyx_v_wt_boundry) * __pyx_v_freq));
 
-    /* "pippi/noise.pyx":28
+    /* "pippi/noise.pyx":34
  *         phase += isamplerate * wt_boundry * freq
  * 
  *         if phase >= wt_boundry:             # <<<<<<<<<<<<<<
- *             freq = rand(minfreq, maxfreq)
+ *             freq = rand(minf, maxf)
  * 
  */
-    __pyx_t_16 = ((__pyx_v_phase >= __pyx_v_wt_boundry) != 0);
-    if (__pyx_t_16) {
+    __pyx_t_18 = ((__pyx_v_phase >= __pyx_v_wt_boundry) != 0);
+    if (__pyx_t_18) {
 
-      /* "pippi/noise.pyx":29
+      /* "pippi/noise.pyx":35
  * 
  *         if phase >= wt_boundry:
- *             freq = rand(minfreq, maxfreq)             # <<<<<<<<<<<<<<
+ *             freq = rand(minf, maxf)             # <<<<<<<<<<<<<<
  * 
  *         while phase >= wt_boundry:
  */
-      __pyx_t_2.__pyx_n = 2;
-      __pyx_t_2.low = __pyx_v_minfreq;
-      __pyx_t_2.high = __pyx_v_maxfreq;
-      __pyx_t_1 = __pyx_f_5pippi_3dsp_rand(0, &__pyx_t_2); 
-      __pyx_v_freq = __pyx_t_1;
+      __pyx_t_5.__pyx_n = 2;
+      __pyx_t_5.low = __pyx_v_minf;
+      __pyx_t_5.high = __pyx_v_maxf;
+      __pyx_t_4 = __pyx_f_5pippi_3dsp_rand(0, &__pyx_t_5); 
+      __pyx_v_freq = __pyx_t_4;
 
-      /* "pippi/noise.pyx":28
+      /* "pippi/noise.pyx":34
  *         phase += isamplerate * wt_boundry * freq
  * 
  *         if phase >= wt_boundry:             # <<<<<<<<<<<<<<
- *             freq = rand(minfreq, maxfreq)
+ *             freq = rand(minf, maxf)
  * 
  */
     }
 
-    /* "pippi/noise.pyx":31
- *             freq = rand(minfreq, maxfreq)
+    /* "pippi/noise.pyx":37
+ *             freq = rand(minf, maxf)
  * 
  *         while phase >= wt_boundry:             # <<<<<<<<<<<<<<
  *             phase -= wt_boundry
  * 
  */
     while (1) {
-      __pyx_t_16 = ((__pyx_v_phase >= __pyx_v_wt_boundry) != 0);
-      if (!__pyx_t_16) break;
+      __pyx_t_18 = ((__pyx_v_phase >= __pyx_v_wt_boundry) != 0);
+      if (!__pyx_t_18) break;
 
-      /* "pippi/noise.pyx":32
+      /* "pippi/noise.pyx":38
  * 
  *         while phase >= wt_boundry:
  *             phase -= wt_boundry             # <<<<<<<<<<<<<<
@@ -3415,12 +3500,12 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
     }
   }
 
-  /* "pippi/noise.pyx":34
+  /* "pippi/noise.pyx":40
  *             phase -= wt_boundry
  * 
  *     return out             # <<<<<<<<<<<<<<
  * 
- * cpdef SoundBuffer bln(object wt, double length, double minfreq, double maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):
+ * cpdef SoundBuffer bln(object wt, double length, object minfreq, object maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):
  */
   __PYX_INC_MEMVIEW(&__pyx_v_out, 0);
   __pyx_r = __pyx_v_out;
@@ -3429,7 +3514,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
   /* "pippi/noise.pyx":12
  * cimport numpy as np
  * 
- * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double minfreq, double maxfreq, int channels, int samplerate):             # <<<<<<<<<<<<<<
+ * cdef double[:,:] _bln(double[:,:] out, double[:] wt, unsigned int length, double[:] minfreq, double[:] maxfreq, int channels, int samplerate):             # <<<<<<<<<<<<<<
  *     cdef double phase=0, sample=0
  *     cdef int i=0, c=0
  */
@@ -3449,19 +3534,21 @@ static __Pyx_memviewslice __pyx_f_5pippi_5noise__bln(__Pyx_memviewslice __pyx_v_
   return __pyx_r;
 }
 
-/* "pippi/noise.pyx":36
+/* "pippi/noise.pyx":42
  *     return out
  * 
- * cpdef SoundBuffer bln(object wt, double length, double minfreq, double maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer bln(object wt, double length, object minfreq, object maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
  *     cdef double[:] _wt = to_wavetable(wt)
- *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
+ *     cdef double[:] _minfreq = to_window(minfreq)
  */
 
 static PyObject *__pyx_pw_5pippi_5noise_1bln(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_bln(PyObject *__pyx_v_wt, double __pyx_v_length, double __pyx_v_minfreq, double __pyx_v_maxfreq, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_5noise_bln *__pyx_optional_args) {
+static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_bln(PyObject *__pyx_v_wt, double __pyx_v_length, PyObject *__pyx_v_minfreq, PyObject *__pyx_v_maxfreq, CYTHON_UNUSED int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_5noise_bln *__pyx_optional_args) {
   PyObject *__pyx_v_channels = __pyx_k_;
   PyObject *__pyx_v_samplerate = __pyx_k__2;
   __Pyx_memviewslice __pyx_v__wt = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v__minfreq = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v__maxfreq = { 0, 0, { 0 }, { 0 }, { 0 } };
   unsigned int __pyx_v_framelength;
   __Pyx_memviewslice __pyx_v_out = { 0, 0, { 0 }, { 0 }, { 0 } };
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_r = NULL;
@@ -3485,48 +3572,72 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_
     }
   }
 
-  /* "pippi/noise.pyx":37
+  /* "pippi/noise.pyx":43
  * 
- * cpdef SoundBuffer bln(object wt, double length, double minfreq, double maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):
+ * cpdef SoundBuffer bln(object wt, double length, object minfreq, object maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):
  *     cdef double[:] _wt = to_wavetable(wt)             # <<<<<<<<<<<<<<
- *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
- *     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')
+ *     cdef double[:] _minfreq = to_window(minfreq)
+ *     cdef double[:] _maxfreq = to_window(maxfreq)
  */
-  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_wt, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 37, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_wavetable(__pyx_v_wt, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 43, __pyx_L1_error)
   __pyx_v__wt = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "pippi/noise.pyx":38
- * cpdef SoundBuffer bln(object wt, double length, double minfreq, double maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):
+  /* "pippi/noise.pyx":44
+ * cpdef SoundBuffer bln(object wt, double length, object minfreq, object maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):
  *     cdef double[:] _wt = to_wavetable(wt)
+ *     cdef double[:] _minfreq = to_window(minfreq)             # <<<<<<<<<<<<<<
+ *     cdef double[:] _maxfreq = to_window(maxfreq)
+ *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
+ */
+  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_minfreq, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 44, __pyx_L1_error)
+  __pyx_v__minfreq = __pyx_t_1;
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+
+  /* "pippi/noise.pyx":45
+ *     cdef double[:] _wt = to_wavetable(wt)
+ *     cdef double[:] _minfreq = to_window(minfreq)
+ *     cdef double[:] _maxfreq = to_window(maxfreq)             # <<<<<<<<<<<<<<
+ *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
+ *     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')
+ */
+  __pyx_t_1 = __pyx_f_5pippi_10wavetables_to_window(__pyx_v_maxfreq, 0, NULL); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 45, __pyx_L1_error)
+  __pyx_v__maxfreq = __pyx_t_1;
+  __pyx_t_1.memview = NULL;
+  __pyx_t_1.data = NULL;
+
+  /* "pippi/noise.pyx":46
+ *     cdef double[:] _minfreq = to_window(minfreq)
+ *     cdef double[:] _maxfreq = to_window(maxfreq)
  *     cdef unsigned int framelength = <unsigned int>(length * samplerate)             # <<<<<<<<<<<<<<
  *     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')
- *     return SoundBuffer(_bln(out, _wt, framelength, minfreq, maxfreq, channels, samplerate), channels=channels, samplerate=samplerate)
+ *     return SoundBuffer(_bln(out, _wt, framelength, _minfreq, _maxfreq, channels, samplerate), channels=channels, samplerate=samplerate)
  */
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_t_2, __pyx_v_samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_t_2, __pyx_v_samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_unsigned_int(__pyx_t_3); if (unlikely((__pyx_t_4 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_unsigned_int(__pyx_t_3); if (unlikely((__pyx_t_4 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_framelength = ((unsigned int)__pyx_t_4);
 
-  /* "pippi/noise.pyx":39
- *     cdef double[:] _wt = to_wavetable(wt)
+  /* "pippi/noise.pyx":47
+ *     cdef double[:] _maxfreq = to_window(maxfreq)
  *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
  *     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')             # <<<<<<<<<<<<<<
- *     return SoundBuffer(_bln(out, _wt, framelength, minfreq, maxfreq, channels, samplerate), channels=channels, samplerate=samplerate)
+ *     return SoundBuffer(_bln(out, _wt, framelength, _minfreq, _maxfreq, channels, samplerate), channels=channels, samplerate=samplerate)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_unsigned_int(__pyx_v_framelength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_unsigned_int(__pyx_v_framelength); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
@@ -3534,49 +3645,49 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_
   __Pyx_GIVEREF(__pyx_v_channels);
   PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_v_channels);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 39, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 47, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_6, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_6, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 47, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_out = __pyx_t_7;
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
 
-  /* "pippi/noise.pyx":40
+  /* "pippi/noise.pyx":48
  *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
  *     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')
- *     return SoundBuffer(_bln(out, _wt, framelength, minfreq, maxfreq, channels, samplerate), channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
+ *     return SoundBuffer(_bln(out, _wt, framelength, _minfreq, _maxfreq, channels, samplerate), channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_v_channels); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L1_error)
-  __pyx_t_9 = __Pyx_PyInt_As_int(__pyx_v_samplerate); if (unlikely((__pyx_t_9 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 40, __pyx_L1_error)
-  __pyx_t_7 = __pyx_f_5pippi_5noise__bln(__pyx_v_out, __pyx_v__wt, __pyx_v_framelength, __pyx_v_minfreq, __pyx_v_maxfreq, __pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 40, __pyx_L1_error)
-  __pyx_t_6 = __pyx_memoryview_fromslice(__pyx_t_7, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_v_channels); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_int(__pyx_v_samplerate); if (unlikely((__pyx_t_9 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_7 = __pyx_f_5pippi_5noise__bln(__pyx_v_out, __pyx_v__wt, __pyx_v_framelength, __pyx_v__minfreq, __pyx_v__maxfreq, __pyx_t_8, __pyx_t_9); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_6 = __pyx_memoryview_fromslice(__pyx_t_7, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __PYX_XDEC_MEMVIEW(&__pyx_t_7, 1);
   __pyx_t_7.memview = NULL;
   __pyx_t_7.data = NULL;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_channels, __pyx_v_channels) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_samplerate, __pyx_v_samplerate) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_channels, __pyx_v_channels) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_samplerate, __pyx_v_samplerate) < 0) __PYX_ERR(0, 48, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_5, __pyx_t_6); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -3584,12 +3695,12 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "pippi/noise.pyx":36
+  /* "pippi/noise.pyx":42
  *     return out
  * 
- * cpdef SoundBuffer bln(object wt, double length, double minfreq, double maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer bln(object wt, double length, object minfreq, object maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
  *     cdef double[:] _wt = to_wavetable(wt)
- *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
+ *     cdef double[:] _minfreq = to_window(minfreq)
  */
 
   /* function exit code */
@@ -3604,6 +3715,8 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5noise_
   __pyx_r = 0;
   __pyx_L0:;
   __PYX_XDEC_MEMVIEW(&__pyx_v__wt, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v__minfreq, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v__maxfreq, 1);
   __PYX_XDEC_MEMVIEW(&__pyx_v_out, 1);
   __Pyx_XGIVEREF((PyObject *)__pyx_r);
   __Pyx_RefNannyFinishContext();
@@ -3615,8 +3728,8 @@ static PyObject *__pyx_pw_5pippi_5noise_1bln(PyObject *__pyx_self, PyObject *__p
 static PyObject *__pyx_pw_5pippi_5noise_1bln(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_wt = 0;
   double __pyx_v_length;
-  double __pyx_v_minfreq;
-  double __pyx_v_maxfreq;
+  PyObject *__pyx_v_minfreq = 0;
+  PyObject *__pyx_v_maxfreq = 0;
   PyObject *__pyx_v_channels = 0;
   PyObject *__pyx_v_samplerate = 0;
   PyObject *__pyx_r = 0;
@@ -3655,19 +3768,19 @@ static PyObject *__pyx_pw_5pippi_5noise_1bln(PyObject *__pyx_self, PyObject *__p
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_length)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, 1); __PYX_ERR(0, 36, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, 1); __PYX_ERR(0, 42, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_minfreq)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, 2); __PYX_ERR(0, 36, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, 2); __PYX_ERR(0, 42, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_maxfreq)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, 3); __PYX_ERR(0, 36, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, 3); __PYX_ERR(0, 42, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -3683,7 +3796,7 @@ static PyObject *__pyx_pw_5pippi_5noise_1bln(PyObject *__pyx_self, PyObject *__p
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "bln") < 0)) __PYX_ERR(0, 36, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "bln") < 0)) __PYX_ERR(0, 42, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3700,15 +3813,15 @@ static PyObject *__pyx_pw_5pippi_5noise_1bln(PyObject *__pyx_self, PyObject *__p
       }
     }
     __pyx_v_wt = values[0];
-    __pyx_v_length = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L3_error)
-    __pyx_v_minfreq = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_minfreq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L3_error)
-    __pyx_v_maxfreq = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_maxfreq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L3_error)
+    __pyx_v_length = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 42, __pyx_L3_error)
+    __pyx_v_minfreq = values[2];
+    __pyx_v_maxfreq = values[3];
     __pyx_v_channels = values[4];
     __pyx_v_samplerate = values[5];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 36, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("bln", 0, 4, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 42, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.noise.bln", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3721,7 +3834,7 @@ static PyObject *__pyx_pw_5pippi_5noise_1bln(PyObject *__pyx_self, PyObject *__p
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_5noise_bln(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wt, double __pyx_v_length, double __pyx_v_minfreq, double __pyx_v_maxfreq, PyObject *__pyx_v_channels, PyObject *__pyx_v_samplerate) {
+static PyObject *__pyx_pf_5pippi_5noise_bln(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_wt, double __pyx_v_length, PyObject *__pyx_v_minfreq, PyObject *__pyx_v_maxfreq, PyObject *__pyx_v_channels, PyObject *__pyx_v_samplerate) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3731,7 +3844,7 @@ static PyObject *__pyx_pf_5pippi_5noise_bln(CYTHON_UNUSED PyObject *__pyx_self, 
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.channels = __pyx_v_channels;
   __pyx_t_2.samplerate = __pyx_v_samplerate;
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_5noise_bln(__pyx_v_wt, __pyx_v_length, __pyx_v_minfreq, __pyx_v_maxfreq, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_5noise_bln(__pyx_v_wt, __pyx_v_length, __pyx_v_minfreq, __pyx_v_maxfreq, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3748,7 +3861,7 @@ static PyObject *__pyx_pf_5pippi_5noise_bln(CYTHON_UNUSED PyObject *__pyx_self, 
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":258
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":258
  *         # experimental exception made for __getbuffer__ and __releasebuffer__
  *         # -- the details of this may change.
  *         def __getbuffer__(ndarray self, Py_buffer* info, int flags):             # <<<<<<<<<<<<<<
@@ -3797,7 +3910,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   __pyx_v_info->obj = Py_None; __Pyx_INCREF(Py_None);
   __Pyx_GIVEREF(__pyx_v_info->obj);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":265
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":265
  * 
  *             cdef int i, ndim
  *             cdef int endian_detector = 1             # <<<<<<<<<<<<<<
@@ -3806,7 +3919,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_endian_detector = 1;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":266
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":266
  *             cdef int i, ndim
  *             cdef int endian_detector = 1
  *             cdef bint little_endian = ((<char*>&endian_detector)[0] != 0)             # <<<<<<<<<<<<<<
@@ -3815,7 +3928,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_little_endian = ((((char *)(&__pyx_v_endian_detector))[0]) != 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":268
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":268
  *             cdef bint little_endian = ((<char*>&endian_detector)[0] != 0)
  * 
  *             ndim = PyArray_NDIM(self)             # <<<<<<<<<<<<<<
@@ -3824,7 +3937,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_ndim = PyArray_NDIM(__pyx_v_self);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":270
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":270
  *             ndim = PyArray_NDIM(self)
  * 
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)             # <<<<<<<<<<<<<<
@@ -3838,7 +3951,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     goto __pyx_L4_bool_binop_done;
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":271
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":271
  * 
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_ARRAY_C_CONTIGUOUS)):             # <<<<<<<<<<<<<<
@@ -3849,7 +3962,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   __pyx_t_1 = __pyx_t_2;
   __pyx_L4_bool_binop_done:;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":270
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":270
  *             ndim = PyArray_NDIM(self)
  * 
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)             # <<<<<<<<<<<<<<
@@ -3858,7 +3971,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   if (unlikely(__pyx_t_1)) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":272
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":272
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_ARRAY_C_CONTIGUOUS)):
  *                 raise ValueError(u"ndarray is not C contiguous")             # <<<<<<<<<<<<<<
@@ -3871,7 +3984,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __PYX_ERR(1, 272, __pyx_L1_error)
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":270
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":270
  *             ndim = PyArray_NDIM(self)
  * 
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)             # <<<<<<<<<<<<<<
@@ -3880,7 +3993,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":274
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":274
  *                 raise ValueError(u"ndarray is not C contiguous")
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)             # <<<<<<<<<<<<<<
@@ -3894,7 +4007,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     goto __pyx_L7_bool_binop_done;
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":275
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":275
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_ARRAY_F_CONTIGUOUS)):             # <<<<<<<<<<<<<<
@@ -3905,7 +4018,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   __pyx_t_1 = __pyx_t_2;
   __pyx_L7_bool_binop_done:;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":274
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":274
  *                 raise ValueError(u"ndarray is not C contiguous")
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)             # <<<<<<<<<<<<<<
@@ -3914,7 +4027,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   if (unlikely(__pyx_t_1)) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":276
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":276
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_ARRAY_F_CONTIGUOUS)):
  *                 raise ValueError(u"ndarray is not Fortran contiguous")             # <<<<<<<<<<<<<<
@@ -3927,7 +4040,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __PYX_ERR(1, 276, __pyx_L1_error)
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":274
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":274
  *                 raise ValueError(u"ndarray is not C contiguous")
  * 
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)             # <<<<<<<<<<<<<<
@@ -3936,7 +4049,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":278
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":278
  *                 raise ValueError(u"ndarray is not Fortran contiguous")
  * 
  *             info.buf = PyArray_DATA(self)             # <<<<<<<<<<<<<<
@@ -3945,7 +4058,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_info->buf = PyArray_DATA(__pyx_v_self);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":279
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":279
  * 
  *             info.buf = PyArray_DATA(self)
  *             info.ndim = ndim             # <<<<<<<<<<<<<<
@@ -3954,7 +4067,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_info->ndim = __pyx_v_ndim;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":280
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":280
  *             info.buf = PyArray_DATA(self)
  *             info.ndim = ndim
  *             if sizeof(npy_intp) != sizeof(Py_ssize_t):             # <<<<<<<<<<<<<<
@@ -3964,7 +4077,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   __pyx_t_1 = (((sizeof(npy_intp)) != (sizeof(Py_ssize_t))) != 0);
   if (__pyx_t_1) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":283
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":283
  *                 # Allocate new buffer for strides and shape info.
  *                 # This is allocated as one block, strides first.
  *                 info.strides = <Py_ssize_t*>PyObject_Malloc(sizeof(Py_ssize_t) * 2 * <size_t>ndim)             # <<<<<<<<<<<<<<
@@ -3973,7 +4086,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
     __pyx_v_info->strides = ((Py_ssize_t *)PyObject_Malloc((((sizeof(Py_ssize_t)) * 2) * ((size_t)__pyx_v_ndim))));
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":284
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":284
  *                 # This is allocated as one block, strides first.
  *                 info.strides = <Py_ssize_t*>PyObject_Malloc(sizeof(Py_ssize_t) * 2 * <size_t>ndim)
  *                 info.shape = info.strides + ndim             # <<<<<<<<<<<<<<
@@ -3982,7 +4095,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
     __pyx_v_info->shape = (__pyx_v_info->strides + __pyx_v_ndim);
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":285
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":285
  *                 info.strides = <Py_ssize_t*>PyObject_Malloc(sizeof(Py_ssize_t) * 2 * <size_t>ndim)
  *                 info.shape = info.strides + ndim
  *                 for i in range(ndim):             # <<<<<<<<<<<<<<
@@ -3994,7 +4107,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
       __pyx_v_i = __pyx_t_6;
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":286
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":286
  *                 info.shape = info.strides + ndim
  *                 for i in range(ndim):
  *                     info.strides[i] = PyArray_STRIDES(self)[i]             # <<<<<<<<<<<<<<
@@ -4003,7 +4116,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
       (__pyx_v_info->strides[__pyx_v_i]) = (PyArray_STRIDES(__pyx_v_self)[__pyx_v_i]);
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":287
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":287
  *                 for i in range(ndim):
  *                     info.strides[i] = PyArray_STRIDES(self)[i]
  *                     info.shape[i] = PyArray_DIMS(self)[i]             # <<<<<<<<<<<<<<
@@ -4013,7 +4126,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       (__pyx_v_info->shape[__pyx_v_i]) = (PyArray_DIMS(__pyx_v_self)[__pyx_v_i]);
     }
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":280
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":280
  *             info.buf = PyArray_DATA(self)
  *             info.ndim = ndim
  *             if sizeof(npy_intp) != sizeof(Py_ssize_t):             # <<<<<<<<<<<<<<
@@ -4023,7 +4136,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     goto __pyx_L9;
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":289
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":289
  *                     info.shape[i] = PyArray_DIMS(self)[i]
  *             else:
  *                 info.strides = <Py_ssize_t*>PyArray_STRIDES(self)             # <<<<<<<<<<<<<<
@@ -4033,7 +4146,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   /*else*/ {
     __pyx_v_info->strides = ((Py_ssize_t *)PyArray_STRIDES(__pyx_v_self));
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":290
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":290
  *             else:
  *                 info.strides = <Py_ssize_t*>PyArray_STRIDES(self)
  *                 info.shape = <Py_ssize_t*>PyArray_DIMS(self)             # <<<<<<<<<<<<<<
@@ -4044,7 +4157,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   }
   __pyx_L9:;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":291
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":291
  *                 info.strides = <Py_ssize_t*>PyArray_STRIDES(self)
  *                 info.shape = <Py_ssize_t*>PyArray_DIMS(self)
  *             info.suboffsets = NULL             # <<<<<<<<<<<<<<
@@ -4053,7 +4166,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_info->suboffsets = NULL;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":292
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":292
  *                 info.shape = <Py_ssize_t*>PyArray_DIMS(self)
  *             info.suboffsets = NULL
  *             info.itemsize = PyArray_ITEMSIZE(self)             # <<<<<<<<<<<<<<
@@ -4062,7 +4175,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_info->itemsize = PyArray_ITEMSIZE(__pyx_v_self);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":293
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":293
  *             info.suboffsets = NULL
  *             info.itemsize = PyArray_ITEMSIZE(self)
  *             info.readonly = not PyArray_ISWRITEABLE(self)             # <<<<<<<<<<<<<<
@@ -4071,7 +4184,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_info->readonly = (!(PyArray_ISWRITEABLE(__pyx_v_self) != 0));
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":296
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":296
  * 
  *             cdef int t
  *             cdef char* f = NULL             # <<<<<<<<<<<<<<
@@ -4080,7 +4193,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   __pyx_v_f = NULL;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":297
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":297
  *             cdef int t
  *             cdef char* f = NULL
  *             cdef dtype descr = <dtype>PyArray_DESCR(self)             # <<<<<<<<<<<<<<
@@ -4093,7 +4206,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   __pyx_v_descr = ((PyArray_Descr *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":300
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":300
  *             cdef int offset
  * 
  *             info.obj = self             # <<<<<<<<<<<<<<
@@ -4106,7 +4219,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   __Pyx_DECREF(__pyx_v_info->obj);
   __pyx_v_info->obj = ((PyObject *)__pyx_v_self);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":302
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":302
  *             info.obj = self
  * 
  *             if not PyDataType_HASFIELDS(descr):             # <<<<<<<<<<<<<<
@@ -4116,7 +4229,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   __pyx_t_1 = ((!(PyDataType_HASFIELDS(__pyx_v_descr) != 0)) != 0);
   if (__pyx_t_1) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":303
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":303
  * 
  *             if not PyDataType_HASFIELDS(descr):
  *                 t = descr.type_num             # <<<<<<<<<<<<<<
@@ -4126,7 +4239,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     __pyx_t_4 = __pyx_v_descr->type_num;
     __pyx_v_t = __pyx_t_4;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":304
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":304
  *             if not PyDataType_HASFIELDS(descr):
  *                 t = descr.type_num
  *                 if ((descr.byteorder == c'>' and little_endian) or             # <<<<<<<<<<<<<<
@@ -4146,7 +4259,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     }
     __pyx_L15_next_or:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":305
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":305
  *                 t = descr.type_num
  *                 if ((descr.byteorder == c'>' and little_endian) or
  *                     (descr.byteorder == c'<' and not little_endian)):             # <<<<<<<<<<<<<<
@@ -4163,7 +4276,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     __pyx_t_1 = __pyx_t_2;
     __pyx_L14_bool_binop_done:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":304
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":304
  *             if not PyDataType_HASFIELDS(descr):
  *                 t = descr.type_num
  *                 if ((descr.byteorder == c'>' and little_endian) or             # <<<<<<<<<<<<<<
@@ -4172,7 +4285,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
     if (unlikely(__pyx_t_1)) {
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":306
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":306
  *                 if ((descr.byteorder == c'>' and little_endian) or
  *                     (descr.byteorder == c'<' and not little_endian)):
  *                     raise ValueError(u"Non-native byte order not supported")             # <<<<<<<<<<<<<<
@@ -4185,7 +4298,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __PYX_ERR(1, 306, __pyx_L1_error)
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":304
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":304
  *             if not PyDataType_HASFIELDS(descr):
  *                 t = descr.type_num
  *                 if ((descr.byteorder == c'>' and little_endian) or             # <<<<<<<<<<<<<<
@@ -4194,7 +4307,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
     }
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":307
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":307
  *                     (descr.byteorder == c'<' and not little_endian)):
  *                     raise ValueError(u"Non-native byte order not supported")
  *                 if   t == NPY_BYTE:        f = "b"             # <<<<<<<<<<<<<<
@@ -4207,7 +4320,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_UBYTE:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":308
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":308
  *                     raise ValueError(u"Non-native byte order not supported")
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"             # <<<<<<<<<<<<<<
@@ -4218,7 +4331,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_SHORT:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":309
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":309
  *                 if   t == NPY_BYTE:        f = "b"
  *                 elif t == NPY_UBYTE:       f = "B"
  *                 elif t == NPY_SHORT:       f = "h"             # <<<<<<<<<<<<<<
@@ -4229,7 +4342,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_USHORT:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":310
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":310
  *                 elif t == NPY_UBYTE:       f = "B"
  *                 elif t == NPY_SHORT:       f = "h"
  *                 elif t == NPY_USHORT:      f = "H"             # <<<<<<<<<<<<<<
@@ -4240,7 +4353,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_INT:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":311
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":311
  *                 elif t == NPY_SHORT:       f = "h"
  *                 elif t == NPY_USHORT:      f = "H"
  *                 elif t == NPY_INT:         f = "i"             # <<<<<<<<<<<<<<
@@ -4251,7 +4364,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_UINT:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":312
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":312
  *                 elif t == NPY_USHORT:      f = "H"
  *                 elif t == NPY_INT:         f = "i"
  *                 elif t == NPY_UINT:        f = "I"             # <<<<<<<<<<<<<<
@@ -4262,7 +4375,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_LONG:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":313
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":313
  *                 elif t == NPY_INT:         f = "i"
  *                 elif t == NPY_UINT:        f = "I"
  *                 elif t == NPY_LONG:        f = "l"             # <<<<<<<<<<<<<<
@@ -4273,7 +4386,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_ULONG:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":314
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":314
  *                 elif t == NPY_UINT:        f = "I"
  *                 elif t == NPY_LONG:        f = "l"
  *                 elif t == NPY_ULONG:       f = "L"             # <<<<<<<<<<<<<<
@@ -4284,7 +4397,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_LONGLONG:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":315
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":315
  *                 elif t == NPY_LONG:        f = "l"
  *                 elif t == NPY_ULONG:       f = "L"
  *                 elif t == NPY_LONGLONG:    f = "q"             # <<<<<<<<<<<<<<
@@ -4295,7 +4408,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_ULONGLONG:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":316
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":316
  *                 elif t == NPY_ULONG:       f = "L"
  *                 elif t == NPY_LONGLONG:    f = "q"
  *                 elif t == NPY_ULONGLONG:   f = "Q"             # <<<<<<<<<<<<<<
@@ -4306,7 +4419,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_FLOAT:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":317
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":317
  *                 elif t == NPY_LONGLONG:    f = "q"
  *                 elif t == NPY_ULONGLONG:   f = "Q"
  *                 elif t == NPY_FLOAT:       f = "f"             # <<<<<<<<<<<<<<
@@ -4317,7 +4430,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_DOUBLE:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":318
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":318
  *                 elif t == NPY_ULONGLONG:   f = "Q"
  *                 elif t == NPY_FLOAT:       f = "f"
  *                 elif t == NPY_DOUBLE:      f = "d"             # <<<<<<<<<<<<<<
@@ -4328,7 +4441,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_LONGDOUBLE:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":319
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":319
  *                 elif t == NPY_FLOAT:       f = "f"
  *                 elif t == NPY_DOUBLE:      f = "d"
  *                 elif t == NPY_LONGDOUBLE:  f = "g"             # <<<<<<<<<<<<<<
@@ -4339,7 +4452,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_CFLOAT:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":320
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":320
  *                 elif t == NPY_DOUBLE:      f = "d"
  *                 elif t == NPY_LONGDOUBLE:  f = "g"
  *                 elif t == NPY_CFLOAT:      f = "Zf"             # <<<<<<<<<<<<<<
@@ -4350,7 +4463,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_CDOUBLE:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":321
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":321
  *                 elif t == NPY_LONGDOUBLE:  f = "g"
  *                 elif t == NPY_CFLOAT:      f = "Zf"
  *                 elif t == NPY_CDOUBLE:     f = "Zd"             # <<<<<<<<<<<<<<
@@ -4361,7 +4474,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_CLONGDOUBLE:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":322
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":322
  *                 elif t == NPY_CFLOAT:      f = "Zf"
  *                 elif t == NPY_CDOUBLE:     f = "Zd"
  *                 elif t == NPY_CLONGDOUBLE: f = "Zg"             # <<<<<<<<<<<<<<
@@ -4372,7 +4485,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       case NPY_OBJECT:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":323
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":323
  *                 elif t == NPY_CDOUBLE:     f = "Zd"
  *                 elif t == NPY_CLONGDOUBLE: f = "Zg"
  *                 elif t == NPY_OBJECT:      f = "O"             # <<<<<<<<<<<<<<
@@ -4383,7 +4496,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
       default:
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":325
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":325
  *                 elif t == NPY_OBJECT:      f = "O"
  *                 else:
  *                     raise ValueError(u"unknown dtype code in numpy.pxd (%d)" % t)             # <<<<<<<<<<<<<<
@@ -4404,7 +4517,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
       break;
     }
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":326
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":326
  *                 else:
  *                     raise ValueError(u"unknown dtype code in numpy.pxd (%d)" % t)
  *                 info.format = f             # <<<<<<<<<<<<<<
@@ -4413,7 +4526,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
     __pyx_v_info->format = __pyx_v_f;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":327
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":327
  *                     raise ValueError(u"unknown dtype code in numpy.pxd (%d)" % t)
  *                 info.format = f
  *                 return             # <<<<<<<<<<<<<<
@@ -4423,7 +4536,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     __pyx_r = 0;
     goto __pyx_L0;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":302
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":302
  *             info.obj = self
  * 
  *             if not PyDataType_HASFIELDS(descr):             # <<<<<<<<<<<<<<
@@ -4432,7 +4545,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":329
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":329
  *                 return
  *             else:
  *                 info.format = <char*>PyObject_Malloc(_buffer_format_string_len)             # <<<<<<<<<<<<<<
@@ -4442,7 +4555,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   /*else*/ {
     __pyx_v_info->format = ((char *)PyObject_Malloc(0xFF));
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":330
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":330
  *             else:
  *                 info.format = <char*>PyObject_Malloc(_buffer_format_string_len)
  *                 info.format[0] = c'^' # Native data types, manual alignment             # <<<<<<<<<<<<<<
@@ -4451,7 +4564,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
     (__pyx_v_info->format[0]) = '^';
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":331
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":331
  *                 info.format = <char*>PyObject_Malloc(_buffer_format_string_len)
  *                 info.format[0] = c'^' # Native data types, manual alignment
  *                 offset = 0             # <<<<<<<<<<<<<<
@@ -4460,7 +4573,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
  */
     __pyx_v_offset = 0;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":332
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":332
  *                 info.format[0] = c'^' # Native data types, manual alignment
  *                 offset = 0
  *                 f = _util_dtypestring(descr, info.format + 1,             # <<<<<<<<<<<<<<
@@ -4470,7 +4583,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     __pyx_t_9 = __pyx_f_5numpy__util_dtypestring(__pyx_v_descr, (__pyx_v_info->format + 1), (__pyx_v_info->format + 0xFF), (&__pyx_v_offset)); if (unlikely(__pyx_t_9 == ((char *)NULL))) __PYX_ERR(1, 332, __pyx_L1_error)
     __pyx_v_f = __pyx_t_9;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":335
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":335
  *                                       info.format + _buffer_format_string_len,
  *                                       &offset)
  *                 f[0] = c'\0' # Terminate format string             # <<<<<<<<<<<<<<
@@ -4480,7 +4593,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
     (__pyx_v_f[0]) = '\x00';
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":258
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":258
  *         # experimental exception made for __getbuffer__ and __releasebuffer__
  *         # -- the details of this may change.
  *         def __getbuffer__(ndarray self, Py_buffer* info, int flags):             # <<<<<<<<<<<<<<
@@ -4512,7 +4625,7 @@ static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, P
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":337
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":337
  *                 f[0] = c'\0' # Terminate format string
  * 
  *         def __releasebuffer__(ndarray self, Py_buffer* info):             # <<<<<<<<<<<<<<
@@ -4536,7 +4649,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("__releasebuffer__", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":338
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":338
  * 
  *         def __releasebuffer__(ndarray self, Py_buffer* info):
  *             if PyArray_HASFIELDS(self):             # <<<<<<<<<<<<<<
@@ -4546,7 +4659,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
   __pyx_t_1 = (PyArray_HASFIELDS(__pyx_v_self) != 0);
   if (__pyx_t_1) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":339
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":339
  *         def __releasebuffer__(ndarray self, Py_buffer* info):
  *             if PyArray_HASFIELDS(self):
  *                 PyObject_Free(info.format)             # <<<<<<<<<<<<<<
@@ -4555,7 +4668,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
  */
     PyObject_Free(__pyx_v_info->format);
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":338
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":338
  * 
  *         def __releasebuffer__(ndarray self, Py_buffer* info):
  *             if PyArray_HASFIELDS(self):             # <<<<<<<<<<<<<<
@@ -4564,7 +4677,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
  */
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":340
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":340
  *             if PyArray_HASFIELDS(self):
  *                 PyObject_Free(info.format)
  *             if sizeof(npy_intp) != sizeof(Py_ssize_t):             # <<<<<<<<<<<<<<
@@ -4574,7 +4687,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
   __pyx_t_1 = (((sizeof(npy_intp)) != (sizeof(Py_ssize_t))) != 0);
   if (__pyx_t_1) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":341
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":341
  *                 PyObject_Free(info.format)
  *             if sizeof(npy_intp) != sizeof(Py_ssize_t):
  *                 PyObject_Free(info.strides)             # <<<<<<<<<<<<<<
@@ -4583,7 +4696,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
  */
     PyObject_Free(__pyx_v_info->strides);
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":340
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":340
  *             if PyArray_HASFIELDS(self):
  *                 PyObject_Free(info.format)
  *             if sizeof(npy_intp) != sizeof(Py_ssize_t):             # <<<<<<<<<<<<<<
@@ -4592,7 +4705,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
  */
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":337
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":337
  *                 f[0] = c'\0' # Terminate format string
  * 
  *         def __releasebuffer__(ndarray self, Py_buffer* info):             # <<<<<<<<<<<<<<
@@ -4604,7 +4717,7 @@ static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_s
   __Pyx_RefNannyFinishContext();
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":821
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":821
  * ctypedef npy_cdouble     complex_t
  * 
  * cdef inline object PyArray_MultiIterNew1(a):             # <<<<<<<<<<<<<<
@@ -4618,7 +4731,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew1", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":822
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":822
  * 
  * cdef inline object PyArray_MultiIterNew1(a):
  *     return PyArray_MultiIterNew(1, <void*>a)             # <<<<<<<<<<<<<<
@@ -4632,7 +4745,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":821
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":821
  * ctypedef npy_cdouble     complex_t
  * 
  * cdef inline object PyArray_MultiIterNew1(a):             # <<<<<<<<<<<<<<
@@ -4651,7 +4764,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew1(PyObject *__
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":824
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":824
  *     return PyArray_MultiIterNew(1, <void*>a)
  * 
  * cdef inline object PyArray_MultiIterNew2(a, b):             # <<<<<<<<<<<<<<
@@ -4665,7 +4778,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew2", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":825
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":825
  * 
  * cdef inline object PyArray_MultiIterNew2(a, b):
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)             # <<<<<<<<<<<<<<
@@ -4679,7 +4792,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":824
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":824
  *     return PyArray_MultiIterNew(1, <void*>a)
  * 
  * cdef inline object PyArray_MultiIterNew2(a, b):             # <<<<<<<<<<<<<<
@@ -4698,7 +4811,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew2(PyObject *__
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":827
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":827
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
  * 
  * cdef inline object PyArray_MultiIterNew3(a, b, c):             # <<<<<<<<<<<<<<
@@ -4712,7 +4825,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew3", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":828
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":828
  * 
  * cdef inline object PyArray_MultiIterNew3(a, b, c):
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)             # <<<<<<<<<<<<<<
@@ -4726,7 +4839,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":827
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":827
  *     return PyArray_MultiIterNew(2, <void*>a, <void*>b)
  * 
  * cdef inline object PyArray_MultiIterNew3(a, b, c):             # <<<<<<<<<<<<<<
@@ -4745,7 +4858,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew3(PyObject *__
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":830
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":830
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
  * 
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):             # <<<<<<<<<<<<<<
@@ -4759,7 +4872,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew4", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":831
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":831
  * 
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)             # <<<<<<<<<<<<<<
@@ -4773,7 +4886,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":830
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":830
  *     return PyArray_MultiIterNew(3, <void*>a, <void*>b, <void*> c)
  * 
  * cdef inline object PyArray_MultiIterNew4(a, b, c, d):             # <<<<<<<<<<<<<<
@@ -4792,7 +4905,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew4(PyObject *__
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":833
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":833
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
  * 
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):             # <<<<<<<<<<<<<<
@@ -4806,7 +4919,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("PyArray_MultiIterNew5", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":834
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":834
  * 
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)             # <<<<<<<<<<<<<<
@@ -4820,7 +4933,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":833
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":833
  *     return PyArray_MultiIterNew(4, <void*>a, <void*>b, <void*>c, <void*> d)
  * 
  * cdef inline object PyArray_MultiIterNew5(a, b, c, d, e):             # <<<<<<<<<<<<<<
@@ -4839,7 +4952,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyArray_MultiIterNew5(PyObject *__
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":836
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":836
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):             # <<<<<<<<<<<<<<
@@ -4853,7 +4966,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("PyDataType_SHAPE", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":837
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":837
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):             # <<<<<<<<<<<<<<
@@ -4863,7 +4976,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
   __pyx_t_1 = (PyDataType_HASSUBARRAY(__pyx_v_d) != 0);
   if (__pyx_t_1) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":838
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":838
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):
  *         return <tuple>d.subarray.shape             # <<<<<<<<<<<<<<
@@ -4875,7 +4988,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
     __pyx_r = ((PyObject*)__pyx_v_d->subarray->shape);
     goto __pyx_L0;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":837
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":837
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):
  *     if PyDataType_HASSUBARRAY(d):             # <<<<<<<<<<<<<<
@@ -4884,7 +4997,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
  */
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":840
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":840
  *         return <tuple>d.subarray.shape
  *     else:
  *         return ()             # <<<<<<<<<<<<<<
@@ -4898,7 +5011,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
     goto __pyx_L0;
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":836
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":836
  *     return PyArray_MultiIterNew(5, <void*>a, <void*>b, <void*>c, <void*> d, <void*> e)
  * 
  * cdef inline tuple PyDataType_SHAPE(dtype d):             # <<<<<<<<<<<<<<
@@ -4913,7 +5026,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_PyDataType_SHAPE(PyArray_Descr *__
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":842
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":842
  *         return ()
  * 
  * cdef inline char* _util_dtypestring(dtype descr, char* f, char* end, int* offset) except NULL:             # <<<<<<<<<<<<<<
@@ -4942,7 +5055,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
   char *__pyx_t_9;
   __Pyx_RefNannySetupContext("_util_dtypestring", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":847
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":847
  * 
  *     cdef dtype child
  *     cdef int endian_detector = 1             # <<<<<<<<<<<<<<
@@ -4951,7 +5064,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
   __pyx_v_endian_detector = 1;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":848
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":848
  *     cdef dtype child
  *     cdef int endian_detector = 1
  *     cdef bint little_endian = ((<char*>&endian_detector)[0] != 0)             # <<<<<<<<<<<<<<
@@ -4960,7 +5073,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
   __pyx_v_little_endian = ((((char *)(&__pyx_v_endian_detector))[0]) != 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":851
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":851
  *     cdef tuple fields
  * 
  *     for childname in descr.names:             # <<<<<<<<<<<<<<
@@ -4983,7 +5096,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     __Pyx_XDECREF_SET(__pyx_v_childname, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":852
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":852
  * 
  *     for childname in descr.names:
  *         fields = descr.fields[childname]             # <<<<<<<<<<<<<<
@@ -5000,7 +5113,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     __Pyx_XDECREF_SET(__pyx_v_fields, ((PyObject*)__pyx_t_3));
     __pyx_t_3 = 0;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":853
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":853
  *     for childname in descr.names:
  *         fields = descr.fields[childname]
  *         child, new_offset = fields             # <<<<<<<<<<<<<<
@@ -5035,7 +5148,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     __Pyx_XDECREF_SET(__pyx_v_new_offset, __pyx_t_4);
     __pyx_t_4 = 0;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":855
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":855
  *         child, new_offset = fields
  * 
  *         if (end - f) - <int>(new_offset - offset[0]) < 15:             # <<<<<<<<<<<<<<
@@ -5052,7 +5165,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     __pyx_t_6 = ((((__pyx_v_end - __pyx_v_f) - ((int)__pyx_t_5)) < 15) != 0);
     if (unlikely(__pyx_t_6)) {
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":856
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":856
  * 
  *         if (end - f) - <int>(new_offset - offset[0]) < 15:
  *             raise RuntimeError(u"Format string allocated too short, see comment in numpy.pxd")             # <<<<<<<<<<<<<<
@@ -5065,7 +5178,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __PYX_ERR(1, 856, __pyx_L1_error)
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":855
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":855
  *         child, new_offset = fields
  * 
  *         if (end - f) - <int>(new_offset - offset[0]) < 15:             # <<<<<<<<<<<<<<
@@ -5074,7 +5187,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
     }
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":858
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":858
  *             raise RuntimeError(u"Format string allocated too short, see comment in numpy.pxd")
  * 
  *         if ((child.byteorder == c'>' and little_endian) or             # <<<<<<<<<<<<<<
@@ -5094,7 +5207,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     }
     __pyx_L8_next_or:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":859
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":859
  * 
  *         if ((child.byteorder == c'>' and little_endian) or
  *             (child.byteorder == c'<' and not little_endian)):             # <<<<<<<<<<<<<<
@@ -5111,7 +5224,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     __pyx_t_6 = __pyx_t_7;
     __pyx_L7_bool_binop_done:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":858
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":858
  *             raise RuntimeError(u"Format string allocated too short, see comment in numpy.pxd")
  * 
  *         if ((child.byteorder == c'>' and little_endian) or             # <<<<<<<<<<<<<<
@@ -5120,7 +5233,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
     if (unlikely(__pyx_t_6)) {
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":860
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":860
  *         if ((child.byteorder == c'>' and little_endian) or
  *             (child.byteorder == c'<' and not little_endian)):
  *             raise ValueError(u"Non-native byte order not supported")             # <<<<<<<<<<<<<<
@@ -5133,7 +5246,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __PYX_ERR(1, 860, __pyx_L1_error)
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":858
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":858
  *             raise RuntimeError(u"Format string allocated too short, see comment in numpy.pxd")
  * 
  *         if ((child.byteorder == c'>' and little_endian) or             # <<<<<<<<<<<<<<
@@ -5142,7 +5255,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
     }
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":870
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":870
  * 
  *         # Output padding bytes
  *         while offset[0] < new_offset:             # <<<<<<<<<<<<<<
@@ -5158,7 +5271,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       if (!__pyx_t_6) break;
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":871
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":871
  *         # Output padding bytes
  *         while offset[0] < new_offset:
  *             f[0] = 120 # "x"; pad byte             # <<<<<<<<<<<<<<
@@ -5167,7 +5280,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
       (__pyx_v_f[0]) = 0x78;
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":872
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":872
  *         while offset[0] < new_offset:
  *             f[0] = 120 # "x"; pad byte
  *             f += 1             # <<<<<<<<<<<<<<
@@ -5176,7 +5289,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
       __pyx_v_f = (__pyx_v_f + 1);
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":873
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":873
  *             f[0] = 120 # "x"; pad byte
  *             f += 1
  *             offset[0] += 1             # <<<<<<<<<<<<<<
@@ -5187,7 +5300,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       (__pyx_v_offset[__pyx_t_8]) = ((__pyx_v_offset[__pyx_t_8]) + 1);
     }
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":875
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":875
  *             offset[0] += 1
  * 
  *         offset[0] += child.itemsize             # <<<<<<<<<<<<<<
@@ -5197,7 +5310,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     __pyx_t_8 = 0;
     (__pyx_v_offset[__pyx_t_8]) = ((__pyx_v_offset[__pyx_t_8]) + __pyx_v_child->elsize);
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":877
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":877
  *         offset[0] += child.itemsize
  * 
  *         if not PyDataType_HASFIELDS(child):             # <<<<<<<<<<<<<<
@@ -5207,7 +5320,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     __pyx_t_6 = ((!(PyDataType_HASFIELDS(__pyx_v_child) != 0)) != 0);
     if (__pyx_t_6) {
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":878
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":878
  * 
  *         if not PyDataType_HASFIELDS(child):
  *             t = child.type_num             # <<<<<<<<<<<<<<
@@ -5219,7 +5332,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       __Pyx_XDECREF_SET(__pyx_v_t, __pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":879
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":879
  *         if not PyDataType_HASFIELDS(child):
  *             t = child.type_num
  *             if end - f < 5:             # <<<<<<<<<<<<<<
@@ -5229,7 +5342,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       __pyx_t_6 = (((__pyx_v_end - __pyx_v_f) < 5) != 0);
       if (unlikely(__pyx_t_6)) {
 
-        /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":880
+        /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":880
  *             t = child.type_num
  *             if end - f < 5:
  *                 raise RuntimeError(u"Format string allocated too short.")             # <<<<<<<<<<<<<<
@@ -5242,7 +5355,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         __PYX_ERR(1, 880, __pyx_L1_error)
 
-        /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":879
+        /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":879
  *         if not PyDataType_HASFIELDS(child):
  *             t = child.type_num
  *             if end - f < 5:             # <<<<<<<<<<<<<<
@@ -5251,7 +5364,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":883
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":883
  * 
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  *             if   t == NPY_BYTE:        f[0] =  98 #"b"             # <<<<<<<<<<<<<<
@@ -5269,7 +5382,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":884
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":884
  *             # Until ticket #99 is fixed, use integers to avoid warnings
  *             if   t == NPY_BYTE:        f[0] =  98 #"b"
  *             elif t == NPY_UBYTE:       f[0] =  66 #"B"             # <<<<<<<<<<<<<<
@@ -5287,7 +5400,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":885
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":885
  *             if   t == NPY_BYTE:        f[0] =  98 #"b"
  *             elif t == NPY_UBYTE:       f[0] =  66 #"B"
  *             elif t == NPY_SHORT:       f[0] = 104 #"h"             # <<<<<<<<<<<<<<
@@ -5305,7 +5418,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":886
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":886
  *             elif t == NPY_UBYTE:       f[0] =  66 #"B"
  *             elif t == NPY_SHORT:       f[0] = 104 #"h"
  *             elif t == NPY_USHORT:      f[0] =  72 #"H"             # <<<<<<<<<<<<<<
@@ -5323,7 +5436,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":887
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":887
  *             elif t == NPY_SHORT:       f[0] = 104 #"h"
  *             elif t == NPY_USHORT:      f[0] =  72 #"H"
  *             elif t == NPY_INT:         f[0] = 105 #"i"             # <<<<<<<<<<<<<<
@@ -5341,7 +5454,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":888
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":888
  *             elif t == NPY_USHORT:      f[0] =  72 #"H"
  *             elif t == NPY_INT:         f[0] = 105 #"i"
  *             elif t == NPY_UINT:        f[0] =  73 #"I"             # <<<<<<<<<<<<<<
@@ -5359,7 +5472,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":889
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":889
  *             elif t == NPY_INT:         f[0] = 105 #"i"
  *             elif t == NPY_UINT:        f[0] =  73 #"I"
  *             elif t == NPY_LONG:        f[0] = 108 #"l"             # <<<<<<<<<<<<<<
@@ -5377,7 +5490,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":890
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":890
  *             elif t == NPY_UINT:        f[0] =  73 #"I"
  *             elif t == NPY_LONG:        f[0] = 108 #"l"
  *             elif t == NPY_ULONG:       f[0] = 76  #"L"             # <<<<<<<<<<<<<<
@@ -5395,7 +5508,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":891
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":891
  *             elif t == NPY_LONG:        f[0] = 108 #"l"
  *             elif t == NPY_ULONG:       f[0] = 76  #"L"
  *             elif t == NPY_LONGLONG:    f[0] = 113 #"q"             # <<<<<<<<<<<<<<
@@ -5413,7 +5526,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":892
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":892
  *             elif t == NPY_ULONG:       f[0] = 76  #"L"
  *             elif t == NPY_LONGLONG:    f[0] = 113 #"q"
  *             elif t == NPY_ULONGLONG:   f[0] = 81  #"Q"             # <<<<<<<<<<<<<<
@@ -5431,7 +5544,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":893
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":893
  *             elif t == NPY_LONGLONG:    f[0] = 113 #"q"
  *             elif t == NPY_ULONGLONG:   f[0] = 81  #"Q"
  *             elif t == NPY_FLOAT:       f[0] = 102 #"f"             # <<<<<<<<<<<<<<
@@ -5449,7 +5562,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":894
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":894
  *             elif t == NPY_ULONGLONG:   f[0] = 81  #"Q"
  *             elif t == NPY_FLOAT:       f[0] = 102 #"f"
  *             elif t == NPY_DOUBLE:      f[0] = 100 #"d"             # <<<<<<<<<<<<<<
@@ -5467,7 +5580,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":895
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":895
  *             elif t == NPY_FLOAT:       f[0] = 102 #"f"
  *             elif t == NPY_DOUBLE:      f[0] = 100 #"d"
  *             elif t == NPY_LONGDOUBLE:  f[0] = 103 #"g"             # <<<<<<<<<<<<<<
@@ -5485,7 +5598,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":896
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":896
  *             elif t == NPY_DOUBLE:      f[0] = 100 #"d"
  *             elif t == NPY_LONGDOUBLE:  f[0] = 103 #"g"
  *             elif t == NPY_CFLOAT:      f[0] = 90; f[1] = 102; f += 1 # Zf             # <<<<<<<<<<<<<<
@@ -5505,7 +5618,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":897
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":897
  *             elif t == NPY_LONGDOUBLE:  f[0] = 103 #"g"
  *             elif t == NPY_CFLOAT:      f[0] = 90; f[1] = 102; f += 1 # Zf
  *             elif t == NPY_CDOUBLE:     f[0] = 90; f[1] = 100; f += 1 # Zd             # <<<<<<<<<<<<<<
@@ -5525,7 +5638,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":898
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":898
  *             elif t == NPY_CFLOAT:      f[0] = 90; f[1] = 102; f += 1 # Zf
  *             elif t == NPY_CDOUBLE:     f[0] = 90; f[1] = 100; f += 1 # Zd
  *             elif t == NPY_CLONGDOUBLE: f[0] = 90; f[1] = 103; f += 1 # Zg             # <<<<<<<<<<<<<<
@@ -5545,7 +5658,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":899
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":899
  *             elif t == NPY_CDOUBLE:     f[0] = 90; f[1] = 100; f += 1 # Zd
  *             elif t == NPY_CLONGDOUBLE: f[0] = 90; f[1] = 103; f += 1 # Zg
  *             elif t == NPY_OBJECT:      f[0] = 79 #"O"             # <<<<<<<<<<<<<<
@@ -5563,7 +5676,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
         goto __pyx_L15;
       }
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":901
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":901
  *             elif t == NPY_OBJECT:      f[0] = 79 #"O"
  *             else:
  *                 raise ValueError(u"unknown dtype code in numpy.pxd (%d)" % t)             # <<<<<<<<<<<<<<
@@ -5582,7 +5695,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       }
       __pyx_L15:;
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":902
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":902
  *             else:
  *                 raise ValueError(u"unknown dtype code in numpy.pxd (%d)" % t)
  *             f += 1             # <<<<<<<<<<<<<<
@@ -5591,7 +5704,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
  */
       __pyx_v_f = (__pyx_v_f + 1);
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":877
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":877
  *         offset[0] += child.itemsize
  * 
  *         if not PyDataType_HASFIELDS(child):             # <<<<<<<<<<<<<<
@@ -5601,7 +5714,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
       goto __pyx_L13;
     }
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":906
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":906
  *             # Cython ignores struct boundary information ("T{...}"),
  *             # so don't output it
  *             f = _util_dtypestring(child, f, end, offset)             # <<<<<<<<<<<<<<
@@ -5614,7 +5727,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
     }
     __pyx_L13:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":851
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":851
  *     cdef tuple fields
  * 
  *     for childname in descr.names:             # <<<<<<<<<<<<<<
@@ -5624,7 +5737,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":907
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":907
  *             # so don't output it
  *             f = _util_dtypestring(child, f, end, offset)
  *     return f             # <<<<<<<<<<<<<<
@@ -5634,7 +5747,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
   __pyx_r = __pyx_v_f;
   goto __pyx_L0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":842
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":842
  *         return ()
  * 
  * cdef inline char* _util_dtypestring(dtype descr, char* f, char* end, int* offset) except NULL:             # <<<<<<<<<<<<<<
@@ -5659,7 +5772,7 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *__pyx
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1022
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1022
  *     int _import_umath() except -1
  * 
  * cdef inline void set_array_base(ndarray arr, object base):             # <<<<<<<<<<<<<<
@@ -5671,7 +5784,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("set_array_base", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1023
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1023
  * 
  * cdef inline void set_array_base(ndarray arr, object base):
  *     Py_INCREF(base) # important to do this before stealing the reference below!             # <<<<<<<<<<<<<<
@@ -5680,7 +5793,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
  */
   Py_INCREF(__pyx_v_base);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1024
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1024
  * cdef inline void set_array_base(ndarray arr, object base):
  *     Py_INCREF(base) # important to do this before stealing the reference below!
  *     PyArray_SetBaseObject(arr, base)             # <<<<<<<<<<<<<<
@@ -5689,7 +5802,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
  */
   (void)(PyArray_SetBaseObject(__pyx_v_arr, __pyx_v_base));
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1022
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1022
  *     int _import_umath() except -1
  * 
  * cdef inline void set_array_base(ndarray arr, object base):             # <<<<<<<<<<<<<<
@@ -5701,7 +5814,7 @@ static CYTHON_INLINE void __pyx_f_5numpy_set_array_base(PyArrayObject *__pyx_v_a
   __Pyx_RefNannyFinishContext();
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1026
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1026
  *     PyArray_SetBaseObject(arr, base)
  * 
  * cdef inline object get_array_base(ndarray arr):             # <<<<<<<<<<<<<<
@@ -5716,7 +5829,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   int __pyx_t_1;
   __Pyx_RefNannySetupContext("get_array_base", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1027
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1027
  * 
  * cdef inline object get_array_base(ndarray arr):
  *     base = PyArray_BASE(arr)             # <<<<<<<<<<<<<<
@@ -5725,7 +5838,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
  */
   __pyx_v_base = PyArray_BASE(__pyx_v_arr);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1028
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1028
  * cdef inline object get_array_base(ndarray arr):
  *     base = PyArray_BASE(arr)
  *     if base is NULL:             # <<<<<<<<<<<<<<
@@ -5735,7 +5848,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   __pyx_t_1 = ((__pyx_v_base == NULL) != 0);
   if (__pyx_t_1) {
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1029
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1029
  *     base = PyArray_BASE(arr)
  *     if base is NULL:
  *         return None             # <<<<<<<<<<<<<<
@@ -5746,7 +5859,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1028
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1028
  * cdef inline object get_array_base(ndarray arr):
  *     base = PyArray_BASE(arr)
  *     if base is NULL:             # <<<<<<<<<<<<<<
@@ -5755,7 +5868,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
  */
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1030
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1030
  *     if base is NULL:
  *         return None
  *     return <object>base             # <<<<<<<<<<<<<<
@@ -5767,7 +5880,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   __pyx_r = ((PyObject *)__pyx_v_base);
   goto __pyx_L0;
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1026
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1026
  *     PyArray_SetBaseObject(arr, base)
  * 
  * cdef inline object get_array_base(ndarray arr):             # <<<<<<<<<<<<<<
@@ -5782,7 +5895,7 @@ static CYTHON_INLINE PyObject *__pyx_f_5numpy_get_array_base(PyArrayObject *__py
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1034
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1034
  * # Versions of the import_* functions which are more suitable for
  * # Cython code.
  * cdef inline int import_array() except -1:             # <<<<<<<<<<<<<<
@@ -5803,7 +5916,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("import_array", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1035
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1035
  * # Cython code.
  * cdef inline int import_array() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -5819,7 +5932,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1036
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1036
  * cdef inline int import_array() except -1:
  *     try:
  *         _import_array()             # <<<<<<<<<<<<<<
@@ -5828,7 +5941,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
  */
       __pyx_t_4 = _import_array(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(1, 1036, __pyx_L3_error)
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1035
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1035
  * # Cython code.
  * cdef inline int import_array() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -5842,7 +5955,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     goto __pyx_L8_try_end;
     __pyx_L3_error:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1037
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1037
  *     try:
  *         _import_array()
  *     except Exception:             # <<<<<<<<<<<<<<
@@ -5857,7 +5970,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_7);
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1038
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1038
  *         _import_array()
  *     except Exception:
  *         raise ImportError("numpy.core.multiarray failed to import")             # <<<<<<<<<<<<<<
@@ -5873,7 +5986,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     goto __pyx_L5_except_error;
     __pyx_L5_except_error:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1035
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1035
  * # Cython code.
  * cdef inline int import_array() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -5888,7 +6001,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
     __pyx_L8_try_end:;
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1034
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1034
  * # Versions of the import_* functions which are more suitable for
  * # Cython code.
  * cdef inline int import_array() except -1:             # <<<<<<<<<<<<<<
@@ -5911,7 +6024,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void) {
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1040
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1040
  *         raise ImportError("numpy.core.multiarray failed to import")
  * 
  * cdef inline int import_umath() except -1:             # <<<<<<<<<<<<<<
@@ -5932,7 +6045,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("import_umath", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1041
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1041
  * 
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -5948,7 +6061,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1042
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1042
  * cdef inline int import_umath() except -1:
  *     try:
  *         _import_umath()             # <<<<<<<<<<<<<<
@@ -5957,7 +6070,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
  */
       __pyx_t_4 = _import_umath(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(1, 1042, __pyx_L3_error)
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1041
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1041
  * 
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -5971,7 +6084,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     goto __pyx_L8_try_end;
     __pyx_L3_error:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1043
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1043
  *     try:
  *         _import_umath()
  *     except Exception:             # <<<<<<<<<<<<<<
@@ -5986,7 +6099,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_7);
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1044
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1044
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy.core.umath failed to import")             # <<<<<<<<<<<<<<
@@ -6002,7 +6115,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     goto __pyx_L5_except_error;
     __pyx_L5_except_error:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1041
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1041
  * 
  * cdef inline int import_umath() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -6017,7 +6130,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
     __pyx_L8_try_end:;
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1040
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1040
  *         raise ImportError("numpy.core.multiarray failed to import")
  * 
  * cdef inline int import_umath() except -1:             # <<<<<<<<<<<<<<
@@ -6040,7 +6153,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_umath(void) {
   return __pyx_r;
 }
 
-/* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1046
+/* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1046
  *         raise ImportError("numpy.core.umath failed to import")
  * 
  * cdef inline int import_ufunc() except -1:             # <<<<<<<<<<<<<<
@@ -6061,7 +6174,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
   PyObject *__pyx_t_8 = NULL;
   __Pyx_RefNannySetupContext("import_ufunc", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1047
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1047
  * 
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -6077,7 +6190,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     __Pyx_XGOTREF(__pyx_t_3);
     /*try:*/ {
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1048
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1048
  * cdef inline int import_ufunc() except -1:
  *     try:
  *         _import_umath()             # <<<<<<<<<<<<<<
@@ -6086,7 +6199,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
  */
       __pyx_t_4 = _import_umath(); if (unlikely(__pyx_t_4 == ((int)-1))) __PYX_ERR(1, 1048, __pyx_L3_error)
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1047
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1047
  * 
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -6100,7 +6213,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     goto __pyx_L8_try_end;
     __pyx_L3_error:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1049
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1049
  *     try:
  *         _import_umath()
  *     except Exception:             # <<<<<<<<<<<<<<
@@ -6114,7 +6227,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GOTREF(__pyx_t_7);
 
-      /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1050
+      /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1050
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy.core.umath failed to import")             # <<<<<<<<<<<<<<
@@ -6128,7 +6241,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     goto __pyx_L5_except_error;
     __pyx_L5_except_error:;
 
-    /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1047
+    /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1047
  * 
  * cdef inline int import_ufunc() except -1:
  *     try:             # <<<<<<<<<<<<<<
@@ -6143,7 +6256,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_ufunc(void) {
     __pyx_L8_try_end:;
   }
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1046
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1046
  *         raise ImportError("numpy.core.umath failed to import")
  * 
  * cdef inline int import_ufunc() except -1:             # <<<<<<<<<<<<<<
@@ -19768,7 +19881,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 23, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 272, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(1, 856, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 1038, __pyx_L1_error)
@@ -19787,7 +19900,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":272
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":272
  *             if ((flags & pybuf.PyBUF_C_CONTIGUOUS == pybuf.PyBUF_C_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_ARRAY_C_CONTIGUOUS)):
  *                 raise ValueError(u"ndarray is not C contiguous")             # <<<<<<<<<<<<<<
@@ -19798,7 +19911,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":276
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":276
  *             if ((flags & pybuf.PyBUF_F_CONTIGUOUS == pybuf.PyBUF_F_CONTIGUOUS)
  *                 and not PyArray_CHKFLAGS(self, NPY_ARRAY_F_CONTIGUOUS)):
  *                 raise ValueError(u"ndarray is not Fortran contiguous")             # <<<<<<<<<<<<<<
@@ -19809,7 +19922,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":306
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":306
  *                 if ((descr.byteorder == c'>' and little_endian) or
  *                     (descr.byteorder == c'<' and not little_endian)):
  *                     raise ValueError(u"Non-native byte order not supported")             # <<<<<<<<<<<<<<
@@ -19820,7 +19933,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":856
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":856
  * 
  *         if (end - f) - <int>(new_offset - offset[0]) < 15:
  *             raise RuntimeError(u"Format string allocated too short, see comment in numpy.pxd")             # <<<<<<<<<<<<<<
@@ -19831,7 +19944,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":880
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":880
  *             t = child.type_num
  *             if end - f < 5:
  *                 raise RuntimeError(u"Format string allocated too short.")             # <<<<<<<<<<<<<<
@@ -19842,7 +19955,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1038
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1038
  *         _import_array()
  *     except Exception:
  *         raise ImportError("numpy.core.multiarray failed to import")             # <<<<<<<<<<<<<<
@@ -19853,7 +19966,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "../../sessions/amber/venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1044
+  /* "venv/lib/python3.7/site-packages/Cython/Includes/numpy/__init__.pxd":1044
  *         _import_umath()
  *     except Exception:
  *         raise ImportError("numpy.core.umath failed to import")             # <<<<<<<<<<<<<<
@@ -20341,10 +20454,12 @@ static int __Pyx_modinit_function_import_code(void) {
   if (__Pyx_ImportFunction(__pyx_t_1, "rand", (void (**)(void))&__pyx_f_5pippi_3dsp_rand, "double (int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_rand *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_2 = PyImport_ImportModule("pippi.wavetables"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_2, "to_window", (void (**)(void))&__pyx_f_5pippi_10wavetables_to_window, "__Pyx_memviewslice (PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_window *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_2, "to_wavetable", (void (**)(void))&__pyx_f_5pippi_10wavetables_to_wavetable, "__Pyx_memviewslice (PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_wavetable *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_3 = PyImport_ImportModule("pippi.interpolation"); if (!__pyx_t_3) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_3, "_linear_point", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_point, "double (__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_3, "_linear_pos", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_pos, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -20567,29 +20682,29 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pippi/noise.pyx":36
+  /* "pippi/noise.pyx":42
  *     return out
  * 
- * cpdef SoundBuffer bln(object wt, double length, double minfreq, double maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer bln(object wt, double length, object minfreq, object maxfreq, channels=DEFAULT_CHANNELS, samplerate=DEFAULT_SAMPLERATE):             # <<<<<<<<<<<<<<
  *     cdef double[:] _wt = to_wavetable(wt)
- *     cdef unsigned int framelength = <unsigned int>(length * samplerate)
+ *     cdef double[:] _minfreq = to_window(minfreq)
  */
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_CHANNELS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_CHANNELS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k_ = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k__2 = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_CHANNELS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_CHANNELS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k_ = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 36, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k__2 = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
