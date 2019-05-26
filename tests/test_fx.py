@@ -13,6 +13,12 @@ class TestFx(TestCase):
         snd = snd + g
         snd.write('tests/renders/fx_vspeed.wav')
 
+    def test_crossfade(self):
+        snd1 = dsp.read('tests/sounds/linux.wav').cut(0, 3)
+        snd2 = dsp.read('tests/sounds/guitar10s.wav').cut(0, 3)
+        out = fx.crossfade(snd1, snd2, 'saw')
+        out.write('tests/renders/fx_crossfade.wav')
+
     def test_envelope_follower(self):
         snd = dsp.read('tests/sounds/linux.wav')
         osc = oscs.Osc('sine')

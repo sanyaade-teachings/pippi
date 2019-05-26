@@ -14,6 +14,26 @@ from cpython cimport bool
 
 cdef double MINDENSITY = 0.001
 
+cdef double[:,:] _crossfade(double[:,:] out, double[:,:] a, double[:,:] b, double[:] curve):
+    cdef unsigned int length = len(a)
+    cdef int channels = a.shape[1]
+    cdef double pos = 0
+    cdef double p = 0
+
+    for i in range(length):
+        pos = <double>i / <double>length
+        p = _linear_pos(curve, pos)
+        for c in range(channels):
+            out[i,c] = (a[i,c] * p) + (b[i,c] * (1-p))
+
+    return out
+
+cpdef SoundBuffer crossfade(SoundBuffer a, SoundBuffer b, object curve):
+    if len(a) != len(b):
+        raise TypeError('Lengths do not match')
+    cdef double[:] _curve = wavetables.Wavetable(curve, 0, 1).data
+    cdef double[:,:] out = np.zeros((len(a), a.channels), dtype='d')
+    return SoundBuffer(_crossfade(out, a.frames, b.frames, _curve), channels=a.channels, samplerate=a.samplerate)
 
 cpdef SoundBuffer crush(SoundBuffer snd, object bitdepth=None, object samplerate=None):
     if bitdepth is None:
