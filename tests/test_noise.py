@@ -1,7 +1,7 @@
 from unittest import TestCase
 from pippi import dsp, noise
 
-class TestFx(TestCase):
+class TestNoise(TestCase):
     def test_bln_low(self):
         out = noise.bln('sine', 2, 40, 200).env('hann') * 0.1
         out.write('tests/renders/noise_bln_low.wav')

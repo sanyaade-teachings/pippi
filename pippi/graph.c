@@ -1489,7 +1489,7 @@ struct __pyx_opt_args_5pippi_13interpolation_linear_point {
 struct __pyx_opt_args_5pippi_9soundpipe_mincer;
 struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
 
-/* "soundpipe.pxd":171
+/* "soundpipe.pxd":176
  * 
  * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, double amp, double[:] pitch)
  * cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=?, int samplerate=?)             # <<<<<<<<<<<<<<
@@ -1502,7 +1502,7 @@ struct __pyx_opt_args_5pippi_9soundpipe_mincer {
   int samplerate;
 };
 
-/* "soundpipe.pxd":180
+/* "soundpipe.pxd":185
  * 
  * cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
  * cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)             # <<<<<<<<<<<<<<

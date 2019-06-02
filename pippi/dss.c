@@ -819,11 +819,11 @@ static const char *__pyx_f[] = {
   "pippi/dss.pyx",
   "stringsource",
   "pippi/dss.pxd",
-  "array.pxd",
+  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/array.pxd",
   "pippi/wavetables.pxd",
   "pippi/soundbuffer.pxd",
   "pippi/grains.pxd",
-  "type.pxd",
+  "venv/lib/python3.7/site-packages/Cython/Includes/cpython/type.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -1498,7 +1498,7 @@ struct __pyx_opt_args_5pippi_13interpolation_linear_point {
 struct __pyx_opt_args_5pippi_9soundpipe_mincer;
 struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
 
-/* "soundpipe.pxd":175
+/* "soundpipe.pxd":176
  * 
  * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, double amp, double[:] pitch)
  * cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=?, int samplerate=?)             # <<<<<<<<<<<<<<
@@ -1511,7 +1511,7 @@ struct __pyx_opt_args_5pippi_9soundpipe_mincer {
   int samplerate;
 };
 
-/* "soundpipe.pxd":184
+/* "soundpipe.pxd":185
  * 
  * cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
  * cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)             # <<<<<<<<<<<<<<

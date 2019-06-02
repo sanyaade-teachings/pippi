@@ -15,6 +15,9 @@ test-fx:
 test-noise:
 	python -m unittest tests/test_noise.py -v
 
+test-shapes:
+	python -m unittest tests/test_shapes.py -v
+
 test-oscs:
 	python -m unittest tests/test_oscs.py -v
 
