@@ -130,20 +130,20 @@ cdef class Waveset:
         w.end = end
         w.length = end-start
 
-        #cdef int waveset_length = end-start
-        #waveset = np.zeros(waveset_length, dtype='d')
-        #waveset = raw[start:end]
-        #self.wavesets += [ waveset ]
+        cdef int waveset_length = end-start
+        waveset = np.zeros(waveset_length, dtype='d')
+        waveset = raw[start:end]
+        self.wavesets += [ waveset ]
 
-        #self.max_length = max(self.max_length, waveset_length)
-        self.max_length = max(self.max_length, w.length)
+        self.max_length = max(self.max_length, waveset_length)
+        #self.max_length = max(self.max_length, w.length)
 
         if self.min_length == 0:
-            #self.min_length = waveset_length
-            self.min_length = w.length
+            self.min_length = waveset_length
+            #self.min_length = w.length
         else:
-            #self.min_length = min(self.min_length, waveset_length)
-            self.min_length = min(self.min_length, w.length)
+            self.min_length = min(self.min_length, waveset_length)
+            #self.min_length = min(self.min_length, w.length)
 
 
     cpdef void interleave(Waveset self, Waveset source):

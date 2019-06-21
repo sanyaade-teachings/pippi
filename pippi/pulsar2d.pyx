@@ -109,7 +109,7 @@ cdef class Pulsar2d:
 
         for i, window in enumerate(windows):
             win = wts.to_window(window, self.win_length)
-            if len(wt) < self.wt_length:
+            if len(win) < self.win_length:
                 win = interpolation._linear(win, self.win_length)
 
             for j, val in enumerate(win):

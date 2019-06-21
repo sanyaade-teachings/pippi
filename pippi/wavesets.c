@@ -2667,7 +2667,7 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 static struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_f_5pippi_8wavesets_7Waveset_copy(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
 static void __pyx_f_5pippi_8wavesets_7Waveset__import(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, PyObject *__pyx_v_wavesets); /* proto*/
 static void __pyx_f_5pippi_8wavesets_7Waveset__load(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, PyObject *__pyx_v_values, int __pyx_v_crossings, int __pyx_v_offset, int __pyx_v_limit, int __pyx_v_modulo); /* proto*/
-static void __pyx_f_5pippi_8wavesets_7Waveset__slice(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, CYTHON_UNUSED __Pyx_memviewslice __pyx_v_raw, int __pyx_v_start, int __pyx_v_end); /* proto*/
+static void __pyx_f_5pippi_8wavesets_7Waveset__slice(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, __Pyx_memviewslice __pyx_v_raw, int __pyx_v_start, int __pyx_v_end); /* proto*/
 static void __pyx_f_5pippi_8wavesets_7Waveset_interleave(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_source, int __pyx_skip_dispatch); /* proto*/
 static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_8wavesets_7Waveset_stretch(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_8wavesets_7Waveset_stretch *__pyx_optional_args); /* proto*/
 static void __pyx_f_5pippi_8wavesets_7Waveset_reverse(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, int __pyx_skip_dispatch); /* proto*/
@@ -4774,13 +4774,20 @@ static void __pyx_f_5pippi_8wavesets_7Waveset__load(struct __pyx_obj_5pippi_8wav
  *         w.start = start
  */
 
-static void __pyx_f_5pippi_8wavesets_7Waveset__slice(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, CYTHON_UNUSED __Pyx_memviewslice __pyx_v_raw, int __pyx_v_start, int __pyx_v_end) {
+static void __pyx_f_5pippi_8wavesets_7Waveset__slice(struct __pyx_obj_5pippi_8wavesets_Waveset *__pyx_v_self, __Pyx_memviewslice __pyx_v_raw, int __pyx_v_start, int __pyx_v_end) {
   struct __pyx_t_5pippi_8wavesets_Wave *__pyx_v_w;
+  int __pyx_v_waveset_length;
+  PyObject *__pyx_v_waveset = NULL;
   __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
-  int __pyx_t_2;
-  int __pyx_t_3;
-  int __pyx_t_4;
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  PyObject *__pyx_t_4 = NULL;
+  __Pyx_memviewslice __pyx_t_5 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_t_6;
+  int __pyx_t_7;
+  int __pyx_t_8;
+  int __pyx_t_9;
   __Pyx_RefNannySetupContext("_slice", 0);
 
   /* "pippi/wavesets.pyx":128
@@ -4815,72 +4822,167 @@ static void __pyx_f_5pippi_8wavesets_7Waveset__slice(struct __pyx_obj_5pippi_8wa
  *         w.end = end
  *         w.length = end-start             # <<<<<<<<<<<<<<
  * 
- *         #cdef int waveset_length = end-start
+ *         cdef int waveset_length = end-start
  */
   __pyx_v_w->length = (__pyx_v_end - __pyx_v_start);
 
-  /* "pippi/wavesets.pyx":139
+  /* "pippi/wavesets.pyx":133
+ *         w.length = end-start
  * 
- *         #self.max_length = max(self.max_length, waveset_length)
- *         self.max_length = max(self.max_length, w.length)             # <<<<<<<<<<<<<<
- * 
- *         if self.min_length == 0:
+ *         cdef int waveset_length = end-start             # <<<<<<<<<<<<<<
+ *         waveset = np.zeros(waveset_length, dtype='d')
+ *         waveset = raw[start:end]
  */
-  __pyx_t_1 = __pyx_v_w->length;
-  __pyx_t_2 = __pyx_v_self->max_length;
-  if (((__pyx_t_1 > __pyx_t_2) != 0)) {
-    __pyx_t_3 = __pyx_t_1;
+  __pyx_v_waveset_length = (__pyx_v_end - __pyx_v_start);
+
+  /* "pippi/wavesets.pyx":134
+ * 
+ *         cdef int waveset_length = end-start
+ *         waveset = np.zeros(waveset_length, dtype='d')             # <<<<<<<<<<<<<<
+ *         waveset = raw[start:end]
+ *         self.wavesets += [ waveset ]
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_waveset_length); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
+  __pyx_t_1 = 0;
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 134, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_v_waveset = __pyx_t_4;
+  __pyx_t_4 = 0;
+
+  /* "pippi/wavesets.pyx":135
+ *         cdef int waveset_length = end-start
+ *         waveset = np.zeros(waveset_length, dtype='d')
+ *         waveset = raw[start:end]             # <<<<<<<<<<<<<<
+ *         self.wavesets += [ waveset ]
+ * 
+ */
+  __pyx_t_5.data = __pyx_v_raw.data;
+  __pyx_t_5.memview = __pyx_v_raw.memview;
+  __PYX_INC_MEMVIEW(&__pyx_t_5, 0);
+  __pyx_t_6 = -1;
+  if (unlikely(__pyx_memoryview_slice_memviewslice(
+    &__pyx_t_5,
+    __pyx_v_raw.shape[0], __pyx_v_raw.strides[0], __pyx_v_raw.suboffsets[0],
+    0,
+    0,
+    &__pyx_t_6,
+    __pyx_v_start,
+    __pyx_v_end,
+    0,
+    1,
+    1,
+    0,
+    1) < 0))
+{
+    __PYX_ERR(0, 135, __pyx_L1_error)
+}
+
+__pyx_t_4 = __pyx_memoryview_fromslice(__pyx_t_5, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 135, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
+  __pyx_t_5.memview = NULL;
+  __pyx_t_5.data = NULL;
+  __Pyx_DECREF_SET(__pyx_v_waveset, __pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "pippi/wavesets.pyx":136
+ *         waveset = np.zeros(waveset_length, dtype='d')
+ *         waveset = raw[start:end]
+ *         self.wavesets += [ waveset ]             # <<<<<<<<<<<<<<
+ * 
+ *         self.max_length = max(self.max_length, waveset_length)
+ */
+  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_INCREF(__pyx_v_waveset);
+  __Pyx_GIVEREF(__pyx_v_waveset);
+  PyList_SET_ITEM(__pyx_t_4, 0, __pyx_v_waveset);
+  __pyx_t_1 = PyNumber_InPlaceAdd(__pyx_v_self->wavesets, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 136, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_GIVEREF(__pyx_t_1);
+  __Pyx_GOTREF(__pyx_v_self->wavesets);
+  __Pyx_DECREF(__pyx_v_self->wavesets);
+  __pyx_v_self->wavesets = ((PyObject*)__pyx_t_1);
+  __pyx_t_1 = 0;
+
+  /* "pippi/wavesets.pyx":138
+ *         self.wavesets += [ waveset ]
+ * 
+ *         self.max_length = max(self.max_length, waveset_length)             # <<<<<<<<<<<<<<
+ *         #self.max_length = max(self.max_length, w.length)
+ * 
+ */
+  __pyx_t_6 = __pyx_v_waveset_length;
+  __pyx_t_7 = __pyx_v_self->max_length;
+  if (((__pyx_t_6 > __pyx_t_7) != 0)) {
+    __pyx_t_8 = __pyx_t_6;
   } else {
-    __pyx_t_3 = __pyx_t_2;
+    __pyx_t_8 = __pyx_t_7;
   }
-  __pyx_v_self->max_length = __pyx_t_3;
+  __pyx_v_self->max_length = __pyx_t_8;
 
   /* "pippi/wavesets.pyx":141
- *         self.max_length = max(self.max_length, w.length)
+ *         #self.max_length = max(self.max_length, w.length)
  * 
  *         if self.min_length == 0:             # <<<<<<<<<<<<<<
- *             #self.min_length = waveset_length
- *             self.min_length = w.length
+ *             self.min_length = waveset_length
+ *             #self.min_length = w.length
  */
-  __pyx_t_4 = ((__pyx_v_self->min_length == 0) != 0);
-  if (__pyx_t_4) {
+  __pyx_t_9 = ((__pyx_v_self->min_length == 0) != 0);
+  if (__pyx_t_9) {
 
-    /* "pippi/wavesets.pyx":143
+    /* "pippi/wavesets.pyx":142
+ * 
  *         if self.min_length == 0:
- *             #self.min_length = waveset_length
- *             self.min_length = w.length             # <<<<<<<<<<<<<<
+ *             self.min_length = waveset_length             # <<<<<<<<<<<<<<
+ *             #self.min_length = w.length
  *         else:
- *             #self.min_length = min(self.min_length, waveset_length)
  */
-    __pyx_t_3 = __pyx_v_w->length;
-    __pyx_v_self->min_length = __pyx_t_3;
+    __pyx_v_self->min_length = __pyx_v_waveset_length;
 
     /* "pippi/wavesets.pyx":141
- *         self.max_length = max(self.max_length, w.length)
+ *         #self.max_length = max(self.max_length, w.length)
  * 
  *         if self.min_length == 0:             # <<<<<<<<<<<<<<
- *             #self.min_length = waveset_length
- *             self.min_length = w.length
+ *             self.min_length = waveset_length
+ *             #self.min_length = w.length
  */
     goto __pyx_L3;
   }
 
-  /* "pippi/wavesets.pyx":146
+  /* "pippi/wavesets.pyx":145
+ *             #self.min_length = w.length
  *         else:
- *             #self.min_length = min(self.min_length, waveset_length)
- *             self.min_length = min(self.min_length, w.length)             # <<<<<<<<<<<<<<
- * 
+ *             self.min_length = min(self.min_length, waveset_length)             # <<<<<<<<<<<<<<
+ *             #self.min_length = min(self.min_length, w.length)
  * 
  */
   /*else*/ {
-    __pyx_t_3 = __pyx_v_w->length;
-    __pyx_t_1 = __pyx_v_self->min_length;
-    if (((__pyx_t_3 < __pyx_t_1) != 0)) {
-      __pyx_t_2 = __pyx_t_3;
+    __pyx_t_8 = __pyx_v_waveset_length;
+    __pyx_t_6 = __pyx_v_self->min_length;
+    if (((__pyx_t_8 < __pyx_t_6) != 0)) {
+      __pyx_t_7 = __pyx_t_8;
     } else {
-      __pyx_t_2 = __pyx_t_1;
+      __pyx_t_7 = __pyx_t_6;
     }
-    __pyx_v_self->min_length = __pyx_t_2;
+    __pyx_v_self->min_length = __pyx_t_7;
   }
   __pyx_L3:;
 
@@ -4893,6 +4995,16 @@ static void __pyx_f_5pippi_8wavesets_7Waveset__slice(struct __pyx_obj_5pippi_8wa
  */
 
   /* function exit code */
+  goto __pyx_L0;
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
+  __Pyx_XDECREF(__pyx_t_4);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_5, 1);
+  __Pyx_WriteUnraisable("pippi.wavesets.Waveset._slice", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
+  __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_waveset);
   __Pyx_RefNannyFinishContext();
 }
 

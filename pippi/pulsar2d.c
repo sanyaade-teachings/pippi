@@ -2184,9 +2184,6 @@ static int __Pyx_GetException(PyObject **type, PyObject **value, PyObject **tb);
 /* BufferIndexError.proto */
 static void __Pyx_RaiseBufferIndexError(int axis);
 
-/* None.proto */
-static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname);
-
 /* PyErrFetchRestore.proto */
 #if CYTHON_FAST_THREAD_STATE
 #define __Pyx_PyErr_Clear() __Pyx_ErrRestore(NULL, NULL, NULL)
@@ -2405,6 +2402,9 @@ static CYTHON_INLINE int __Pyx_PyList_Append(PyObject* list, PyObject* x) {
 #else
 #define __Pyx_PyList_Append(L,x) PyList_Append(L,x)
 #endif
+
+/* None.proto */
+static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname);
 
 /* None.proto */
 static CYTHON_INLINE long __Pyx_div_long(long, long);
@@ -4518,7 +4518,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  * 
  *         for i, window in enumerate(windows):             # <<<<<<<<<<<<<<
  *             win = wts.to_window(window, self.win_length)
- *             if len(wt) < self.wt_length:
+ *             if len(win) < self.win_length:
  */
   __pyx_t_17 = 0;
   if (likely(PyList_CheckExact(__pyx_v_windows)) || PyTuple_CheckExact(__pyx_v_windows)) {
@@ -4569,7 +4569,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  * 
  *         for i, window in enumerate(windows):
  *             win = wts.to_window(window, self.win_length)             # <<<<<<<<<<<<<<
- *             if len(wt) < self.wt_length:
+ *             if len(win) < self.win_length:
  *                 win = interpolation._linear(win, self.win_length)
  */
     __pyx_t_26.__pyx_n = 1;
@@ -4583,18 +4583,17 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
     /* "pippi/pulsar2d.pyx":112
  *         for i, window in enumerate(windows):
  *             win = wts.to_window(window, self.win_length)
- *             if len(wt) < self.wt_length:             # <<<<<<<<<<<<<<
+ *             if len(win) < self.win_length:             # <<<<<<<<<<<<<<
  *                 win = interpolation._linear(win, self.win_length)
  * 
  */
-    if (unlikely(!__pyx_v_wt.memview)) { __Pyx_RaiseUnboundLocalError("wt"); __PYX_ERR(0, 112, __pyx_L1_error) }
-    __pyx_t_21 = __Pyx_MemoryView_Len(__pyx_v_wt); 
-    __pyx_t_2 = ((__pyx_t_21 < __pyx_v_self->wt_length) != 0);
+    __pyx_t_21 = __Pyx_MemoryView_Len(__pyx_v_win); 
+    __pyx_t_2 = ((__pyx_t_21 < __pyx_v_self->win_length) != 0);
     if (__pyx_t_2) {
 
       /* "pippi/pulsar2d.pyx":113
  *             win = wts.to_window(window, self.win_length)
- *             if len(wt) < self.wt_length:
+ *             if len(win) < self.win_length:
  *                 win = interpolation._linear(win, self.win_length)             # <<<<<<<<<<<<<<
  * 
  *             for j, val in enumerate(win):
@@ -4608,7 +4607,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
       /* "pippi/pulsar2d.pyx":112
  *         for i, window in enumerate(windows):
  *             win = wts.to_window(window, self.win_length)
- *             if len(wt) < self.wt_length:             # <<<<<<<<<<<<<<
+ *             if len(win) < self.win_length:             # <<<<<<<<<<<<<<
  *                 win = interpolation._linear(win, self.win_length)
  * 
  */
@@ -4710,7 +4709,7 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  * 
  *         for i, window in enumerate(windows):             # <<<<<<<<<<<<<<
  *             win = wts.to_window(window, self.win_length)
- *             if len(wt) < self.wt_length:
+ *             if len(win) < self.win_length:
  */
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -22376,11 +22375,6 @@ static void __Pyx_RaiseBufferIndexError(int axis) {
      "Out of bounds on buffer access (axis %d)", axis);
 }
 
-/* None */
-static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname) {
-    PyErr_Format(PyExc_UnboundLocalError, "local variable '%s' referenced before assignment", varname);
-}
-
 /* PyErrFetchRestore */
 #if CYTHON_FAST_THREAD_STATE
 static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
@@ -23396,6 +23390,11 @@ static PyObject* __Pyx_PyInt_AddObjC(PyObject *op1, PyObject *op2, CYTHON_UNUSED
     return (inplace ? PyNumber_InPlaceAdd : PyNumber_Add)(op1, op2);
 }
 #endif
+
+/* None */
+static CYTHON_INLINE void __Pyx_RaiseUnboundLocalError(const char *varname) {
+    PyErr_Format(PyExc_UnboundLocalError, "local variable '%s' referenced before assignment", varname);
+}
 
 /* None */
 static CYTHON_INLINE long __Pyx_div_long(long a, long b) {
