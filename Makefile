@@ -21,6 +21,9 @@ test-shapes:
 test-oscs:
 	python -m unittest tests/test_oscs.py -v
 
+test-soundbuffer:
+	python -m unittest tests/test_soundbuffer.py -v
+
 clean:
 	rm -rf build/
 	rm -rf pippi/*.c
