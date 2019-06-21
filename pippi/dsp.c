@@ -1514,72 +1514,34 @@ struct __pyx_opt_args_5pippi_4rand_randint {
   int low;
   int high;
 };
-struct __pyx_opt_args_5pippi_3dsp_rand;
-struct __pyx_opt_args_5pippi_3dsp_seed;
-struct __pyx_opt_args_5pippi_3dsp_randint;
 struct __pyx_opt_args_5pippi_3dsp_mix;
 struct __pyx_opt_args_5pippi_3dsp_randline;
 struct __pyx_opt_args_5pippi_3dsp_wt;
 struct __pyx_opt_args_5pippi_3dsp_win;
 struct __pyx_opt_args_5pippi_3dsp_buffer;
 struct __pyx_opt_args_5pippi_3dsp_read;
+struct __pyx_opt_args_5pippi_3dsp_rand;
+struct __pyx_opt_args_5pippi_3dsp_randint;
+struct __pyx_opt_args_5pippi_3dsp_seed;
 
-/* "pippi/dsp.pxd":4
- * 
+/* "pippi/dsp.pxd":8
  * cdef double _mag(double[:,:] snd)
- * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
- * cpdef void seed(object value=*)
- * cpdef int randint(int low=*, int high=*)
- */
-struct __pyx_opt_args_5pippi_3dsp_rand {
-  int __pyx_n;
-  double low;
-  double high;
-};
-
-/* "pippi/dsp.pxd":5
- * cdef double _mag(double[:,:] snd)
- * cpdef double rand(double low=*, double high=*)
- * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
- * cpdef int randint(int low=*, int high=*)
- * cpdef object choice(list choices)
- */
-struct __pyx_opt_args_5pippi_3dsp_seed {
-  int __pyx_n;
-  PyObject *value;
-};
-
-/* "pippi/dsp.pxd":6
- * cpdef double rand(double low=*, double high=*)
- * cpdef void seed(object value=*)
- * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
- * cpdef object choice(list choices)
- * 
- */
-struct __pyx_opt_args_5pippi_3dsp_randint {
-  int __pyx_n;
-  int low;
-  int high;
-};
-
-/* "pippi/dsp.pyx":46
- * 
- * 
- * cpdef SoundBuffer mix(list sounds, align_end=False):             # <<<<<<<<<<<<<<
- *     """ Mix a list of sounds into a new sound
- *     """
+ * cpdef double mag(SoundBuffer snd)
+ * cpdef SoundBuffer mix(list sounds, align_end=*)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
  */
 struct __pyx_opt_args_5pippi_3dsp_mix {
   int __pyx_n;
   PyObject *align_end;
 };
 
-/* "pippi/dsp.pyx":68
- *     return out
- * 
- * cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):             # <<<<<<<<<<<<<<
- *     return _randline(numpoints, lowvalue, highvalue, wtsize)
- * 
+/* "pippi/dsp.pxd":9
+ * cpdef double mag(SoundBuffer snd)
+ * cpdef SoundBuffer mix(list sounds, align_end=*)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
  */
 struct __pyx_opt_args_5pippi_3dsp_randline {
   int __pyx_n;
@@ -1588,12 +1550,12 @@ struct __pyx_opt_args_5pippi_3dsp_randline {
   int wtsize;
 };
 
-/* "pippi/dsp.pyx":71
- *     return _randline(numpoints, lowvalue, highvalue, wtsize)
- * 
- * cpdef Wavetable wt(object values,             # <<<<<<<<<<<<<<
- *         object lowvalue=None,
- *         object highvalue=None,
+/* "pippi/dsp.pxd":10
+ * cpdef SoundBuffer mix(list sounds, align_end=*)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef SoundBuffer stack(list sounds)
  */
 struct __pyx_opt_args_5pippi_3dsp_wt {
   int __pyx_n;
@@ -1602,12 +1564,12 @@ struct __pyx_opt_args_5pippi_3dsp_wt {
   PyObject *wtsize;
 };
 
-/* "pippi/dsp.pyx":78
- *     return Wavetable(values, lowvalue, highvalue, wtsize, False)
- * 
- * cpdef Wavetable win(object values,             # <<<<<<<<<<<<<<
- *         object lowvalue=None,
- *         object highvalue=None,
+/* "pippi/dsp.pxd":11
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer stack(list sounds)
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)
  */
 struct __pyx_opt_args_5pippi_3dsp_win {
   int __pyx_n;
@@ -1616,12 +1578,12 @@ struct __pyx_opt_args_5pippi_3dsp_win {
   PyObject *wtsize;
 };
 
-/* "pippi/dsp.pyx":130
- *     return out
- * 
- * cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, int samplerate=44100):             # <<<<<<<<<<<<<<
- *     return SoundBuffer.__new__(SoundBuffer, frames=frames, length=length, channels=channels, samplerate=samplerate)
- * 
+/* "pippi/dsp.pxd":13
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef SoundBuffer stack(list sounds)
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)
+ * cpdef double rand(double low=*, double high=*)
  */
 struct __pyx_opt_args_5pippi_3dsp_buffer {
   int __pyx_n;
@@ -1631,17 +1593,54 @@ struct __pyx_opt_args_5pippi_3dsp_buffer {
   int samplerate;
 };
 
-/* "pippi/dsp.pyx":133
- *     return SoundBuffer.__new__(SoundBuffer, frames=frames, length=length, channels=channels, samplerate=samplerate)
- * 
- * cpdef SoundBuffer read(object filename, double length=-1, double start=0):             # <<<<<<<<<<<<<<
- *     """ Read a soundfile from disk and return a `SoundBuffer` with its contents.
- *         May include a start position and length in seconds to read a segment from a large file.
+/* "pippi/dsp.pxd":14
+ * cpdef SoundBuffer stack(list sounds)
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)             # <<<<<<<<<<<<<<
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)
  */
 struct __pyx_opt_args_5pippi_3dsp_read {
   int __pyx_n;
   double length;
   double start;
+};
+
+/* "pippi/dsp.pxd":15
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)
+ * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ */
+struct __pyx_opt_args_5pippi_3dsp_rand {
+  int __pyx_n;
+  double low;
+  double high;
+};
+
+/* "pippi/dsp.pxd":16
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
+ * cpdef object choice(list choices)
+ * cpdef void seed(object value=*)
+ */
+struct __pyx_opt_args_5pippi_3dsp_randint {
+  int __pyx_n;
+  int low;
+  int high;
+};
+
+/* "pippi/dsp.pxd":18
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
+ * 
+ */
+struct __pyx_opt_args_5pippi_3dsp_seed {
+  int __pyx_n;
+  PyObject *value;
 };
 
 /* "pippi/wavetables.pxd":10
@@ -2692,10 +2691,6 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp); /* proto*/
 static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp, PyObject *__pyx_v_value); /* proto*/
 
-/* Module declarations from 'cython.view' */
-
-/* Module declarations from 'cython' */
-
 /* Module declarations from 'pippi.wavetables' */
 static PyTypeObject *__pyx_ptype_5pippi_10wavetables_Wavetable = 0;
 static int *__pyx_vp_5pippi_10wavetables_SINE = 0;
@@ -2763,6 +2758,10 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *(*__pyx_f_5pippi_10waveta
 /* Module declarations from 'pippi.soundbuffer' */
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
 
+/* Module declarations from 'cython.view' */
+
+/* Module declarations from 'cython' */
+
 /* Module declarations from 'pippi.defaults' */
 static int *__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS = 0;
 #define __pyx_v_5pippi_8defaults_DEFAULT_CHANNELS (*__pyx_vp_5pippi_8defaults_DEFAULT_CHANNELS)
@@ -2804,10 +2803,6 @@ static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
 static double __pyx_f_5pippi_3dsp__mag(__Pyx_memviewslice); /*proto*/
-static double __pyx_f_5pippi_3dsp_rand(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_rand *__pyx_optional_args); /*proto*/
-static void __pyx_f_5pippi_3dsp_seed(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_seed *__pyx_optional_args); /*proto*/
-static int __pyx_f_5pippi_3dsp_randint(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_randint *__pyx_optional_args); /*proto*/
-static PyObject *__pyx_f_5pippi_3dsp_choice(PyObject *, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_5pippi_3dsp_mag(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch); /*proto*/
 static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_3dsp_mix(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_mix *__pyx_optional_args); /*proto*/
 static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_3dsp_randline(int, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_randline *__pyx_optional_args); /*proto*/
@@ -2816,6 +2811,10 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_3dsp_win(P
 static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_3dsp_stack(PyObject *, int __pyx_skip_dispatch); /*proto*/
 static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_3dsp_buffer(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_buffer *__pyx_optional_args); /*proto*/
 static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_3dsp_read(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_read *__pyx_optional_args); /*proto*/
+static double __pyx_f_5pippi_3dsp_rand(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_rand *__pyx_optional_args); /*proto*/
+static int __pyx_f_5pippi_3dsp_randint(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_randint *__pyx_optional_args); /*proto*/
+static PyObject *__pyx_f_5pippi_3dsp_choice(PyObject *, int __pyx_skip_dispatch); /*proto*/
+static void __pyx_f_5pippi_3dsp_seed(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_seed *__pyx_optional_args); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
 static PyObject *__pyx_memoryview_new(PyObject *, int, int, __Pyx_TypeInfo *); /*proto*/
@@ -22045,10 +22044,18 @@ static int __Pyx_modinit_function_export_code(void) {
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_export_code", 0);
   /*--- Function export code ---*/
   if (__Pyx_ExportFunction("_mag", (void (*)(void))__pyx_f_5pippi_3dsp__mag, "double (__Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("mag", (void (*)(void))__pyx_f_5pippi_3dsp_mag, "double (struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("mix", (void (*)(void))__pyx_f_5pippi_3dsp_mix, "struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_mix *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("randline", (void (*)(void))__pyx_f_5pippi_3dsp_randline, "struct __pyx_obj_5pippi_10wavetables_Wavetable *(int, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_randline *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("wt", (void (*)(void))__pyx_f_5pippi_3dsp_wt, "struct __pyx_obj_5pippi_10wavetables_Wavetable *(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_wt *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("win", (void (*)(void))__pyx_f_5pippi_3dsp_win, "struct __pyx_obj_5pippi_10wavetables_Wavetable *(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_win *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("stack", (void (*)(void))__pyx_f_5pippi_3dsp_stack, "struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(PyObject *, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("buffer", (void (*)(void))__pyx_f_5pippi_3dsp_buffer, "struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_buffer *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("read", (void (*)(void))__pyx_f_5pippi_3dsp_read, "struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_read *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("rand", (void (*)(void))__pyx_f_5pippi_3dsp_rand, "double (int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_rand *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ExportFunction("seed", (void (*)(void))__pyx_f_5pippi_3dsp_seed, "void (int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_seed *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("randint", (void (*)(void))__pyx_f_5pippi_3dsp_randint, "int (int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_randint *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportFunction("choice", (void (*)(void))__pyx_f_5pippi_3dsp_choice, "PyObject *(PyObject *, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportFunction("seed", (void (*)(void))__pyx_f_5pippi_3dsp_seed, "void (int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_seed *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;

@@ -938,47 +938,6 @@ struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
-struct __pyx_opt_args_5pippi_3dsp_rand;
-struct __pyx_opt_args_5pippi_3dsp_seed;
-struct __pyx_opt_args_5pippi_3dsp_randint;
-
-/* "dsp.pxd":4
- * 
- * cdef double _mag(double[:,:] snd)
- * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
- * cpdef void seed(object value=*)
- * cpdef int randint(int low=*, int high=*)
- */
-struct __pyx_opt_args_5pippi_3dsp_rand {
-  int __pyx_n;
-  double low;
-  double high;
-};
-
-/* "dsp.pxd":5
- * cdef double _mag(double[:,:] snd)
- * cpdef double rand(double low=*, double high=*)
- * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
- * cpdef int randint(int low=*, int high=*)
- * cpdef object choice(list choices)
- */
-struct __pyx_opt_args_5pippi_3dsp_seed {
-  int __pyx_n;
-  PyObject *value;
-};
-
-/* "dsp.pxd":6
- * cpdef double rand(double low=*, double high=*)
- * cpdef void seed(object value=*)
- * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
- * cpdef object choice(list choices)
- * 
- */
-struct __pyx_opt_args_5pippi_3dsp_randint {
-  int __pyx_n;
-  int low;
-  int high;
-};
 struct __pyx_opt_args_5pippi_10wavetables__fir;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_clip;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_convolve;
@@ -1410,6 +1369,134 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv {
   int __pyx_n;
   double window;
+};
+struct __pyx_opt_args_5pippi_3dsp_mix;
+struct __pyx_opt_args_5pippi_3dsp_randline;
+struct __pyx_opt_args_5pippi_3dsp_wt;
+struct __pyx_opt_args_5pippi_3dsp_win;
+struct __pyx_opt_args_5pippi_3dsp_buffer;
+struct __pyx_opt_args_5pippi_3dsp_read;
+struct __pyx_opt_args_5pippi_3dsp_rand;
+struct __pyx_opt_args_5pippi_3dsp_randint;
+struct __pyx_opt_args_5pippi_3dsp_seed;
+
+/* "dsp.pxd":8
+ * cdef double _mag(double[:,:] snd)
+ * cpdef double mag(SoundBuffer snd)
+ * cpdef SoundBuffer mix(list sounds, align_end=*)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ */
+struct __pyx_opt_args_5pippi_3dsp_mix {
+  int __pyx_n;
+  PyObject *align_end;
+};
+
+/* "dsp.pxd":9
+ * cpdef double mag(SoundBuffer snd)
+ * cpdef SoundBuffer mix(list sounds, align_end=*)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ */
+struct __pyx_opt_args_5pippi_3dsp_randline {
+  int __pyx_n;
+  double lowvalue;
+  double highvalue;
+  int wtsize;
+};
+
+/* "dsp.pxd":10
+ * cpdef SoundBuffer mix(list sounds, align_end=*)
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)             # <<<<<<<<<<<<<<
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef SoundBuffer stack(list sounds)
+ */
+struct __pyx_opt_args_5pippi_3dsp_wt {
+  int __pyx_n;
+  PyObject *lowvalue;
+  PyObject *highvalue;
+  PyObject *wtsize;
+};
+
+/* "dsp.pxd":11
+ * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
+ * cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer stack(list sounds)
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)
+ */
+struct __pyx_opt_args_5pippi_3dsp_win {
+  int __pyx_n;
+  PyObject *lowvalue;
+  PyObject *highvalue;
+  PyObject *wtsize;
+};
+
+/* "dsp.pxd":13
+ * cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, object wtsize=*)
+ * cpdef SoundBuffer stack(list sounds)
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)
+ * cpdef double rand(double low=*, double high=*)
+ */
+struct __pyx_opt_args_5pippi_3dsp_buffer {
+  int __pyx_n;
+  PyObject *frames;
+  double length;
+  int channels;
+  int samplerate;
+};
+
+/* "dsp.pxd":14
+ * cpdef SoundBuffer stack(list sounds)
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)             # <<<<<<<<<<<<<<
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)
+ */
+struct __pyx_opt_args_5pippi_3dsp_read {
+  int __pyx_n;
+  double length;
+  double start;
+};
+
+/* "dsp.pxd":15
+ * cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)
+ * cpdef double rand(double low=*, double high=*)             # <<<<<<<<<<<<<<
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ */
+struct __pyx_opt_args_5pippi_3dsp_rand {
+  int __pyx_n;
+  double low;
+  double high;
+};
+
+/* "dsp.pxd":16
+ * cpdef SoundBuffer read(object filename, double length=*, double start=*)
+ * cpdef double rand(double low=*, double high=*)
+ * cpdef int randint(int low=*, int high=*)             # <<<<<<<<<<<<<<
+ * cpdef object choice(list choices)
+ * cpdef void seed(object value=*)
+ */
+struct __pyx_opt_args_5pippi_3dsp_randint {
+  int __pyx_n;
+  int low;
+  int high;
+};
+
+/* "dsp.pxd":18
+ * cpdef int randint(int low=*, int high=*)
+ * cpdef object choice(list choices)
+ * cpdef void seed(object value=*)             # <<<<<<<<<<<<<<
+ * 
+ */
+struct __pyx_opt_args_5pippi_3dsp_seed {
+  int __pyx_n;
+  PyObject *value;
 };
 struct __pyx_opt_args_5pippi_2fx__fir;
 struct __pyx_opt_args_5pippi_2fx_fir;
@@ -2439,8 +2526,6 @@ static int *__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE = 0;
 static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 #define __pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE (*__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE)
 
-/* Module declarations from 'pippi.dsp' */
-
 /* Module declarations from 'pippi.wavetables' */
 static PyTypeObject *__pyx_ptype_5pippi_10wavetables_Wavetable = 0;
 static int *__pyx_vp_5pippi_10wavetables_SINE = 0;
@@ -2506,6 +2591,9 @@ static int **__pyx_vp_5pippi_10wavetables_ALL_WAVETABLES = 0;
 
 /* Module declarations from 'pippi.soundbuffer' */
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
+
+/* Module declarations from 'pippi.dsp' */
+static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*__pyx_f_5pippi_3dsp_read)(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_read *__pyx_optional_args); /*proto*/
 
 /* Module declarations from 'pippi.fx' */
 
@@ -2591,7 +2679,6 @@ static const char __pyx_k_id[] = "id";
 static const char __pyx_k_np[] = "np";
 static const char __pyx_k_PIL[] = "PIL";
 static const char __pyx_k__22[] = "_";
-static const char __pyx_k_dsp[] = "dsp";
 static const char __pyx_k_img[] = "img";
 static const char __pyx_k_new[] = "new";
 static const char __pyx_k_obj[] = "obj";
@@ -2613,7 +2700,6 @@ static const char __pyx_k_mult[] = "mult";
 static const char __pyx_k_name[] = "name";
 static const char __pyx_k_ndim[] = "ndim";
 static const char __pyx_k_pack[] = "pack";
-static const char __pyx_k_read[] = "read";
 static const char __pyx_k_save[] = "save";
 static const char __pyx_k_size[] = "size";
 static const char __pyx_k_step[] = "step";
@@ -2782,7 +2868,6 @@ static PyObject *__pyx_n_s_data;
 static PyObject *__pyx_n_s_data_2;
 static PyObject *__pyx_n_s_dict;
 static PyObject *__pyx_n_s_draw;
-static PyObject *__pyx_n_s_dsp;
 static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_dtype_is_object;
 static PyObject *__pyx_n_s_encode;
@@ -2851,7 +2936,6 @@ static PyObject *__pyx_n_s_pyx_vtable;
 static PyObject *__pyx_n_s_randint;
 static PyObject *__pyx_n_s_random;
 static PyObject *__pyx_n_s_range;
-static PyObject *__pyx_n_s_read;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
@@ -18565,7 +18649,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_data_2, __pyx_k_data_2, sizeof(__pyx_k_data_2), 0, 0, 1, 1},
   {&__pyx_n_s_dict, __pyx_k_dict, sizeof(__pyx_k_dict), 0, 0, 1, 1},
   {&__pyx_n_s_draw, __pyx_k_draw, sizeof(__pyx_k_draw), 0, 0, 1, 1},
-  {&__pyx_n_s_dsp, __pyx_k_dsp, sizeof(__pyx_k_dsp), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
@@ -18634,7 +18717,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_randint, __pyx_k_randint, sizeof(__pyx_k_randint), 0, 0, 1, 1},
   {&__pyx_n_s_random, __pyx_k_random, sizeof(__pyx_k_random), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
-  {&__pyx_n_s_read, __pyx_k_read, sizeof(__pyx_k_read), 0, 0, 1, 1},
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
@@ -19205,15 +19287,20 @@ static int __Pyx_modinit_variable_import_code(void) {
 static int __Pyx_modinit_function_import_code(void) {
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("__Pyx_modinit_function_import_code", 0);
   /*--- Function import code ---*/
-  __pyx_t_1 = PyImport_ImportModule("pippi.interpolation"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_1, "_linear_pos", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_pos, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.dsp"); if (!__pyx_t_1) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_1, "read", (void (**)(void))&__pyx_f_5pippi_3dsp_read, "struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_3dsp_read *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyImport_ImportModule("pippi.interpolation"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_2, "_linear_pos", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_pos, "double (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_RefNannyFinishContext();
   return -1;
 }
@@ -19313,9 +19400,8 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_graph(PyObject *__pyx_pyinit_modul
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
   int __pyx_t_3;
-  PyObject *__pyx_t_4 = NULL;
-  struct __pyx_opt_args_5pippi_5graph_waveform __pyx_t_5;
-  static PyThread_type_lock __pyx_t_6[8];
+  struct __pyx_opt_args_5pippi_5graph_waveform __pyx_t_4;
+  static PyThread_type_lock __pyx_t_5[8];
   __Pyx_RefNannyDeclarations
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   if (__pyx_m) {
@@ -19552,41 +19638,35 @@ if (!__Pyx_RefNanny) {
  *     snd = dsp.read(snd_filename).remix(1)             # <<<<<<<<<<<<<<
  *     waveform(snd, out_filename, width=2050, height=1024)
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_dsp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_read); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 114, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_snd_filename); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_3dsp_read(__pyx_t_2, 0, NULL)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_remix); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_remix); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__25, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__25, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (PyDict_SetItem(__pyx_d, __pyx_n_s_snd, __pyx_t_4) < 0) __PYX_ERR(0, 114, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    if (PyDict_SetItem(__pyx_d, __pyx_n_s_snd, __pyx_t_1) < 0) __PYX_ERR(0, 114, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "pippi/graph.pyx":115
  *     out_filename = sys.argv[2]
  *     snd = dsp.read(snd_filename).remix(1)
  *     waveform(snd, out_filename, width=2050, height=1024)             # <<<<<<<<<<<<<<
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_snd); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 115, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_snd); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 115, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_out_filename); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5.__pyx_n = 3;
-    __pyx_t_5.filename = __pyx_t_2;
-    __pyx_t_5.width = 0x802;
-    __pyx_t_5.height = 0x400;
-    __pyx_f_5pippi_5graph_waveform(__pyx_t_4, 0, &__pyx_t_5); 
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_4.__pyx_n = 3;
+    __pyx_t_4.filename = __pyx_t_2;
+    __pyx_t_4.width = 0x802;
+    __pyx_t_4.height = 0x400;
+    __pyx_f_5pippi_5graph_waveform(__pyx_t_1, 0, &__pyx_t_4); 
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
     /* "pippi/graph.pyx":111
@@ -19707,15 +19787,15 @@ if (!__Pyx_RefNanny) {
  *     PyThread_allocate_lock(),
  *     PyThread_allocate_lock(),
  */
-  __pyx_t_6[0] = PyThread_allocate_lock();
-  __pyx_t_6[1] = PyThread_allocate_lock();
-  __pyx_t_6[2] = PyThread_allocate_lock();
-  __pyx_t_6[3] = PyThread_allocate_lock();
-  __pyx_t_6[4] = PyThread_allocate_lock();
-  __pyx_t_6[5] = PyThread_allocate_lock();
-  __pyx_t_6[6] = PyThread_allocate_lock();
-  __pyx_t_6[7] = PyThread_allocate_lock();
-  memcpy(&(__pyx_memoryview_thread_locks[0]), __pyx_t_6, sizeof(__pyx_memoryview_thread_locks[0]) * (8));
+  __pyx_t_5[0] = PyThread_allocate_lock();
+  __pyx_t_5[1] = PyThread_allocate_lock();
+  __pyx_t_5[2] = PyThread_allocate_lock();
+  __pyx_t_5[3] = PyThread_allocate_lock();
+  __pyx_t_5[4] = PyThread_allocate_lock();
+  __pyx_t_5[5] = PyThread_allocate_lock();
+  __pyx_t_5[6] = PyThread_allocate_lock();
+  __pyx_t_5[7] = PyThread_allocate_lock();
+  memcpy(&(__pyx_memoryview_thread_locks[0]), __pyx_t_5, sizeof(__pyx_memoryview_thread_locks[0]) * (8));
 
   /* "View.MemoryView":545
  *         info.obj = self
@@ -19767,7 +19847,6 @@ if (!__Pyx_RefNanny) {
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_4);
   if (__pyx_m) {
     if (__pyx_d) {
       __Pyx_AddTraceback("init pippi.graph", __pyx_clineno, __pyx_lineno, __pyx_filename);
