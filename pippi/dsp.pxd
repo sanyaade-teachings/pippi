@@ -6,7 +6,7 @@ from pippi.wavetables cimport Wavetable
 cdef double _mag(double[:,:] snd)
 cpdef double mag(SoundBuffer snd)
 cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
-cpdef list snap(list source, double mult=*, list pattern=*)
+cpdef list snap(list source, double mult=*, object pattern=*)
 cpdef SoundBuffer mix(list sounds, align_end=*)
 cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
 cpdef Wavetable wt(object values, object lowvalue=*, object highvalue=*, object wtsize=*)

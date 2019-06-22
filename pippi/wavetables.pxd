@@ -37,6 +37,8 @@ cdef class Wavetable:
     cpdef Wavetable taper(Wavetable self, int length)
     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+    cpdef void snap(Wavetable self, double mult=*, object pattern=*)
+    cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)
     cpdef void skew(Wavetable self, double tip)
     cpdef Wavetable skewed(Wavetable self, double tip)
     cpdef void normalize(Wavetable self, double amount=*)

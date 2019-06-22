@@ -2,6 +2,7 @@
 
 import numpy as np
 cimport numpy as np
+from pippi.wavetables cimport to_window
 
 cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh):
     cdef int i = 0
@@ -54,7 +55,7 @@ cdef double[:] _snap_mult(double[:] out, double[:] source, double mult):
 
     return out
 
-cpdef list snap(list source, double mult=0, list pattern=None):
+cpdef list snap(list source, double mult=0, object pattern=None):
     if mult <= 0 and pattern is None:
         raise ValueError('Please provide a valid quantization multiple or pattern')
 
@@ -68,6 +69,6 @@ cpdef list snap(list source, double mult=0, list pattern=None):
     if pattern is None or (pattern is not None and len(pattern) == 0):
         raise ValueError('Invalid (empty) pattern')
 
-    cdef double[:] _pattern = np.array(pattern, dtype='d')
+    cdef double[:] _pattern = to_window(pattern)
     return np.array(_snap_pattern(out, _source, _pattern), dtype='d').tolist()
 

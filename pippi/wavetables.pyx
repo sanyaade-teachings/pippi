@@ -17,7 +17,7 @@ from libc cimport math
 from pippi cimport interpolation, rand
 from pippi import graph
 from pippi.soundbuffer cimport SoundBuffer
-from pippi.lists cimport _scale
+from pippi.lists cimport _scale, _snap_mult, _snap_pattern
 
 cdef int SINE = 0
 cdef int SINEIN = 17
@@ -553,6 +553,39 @@ cdef class Wavetable:
         cdef double[:] out = np.zeros(len(self.data), dtype='d')
         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
 
+    cpdef void snap(Wavetable self, double mult=0, object pattern=None):
+        if mult <= 0 and pattern is None:
+            raise ValueError('Please provide a valid quantization multiple or pattern')
+
+        cdef unsigned int length = len(self.data)
+        cdef double[:] out = np.zeros(length, dtype='d')
+
+        if mult > 0:
+            self.data = _snap_mult(out, self.data, mult)
+            return
+
+        if pattern is None or (pattern is not None and len(pattern) == 0):
+            raise ValueError('Invalid (empty) pattern')
+
+        cdef double[:] _pattern = to_window(pattern)
+        self.data = _snap_pattern(out, self.data, _pattern)
+
+    cpdef Wavetable snapped(Wavetable self, double mult=0, object pattern=None):
+        if mult <= 0 and pattern is None:
+            raise ValueError('Please provide a valid quantization multiple or pattern')
+
+        cdef unsigned int length = len(self.data)
+        cdef double[:] out = np.zeros(length, dtype='d')
+
+        if mult > 0:
+            return Wavetable(_snap_mult(out, self.data, mult))
+
+        if pattern is None or (pattern is not None and len(pattern) == 0):
+            raise ValueError('Invalid (empty) pattern')
+
+        cdef double[:] _pattern = to_window(pattern)
+        return Wavetable(_snap_pattern(out, self.data, _pattern))
+
     cpdef void skew(Wavetable self, double tip):
         self.data = _seesaw(self.data, len(self.data), tip)
 
@@ -812,6 +845,9 @@ cpdef double[:] to_window(object w, int wtsize=4096):
     elif isinstance(w, SoundBuffer):
         wt = np.ravel(np.array(w.remix(1).frames, dtype='d'))
 
+    elif isinstance(w, list):
+        wt = np.array(w, dtype='d')
+
     else:
         wt = interpolation._linear(array('d', w), wtsize)
 
@@ -829,11 +865,14 @@ cpdef double[:] to_wavetable(object w, int wtsize=4096):
     elif isinstance(w, numbers.Real):
         wt = np.full(1, w, dtype='d')
 
+    elif isinstance(w, Wavetable):
+        wt = w.data
+
     elif isinstance(w, SoundBuffer):
         wt = np.ravel(np.array(w.remix(1).frames, dtype='d'))
 
-    elif isinstance(w, Wavetable):
-        wt = w.data
+    elif isinstance(w, list):
+        wt = np.array(w, dtype='d')
 
     else:
         wt = interpolation._linear(array('d', w), wtsize)

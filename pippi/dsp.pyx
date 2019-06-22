@@ -49,7 +49,7 @@ cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow
     cdef double[:] _source = np.array(source, dtype='d')
     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
 
-cpdef list snap(list source, double mult=0, list pattern=None):
+cpdef list snap(list source, double mult=0, object pattern=None):
     return lists.snap(source, mult, pattern)
 
 cpdef SoundBuffer mix(list sounds, align_end=False):
