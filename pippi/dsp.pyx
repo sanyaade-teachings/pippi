@@ -13,6 +13,7 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable, _randline
 from pippi cimport rand as _rand
 from pippi import drummachine as dm
+from pippi.lists cimport _scale
 
 # Just a shorthand for MS in scripts. 
 # For example:
@@ -42,6 +43,11 @@ cdef double _mag(double[:,:] snd):
 cpdef double mag(SoundBuffer snd):
     return _mag(snd.frames)
 
+cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+    cdef unsigned int length = len(source)
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef double[:] _source = np.array(source, dtype='d')
+    return np.array(_scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
 
 cpdef SoundBuffer mix(list sounds, align_end=False):
     """ Mix a list of sounds into a new sound

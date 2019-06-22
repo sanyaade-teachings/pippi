@@ -18,6 +18,9 @@ ext_modules = cythonize([
             library_dirs=['/usr/local/lib'],
             include_dirs=['/usr/local/include']
         ),
+        Extension('pippi.lists', ['pippi/lists.pyx'],
+            include_dirs=[np.get_include()], 
+        ),
         Extension('pippi.sampler', ['pippi/sampler.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],

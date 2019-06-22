@@ -1,4 +1,4 @@
-.PHONY: test test-grains examples build
+.PHONY: test test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists build
 
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
@@ -23,6 +23,9 @@ test-oscs:
 
 test-soundbuffer:
 	python -m unittest tests/test_soundbuffer.py -v
+
+test-lists:
+	python -m unittest tests/test_lists.py -v
 
 clean:
 	rm -rf build/

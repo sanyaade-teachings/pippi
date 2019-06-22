@@ -17,6 +17,7 @@ from libc cimport math
 from pippi cimport interpolation, rand
 from pippi import graph
 from pippi.soundbuffer cimport SoundBuffer
+from pippi.lists cimport _scale
 
 cdef int SINE = 0
 cdef int SINEIN = 17
@@ -544,6 +545,13 @@ cdef class Wavetable:
 
     cpdef Wavetable taper(Wavetable self, int length):
         return self * _adsr(len(self), length, 0, 1, length)
+
+    cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+        self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh)
+
+    cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+        cdef double[:] out = np.zeros(len(self.data), dtype='d')
+        return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
 
     cpdef void skew(Wavetable self, double tip):
         self.data = _seesaw(self.data, len(self.data), tip)
