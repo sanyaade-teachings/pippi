@@ -1569,11 +1569,14 @@ struct __pyx_opt_args_5pippi_4rand_randint {
   int high;
 };
 struct __pyx_opt_args_5pippi_5lists_scale;
+struct __pyx_opt_args_5pippi_5lists_snap;
 
 /* "pippi/lists.pxd":4
  * 
  * cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh)
  * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ * cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern)
+ * cdef double[:] _snap_mult(double[:] out, double[:] source, double mult)
  */
 struct __pyx_opt_args_5pippi_5lists_scale {
   int __pyx_n;
@@ -1581,6 +1584,17 @@ struct __pyx_opt_args_5pippi_5lists_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+};
+
+/* "pippi/lists.pxd":7
+ * cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern)
+ * cdef double[:] _snap_mult(double[:] out, double[:] source, double mult)
+ * cpdef list snap(list source, double mult=*, list pattern=*)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_5pippi_5lists_snap {
+  int __pyx_n;
+  double mult;
+  PyObject *pattern;
 };
 struct __pyx_opt_args_5pippi_10wavetables__fir;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_clip;

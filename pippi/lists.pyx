@@ -23,3 +23,51 @@ cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow
     cdef double[:] out = np.zeros(length, dtype='d')
     cdef double[:] _source = np.array(source, dtype='d')
     return np.array(_scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
+
+cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern):
+    cdef int i=0, j=0
+    cdef double v=0, t=0
+
+    for i in range(len(source)):
+        v = source[i]
+        t = pattern[0]
+        for j in range(len(pattern)):
+            if abs(v - pattern[j]) < abs(v - t):
+                t = pattern[j]
+        out[i] = t
+
+    return out
+
+cdef double[:] _snap_mult(double[:] out, double[:] source, double mult):
+    cdef int i=0, m=1
+    cdef double v = 0
+    for i in range(len(source)):
+        v = source[i]
+        if v < mult:
+            out[i] = mult
+            continue
+        
+        while mult * m < v:
+            m += 1
+
+        out[i] = mult * m
+
+    return out
+
+cpdef list snap(list source, double mult=0, list pattern=None):
+    if mult <= 0 and pattern is None:
+        raise ValueError('Please provide a valid quantization multiple or pattern')
+
+    cdef unsigned int length = len(source)
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef double[:] _source = np.array(source, dtype='d')
+
+    if mult > 0:
+        return np.array(_snap_mult(out, _source, mult), dtype='d').tolist()
+
+    if pattern is None or (pattern is not None and len(pattern) == 0):
+        raise ValueError('Invalid (empty) pattern')
+
+    cdef double[:] _pattern = np.array(pattern, dtype='d')
+    return np.array(_snap_pattern(out, _source, _pattern), dtype='d').tolist()
+
