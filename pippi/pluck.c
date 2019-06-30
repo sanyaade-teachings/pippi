@@ -1203,8 +1203,8 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeated {
 /* "pippi/wavetables.pxd":38
  *     cpdef Wavetable reversed(Wavetable self)
  *     cpdef Wavetable taper(Wavetable self, int length)
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scale {
@@ -1213,12 +1213,13 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/wavetables.pxd":39
  *     cpdef Wavetable taper(Wavetable self, int length)
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)
  */
@@ -1228,11 +1229,12 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scaled {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/wavetables.pxd":40
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)
  *     cpdef void skew(Wavetable self, double tip)
@@ -1244,7 +1246,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_snap {
 };
 
 /* "pippi/wavetables.pxd":41
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  *     cpdef void skew(Wavetable self, double tip)
@@ -1448,7 +1450,7 @@ struct __pyx_opt_args_5pippi_3dsp_seed;
 /* "dsp.pxd":8
  * cdef double _mag(double[:,:] snd)
  * cpdef double mag(SoundBuffer snd)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  * cpdef list snap(list source, double mult=*, object pattern=*)
  * cpdef SoundBuffer mix(list sounds, align_end=*)
  */
@@ -1458,11 +1460,12 @@ struct __pyx_opt_args_5pippi_3dsp_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "dsp.pxd":9
  * cpdef double mag(SoundBuffer snd)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  * cpdef list snap(list source, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  * cpdef SoundBuffer mix(list sounds, align_end=*)
  * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
@@ -1474,7 +1477,7 @@ struct __pyx_opt_args_5pippi_3dsp_snap {
 };
 
 /* "dsp.pxd":10
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  * cpdef list snap(list source, double mult=*, object pattern=*)
  * cpdef SoundBuffer mix(list sounds, align_end=*)             # <<<<<<<<<<<<<<
  * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)

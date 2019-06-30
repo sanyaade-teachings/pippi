@@ -1201,8 +1201,8 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeated {
 /* "pippi/wavetables.pxd":38
  *     cpdef Wavetable reversed(Wavetable self)
  *     cpdef Wavetable taper(Wavetable self, int length)
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scale {
@@ -1211,12 +1211,13 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/wavetables.pxd":39
  *     cpdef Wavetable taper(Wavetable self, int length)
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)
  */
@@ -1226,11 +1227,12 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scaled {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/wavetables.pxd":40
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)
  *     cpdef void skew(Wavetable self, double tip)
@@ -1242,7 +1244,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_snap {
 };
 
 /* "pippi/wavetables.pxd":41
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  *     cpdef void skew(Wavetable self, double tip)
@@ -1579,8 +1581,8 @@ struct __pyx_opt_args_5pippi_5lists_snap;
 
 /* "lists.pxd":4
  * 
- * cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ * cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh, bint log)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  * cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern)
  * cdef double[:] _snap_mult(double[:] out, double[:] source, double mult)
  */
@@ -1590,12 +1592,13 @@ struct __pyx_opt_args_5pippi_5lists_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "lists.pxd":7
  * cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern)
  * cdef double[:] _snap_mult(double[:] out, double[:] source, double mult)
- * cpdef list snap(list source, double mult=*, list pattern=*)             # <<<<<<<<<<<<<<
+ * cpdef list snap(list source, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  */
 struct __pyx_opt_args_5pippi_5lists_snap {
   int __pyx_n;
@@ -1617,7 +1620,7 @@ struct __pyx_opt_args_5pippi_3dsp_seed;
 /* "pippi/dsp.pxd":8
  * cdef double _mag(double[:,:] snd)
  * cpdef double mag(SoundBuffer snd)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  * cpdef list snap(list source, double mult=*, object pattern=*)
  * cpdef SoundBuffer mix(list sounds, align_end=*)
  */
@@ -1627,11 +1630,12 @@ struct __pyx_opt_args_5pippi_3dsp_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/dsp.pxd":9
  * cpdef double mag(SoundBuffer snd)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  * cpdef list snap(list source, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  * cpdef SoundBuffer mix(list sounds, align_end=*)
  * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
@@ -1643,7 +1647,7 @@ struct __pyx_opt_args_5pippi_3dsp_snap {
 };
 
 /* "pippi/dsp.pxd":10
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  * cpdef list snap(list source, double mult=*, object pattern=*)
  * cpdef SoundBuffer mix(list sounds, align_end=*)             # <<<<<<<<<<<<<<
  * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
@@ -2915,7 +2919,7 @@ static int (*__pyx_f_5pippi_4rand_randint)(int __pyx_skip_dispatch, struct __pyx
 static PyObject *(*__pyx_f_5pippi_4rand_choice)(PyObject *, int __pyx_skip_dispatch); /*proto*/
 
 /* Module declarations from 'pippi.lists' */
-static __Pyx_memviewslice (*__pyx_f_5pippi_5lists__scale)(__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double); /*proto*/
+static __Pyx_memviewslice (*__pyx_f_5pippi_5lists__scale)(__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double, int); /*proto*/
 static PyObject *(*__pyx_f_5pippi_5lists_snap)(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_5lists_snap *__pyx_optional_args); /*proto*/
 
 /* Module declarations from 'pippi.dsp' */
@@ -3006,6 +3010,7 @@ static const char __pyx_k__29[] = "_";
 static const char __pyx_k_dub[] = "dub";
 static const char __pyx_k_dur[] = "dur";
 static const char __pyx_k_get[] = "get";
+static const char __pyx_k_log[] = "log";
 static const char __pyx_k_low[] = "low";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
@@ -3241,6 +3246,7 @@ static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_join;
 static PyObject *__pyx_n_s_kwargs;
 static PyObject *__pyx_n_s_length;
+static PyObject *__pyx_n_s_log;
 static PyObject *__pyx_n_s_low;
 static PyObject *__pyx_n_s_lowvalue;
 static PyObject *__pyx_n_s_main;
@@ -3322,7 +3328,7 @@ static PyObject *__pyx_n_s_values;
 static PyObject *__pyx_n_s_wtsize;
 static PyObject *__pyx_n_s_zeros;
 static PyObject *__pyx_pf_5pippi_3dsp_mag(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_v_snd); /* proto */
-static PyObject *__pyx_pf_5pippi_3dsp_2scale(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_source, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh); /* proto */
+static PyObject *__pyx_pf_5pippi_3dsp_2scale(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_source, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh, int __pyx_v_log); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_4snap(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_source, double __pyx_v_mult, PyObject *__pyx_v_pattern); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_6mix(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_sounds, PyObject *__pyx_v_align_end); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_8randline(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_numpoints, double __pyx_v_lowvalue, double __pyx_v_highvalue, int __pyx_v_wtsize); /* proto */
@@ -3596,7 +3602,7 @@ static double __pyx_f_5pippi_3dsp_mag(struct __pyx_obj_5pippi_11soundbuffer_Soun
  * cpdef double mag(SoundBuffer snd):
  *     return _mag(snd.frames)             # <<<<<<<<<<<<<<
  * 
- * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+ * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
  */
   if (unlikely(!__pyx_v_snd->frames.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 44, __pyx_L1_error)}
   __pyx_r = __pyx_f_5pippi_3dsp__mag(__pyx_v_snd->frames);
@@ -3663,7 +3669,7 @@ static PyObject *__pyx_pf_5pippi_3dsp_mag(CYTHON_UNUSED PyObject *__pyx_self, st
 /* "pippi/dsp.pyx":46
  *     return _mag(snd.frames)
  * 
- * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):             # <<<<<<<<<<<<<<
+ * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):             # <<<<<<<<<<<<<<
  *     cdef unsigned int length = len(source)
  *     cdef double[:] out = np.zeros(length, dtype='d')
  */
@@ -3674,6 +3680,7 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
   double __pyx_v_fromhigh = ((double)1.0);
   double __pyx_v_tolow = ((double)0.0);
   double __pyx_v_tohigh = ((double)1.0);
+  int __pyx_v_log = ((int)0);
   unsigned int __pyx_v_length;
   __Pyx_memviewslice __pyx_v_out = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v__source = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -3696,6 +3703,9 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
           __pyx_v_tolow = __pyx_optional_args->tolow;
           if (__pyx_optional_args->__pyx_n > 3) {
             __pyx_v_tohigh = __pyx_optional_args->tohigh;
+            if (__pyx_optional_args->__pyx_n > 4) {
+              __pyx_v_log = __pyx_optional_args->log;
+            }
           }
         }
       }
@@ -3704,7 +3714,7 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
 
   /* "pippi/dsp.pyx":47
  * 
- * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+ * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
  *     cdef unsigned int length = len(source)             # <<<<<<<<<<<<<<
  *     cdef double[:] out = np.zeros(length, dtype='d')
  *     cdef double[:] _source = np.array(source, dtype='d')
@@ -3717,11 +3727,11 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
   __pyx_v_length = __pyx_t_1;
 
   /* "pippi/dsp.pyx":48
- * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+ * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
  *     cdef unsigned int length = len(source)
  *     cdef double[:] out = np.zeros(length, dtype='d')             # <<<<<<<<<<<<<<
  *     cdef double[:] _source = np.array(source, dtype='d')
- *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
+ *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh, log), dtype='d').tolist()
  */
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -3753,7 +3763,7 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
  *     cdef unsigned int length = len(source)
  *     cdef double[:] out = np.zeros(length, dtype='d')
  *     cdef double[:] _source = np.array(source, dtype='d')             # <<<<<<<<<<<<<<
- *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
+ *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh, log), dtype='d').tolist()
  * 
  */
   __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
@@ -3783,7 +3793,7 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
   /* "pippi/dsp.pyx":50
  *     cdef double[:] out = np.zeros(length, dtype='d')
  *     cdef double[:] _source = np.array(source, dtype='d')
- *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()             # <<<<<<<<<<<<<<
+ *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh, log), dtype='d').tolist()             # <<<<<<<<<<<<<<
  * 
  * cpdef list snap(list source, double mult=0, object pattern=None):
  */
@@ -3793,7 +3803,7 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
   __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_6 = __pyx_f_5pippi_5lists__scale(__pyx_v_out, __pyx_v__source, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 50, __pyx_L1_error)
+  __pyx_t_6 = __pyx_f_5pippi_5lists__scale(__pyx_v_out, __pyx_v__source, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh, __pyx_v_log); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 50, __pyx_L1_error)
   __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_t_6, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 50, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
@@ -3838,7 +3848,7 @@ static PyObject *__pyx_f_5pippi_3dsp_scale(PyObject *__pyx_v_source, CYTHON_UNUS
   /* "pippi/dsp.pyx":46
  *     return _mag(snd.frames)
  * 
- * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):             # <<<<<<<<<<<<<<
+ * cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):             # <<<<<<<<<<<<<<
  *     cdef unsigned int length = len(source)
  *     cdef double[:] out = np.zeros(length, dtype='d')
  */
@@ -3869,16 +3879,19 @@ static PyObject *__pyx_pw_5pippi_3dsp_3scale(PyObject *__pyx_self, PyObject *__p
   double __pyx_v_fromhigh;
   double __pyx_v_tolow;
   double __pyx_v_tohigh;
+  int __pyx_v_log;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("scale (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_source,&__pyx_n_s_fromlow,&__pyx_n_s_fromhigh,&__pyx_n_s_tolow,&__pyx_n_s_tohigh,0};
-    PyObject* values[5] = {0,0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_source,&__pyx_n_s_fromlow,&__pyx_n_s_fromhigh,&__pyx_n_s_tolow,&__pyx_n_s_tohigh,&__pyx_n_s_log,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
         case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
         CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
@@ -3921,12 +3934,20 @@ static PyObject *__pyx_pw_5pippi_3dsp_3scale(PyObject *__pyx_self, PyObject *__p
           PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_tohigh);
           if (value) { values[4] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_log);
+          if (value) { values[5] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "scale") < 0)) __PYX_ERR(0, 46, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
         case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
         CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
@@ -3961,17 +3982,22 @@ static PyObject *__pyx_pw_5pippi_3dsp_3scale(PyObject *__pyx_self, PyObject *__p
     } else {
       __pyx_v_tohigh = ((double)1.0);
     }
+    if (values[5]) {
+      __pyx_v_log = __Pyx_PyObject_IsTrue(values[5]); if (unlikely((__pyx_v_log == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L3_error)
+    } else {
+      __pyx_v_log = ((int)0);
+    }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("scale", 0, 1, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 46, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("scale", 0, 1, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 46, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.dsp.scale", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_source), (&PyList_Type), 1, "source", 1))) __PYX_ERR(0, 46, __pyx_L1_error)
-  __pyx_r = __pyx_pf_5pippi_3dsp_2scale(__pyx_self, __pyx_v_source, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh);
+  __pyx_r = __pyx_pf_5pippi_3dsp_2scale(__pyx_self, __pyx_v_source, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh, __pyx_v_log);
 
   /* function exit code */
   goto __pyx_L0;
@@ -3982,18 +4008,19 @@ static PyObject *__pyx_pw_5pippi_3dsp_3scale(PyObject *__pyx_self, PyObject *__p
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_3dsp_2scale(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_source, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh) {
+static PyObject *__pyx_pf_5pippi_3dsp_2scale(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_source, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh, int __pyx_v_log) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   struct __pyx_opt_args_5pippi_3dsp_scale __pyx_t_2;
   __Pyx_RefNannySetupContext("scale", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2.__pyx_n = 4;
+  __pyx_t_2.__pyx_n = 5;
   __pyx_t_2.fromlow = __pyx_v_fromlow;
   __pyx_t_2.fromhigh = __pyx_v_fromhigh;
   __pyx_t_2.tolow = __pyx_v_tolow;
   __pyx_t_2.tohigh = __pyx_v_tohigh;
+  __pyx_t_2.log = __pyx_v_log;
   __pyx_t_1 = __pyx_f_5pippi_3dsp_scale(__pyx_v_source, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
@@ -4012,7 +4039,7 @@ static PyObject *__pyx_pf_5pippi_3dsp_2scale(CYTHON_UNUSED PyObject *__pyx_self,
 }
 
 /* "pippi/dsp.pyx":52
- *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
+ *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh, log), dtype='d').tolist()
  * 
  * cpdef list snap(list source, double mult=0, object pattern=None):             # <<<<<<<<<<<<<<
  *     return lists.snap(source, mult, pattern)
@@ -4045,10 +4072,9 @@ static PyObject *__pyx_f_5pippi_3dsp_snap(PyObject *__pyx_v_source, CYTHON_UNUSE
  * cpdef SoundBuffer mix(list sounds, align_end=False):
  */
   __Pyx_XDECREF(__pyx_r);
-  if (!(likely(PyList_CheckExact(__pyx_v_pattern))||((__pyx_v_pattern) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "list", Py_TYPE(__pyx_v_pattern)->tp_name), 0))) __PYX_ERR(0, 53, __pyx_L1_error)
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.mult = __pyx_v_mult;
-  __pyx_t_2.pattern = ((PyObject*)__pyx_v_pattern);
+  __pyx_t_2.pattern = __pyx_v_pattern;
   __pyx_t_1 = __pyx_f_5pippi_5lists_snap(__pyx_v_source, 0, &__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 53, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = ((PyObject*)__pyx_t_1);
@@ -4056,7 +4082,7 @@ static PyObject *__pyx_f_5pippi_3dsp_snap(PyObject *__pyx_v_source, CYTHON_UNUSE
   goto __pyx_L0;
 
   /* "pippi/dsp.pyx":52
- *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
+ *     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh, log), dtype='d').tolist()
  * 
  * cpdef list snap(list source, double mult=0, object pattern=None):             # <<<<<<<<<<<<<<
  *     return lists.snap(source, mult, pattern)
@@ -22237,6 +22263,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_join, __pyx_k_join, sizeof(__pyx_k_join), 0, 0, 1, 1},
   {&__pyx_n_s_kwargs, __pyx_k_kwargs, sizeof(__pyx_k_kwargs), 0, 0, 1, 1},
   {&__pyx_n_s_length, __pyx_k_length, sizeof(__pyx_k_length), 0, 0, 1, 1},
+  {&__pyx_n_s_log, __pyx_k_log, sizeof(__pyx_k_log), 0, 0, 1, 1},
   {&__pyx_n_s_low, __pyx_k_low, sizeof(__pyx_k_low), 0, 0, 1, 1},
   {&__pyx_n_s_lowvalue, __pyx_k_lowvalue, sizeof(__pyx_k_lowvalue), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
@@ -22910,7 +22937,7 @@ static int __Pyx_modinit_function_import_code(void) {
   if (__Pyx_ImportFunction(__pyx_t_2, "choice", (void (**)(void))&__pyx_f_5pippi_4rand_choice, "PyObject *(PyObject *, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_3 = PyImport_ImportModule("pippi.lists"); if (!__pyx_t_3) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_3, "_scale", (void (**)(void))&__pyx_f_5pippi_5lists__scale, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_3, "_scale", (void (**)(void))&__pyx_f_5pippi_5lists__scale, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_3, "snap", (void (**)(void))&__pyx_f_5pippi_5lists_snap, "PyObject *(PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_5lists_snap *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_RefNannyFinishContext();

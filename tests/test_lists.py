@@ -12,6 +12,12 @@ class TestLists(TestCase):
         result = dsp.scale(source, 1, 3, 3, 5)
         self.assertEqual(result, target)
 
+    def test_log_scaled_list(self):
+        source = [1,2,3,4,5,6]
+        target = [6,7,8,9,10,11]
+        result = dsp.scale(source, 1, 6, 6, 11, log=True)
+        self.assertEqual(result, target)
+
     def test_snapped_list(self):
         source = [1,2,3,4,5,6]
         pattern = [3,4,5]

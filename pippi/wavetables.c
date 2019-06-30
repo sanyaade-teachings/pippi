@@ -1312,7 +1312,7 @@ struct __pyx_opt_args_5pippi_3dsp_seed;
 /* "dsp.pxd":8
  * cdef double _mag(double[:,:] snd)
  * cpdef double mag(SoundBuffer snd)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  * cpdef list snap(list source, double mult=*, object pattern=*)
  * cpdef SoundBuffer mix(list sounds, align_end=*)
  */
@@ -1322,11 +1322,12 @@ struct __pyx_opt_args_5pippi_3dsp_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "dsp.pxd":9
  * cpdef double mag(SoundBuffer snd)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  * cpdef list snap(list source, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  * cpdef SoundBuffer mix(list sounds, align_end=*)
  * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
@@ -1338,7 +1339,7 @@ struct __pyx_opt_args_5pippi_3dsp_snap {
 };
 
 /* "dsp.pxd":10
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  * cpdef list snap(list source, double mult=*, object pattern=*)
  * cpdef SoundBuffer mix(list sounds, align_end=*)             # <<<<<<<<<<<<<<
  * cpdef Wavetable randline(int numpoints, double lowvalue=*, double highvalue=*, int wtsize=*)
@@ -1603,8 +1604,8 @@ struct __pyx_opt_args_5pippi_5lists_snap;
 
 /* "pippi/lists.pxd":4
  * 
- * cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh)
- * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ * cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh, bint log)
+ * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  * cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern)
  * cdef double[:] _snap_mult(double[:] out, double[:] source, double mult)
  */
@@ -1614,6 +1615,7 @@ struct __pyx_opt_args_5pippi_5lists_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/lists.pxd":7
@@ -1888,8 +1890,8 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_repeated {
 /* "pippi/wavetables.pxd":38
  *     cpdef Wavetable reversed(Wavetable self)
  *     cpdef Wavetable taper(Wavetable self, int length)
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scale {
@@ -1898,12 +1900,13 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scale {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/wavetables.pxd":39
  *     cpdef Wavetable taper(Wavetable self, int length)
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)             # <<<<<<<<<<<<<<
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)
  */
@@ -1913,11 +1916,12 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scaled {
   double fromhigh;
   double tolow;
   double tohigh;
+  int log;
 };
 
 /* "pippi/wavetables.pxd":40
- *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef void scale(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)
  *     cpdef void skew(Wavetable self, double tip)
@@ -1929,7 +1933,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_snap {
 };
 
 /* "pippi/wavetables.pxd":41
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*)
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)
  *     cpdef void snap(Wavetable self, double mult=*, object pattern=*)
  *     cpdef Wavetable snapped(Wavetable self, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
  *     cpdef void skew(Wavetable self, double tip)
@@ -3388,7 +3392,7 @@ static double (*__pyx_f_5pippi_4rand_rand)(int __pyx_skip_dispatch, struct __pyx
 static int (*__pyx_f_5pippi_4rand_randint)(int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_4rand_randint *__pyx_optional_args); /*proto*/
 
 /* Module declarations from 'pippi.lists' */
-static __Pyx_memviewslice (*__pyx_f_5pippi_5lists__scale)(__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double); /*proto*/
+static __Pyx_memviewslice (*__pyx_f_5pippi_5lists__scale)(__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double, int); /*proto*/
 static __Pyx_memviewslice (*__pyx_f_5pippi_5lists__snap_pattern)(__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice); /*proto*/
 static __Pyx_memviewslice (*__pyx_f_5pippi_5lists__snap_mult)(__Pyx_memviewslice, __Pyx_memviewslice, double); /*proto*/
 
@@ -3522,6 +3526,7 @@ static const char __pyx_k_add[] = "add";
 static const char __pyx_k_cos[] = "cos";
 static const char __pyx_k_end[] = "end";
 static const char __pyx_k_env[] = "env";
+static const char __pyx_k_log[] = "log";
 static const char __pyx_k_max[] = "max";
 static const char __pyx_k_min[] = "min";
 static const char __pyx_k_new[] = "__new__";
@@ -3921,6 +3926,7 @@ static PyObject *__pyx_n_u_length;
 static PyObject *__pyx_n_u_line;
 static PyObject *__pyx_n_u_linear;
 static PyObject *__pyx_n_s_linspace;
+static PyObject *__pyx_n_s_log;
 static PyObject *__pyx_n_s_lowvalue;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_match;
@@ -4080,8 +4086,8 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_62repeated(struct __pyx
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_64reverse(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_66reversed(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_68taper(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, int __pyx_v_length); /* proto */
-static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_70scale(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh); /* proto */
-static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_72scaled(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh); /* proto */
+static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_70scale(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh, int __pyx_v_log); /* proto */
+static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_72scaled(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh, int __pyx_v_log); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_74snap(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_mult, PyObject *__pyx_v_pattern); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_76snapped(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_mult, PyObject *__pyx_v_pattern); /* proto */
 static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_78skew(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_tip); /* proto */
@@ -15910,7 +15916,7 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
  *     cpdef Wavetable taper(Wavetable self, int length):
  *         return self * _adsr(len(self), length, 0, 1, length)             # <<<<<<<<<<<<<<
  * 
- *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+ *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
   __pyx_t_6 = PyObject_Length(((PyObject *)__pyx_v_self)); if (unlikely(__pyx_t_6 == ((Py_ssize_t)-1))) __PYX_ERR(0, 547, __pyx_L1_error)
@@ -16001,8 +16007,8 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_68taper(struct __pyx_ob
 /* "pippi/wavetables.pyx":549
  *         return self * _adsr(len(self), length, 0, 1, length)
  * 
- *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):             # <<<<<<<<<<<<<<
- *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh)
+ *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):             # <<<<<<<<<<<<<<
+ *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh, log)
  * 
  */
 
@@ -16012,6 +16018,7 @@ static void __pyx_f_5pippi_10wavetables_9Wavetable_scale(struct __pyx_obj_5pippi
   double __pyx_v_fromhigh = ((double)1.0);
   double __pyx_v_tolow = ((double)0.0);
   double __pyx_v_tohigh = ((double)1.0);
+  int __pyx_v_log = ((int)0);
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
@@ -16021,9 +16028,10 @@ static void __pyx_f_5pippi_10wavetables_9Wavetable_scale(struct __pyx_obj_5pippi
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
-  int __pyx_t_9;
-  PyObject *__pyx_t_10 = NULL;
-  __Pyx_memviewslice __pyx_t_11 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_9 = NULL;
+  int __pyx_t_10;
+  PyObject *__pyx_t_11 = NULL;
+  __Pyx_memviewslice __pyx_t_12 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("scale", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -16034,6 +16042,9 @@ static void __pyx_f_5pippi_10wavetables_9Wavetable_scale(struct __pyx_obj_5pippi
           __pyx_v_tolow = __pyx_optional_args->tolow;
           if (__pyx_optional_args->__pyx_n > 3) {
             __pyx_v_tohigh = __pyx_optional_args->tohigh;
+            if (__pyx_optional_args->__pyx_n > 4) {
+              __pyx_v_log = __pyx_optional_args->log;
+            }
           }
         }
       }
@@ -16059,66 +16070,73 @@ static void __pyx_f_5pippi_10wavetables_9Wavetable_scale(struct __pyx_obj_5pippi
         __Pyx_GOTREF(__pyx_t_5);
         __pyx_t_6 = PyFloat_FromDouble(__pyx_v_tohigh); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 549, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
+        __pyx_t_7 = __Pyx_PyBool_FromLong(__pyx_v_log); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 549, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_7);
         __Pyx_INCREF(__pyx_t_1);
-        __pyx_t_7 = __pyx_t_1; __pyx_t_8 = NULL;
-        __pyx_t_9 = 0;
-        if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
-          __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_7);
-          if (likely(__pyx_t_8)) {
-            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
-            __Pyx_INCREF(__pyx_t_8);
+        __pyx_t_8 = __pyx_t_1; __pyx_t_9 = NULL;
+        __pyx_t_10 = 0;
+        if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_8))) {
+          __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_8);
+          if (likely(__pyx_t_9)) {
+            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
+            __Pyx_INCREF(__pyx_t_9);
             __Pyx_INCREF(function);
-            __Pyx_DECREF_SET(__pyx_t_7, function);
-            __pyx_t_9 = 1;
+            __Pyx_DECREF_SET(__pyx_t_8, function);
+            __pyx_t_10 = 1;
           }
         }
         #if CYTHON_FAST_PYCALL
-        if (PyFunction_Check(__pyx_t_7)) {
-          PyObject *__pyx_temp[5] = {__pyx_t_8, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
-          __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (PyFunction_Check(__pyx_t_8)) {
+          PyObject *__pyx_temp[6] = {__pyx_t_9, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7};
+          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_10, 5+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         } else
         #endif
         #if CYTHON_FAST_PYCCALL
-        if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
-          PyObject *__pyx_temp[5] = {__pyx_t_8, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
-          __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
+          PyObject *__pyx_temp[6] = {__pyx_t_9, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7};
+          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_10, 5+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         } else
         #endif
         {
-          __pyx_t_10 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 549, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_10);
-          if (__pyx_t_8) {
-            __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
+          __pyx_t_11 = PyTuple_New(5+__pyx_t_10); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 549, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_11);
+          if (__pyx_t_9) {
+            __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_9); __pyx_t_9 = NULL;
           }
           __Pyx_GIVEREF(__pyx_t_3);
-          PyTuple_SET_ITEM(__pyx_t_10, 0+__pyx_t_9, __pyx_t_3);
+          PyTuple_SET_ITEM(__pyx_t_11, 0+__pyx_t_10, __pyx_t_3);
           __Pyx_GIVEREF(__pyx_t_4);
-          PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_9, __pyx_t_4);
+          PyTuple_SET_ITEM(__pyx_t_11, 1+__pyx_t_10, __pyx_t_4);
           __Pyx_GIVEREF(__pyx_t_5);
-          PyTuple_SET_ITEM(__pyx_t_10, 2+__pyx_t_9, __pyx_t_5);
+          PyTuple_SET_ITEM(__pyx_t_11, 2+__pyx_t_10, __pyx_t_5);
           __Pyx_GIVEREF(__pyx_t_6);
-          PyTuple_SET_ITEM(__pyx_t_10, 3+__pyx_t_9, __pyx_t_6);
+          PyTuple_SET_ITEM(__pyx_t_11, 3+__pyx_t_10, __pyx_t_6);
+          __Pyx_GIVEREF(__pyx_t_7);
+          PyTuple_SET_ITEM(__pyx_t_11, 4+__pyx_t_10, __pyx_t_7);
           __pyx_t_3 = 0;
           __pyx_t_4 = 0;
           __pyx_t_5 = 0;
           __pyx_t_6 = 0;
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
+          __pyx_t_7 = 0;
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_11, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+          __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
         }
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
         goto __pyx_L0;
@@ -16138,24 +16156,24 @@ static void __pyx_f_5pippi_10wavetables_9Wavetable_scale(struct __pyx_obj_5pippi
 
   /* "pippi/wavetables.pyx":550
  * 
- *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
- *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh)             # <<<<<<<<<<<<<<
+ *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
+ *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh, log)             # <<<<<<<<<<<<<<
  * 
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
  */
   if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 550, __pyx_L1_error)}
   if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 550, __pyx_L1_error)}
-  __pyx_t_11 = __pyx_f_5pippi_5lists__scale(__pyx_v_self->data, __pyx_v_self->data, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh); if (unlikely(!__pyx_t_11.memview)) __PYX_ERR(0, 550, __pyx_L1_error)
+  __pyx_t_12 = __pyx_f_5pippi_5lists__scale(__pyx_v_self->data, __pyx_v_self->data, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh, __pyx_v_log); if (unlikely(!__pyx_t_12.memview)) __PYX_ERR(0, 550, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->data, 0);
-  __pyx_v_self->data = __pyx_t_11;
-  __pyx_t_11.memview = NULL;
-  __pyx_t_11.data = NULL;
+  __pyx_v_self->data = __pyx_t_12;
+  __pyx_t_12.memview = NULL;
+  __pyx_t_12.data = NULL;
 
   /* "pippi/wavetables.pyx":549
  *         return self * _adsr(len(self), length, 0, 1, length)
  * 
- *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):             # <<<<<<<<<<<<<<
- *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh)
+ *     cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):             # <<<<<<<<<<<<<<
+ *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh, log)
  * 
  */
 
@@ -16170,8 +16188,9 @@ static void __pyx_f_5pippi_10wavetables_9Wavetable_scale(struct __pyx_obj_5pippi
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_XDECREF(__pyx_t_10);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_11, 1);
+  __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_XDECREF(__pyx_t_11);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_12, 1);
   __Pyx_WriteUnraisable("pippi.wavetables.Wavetable.scale", __pyx_clineno, __pyx_lineno, __pyx_filename, 1, 0);
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
@@ -16184,16 +16203,19 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_71scale(PyObject *__pyx
   double __pyx_v_fromhigh;
   double __pyx_v_tolow;
   double __pyx_v_tohigh;
+  int __pyx_v_log;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("scale (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_fromlow,&__pyx_n_s_fromhigh,&__pyx_n_s_tolow,&__pyx_n_s_tohigh,0};
-    PyObject* values[4] = {0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_fromlow,&__pyx_n_s_fromhigh,&__pyx_n_s_tolow,&__pyx_n_s_tohigh,&__pyx_n_s_log,0};
+    PyObject* values[5] = {0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -16230,12 +16252,20 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_71scale(PyObject *__pyx
           PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_tohigh);
           if (value) { values[3] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_log);
+          if (value) { values[4] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "scale") < 0)) __PYX_ERR(0, 549, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -16268,34 +16298,40 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_71scale(PyObject *__pyx
     } else {
       __pyx_v_tohigh = ((double)1.0);
     }
+    if (values[4]) {
+      __pyx_v_log = __Pyx_PyObject_IsTrue(values[4]); if (unlikely((__pyx_v_log == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 549, __pyx_L3_error)
+    } else {
+      __pyx_v_log = ((int)0);
+    }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("scale", 0, 0, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 549, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("scale", 0, 0, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 549, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.wavetables.Wavetable.scale", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_10wavetables_9Wavetable_70scale(((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_v_self), __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh);
+  __pyx_r = __pyx_pf_5pippi_10wavetables_9Wavetable_70scale(((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_v_self), __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh, __pyx_v_log);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_70scale(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh) {
+static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_70scale(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh, int __pyx_v_log) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scale __pyx_t_1;
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("scale", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1.__pyx_n = 4;
+  __pyx_t_1.__pyx_n = 5;
   __pyx_t_1.fromlow = __pyx_v_fromlow;
   __pyx_t_1.fromhigh = __pyx_v_fromhigh;
   __pyx_t_1.tolow = __pyx_v_tolow;
   __pyx_t_1.tohigh = __pyx_v_tohigh;
+  __pyx_t_1.log = __pyx_v_log;
   __pyx_vtabptr_5pippi_10wavetables_Wavetable->scale(__pyx_v_self, 1, &__pyx_t_1); 
   __pyx_t_2 = __Pyx_void_to_None(NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 549, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -16315,11 +16351,11 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_70scale(struct __pyx_ob
 }
 
 /* "pippi/wavetables.pyx":552
- *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh)
+ *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh, log)
  * 
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):             # <<<<<<<<<<<<<<
  *         cdef double[:] out = np.zeros(len(self.data), dtype='d')
- *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
+ *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh, log))
  */
 
 static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_73scaled(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
@@ -16328,6 +16364,7 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
   double __pyx_v_fromhigh = ((double)1.0);
   double __pyx_v_tolow = ((double)0.0);
   double __pyx_v_tohigh = ((double)1.0);
+  int __pyx_v_log = ((int)0);
   __Pyx_memviewslice __pyx_v_out = { 0, 0, { 0 }, { 0 }, { 0 } };
   struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -16339,10 +16376,11 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
   PyObject *__pyx_t_6 = NULL;
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
-  int __pyx_t_9;
-  PyObject *__pyx_t_10 = NULL;
-  size_t __pyx_t_11;
-  __Pyx_memviewslice __pyx_t_12 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_9 = NULL;
+  int __pyx_t_10;
+  PyObject *__pyx_t_11 = NULL;
+  size_t __pyx_t_12;
+  __Pyx_memviewslice __pyx_t_13 = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_RefNannySetupContext("scaled", 0);
   if (__pyx_optional_args) {
     if (__pyx_optional_args->__pyx_n > 0) {
@@ -16353,6 +16391,9 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
           __pyx_v_tolow = __pyx_optional_args->tolow;
           if (__pyx_optional_args->__pyx_n > 3) {
             __pyx_v_tohigh = __pyx_optional_args->tohigh;
+            if (__pyx_optional_args->__pyx_n > 4) {
+              __pyx_v_log = __pyx_optional_args->log;
+            }
           }
         }
       }
@@ -16379,66 +16420,73 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
         __Pyx_GOTREF(__pyx_t_5);
         __pyx_t_6 = PyFloat_FromDouble(__pyx_v_tohigh); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 552, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
+        __pyx_t_7 = __Pyx_PyBool_FromLong(__pyx_v_log); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 552, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_7);
         __Pyx_INCREF(__pyx_t_1);
-        __pyx_t_7 = __pyx_t_1; __pyx_t_8 = NULL;
-        __pyx_t_9 = 0;
-        if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
-          __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_7);
-          if (likely(__pyx_t_8)) {
-            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
-            __Pyx_INCREF(__pyx_t_8);
+        __pyx_t_8 = __pyx_t_1; __pyx_t_9 = NULL;
+        __pyx_t_10 = 0;
+        if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_8))) {
+          __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_8);
+          if (likely(__pyx_t_9)) {
+            PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
+            __Pyx_INCREF(__pyx_t_9);
             __Pyx_INCREF(function);
-            __Pyx_DECREF_SET(__pyx_t_7, function);
-            __pyx_t_9 = 1;
+            __Pyx_DECREF_SET(__pyx_t_8, function);
+            __pyx_t_10 = 1;
           }
         }
         #if CYTHON_FAST_PYCALL
-        if (PyFunction_Check(__pyx_t_7)) {
-          PyObject *__pyx_temp[5] = {__pyx_t_8, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
-          __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (PyFunction_Check(__pyx_t_8)) {
+          PyObject *__pyx_temp[6] = {__pyx_t_9, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7};
+          __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_10, 5+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         } else
         #endif
         #if CYTHON_FAST_PYCCALL
-        if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
-          PyObject *__pyx_temp[5] = {__pyx_t_8, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6};
-          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
-          __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
+          PyObject *__pyx_temp[6] = {__pyx_t_9, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6, __pyx_t_7};
+          __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_10, 5+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
           __Pyx_GOTREF(__pyx_t_2);
           __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+          __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         } else
         #endif
         {
-          __pyx_t_10 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 552, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_10);
-          if (__pyx_t_8) {
-            __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
+          __pyx_t_11 = PyTuple_New(5+__pyx_t_10); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 552, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_11);
+          if (__pyx_t_9) {
+            __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_9); __pyx_t_9 = NULL;
           }
           __Pyx_GIVEREF(__pyx_t_3);
-          PyTuple_SET_ITEM(__pyx_t_10, 0+__pyx_t_9, __pyx_t_3);
+          PyTuple_SET_ITEM(__pyx_t_11, 0+__pyx_t_10, __pyx_t_3);
           __Pyx_GIVEREF(__pyx_t_4);
-          PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_9, __pyx_t_4);
+          PyTuple_SET_ITEM(__pyx_t_11, 1+__pyx_t_10, __pyx_t_4);
           __Pyx_GIVEREF(__pyx_t_5);
-          PyTuple_SET_ITEM(__pyx_t_10, 2+__pyx_t_9, __pyx_t_5);
+          PyTuple_SET_ITEM(__pyx_t_11, 2+__pyx_t_10, __pyx_t_5);
           __Pyx_GIVEREF(__pyx_t_6);
-          PyTuple_SET_ITEM(__pyx_t_10, 3+__pyx_t_9, __pyx_t_6);
+          PyTuple_SET_ITEM(__pyx_t_11, 3+__pyx_t_10, __pyx_t_6);
+          __Pyx_GIVEREF(__pyx_t_7);
+          PyTuple_SET_ITEM(__pyx_t_11, 4+__pyx_t_10, __pyx_t_7);
           __pyx_t_3 = 0;
           __pyx_t_4 = 0;
           __pyx_t_5 = 0;
           __pyx_t_6 = 0;
-          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_10, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
+          __pyx_t_7 = 0;
+          __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_11, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 552, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_2);
-          __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+          __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
         }
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
         if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5pippi_10wavetables_Wavetable))))) __PYX_ERR(0, 552, __pyx_L1_error)
         __pyx_r = ((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_t_2);
         __pyx_t_2 = 0;
@@ -16460,9 +16508,9 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
 
   /* "pippi/wavetables.pyx":553
  * 
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
  *         cdef double[:] out = np.zeros(len(self.data), dtype='d')             # <<<<<<<<<<<<<<
- *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
+ *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh, log))
  * 
  */
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 553, __pyx_L1_error)
@@ -16471,56 +16519,56 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 553, __pyx_L1_error)}
-  __pyx_t_11 = __Pyx_MemoryView_Len(__pyx_v_self->data); 
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 553, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_MemoryView_Len(__pyx_v_self->data); 
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(__pyx_t_12); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 553, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 553, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 553, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_1);
+  PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_1);
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 553, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 553, __pyx_L1_error)
-  __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_7, __pyx_t_1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 553, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_10);
+  __pyx_t_11 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, __pyx_t_1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 553, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_11);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_12 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_10, PyBUF_WRITABLE); if (unlikely(!__pyx_t_12.memview)) __PYX_ERR(0, 553, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_v_out = __pyx_t_12;
-  __pyx_t_12.memview = NULL;
-  __pyx_t_12.data = NULL;
+  __pyx_t_13 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_11, PyBUF_WRITABLE); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 553, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
+  __pyx_v_out = __pyx_t_13;
+  __pyx_t_13.memview = NULL;
+  __pyx_t_13.data = NULL;
 
   /* "pippi/wavetables.pyx":554
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
  *         cdef double[:] out = np.zeros(len(self.data), dtype='d')
- *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))             # <<<<<<<<<<<<<<
+ *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh, log))             # <<<<<<<<<<<<<<
  * 
  *     cpdef void snap(Wavetable self, double mult=0, object pattern=None):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
   if (unlikely(!__pyx_v_self->data.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 554, __pyx_L1_error)}
-  __pyx_t_12 = __pyx_f_5pippi_5lists__scale(__pyx_v_out, __pyx_v_self->data, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh); if (unlikely(!__pyx_t_12.memview)) __PYX_ERR(0, 554, __pyx_L1_error)
-  __pyx_t_10 = __pyx_memoryview_fromslice(__pyx_t_12, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 554, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_10);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_12, 1);
-  __pyx_t_12.memview = NULL;
-  __pyx_t_12.data = NULL;
-  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 554, __pyx_L1_error)
+  __pyx_t_13 = __pyx_f_5pippi_5lists__scale(__pyx_v_out, __pyx_v_self->data, __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh, __pyx_v_log); if (unlikely(!__pyx_t_13.memview)) __PYX_ERR(0, 554, __pyx_L1_error)
+  __pyx_t_11 = __pyx_memoryview_fromslice(__pyx_t_13, 1, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 554, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_11);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_13, 1);
+  __pyx_t_13.memview = NULL;
+  __pyx_t_13.data = NULL;
+  __pyx_t_1 = __Pyx_PyObject_CallOneArg(((PyObject *)__pyx_ptype_5pippi_10wavetables_Wavetable), __pyx_t_11); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 554, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+  __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __pyx_r = ((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_t_1);
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
   /* "pippi/wavetables.pyx":552
- *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh)
+ *         self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh, log)
  * 
- *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):             # <<<<<<<<<<<<<<
+ *     cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):             # <<<<<<<<<<<<<<
  *         cdef double[:] out = np.zeros(len(self.data), dtype='d')
- *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
+ *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh, log))
  */
 
   /* function exit code */
@@ -16533,8 +16581,9 @@ static struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_f_5pippi_10wavetabl
   __Pyx_XDECREF(__pyx_t_6);
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
-  __Pyx_XDECREF(__pyx_t_10);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_12, 1);
+  __Pyx_XDECREF(__pyx_t_9);
+  __Pyx_XDECREF(__pyx_t_11);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_13, 1);
   __Pyx_AddTraceback("pippi.wavetables.Wavetable.scaled", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   __pyx_L0:;
@@ -16551,16 +16600,19 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_73scaled(PyObject *__py
   double __pyx_v_fromhigh;
   double __pyx_v_tolow;
   double __pyx_v_tohigh;
+  int __pyx_v_log;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("scaled (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_fromlow,&__pyx_n_s_fromhigh,&__pyx_n_s_tolow,&__pyx_n_s_tohigh,0};
-    PyObject* values[4] = {0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_fromlow,&__pyx_n_s_fromhigh,&__pyx_n_s_tolow,&__pyx_n_s_tohigh,&__pyx_n_s_log,0};
+    PyObject* values[5] = {0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -16597,12 +16649,20 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_73scaled(PyObject *__py
           PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_tohigh);
           if (value) { values[3] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_log);
+          if (value) { values[4] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "scaled") < 0)) __PYX_ERR(0, 552, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -16635,34 +16695,40 @@ static PyObject *__pyx_pw_5pippi_10wavetables_9Wavetable_73scaled(PyObject *__py
     } else {
       __pyx_v_tohigh = ((double)1.0);
     }
+    if (values[4]) {
+      __pyx_v_log = __Pyx_PyObject_IsTrue(values[4]); if (unlikely((__pyx_v_log == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 552, __pyx_L3_error)
+    } else {
+      __pyx_v_log = ((int)0);
+    }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("scaled", 0, 0, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 552, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("scaled", 0, 0, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 552, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.wavetables.Wavetable.scaled", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_10wavetables_9Wavetable_72scaled(((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_v_self), __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh);
+  __pyx_r = __pyx_pf_5pippi_10wavetables_9Wavetable_72scaled(((struct __pyx_obj_5pippi_10wavetables_Wavetable *)__pyx_v_self), __pyx_v_fromlow, __pyx_v_fromhigh, __pyx_v_tolow, __pyx_v_tohigh, __pyx_v_log);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_72scaled(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh) {
+static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_72scaled(struct __pyx_obj_5pippi_10wavetables_Wavetable *__pyx_v_self, double __pyx_v_fromlow, double __pyx_v_fromhigh, double __pyx_v_tolow, double __pyx_v_tohigh, int __pyx_v_log) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_scaled __pyx_t_2;
   __Pyx_RefNannySetupContext("scaled", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2.__pyx_n = 4;
+  __pyx_t_2.__pyx_n = 5;
   __pyx_t_2.fromlow = __pyx_v_fromlow;
   __pyx_t_2.fromhigh = __pyx_v_fromhigh;
   __pyx_t_2.tolow = __pyx_v_tolow;
   __pyx_t_2.tohigh = __pyx_v_tohigh;
+  __pyx_t_2.log = __pyx_v_log;
   __pyx_t_1 = ((PyObject *)__pyx_vtabptr_5pippi_10wavetables_Wavetable->scaled(__pyx_v_self, 1, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 552, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
@@ -16681,7 +16747,7 @@ static PyObject *__pyx_pf_5pippi_10wavetables_9Wavetable_72scaled(struct __pyx_o
 }
 
 /* "pippi/wavetables.pyx":556
- *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
+ *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh, log))
  * 
  *     cpdef void snap(Wavetable self, double mult=0, object pattern=None):             # <<<<<<<<<<<<<<
  *         if mult <= 0 and pattern is None:
@@ -17000,7 +17066,7 @@ static void __pyx_f_5pippi_10wavetables_9Wavetable_snap(struct __pyx_obj_5pippi_
   __pyx_t_12.data = NULL;
 
   /* "pippi/wavetables.pyx":556
- *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
+ *         return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh, log))
  * 
  *     cpdef void snap(Wavetable self, double mult=0, object pattern=None):             # <<<<<<<<<<<<<<
  *         if mult <= 0 and pattern is None:
@@ -42004,6 +42070,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_u_line, __pyx_k_line, sizeof(__pyx_k_line), 0, 1, 0, 1},
   {&__pyx_n_u_linear, __pyx_k_linear, sizeof(__pyx_k_linear), 0, 1, 0, 1},
   {&__pyx_n_s_linspace, __pyx_k_linspace, sizeof(__pyx_k_linspace), 0, 0, 1, 1},
+  {&__pyx_n_s_log, __pyx_k_log, sizeof(__pyx_k_log), 0, 0, 1, 1},
   {&__pyx_n_s_lowvalue, __pyx_k_lowvalue, sizeof(__pyx_k_lowvalue), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_match, __pyx_k_match, sizeof(__pyx_k_match), 0, 0, 1, 1},
@@ -42845,7 +42912,7 @@ static int __Pyx_modinit_function_import_code(void) {
   if (__Pyx_ImportFunction(__pyx_t_2, "randint", (void (**)(void))&__pyx_f_5pippi_4rand_randint, "int (int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_4rand_randint *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_3 = PyImport_ImportModule("pippi.lists"); if (!__pyx_t_3) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_3, "_scale", (void (**)(void))&__pyx_f_5pippi_5lists__scale, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_3, "_scale", (void (**)(void))&__pyx_f_5pippi_5lists__scale, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice, double, double, double, double, int)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_3, "_snap_pattern", (void (**)(void))&__pyx_f_5pippi_5lists__snap_pattern, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice, __Pyx_memviewslice)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_3, "_snap_mult", (void (**)(void))&__pyx_f_5pippi_5lists__snap_mult, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_3); __pyx_t_3 = 0;

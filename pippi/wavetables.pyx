@@ -546,12 +546,12 @@ cdef class Wavetable:
     cpdef Wavetable taper(Wavetable self, int length):
         return self * _adsr(len(self), length, 0, 1, length)
 
-    cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
-        self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh)
+    cpdef void scale(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
+        self.data = _scale(self.data, self.data, fromlow, fromhigh, tolow, tohigh, log)
 
-    cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+    cpdef Wavetable scaled(Wavetable self, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
         cdef double[:] out = np.zeros(len(self.data), dtype='d')
-        return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh))
+        return Wavetable(_scale(out, self.data, fromlow, fromhigh, tolow, tohigh, log))
 
     cpdef void snap(Wavetable self, double mult=0, object pattern=None):
         if mult <= 0 and pattern is None:

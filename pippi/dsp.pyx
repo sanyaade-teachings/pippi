@@ -43,11 +43,11 @@ cdef double _mag(double[:,:] snd):
 cpdef double mag(SoundBuffer snd):
     return _mag(snd.frames)
 
-cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1):
+cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False):
     cdef unsigned int length = len(source)
     cdef double[:] out = np.zeros(length, dtype='d')
     cdef double[:] _source = np.array(source, dtype='d')
-    return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh), dtype='d').tolist()
+    return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh, log), dtype='d').tolist()
 
 cpdef list snap(list source, double mult=0, object pattern=None):
     return lists.snap(source, mult, pattern)
