@@ -406,4 +406,38 @@ cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch
     cdef double[:,:] out = np.zeros((outlength, channels), dtype='d')
     return _paulstretch(snd, out, windowsize, stretch, length, outlength, channels)
 
+cdef double[:,:] _bar(double[:,:] out, int length, double[:] amp, double stiffness, double decay, double leftclamp, double rightclamp, double scan, double barpos, double velocity, double width, double loss, int channels):
+    cdef sp_data* sp
+    cdef sp_bar* bar
+    cdef int i=0, c=0
+    cdef double t=1, output=0, pos=0, a=1
+
+    sp_create(&sp)
+
+    for c in range(channels):
+        sp_bar_create(&bar)
+        sp_bar_init(sp, bar, stiffness, loss)
+        bar.T30 = decay
+        bar.bcL = leftclamp
+        bar.bcR = rightclamp
+        bar.scan = scan
+        bar.pos = barpos
+        bar.vel = velocity
+        bar.wid = width
+
+        for i in range(length):
+            if i > 0:
+                t = 0 
+
+            sp_bar_compute(sp, bar, &t, &output)
+            pos = <double>i / <double>length
+            a = interpolation._linear_pos(amp, pos)
+            out[i,c] = output * a
+
+        sp_bar_destroy(&bar)
+
+    sp_destroy(&sp)
+
+    return out
+
 

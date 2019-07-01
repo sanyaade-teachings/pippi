@@ -5,6 +5,11 @@ from Cython.Build import cythonize
 import numpy as np
 
 ext_modules = cythonize([
+        Extension('pippi.bar', ['pippi/bar.pyx'],
+            libraries=['soundpipe'], 
+            library_dirs=['/usr/local/lib'],
+            include_dirs=[np.get_include(), '/usr/local/include']
+        ),
         Extension('pippi.defaults', ['pippi/defaults.pyx']), 
         Extension('pippi.dsp', ['pippi/dsp.pyx']), 
         Extension('pippi.drummachine', ['pippi/drummachine.pyx']), 

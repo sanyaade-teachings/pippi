@@ -24,6 +24,9 @@ test-oscs:
 test-soundbuffer:
 	python -m unittest tests/test_soundbuffer.py -v
 
+test-soundpipe:
+	python -m unittest tests/test_soundpipe.py -v
+
 test-lists:
 	python -m unittest tests/test_lists.py -v
 

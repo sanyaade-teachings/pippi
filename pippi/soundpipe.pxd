@@ -17,6 +17,37 @@ cdef extern from "soundpipe.h":
     int sp_destroy(sp_data**)
     int sp_process(sp_data*, void*, void (*callback)(sp_data*, void*))
 
+    ctypedef struct sp_auxdata:
+        size_t size
+        void* ptr
+
+    ctypedef struct sp_bar:
+        double bcL
+        double bcR
+        double iK
+        double ib
+        double scan
+        double T30
+        double pos
+        double vel
+        double wid
+        double* w
+        double* w1
+        double* w2
+        int step
+        int first
+        double s0
+        double s1
+        double s2
+        double t0
+        double t1
+        sp_auxdata w_aux
+
+    int sp_bar_create(sp_bar**)
+    int sp_bar_destroy(sp_bar**)
+    int sp_bar_init(sp_data*, sp_bar*, double iK, double ib)
+    int sp_bar_compute(sp_data*, sp_bar*, double*, double*)
+
     ctypedef struct sp_compressor:
         void* faust
         int argpos
@@ -183,5 +214,7 @@ cpdef double[:,:] compressor(double[:,:] snd, double ratio, double thresh, doubl
 
 cdef double[:,:] _paulstretch(double[:,:] snd, double[:,:] out, double windowsize, double stretch, int length, int outlength, int channels)
 cpdef double[:,:] paulstretch(double[:,:] snd, double windowsize, double stretch, int samplerate=?)
+
+cdef double[:,:] _bar(double[:,:] out, int length, double[:] amp, double stiffness, double decay, double leftclamp, double rightclamp, double scan, double barpos, double velocity, double width, double loss, int channels)
 
 cdef double** memoryview2ftbls(double[:,:] snd)
