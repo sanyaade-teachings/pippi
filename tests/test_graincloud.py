@@ -75,6 +75,18 @@ class TestCloud(TestCase):
 
         out.write('tests/renders/graincloud_with_speed_lfo.wav')
 
+    def test_graincloud_with_extreme_speed_lfo(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+
+        length = 30
+        speed = dsp.wt('hann', 1, 100)
+        framelength = int(length * sound.samplerate)
+
+        out = sound.cloud(length=length, speed=speed)
+        self.assertEqual(len(out), framelength)
+
+        out.write('tests/renders/graincloud_with_extreme_speed_lfo.wav')
+
     def test_graincloud_with_read_lfo(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         cloud = grains.Cloud(sound, position=dsp.win('hann', 0, 1))

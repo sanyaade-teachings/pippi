@@ -40,6 +40,9 @@ cdef int RND = 11
 cdef int LINE = SAW
 cdef int PHASOR = SAW
 cdef int SINC = 23
+cdef int GAUSS = 24
+cdef int GAUSSIN = 25
+cdef int GAUSSOUT = 26
 
 cdef int LINEAR = 12
 cdef int TRUNC = 13
@@ -47,7 +50,7 @@ cdef int HERMITE = 14
 cdef int CONSTANT = 15
 cdef int GOGINS = 16
 
-cdef int LEN_WINDOWS = 14
+cdef int LEN_WINDOWS = 17
 cdef int* ALL_WINDOWS = [
             SINE, 
             SINEIN, 
@@ -62,7 +65,10 @@ cdef int* ALL_WINDOWS = [
             HAMM,
             BLACK,
             BART,
-            KAISER
+            KAISER,
+            GAUSS,
+            GAUSSIN,
+            GAUSSOUT,
         ]
 
 cdef int LEN_WAVETABLES = 6
@@ -107,9 +113,56 @@ cdef int to_flag(str value):
         'constant': CONSTANT, 
         'gogins': GOGINS, 
         'sinc': SINC,
+        'gauss': GAUSS,
+        'gaussin': GAUSSIN,
+        'gaussout': GAUSSOUT
     }
 
     return flags[value]
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:] _gaussian(int length):
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef int i=0
+    cdef double ax=0, nn=0
+
+    nn = 0.5 * (length-1)
+    for i in range(length):
+        ax = (i-nn) / 0.3 / nn
+        out[i] = math.exp(-0.5 * ax * ax)
+
+    return out
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:] _gaussian_in(int length):
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef int i=0
+    cdef double ax=0
+
+    for i in range(length):
+        ax = (<double>(length-i) / <double>length) * 4.0
+        out[i] = math.exp(-0.5 * ax * ax)
+
+    return out
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:] _gaussian_out(int length):
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef int i=0
+    cdef double ax=0
+
+    for i in range(length):
+        ax = (<double>i / <double>length) * 4.0
+        out[i] = math.exp(-0.5 * ax * ax)
+
+    return out
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -741,6 +794,15 @@ cdef double[:] _window(int window_type, int length):
         
     elif window_type == SINC:
         wt = np.sinc(np.linspace(-15, 15, length, dtype='d'))
+
+    elif window_type == GAUSS:
+        wt = _gaussian(length) 
+
+    elif window_type == GAUSSIN:
+        wt = _gaussian_in(length) 
+
+    elif window_type == GAUSSOUT:
+        wt = _gaussian_out(length) 
 
     else:
         wt = _window(SINE, length)

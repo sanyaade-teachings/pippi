@@ -9,6 +9,9 @@ test-grains:
 test-wavesets:
 	python -m unittest tests/test_wavesets.py -v
 
+test-wavetables:
+	python -m unittest tests/test_wavetables.py -v
+
 test-fx:
 	python -m unittest tests/test_fx.py -v
 

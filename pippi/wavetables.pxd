@@ -72,6 +72,9 @@ cdef int HERMITE
 cdef int CONSTANT
 cdef int GOGINS
 cdef int SINC
+cdef int GAUSS
+cdef int GAUSSIN
+cdef int GAUSSOUT
 
 cdef int LEN_WINDOWS
 cdef int* ALL_WINDOWS
