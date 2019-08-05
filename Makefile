@@ -38,5 +38,11 @@ clean:
 	rm -rf pippi/*.c
 	rm -rf pippi/*.so
 
+install:
+	pip install -r requirements.txt
+	git submodule init --update
+	cd modules/Soundpipe && make && sudo make install
+	python setup.py develop
+
 build:
 	python setup.py develop
