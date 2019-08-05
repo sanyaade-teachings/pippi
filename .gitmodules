@@ -1,4 +1,7 @@
 [submodule "Soundpipe"]
-	path = Soundpipe
+	path = modules/Soundpipe
 	url = https://github.com/luvsound/Soundpipe.git
 	branch = dev
+[submodule "modules/kissfft"]
+	path = modules/kissfft
+	url = https://github.com/luvsound/kissfft.git
