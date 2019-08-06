@@ -1,7 +1,10 @@
-.PHONY: test test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists build
+.PHONY: test test-fft test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists build
 
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
+
+test-fft:
+	python -m unittest tests/test_fft.py -v
 
 test-grains:
 	python -m unittest tests/test_graincloud.py -v
