@@ -605,7 +605,7 @@ cdef class SoundBuffer:
             _impulse = np.hstack([ _wt for _ in range(self.channels) ])
 
         elif isinstance(impulse, Wavetable):
-            _impulse = np.hstack([ impulse.data for _ in range(self.channels) ])
+            _impulse = np.hstack([ np.reshape(impulse.data, (-1, 1)) for _ in range(self.channels) ])
 
         elif isinstance(impulse, SoundBuffer):
             if impulse.channels != self.channels:
