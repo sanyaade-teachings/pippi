@@ -59,6 +59,11 @@ While hacking on pippi itself, running `make build` will recompile the cython ex
 
 If you need to build sources from a clean slate (sometimes updates to `pxd` files require this) then run `make clean build` instead.
 
+## Thanks
+
+[Project Nayuki](https://www.nayuki.io/page/free-small-fft-in-multiple-languages) for a compact FFT!
+[Paul Batchelor](https://github.com/PaulBatchelor/Soundpipe) for all the goodness in Soundpipe that has made its way into Pippi.
+
 
 ## Release Notes
 
