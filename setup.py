@@ -31,9 +31,6 @@ ext_modules = cythonize([
             library_dirs=['/usr/local/lib'],
             include_dirs=['/usr/local/include']
         ),
-        Extension('pippi.kissfft', ['pippi/kissfft.pyx'], 
-            include_dirs=['modules/kissfft', 'modules/kissfft/tools'], 
-        ), 
         Extension('pippi.fft', ['modules/fft/fft.c', 'pippi/fft.pyx'], 
             include_dirs=['modules/fft', np.get_include()], 
         ), 
