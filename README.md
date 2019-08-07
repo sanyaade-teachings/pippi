@@ -61,8 +61,13 @@ If you need to build sources from a clean slate (sometimes updates to `pxd` file
 
 ## Thanks
 
-[Project Nayuki](https://www.nayuki.io/page/free-small-fft-in-multiple-languages) for a compact FFT!
-[Paul Batchelor](https://github.com/PaulBatchelor/Soundpipe) for all the goodness in Soundpipe that has made its way into Pippi.
+[Project Nayuki](https://www.nayuki.io/page/free-small-fft-in-multiple-languages) for a compact FFT! (Used in `SoundBuffer.convolve()`)
+
+[Paul Batchelor](https://github.com/PaulBatchelor/Soundpipe) for all the goodness in Soundpipe that has made its way into Pippi. (See the `fx` and `bar` modules.)
+
+[Bernhard Schelling](https://zillalib.github.io/) for his TinySoundFont library used in the `soundfont` module.
+
+[Nando Florestan](https://web.archive.org/web/20160707135905/http://nando.oui.com.br/pages/about.html) for his small public domain GM soundfont used in the test suite.
 
 
 ## Release Notes
