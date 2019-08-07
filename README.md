@@ -67,7 +67,7 @@ If you need to build sources from a clean slate (sometimes updates to `pxd` file
 
 [Bernhard Schelling](https://zillalib.github.io/) for his TinySoundFont library used in the `soundfont` module.
 
-[Nando Florestan](https://web.archive.org/web/20160707135905/http://nando.oui.com.br/pages/about.html) for his small public domain GM soundfont used in the test suite.
+[Nando Florestan](http://dev.nando.audio/) for his small public domain GM soundfont used in the test suite.
 
 
 ## Release Notes
