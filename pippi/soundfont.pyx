@@ -20,8 +20,8 @@ cdef double[:,:] render(str font, object events, int voice, int channels, int sa
 
     cdef tsf* TSF = tsf_load_filename(font.encode('UTF-8'))
 
-    # Total length is last event onset time + length
-    cdef double length = events[-1][0] + events[-1][1]
+    # Total length is last event onset time + length + 3 seconds of slop for the tail
+    cdef double length = events[-1][0] + events[-1][1] + 3
     cdef int _length = <int>(length * samplerate)
 
     cdef int _voice = max(0, voice-1)
@@ -41,13 +41,31 @@ cdef double[:,:] render(str font, object events, int voice, int channels, int sa
     cdef size_t offset = 0
 
     cdef list playing = []
+    cdef list stopped = []
+    cdef list _events = []
+
+    cdef int _onset, _end, _note
+
+    for e in events:
+        onset = <int>(e[0] * samplerate)
+        end = <int>(e[1] * samplerate) + onset
+        note = <int>ftom(e[2])
+
+        if len(e) == 5:
+            _events += [(onset, end, note, e[3], e[4])]
+        else:
+            _events += [(onset, end, note, e[3])]
 
     while elapsed < _length:
         offset = 0
-        for ei, e in enumerate(events):
-            if e[0] * samplerate <= elapsed and ei not in playing:
+        for ei, e in enumerate(_events):
+            if e[0] <= elapsed and ei not in playing:
                 _play_note(TSF, _voice, e)
                 playing += [ ei ]
+
+            if e[1] >= elapsed and ei in playing and ei not in stopped:
+                _stop_note(TSF, _voice, e)
+                stopped += [ ei ]
 
         tsf_render_float(TSF, block, BLOCKSIZE, 0)
 
@@ -63,11 +81,15 @@ cdef double[:,:] render(str font, object events, int voice, int channels, int sa
 
     return out
 
+cdef _stop_note(tsf* TSF, int _voice, tuple event):
+    if len(event) == 5:
+        _voice = event[4]
+    tsf_note_on(TSF, _voice, event[2], 0)
+
 cdef _play_note(tsf* TSF, int _voice, tuple event):
     if len(event) == 5:
         _voice = event[4]
-    cdef int note = <int>ftom(event[2])
-    tsf_note_on(TSF, _voice, note, event[3])
+    tsf_note_on(TSF, _voice, event[2], event[3])
 
 cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):
     cdef list events = [(0, length, freq, amp)]

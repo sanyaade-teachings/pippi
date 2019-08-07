@@ -1,6 +1,8 @@
 from unittest import TestCase
 from pippi import dsp, soundfont, fx
 
+dsp.seed()
+
 class TestSoundfont(TestCase):
     def test_play(self):
         length = 3
@@ -11,15 +13,16 @@ class TestSoundfont(TestCase):
         out.write('tests/renders/soundfont_play.wav')
 
     def test_playall(self):
-        events = [
-            (0, 1, 330, 1, dsp.randint(0, 127)), 
-            (0.3, 1.5, 440, 1, dsp.randint(0, 127)), 
-            (0.6, 2, 550, 1, dsp.randint(0, 127)), 
-            (0.9, 3, 660, 1, dsp.randint(0, 127)), 
-            (1.2, 1.5, 770, 1, dsp.randint(0, 127)), 
-            (1.5, 1, 880, 1, dsp.randint(0, 127)), 
-        ]        
+        events = []
+        pos = 0
+        length = 10
+
+        while pos < length:
+            events += [(pos, dsp.rand(0.2, 3), 110*dsp.randint(1, 10), dsp.rand(), dsp.randint(0, 127))]
+            pos += dsp.rand(0.01, 0.2)
+ 
         out = soundfont.playall("tests/sounds/florestan-gm.sf2", events)
+        out = fx.norm(out, 0.5)
         out.write('tests/renders/soundfont_playall.wav')
 
 
