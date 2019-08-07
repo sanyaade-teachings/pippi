@@ -2,3 +2,6 @@
 	path = modules/Soundpipe
 	url = https://github.com/luvsound/Soundpipe.git
 	branch = dev
+[submodule "modules/TinySoundFont"]
+	path = modules/TinySoundFont
+	url = https://github.com/luvsound/TinySoundFont.git
