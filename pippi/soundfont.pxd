@@ -17,4 +17,6 @@ cdef extern from "tsf.h":
     void tsf_render_float(tsf* f, float* buffer, int samples, int flag_mixing)
     void tsf_reset(tsf* f)
     
-cpdef SoundBuffer render(str font, double length, double freq, double amp, int channels=*, int samplerate=*)
+cdef double[:,:] render(str font, object events, int voice, int channels, int samplerate)
+cpdef SoundBuffer play(str font, double length=*, double freq=*, double amp=*, int voice=*, int channels=*, int samplerate=*)
+cpdef SoundBuffer playall(str font, object events, int voice=*, int channels=*, int samplerate=*)
