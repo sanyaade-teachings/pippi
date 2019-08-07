@@ -46,7 +46,6 @@ cdef double[:,:] render(str font, object events, int voice, int channels, int sa
         offset = 0
         for ei, e in enumerate(events):
             if e[0] * samplerate <= elapsed and ei not in playing:
-                print('PLAY', ei, e[0], elapsed)
                 _play_note(TSF, _voice, e)
                 playing += [ ei ]
 
@@ -65,6 +64,8 @@ cdef double[:,:] render(str font, object events, int voice, int channels, int sa
     return out
 
 cdef _play_note(tsf* TSF, int _voice, tuple event):
+    if len(event) == 5:
+        _voice = event[4]
     cdef int note = <int>ftom(event[2])
     tsf_note_on(TSF, _voice, note, event[3])
 
