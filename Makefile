@@ -43,7 +43,7 @@ clean:
 
 install:
 	pip install -r requirements.txt
-	git submodule init --update
+	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install
 	python setup.py develop
 
