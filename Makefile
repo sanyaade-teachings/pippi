@@ -6,6 +6,9 @@ test:
 test-fft:
 	python -m unittest tests/test_fft.py -v
 
+test-tsf:
+	python -m unittest tests/test_tsf.py -v
+
 test-grains:
 	python -m unittest tests/test_graincloud.py -v
 
