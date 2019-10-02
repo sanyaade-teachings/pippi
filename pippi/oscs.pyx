@@ -9,3 +9,4 @@ from pippi.pulsar2d import Pulsar2d
 from pippi.pluck import Pluck
 from pippi.alias import Alias
 from pippi.bar import Bar
+from pippi.tukey import Tukey

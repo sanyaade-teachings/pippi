@@ -1,10 +1,10 @@
 import random
 from unittest import TestCase
 
-from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d, Alias, Bar
+from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d, Alias, Bar, Tukey
 from pippi.soundbuffer import SoundBuffer
 from pippi.wavesets import Waveset
-from pippi import dsp, fx
+from pippi import dsp, fx, tune
 
 class TestOscs(TestCase):
     def test_create_sinewave(self):
@@ -46,6 +46,20 @@ class TestOscs(TestCase):
         out.write('tests/renders/osc2d_RND_randlist_randwt_guitar_10x.wav')
 
         self.assertEqual(len(out), int(length * out.samplerate))
+
+    def test_create_tukey(self):
+        osc = Tukey()
+        length = 10
+        shape = 'phasor'
+        chord = tune.chord('i9')
+        out = dsp.buffer(length=length)
+        for freq in chord:
+            freq = dsp.wt('tri', freq, freq*2)
+            l = osc.play(length, freq, shape)
+            l = l.pan(dsp.rand())
+            out.dub(l)
+        out = fx.norm(out, 0.8)
+        out.write('tests/renders/osc_tukey.wav')
 
     def test_create_pulsar(self):
         osc = Pulsar(
