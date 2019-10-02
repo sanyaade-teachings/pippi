@@ -31,10 +31,6 @@ cdef class Tukey:
         cdef long _length = <long>(length * self.samplerate)
         cdef double[:,:] out = np.zeros((_length, self.channels))
 
-
-        cdef double period = <double>self.samplerate / 200.0
-        period = 1
-
         while i < _length:
             pos = <double>i / <double>_length
             r = interpolation._linear_pos(_shape, pos)
