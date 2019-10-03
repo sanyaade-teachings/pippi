@@ -30,6 +30,7 @@ cdef class Tukey:
 
         cdef long _length = <long>(length * self.samplerate)
         cdef double[:,:] out = np.zeros((_length, self.channels))
+        cdef int direction = 1
 
         while i < _length:
             pos = <double>i / <double>_length
@@ -50,10 +51,15 @@ cdef class Tukey:
             else:
                 sample = 0.5 * (1 + math.cos(a * (self.phase - 1 + r / 2)))
 
+            sample *= direction
+
             for c in range(self.channels):
                 out[i,c] = sample 
 
-            self.phase += (1.0/self.samplerate) * f
+            self.phase += (1.0/self.samplerate) * f * 2
+
+            if self.phase > 1:
+                direction *= -1
             while self.phase >= 1:
                 self.phase -= 1
 
