@@ -15,11 +15,18 @@ class TestSoundfont(TestCase):
     def test_playall(self):
         events = []
         pos = 0
-        length = 10
+        length = 30
 
         while pos < length:
-            events += [(pos, dsp.rand(0.2, 3), 110*dsp.randint(1, 10), dsp.rand(), dsp.randint(0, 127))]
-            pos += dsp.rand(0.01, 0.2)
+            events += [dict(
+                start=pos, 
+                length=dsp.rand(0.2, 3), 
+                freq=110*dsp.randint(1, 10), 
+                amp=dsp.rand(), 
+                voice=dsp.randint(0, 127)
+            )]
+
+            pos += dsp.rand(0.01, 0.1)
  
         out = soundfont.playall("tests/sounds/florestan-gm.sf2", events)
         out = fx.norm(out, 0.5)

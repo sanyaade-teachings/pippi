@@ -3263,7 +3263,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
   __Pyx_memviewslice __pyx_v__freq = { 0, 0, { 0 }, { 0 }, { 0 } };
   long __pyx_v__length;
   __Pyx_memviewslice __pyx_v_out = { 0, 0, { 0 }, { 0 }, { 0 } };
-  CYTHON_UNUSED double __pyx_v_period;
+  int __pyx_v_direction;
   double __pyx_v_f;
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -3434,7 +3434,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
  * 
  *         cdef long _length = <long>(length * self.samplerate)             # <<<<<<<<<<<<<<
  *         cdef double[:,:] out = np.zeros((_length, self.channels))
- * 
+ *         cdef int direction = 1
  */
   __pyx_v__length = ((long)(__pyx_v_length * __pyx_v_self->samplerate));
 
@@ -3442,7 +3442,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
  * 
  *         cdef long _length = <long>(length * self.samplerate)
  *         cdef double[:,:] out = np.zeros((_length, self.channels))             # <<<<<<<<<<<<<<
- * 
+ *         cdef int direction = 1
  * 
  */
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
@@ -3484,26 +3484,17 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
   __pyx_t_9.memview = NULL;
   __pyx_t_9.data = NULL;
 
-  /* "pippi/tukey.pyx":35
- * 
- * 
- *         cdef double period = <double>self.samplerate / 200.0             # <<<<<<<<<<<<<<
- *         period = 1
- * 
- */
-  __pyx_v_period = (((double)__pyx_v_self->samplerate) / 200.0);
-
-  /* "pippi/tukey.pyx":36
- * 
- *         cdef double period = <double>self.samplerate / 200.0
- *         period = 1             # <<<<<<<<<<<<<<
+  /* "pippi/tukey.pyx":33
+ *         cdef long _length = <long>(length * self.samplerate)
+ *         cdef double[:,:] out = np.zeros((_length, self.channels))
+ *         cdef int direction = 1             # <<<<<<<<<<<<<<
  * 
  *         while i < _length:
  */
-  __pyx_v_period = 1.0;
+  __pyx_v_direction = 1;
 
-  /* "pippi/tukey.pyx":38
- *         period = 1
+  /* "pippi/tukey.pyx":35
+ *         cdef int direction = 1
  * 
  *         while i < _length:             # <<<<<<<<<<<<<<
  *             pos = <double>i / <double>_length
@@ -3513,7 +3504,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
     __pyx_t_10 = ((__pyx_v_i < __pyx_v__length) != 0);
     if (!__pyx_t_10) break;
 
-    /* "pippi/tukey.pyx":39
+    /* "pippi/tukey.pyx":36
  * 
  *         while i < _length:
  *             pos = <double>i / <double>_length             # <<<<<<<<<<<<<<
@@ -3522,11 +3513,11 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
  */
     if (unlikely(((double)__pyx_v__length) == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 39, __pyx_L1_error)
+      __PYX_ERR(0, 36, __pyx_L1_error)
     }
     __pyx_v_pos = (((double)__pyx_v_i) / ((double)__pyx_v__length));
 
-    /* "pippi/tukey.pyx":40
+    /* "pippi/tukey.pyx":37
  *         while i < _length:
  *             pos = <double>i / <double>_length
  *             r = interpolation._linear_pos(_shape, pos)             # <<<<<<<<<<<<<<
@@ -3535,7 +3526,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
  */
     __pyx_v_r = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v__shape, __pyx_v_pos);
 
-    /* "pippi/tukey.pyx":41
+    /* "pippi/tukey.pyx":38
  *             pos = <double>i / <double>_length
  *             r = interpolation._linear_pos(_shape, pos)
  *             r = max(r, 0.00001)             # <<<<<<<<<<<<<<
@@ -3551,7 +3542,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
     }
     __pyx_v_r = __pyx_t_13;
 
-    /* "pippi/tukey.pyx":43
+    /* "pippi/tukey.pyx":40
  *             r = max(r, 0.00001)
  * 
  *             f = interpolation._linear_pos(_freq, pos)             # <<<<<<<<<<<<<<
@@ -3560,7 +3551,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
  */
     __pyx_v_f = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v__freq, __pyx_v_pos);
 
-    /* "pippi/tukey.pyx":45
+    /* "pippi/tukey.pyx":42
  *             f = interpolation._linear_pos(_freq, pos)
  * 
  *             a = (2*math.pi) / r             # <<<<<<<<<<<<<<
@@ -3570,11 +3561,11 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
     __pyx_t_13 = (2.0 * M_PI);
     if (unlikely(__pyx_v_r == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 45, __pyx_L1_error)
+      __PYX_ERR(0, 42, __pyx_L1_error)
     }
     __pyx_v_a = (__pyx_t_13 / __pyx_v_r);
 
-    /* "pippi/tukey.pyx":48
+    /* "pippi/tukey.pyx":45
  * 
  *             # Implementation based on https://www.mathworks.com/help/signal/ref/tukeywin.html
  *             if self.phase <= r / 2:             # <<<<<<<<<<<<<<
@@ -3584,7 +3575,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
     __pyx_t_10 = ((__pyx_v_self->phase <= (__pyx_v_r / 2.0)) != 0);
     if (__pyx_t_10) {
 
-      /* "pippi/tukey.pyx":49
+      /* "pippi/tukey.pyx":46
  *             # Implementation based on https://www.mathworks.com/help/signal/ref/tukeywin.html
  *             if self.phase <= r / 2:
  *                 sample = 0.5 * (1 + math.cos(a * (self.phase - r / 2)))             # <<<<<<<<<<<<<<
@@ -3593,7 +3584,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
  */
       __pyx_v_sample = (0.5 * (1.0 + cos((__pyx_v_a * (__pyx_v_self->phase - (__pyx_v_r / 2.0))))));
 
-      /* "pippi/tukey.pyx":48
+      /* "pippi/tukey.pyx":45
  * 
  *             # Implementation based on https://www.mathworks.com/help/signal/ref/tukeywin.html
  *             if self.phase <= r / 2:             # <<<<<<<<<<<<<<
@@ -3603,7 +3594,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
       goto __pyx_L5;
     }
 
-    /* "pippi/tukey.pyx":51
+    /* "pippi/tukey.pyx":48
  *                 sample = 0.5 * (1 + math.cos(a * (self.phase - r / 2)))
  * 
  *             elif self.phase < 1 - (r/2):             # <<<<<<<<<<<<<<
@@ -3613,7 +3604,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
     __pyx_t_10 = ((__pyx_v_self->phase < (1.0 - (__pyx_v_r / 2.0))) != 0);
     if (__pyx_t_10) {
 
-      /* "pippi/tukey.pyx":52
+      /* "pippi/tukey.pyx":49
  * 
  *             elif self.phase < 1 - (r/2):
  *                 sample = 1             # <<<<<<<<<<<<<<
@@ -3622,7 +3613,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
  */
       __pyx_v_sample = 1.0;
 
-      /* "pippi/tukey.pyx":51
+      /* "pippi/tukey.pyx":48
  *                 sample = 0.5 * (1 + math.cos(a * (self.phase - r / 2)))
  * 
  *             elif self.phase < 1 - (r/2):             # <<<<<<<<<<<<<<
@@ -3632,20 +3623,29 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
       goto __pyx_L5;
     }
 
-    /* "pippi/tukey.pyx":55
+    /* "pippi/tukey.pyx":52
  * 
  *             else:
  *                 sample = 0.5 * (1 + math.cos(a * (self.phase - 1 + r / 2)))             # <<<<<<<<<<<<<<
  * 
- *             for c in range(self.channels):
+ *             sample *= direction
  */
     /*else*/ {
       __pyx_v_sample = (0.5 * (1.0 + cos((__pyx_v_a * ((__pyx_v_self->phase - 1.0) + (__pyx_v_r / 2.0))))));
     }
     __pyx_L5:;
 
-    /* "pippi/tukey.pyx":57
+    /* "pippi/tukey.pyx":54
  *                 sample = 0.5 * (1 + math.cos(a * (self.phase - 1 + r / 2)))
+ * 
+ *             sample *= direction             # <<<<<<<<<<<<<<
+ * 
+ *             for c in range(self.channels):
+ */
+    __pyx_v_sample = (__pyx_v_sample * __pyx_v_direction);
+
+    /* "pippi/tukey.pyx":56
+ *             sample *= direction
  * 
  *             for c in range(self.channels):             # <<<<<<<<<<<<<<
  *                 out[i,c] = sample
@@ -3656,12 +3656,12 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
     for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
       __pyx_v_c = __pyx_t_15;
 
-      /* "pippi/tukey.pyx":58
+      /* "pippi/tukey.pyx":57
  * 
  *             for c in range(self.channels):
  *                 out[i,c] = sample             # <<<<<<<<<<<<<<
  * 
- *             self.phase += (1.0/self.samplerate) * f
+ *             self.phase += (1.0/self.samplerate) * f * 2
  */
       __pyx_t_16 = __pyx_v_i;
       __pyx_t_17 = __pyx_v_c;
@@ -3676,27 +3676,55 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
       } else if (unlikely(__pyx_t_17 >= __pyx_v_out.shape[1])) __pyx_t_18 = 1;
       if (unlikely(__pyx_t_18 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_18);
-        __PYX_ERR(0, 58, __pyx_L1_error)
+        __PYX_ERR(0, 57, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_16 * __pyx_v_out.strides[0]) ) + __pyx_t_17 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
     }
 
-    /* "pippi/tukey.pyx":60
+    /* "pippi/tukey.pyx":59
  *                 out[i,c] = sample
  * 
- *             self.phase += (1.0/self.samplerate) * f             # <<<<<<<<<<<<<<
- *             while self.phase >= 1:
- *                 self.phase -= 1
+ *             self.phase += (1.0/self.samplerate) * f * 2             # <<<<<<<<<<<<<<
+ * 
+ *             if self.phase > 1:
  */
     if (unlikely(__pyx_v_self->samplerate == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 60, __pyx_L1_error)
+      __PYX_ERR(0, 59, __pyx_L1_error)
     }
-    __pyx_v_self->phase = (__pyx_v_self->phase + ((1.0 / ((double)__pyx_v_self->samplerate)) * __pyx_v_f));
+    __pyx_v_self->phase = (__pyx_v_self->phase + (((1.0 / ((double)__pyx_v_self->samplerate)) * __pyx_v_f) * 2.0));
 
     /* "pippi/tukey.pyx":61
+ *             self.phase += (1.0/self.samplerate) * f * 2
  * 
- *             self.phase += (1.0/self.samplerate) * f
+ *             if self.phase > 1:             # <<<<<<<<<<<<<<
+ *                 direction *= -1
+ *             while self.phase >= 1:
+ */
+    __pyx_t_10 = ((__pyx_v_self->phase > 1.0) != 0);
+    if (__pyx_t_10) {
+
+      /* "pippi/tukey.pyx":62
+ * 
+ *             if self.phase > 1:
+ *                 direction *= -1             # <<<<<<<<<<<<<<
+ *             while self.phase >= 1:
+ *                 self.phase -= 1
+ */
+      __pyx_v_direction = (__pyx_v_direction * -1L);
+
+      /* "pippi/tukey.pyx":61
+ *             self.phase += (1.0/self.samplerate) * f * 2
+ * 
+ *             if self.phase > 1:             # <<<<<<<<<<<<<<
+ *                 direction *= -1
+ *             while self.phase >= 1:
+ */
+    }
+
+    /* "pippi/tukey.pyx":63
+ *             if self.phase > 1:
+ *                 direction *= -1
  *             while self.phase >= 1:             # <<<<<<<<<<<<<<
  *                 self.phase -= 1
  * 
@@ -3705,8 +3733,8 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
       __pyx_t_10 = ((__pyx_v_self->phase >= 1.0) != 0);
       if (!__pyx_t_10) break;
 
-      /* "pippi/tukey.pyx":62
- *             self.phase += (1.0/self.samplerate) * f
+      /* "pippi/tukey.pyx":64
+ *                 direction *= -1
  *             while self.phase >= 1:
  *                 self.phase -= 1             # <<<<<<<<<<<<<<
  * 
@@ -3715,7 +3743,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
       __pyx_v_self->phase = (__pyx_v_self->phase - 1.0);
     }
 
-    /* "pippi/tukey.pyx":64
+    /* "pippi/tukey.pyx":66
  *                 self.phase -= 1
  * 
  *             i += 1             # <<<<<<<<<<<<<<
@@ -3725,31 +3753,31 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_5tukey_
     __pyx_v_i = (__pyx_v_i + 1);
   }
 
-  /* "pippi/tukey.pyx":66
+  /* "pippi/tukey.pyx":68
  *             i += 1
  * 
  *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 66, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 66, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -17875,7 +17903,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 56, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 133, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 148, __pyx_L1_error)

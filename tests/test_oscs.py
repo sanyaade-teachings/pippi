@@ -4,7 +4,7 @@ from unittest import TestCase
 from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d, Alias, Bar, Tukey
 from pippi.soundbuffer import SoundBuffer
 from pippi.wavesets import Waveset
-from pippi import dsp, fx, tune
+from pippi import dsp, fx, tune, shapes
 
 class TestOscs(TestCase):
     def test_create_sinewave(self):
@@ -49,12 +49,12 @@ class TestOscs(TestCase):
 
     def test_create_tukey(self):
         osc = Tukey()
-        length = 10
-        shape = 'phasor'
-        chord = tune.chord('i9')
+        length = 40
+        shape = dsp.win(shapes.win('sine', length=3), 0, 0.5)
+        chord = tune.chord('i9', octave=2)
         out = dsp.buffer(length=length)
         for freq in chord:
-            freq = dsp.wt('tri', freq, freq*2)
+            freq = dsp.wt('sinc', freq, freq*4)
             l = osc.play(length, freq, shape)
             l = l.pan(dsp.rand())
             out.dub(l)
