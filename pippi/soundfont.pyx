@@ -24,17 +24,20 @@ cdef list parsemessages(list events, int samplerate):
     cdef dict e, m
     cdef str _id
     cdef int note
+    cdef double fnote, frac
     cdef size_t start
     cdef size_t end
     
     for e in events:
-        note = <int>ftom(e['freq'])
+        fnote = ftom(e['freq'])
+        note = <int>fnote
+        frac = fnote - note
         start = <int>(e['start'] * samplerate)
         end = <int>(e['length'] * samplerate) + start
         _id = str(uuid.uuid4())
 
-        messages += [dict(id=_id, type=NOTE_ON, note=note, pos=start, amp=e['amp'], instrument=e['voice'])]
-        messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, amp=e['amp'], instrument=e['voice'])]
+        messages += [dict(id=_id, type=NOTE_ON, note=note, frac=frac, pos=start, amp=e['amp'], instrument=e['voice'])]
+        messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, instrument=e['voice'])]
 
     return sorted(messages, key=lambda x: x['pos'])
 
@@ -91,7 +94,7 @@ cdef double[:,:] render(str font, list events, int voice, int channels, int samp
                         # Whaddya gonna do...?
                         continue
 
-                    tsf_channel_note_on(TSF, channel, msg['note'], msg['amp'])
+                    tsf_channel_mts_note_on(TSF, channel, <double>msg['note']+msg['frac'], msg['amp'])
 
                 elif msg['type'] == NOTE_OFF:
                     if msg['id'] in event_map:

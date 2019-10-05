@@ -17,6 +17,7 @@ cdef extern from "tsf.h":
     void tsf_note_off(tsf* f, int preset_index, int key)
     void tsf_render_float(tsf* f, float* buffer, int samples, int flag_mixing)
     void tsf_reset(tsf* f)
+    void tsf_channel_mts_note_on(tsf* f, int channel, double key, float vel)
     void tsf_channel_note_on(tsf* f, int channel, int key, float vel)
     void tsf_channel_note_off(tsf* f, int channel, int key)
     void tsf_channel_note_off_all(tsf* f, int channel)

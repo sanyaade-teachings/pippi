@@ -1729,7 +1729,7 @@ typedef npy_cdouble __pyx_t_5numpy_complex_t;
 struct __pyx_opt_args_5pippi_9soundfont_play;
 struct __pyx_opt_args_5pippi_9soundfont_playall;
 
-/* "pippi/soundfont.pxd":29
+/* "pippi/soundfont.pxd":30
  * 
  * cdef double[:,:] render(str font, list events, int voice, int channels, int samplerate)
  * cpdef SoundBuffer play(str font, double length=*, double freq=*, double amp=*, int voice=*, int channels=*, int samplerate=*)             # <<<<<<<<<<<<<<
@@ -1745,7 +1745,7 @@ struct __pyx_opt_args_5pippi_9soundfont_play {
   int samplerate;
 };
 
-/* "pippi/soundfont.pxd":30
+/* "pippi/soundfont.pxd":31
  * cdef double[:,:] render(str font, list events, int voice, int channels, int samplerate)
  * cpdef SoundBuffer play(str font, double length=*, double freq=*, double amp=*, int voice=*, int channels=*, int samplerate=*)
  * cpdef SoundBuffer playall(str font, object events, int voice=*, int channels=*, int samplerate=*)             # <<<<<<<<<<<<<<
@@ -3076,6 +3076,7 @@ static const char __pyx_k_pos[] = "pos";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_font[] = "font";
+static const char __pyx_k_frac[] = "frac";
 static const char __pyx_k_freq[] = "freq";
 static const char __pyx_k_ftom[] = "ftom";
 static const char __pyx_k_keys[] = "keys";
@@ -3246,6 +3247,8 @@ static PyObject *__pyx_n_s_font;
 static PyObject *__pyx_n_s_format;
 static PyObject *__pyx_n_s_fortran;
 static PyObject *__pyx_n_u_fortran;
+static PyObject *__pyx_n_s_frac;
+static PyObject *__pyx_n_u_frac;
 static PyObject *__pyx_n_s_freq;
 static PyObject *__pyx_n_u_freq;
 static PyObject *__pyx_n_s_ftom;
@@ -3426,8 +3429,8 @@ static PyObject *__pyx_tuple__35;
 static PyObject *__pyx_codeobj__36;
 /* Late includes */
 
-/* "pippi/soundfont.pyx":39
- *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, amp=e['amp'], instrument=e['voice'])]
+/* "pippi/soundfont.pyx":42
+ *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, instrument=e['voice'])]
  * 
  *     return sorted(messages, key=lambda x: x['pos'])             # <<<<<<<<<<<<<<
  * 
@@ -3454,7 +3457,7 @@ static PyObject *__pyx_lambda_funcdef_lambda(CYTHON_UNUSED PyObject *__pyx_self,
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("lambda", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_x, __pyx_n_u_pos); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_x, __pyx_n_u_pos); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3484,6 +3487,8 @@ static PyObject *__pyx_f_5pippi_9soundfont_parsemessages(PyObject *__pyx_v_event
   PyObject *__pyx_v_e = 0;
   PyObject *__pyx_v__id = 0;
   int __pyx_v_note;
+  double __pyx_v_fnote;
+  double __pyx_v_frac;
   size_t __pyx_v_start;
   size_t __pyx_v_end;
   PyObject *__pyx_r = NULL;
@@ -3494,7 +3499,8 @@ static PyObject *__pyx_f_5pippi_9soundfont_parsemessages(PyObject *__pyx_v_event
   PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
   PyObject *__pyx_t_6 = NULL;
-  int __pyx_t_7;
+  double __pyx_t_7;
+  int __pyx_t_8;
   __Pyx_RefNannySetupContext("parsemessages", 0);
 
   /* "pippi/soundfont.pyx":23
@@ -3509,44 +3515,44 @@ static PyObject *__pyx_f_5pippi_9soundfont_parsemessages(PyObject *__pyx_v_event
   __pyx_v_messages = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pippi/soundfont.pyx":30
+  /* "pippi/soundfont.pyx":31
  *     cdef size_t end
  * 
  *     for e in events:             # <<<<<<<<<<<<<<
- *         note = <int>ftom(e['freq'])
- *         start = <int>(e['start'] * samplerate)
+ *         fnote = ftom(e['freq'])
+ *         note = <int>fnote
  */
   if (unlikely(__pyx_v_events == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-    __PYX_ERR(0, 30, __pyx_L1_error)
+    __PYX_ERR(0, 31, __pyx_L1_error)
   }
   __pyx_t_1 = __pyx_v_events; __Pyx_INCREF(__pyx_t_1); __pyx_t_2 = 0;
   for (;;) {
     if (__pyx_t_2 >= PyList_GET_SIZE(__pyx_t_1)) break;
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_3); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 30, __pyx_L1_error)
+    __pyx_t_3 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_2); __Pyx_INCREF(__pyx_t_3); __pyx_t_2++; if (unlikely(0 < 0)) __PYX_ERR(0, 31, __pyx_L1_error)
     #else
-    __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 30, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(__pyx_t_1, __pyx_t_2); __pyx_t_2++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     #endif
-    if (!(likely(PyDict_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "dict", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 30, __pyx_L1_error)
+    if (!(likely(PyDict_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "dict", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 31, __pyx_L1_error)
     __Pyx_XDECREF_SET(__pyx_v_e, ((PyObject*)__pyx_t_3));
     __pyx_t_3 = 0;
 
-    /* "pippi/soundfont.pyx":31
+    /* "pippi/soundfont.pyx":32
  * 
  *     for e in events:
- *         note = <int>ftom(e['freq'])             # <<<<<<<<<<<<<<
- *         start = <int>(e['start'] * samplerate)
- *         end = <int>(e['length'] * samplerate) + start
+ *         fnote = ftom(e['freq'])             # <<<<<<<<<<<<<<
+ *         note = <int>fnote
+ *         frac = fnote - note
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ftom); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 31, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_ftom); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     if (unlikely(__pyx_v_e == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 31, __pyx_L1_error)
+      __PYX_ERR(0, 32, __pyx_L1_error)
     }
-    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_freq); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 31, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_freq); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -3561,38 +3567,56 @@ static PyObject *__pyx_f_5pippi_9soundfont_parsemessages(PyObject *__pyx_v_event
     __pyx_t_3 = (__pyx_t_6) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_6, __pyx_t_5) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5);
     __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L1_error)
+    __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_t_3); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_v_note = ((int)__pyx_t_7);
+    __pyx_v_fnote = __pyx_t_7;
 
-    /* "pippi/soundfont.pyx":32
+    /* "pippi/soundfont.pyx":33
  *     for e in events:
- *         note = <int>ftom(e['freq'])
+ *         fnote = ftom(e['freq'])
+ *         note = <int>fnote             # <<<<<<<<<<<<<<
+ *         frac = fnote - note
+ *         start = <int>(e['start'] * samplerate)
+ */
+    __pyx_v_note = ((int)__pyx_v_fnote);
+
+    /* "pippi/soundfont.pyx":34
+ *         fnote = ftom(e['freq'])
+ *         note = <int>fnote
+ *         frac = fnote - note             # <<<<<<<<<<<<<<
+ *         start = <int>(e['start'] * samplerate)
+ *         end = <int>(e['length'] * samplerate) + start
+ */
+    __pyx_v_frac = (__pyx_v_fnote - __pyx_v_note);
+
+    /* "pippi/soundfont.pyx":35
+ *         note = <int>fnote
+ *         frac = fnote - note
  *         start = <int>(e['start'] * samplerate)             # <<<<<<<<<<<<<<
  *         end = <int>(e['length'] * samplerate) + start
  *         _id = str(uuid.uuid4())
  */
     if (unlikely(__pyx_v_e == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 32, __pyx_L1_error)
+      __PYX_ERR(0, 35, __pyx_L1_error)
     }
-    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_start); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_start); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 35, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 35, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 35, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_v_start = ((int)__pyx_t_7);
+    __pyx_v_start = ((int)__pyx_t_8);
 
-    /* "pippi/soundfont.pyx":33
- *         note = <int>ftom(e['freq'])
+    /* "pippi/soundfont.pyx":36
+ *         frac = fnote - note
  *         start = <int>(e['start'] * samplerate)
  *         end = <int>(e['length'] * samplerate) + start             # <<<<<<<<<<<<<<
  *         _id = str(uuid.uuid4())
@@ -3600,30 +3624,30 @@ static PyObject *__pyx_f_5pippi_9soundfont_parsemessages(PyObject *__pyx_v_event
  */
     if (unlikely(__pyx_v_e == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 33, __pyx_L1_error)
+      __PYX_ERR(0, 36, __pyx_L1_error)
     }
-    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_length); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 33, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_length); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 36, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 33, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 36, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 33, __pyx_L1_error)
+    __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 36, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_v_end = (((int)__pyx_t_7) + __pyx_v_start);
+    __pyx_v_end = (((int)__pyx_t_8) + __pyx_v_start);
 
-    /* "pippi/soundfont.pyx":34
+    /* "pippi/soundfont.pyx":37
  *         start = <int>(e['start'] * samplerate)
  *         end = <int>(e['length'] * samplerate) + start
  *         _id = str(uuid.uuid4())             # <<<<<<<<<<<<<<
  * 
- *         messages += [dict(id=_id, type=NOTE_ON, note=note, pos=start, amp=e['amp'], instrument=e['voice'])]
+ *         messages += [dict(id=_id, type=NOTE_ON, note=note, frac=frac, pos=start, amp=e['amp'], instrument=e['voice'])]
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_uuid); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_uuid); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 37, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_uuid4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_uuid4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -3638,147 +3662,143 @@ static PyObject *__pyx_f_5pippi_9soundfont_parsemessages(PyObject *__pyx_v_event
     }
     __pyx_t_3 = (__pyx_t_4) ? __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4) : __Pyx_PyObject_CallNoArg(__pyx_t_5);
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 34, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 34, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(((PyObject *)(&PyUnicode_Type)), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_XDECREF_SET(__pyx_v__id, ((PyObject*)__pyx_t_5));
     __pyx_t_5 = 0;
 
-    /* "pippi/soundfont.pyx":36
+    /* "pippi/soundfont.pyx":39
  *         _id = str(uuid.uuid4())
  * 
- *         messages += [dict(id=_id, type=NOTE_ON, note=note, pos=start, amp=e['amp'], instrument=e['voice'])]             # <<<<<<<<<<<<<<
- *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, amp=e['amp'], instrument=e['voice'])]
+ *         messages += [dict(id=_id, type=NOTE_ON, note=note, frac=frac, pos=start, amp=e['amp'], instrument=e['voice'])]             # <<<<<<<<<<<<<<
+ *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, instrument=e['voice'])]
  * 
  */
-    __pyx_t_5 = __Pyx_PyDict_NewPresized(6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyDict_NewPresized(7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_id, __pyx_v__id) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NOTE_ON); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_id, __pyx_v__id) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NOTE_ON); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_type, __pyx_t_3) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_type, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_note, __pyx_t_3) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_note, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_start); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_3 = PyFloat_FromDouble(__pyx_v_frac); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_pos, __pyx_t_3) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_frac, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(__pyx_v_e == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 36, __pyx_L1_error)
-    }
-    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_amp); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_start); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_amp, __pyx_t_3) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_pos, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (unlikely(__pyx_v_e == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 36, __pyx_L1_error)
+      __PYX_ERR(0, 39, __pyx_L1_error)
     }
-    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_voice); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_amp); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_instrument, __pyx_t_3) < 0) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_amp, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 36, __pyx_L1_error)
+    if (unlikely(__pyx_v_e == Py_None)) {
+      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+      __PYX_ERR(0, 39, __pyx_L1_error)
+    }
+    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_voice); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_instrument, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_5);
     PyList_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_messages, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 36, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_messages, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF_SET(__pyx_v_messages, ((PyObject*)__pyx_t_5));
     __pyx_t_5 = 0;
 
-    /* "pippi/soundfont.pyx":37
+    /* "pippi/soundfont.pyx":40
  * 
- *         messages += [dict(id=_id, type=NOTE_ON, note=note, pos=start, amp=e['amp'], instrument=e['voice'])]
- *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, amp=e['amp'], instrument=e['voice'])]             # <<<<<<<<<<<<<<
+ *         messages += [dict(id=_id, type=NOTE_ON, note=note, frac=frac, pos=start, amp=e['amp'], instrument=e['voice'])]
+ *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, instrument=e['voice'])]             # <<<<<<<<<<<<<<
  * 
  *     return sorted(messages, key=lambda x: x['pos'])
  */
-    __pyx_t_5 = __Pyx_PyDict_NewPresized(6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyDict_NewPresized(5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_id, __pyx_v__id) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
-    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NOTE_OFF); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_id, __pyx_v__id) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NOTE_OFF); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_type, __pyx_t_3) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_type, __pyx_t_3) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_note, __pyx_t_3) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_note, __pyx_t_3) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_end); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_FromSize_t(__pyx_v_end); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_pos, __pyx_t_3) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(__pyx_v_e == Py_None)) {
-      PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 37, __pyx_L1_error)
-    }
-    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_amp); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_amp, __pyx_t_3) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_pos, __pyx_t_3) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     if (unlikely(__pyx_v_e == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-      __PYX_ERR(0, 37, __pyx_L1_error)
+      __PYX_ERR(0, 40, __pyx_L1_error)
     }
-    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_voice); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_e, __pyx_n_u_voice); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_instrument, __pyx_t_3) < 0) __PYX_ERR(0, 37, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_instrument, __pyx_t_3) < 0) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_5);
     PyList_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_messages, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 37, __pyx_L1_error)
+    __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_v_messages, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 40, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF_SET(__pyx_v_messages, ((PyObject*)__pyx_t_5));
     __pyx_t_5 = 0;
 
-    /* "pippi/soundfont.pyx":30
+    /* "pippi/soundfont.pyx":31
  *     cdef size_t end
  * 
  *     for e in events:             # <<<<<<<<<<<<<<
- *         note = <int>ftom(e['freq'])
- *         start = <int>(e['start'] * samplerate)
+ *         fnote = ftom(e['freq'])
+ *         note = <int>fnote
  */
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pippi/soundfont.pyx":39
- *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, amp=e['amp'], instrument=e['voice'])]
+  /* "pippi/soundfont.pyx":42
+ *         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, instrument=e['voice'])]
  * 
  *     return sorted(messages, key=lambda x: x['pos'])             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_v_messages);
   __Pyx_GIVEREF(__pyx_v_messages);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_v_messages);
-  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = __Pyx_CyFunction_NewEx(&__pyx_mdef_5pippi_9soundfont_13parsemessages_lambda, 0, __pyx_n_s_parsemessages_locals_lambda, NULL, __pyx_n_s_pippi_soundfont, __pyx_d, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_CyFunction_NewEx(&__pyx_mdef_5pippi_9soundfont_13parsemessages_lambda, 0, __pyx_n_s_parsemessages_locals_lambda, NULL, __pyx_n_s_pippi_soundfont, __pyx_d, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_key, __pyx_t_3) < 0) __PYX_ERR(0, 39, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_key, __pyx_t_3) < 0) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_sorted, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 39, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_sorted, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 42, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(PyList_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "list", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 39, __pyx_L1_error)
+  if (!(likely(PyList_CheckExact(__pyx_t_3))||((__pyx_t_3) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "list", Py_TYPE(__pyx_t_3)->tp_name), 0))) __PYX_ERR(0, 42, __pyx_L1_error)
   __pyx_r = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
   goto __pyx_L0;
@@ -3809,7 +3829,7 @@ static PyObject *__pyx_f_5pippi_9soundfont_parsemessages(PyObject *__pyx_v_event
   return __pyx_r;
 }
 
-/* "pippi/soundfont.pyx":42
+/* "pippi/soundfont.pyx":45
  * 
  * 
  * cdef double[:,:] render(str font, list events, int voice, int channels, int samplerate):             # <<<<<<<<<<<<<<
@@ -3850,17 +3870,18 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   PyObject *__pyx_t_14 = NULL;
   int __pyx_t_15;
   PyObject *__pyx_t_16 = NULL;
-  float __pyx_t_17;
-  PyObject *__pyx_t_18 = NULL;
-  size_t __pyx_t_19;
-  long __pyx_t_20;
+  double __pyx_t_17;
+  float __pyx_t_18;
+  PyObject *__pyx_t_19 = NULL;
+  size_t __pyx_t_20;
   long __pyx_t_21;
-  size_t __pyx_t_22;
+  long __pyx_t_22;
   size_t __pyx_t_23;
-  int __pyx_t_24;
+  size_t __pyx_t_24;
+  int __pyx_t_25;
   __Pyx_RefNannySetupContext("render", 0);
 
-  /* "pippi/soundfont.pyx":43
+  /* "pippi/soundfont.pyx":46
  * 
  * cdef double[:,:] render(str font, list events, int voice, int channels, int samplerate):
  *     cdef tsf* TSF = tsf_load_filename(font.encode('UTF-8'))             # <<<<<<<<<<<<<<
@@ -3869,15 +3890,15 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
   if (unlikely(__pyx_v_font == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "encode");
-    __PYX_ERR(0, 43, __pyx_L1_error)
+    __PYX_ERR(0, 46, __pyx_L1_error)
   }
-  __pyx_t_1 = PyUnicode_AsUTF8String(__pyx_v_font); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_1 = PyUnicode_AsUTF8String(__pyx_v_font); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_t_1); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_t_1); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L1_error)
   __pyx_v_TSF = tsf_load_filename(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "pippi/soundfont.pyx":46
+  /* "pippi/soundfont.pyx":49
  * 
  *     # Total length is last event onset time + length + 3 seconds of slop for the tail
  *     cdef int length = <int>(events[-1]['start'] + events[-1]['length'] + 3) * samplerate             # <<<<<<<<<<<<<<
@@ -3886,34 +3907,34 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
   if (unlikely(__pyx_v_events == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 46, __pyx_L1_error)
+    __PYX_ERR(0, 49, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_List(__pyx_v_events, -1L, long, 1, __Pyx_PyInt_From_long, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_List(__pyx_v_events, -1L, long, 1, __Pyx_PyInt_From_long, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_start); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_start); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (unlikely(__pyx_v_events == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 46, __pyx_L1_error)
+    __PYX_ERR(0, 49, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_GetItemInt_List(__pyx_v_events, -1L, long, 1, __Pyx_PyInt_From_long, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt_List(__pyx_v_events, -1L, long, 1, __Pyx_PyInt_From_long, 1, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_t_1, __pyx_n_u_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyNumber_Add(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_1 = PyNumber_Add(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_3, 3, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_AddObjC(__pyx_t_1, __pyx_int_3, 3, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 46, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 49, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_length = (((int)__pyx_t_5) * __pyx_v_samplerate);
 
-  /* "pippi/soundfont.pyx":49
+  /* "pippi/soundfont.pyx":52
  * 
  *     # TSF only supports stereo or mono
  *     if channels == 1:             # <<<<<<<<<<<<<<
@@ -3923,7 +3944,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   __pyx_t_6 = ((__pyx_v_channels == 1) != 0);
   if (__pyx_t_6) {
 
-    /* "pippi/soundfont.pyx":50
+    /* "pippi/soundfont.pyx":53
  *     # TSF only supports stereo or mono
  *     if channels == 1:
  *         tsf_set_output(TSF, TSF_MONO, samplerate, 0)             # <<<<<<<<<<<<<<
@@ -3932,7 +3953,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
     tsf_set_output(__pyx_v_TSF, TSF_MONO, __pyx_v_samplerate, 0.0);
 
-    /* "pippi/soundfont.pyx":49
+    /* "pippi/soundfont.pyx":52
  * 
  *     # TSF only supports stereo or mono
  *     if channels == 1:             # <<<<<<<<<<<<<<
@@ -3942,7 +3963,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
     goto __pyx_L3;
   }
 
-  /* "pippi/soundfont.pyx":52
+  /* "pippi/soundfont.pyx":55
  *         tsf_set_output(TSF, TSF_MONO, samplerate, 0)
  *     else:
  *         channels = 2             # <<<<<<<<<<<<<<
@@ -3952,7 +3973,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   /*else*/ {
     __pyx_v_channels = 2;
 
-    /* "pippi/soundfont.pyx":53
+    /* "pippi/soundfont.pyx":56
  *     else:
  *         channels = 2
  *         tsf_set_output(TSF, TSF_STEREO_UNWEAVED, samplerate, 0)             # <<<<<<<<<<<<<<
@@ -3963,23 +3984,23 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   }
   __pyx_L3:;
 
-  /* "pippi/soundfont.pyx":55
+  /* "pippi/soundfont.pyx":58
  *         tsf_set_output(TSF, TSF_STEREO_UNWEAVED, samplerate, 0)
  * 
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')             # <<<<<<<<<<<<<<
  *     cdef float* block = <float*>malloc(sizeof(float) * BLOCKSIZE * 2)
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
@@ -3987,48 +4008,48 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_3);
   __pyx_t_4 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 58, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 58, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_out = __pyx_t_8;
   __pyx_t_8.memview = NULL;
   __pyx_t_8.data = NULL;
 
-  /* "pippi/soundfont.pyx":56
+  /* "pippi/soundfont.pyx":59
  * 
  *     cdef double[:,:] out = np.zeros((length, channels), dtype='d')
  *     cdef float* block = <float*>malloc(sizeof(float) * BLOCKSIZE * 2)             # <<<<<<<<<<<<<<
  * 
  *     cdef int elapsed = 0
  */
-  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(float))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_FromSize_t((sizeof(float))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_t_4, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyNumber_Multiply(__pyx_t_3, __pyx_int_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_7 = PyNumber_Multiply(__pyx_t_3, __pyx_int_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_7); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_7); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_block = ((float *)malloc(__pyx_t_9));
 
-  /* "pippi/soundfont.pyx":58
+  /* "pippi/soundfont.pyx":61
  *     cdef float* block = <float*>malloc(sizeof(float) * BLOCKSIZE * 2)
  * 
  *     cdef int elapsed = 0             # <<<<<<<<<<<<<<
@@ -4037,7 +4058,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
   __pyx_v_elapsed = 0;
 
-  /* "pippi/soundfont.pyx":59
+  /* "pippi/soundfont.pyx":62
  * 
  *     cdef int elapsed = 0
  *     cdef size_t c=0, i=0             # <<<<<<<<<<<<<<
@@ -4047,7 +4068,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   __pyx_v_c = 0;
   __pyx_v_i = 0;
 
-  /* "pippi/soundfont.pyx":60
+  /* "pippi/soundfont.pyx":63
  *     cdef int elapsed = 0
  *     cdef size_t c=0, i=0
  *     cdef size_t offset = 0             # <<<<<<<<<<<<<<
@@ -4056,7 +4077,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
   __pyx_v_offset = 0;
 
-  /* "pippi/soundfont.pyx":61
+  /* "pippi/soundfont.pyx":64
  *     cdef size_t c=0, i=0
  *     cdef size_t offset = 0
  *     cdef int channel = 0             # <<<<<<<<<<<<<<
@@ -4065,19 +4086,19 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
   __pyx_v_channel = 0;
 
-  /* "pippi/soundfont.pyx":63
+  /* "pippi/soundfont.pyx":66
  *     cdef int channel = 0
  * 
  *     cdef list messages = parsemessages(events, samplerate)             # <<<<<<<<<<<<<<
  *     cdef dict channel_map = { c+1: [] for c in range(16) }
  *     cdef dict event_map = {}
  */
-  __pyx_t_7 = __pyx_f_5pippi_9soundfont_parsemessages(__pyx_v_events, __pyx_v_samplerate); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_7 = __pyx_f_5pippi_9soundfont_parsemessages(__pyx_v_events, __pyx_v_samplerate); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 66, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_v_messages = ((PyObject*)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "pippi/soundfont.pyx":64
+  /* "pippi/soundfont.pyx":67
  * 
  *     cdef list messages = parsemessages(events, samplerate)
  *     cdef dict channel_map = { c+1: [] for c in range(16) }             # <<<<<<<<<<<<<<
@@ -4085,15 +4106,15 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  * 
  */
   { /* enter inner scope */
-    __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 67, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     for (__pyx_t_9 = 0; __pyx_t_9 < 16; __pyx_t_9+=1) {
       __pyx_7genexpr__pyx_v_c = __pyx_t_9;
-      __pyx_t_3 = __Pyx_PyInt_FromSize_t((__pyx_7genexpr__pyx_v_c + 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_FromSize_t((__pyx_7genexpr__pyx_v_c + 1)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 67, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 64, __pyx_L1_error)
+      __pyx_t_4 = PyList_New(0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 67, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      if (unlikely(PyDict_SetItem(__pyx_t_7, (PyObject*)__pyx_t_3, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 64, __pyx_L1_error)
+      if (unlikely(PyDict_SetItem(__pyx_t_7, (PyObject*)__pyx_t_3, (PyObject*)__pyx_t_4))) __PYX_ERR(0, 67, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -4101,19 +4122,19 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   __pyx_v_channel_map = ((PyObject*)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "pippi/soundfont.pyx":65
+  /* "pippi/soundfont.pyx":68
  *     cdef list messages = parsemessages(events, samplerate)
  *     cdef dict channel_map = { c+1: [] for c in range(16) }
  *     cdef dict event_map = {}             # <<<<<<<<<<<<<<
  * 
  *     # TODO: handle microtones with pitch bend
  */
-  __pyx_t_7 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 68, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_v_event_map = ((PyObject*)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "pippi/soundfont.pyx":69
+  /* "pippi/soundfont.pyx":72
  *     # TODO: handle microtones with pitch bend
  * 
  *     while True:             # <<<<<<<<<<<<<<
@@ -4122,7 +4143,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
   while (1) {
 
-    /* "pippi/soundfont.pyx":70
+    /* "pippi/soundfont.pyx":73
  * 
  *     while True:
  *         for msg in messages:             # <<<<<<<<<<<<<<
@@ -4131,39 +4152,39 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
     if (unlikely(__pyx_v_messages == Py_None)) {
       PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-      __PYX_ERR(0, 70, __pyx_L1_error)
+      __PYX_ERR(0, 73, __pyx_L1_error)
     }
     __pyx_t_7 = __pyx_v_messages; __Pyx_INCREF(__pyx_t_7); __pyx_t_10 = 0;
     for (;;) {
       if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_7)) break;
       #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-      __pyx_t_4 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 70, __pyx_L1_error)
+      __pyx_t_4 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_10); __Pyx_INCREF(__pyx_t_4); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 73, __pyx_L1_error)
       #else
-      __pyx_t_4 = PySequence_ITEM(__pyx_t_7, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 70, __pyx_L1_error)
+      __pyx_t_4 = PySequence_ITEM(__pyx_t_7, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 73, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       #endif
       __Pyx_XDECREF_SET(__pyx_v_msg, __pyx_t_4);
       __pyx_t_4 = 0;
 
-      /* "pippi/soundfont.pyx":71
+      /* "pippi/soundfont.pyx":74
  *     while True:
  *         for msg in messages:
  *             if msg['pos'] > elapsed:             # <<<<<<<<<<<<<<
  *                 break
  * 
  */
-      __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_pos); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_pos); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_elapsed); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_elapsed); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_1 = PyObject_RichCompare(__pyx_t_4, __pyx_t_3, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_1 = PyObject_RichCompare(__pyx_t_4, __pyx_t_3, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 71, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 74, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       if (__pyx_t_6) {
 
-        /* "pippi/soundfont.pyx":72
+        /* "pippi/soundfont.pyx":75
  *         for msg in messages:
  *             if msg['pos'] > elapsed:
  *                 break             # <<<<<<<<<<<<<<
@@ -4172,7 +4193,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
         goto __pyx_L9_break;
 
-        /* "pippi/soundfont.pyx":71
+        /* "pippi/soundfont.pyx":74
  *     while True:
  *         for msg in messages:
  *             if msg['pos'] > elapsed:             # <<<<<<<<<<<<<<
@@ -4181,56 +4202,56 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
       }
 
-      /* "pippi/soundfont.pyx":74
+      /* "pippi/soundfont.pyx":77
  *                 break
  * 
  *             if msg['pos'] <= elapsed:             # <<<<<<<<<<<<<<
  *                 tsf_channel_set_presetnumber(TSF, channel, msg['instrument'], False)
  * 
  */
-      __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_pos); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_pos); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_elapsed); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_elapsed); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 77, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_4 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_LE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_4 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_LE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 77, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 77, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       if (__pyx_t_6) {
 
-        /* "pippi/soundfont.pyx":75
+        /* "pippi/soundfont.pyx":78
  * 
  *             if msg['pos'] <= elapsed:
  *                 tsf_channel_set_presetnumber(TSF, channel, msg['instrument'], False)             # <<<<<<<<<<<<<<
  * 
  *                 if msg['type'] == NOTE_ON:
  */
-        __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_instrument); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_instrument); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 78, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         (void)(tsf_channel_set_presetnumber(__pyx_v_TSF, __pyx_v_channel, __pyx_t_5, 0));
 
-        /* "pippi/soundfont.pyx":77
+        /* "pippi/soundfont.pyx":80
  *                 tsf_channel_set_presetnumber(TSF, channel, msg['instrument'], False)
  * 
  *                 if msg['type'] == NOTE_ON:             # <<<<<<<<<<<<<<
  *                     channel = -1
  * 
  */
-        __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_type); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 77, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_type); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NOTE_ON); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 77, __pyx_L1_error)
+        __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_NOTE_ON); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_1 = PyObject_RichCompare(__pyx_t_4, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 77, __pyx_L1_error)
+        __pyx_t_1 = PyObject_RichCompare(__pyx_t_4, __pyx_t_3, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-        __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 77, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
         if (__pyx_t_6) {
 
-          /* "pippi/soundfont.pyx":78
+          /* "pippi/soundfont.pyx":81
  * 
  *                 if msg['type'] == NOTE_ON:
  *                     channel = -1             # <<<<<<<<<<<<<<
@@ -4239,7 +4260,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
           __pyx_v_channel = -1;
 
-          /* "pippi/soundfont.pyx":81
+          /* "pippi/soundfont.pyx":84
  * 
  *                     # look for a free channel not already playing this note
  *                     for c in channel_map.keys():             # <<<<<<<<<<<<<<
@@ -4247,7 +4268,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  *                             # Populate the maps for noteoff lookups
  */
           __pyx_t_11 = 0;
-          __pyx_t_3 = __Pyx_dict_iterator(__pyx_v_channel_map, 1, __pyx_n_s_keys, (&__pyx_t_12), (&__pyx_t_5)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
+          __pyx_t_3 = __Pyx_dict_iterator(__pyx_v_channel_map, 1, __pyx_n_s_keys, (&__pyx_t_12), (&__pyx_t_5)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 84, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_3);
           __Pyx_XDECREF(__pyx_t_1);
           __pyx_t_1 = __pyx_t_3;
@@ -4255,33 +4276,33 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
           while (1) {
             __pyx_t_13 = __Pyx_dict_iter_next(__pyx_t_1, __pyx_t_12, &__pyx_t_11, &__pyx_t_3, NULL, NULL, __pyx_t_5);
             if (unlikely(__pyx_t_13 == 0)) break;
-            if (unlikely(__pyx_t_13 == -1)) __PYX_ERR(0, 81, __pyx_L1_error)
+            if (unlikely(__pyx_t_13 == -1)) __PYX_ERR(0, 84, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 81, __pyx_L1_error)
+            __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_3); if (unlikely((__pyx_t_9 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 84, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_v_c = __pyx_t_9;
 
-            /* "pippi/soundfont.pyx":82
+            /* "pippi/soundfont.pyx":85
  *                     # look for a free channel not already playing this note
  *                     for c in channel_map.keys():
  *                         if msg['note'] not in channel_map[c]:             # <<<<<<<<<<<<<<
  *                             # Populate the maps for noteoff lookups
  *                             channel = c
  */
-            __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 85, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_4 = __Pyx_PyInt_FromSize_t(__pyx_v_c); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 82, __pyx_L1_error)
+            __pyx_t_4 = __Pyx_PyInt_FromSize_t(__pyx_v_c); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 85, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_4);
-            __pyx_t_14 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_4); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 82, __pyx_L1_error)
+            __pyx_t_14 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_4); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 85, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_14);
             __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-            __pyx_t_6 = (__Pyx_PySequence_ContainsTF(__pyx_t_3, __pyx_t_14, Py_NE)); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
+            __pyx_t_6 = (__Pyx_PySequence_ContainsTF(__pyx_t_3, __pyx_t_14, Py_NE)); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
             __pyx_t_15 = (__pyx_t_6 != 0);
             if (__pyx_t_15) {
 
-              /* "pippi/soundfont.pyx":84
+              /* "pippi/soundfont.pyx":87
  *                         if msg['note'] not in channel_map[c]:
  *                             # Populate the maps for noteoff lookups
  *                             channel = c             # <<<<<<<<<<<<<<
@@ -4290,48 +4311,48 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
               __pyx_v_channel = __pyx_v_c;
 
-              /* "pippi/soundfont.pyx":85
+              /* "pippi/soundfont.pyx":88
  *                             # Populate the maps for noteoff lookups
  *                             channel = c
  *                             channel_map[c] += [ msg['note'] ]             # <<<<<<<<<<<<<<
  *                             event_map[msg['id']] = channel
  *                             break
  */
-              __pyx_t_14 = __Pyx_PyInt_FromSize_t(__pyx_v_c); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 85, __pyx_L1_error)
+              __pyx_t_14 = __Pyx_PyInt_FromSize_t(__pyx_v_c); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 88, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_14); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 85, __pyx_L1_error)
+              __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_14); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 88, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_3);
-              __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 85, __pyx_L1_error)
+              __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_4);
-              __pyx_t_16 = PyList_New(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 85, __pyx_L1_error)
+              __pyx_t_16 = PyList_New(1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 88, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_16);
               __Pyx_GIVEREF(__pyx_t_4);
               PyList_SET_ITEM(__pyx_t_16, 0, __pyx_t_4);
               __pyx_t_4 = 0;
-              __pyx_t_4 = PyNumber_InPlaceAdd(__pyx_t_3, __pyx_t_16); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 85, __pyx_L1_error)
+              __pyx_t_4 = PyNumber_InPlaceAdd(__pyx_t_3, __pyx_t_16); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 88, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_4);
               __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
               __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-              if (unlikely(PyDict_SetItem(__pyx_v_channel_map, __pyx_t_14, __pyx_t_4) < 0)) __PYX_ERR(0, 85, __pyx_L1_error)
+              if (unlikely(PyDict_SetItem(__pyx_v_channel_map, __pyx_t_14, __pyx_t_4) < 0)) __PYX_ERR(0, 88, __pyx_L1_error)
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-              /* "pippi/soundfont.pyx":86
+              /* "pippi/soundfont.pyx":89
  *                             channel = c
  *                             channel_map[c] += [ msg['note'] ]
  *                             event_map[msg['id']] = channel             # <<<<<<<<<<<<<<
  *                             break
  * 
  */
-              __pyx_t_14 = __Pyx_PyInt_From_int(__pyx_v_channel); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 86, __pyx_L1_error)
+              __pyx_t_14 = __Pyx_PyInt_From_int(__pyx_v_channel); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 89, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_14);
-              __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
+              __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 89, __pyx_L1_error)
               __Pyx_GOTREF(__pyx_t_4);
-              if (unlikely(PyDict_SetItem(__pyx_v_event_map, __pyx_t_4, __pyx_t_14) < 0)) __PYX_ERR(0, 86, __pyx_L1_error)
+              if (unlikely(PyDict_SetItem(__pyx_v_event_map, __pyx_t_4, __pyx_t_14) < 0)) __PYX_ERR(0, 89, __pyx_L1_error)
               __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
               __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-              /* "pippi/soundfont.pyx":87
+              /* "pippi/soundfont.pyx":90
  *                             channel_map[c] += [ msg['note'] ]
  *                             event_map[msg['id']] = channel
  *                             break             # <<<<<<<<<<<<<<
@@ -4340,7 +4361,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
               goto __pyx_L14_break;
 
-              /* "pippi/soundfont.pyx":82
+              /* "pippi/soundfont.pyx":85
  *                     # look for a free channel not already playing this note
  *                     for c in channel_map.keys():
  *                         if msg['note'] not in channel_map[c]:             # <<<<<<<<<<<<<<
@@ -4352,7 +4373,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
           __pyx_L14_break:;
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-          /* "pippi/soundfont.pyx":89
+          /* "pippi/soundfont.pyx":92
  *                             break
  * 
  *                     if channel < 0:             # <<<<<<<<<<<<<<
@@ -4362,16 +4383,16 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
           __pyx_t_15 = ((__pyx_v_channel < 0) != 0);
           if (__pyx_t_15) {
 
-            /* "pippi/soundfont.pyx":92
+            /* "pippi/soundfont.pyx":95
  *                         # All channels are in use, so ignore the note.
  *                         # Whaddya gonna do...?
  *                         continue             # <<<<<<<<<<<<<<
  * 
- *                     tsf_channel_note_on(TSF, channel, msg['note'], msg['amp'])
+ *                     tsf_channel_mts_note_on(TSF, channel, <double>msg['note']+msg['frac'], msg['amp'])
  */
             goto __pyx_L8_continue;
 
-            /* "pippi/soundfont.pyx":89
+            /* "pippi/soundfont.pyx":92
  *                             break
  * 
  *                     if channel < 0:             # <<<<<<<<<<<<<<
@@ -4380,24 +4401,34 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
           }
 
-          /* "pippi/soundfont.pyx":94
+          /* "pippi/soundfont.pyx":97
  *                         continue
  * 
- *                     tsf_channel_note_on(TSF, channel, msg['note'], msg['amp'])             # <<<<<<<<<<<<<<
+ *                     tsf_channel_mts_note_on(TSF, channel, <double>msg['note']+msg['frac'], msg['amp'])             # <<<<<<<<<<<<<<
  * 
  *                 elif msg['type'] == NOTE_OFF:
  */
-          __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 94, __pyx_L1_error)
+          __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 97, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L1_error)
+          __pyx_t_17 = __pyx_PyFloat_AsDouble(__pyx_t_1); if (unlikely((__pyx_t_17 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-          __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_amp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 94, __pyx_L1_error)
+          __pyx_t_1 = PyFloat_FromDouble(((double)__pyx_t_17)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 97, __pyx_L1_error)
           __Pyx_GOTREF(__pyx_t_1);
-          __pyx_t_17 = __pyx_PyFloat_AsFloat(__pyx_t_1); if (unlikely((__pyx_t_17 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 94, __pyx_L1_error)
+          __pyx_t_14 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_frac); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 97, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_14);
+          __pyx_t_4 = PyNumber_Add(__pyx_t_1, __pyx_t_14); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_4);
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-          tsf_channel_note_on(__pyx_v_TSF, __pyx_v_channel, __pyx_t_5, __pyx_t_17);
+          __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+          __pyx_t_17 = __pyx_PyFloat_AsDouble(__pyx_t_4); if (unlikely((__pyx_t_17 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
+          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+          __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_amp); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_4);
+          __pyx_t_18 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_18 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 97, __pyx_L1_error)
+          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+          tsf_channel_mts_note_on(__pyx_v_TSF, __pyx_v_channel, __pyx_t_17, __pyx_t_18);
 
-          /* "pippi/soundfont.pyx":77
+          /* "pippi/soundfont.pyx":80
  *                 tsf_channel_set_presetnumber(TSF, channel, msg['instrument'], False)
  * 
  *                 if msg['type'] == NOTE_ON:             # <<<<<<<<<<<<<<
@@ -4407,139 +4438,139 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
           goto __pyx_L12;
         }
 
-        /* "pippi/soundfont.pyx":96
- *                     tsf_channel_note_on(TSF, channel, msg['note'], msg['amp'])
+        /* "pippi/soundfont.pyx":99
+ *                     tsf_channel_mts_note_on(TSF, channel, <double>msg['note']+msg['frac'], msg['amp'])
  * 
  *                 elif msg['type'] == NOTE_OFF:             # <<<<<<<<<<<<<<
  *                     if msg['id'] in event_map:
  *                         # If this event is playing, find the channel and cleanup
  */
-        __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_type); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 96, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_1);
-        __Pyx_GetModuleGlobalName(__pyx_t_14, __pyx_n_s_NOTE_OFF); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 96, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_type); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_4);
+        __Pyx_GetModuleGlobalName(__pyx_t_14, __pyx_n_s_NOTE_OFF); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 99, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_14);
-        __pyx_t_4 = PyObject_RichCompare(__pyx_t_1, __pyx_t_14, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 96, __pyx_L1_error)
-        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-        __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-        __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_15 < 0)) __PYX_ERR(0, 96, __pyx_L1_error)
+        __pyx_t_1 = PyObject_RichCompare(__pyx_t_4, __pyx_t_14, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 99, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
+        __pyx_t_15 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_15 < 0)) __PYX_ERR(0, 99, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
         if (__pyx_t_15) {
 
-          /* "pippi/soundfont.pyx":97
+          /* "pippi/soundfont.pyx":100
  * 
  *                 elif msg['type'] == NOTE_OFF:
  *                     if msg['id'] in event_map:             # <<<<<<<<<<<<<<
  *                         # If this event is playing, find the channel and cleanup
  *                         channel = event_map[msg['id']]
  */
-          __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 97, __pyx_L1_error)
-          __Pyx_GOTREF(__pyx_t_4);
-          __pyx_t_15 = (__Pyx_PyDict_ContainsTF(__pyx_t_4, __pyx_v_event_map, Py_EQ)); if (unlikely(__pyx_t_15 < 0)) __PYX_ERR(0, 97, __pyx_L1_error)
-          __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+          __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_1);
+          __pyx_t_15 = (__Pyx_PyDict_ContainsTF(__pyx_t_1, __pyx_v_event_map, Py_EQ)); if (unlikely(__pyx_t_15 < 0)) __PYX_ERR(0, 100, __pyx_L1_error)
+          __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           __pyx_t_6 = (__pyx_t_15 != 0);
           if (__pyx_t_6) {
 
-            /* "pippi/soundfont.pyx":99
+            /* "pippi/soundfont.pyx":102
  *                     if msg['id'] in event_map:
  *                         # If this event is playing, find the channel and cleanup
  *                         channel = event_map[msg['id']]             # <<<<<<<<<<<<<<
  *                         channel_map[channel].pop(channel_map[channel].index(msg['note']))
  *                         del event_map[msg['id']]
  */
-            __pyx_t_4 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 99, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_4);
-            __pyx_t_14 = __Pyx_PyDict_GetItem(__pyx_v_event_map, __pyx_t_4); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 99, __pyx_L1_error)
+            __pyx_t_1 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_1);
+            __pyx_t_14 = __Pyx_PyDict_GetItem(__pyx_v_event_map, __pyx_t_1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 102, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_14);
-            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-            __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_14); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 99, __pyx_L1_error)
+            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+            __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_14); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
             __pyx_v_channel = __pyx_t_5;
 
-            /* "pippi/soundfont.pyx":100
+            /* "pippi/soundfont.pyx":103
  *                         # If this event is playing, find the channel and cleanup
  *                         channel = event_map[msg['id']]
  *                         channel_map[channel].pop(channel_map[channel].index(msg['note']))             # <<<<<<<<<<<<<<
  *                         del event_map[msg['id']]
  *                         tsf_channel_note_off(TSF, channel, msg['note'])
  */
-            __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_channel); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_4);
-            __pyx_t_1 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)
+            __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_channel); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_1);
-            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-            __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_pop); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 100, __pyx_L1_error)
+            __pyx_t_4 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_4);
             __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            __pyx_t_16 = __Pyx_PyInt_From_int(__pyx_v_channel); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 100, __pyx_L1_error)
+            __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_pop); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 103, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_1);
+            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            __pyx_t_16 = __Pyx_PyInt_From_int(__pyx_v_channel); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 103, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_16);
-            __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_16); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 100, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyDict_GetItem(__pyx_v_channel_map, __pyx_t_16); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
-            __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_index); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 100, __pyx_L1_error)
+            __pyx_t_16 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_index); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 103, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_16);
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-            __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 100, __pyx_L1_error)
+            __pyx_t_3 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 103, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_3);
-            __pyx_t_18 = NULL;
+            __pyx_t_19 = NULL;
             if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_16))) {
-              __pyx_t_18 = PyMethod_GET_SELF(__pyx_t_16);
-              if (likely(__pyx_t_18)) {
+              __pyx_t_19 = PyMethod_GET_SELF(__pyx_t_16);
+              if (likely(__pyx_t_19)) {
                 PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_16);
-                __Pyx_INCREF(__pyx_t_18);
+                __Pyx_INCREF(__pyx_t_19);
                 __Pyx_INCREF(function);
                 __Pyx_DECREF_SET(__pyx_t_16, function);
               }
             }
-            __pyx_t_1 = (__pyx_t_18) ? __Pyx_PyObject_Call2Args(__pyx_t_16, __pyx_t_18, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_16, __pyx_t_3);
-            __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
+            __pyx_t_4 = (__pyx_t_19) ? __Pyx_PyObject_Call2Args(__pyx_t_16, __pyx_t_19, __pyx_t_3) : __Pyx_PyObject_CallOneArg(__pyx_t_16, __pyx_t_3);
+            __Pyx_XDECREF(__pyx_t_19); __pyx_t_19 = 0;
             __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-            if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 100, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_1);
+            if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 103, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_4);
             __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
             __pyx_t_16 = NULL;
-            if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
-              __pyx_t_16 = PyMethod_GET_SELF(__pyx_t_4);
+            if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
+              __pyx_t_16 = PyMethod_GET_SELF(__pyx_t_1);
               if (likely(__pyx_t_16)) {
-                PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+                PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
                 __Pyx_INCREF(__pyx_t_16);
                 __Pyx_INCREF(function);
-                __Pyx_DECREF_SET(__pyx_t_4, function);
+                __Pyx_DECREF_SET(__pyx_t_1, function);
               }
             }
-            __pyx_t_14 = (__pyx_t_16) ? __Pyx_PyObject_Call2Args(__pyx_t_4, __pyx_t_16, __pyx_t_1) : __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_1);
+            __pyx_t_14 = (__pyx_t_16) ? __Pyx_PyObject_Call2Args(__pyx_t_1, __pyx_t_16, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_4);
             __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
-            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-            if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 100, __pyx_L1_error)
-            __Pyx_GOTREF(__pyx_t_14);
             __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 103, __pyx_L1_error)
+            __Pyx_GOTREF(__pyx_t_14);
+            __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
             __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-            /* "pippi/soundfont.pyx":101
+            /* "pippi/soundfont.pyx":104
  *                         channel = event_map[msg['id']]
  *                         channel_map[channel].pop(channel_map[channel].index(msg['note']))
  *                         del event_map[msg['id']]             # <<<<<<<<<<<<<<
  *                         tsf_channel_note_off(TSF, channel, msg['note'])
  * 
  */
-            __pyx_t_14 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 101, __pyx_L1_error)
+            __pyx_t_14 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_id); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 104, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_14);
-            if (unlikely(PyDict_DelItem(__pyx_v_event_map, __pyx_t_14) < 0)) __PYX_ERR(0, 101, __pyx_L1_error)
+            if (unlikely(PyDict_DelItem(__pyx_v_event_map, __pyx_t_14) < 0)) __PYX_ERR(0, 104, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
 
-            /* "pippi/soundfont.pyx":102
+            /* "pippi/soundfont.pyx":105
  *                         channel_map[channel].pop(channel_map[channel].index(msg['note']))
  *                         del event_map[msg['id']]
  *                         tsf_channel_note_off(TSF, channel, msg['note'])             # <<<<<<<<<<<<<<
  * 
  *                 messages.pop(messages.index(msg))
  */
-            __pyx_t_14 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 102, __pyx_L1_error)
+            __pyx_t_14 = __Pyx_PyObject_Dict_GetItem(__pyx_v_msg, __pyx_n_u_note); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 105, __pyx_L1_error)
             __Pyx_GOTREF(__pyx_t_14);
-            __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_14); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
+            __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_14); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 105, __pyx_L1_error)
             __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
             tsf_channel_note_off(__pyx_v_TSF, __pyx_v_channel, __pyx_t_5);
 
-            /* "pippi/soundfont.pyx":97
+            /* "pippi/soundfont.pyx":100
  * 
  *                 elif msg['type'] == NOTE_OFF:
  *                     if msg['id'] in event_map:             # <<<<<<<<<<<<<<
@@ -4548,8 +4579,8 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
           }
 
-          /* "pippi/soundfont.pyx":96
- *                     tsf_channel_note_on(TSF, channel, msg['note'], msg['amp'])
+          /* "pippi/soundfont.pyx":99
+ *                     tsf_channel_mts_note_on(TSF, channel, <double>msg['note']+msg['frac'], msg['amp'])
  * 
  *                 elif msg['type'] == NOTE_OFF:             # <<<<<<<<<<<<<<
  *                     if msg['id'] in event_map:
@@ -4558,7 +4589,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
         }
         __pyx_L12:;
 
-        /* "pippi/soundfont.pyx":104
+        /* "pippi/soundfont.pyx":107
  *                         tsf_channel_note_off(TSF, channel, msg['note'])
  * 
  *                 messages.pop(messages.index(msg))             # <<<<<<<<<<<<<<
@@ -4567,17 +4598,17 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
         if (unlikely(__pyx_v_messages == Py_None)) {
           PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "pop");
-          __PYX_ERR(0, 104, __pyx_L1_error)
+          __PYX_ERR(0, 107, __pyx_L1_error)
         }
-        __pyx_t_14 = __Pyx_CallUnboundCMethod1(&__pyx_umethod_PyList_Type_index, __pyx_v_messages, __pyx_v_msg); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 104, __pyx_L1_error)
+        __pyx_t_14 = __Pyx_CallUnboundCMethod1(&__pyx_umethod_PyList_Type_index, __pyx_v_messages, __pyx_v_msg); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 107, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_14);
-        __pyx_t_12 = __Pyx_PyIndex_AsSsize_t(__pyx_t_14); if (unlikely((__pyx_t_12 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 104, __pyx_L1_error)
-        __pyx_t_4 = __Pyx_PyList_PopIndex(__pyx_v_messages, __pyx_t_14, __pyx_t_12, 1, Py_ssize_t, PyInt_FromSsize_t); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 104, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_4);
+        __pyx_t_12 = __Pyx_PyIndex_AsSsize_t(__pyx_t_14); if (unlikely((__pyx_t_12 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 107, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyList_PopIndex(__pyx_v_messages, __pyx_t_14, __pyx_t_12, 1, Py_ssize_t, PyInt_FromSsize_t); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 107, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+        __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-        /* "pippi/soundfont.pyx":74
+        /* "pippi/soundfont.pyx":77
  *                 break
  * 
  *             if msg['pos'] <= elapsed:             # <<<<<<<<<<<<<<
@@ -4586,7 +4617,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
       }
 
-      /* "pippi/soundfont.pyx":70
+      /* "pippi/soundfont.pyx":73
  * 
  *     while True:
  *         for msg in messages:             # <<<<<<<<<<<<<<
@@ -4598,20 +4629,20 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
     __pyx_L9_break:;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "pippi/soundfont.pyx":106
+    /* "pippi/soundfont.pyx":109
  *                 messages.pop(messages.index(msg))
  * 
  *         tsf_render_float(TSF, block, BLOCKSIZE, 0)             # <<<<<<<<<<<<<<
  * 
  *         for c in range(channels):
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 106, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 106, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 109, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     tsf_render_float(__pyx_v_TSF, __pyx_v_block, __pyx_t_5, 0);
 
-    /* "pippi/soundfont.pyx":108
+    /* "pippi/soundfont.pyx":111
  *         tsf_render_float(TSF, block, BLOCKSIZE, 0)
  * 
  *         for c in range(channels):             # <<<<<<<<<<<<<<
@@ -4623,41 +4654,41 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
     for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_13; __pyx_t_9+=1) {
       __pyx_v_c = __pyx_t_9;
 
-      /* "pippi/soundfont.pyx":109
+      /* "pippi/soundfont.pyx":112
  * 
  *         for c in range(channels):
  *             offset = c * BLOCKSIZE             # <<<<<<<<<<<<<<
  *             for i in range(BLOCKSIZE):
  *                 if i+elapsed < length:
  */
-      __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_c); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyInt_FromSize_t(__pyx_v_c); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 112, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 109, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_14 = PyNumber_Multiply(__pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 109, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 112, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_14 = PyNumber_Multiply(__pyx_t_7, __pyx_t_1); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 112, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_14);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_t_14); if (unlikely((__pyx_t_19 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 109, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __pyx_t_20 = __Pyx_PyInt_As_size_t(__pyx_t_14); if (unlikely((__pyx_t_20 == (size_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 112, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-      __pyx_v_offset = __pyx_t_19;
+      __pyx_v_offset = __pyx_t_20;
 
-      /* "pippi/soundfont.pyx":110
+      /* "pippi/soundfont.pyx":113
  *         for c in range(channels):
  *             offset = c * BLOCKSIZE
  *             for i in range(BLOCKSIZE):             # <<<<<<<<<<<<<<
  *                 if i+elapsed < length:
  *                     out[i+elapsed,c] = block[i+offset]
  */
-      __Pyx_GetModuleGlobalName(__pyx_t_14, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 110, __pyx_L1_error)
+      __Pyx_GetModuleGlobalName(__pyx_t_14, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_14);
-      __pyx_t_20 = __Pyx_PyInt_As_long(__pyx_t_14); if (unlikely((__pyx_t_20 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 110, __pyx_L1_error)
+      __pyx_t_21 = __Pyx_PyInt_As_long(__pyx_t_14); if (unlikely((__pyx_t_21 == (long)-1) && PyErr_Occurred())) __PYX_ERR(0, 113, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-      __pyx_t_21 = __pyx_t_20;
-      for (__pyx_t_19 = 0; __pyx_t_19 < __pyx_t_21; __pyx_t_19+=1) {
-        __pyx_v_i = __pyx_t_19;
+      __pyx_t_22 = __pyx_t_21;
+      for (__pyx_t_20 = 0; __pyx_t_20 < __pyx_t_22; __pyx_t_20+=1) {
+        __pyx_v_i = __pyx_t_20;
 
-        /* "pippi/soundfont.pyx":111
+        /* "pippi/soundfont.pyx":114
  *             offset = c * BLOCKSIZE
  *             for i in range(BLOCKSIZE):
  *                 if i+elapsed < length:             # <<<<<<<<<<<<<<
@@ -4667,25 +4698,25 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
         __pyx_t_6 = (((__pyx_v_i + __pyx_v_elapsed) < __pyx_v_length) != 0);
         if (__pyx_t_6) {
 
-          /* "pippi/soundfont.pyx":112
+          /* "pippi/soundfont.pyx":115
  *             for i in range(BLOCKSIZE):
  *                 if i+elapsed < length:
  *                     out[i+elapsed,c] = block[i+offset]             # <<<<<<<<<<<<<<
  * 
  *         elapsed += BLOCKSIZE
  */
-          __pyx_t_22 = (__pyx_v_i + __pyx_v_elapsed);
-          __pyx_t_23 = __pyx_v_c;
-          __pyx_t_24 = -1;
-          if (unlikely(__pyx_t_22 >= (size_t)__pyx_v_out.shape[0])) __pyx_t_24 = 0;
-          if (unlikely(__pyx_t_23 >= (size_t)__pyx_v_out.shape[1])) __pyx_t_24 = 1;
-          if (unlikely(__pyx_t_24 != -1)) {
-            __Pyx_RaiseBufferIndexError(__pyx_t_24);
-            __PYX_ERR(0, 112, __pyx_L1_error)
+          __pyx_t_23 = (__pyx_v_i + __pyx_v_elapsed);
+          __pyx_t_24 = __pyx_v_c;
+          __pyx_t_25 = -1;
+          if (unlikely(__pyx_t_23 >= (size_t)__pyx_v_out.shape[0])) __pyx_t_25 = 0;
+          if (unlikely(__pyx_t_24 >= (size_t)__pyx_v_out.shape[1])) __pyx_t_25 = 1;
+          if (unlikely(__pyx_t_25 != -1)) {
+            __Pyx_RaiseBufferIndexError(__pyx_t_25);
+            __PYX_ERR(0, 115, __pyx_L1_error)
           }
-          *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_22 * __pyx_v_out.strides[0]) ) + __pyx_t_23 * __pyx_v_out.strides[1]) )) = (__pyx_v_block[(__pyx_v_i + __pyx_v_offset)]);
+          *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_23 * __pyx_v_out.strides[0]) ) + __pyx_t_24 * __pyx_v_out.strides[1]) )) = (__pyx_v_block[(__pyx_v_i + __pyx_v_offset)]);
 
-          /* "pippi/soundfont.pyx":111
+          /* "pippi/soundfont.pyx":114
  *             offset = c * BLOCKSIZE
  *             for i in range(BLOCKSIZE):
  *                 if i+elapsed < length:             # <<<<<<<<<<<<<<
@@ -4696,26 +4727,26 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
       }
     }
 
-    /* "pippi/soundfont.pyx":114
+    /* "pippi/soundfont.pyx":117
  *                     out[i+elapsed,c] = block[i+offset]
  * 
  *         elapsed += BLOCKSIZE             # <<<<<<<<<<<<<<
  * 
  *         if elapsed > length:
  */
-    __pyx_t_14 = __Pyx_PyInt_From_int(__pyx_v_elapsed); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_14 = __Pyx_PyInt_From_int(__pyx_v_elapsed); if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 117, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_14);
-    __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 114, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_7 = PyNumber_InPlaceAdd(__pyx_t_14, __pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_BLOCKSIZE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 117, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_7 = PyNumber_InPlaceAdd(__pyx_t_14, __pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 117, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_14); __pyx_t_14 = 0;
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 114, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_7); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 117, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_v_elapsed = __pyx_t_5;
 
-    /* "pippi/soundfont.pyx":116
+    /* "pippi/soundfont.pyx":119
  *         elapsed += BLOCKSIZE
  * 
  *         if elapsed > length:             # <<<<<<<<<<<<<<
@@ -4725,7 +4756,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
     __pyx_t_6 = ((__pyx_v_elapsed > __pyx_v_length) != 0);
     if (__pyx_t_6) {
 
-      /* "pippi/soundfont.pyx":117
+      /* "pippi/soundfont.pyx":120
  * 
  *         if elapsed > length:
  *             break             # <<<<<<<<<<<<<<
@@ -4734,7 +4765,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
       goto __pyx_L7_break;
 
-      /* "pippi/soundfont.pyx":116
+      /* "pippi/soundfont.pyx":119
  *         elapsed += BLOCKSIZE
  * 
  *         if elapsed > length:             # <<<<<<<<<<<<<<
@@ -4745,7 +4776,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   }
   __pyx_L7_break:;
 
-  /* "pippi/soundfont.pyx":119
+  /* "pippi/soundfont.pyx":122
  *             break
  * 
  *     free(block)             # <<<<<<<<<<<<<<
@@ -4754,7 +4785,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
  */
   free(__pyx_v_block);
 
-  /* "pippi/soundfont.pyx":121
+  /* "pippi/soundfont.pyx":124
  *     free(block)
  * 
  *     return out             # <<<<<<<<<<<<<<
@@ -4765,7 +4796,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   __pyx_r = __pyx_v_out;
   goto __pyx_L0;
 
-  /* "pippi/soundfont.pyx":42
+  /* "pippi/soundfont.pyx":45
  * 
  * 
  * cdef double[:,:] render(str font, list events, int voice, int channels, int samplerate):             # <<<<<<<<<<<<<<
@@ -4782,7 +4813,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   __PYX_XDEC_MEMVIEW(&__pyx_t_8, 1);
   __Pyx_XDECREF(__pyx_t_14);
   __Pyx_XDECREF(__pyx_t_16);
-  __Pyx_XDECREF(__pyx_t_18);
+  __Pyx_XDECREF(__pyx_t_19);
   __pyx_r.data = NULL;
   __pyx_r.memview = NULL;
   __Pyx_AddTraceback("pippi.soundfont.render", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -4801,7 +4832,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_9soundfont_render(PyObject *__pyx_v_fon
   return __pyx_r;
 }
 
-/* "pippi/soundfont.pyx":123
+/* "pippi/soundfont.pyx":126
  *     return out
  * 
  * cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):             # <<<<<<<<<<<<<<
@@ -4846,33 +4877,33 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundf
     }
   }
 
-  /* "pippi/soundfont.pyx":124
+  /* "pippi/soundfont.pyx":127
  * 
  * cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):
  *     cdef list events = [dict(start=0, length=length, freq=freq, amp=amp, voice=voice)]             # <<<<<<<<<<<<<<
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
  * 
  */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 124, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_start, __pyx_int_0) < 0) __PYX_ERR(0, 124, __pyx_L1_error)
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_start, __pyx_int_0) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_length); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_length, __pyx_t_2) < 0) __PYX_ERR(0, 124, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_length, __pyx_t_2) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_freq); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_freq); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_freq, __pyx_t_2) < 0) __PYX_ERR(0, 124, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_freq, __pyx_t_2) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_amp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_amp); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_amp, __pyx_t_2) < 0) __PYX_ERR(0, 124, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_amp, __pyx_t_2) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_voice); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_voice); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_voice, __pyx_t_2) < 0) __PYX_ERR(0, 124, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_voice, __pyx_t_2) < 0) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 124, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
@@ -4880,7 +4911,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundf
   __pyx_v_events = ((PyObject*)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "pippi/soundfont.pyx":125
+  /* "pippi/soundfont.pyx":128
  * cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):
  *     cdef list events = [dict(start=0, length=length, freq=freq, amp=amp, voice=voice)]
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
@@ -4888,28 +4919,28 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundf
  * cpdef SoundBuffer playall(str font, object events, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  __pyx_t_3 = __pyx_f_5pippi_9soundfont_render(__pyx_v_font, __pyx_v_events, __pyx_v_voice, __pyx_v_channels, __pyx_v_samplerate); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 125, __pyx_L1_error)
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_3, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5pippi_9soundfont_render(__pyx_v_font, __pyx_v_events, __pyx_v_voice, __pyx_v_channels, __pyx_v_samplerate); if (unlikely(!__pyx_t_3.memview)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_3, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_3, 1);
   __pyx_t_3.memview = NULL;
   __pyx_t_3.data = NULL;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_channels, __pyx_t_4) < 0) __PYX_ERR(0, 125, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_channels, __pyx_t_4) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_samplerate, __pyx_t_4) < 0) __PYX_ERR(0, 125, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_samplerate, __pyx_t_4) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -4917,7 +4948,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundf
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "pippi/soundfont.pyx":123
+  /* "pippi/soundfont.pyx":126
  *     return out
  * 
  * cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):             # <<<<<<<<<<<<<<
@@ -5020,7 +5051,7 @@ static PyObject *__pyx_pw_5pippi_9soundfont_1play(PyObject *__pyx_self, PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "play") < 0)) __PYX_ERR(0, 123, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "play") < 0)) __PYX_ERR(0, 126, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5043,45 +5074,45 @@ static PyObject *__pyx_pw_5pippi_9soundfont_1play(PyObject *__pyx_self, PyObject
     }
     __pyx_v_font = ((PyObject*)values[0]);
     if (values[1]) {
-      __pyx_v_length = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L3_error)
+      __pyx_v_length = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L3_error)
     } else {
       __pyx_v_length = ((double)1.0);
     }
     if (values[2]) {
-      __pyx_v_freq = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_freq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L3_error)
+      __pyx_v_freq = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_freq == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L3_error)
     } else {
       __pyx_v_freq = ((double)440.0);
     }
     if (values[3]) {
-      __pyx_v_amp = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_amp == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L3_error)
+      __pyx_v_amp = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_amp == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L3_error)
     } else {
       __pyx_v_amp = ((double)1.0);
     }
     if (values[4]) {
-      __pyx_v_voice = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_voice == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L3_error)
+      __pyx_v_voice = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_voice == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L3_error)
     } else {
       __pyx_v_voice = ((int)1);
     }
     if (values[5]) {
-      __pyx_v_channels = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_channels == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L3_error)
+      __pyx_v_channels = __Pyx_PyInt_As_int(values[5]); if (unlikely((__pyx_v_channels == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L3_error)
     } else {
       __pyx_v_channels = __pyx_k_;
     }
     if (values[6]) {
-      __pyx_v_samplerate = __Pyx_PyInt_As_int(values[6]); if (unlikely((__pyx_v_samplerate == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L3_error)
+      __pyx_v_samplerate = __Pyx_PyInt_As_int(values[6]); if (unlikely((__pyx_v_samplerate == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L3_error)
     } else {
       __pyx_v_samplerate = __pyx_k__2;
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("play", 0, 1, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 123, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("play", 0, 1, 7, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 126, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.soundfont.play", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_font), (&PyUnicode_Type), 1, "font", 1))) __PYX_ERR(0, 123, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_font), (&PyUnicode_Type), 1, "font", 1))) __PYX_ERR(0, 126, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_9soundfont_play(__pyx_self, __pyx_v_font, __pyx_v_length, __pyx_v_freq, __pyx_v_amp, __pyx_v_voice, __pyx_v_channels, __pyx_v_samplerate);
 
   /* function exit code */
@@ -5107,7 +5138,7 @@ static PyObject *__pyx_pf_5pippi_9soundfont_play(CYTHON_UNUSED PyObject *__pyx_s
   __pyx_t_2.voice = __pyx_v_voice;
   __pyx_t_2.channels = __pyx_v_channels;
   __pyx_t_2.samplerate = __pyx_v_samplerate;
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundfont_play(__pyx_v_font, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundfont_play(__pyx_v_font, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5124,7 +5155,7 @@ static PyObject *__pyx_pf_5pippi_9soundfont_play(CYTHON_UNUSED PyObject *__pyx_s
   return __pyx_r;
 }
 
-/* "pippi/soundfont.pyx":127
+/* "pippi/soundfont.pyx":130
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
  * 
  * cpdef SoundBuffer playall(str font, object events, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):             # <<<<<<<<<<<<<<
@@ -5156,7 +5187,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundf
     }
   }
 
-  /* "pippi/soundfont.pyx":128
+  /* "pippi/soundfont.pyx":131
  * 
  * cpdef SoundBuffer playall(str font, object events, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)             # <<<<<<<<<<<<<<
@@ -5164,29 +5195,29 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundf
  * 
  */
   __Pyx_XDECREF(((PyObject *)__pyx_r));
-  if (!(likely(PyList_CheckExact(__pyx_v_events))||((__pyx_v_events) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "list", Py_TYPE(__pyx_v_events)->tp_name), 0))) __PYX_ERR(0, 128, __pyx_L1_error)
-  __pyx_t_1 = __pyx_f_5pippi_9soundfont_render(__pyx_v_font, ((PyObject*)__pyx_v_events), __pyx_v_voice, __pyx_v_channels, __pyx_v_samplerate); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 128, __pyx_L1_error)
-  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
+  if (!(likely(PyList_CheckExact(__pyx_v_events))||((__pyx_v_events) == Py_None)||(PyErr_Format(PyExc_TypeError, "Expected %.16s, got %.200s", "list", Py_TYPE(__pyx_v_events)->tp_name), 0))) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_5pippi_9soundfont_render(__pyx_v_font, ((PyObject*)__pyx_v_events), __pyx_v_voice, __pyx_v_channels, __pyx_v_samplerate); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 131, __pyx_L1_error)
+  __pyx_t_2 = __pyx_memoryview_fromslice(__pyx_t_1, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_channels, __pyx_t_4) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_channels, __pyx_t_4) < 0) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_samplerate); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_samplerate, __pyx_t_4) < 0) __PYX_ERR(0, 128, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_samplerate, __pyx_t_4) < 0) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5194,7 +5225,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_9soundf
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "pippi/soundfont.pyx":127
+  /* "pippi/soundfont.pyx":130
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
  * 
  * cpdef SoundBuffer playall(str font, object events, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):             # <<<<<<<<<<<<<<
@@ -5256,7 +5287,7 @@ static PyObject *__pyx_pw_5pippi_9soundfont_3playall(PyObject *__pyx_self, PyObj
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_events)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("playall", 0, 2, 5, 1); __PYX_ERR(0, 127, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("playall", 0, 2, 5, 1); __PYX_ERR(0, 130, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -5278,7 +5309,7 @@ static PyObject *__pyx_pw_5pippi_9soundfont_3playall(PyObject *__pyx_self, PyObj
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "playall") < 0)) __PYX_ERR(0, 127, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "playall") < 0)) __PYX_ERR(0, 130, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5297,30 +5328,30 @@ static PyObject *__pyx_pw_5pippi_9soundfont_3playall(PyObject *__pyx_self, PyObj
     __pyx_v_font = ((PyObject*)values[0]);
     __pyx_v_events = values[1];
     if (values[2]) {
-      __pyx_v_voice = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_voice == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L3_error)
+      __pyx_v_voice = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_voice == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L3_error)
     } else {
       __pyx_v_voice = ((int)1);
     }
     if (values[3]) {
-      __pyx_v_channels = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_channels == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L3_error)
+      __pyx_v_channels = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_channels == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L3_error)
     } else {
       __pyx_v_channels = __pyx_k__3;
     }
     if (values[4]) {
-      __pyx_v_samplerate = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_samplerate == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L3_error)
+      __pyx_v_samplerate = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_samplerate == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L3_error)
     } else {
       __pyx_v_samplerate = __pyx_k__4;
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("playall", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 127, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("playall", 0, 2, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 130, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.soundfont.playall", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_font), (&PyUnicode_Type), 1, "font", 1))) __PYX_ERR(0, 127, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_font), (&PyUnicode_Type), 1, "font", 1))) __PYX_ERR(0, 130, __pyx_L1_error)
   __pyx_r = __pyx_pf_5pippi_9soundfont_2playall(__pyx_self, __pyx_v_font, __pyx_v_events, __pyx_v_voice, __pyx_v_channels, __pyx_v_samplerate);
 
   /* function exit code */
@@ -5343,7 +5374,7 @@ static PyObject *__pyx_pf_5pippi_9soundfont_2playall(CYTHON_UNUSED PyObject *__p
   __pyx_t_2.voice = __pyx_v_voice;
   __pyx_t_2.channels = __pyx_v_channels;
   __pyx_t_2.samplerate = __pyx_v_samplerate;
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundfont_playall(__pyx_v_font, __pyx_v_events, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_9soundfont_playall(__pyx_v_font, __pyx_v_events, 0, &__pyx_t_2)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -21328,6 +21359,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_format, __pyx_k_format, sizeof(__pyx_k_format), 0, 0, 1, 1},
   {&__pyx_n_s_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 0, 1, 1},
   {&__pyx_n_u_fortran, __pyx_k_fortran, sizeof(__pyx_k_fortran), 0, 1, 0, 1},
+  {&__pyx_n_s_frac, __pyx_k_frac, sizeof(__pyx_k_frac), 0, 0, 1, 1},
+  {&__pyx_n_u_frac, __pyx_k_frac, sizeof(__pyx_k_frac), 0, 1, 0, 1},
   {&__pyx_n_s_freq, __pyx_k_freq, sizeof(__pyx_k_freq), 0, 0, 1, 1},
   {&__pyx_n_u_freq, __pyx_k_freq, sizeof(__pyx_k_freq), 0, 1, 0, 1},
   {&__pyx_n_s_ftom, __pyx_k_ftom, sizeof(__pyx_k_ftom), 0, 0, 1, 1},
@@ -21413,8 +21446,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_sorted = __Pyx_GetBuiltinName(__pyx_n_s_sorted); if (!__pyx_builtin_sorted) __PYX_ERR(0, 39, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_builtin_sorted = __Pyx_GetBuiltinName(__pyx_n_s_sorted); if (!__pyx_builtin_sorted) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 111, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 272, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(1, 856, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(1, 1038, __pyx_L1_error)
@@ -22291,59 +22324,59 @@ if (!__Pyx_RefNanny) {
  */
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_NOTE_OFF, __pyx_int_1) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
 
-  /* "pippi/soundfont.pyx":123
+  /* "pippi/soundfont.pyx":126
  *     return out
  * 
  * cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):             # <<<<<<<<<<<<<<
  *     cdef list events = [dict(start=0, length=length, freq=freq, amp=amp, voice=voice)]
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k_ = __pyx_t_3;
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k__2 = __pyx_t_3;
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k_ = __pyx_t_3;
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k__2 = __pyx_t_3;
 
-  /* "pippi/soundfont.pyx":127
+  /* "pippi/soundfont.pyx":130
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
  * 
  * cpdef SoundBuffer playall(str font, object events, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):             # <<<<<<<<<<<<<<
  *     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k__3 = __pyx_t_3;
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k__4 = __pyx_t_3;
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_CHANNELS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k__3 = __pyx_t_3;
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_SAMPLERATE); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 127, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_3 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 130, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_k__4 = __pyx_t_3;
 
