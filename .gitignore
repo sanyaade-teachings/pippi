@@ -15,6 +15,7 @@ examples/*.wav
 examples/*.mp3
 
 tests/renders/*.wav
+tests/renders/*.png
 
 pippi.log
 
