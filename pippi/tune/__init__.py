@@ -7,7 +7,7 @@ a4 = a0 * 2**4
 default_key = 'c'
 match_roman = '[ivIV]?[ivIV]?[iI]?'
 
-intervals = {
+INTERVALS = {
     'P1': 0, 
     'm2': 1, 
     'M2': 2, 
@@ -36,14 +36,14 @@ intervals = {
 }
 
 # what's the best way to handle inversions?
-base_qualities = {
+BASE_QUALITIES = {
     '^': ['P1', 'M3', 'P5'],   # major
     '-': ['P1', 'm3', 'P5'],   # minor
     '*': ['P1', 'm3', 'TT'],   # diminished 
     '+': ['P1', 'M3', 'm6'],   # augmented
 }
 
-extensions = {
+EXTENSIONS = {
     '7': ['m7'],               # dominant 7th
     '^7': ['M7'],              # major 7th
     '9': ['m7', 'M9'],         # dominant 9th
@@ -54,7 +54,7 @@ extensions = {
     '6': ['M6'],        
 }
 
-chord_romans = {
+CHORD_ROMANS = {
     'i': 0,
     'ii': 2,
     'iii': 4,
@@ -65,7 +65,7 @@ chord_romans = {
 }
 
 # Common root movements
-progressions = {
+PROGRESSIONS = {
     'I': ['iii', 'vi', 'ii', 'IV', 'V', 'vii*'],
     'i': ['VII', 'III', 'VI', 'ii*', 'iv', 'V', 'vii*'],
     'ii': ['V', 'vii*'],
@@ -81,9 +81,9 @@ progressions = {
     'vii': ['I', 'i'], # a pivot
 }
 
-equal = tuple([ 2**(i/12) for i in range(12) ])
+EQUAL = tuple([ 2**(i/12) for i in range(12) ])
 
-just = ( 
+JUST = ( 
     (1.0, 1.0),     # P1
     (16.0, 15.0),   # m2
     (9.0, 8.0),     # M2
@@ -98,7 +98,7 @@ just = (
     (15.0, 8.0),    # M7
 )
 
-terry = (
+TERRY = (
     (1.0, 1.0),     # P1  C
     (16.0, 15.0),   # m2  Db
     (10.0, 9.0),    # M2  D
@@ -113,7 +113,7 @@ terry = (
     (15.0, 8.0),    # M7  B
 )
 
-young = (
+YOUNG = (
     (1.0, 1.0),       # P1 0
     (567.0, 512.0),   # m2 1
     (9.0, 8.0),       # M2 2
@@ -128,33 +128,33 @@ young = (
     (63.0, 32.0),     # M7 11
 )
 
-louis = (
-    1, 
-    math.sqrt(5) * 0.5,
-    math.sqrt(6) * 0.5, 
-    math.sqrt(7) * 0.5, 
-    math.sqrt(2), 
-    math.sqrt(9) * 0.5, 
-    math.sqrt(10) * 0.5, 
-    math.sqrt(11) * 0.5, 
-    math.sqrt(3), 
-    math.sqrt(13) * 0.5, 
-    math.sqrt(14) * 0.5, 
-    math.sqrt(15) * 0.5, 
+LOUIS = (
+    (1, 1), 
+    (math.sqrt(5) * 0.5, 1),
+    (math.sqrt(6) * 0.5, 1), 
+    (math.sqrt(7) * 0.5, 1), 
+    (math.sqrt(2), 1), 
+    (math.sqrt(9) * 0.5, 1), 
+    (math.sqrt(10) * 0.5, 1), 
+    (math.sqrt(11) * 0.5, 1), 
+    (math.sqrt(3), 1), 
+    (math.sqrt(13) * 0.5, 1), 
+    (math.sqrt(14) * 0.5, 1), 
+    (math.sqrt(15) * 0.5, 1), 
 )
 
 
 ## scale mappings
 # standard
-major = (0, 2, 4, 5, 7, 9, 11)
-minor = (0, 2, 3, 5, 7, 8, 10)
-chromatic = tuple(range(12))
+MAJOR = (0, 2, 4, 5, 7, 9, 11)
+MINOR = (0, 2, 3, 5, 7, 8, 10)
+CHROMATIC = tuple(range(12))
 
 # notated as semitone deviations from 
-# a major scale for readability
-scales = {
-    'major': major,
-    'minor': minor,
+# a MAJOR scale for readability
+SCALES = {
+    'MAJOR': MAJOR,
+    'MINOR': MINOR,
     'super_locrian': (0, 2-1, 4-1, 5-1, 7-1, 9-1, 11-1),
     'neapolitan_minor': (0, 2-1, 4-1, 5, 7, 9-1, 11),
     'neapolitan_major': (0, 2-1, 4-1, 5, 7, 9, 11),
@@ -163,8 +163,8 @@ scales = {
     'enigmatic': (0, 2-1, 4, 5+1, 7+1, 9+1, 11),
 }
 
-# Maps to chromatic ratio lists above
-notes = { 
+# Maps to CHROMATIC ratio lists above
+NOTES = { 
     'a': 0,
     'a#': 1,
     'bb': 1, 
@@ -184,7 +184,7 @@ notes = {
     'ab': 11, 
 }
 
-midi_notes = {
+MIDI_NOTES = {
     'a': 21,
     'a#': 22,
     'bb': 22,
@@ -245,7 +245,7 @@ def nti(note):
             returns the index of enharmonic note names
             or False if not found
     """
-    return notes.get(note, False)
+    return NOTES.get(note, False)
 
 def ntf(note, octave=None, ratios=None):
     """ Note to freq 
@@ -257,7 +257,7 @@ def ntf(note, octave=None, ratios=None):
         octave = int(parsed.group(2))
 
     if ratios is None:
-        ratios = terry
+        ratios = TERRY
 
     if octave is None:
         octave = 4
@@ -298,7 +298,7 @@ def nts(note, octave):
     octave = octave if octave >= -2 else -2
     octave = octave if octave <= 8 else 8 
 
-    degree = notes[note] * 2
+    degree = NOTES[note] * 2
 
     degree = degree + ((octave + 2) * 24) 
 
@@ -345,10 +345,10 @@ def scale_mask_to_indexes(mask):
 
 def tofreqs(degrees=None, root=261.63, ratios=None, scale=None, scale_mask=None):
     if ratios is None:
-        ratios = just
+        ratios = JUST
 
     if scale is None:
-        scale = major
+        scale = MAJOR
     
     if degrees is None:
         degrees = range(len(scale))
@@ -369,10 +369,10 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
         scale_degrees = [1,3,5]
 
     if ratios is None:
-        ratios = terry
+        ratios = TERRY
 
     if scale is None:
-        scale = major
+        scale = MAJOR
 
     freqs = []
     root = ntf(root, octave)
@@ -403,14 +403,14 @@ def get_intervals(name):
     quality = get_quality(name)
     extension = get_extension(name)
 
-    chord = base_qualities[quality]
+    chord = BASE_QUALITIES[quality]
 
     if extension != '':
-        chord = chord + extensions[extension]
+        chord = chord + EXTENSIONS[extension]
 
     return chord
 
-def get_freq_from_chord_name(name, root=440, octave=3, ratios=just):
+def get_freq_from_chord_name(name, root=440, octave=3, ratios=JUST):
     index = get_chord_root_index(name)
     freq = ratios[index]
     freq = root * (freq[0] / freq[1]) * 2**octave
@@ -422,7 +422,7 @@ def strip_chord(name):
     return root.lower()
 
 def get_chord_root_index(name):
-    root = chord_romans[strip_chord(name)]
+    root = CHORD_ROMANS[strip_chord(name)]
 
     if '#' in name:
         root += 1
@@ -433,10 +433,10 @@ def get_chord_root_index(name):
     return root % 12
 
 def add_intervals(a, b):
-    a = intervals[a]
-    b = intervals[b]
+    a = INTERVALS[a]
+    b = INTERVALS[b]
     c = a + b
-    for interval, index in intervals.items():
+    for interval, index in INTERVALS.items():
         if c == index:
             c = interval
 
@@ -444,7 +444,7 @@ def add_intervals(a, b):
 
 def get_ratio_from_interval(interval, ratios):
     try:
-        index = intervals[interval]
+        index = INTERVALS[interval]
     except IndexError:
         log('Interval out of range, doh. Here have a P1')
         index = 0
@@ -464,14 +464,14 @@ def get_ratio_from_interval(interval, ratios):
 
 def next_chord(name):
     name = strip_chord(name)
-    return random.choice(progressions[name])
+    return random.choice(PROGRESSIONS[name])
 
 def chord(name, key=None, octave=3, ratios=None):
     if key is None:
         key = default_key
 
     if ratios is None:
-        ratios = terry
+        ratios = TERRY
 
     key = ntf(key, octave, ratios)
     root = ratios[get_chord_root_index(name)]
@@ -484,7 +484,7 @@ def chord(name, key=None, octave=3, ratios=None):
 
     return chord
 
-def chords(names, key=None, octave=3, ratios=just):
+def chords(names, key=None, octave=3, ratios=JUST):
     if key is None:
         key = default_key
 
@@ -524,3 +524,27 @@ def fit(freq, low=20, high=20000, get_change=False):
         return freq, mult
     else:
         return freq
+
+class Parser:
+    def __init__(self, score, durations=None, octave=3, ratios=None):
+        self.score = score
+        self.octave = octave
+
+        if durations is None:
+            durations = (0.5,)
+        self.durations = durations
+
+        if ratios is None:
+            ratios = TERRY
+        self.ratios = ratios
+
+    def parse(self):
+        pos = 0
+        events = []
+
+        for note in self.score.split(' '):
+            cluster = note.split(',')
+            events += [(pos, cluster)]
+            
+
+        self.parsed = parsed
