@@ -213,23 +213,24 @@ def ftom(freq):
 def ftomi(freq):
     return int(round(ftom(freq)))
 
-def extractPitchClass(pitch):
-    parsed = re.match('([a-zA-Z]#?b?)(\d+)', pitch)
+def parse_pitch_class(note, octave=None):
+    note = note.lower()
+    if re.match('[a-zA-Z]#?b?\d+', note) is not None:
+        parsed = re.match('([a-zA-Z]#?b?)(\d+)', note)
+        note = parsed.group(1)
+        octave = int(parsed.group(2))
 
-    try:
-        pitch_class = parsed.group(1)
-    except AttributeError:
-        return pitch
+    if octave is None:
+        octave = 4
 
-    return pitch_class
+    return note, octave
 
-def ptom(pitch):
-    pitch_class = extractPitchClass(pitch.lower())
-    register = int(pitch[-1])
-    midi_note = midi_map[pitch_class]
-    midi_note += register * 12
-
-    return midi_note
+def ntm(note, octave=None):
+    note, octave = parse_pitch_class(note, octave)
+    note_index = nti(note)
+    if note_index >= 3:
+        octave -= 1
+    return note_index + 21 + (octave * 12)
 
 def edo(degree, divs=12):
     return 2**(degree/float(divs))
@@ -250,17 +251,10 @@ def nti(note):
 def ntf(note, octave=None, ratios=None):
     """ Note to freq 
     """
-    note = note.lower()
-    if re.match('[a-zA-Z]#?b?\d+', note) is not None:
-        parsed = re.match('([a-zA-Z]#?b?)(\d+)', note)
-        note = parsed.group(1)
-        octave = int(parsed.group(2))
-
     if ratios is None:
         ratios = TERRY
 
-    if octave is None:
-        octave = 4
+    note, octave = parse_pitch_class(note, octave)
 
     note_index = nti(note)
     mult = ratios[note_index][0] / ratios[note_index][1]

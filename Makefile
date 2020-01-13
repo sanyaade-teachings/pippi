@@ -1,4 +1,4 @@
-.PHONY: test test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists build
+.PHONY: test test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches build
 
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
@@ -38,6 +38,9 @@ test-soundpipe:
 
 test-lists:
 	python -m unittest tests/test_lists.py -v
+
+test-pitches:
+	python -m unittest tests/test_pitches.py -v
 
 clean:
 	rm -rf build/
