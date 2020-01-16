@@ -286,6 +286,7 @@ cdef double[:,:] _mincer(double[:,:] snd,
                          int wtsize, 
                          int length, 
                          int channels, 
+                         int samplerate,
                          double[:] time, 
                          double amp, 
                          double[:] pitch):
@@ -297,6 +298,7 @@ cdef double[:,:] _mincer(double[:,:] snd,
     cdef double** tbls = memoryview2ftbls(snd)
     cdef double pos = 0
     cdef sp_ftbl* tbl
+    cdef double sourcelength = <double>sndframelength / <double>samplerate
 
     sp_create(&sp)
 
@@ -309,7 +311,7 @@ cdef double[:,:] _mincer(double[:,:] snd,
 
         for i in range(length):
             pos = <double>i/<double>length
-            mincer.time = <double>interpolation._linear_pos(time, pos) * sndlength
+            mincer.time = <double>interpolation._linear_pos(time, pos) * sourcelength
             mincer.pitch = <double>interpolation._linear_pos(pitch, pos)
             sp_mincer_compute(sp, mincer, NULL, &output)
             out[i,c] = <double>output
@@ -327,7 +329,7 @@ cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double 
     cdef int framelength = <int>(samplerate * length)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((framelength, channels), dtype='d')
-    return _mincer(snd, out, length, <int>len(snd), wtsize, framelength, channels, time, amp, pitch)
+    return _mincer(snd, out, length, <int>len(snd), wtsize, framelength, channels, samplerate, time, amp, pitch)
 
 cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, double drive, double dcoffset, int length, int channels, bint dcblock):
     cdef sp_data* sp

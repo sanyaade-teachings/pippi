@@ -1711,7 +1711,7 @@ struct __pyx_opt_args_5pippi_9soundpipe_paulstretch;
 
 /* "pippi/soundpipe.pxd":207
  * 
- * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, double[:] time, double amp, double[:] pitch)
+ * cdef double[:,:] _mincer(double[:,:] snd, double[:,:] out, double sndlength, int sndframelength, int wtsize, int length, int channels, int samplerate, double[:] time, double amp, double[:] pitch)
  * cpdef double[:,:] mincer(double[:,:] snd, double length, double[:] time, double amp, double[:] pitch, int wtsize=?, int samplerate=?)             # <<<<<<<<<<<<<<
  * 
  * cdef double[:,:] _saturator(double[:,:] snd, double[:,:] out, double drive, double dcoffset, int length, int channels, bint dcblock)

@@ -910,7 +910,7 @@ cdef class SoundBuffer:
             Uses the csound `mincer` phase vocoder implementation from soundpipe.
         """
         if position is None:
-            position = Wavetable('phasor') * self.dur
+            position = Wavetable('phasor', window=True)
 
         cdef double[:] time_lfo = to_window(position)
         cdef double[:] pitch_lfo = to_window(1.0)
@@ -930,7 +930,7 @@ cdef class SoundBuffer:
             length = self.dur
 
         if position is None:
-            position = Wavetable('phasor') * length
+            position = Wavetable('phasor', window=True)
 
         cdef double[:] time_lfo = to_window(position)
         cdef double[:] pitch_lfo = to_window(speed)
