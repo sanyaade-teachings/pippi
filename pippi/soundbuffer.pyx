@@ -10,7 +10,7 @@ cimport numpy as np
 cimport cython
 from libc cimport math
 
-from pippi.wavetables cimport Wavetable, PHASOR, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window, to_flag
+from pippi.wavetables cimport Wavetable, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window, to_flag
 from pippi.dsp cimport _mag
 from pippi cimport interpolation
 from pippi cimport fx
@@ -910,7 +910,7 @@ cdef class SoundBuffer:
             Uses the csound `mincer` phase vocoder implementation from soundpipe.
         """
         if position is None:
-            position = Wavetable(PHASOR) * self.dur
+            position = Wavetable('phasor') * self.dur
 
         cdef double[:] time_lfo = to_window(position)
         cdef double[:] pitch_lfo = to_window(1.0)
@@ -930,7 +930,7 @@ cdef class SoundBuffer:
             length = self.dur
 
         if position is None:
-            position = Wavetable(PHASOR) * length
+            position = Wavetable('phasor') * length
 
         cdef double[:] time_lfo = to_window(position)
         cdef double[:] pitch_lfo = to_window(speed)
