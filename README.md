@@ -31,16 +31,18 @@ beta phase of development is to deal with the lack of documentation for this pro
 
 ## Install from source
 
-To install the most recent development version run:
+> raspbian buster users: you must install the `libatlas-base-dev` package with `apt` to build the latest version of numpy.
+
+To install pippi:
 
     make install
 
-Which will:
+Which does a few things:
 
-- Install python deps, so make sure you're inside your venv if you want to be!
-- Init and update git submodules
-- Build and install Soundpipe
-- Build and install pippi
+- Installs python deps, so *make sure you're inside a virtual environment* if you want to be!
+- Sets up git submodules for external libs
+- Builds and installs Soundpipe
+- Builds and installs pippi & cython extensions
 
 Please let me know if you run into problems!
 
