@@ -5,7 +5,7 @@ dsp.seed()
 
 class TestSoundfont(TestCase):
     def test_play(self):
-        length = 3
+        length = 10
         freq = 660
         amp = 1
         voice = 1
@@ -15,13 +15,13 @@ class TestSoundfont(TestCase):
     def test_playall(self):
         events = []
         pos = 0
-        length = 30
+        length = 10
 
         while pos < length:
             events += [dict(
                 start=pos, 
                 length=dsp.rand(0.2, 3), 
-                freq=110*dsp.randint(1, 10), 
+                freq=30*dsp.randint(1, 10), 
                 amp=dsp.rand(), 
                 voice=dsp.randint(0, 127)
             )]
