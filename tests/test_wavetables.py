@@ -29,18 +29,14 @@ class TestWavetables(TestCase):
         self.assertEqual(len(wt2), 4096)
         self.assertEqual(len(wt3), 1000)
 
-    """
-    def test_polyseg(self):
-        score = 'sine 1,tri,0-1 rand,0.3-0.8'
-        length = random.randint(100, 1000)
-        for segment in score.split(' '):
-            match = wavetables.SEGMENT_RE.match(segment)
+    def test_save_and_load_wt(self):
+        wt = dsp.wt('sine', wtsize=4096)
+        self.assertEqual(len(wt), 4096)
+        wt.write('tests/renders/wavetable_sine.wav')
+        wt.graph('tests/renders/wavetable_sine-original.png')
 
-     
-        wt = wavetables.polyseg(score, length)
-
-        self.assertEqual(len(wt), length)
-    """
+        wt = dsp.load('tests/renders/wavetable_sine.wav')
+        wt.graph('tests/renders/wavetable_sine-reloaded.png')
 
     def test_randline(self):
         numpoints = random.randint(1, 10)

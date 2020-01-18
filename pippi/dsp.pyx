@@ -7,6 +7,7 @@ import numpy as np
 import random
 
 cimport cython
+import soundfile
 
 from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
@@ -138,6 +139,10 @@ def join(sounds, overlap=None, channels=None, samplerate=None):
 
 cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, int samplerate=44100):
     return SoundBuffer.__new__(SoundBuffer, frames=frames, length=length, channels=channels, samplerate=samplerate)
+
+cpdef Wavetable load(object filename):
+    frames, samplerate = soundfile.read(filename, dtype='float64', always_2d=False)
+    return Wavetable(frames)
 
 cpdef SoundBuffer read(object filename, double length=-1, double start=0):
     """ Read a soundfile from disk and return a `SoundBuffer` with its contents.

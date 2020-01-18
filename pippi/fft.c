@@ -1214,6 +1214,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_snapped;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_normalize;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_interp;
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_toonsets;
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_write;
 struct __pyx_opt_args_5pippi_10wavetables_to_window;
 struct __pyx_opt_args_5pippi_10wavetables_to_wavetable;
 struct __pyx_opt_args_5pippi_10wavetables_to_stack;
@@ -1537,14 +1538,27 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_interp {
  *     cpdef double interp(Wavetable self, double pos, str method=*)
  *     cpdef list toonsets(Wavetable self, double length=*)             # <<<<<<<<<<<<<<
  * 
- * cdef int SINE
+ *     cpdef void write(Wavetable self, object path=*, int samplerate=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_toonsets {
   int __pyx_n;
   double length;
 };
 
-/* "pippi/wavetables.pxd":85
+/* "pippi/wavetables.pxd":50
+ *     cpdef list toonsets(Wavetable self, double length=*)
+ * 
+ *     cpdef void write(Wavetable self, object path=*, int samplerate=*)             # <<<<<<<<<<<<<<
+ * 
+ * cdef int SINE
+ */
+struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_write {
+  int __pyx_n;
+  PyObject *path;
+  int samplerate;
+};
+
+/* "pippi/wavetables.pxd":87
  * cdef int* ALL_WAVETABLES
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1556,7 +1570,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_window {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":86
+/* "pippi/wavetables.pxd":88
  * 
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1568,7 +1582,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_wavetable {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":87
+/* "pippi/wavetables.pxd":89
  * cpdef double[:] to_window(object w, int wtsize=?)
  * cpdef double[:] to_wavetable(object w, int wtsize=?)
  * cpdef list to_stack(list wavetables, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1580,7 +1594,7 @@ struct __pyx_opt_args_5pippi_10wavetables_to_stack {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":89
+/* "pippi/wavetables.pxd":91
  * cpdef list to_stack(list wavetables, int wtsize=?)
  * cdef int to_flag(str value)
  * cpdef Wavetable _randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)             # <<<<<<<<<<<<<<
@@ -1594,7 +1608,7 @@ struct __pyx_opt_args_5pippi_10wavetables__randline {
   int wtsize;
 };
 
-/* "pippi/wavetables.pxd":94
+/* "pippi/wavetables.pxd":96
  * cpdef double[:] adsr(int length, int attack, int decay, double sustain, int release)
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)             # <<<<<<<<<<<<<<
@@ -1606,7 +1620,7 @@ struct __pyx_opt_args_5pippi_10wavetables_wavetable {
   __Pyx_memviewslice data;
 };
 
-/* "pippi/wavetables.pxd":95
+/* "pippi/wavetables.pxd":97
  * cdef double[:] _wavetable(int wavetable_type, int length)
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
  * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)             # <<<<<<<<<<<<<<
@@ -1617,7 +1631,7 @@ struct __pyx_opt_args_5pippi_10wavetables__seesaw {
   double tip;
 };
 
-/* "pippi/wavetables.pxd":96
+/* "pippi/wavetables.pxd":98
  * cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=?)
  * cdef double[:] _seesaw(double[:] wt, int length, double tip=*)
  * cpdef Wavetable seesaw(object wt, int length, double tip=*)             # <<<<<<<<<<<<<<
@@ -1885,6 +1899,7 @@ struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable {
   struct __pyx_obj_5pippi_10wavetables_Wavetable *(*crushed)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int, int __pyx_skip_dispatch);
   double (*interp)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_interp *__pyx_optional_args);
   PyObject *(*toonsets)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_toonsets *__pyx_optional_args);
+  void (*write)(struct __pyx_obj_5pippi_10wavetables_Wavetable *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_write *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable *__pyx_vtabptr_5pippi_10wavetables_Wavetable;
 

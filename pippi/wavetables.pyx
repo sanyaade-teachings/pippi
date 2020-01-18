@@ -14,6 +14,7 @@ from cpython.array cimport array, clone
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc cimport math
 
+from pippi.defaults cimport DEFAULT_SAMPLERATE
 from pippi cimport interpolation, rand
 from pippi import graph
 from pippi.soundbuffer cimport SoundBuffer
@@ -682,6 +683,11 @@ cdef class Wavetable:
             elapsed += o
 
         return out
+
+    cpdef void write(Wavetable self, object path=None, int samplerate=DEFAULT_SAMPLERATE):
+        if path is None:
+            path = 'wavetable.wav'
+        soundfile.write(path, self.data, samplerate)
 
 
 cdef tuple _parse_polyseg(str score, int length, int wtlength):

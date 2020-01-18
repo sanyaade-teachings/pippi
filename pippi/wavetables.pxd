@@ -47,6 +47,8 @@ cdef class Wavetable:
     cpdef double interp(Wavetable self, double pos, str method=*)
     cpdef list toonsets(Wavetable self, double length=*)
 
+    cpdef void write(Wavetable self, object path=*, int samplerate=*)
+
 cdef int SINE
 cdef int SINEIN 
 cdef int SINEOUT
