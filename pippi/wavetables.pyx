@@ -123,6 +123,21 @@ cdef int to_flag(str value):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+cdef double[:] _mul1d(double[:] output, double[:] values):
+    cdef int i = 0
+    cdef int framelength = len(output)
+
+    if <int>len(values) != framelength:
+        values = interpolation._linear(values, framelength)
+
+    for i in range(framelength):
+        output[i] *= values[i]
+
+    return output
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 @cython.cdivision(True)
 cdef double[:] _gaussian(int length):
     cdef double[:] out = np.zeros(length, dtype='d')
@@ -332,14 +347,14 @@ cdef class Wavetable:
             out = np.multiply(self.data, value)
 
         elif isinstance(value, Wavetable):
-            out = np.multiply(self.data, value.data)
+            out = _mul1d(self.data, value.data)
 
         elif isinstance(value, list):
-            out = np.multiply(self.data, np.array(value))
+            out = _mul1d(self.data, np.array(value))
 
         else:
             try:
-                out = np.multiply(self.data, np.array(value))
+                out = _mul1d(self.data, np.array(value))
             except TypeError:
                 return NotImplemented
 
