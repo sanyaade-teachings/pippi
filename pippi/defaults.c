@@ -1023,6 +1023,7 @@ static int __pyx_v_5pippi_8defaults_DEFAULT_CHANNELS;
 static int __pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE;
 static PyObject *__pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 static int __pyx_v_5pippi_8defaults_DEFAULT_WTSIZE;
+static double __pyx_v_5pippi_8defaults_MIN_PULSEWIDTH;
 #define __Pyx_MODULE_NAME "pippi.defaults"
 extern int __pyx_module_is_main_pippi__defaults;
 int __pyx_module_is_main_pippi__defaults = 0;
@@ -1034,6 +1035,7 @@ static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_pyx_capi[] = "__pyx_capi__";
 static const char __pyx_k_DEFAULT_WTSIZE[] = "DEFAULT_WTSIZE";
+static const char __pyx_k_MIN_PULSEWIDTH[] = "MIN_PULSEWIDTH";
 static const char __pyx_k_DEFAULT_CHANNELS[] = "DEFAULT_CHANNELS";
 static const char __pyx_k_DEFAULT_SOUNDFILE[] = "DEFAULT_SOUNDFILE";
 static const char __pyx_k_DEFAULT_SAMPLERATE[] = "DEFAULT_SAMPLERATE";
@@ -1042,6 +1044,7 @@ static PyObject *__pyx_n_s_DEFAULT_CHANNELS;
 static PyObject *__pyx_n_s_DEFAULT_SAMPLERATE;
 static PyObject *__pyx_n_s_DEFAULT_SOUNDFILE;
 static PyObject *__pyx_n_s_DEFAULT_WTSIZE;
+static PyObject *__pyx_n_s_MIN_PULSEWIDTH;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_name;
@@ -1100,6 +1103,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_DEFAULT_SAMPLERATE, __pyx_k_DEFAULT_SAMPLERATE, sizeof(__pyx_k_DEFAULT_SAMPLERATE), 0, 0, 1, 1},
   {&__pyx_n_s_DEFAULT_SOUNDFILE, __pyx_k_DEFAULT_SOUNDFILE, sizeof(__pyx_k_DEFAULT_SOUNDFILE), 0, 0, 1, 1},
   {&__pyx_n_s_DEFAULT_WTSIZE, __pyx_k_DEFAULT_WTSIZE, sizeof(__pyx_k_DEFAULT_WTSIZE), 0, 0, 1, 1},
+  {&__pyx_n_s_MIN_PULSEWIDTH, __pyx_k_MIN_PULSEWIDTH, sizeof(__pyx_k_MIN_PULSEWIDTH), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
@@ -1151,6 +1155,7 @@ static int __Pyx_modinit_variable_export_code(void) {
   if (__Pyx_ExportVoidPtr(__pyx_n_s_DEFAULT_SAMPLERATE, (void *)&__pyx_v_5pippi_8defaults_DEFAULT_SAMPLERATE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportVoidPtr(__pyx_n_s_DEFAULT_SOUNDFILE, (void *)&__pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE, "PyObject *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ExportVoidPtr(__pyx_n_s_DEFAULT_WTSIZE, (void *)&__pyx_v_5pippi_8defaults_DEFAULT_WTSIZE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ExportVoidPtr(__pyx_n_s_MIN_PULSEWIDTH, (void *)&__pyx_v_5pippi_8defaults_MIN_PULSEWIDTH, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -1418,6 +1423,7 @@ if (!__Pyx_RefNanny) {
  * cdef int DEFAULT_SAMPLERATE = 44100
  * cdef unicode DEFAULT_SOUNDFILE = u'wav'             # <<<<<<<<<<<<<<
  * cdef int DEFAULT_WTSIZE = 4096
+ * cdef double MIN_PULSEWIDTH = 0.001
  */
   __Pyx_INCREF(__pyx_n_u_wav);
   __Pyx_XGOTREF(__pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE);
@@ -1428,8 +1434,16 @@ if (!__Pyx_RefNanny) {
  * cdef int DEFAULT_SAMPLERATE = 44100
  * cdef unicode DEFAULT_SOUNDFILE = u'wav'
  * cdef int DEFAULT_WTSIZE = 4096             # <<<<<<<<<<<<<<
+ * cdef double MIN_PULSEWIDTH = 0.001
  */
   __pyx_v_5pippi_8defaults_DEFAULT_WTSIZE = 0x1000;
+
+  /* "pippi/defaults.pyx":7
+ * cdef unicode DEFAULT_SOUNDFILE = u'wav'
+ * cdef int DEFAULT_WTSIZE = 4096
+ * cdef double MIN_PULSEWIDTH = 0.001             # <<<<<<<<<<<<<<
+ */
+  __pyx_v_5pippi_8defaults_MIN_PULSEWIDTH = 0.001;
 
   /* "pippi/defaults.pyx":1
  * #cython: language_level=3             # <<<<<<<<<<<<<<

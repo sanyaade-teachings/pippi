@@ -7,10 +7,8 @@ from pippi cimport wavetables as wts
 from pippi cimport interpolation
 from pippi.rand cimport rand
 
-cdef inline int DEFAULT_SAMPLERATE = 44100
-cdef inline int DEFAULT_CHANNELS = 2
-cdef inline int DEFAULT_WT_LENGTH = 4096
-cdef inline double MIN_PULSEWIDTH = 0.001
+from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_WTSIZE, DEFAULT_CHANNELS, MIN_PULSEWIDTH
+
 
 cdef class Pulsar2d:
     """ Pulsar synthesis with a 2d wavetable & window stack
@@ -76,12 +74,18 @@ cdef class Pulsar2d:
         if wavetables is None:
             wavetables = ['sine']
 
-        self.wt_length = 0
+        self.wt_length = DEFAULT_WTSIZE
         for wavetable in wavetables:
-            try:
-                self.wt_length = max(len(wavetable), self.wt_length)
-            except TypeError:
-                self.wt_length = max(DEFAULT_WT_LENGTH, self.wt_length)
+            if isinstance(wavetable, str):
+                # We haven't parsed the wavetable stack yet, so 
+                # getting the len of `wavetable` might not make sense -
+                # eg when it is the string "sine" or something. So 
+                # we'll assume any built-in wavetable names will be 
+                # at the default wavetable size.
+                self.wt_length = max(DEFAULT_WTSIZE, self.wt_length)
+                continue
+
+            self.wt_length = max(len(wavetable), self.wt_length)
 
         self.wt_count = len(wavetables)
         self.wavetables = np.zeros((self.wt_count, self.wt_length), dtype='d')
@@ -97,12 +101,14 @@ cdef class Pulsar2d:
         if windows is None:
             windows = ['sine']
 
-        self.win_length = 0
+        self.win_length = DEFAULT_WTSIZE
         for window in windows:
-            try:
-                self.win_length = max(len(window), self.win_length)
-            except TypeError:
-                self.win_length = max(DEFAULT_WT_LENGTH, self.win_length)
+            if isinstance(wavetable, str):
+                # Same dumb workaround for built-in wavetable string literals
+                self.wt_length = max(DEFAULT_WTSIZE, self.wt_length)
+                continue
+
+            self.win_length = max(len(window), self.win_length)
 
         self.win_count = len(windows)
         self.windows = np.zeros((self.win_count, self.win_length), dtype='d')
@@ -113,7 +119,10 @@ cdef class Pulsar2d:
                 win = interpolation._linear(win, self.win_length)
 
             for j, val in enumerate(win):
-                self.windows[i][j] = val                
+                try:
+                    self.windows[i][j] = val                
+                except IndexError as e:
+                    break
 
 
     def play(self, length):

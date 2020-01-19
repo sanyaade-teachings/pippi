@@ -4,3 +4,4 @@ cdef int DEFAULT_CHANNELS
 cdef int DEFAULT_SAMPLERATE
 cdef unicode DEFAULT_SOUNDFILE
 cdef int DEFAULT_WTSIZE
+cdef double MIN_PULSEWIDTH
