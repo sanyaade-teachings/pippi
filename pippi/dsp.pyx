@@ -81,14 +81,14 @@ cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, i
 cpdef Wavetable wt(object values, 
         object lowvalue=None, 
         object highvalue=None, 
-        object wtsize=None, 
+        int wtsize=0, 
     ):
     return Wavetable(values, lowvalue, highvalue, wtsize, False)
 
 cpdef Wavetable win(object values, 
         object lowvalue=None, 
         object highvalue=None, 
-        object wtsize=None, 
+        int wtsize=0, 
     ):
     return Wavetable(values, lowvalue, highvalue, wtsize, True)
 

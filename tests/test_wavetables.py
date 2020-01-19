@@ -38,6 +38,30 @@ class TestWavetables(TestCase):
         wt = dsp.load('tests/renders/wavetable_sine.wav')
         wt.graph('tests/renders/wavetable_sine-reloaded.png')
 
+    def test_cut(self):
+        wt = dsp.wt('sine', wtsize=4092)
+        wt.graph('tests/renders/wavetable_precut.png')
+        wt = wt.cut(10, 100)
+        wt.graph('tests/renders/wavetable_cut.png')
+        self.assertEqual(100, len(wt.data))
+
+    def test_rcut(self):
+        wt = dsp.wt('sine', wtsize=4092)
+        wt.graph('tests/renders/wavetable_prercut.png')
+        wt = wt.rcut(100)
+        wt.graph('tests/renders/wavetable_rcut.png')
+        self.assertEqual(100, len(wt))
+
+    def test_rcut_bad(self):
+        wt = dsp.wt('sine', wtsize=4092)
+        wt = wt.rcut(-100)
+        self.assertEqual(1, len(wt))
+
+    def test_cut_bad(self):
+        wt = dsp.wt('sine', wtsize=4092)
+        wt = wt.cut(-100, -100)
+        self.assertEqual(1, len(wt))
+
     def test_randline(self):
         numpoints = random.randint(1, 10)
         wtsize = random.randint(10, 1000)

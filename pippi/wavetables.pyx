@@ -14,7 +14,7 @@ from cpython.array cimport array, clone
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc cimport math
 
-from pippi.defaults cimport DEFAULT_SAMPLERATE
+from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_WTSIZE
 from pippi cimport interpolation, rand
 from pippi import graph
 from pippi.soundbuffer cimport SoundBuffer
@@ -222,15 +222,15 @@ cdef class Wavetable:
     def __cinit__(self, object values, 
             object lowvalue=None, 
             object highvalue=None,
-            object wtsize=None, 
+            int wtsize=0, 
             bint window=False):
         cdef bint scaled = False
         cdef bint resized = False
 
         if window:
-            self.data = to_window(values)
+            self.data = to_window(values, wtsize)
         else:
-            self.data = to_wavetable(values)
+            self.data = to_wavetable(values, wtsize)
 
         if lowvalue is None:
             self.lowvalue = np.min(self.data)
@@ -247,11 +247,8 @@ cdef class Wavetable:
         if scaled:
             self.data = np.interp(self.data, (np.min(self.data), np.max(self.data)), (self.lowvalue, self.highvalue))
 
-        if wtsize is not None and len(self.data) != wtsize:
-            self.length = wtsize
-            self.data = interpolation._linear(self.data, self.length)
-        else:
-            self.length = len(self.data)
+        self.length = len(self.data)
+
 
     #############################################
     # (+) Addition & concatenation operator (+) #
@@ -410,6 +407,18 @@ cdef class Wavetable:
 
     cpdef Wavetable clip(Wavetable self, double minval=-1, double maxval=1):
         return Wavetable(np.clip(self.data, minval, maxval))
+
+    cpdef Wavetable cut(Wavetable self, int start, int length):
+        start = min(max(0, start), len(self.data))
+        length = min(max(1, length), len(self.data)-start)
+        cdef double[:] out = np.zeros(length, dtype='d')
+        for i in range(length):
+            out[i] = self.data[i+start]
+        return Wavetable(out)
+
+    cpdef Wavetable rcut(Wavetable self, int length):
+        cdef int start = rand.randint(0, len(self.data)-length)
+        return self.cut(start, length)
 
     cpdef Wavetable convolve(Wavetable self, object impulse, bint norm=True):
         cdef double[:] _impulse = to_window(impulse)
@@ -908,13 +917,14 @@ cpdef double[:] fromfile(unicode filename, int length):
 
     return interpolation._linear(wt, length)
 
-cpdef double[:] to_window(object w, int wtsize=4096):
+cpdef double[:] to_window(object w, int wtsize=0):
     cdef double[:] wt
 
     if w is None:
         return None
 
     if isinstance(w, str):
+        wtsize = DEFAULT_WTSIZE
         wt = _window(to_flag(w), wtsize)
 
     elif isinstance(w, numbers.Real):
@@ -929,18 +939,25 @@ cpdef double[:] to_window(object w, int wtsize=4096):
     elif isinstance(w, list):
         wt = np.array(w, dtype='d')
 
+    elif isinstance(w, np.ndarray):
+        wt = w
+
     else:
-        wt = interpolation._linear(array('d', w), wtsize)
+        wt = array('d', w)
+
+    if wtsize > 0 and len(wt) != wtsize:
+        wt = interpolation._linear(wt, wtsize)
 
     return wt
 
-cpdef double[:] to_wavetable(object w, int wtsize=4096):
+cpdef double[:] to_wavetable(object w, int wtsize=0):
     cdef double[:] wt
 
     if w is None:
         return None
 
     if isinstance(w, str):
+        wtsize = DEFAULT_WTSIZE
         wt = _wavetable(to_flag(w), wtsize)
 
     elif isinstance(w, numbers.Real):
@@ -955,8 +972,14 @@ cpdef double[:] to_wavetable(object w, int wtsize=4096):
     elif isinstance(w, list):
         wt = np.array(w, dtype='d')
 
+    elif isinstance(w, np.ndarray):
+        wt = w
+
     else:
-        wt = interpolation._linear(array('d', w), wtsize)
+        wt = array('d', w)
+
+    if wtsize > 0 and len(wt) != wtsize:
+        wt = interpolation._linear(wt, wtsize)
 
     return wt
 

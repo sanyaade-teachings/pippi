@@ -14,6 +14,8 @@ cdef class Wavetable:
     cdef public int length
 
     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
+    cpdef Wavetable cut(Wavetable self, int start, int length)
+    cpdef Wavetable rcut(Wavetable self, int length)
     cpdef Wavetable convolve(Wavetable self, object impulse, bint norm=*)
     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, list indexes=*, bint wrap=*)
     cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)
