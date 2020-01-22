@@ -3152,6 +3152,8 @@ static PyObject **__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE = 0;
 #define __pyx_v_5pippi_8defaults_DEFAULT_SOUNDFILE (*__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE)
 static int *__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE = 0;
 #define __pyx_v_5pippi_8defaults_DEFAULT_WTSIZE (*__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE)
+static double *__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH = 0;
+#define __pyx_v_5pippi_8defaults_MIN_PULSEWIDTH (*__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH)
 
 /* Module declarations from 'pippi.dsp' */
 
@@ -22365,6 +22367,7 @@ static int __Pyx_modinit_variable_import_code(void) {
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_SAMPLERATE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SAMPLERATE, "int") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_SOUNDFILE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE, "PyObject *") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_WTSIZE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE, "int") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_2, "MIN_PULSEWIDTH", (void **)&__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH, "double") < 0) __PYX_ERR(1, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;

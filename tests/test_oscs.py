@@ -16,7 +16,7 @@ class TestOscs(TestCase):
 
         wtA = [ random.random() for _ in range(random.randint(10, 1000)) ]
         osc = Osc(wtA, freq=200.0)
-        length = 1
+        length = 10
         out = osc.play(length)
         out.write('tests/renders/osc_rand_list_wt.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
@@ -41,7 +41,7 @@ class TestOscs(TestCase):
         wtC = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         stack = ['rnd', wtA, wtB, wtC] * 10
         osc = Osc2d(stack, freq=200.0)
-        length = 1
+        length = 10
         out = osc.play(length)
         out.write('tests/renders/osc2d_RND_randlist_randwt_guitar_10x.wav')
 
@@ -49,7 +49,7 @@ class TestOscs(TestCase):
 
     def test_create_tukey(self):
         osc = Tukey()
-        length = 40
+        length = 10
         shape = dsp.win(shapes.win('sine', length=3), 0, 0.5)
         chord = tune.chord('i9', octave=2)
         out = dsp.buffer(length=length)
@@ -127,13 +127,13 @@ class TestOscs(TestCase):
                 freq=200.0, 
                 amp=0.2
             )
-        length = 30
+        length = 10
         out = osc.play(length)
         out.write('tests/renders/osc_pulsar2d.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
     def test_waveset_pulsar2d(self):
-        rain = dsp.read('tests/sounds/rain.wav').cut(0, 10)
+        rain = dsp.read('tests/sounds/rain.wav').cut(0, 1)
         ws = Waveset(rain)
         ws.normalize()
         osc = Pulsar2d(ws,
@@ -141,18 +141,18 @@ class TestOscs(TestCase):
                 freq=200.0, 
                 amp=0.2
             )
-        out = osc.play(60)
+        out = osc.play(10)
         out.write('tests/renders/osc_waveset_pulsar2d.wav')
 
     def test_create_alias(self):
         osc = Alias(freq=200.0)
-        length = 1
+        length = 10
         out = osc.play(length)
         out.write('tests/renders/osc_alias.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
 
     def test_create_bar(self):
-        length = 60
+        length = 1
         out = dsp.buffer(length=length)
 
         params = [(0.21, 1, 0), (0.3, 0.9, 0.5), (0.22, 0.8, 1)]
