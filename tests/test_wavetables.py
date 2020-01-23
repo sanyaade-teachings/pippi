@@ -63,8 +63,8 @@ class TestWavetables(TestCase):
         self.assertEqual(1, len(wt))
 
     def test_randline(self):
-        numpoints = random.randint(1, 10)
-        wtsize = random.randint(10, 1000)
+        numpoints = 3
+        wtsize = 10
 
         wt = dsp.randline(numpoints, wtsize=wtsize)
         self.assertEqual(len(wt), wtsize)
@@ -210,7 +210,7 @@ class TestWavetables(TestCase):
 
     def test_pong(self):
         win = dsp.win('hann', 0, 0.75).harmonics().skewed(0.08).rightpadded(0, mult=4)
-        win = win + dsp.win('hannout', 0, 0.25, len(win))
+        win = win + dsp.win('hannout', 0, 0.25, wtsize=len(win))
         win.graph('tests/renders/graph_pong.png', stroke=3)
 
 

@@ -18,7 +18,7 @@ from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_WTSIZE
 from pippi cimport interpolation, rand
 from pippi import graph
 from pippi.soundbuffer cimport SoundBuffer
-from pippi.lists cimport _scale, _snap_mult, _snap_pattern
+from pippi.lists cimport _scale, _scaleinplace, _snap_mult, _snap_pattern
 
 cdef int SINE = 0
 cdef int SINEIN = 17
@@ -259,10 +259,10 @@ cdef class Wavetable:
             scaled = True
             self.highvalue = <double>highvalue
 
-        if scaled:
-            self.data = np.interp(self.data, (np.min(self.data), np.max(self.data)), (self.lowvalue, self.highvalue))
-
         self.length = len(self.data)
+
+        if scaled:
+            self.data = _scaleinplace(self.data, np.min(self.data), np.max(self.data), self.lowvalue, self.highvalue, False)
 
 
     #############################################
@@ -939,7 +939,8 @@ cpdef double[:] to_window(object w, int wtsize=0):
         return None
 
     if isinstance(w, str):
-        wtsize = DEFAULT_WTSIZE
+        if wtsize <= 0:
+            wtsize = DEFAULT_WTSIZE
         wt = _window(to_flag(w), wtsize)
 
     elif isinstance(w, numbers.Real):
@@ -972,7 +973,8 @@ cpdef double[:] to_wavetable(object w, int wtsize=0):
         return None
 
     if isinstance(w, str):
-        wtsize = DEFAULT_WTSIZE
+        if wtsize <= 0:
+            wtsize = DEFAULT_WTSIZE
         wt = _wavetable(to_flag(w), wtsize)
 
     elif isinstance(w, numbers.Real):
