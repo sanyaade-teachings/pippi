@@ -44,6 +44,8 @@ cdef int SINC = 23
 cdef int GAUSS = 24
 cdef int GAUSSIN = 25
 cdef int GAUSSOUT = 26
+cdef int PLUCKIN = 27
+cdef int PLUCKOUT = 28
 
 cdef int LINEAR = 12
 cdef int TRUNC = 13
@@ -70,6 +72,8 @@ cdef int* ALL_WINDOWS = [
             GAUSS,
             GAUSSIN,
             GAUSSOUT,
+            PLUCKIN,
+            PLUCKOUT,
         ]
 
 cdef int LEN_WAVETABLES = 6
@@ -116,7 +120,9 @@ cdef int to_flag(str value):
         'sinc': SINC,
         'gauss': GAUSS,
         'gaussin': GAUSSIN,
-        'gaussout': GAUSSOUT
+        'gaussout': GAUSSOUT,
+        'pluckin': PLUCKIN,
+        'pluckout': PLUCKOUT,
     }
 
     return flags[value]
@@ -179,6 +185,39 @@ cdef double[:] _gaussian_out(int length):
 
     return out
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:] _pluck_in(int length):
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef double[:] mul = np.zeros(length, dtype='d')
+    cdef int i=0
+
+    out = _window(HANNIN, length)
+    out = _seesaw(out, length, rand.rand(0.97, 0.99))
+    mul = _window(HANNIN, length)
+
+    for i in range(length):
+        out[i] = out[i] * out[i] * mul[i]
+
+    return out
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:] _pluck_out(int length):
+    cdef double[:] out = np.zeros(length, dtype='d')
+    cdef double[:] mul = np.zeros(length, dtype='d')
+    cdef int i=0
+
+    out = _window(HANNOUT, length)
+    out = _seesaw(out, length, rand.rand(0.01, 0.03))
+    mul = _window(HANNOUT, length)
+
+    for i in range(length):
+        out[i] = out[i] * out[i] * mul[i]
+
+    return out
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -846,6 +885,12 @@ cdef double[:] _window(int window_type, int length):
 
     elif window_type == GAUSSOUT:
         wt = _gaussian_out(length) 
+
+    elif window_type == PLUCKIN:
+        wt = _pluck_in(length)
+
+    elif window_type == PLUCKOUT:
+        wt = _pluck_out(length)
 
     else:
         wt = _window(SINE, length)

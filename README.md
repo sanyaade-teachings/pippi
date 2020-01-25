@@ -102,6 +102,12 @@ Wavetable / window options are:
 - `line`
 - `hannin`
 - `hannout`
+- `gauss`
+- `gaussin`
+- `gaussout`
+- `pluckin`
+- `pluckout`
+
 - `square`
 - `sinc`
 

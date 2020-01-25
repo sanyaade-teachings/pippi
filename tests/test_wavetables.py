@@ -117,6 +117,14 @@ class TestWavetables(TestCase):
         wt = dsp.win('gaussout')
         wt.graph('tests/renders/graph_gaussout_window.png', stroke=3)
 
+    def test_graph_pluckin_window(self):
+        wt = dsp.win('pluckin')
+        wt.graph('tests/renders/graph_pluckin_window.png', stroke=3)
+
+    def test_graph_pluckout_window(self):
+        wt = dsp.win('pluckout')
+        wt.graph('tests/renders/graph_pluckout_window.png', stroke=3)
+
     def test_graph_sinein_window(self):
         wt = dsp.win('sinein')
         wt.graph('tests/renders/graph_sinein_window.png', stroke=3)
