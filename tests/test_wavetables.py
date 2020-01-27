@@ -221,4 +221,60 @@ class TestWavetables(TestCase):
         win = win + dsp.win('hannout', 0, 0.25, wtsize=len(win))
         win.graph('tests/renders/graph_pong.png', stroke=3)
 
+    def test_mix_wavetables(self):
+        win = dsp.win([1,2,3])
+        self.assertEqual(len(win), 3)
+        self.assertEqual(win & dsp.win([2,2,2]), dsp.win([3,4,5]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        self.assertEqual(win & dsp.win([1,3,5]), dsp.win([2,5,8]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+    def test_mul_wavetables(self):
+        win = dsp.win([1,2,3])
+        self.assertEqual(len(win), 3)
+        self.assertEqual(win * 2, dsp.win([2,4,6]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        self.assertEqual(win * dsp.win([1,3,5]), dsp.win([1,6,15]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        self.assertEqual(dsp.win([1,3,5]) * win, dsp.win([1,6,15]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        with self.assertRaises(TypeError):
+            2 * win
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+    def test_add_wavetables(self):
+        win = dsp.win([1,2,3])
+        self.assertEqual(len(win), 3)
+        self.assertEqual(win + 2, dsp.win([1,2,3,2]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        self.assertEqual(win + dsp.win([1,3,5]), dsp.win([1,2,3,1,3,5]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        self.assertEqual(dsp.win([1,3,5]) + win, dsp.win([1,3,5,1,2,3]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        with self.assertRaises(TypeError):
+            2 + win
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+    def test_sub_wavetables(self):
+        win = dsp.win([1,2,3])
+        self.assertEqual(len(win), 3)
+        self.assertEqual(win - 2, dsp.win([-1,0,1]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        self.assertEqual(win - dsp.win([1,3,5]), dsp.win([0,-1,-2]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        self.assertEqual(dsp.win([1,3,5]) - win, dsp.win([0,1,2]))
+        self.assertEqual(win, dsp.win([1,2,3]))
+
+        with self.assertRaises(TypeError):
+            2 - win
+        self.assertEqual(win, dsp.win([1,2,3]))
 

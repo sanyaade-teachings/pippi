@@ -129,7 +129,7 @@ cdef int to_flag(str value):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double[:] _mul1d(double[:] output, double[:] values):
+cdef double[:] _imul1d(double[:] output, double[:] values):
     cdef int i = 0
     cdef int framelength = len(output)
 
@@ -140,6 +140,21 @@ cdef double[:] _mul1d(double[:] output, double[:] values):
         output[i] *= values[i]
 
     return output
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double[:] _mul1d(double[:] output, double[:] values):
+    cdef int i = 0
+    cdef int framelength = len(output)
+    cdef double[:] out = np.zeros(framelength, dtype='d')
+
+    if <int>len(values) != framelength:
+        values = interpolation._linear(values, framelength)
+
+    for i in range(framelength):
+        out[i] = output[i] * values[i]
+
+    return out
 
 
 @cython.boundscheck(False)
@@ -304,33 +319,35 @@ cdef class Wavetable:
             self.data = _scaleinplace(self.data, np.min(self.data), np.max(self.data), self.lowvalue, self.highvalue, False)
 
 
-    #############################################
-    # (+) Addition & concatenation operator (+) #
-    #############################################
+    ##################################
+    # (+) Concatenation operator (+) #
+    ##################################
     def __add__(self, value):
-        cdef double[:] out = np.zeros(self.length)
+        cdef double[:] out
+
+        if not isinstance(self, Wavetable):
+            return NotImplemented
 
         if isinstance(value, numbers.Real):
-            out = np.add(self.data, value)
+            out = np.append(self.data, value)
         elif isinstance(value, Wavetable):
-            out = np.add(self.data, value.data)
+            out = np.hstack((self.data, value.data))
         else:
             try:
-                self.data = np.hstack((self.data, value))
+                out = np.hstack((self.data, np.array(value).flatten()))
             except TypeError as e:
                 return NotImplemented
 
         return Wavetable(out)
 
     def __iadd__(self, value):
-        """ In place add either adding number to every value without copy, or 
-            directly extending internal frame buffer.
-        """
         if isinstance(value, numbers.Real):
-            self.data = np.add(self.data, value)
+            self.data = np.append(self.data, value)
+        elif isinstance(value, Wavetable):
+            self.data = np.hstack(self.data, value.data)
         else:
             try:
-                self.data = np.hstack((self.data, value))
+                self.data = np.hstack((self.data, np.array(value).flatten()))
             except TypeError as e:
                 return NotImplemented
 
@@ -345,15 +362,50 @@ cdef class Wavetable:
     ########################
     def __and__(self, value):
         cdef double[:] out
+        cdef double[:] val
 
-        try:
-            out = np.add(self.data, value[:len(self.data)])
-            return Wavetable(out)
-        except TypeError as e:
+        if not isinstance(self, Wavetable):
             return NotImplemented
 
+        if isinstance(value, numbers.Real):
+            out = np.add(self.data, value)
+            return Wavetable(out)
+
+        elif isinstance(value, Wavetable):
+            val = value.data
+        else:
+            try:
+                val = np.array(value).flatten()
+            except TypeError as e:
+                return NotImplemented
+
+        if <int>len(val) != len(self.data):
+            val = interpolation._linear(val, len(self.data))
+
+        out = np.add(self.data, val)
+
+        return Wavetable(out)
+
     def __iand__(self, value):
-        self.data = np.add(self.data, value[:len(self.data)])
+        cdef double[:] val
+
+        if isinstance(value, numbers.Real):
+            self.data = np.add(self.data, value)
+            return self
+
+        elif isinstance(value, Wavetable):
+            val = value.data
+        else:
+            try:
+                val = np.array(value).flatten()
+            except TypeError as e:
+                return NotImplemented
+
+        if <int>len(val) != len(self.data):
+            val = interpolation._linear(val, len(self.data))
+
+        self.data = np.add(self.data, val)
+
         return self
 
     def __rand__(self, value):
@@ -374,26 +426,31 @@ cdef class Wavetable:
     def __len__(self):
         return 0 if self.data is None else len(self.data)
 
+    def __eq__(self, other):
+        try:
+            return len(self) == len(other) and all(a == b for a, b in zip(self, other))
+        except TypeError as e:
+            return NotImplemented
+
 
     ###################################
     # (*) Multiplication operator (*) #
     ###################################
     def __mul__(self, value):
-        cdef int length = len(self.data)
-        cdef double[:] out = np.zeros(length)
+        cdef double[:] out
+
+        if not isinstance(self, Wavetable):
+            return NotImplemented
 
         if isinstance(value, numbers.Real):
             out = np.multiply(self.data, value)
-
         elif isinstance(value, Wavetable):
             out = _mul1d(self.data, value.data)
-
         elif isinstance(value, list):
-            out = _mul1d(self.data, np.array(value))
-
+            out = _mul1d(self.data, np.array(value, dtype='d'))
         else:
             try:
-                out = _mul1d(self.data, np.array(value))
+                out = _mul1d(self.data, np.array(value, dtype='d'))
             except TypeError:
                 return NotImplemented
 
@@ -402,16 +459,13 @@ cdef class Wavetable:
     def __imul__(self, value):
         if isinstance(value, numbers.Real):
             self.data = np.multiply(self.data, value)
-
         elif isinstance(value, Wavetable):
-            self.data = np.multiply(self.data, value.data)
-
+            self.data = _imul1d(self.data, value.data)
         elif isinstance(value, list):
-            self.data = np.multiply(self.data, np.array(value))
-
+            self.data = _imul1d(self.data, np.array(value, dtype='d'))
         else:
             try:
-                self.data = np.multiply(self.data, np.array(value))
+                self.data = _imul1d(self.data, np.array(value, dtype='d'))
             except TypeError:
                 return NotImplemented
 
@@ -425,39 +479,56 @@ cdef class Wavetable:
     # (-) Subtraction operator (-) #
     ################################
     def __sub__(self, value):
-        cdef double[:,:] out
+        cdef double[:] out
+        cdef double[:] val
+
+        if not isinstance(self, Wavetable):
+            return NotImplemented
 
         if isinstance(value, numbers.Real):
             out = np.subtract(self.data, value)
-
-        if isinstance(value, Wavetable):
-            out = np.subtract(self.data, value.data)
+            return Wavetable(out)
+        elif isinstance(value, Wavetable):
+            val = value.data
         else:
             try:
-                out = np.subtract(self.frames, value[:,None])
+                val = np.array(value, dtype='d')
             except TypeError as e:
                 return NotImplemented
+
+        if <int>len(val) != len(self.data):
+            val = interpolation._linear(val, len(self.data))
+
+        out = np.subtract(self.data, val)
 
         return Wavetable(out)
 
     def __isub__(self, value):
+        cdef double[:] val
+
         if isinstance(value, numbers.Real):
             self.data = np.subtract(self.data, value)
-
-        if isinstance(value, Wavetable):
-            self.data = np.subtract(self.data, value.data)
+            return self
+        elif isinstance(value, Wavetable):
+            val = value.data
         else:
             try:
-                self.data = np.subtract(self.data, value)
+                val = np.array(value, dtype='d')
             except TypeError as e:
                 return NotImplemented
+
+        if <int>len(val) != len(self.data):
+            val = interpolation._linear(val, len(self.data))
+
+        self.data = np.subtract(self.data, val)
+
+        return self
 
     def __rsub__(self, value):
         return self - value
 
-
     def __repr__(self):
-        return 'Wavetable({})'.format(self.data)
+        return 'Wavetable({})'.format([ d for d in self.data])
 
     cpdef Wavetable clip(Wavetable self, double minval=-1, double maxval=1):
         return Wavetable(np.clip(self.data, minval, maxval))
