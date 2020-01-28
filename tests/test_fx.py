@@ -41,9 +41,19 @@ class TestFx(TestCase):
         out = fx.crush(snd)
         out.write('tests/renders/fx_crush_linux.wav')
 
-        snd = dsp.read('tests/sounds/guitar1s.wav')
+        snd = dsp.read('tests/sounds/guitar10s.wav')
         out = fx.crush(snd)
         out.write('tests/renders/fx_crush_guitar.wav')
+
+        out = fx.crush(snd, dsp.win('sine', 2, 16), 44100)
+        out.write('tests/renders/fx_crush_guitar_vbitdepth.wav')
+
+        out = fx.crush(snd, 16, dsp.win('sine', 200, 44100))
+        out.write('tests/renders/fx_crush_guitar_vsamplerate.wav')
+
+        out = fx.crush(snd, dsp.win('hannin', 2, 16), dsp.win('sine', 200, 44100))
+        out.write('tests/renders/fx_crush_guitar_vboth.wav')
+
 
     def test_crossover(self):
         snd = dsp.read('tests/sounds/linux.wav')

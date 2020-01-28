@@ -42,8 +42,10 @@ cpdef SoundBuffer crush(SoundBuffer snd, object bitdepth=None, object samplerate
         bitdepth = random.triangular(0, 16)
     if samplerate is None:
         samplerate = random.triangular(0, snd.samplerate)
+    cdef double[:] _bitdepth = wavetables.to_window(bitdepth)
+    cdef double[:] _samplerate = wavetables.to_window(samplerate)
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
-    return SoundBuffer(soundpipe._bitcrush(snd.frames, out, <double>bitdepth, <double>samplerate, len(snd), snd.channels))
+    return SoundBuffer(soundpipe._bitcrush(snd.frames, out, _bitdepth, _samplerate, len(snd), snd.channels))
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

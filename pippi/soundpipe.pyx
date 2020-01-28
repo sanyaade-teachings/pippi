@@ -20,22 +20,25 @@ cdef double** memoryview2ftbls(double[:,:] snd):
 
     return tbls
 
-cdef double[:,:] _bitcrush(double[:,:] snd, double[:,:] out, double bitdepth, double samplerate, int length, int channels):
+cdef double[:,:] _bitcrush(double[:,:] snd, double[:,:] out, double[:] bitdepth, double[:] samplerate, int length, int channels):
     cdef sp_data* sp
     cdef sp_bitcrush* bitcrush
     cdef double sample = 0
     cdef double crushed = 0
     cdef int i=0, c=0
+    cdef double pos = 0
 
     sp_create(&sp)
 
     for c in range(channels):
         sp_bitcrush_create(&bitcrush)
         sp_bitcrush_init(sp, bitcrush)
-        bitcrush.bitdepth = bitdepth
-        bitcrush.srate = samplerate
 
         for i in range(length):
+            pos = <double>i / <double>length
+            bitcrush.bitdepth = interpolation._linear_pos(bitdepth, pos)
+            bitcrush.srate = interpolation._linear_pos(samplerate, pos)
+
             sp_bitcrush_compute(sp, bitcrush, &snd[i,c], &crushed)
             out[i,c] = crushed
 
@@ -45,7 +48,7 @@ cdef double[:,:] _bitcrush(double[:,:] snd, double[:,:] out, double bitdepth, do
 
     return out
 
-cpdef double[:,:] bitcrush(double[:,:] snd, double bitdepth, double samplerate):
+cpdef double[:,:] bitcrush(double[:,:] snd, double[:] bitdepth, double[:] samplerate):
     cdef int length = <int>len(snd)
     cdef int channels = <int>snd.shape[1]
     cdef double[:,:] out = np.zeros((length, channels), dtype='d')

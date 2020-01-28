@@ -191,8 +191,8 @@ cdef extern from "soundpipe.h":
     int sp_bal_compute(sp_data*, sp_bal*, double*, double*, double*)
 
 
-cdef double[:,:] _bitcrush(double[:,:] snd, double[:,:] out, double bitdepth, double samplerate, int length, int channels)
-cpdef double[:,:] bitcrush(double[:,:] snd, double bitdepth, double samplerate)
+cdef double[:,:] _bitcrush(double[:,:] snd, double[:,:] out, double[:] bitdepth, double[:] samplerate, int length, int channels)
+cpdef double[:,:] bitcrush(double[:,:] snd, double[:] bitdepth, double[:] samplerate)
 
 cdef double[:,:] _butbr(double[:,:] snd, double[:,:] out, double[:] freq, int length, int channels)
 cpdef double[:,:] butbr(double[:,:] snd, double[:] freq)
