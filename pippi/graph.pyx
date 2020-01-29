@@ -9,16 +9,6 @@ from pippi.wavetables cimport Wavetable
 import sys
 import numpy as np
 
-BG = (255, 255, 255, 255)
-AX = (0,0,0,255)
-
-###########
-#0123456789
-#1
-#2
-#3
-###########
-
 cdef int ycoord(double point, int canvas_height, double minval, double maxval):
     y = (point - minval) * (1.0/(maxval - minval))
     return <int>(((y - 1) * -1) * canvas_height)
