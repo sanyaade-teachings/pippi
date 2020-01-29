@@ -1,7 +1,7 @@
 #cython: language_level=3
 
 import random
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from pippi cimport interpolation
 from pippi cimport dsp
 from pippi.soundbuffer cimport SoundBuffer
@@ -24,7 +24,12 @@ def write(object data,
         bint show_axis=True,
         list insets=None, 
         list notes=None, 
-        object y=None):
+        object y=None, 
+        str label=None, 
+        int fontsize=40, 
+        str label_top=None,
+        str label_bottom=None,
+        ):
 
     cdef int i = 0
     cdef int channels
@@ -44,9 +49,6 @@ def write(object data,
     if y is not None:
         ymin, ymax = y
 
-    #print('ymin, ymax', ymin, ymax)
-
-    # Convert data into PIL-compatible format
     if isinstance(data, SoundBuffer):
         channels = data.channels
         _data = data.frames
@@ -104,6 +106,25 @@ def write(object data,
                 new.paste(inset, (inset_width*i + gutter//2, 0))
 
             img = new
+
+        if label is not None:
+            label_bottom = label
+
+        if label_top is not None:
+            fontsize = fontsize * upsample_mult
+            font = ImageFont.truetype('modules/pixeldroid-console/pixeldroidConsoleRegular.ttf', fontsize)
+            fontwidth, fontheight = font.getsize(label_top)
+            fontx = width//2 - (fontwidth//2)
+            fonty = 10
+            draw.text((fontx, fonty), label_top, font=font, fill=(0, 0, 0, 200))
+
+        if label_bottom is not None:
+            fontsize = fontsize * upsample_mult
+            font = ImageFont.truetype('modules/pixeldroid-console/pixeldroidConsoleRegular.ttf', fontsize)
+            fontwidth, fontheight = font.getsize(label_bottom)
+            fontx = width//2 - (fontwidth//2)
+            fonty = height - int(fontheight*1.5)
+            draw.text((fontx, fonty), label_bottom, font=font, fill=(0, 0, 0, 200))
 
         img.thumbnail((width//upsample_mult, height//upsample_mult))
 
