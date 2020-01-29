@@ -73,9 +73,6 @@ def write(object data,
     height *= upsample_mult
     stroke *= upsample_mult
 
-    if filename is None:
-        filename = 'waveform.png'
-
     x_axis = list(range(width))
 
     with Image.new('RGBA', (width, height), (255, 255, 255, 255)) as img:
