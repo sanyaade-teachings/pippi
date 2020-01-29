@@ -9,6 +9,20 @@ from pippi.wavetables cimport Wavetable
 import sys
 import numpy as np
 
+BG = (255, 255, 255, 255)
+AX = (0,0,0,255)
+
+###########
+#0123456789
+#1
+#2
+#3
+###########
+
+cdef int ycoord(double point, int canvas_height, double minval, double maxval):
+    y = (point - minval) * (1.0/(maxval - minval))
+    return <int>(((y - 1) * -1) * canvas_height)
+
 def write(object data, 
         object filename=None, 
         int width=400, 
@@ -19,7 +33,8 @@ def write(object data,
         int upsample_mult=5, 
         bint show_axis=True,
         list insets=None, 
-        list notes=None):
+        list notes=None, 
+        object y=None):
 
     cdef int i = 0
     cdef int channels
@@ -32,7 +47,16 @@ def write(object data,
     cdef list mapped_points
     cdef list x_axis
     cdef int x
+    cdef int gutter
 
+    cdef double ymin=-1, ymax=1
+
+    if y is not None:
+        ymin, ymax = y
+
+    #print('ymin, ymax', ymin, ymax)
+
+    # Convert data into PIL-compatible format
     if isinstance(data, SoundBuffer):
         channels = data.channels
         _data = data.frames
@@ -58,43 +82,46 @@ def write(object data,
 
     x_axis = list(range(width))
 
-    img = Image.new('RGBA', (width, height), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(img)
+    with Image.new('RGBA', (width, height), (255, 255, 255, 255)) as img:
+        draw = ImageDraw.Draw(img)
 
-    for channel in range(channels):
-        color = tuple([random.randint(0, 200) for _ in range(3)] + [200])
+        for channel in range(channels):
+            color = tuple([random.randint(0, 200) for _ in range(3)] + [200])
 
-        points = ((np.array(_data[:,channel], dtype='d') - offset) * -1) * height * mult
+            points = np.array(_data[:,channel], dtype='d')
 
-        mapped_points = []
-        for x in x_axis:
-            pos = x / width
-            y = interpolation._linear_pos(points, pos)
-            mapped_points += [ (x, y) ]
+            mapped_points = []
+            for x in x_axis:
+                pos = x / width
+                y = interpolation._linear_pos(points, pos)
+                y = ycoord(y, height, ymin, ymax)
+                mapped_points += [ (x, y) ]
 
-        draw.line(mapped_points, fill=color, width=stroke, joint='curve')
+            draw.line(mapped_points, fill=color, width=stroke, joint='curve')
 
-    if show_axis:
-        draw.line((0, height/2, width, height/2), fill=(0,0,0,255), width=stroke//4)
+        if show_axis:
+            y = ycoord(0, height, ymin, ymax)
+            draw.line((0, y, width, y), fill=(0,0,0,255), width=stroke//4)
 
-    cdef int gutter = stroke
-    if insets is not None:
-        inset_width = width//len(insets) - gutter//2
-        inset_height = height//3 - gutter//2
-        new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
-        new.paste(img, (0, inset_height))
-        for i, inset in enumerate(insets):
-            inset = inset.resize((inset_width, inset_height))
-            new.paste(inset, (inset_width*i + gutter//2, 0))
+        gutter = stroke
+        if insets is not None:
+            inset_width = width//len(insets) - gutter//2
+            inset_height = height//3 - gutter//2
+            new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
+            new.paste(img, (0, inset_height))
+            for i, inset in enumerate(insets):
+                inset = inset.resize((inset_width, inset_height))
+                new.paste(inset, (inset_width*i + gutter//2, 0))
 
-        img = new
+            img = new
 
-    img.thumbnail((width//upsample_mult, height//upsample_mult))
+        img.thumbnail((width//upsample_mult, height//upsample_mult))
 
-    if filename is not None:
-        img.save(filename)
+        if filename is not None:
+            img.save(filename)
 
     return img
+
 
 # FIXME use `write` interface everywhere
 cpdef void waveform(object sound, 
