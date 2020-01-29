@@ -118,14 +118,13 @@ def write(object data,
         if insets is not None:
             inset_width = width//len(insets) - stroke//2
             inset_height = height//3 - stroke//2
-            new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
-            new.paste(img, (0, inset_height))
-            for i, inset in enumerate(insets):
-                inset_height = int(inset.height * (width/inset_width))
-                inset = inset.resize((inset_width, inset_height))
-                new.paste(inset, (inset_width*i + stroke//2, 0))
-
-            img = new
+            with Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255)) as new:
+                new.paste(img, (0, inset_height))
+                for i, inset in enumerate(insets):
+                    inset_height = int(inset.height * (width/inset_width))
+                    inset = inset.resize((inset_width, inset_height))
+                    new.paste(inset, (inset_width*i + stroke//2, 0))
+                img = new
 
         img.thumbnail((width//upsample_mult, height//upsample_mult))
 
