@@ -71,6 +71,8 @@ If you need to build sources from a clean slate (sometimes updates to `pxd` file
 
 [Nando Florestan](http://dev.nando.audio/) for his small public domain GM soundfont used in the test suite.
 
+[Pixeldroid](https://github.com/pixeldroid/fonts) for their OFL licensed console font used for labeling graphs.
+
 
 ## Release Notes
 
