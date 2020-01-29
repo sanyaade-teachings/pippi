@@ -5,6 +5,3 @@
 [submodule "modules/TinySoundFont"]
 	path = modules/TinySoundFont
 	url = https://github.com/luvsound/TinySoundFont.git
-[submodule "modules/pixeldroid-fonts"]
-	path = modules/pixeldroid-fonts
-	url = https://github.com/pixeldroid/fonts.git
