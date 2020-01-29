@@ -4,10 +4,12 @@ import random
 from PIL import Image, ImageDraw, ImageFont
 from pippi cimport interpolation
 from pippi cimport dsp
+from pippi.defaults cimport MIN_FLOAT
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable
 import sys
 import numpy as np
+
 
 cdef int ycoord(double point, int canvas_height, double minval, double maxval):
     y = (point - minval) * (1.0/(maxval - minval))
@@ -46,9 +48,6 @@ def write(object data,
 
     cdef double ymin=-1, ymax=1
 
-    if y is not None:
-        ymin, ymax = y
-
     if isinstance(data, SoundBuffer):
         channels = data.channels
         _data = data.frames
@@ -64,6 +63,15 @@ def write(object data,
     else:
         channels = data.shape[1]
         _data = data
+
+    if y is not None:
+        ymin, ymax = y
+    else:
+        ymin = np.min(_data)
+        ymax = np.max(_data)
+
+    if ymax - ymin <= MIN_FLOAT:
+        raise ValueError('ymax and ymin are too close together')
 
     width *= upsample_mult
     height *= upsample_mult
@@ -95,18 +103,6 @@ def write(object data,
             y = ycoord(0, height, ymin, ymax)
             draw.line((0, y, width, y), fill=(0,0,0,255), width=stroke//4)
 
-        gutter = stroke
-        if insets is not None:
-            inset_width = width//len(insets) - gutter//2
-            inset_height = height//3 - gutter//2
-            new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
-            new.paste(img, (0, inset_height))
-            for i, inset in enumerate(insets):
-                inset = inset.resize((inset_width, inset_height))
-                new.paste(inset, (inset_width*i + gutter//2, 0))
-
-            img = new
-
         if label is not None:
             label_bottom = label
 
@@ -123,8 +119,20 @@ def write(object data,
             font = ImageFont.truetype('modules/pixeldroid-console/pixeldroidConsoleRegular.ttf', fontsize)
             fontwidth, fontheight = font.getsize(label_bottom)
             fontx = width//2 - (fontwidth//2)
-            fonty = height - int(fontheight*1.5)
+            fonty = height - int(fontheight*2)
             draw.text((fontx, fonty), label_bottom, font=font, fill=(0, 0, 0, 200))
+
+        gutter = stroke
+        if insets is not None:
+            inset_width = width//len(insets) - gutter//2
+            inset_height = height//3 - gutter//2
+            new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
+            new.paste(img, (0, inset_height))
+            for i, inset in enumerate(insets):
+                inset = inset.resize((inset_width, inset_height))
+                new.paste(inset, (inset_width*i + gutter//2, 0))
+
+            img = new
 
         img.thumbnail((width//upsample_mult, height//upsample_mult))
 

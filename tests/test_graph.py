@@ -4,16 +4,16 @@ from pippi import wavetables, dsp, graph
 class TestGraph(TestCase):
     def test_insets(self):
         wt1 = wavetables.seesaw('rnd', 4096, dsp.rand(0, 1))
-        wt1_graph = wt1.graph()
+        wt1_graph = wt1.graph(label='LFO 1')
 
         wt2 = wavetables.seesaw('rnd', 4096, dsp.rand(0, 1))
-        wt2_graph = wt2.graph()
+        wt2_graph = wt2.graph(label='LFO 2')
 
         wt3 = wavetables.seesaw('rnd', 4096, dsp.rand(0, 1))
-        wt3_graph = wt3.graph()
+        wt3_graph = wt3.graph(label='LFO 3')
 
         snd = dsp.read('tests/sounds/linux.wav')
-        snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=1200, height=500)
+        snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=1200, height=500, label='I pronounce Linux as Linux')
 
 
     def test_range(self):
