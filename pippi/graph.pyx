@@ -17,8 +17,8 @@ cdef int ycoord(double point, int canvas_height, double minval, double maxval):
 
 def write(object data, 
         object filename=None, 
-        int width=400, 
-        int height=300, 
+        int width=640, 
+        int height=360, 
         double offset=1, 
         double mult=0.5, 
         int stroke=2, 
@@ -122,15 +122,15 @@ def write(object data,
             fonty = height - int(fontheight*2)
             draw.text((fontx, fonty), label_bottom, font=font, fill=(0, 0, 0, 200))
 
-        gutter = stroke
         if insets is not None:
-            inset_width = width//len(insets) - gutter//2
-            inset_height = height//3 - gutter//2
+            inset_width = width//len(insets) - stroke//2
+            inset_height = height//3 - stroke//2
             new = Image.new('RGBA', (img.width, img.height + inset_height), (255,255,255,255))
             new.paste(img, (0, inset_height))
             for i, inset in enumerate(insets):
+                inset_height = int(inset.height * (width/inset_width))
                 inset = inset.resize((inset_width, inset_height))
-                new.paste(inset, (inset_width*i + gutter//2, 0))
+                new.paste(inset, (inset_width*i + stroke//2, 0))
 
             img = new
 
