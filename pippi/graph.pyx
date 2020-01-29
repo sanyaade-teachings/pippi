@@ -19,19 +19,16 @@ def write(object data,
         object filename=None, 
         int width=640, 
         int height=360, 
-        double offset=1, 
-        double mult=0.5, 
         int stroke=2, 
         int upsample_mult=5, 
         bint show_axis=True,
         list insets=None, 
-        list notes=None, 
         object y=None, 
         str label=None, 
         int fontsize=40, 
         str label_top=None,
         str label_bottom=None,
-        ):
+    ):
 
     cdef int i = 0
     cdef int channels
@@ -44,7 +41,6 @@ def write(object data,
     cdef list mapped_points
     cdef list x_axis
     cdef int x
-    cdef int gutter
 
     cdef double ymin=-1, ymax=1
 
