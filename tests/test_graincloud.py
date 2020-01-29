@@ -82,3 +82,15 @@ class TestCloud(TestCase):
 
         out.write('tests/renders/graincloud_with_read_lfo.wav')
 
+    def test_graincloud_grainsize(self):
+        snd = dsp.read('tests/sounds/guitar1s.wav')
+        out = snd.cloud(
+                length=dsp.rand(8, 16), 
+                window='hann', 
+                grainlength=dsp.win('sinc', 0.2, 6), 
+                grid=dsp.win('hannout', 0.04, 1),
+                spread=1, 
+            )
+
+        out.write('tests/renders/graincloud_grainsize.wav')
+
