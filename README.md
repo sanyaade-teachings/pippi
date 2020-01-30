@@ -6,9 +6,48 @@ v2.0.0 - Beta 4 (In Development)
 
 ## What is this?
 
-Pippi is a computer music system that aims to let you write python scores for offline rendering. 
-`astrid` is the experimental kinda-realtime counterpart to `pippi` -- a DAW/live-coding environment 
-for performance and interactive applications.
+Pippi is a computer music library for python. 
+
+It includes a few handy data structures for music like
+`SoundBuffer` & `Wavetable`, which are operator-overloaded 
+to make working with sounds and control structures simpler.
+
+They also include a lot of useful methods for doing common and 
+not-so-common transformations in-place or producing a copy.
+
+    # Mix two sounds
+    both = sound1 & sound2
+
+    # Apply a hann Wavetable as an envelope to a sound
+    enveloped = sound * dsp.win('hann')
+
+    # Or the same, via a shortcut method on the `SoundBuffer`
+    enveloped = sound.env('hann')
+
+    # Synthesize a 10 second graincloud from the sound, 
+    # with grain length modulating between 20ms and 2s 
+    # over a hann shaped curve.
+    cloudy = enveloped.cloud(10, grainlength=dsp.win('hann', dsp.MS*20, 2))
+
+It comes with several oscs:
+
+    - Pulsar - a pulsar synthesis engine
+    - Pulsar2d - a 2d morphing pulsar synthesis engine
+    - Tukey - a tukey-window-based osc with waveshape modulation between square-like and sine-like
+    - Osc - an everyday wavetable osc
+    - Osc2d - a 2d morphing wavetable osc
+    - Fold - an infinite folding wavetable osc
+    - Bar - a bar physical model (from Soundpipe)
+    - Pluck - a plucked string physical model (adapted from JOS)
+    - Alias - a highly aliased pulse train osc
+
+And many built-in effects and transformations:
+
+    - Easy independent control over pitch and speed for any `SoundBuffer`
+    - Paulstretch
+    - Several forms of waveshaping and distortion including a crossover distortion ported from supercollider
+    - Sweapable highpass, lowpass, bandpass and band reject butterworth filters from Soundpipe
+    - Lots more!
 
 ## Installation
 
