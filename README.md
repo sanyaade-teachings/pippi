@@ -1,4 +1,4 @@
-[Pippi: Computer music with python](banner.png)
+![Pippi: Computer music with python](banner.png)
 
 ## Pippi: Computer music with python
 
