@@ -66,7 +66,7 @@ As well as support for pitch and harmony transformations and non-standard tuning
     # Convert a pitch to a frequency
     freq = tune.ntf('C#3')
 
-And basic graphing functionality for `SoundBuffer`s and `Wavetable`s
+And basic graphing functionality for any `SoundBuffer` or `Wavetable` -- some dumb examples pictured in the banner above.
 
     # Render an image of this sound's waveform
     sound.graph('mysound.png')
