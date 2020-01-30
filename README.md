@@ -12,14 +12,14 @@ It includes a few handy data structures for music like
 `SoundBuffer` & `Wavetable`, which are operator-overloaded 
 to make working with sounds and control structures simpler.
 
-They also include a lot of useful methods for doing common and 
-not-so-common transformations in-place or producing a copy.
+It also includes a lot of useful methods for doing common and 
+not-so-common transformations to sounds and control structures. 
 
     # Mix two sounds
     both = sound1 & sound2
 
-    # Apply a hann Wavetable as an envelope to a sound
-    enveloped = sound * dsp.win('hann')
+    # Apply a skewed hann Wavetable as an envelope to a sound
+    enveloped = sound * dsp.win('hann').skewed(0.6)
 
     # Or the same, via a shortcut method on the `SoundBuffer`
     enveloped = sound.env('hann')
