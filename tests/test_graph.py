@@ -14,7 +14,7 @@ class TestGraph(TestCase):
         wt3_graph = wt3.graph(label='LFO 3')
 
         snd = dsp.read('tests/sounds/linux.wav')
-        snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=1200, height=500, label='I pronounce Linux as Linux')
+        snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=900, height=250, label='I pronounce Linux as Linux')
 
     def test_sandwich_board(self):
         # For the readme
