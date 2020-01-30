@@ -1,5 +1,7 @@
 ![Pippi: Computer music with python](banner.png)
 
+[This ugly but useful graph with insets and labels was drawn with pippi](tests/test_graph.py)
+
 ## Pippi: Computer music with python
 
 v2.0.0 - Beta 4 (In Development)
