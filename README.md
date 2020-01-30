@@ -15,6 +15,11 @@ to make working with sounds and control structures simpler.
 It also includes a lot of useful methods for doing common and 
 not-so-common transformations to sounds and control structures. 
 
+    from pippi import dsp
+
+    sound1 = dsp.read('sound1.wav')
+    sound2 = dsp.read('sound2.flac')
+
     # Mix two sounds
     both = sound1 & sound2
 
@@ -51,6 +56,8 @@ And many built-in effects and transformations:
 
 As well as support for pitch and harmony transformations and non-standard tuning systems
 
+    from pippi import tune
+
     # Get a list of frequencies from a list of scale degrees
     frequencies = tune.fromdegrees([1,3,5,9], octave=3, root='a', scale=tune.MINOR, ratios=tune.JUST)
 
@@ -68,11 +75,25 @@ As well as support for pitch and harmony transformations and non-standard tuning
 
 And basic graphing functionality for any `SoundBuffer` or `Wavetable` -- some dumb examples pictured in the banner above.
 
+    from pippi import dsp
+
+    sound = dsp.read('sound.wav')
+
     # Render an image of this sound's waveform
     sound.graph('mysound.png')
 
     # Render an image of a sinc wavetable with a label and scaled range
     dsp.win('sinc').graph('sinc.png', label='A sinc wavetable', y=(-.25, 1))
+
+As well as other neat stuff like soundfont rendering support via tinysf!
+
+    from pippi import dsp, soundfont
+
+    # Play a piano sound from a soundfont with general MIDI soundfont (program change is zero-indexed)
+    tada = soundfont.play('my-cool-soundfont.sf2', length=30, freq=345.9, amp=0.5, voice=0)
+
+    # Save copy to your hard disk
+    tada.write('tada.wav')
 
 
 ## Installation
