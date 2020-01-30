@@ -66,6 +66,14 @@ As well as support for pitch and harmony transformations and non-standard tuning
     # Convert a pitch to a frequency
     freq = tune.ntf('C#3')
 
+And basic graphing functionality for `SoundBuffer`s and `Wavetable`s
+
+    # Render an image of this sound's waveform
+    sound.graph('mysound.png')
+
+    # Render an image of a sinc wavetable with a label and scaled range
+    dsp.win('sinc').graph('sinc.png', label='A sinc wavetable', y=(-.25, 1))
+
 
 ## Installation
 
