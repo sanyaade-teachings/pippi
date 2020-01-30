@@ -1,4 +1,4 @@
-.PHONY: test test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph build
+.PHONY: test test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph build docs
 
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
@@ -47,6 +47,8 @@ test-graph:
 
 docs:
 	portray as_html --overwrite -o docs
+	chmod -R 755 docs
+	rsync -avz docs/ deploy@radio.af:/srv/www/pippi.world --delete
 
 clean:
 	rm -rf build/
