@@ -1,5 +1,6 @@
 from unittest import TestCase
-from pippi import wavetables, dsp, graph
+from pippi import wavetables, dsp, graph, shapes, oscs, fx
+from pippi.wavesets import Waveset
 
 class TestGraph(TestCase):
     def test_insets(self):
@@ -15,6 +16,24 @@ class TestGraph(TestCase):
         snd = dsp.read('tests/sounds/linux.wav')
         snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=1200, height=500, label='I pronounce Linux as Linux')
 
+    def test_sandwich_board(self):
+        # For the readme
+        l = dsp.read('tests/sounds/linux.wav')
+        g = dsp.read('tests/sounds/guitar1s.wav')
+
+        f = fx.crossover(l, dsp.win('phasor', 0, 1), 0.3, dsp.win('rsaw', 0, 1)).graph(fontsize=80, label='Weird FX')
+        ws = Waveset(g).substitute('sine').graph(fontsize=80, label='Waveset Manipulation')
+        ps = oscs.Pulsar2d(freq=80, pulsewidth=shapes.win('hann')).play(2).graph(fontsize=80, label='Pulsar Synthesis')
+
+        wt = shapes.win('hann', length=0.4) * shapes.win('sine') * shapes.win('tri')
+        wt.graph('tests/renders/graph_sandwich_board.png', 
+                insets=[ps, ws, f],
+                width=900, 
+                height=340, 
+                label='Pippi: Computer Music With Python',
+                stroke=30,
+                fontsize=80,
+            )
 
     def test_range(self):
         wt = dsp.win('sine')
