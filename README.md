@@ -1,14 +1,22 @@
-![Pippi: Computer music with python](banner.png)
-
-[This ugly but useful graph with insets and labels was drawn with pippi](tests/test_graph.py)
-
-## Pippi: Computer music with python
+# Pippi
 
 v2.0.0 - Beta 4 (In Development)
 
+Source code: [https://github.com/luvsound/pippi](https://github.com/luvsound/pippi)
+
+Documentation: [https://pippi.world](https://pippi.world)
+
+<small>
+
+[Source code for the wonderful example of Pippi's graphing feature pictured below](https://github.com/luvsound/pippi/blob/master/tests/test_graph.py#L19)
+
+</small>
+
+![Pippi: Computer music with python](banner.png)
+
 ## What is this?
 
-Pippi is a computer music library for python. 
+Pippi is a library of computer music modules for python. 
 
 It includes a few handy data structures for music like
 `SoundBuffer` & `Wavetable`, which are operator-overloaded 
@@ -114,7 +122,7 @@ To use the most recent release from pip (currently `2.0.0 beta 3`) just:
 
 ## Tutorials
 
-There are annotated example scripts in the [tutorials](tutorials) directory which introduce some of pippi's functionality.
+There are annotated example scripts in the [tutorials](docs/tutorials) directory which introduce some of pippi's functionality.
 
 Beyond arriving at a good-enough stable API for the 2.x series of releases (and fixing bugs), my goal during the 
 beta phase of development is to deal with the lack of documentation for this project.

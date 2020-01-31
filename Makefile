@@ -1,4 +1,4 @@
-.PHONY: test test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph build docs
+.PHONY: test test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph build docs deploy
 
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
@@ -46,9 +46,12 @@ test-graph:
 	python -m unittest tests/test_graph.py -v
 
 docs:
-	portray as_html --overwrite -o docs
-	chmod -R 755 docs
-	rsync -avz docs/ deploy@radio.af:/srv/www/pippi.world --delete
+	portray as_html --overwrite -o pippi.world
+	#mkdocs build
+	chmod -R 755 pippi.world
+
+deploy:
+	rsync -avz pippi.world/ deploy@radio.af:/srv/www/pippi.world --delete
 
 clean:
 	rm -rf build/

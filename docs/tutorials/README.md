@@ -12,4 +12,4 @@ Each tutorial has a corresponding python script, which is just all the source co
 
 A short introduction to the `SoundBuffer` type and some basic operations that you can perform on soundfiles.
 
-[Tutorial 001 - SoundBuffers and samples ](http://htmlpreview.github.io/?https://github.com/luvsound/pippi/blob/master/tutorials/001-soundbuffers.html)
+[Tutorial 001 - SoundBuffers and samples ](001-soundbuffers)
