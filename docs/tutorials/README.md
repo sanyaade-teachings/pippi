@@ -1,6 +1,6 @@
 # Pippi Tutorials
 
-In this directory you'll find some tutorial documents created with `pweave`. The source code for the tutorial files have a file extension ending in `.pmd`. 
+In this directory you'll find some tutorial documents created with the help of `pweave`. The source code for the tutorial files have a file extension ending in `.pmd`. 
 
 Audio output from the tutorials is pre-rendered and stored in the `renders` directory for inline embedding in the generated HTML documents.
 

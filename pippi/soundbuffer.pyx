@@ -566,7 +566,7 @@ cdef class SoundBuffer:
     def __repr__(self):
         """ Return a string representation of this SoundBuffer
         """
-        return 'SoundBuffer(samplerate={}, channels={}, frames={})'.format(self.samplerate, self.channels, self.frames)
+        return 'SoundBuffer(samplerate=%s, channels=%s, frames=%s, dur=%.2f)' % (self.samplerate, self.channels, len(self.frames), self.dur)
 
 
     ##########################
