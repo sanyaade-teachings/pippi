@@ -1,4 +1,6 @@
 from unittest import TestCase
+import shutil
+
 from pippi import wavetables, dsp, graph, shapes, oscs, fx
 from pippi.wavesets import Waveset
 
@@ -17,15 +19,14 @@ class TestGraph(TestCase):
         snd.graph('tests/renders/graph_insets.png', insets=[wt1_graph, wt2_graph, wt3_graph], stroke=3, width=900, height=250, label='I pronounce Linux as Linux')
 
     def test_sandwich_board(self):
-        # For the readme
         l = dsp.read('tests/sounds/linux.wav')
         g = dsp.read('tests/sounds/guitar1s.wav')
 
-        f = fx.crossover(l, dsp.win('phasor', 0, 1), 0.3, dsp.win('rsaw', 0, 1)).graph(fontsize=80, label='Weird FX')
-        ws = Waveset(g).substitute('sine').graph(fontsize=80, label='Waveset Manipulation')
-        ps = oscs.Pulsar2d(freq=80, pulsewidth=shapes.win('hann')).play(2).graph(fontsize=80, label='Pulsar Synthesis')
+        f = fx.crossover(l, dsp.win('phasor', 0, 1), dsp.rand(0.1, 0.3), dsp.win('rnd', 0, 1)).graph(fontsize=dsp.rand(60, 100), label='Weird FX')
+        ws = Waveset(g).substitute('sine').graph(fontsize=dsp.rand(60, 100), label='Waveset Manipulation')
+        ps = oscs.Pulsar2d(freq=dsp.rand(10,80), pulsewidth=shapes.win('hann')).play(2).graph(fontsize=dsp.rand(60,100), label='Pulsar Synthesis')
 
-        wt = shapes.win('hann', length=0.4) * shapes.win('sine') * shapes.win('tri')
+        wt = shapes.win('hann', length=0.4) * shapes.win('sine') * shapes.win('rnd')
         wt.graph('tests/renders/graph_sandwich_board.png', 
                 insets=[ps, ws, f],
                 width=900, 
@@ -34,6 +35,9 @@ class TestGraph(TestCase):
                 stroke=30,
                 fontsize=80,
             )
+
+        # For the readme
+        shutil.copy('tests/renders/graph_sandwich_board.png', 'banner.png')
 
     def test_range(self):
         wt = dsp.win('sine')
