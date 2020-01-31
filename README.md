@@ -1,4 +1,4 @@
-# Pippi
+# Pippi: Computer Music With Python
 
 v2.0.0 - Beta 4 (In Development)
 
