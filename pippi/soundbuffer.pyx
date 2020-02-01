@@ -225,6 +225,7 @@ cdef class SoundBuffer:
         self.channels = max(channels, 1)
         cdef int framestart = 0
         cdef int framelength = <int>(length * self.samplerate)
+        cdef double[:] tmplist
 
         if filename is not None:
             framestart = <int>(start * self.samplerate)
@@ -240,7 +241,8 @@ cdef class SoundBuffer:
                 self.frames = np.column_stack([ frames.data for _ in range(self.channels) ])
 
             elif isinstance(frames, list):
-                self.frames = np.column_stack([ frames for _ in range(self.channels) ])
+                tmplist = np.array(frames, dtype='d')
+                self.frames = np.column_stack([ tmplist for _ in range(self.channels) ])
 
             elif frames.shape == 1:
                 self.frames = np.column_stack([ frames for _ in range(self.channels) ])
@@ -375,6 +377,12 @@ cdef class SoundBuffer:
     ##############
     def __bool__(self):
         return bool(len(self))
+
+    def __eq__(self, other):
+        try:
+            return len(self) == len(other) and all(a == b for a, b in zip(self, other))
+        except TypeError as e:
+            return NotImplemented
 
 
     #############################
