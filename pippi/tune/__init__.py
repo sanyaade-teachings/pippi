@@ -204,6 +204,10 @@ MIDI_NOTES = {
     'ab': 32,
 }
 
+DEFAULT_RATIOS = TERRY
+DEFAULT_SCALE = MAJOR
+
+
 def mtof(midi_note):
     return 2**((midi_note-69)/12.0) * 440
 
@@ -252,7 +256,7 @@ def ntf(note, octave=None, ratios=None):
     """ Note to freq 
     """
     if ratios is None:
-        ratios = TERRY
+        ratios = DEFAULT_RATIOS
 
     note, octave = parse_pitch_class(note, octave)
 
@@ -339,10 +343,10 @@ def scale_mask_to_indexes(mask):
 
 def tofreqs(degrees=None, root=261.63, ratios=None, scale=None, scale_mask=None):
     if ratios is None:
-        ratios = JUST
+        ratios = DEFAULT_RATIOS
 
     if scale is None:
-        scale = MAJOR
+        scale = DEFAULT_SCALE
     
     if degrees is None:
         degrees = range(len(scale))
@@ -363,7 +367,7 @@ def fromdegrees(scale_degrees=None, octave=2, root='c', scale=None, ratios=None)
         scale_degrees = [1,3,5]
 
     if ratios is None:
-        ratios = TERRY
+        ratios = DEFAULT_RATIOS
 
     if scale is None:
         scale = MAJOR
@@ -426,22 +430,24 @@ def get_chord_root_index(name):
 
     return root % 12
 
+def apply_interval(freq, iv=None, ratios=None):
+    if iv is None:
+        iv = 'P1'
+    if ratios is None:
+        ratios = DEFAULT_RATIOS
+    return freq * get_ratio_from_interval(iv, ratios)
+
 def add_intervals(a, b):
     a = INTERVALS[a]
     b = INTERVALS[b]
     c = a + b
-    for interval, index in INTERVALS.items():
+    for iv, index in INTERVALS.items():
         if c == index:
-            c = interval
+            return iv
+    return None
 
-    return c
-
-def get_ratio_from_interval(interval, ratios):
-    try:
-        index = INTERVALS[interval]
-    except IndexError:
-        log('Interval out of range, doh. Here have a P1')
-        index = 0
+def get_ratio_from_interval(iv, ratios):
+    index = INTERVALS[iv]
 
     try:
         ratio = ratios[index]
@@ -465,7 +471,7 @@ def chord(name, key=None, octave=3, ratios=None):
         key = default_key
 
     if ratios is None:
-        ratios = TERRY
+        ratios = DEFAULT_RATIOS
 
     key = ntf(key, octave, ratios)
     root = ratios[get_chord_root_index(name)]
@@ -473,7 +479,7 @@ def chord(name, key=None, octave=3, ratios=None):
 
     name = re.sub('[#b]+', '', name)
     chord = get_intervals(name)
-    chord = [ get_ratio_from_interval(interval, ratios) for interval in chord ]
+    chord = [ get_ratio_from_interval(iv, ratios) for iv in chord ]
     chord = [ root * ratio for ratio in chord ]
 
     return chord
@@ -529,7 +535,7 @@ class Parser:
         self.durations = durations
 
         if ratios is None:
-            ratios = TERRY
+            ratios = DEFAULT_RATIOS
         self.ratios = ratios
 
     def parse(self):

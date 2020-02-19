@@ -30,6 +30,12 @@ class TestChords(TestCase):
         assert tune.add_intervals('m3','m3') == 'TT'
         assert tune.add_intervals('m3','M3') == 'P5'
 
+    def test_apply_intervals(self):
+        self.assertEqual(tune.apply_interval(200, 'M2', tune.JUST), 225)
+        self.assertEqual(tune.apply_interval(200, 'P5', tune.JUST), 300)
+        self.assertEqual(tune.apply_interval(200, 'm6', tune.JUST), 320)
+        self.assertEqual(tune.apply_interval(200, 'm7', tune.JUST), 360)
+
     def test_get_chord(self):
         assert tune.chord('I7', key='a', octave=4, ratios=tune.JUST) == [440.0, 550.0, 660.0, 792.0] 
         assert tune.chord('I7', key='a', octave=3, ratios=tune.JUST) == [220.0, 275.0, 330.0, 396.0] 
