@@ -46,14 +46,7 @@ test-graph:
 	python -m unittest tests/test_graph.py -v
 
 docs:
-	echo "Tangling tutorials..."
-	ptangle docs/tutorials/*.pmd
-	echo "Executing tutorials..."
-	python docs/tutorials/*.py
-	echo "Weaving tutorials..."
-	pweave -f pandoc docs/tutorials/*.pmd
-	portray as_html --overwrite -o pippi.world
-	chmod -R 755 pippi.world
+	bash scripts/docs.sh
 
 deploy:
 	rsync -avz pippi.world/ deploy@radio.af:/srv/www/pippi.world --delete
