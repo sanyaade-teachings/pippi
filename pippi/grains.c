@@ -832,12 +832,12 @@ static const char *__pyx_filename;
 static const char *__pyx_f[] = {
   "pippi/grains.pyx",
   "stringsource",
-  "array.pxd",
+  "venv/lib/python3.8/site-packages/Cython/Includes/cpython/array.pxd",
   "pippi/wavetables.pxd",
   "pippi/soundbuffer.pxd",
-  "type.pxd",
-  "bool.pxd",
-  "complex.pxd",
+  "venv/lib/python3.8/site-packages/Cython/Includes/cpython/type.pxd",
+  "venv/lib/python3.8/site-packages/Cython/Includes/cpython/bool.pxd",
+  "venv/lib/python3.8/site-packages/Cython/Includes/cpython/complex.pxd",
 };
 /* MemviewSliceStruct.proto */
 struct __pyx_memoryview_obj;
@@ -2864,6 +2864,8 @@ static int *__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE = 0;
 #define __pyx_v_5pippi_8defaults_DEFAULT_WTSIZE (*__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE)
 static double *__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH = 0;
 #define __pyx_v_5pippi_8defaults_MIN_PULSEWIDTH (*__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH)
+static double *__pyx_vp_5pippi_8defaults_MIN_FLOAT = 0;
+#define __pyx_v_5pippi_8defaults_MIN_FLOAT (*__pyx_vp_5pippi_8defaults_MIN_FLOAT)
 
 /* Module declarations from 'pippi.soundbuffer' */
 static PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer = 0;
@@ -20914,6 +20916,7 @@ static int __Pyx_modinit_variable_import_code(void) {
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_SOUNDFILE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE, "PyObject *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_WTSIZE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "MIN_PULSEWIDTH", (void **)&__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_2, "MIN_FLOAT", (void **)&__pyx_vp_5pippi_8defaults_MIN_FLOAT, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
