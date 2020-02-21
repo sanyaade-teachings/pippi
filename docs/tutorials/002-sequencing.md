@@ -15,63 +15,61 @@ from pippi import dsp
 
 ### The Dub Pattern
 
-Essentially all forms of sequencing in pippi are ultimately just copying the 
-values from one section of one buffer onto the values from another section of 
+With a few exceptions, pippi doesn't really follow a conventional unit generator 
+pattern where a DSP graph is formed and all inputs flow to all outputs over a series 
+of block computations. That's a very useful (and old!) pattern which works very well 
+for realtime systems because the latency of your system is basically fixed. Whatever 
+you can finish computing in a single block of samples is the limit of the system, and 
+also the limit of the responsiveness of the system. 
+
+Non-realtime systems make time and scheduling much easier to reason about because you 
+don't need to worry about doing operations in sequence, on-demand, and in context. 
+Time travel is real in non-realtime systems!
+
+So, essentially all forms of sequencing in pippi consist of just copying the 
+values from one part of one buffer _onto_ the values from another section of 
 a different buffer. This can happen at all sorts of levels and a useful pattern 
-for doing it is basically just a bit of normal python.
+for doing it is basically just to write a simple while loop in python. 
+
+Before we demonstrate the dub pattern, lets take a sidebar and put together a basic
+hi hat generator, so we have something to sequence.
 
 #### A hat synth
 
 We'll get some more into synthesis in future tutorials, but for fun lets demonstrate 
 the dub pattern by synthesizing some percussion-ish sounds with the `noise` module.
 
-This module has basic band-limited noise generation available with `noise.bln()` which 
-will choose a new random frequency within a range you specify on every period of a simple 
-wavetable synth. So you can generate a sinewave that jumps discretely around a boundry
-within for example 1,000 to 2,000 hz. Those boundries can be curves to create filter-sweep-like 
-shapes over time.
+This module has basic band-limited noise generation available with `noise.bln()`. It
+will choose a new random frequency (within a range you specify) on every period of an oscillating
+wavetable synth. Every cycle of the sinewave will jump discretely from frequency to frequency 
+smoothly on the edge of each cycle / waveset / period. Those frequency boundries can also be 
+curves to create filter-sweep-like shapes over time.
 
-Lets make a little hi hat type sound by synthesizing 80ms of sine noise sweeping from between 9,000 and 12,000 hz 
+Lets make a hi hat type sound by synthesizing 80ms of sine wavesets scattered between 9,000 and 12,000 hz 
 to between 11,000 and 14,000 hz over the shape of the right half of a hanning window.
 
-That maybe sounds like a lot but we'll do it pretty simply bit by bit. First, the curves!
+That maybe sounds like a lot but we'll do it in pretty small bits. First, the curves!
 
-The lower end of the hi hat will go from 9khz to 11khz:
+The lower end of the hi hat will go from 9khz to 11khz and the upper end of the hi hat will 
+go from 12khz to 14khz over the `hannin` curve shape pictured below.
 
 
 ```python
 lowhz = dsp.win('hannin', 9000, 11000)
+highhz = dsp.win('hannin', 12000, 14000)
 
 # Graph it
-lowhz.graph('docs/tutorials/figures/002-lowhz-hann-curve.png')
+lowhz.graph('docs/tutorials/figures/002-hann-curve.png')
 ```
 
 
 
-<img src="/docs/tutorials/figures/002-lowhz-hann-curve.png" title="lowhz hann curve"/>
+<img src="/docs/tutorials/figures/002-hann-curve.png" title="hann curve"/>
 
-The upper end of the hi hat will go from 12khz to 14khz over the same shape pictured above.
-
-
-```python
-highhz = dsp.win('hannin', 12000, 14000)
-```
-
-
-
-Now lets make 80ms of noise with the curves:
-
-
-```python
-from pippi import noise 
-
-hat = noise.bln('sine', dsp.MS*80, lowhz, highhz)
-```
-
-
-
-Lets give it an envelope with a sharp attack as well. The `pluckout` built-in wavetable 
-looks like this:
+Now lets make 80ms of noise with that frequency boundry curve and give it an 
+amplitude envelope with a sharp attack as well. The `pluckout` built-in wavetable 
+is pretty good for this. It's got a sharp attack (no attack at all actually) and a 
+quick decay into a long, quiet tail. It looks like this:
 
 
 ```python
@@ -84,8 +82,12 @@ pluckout.graph('docs/tutorials/figures/002-pluckout.png')
 <img src="/docs/tutorials/figures/002-pluckout.png" title="pluckout wavetable"/>
 
 
+
 ```python
-hat = hat.env(pluckout) * 0.5 # Finally multiply by half to reduce the amplitude of the signal
+from pippi import noise 
+
+hat = noise.bln('sine', dsp.MS*80, lowhz, highhz)
+hat = hat.env(pluckout) * 0.5 # Also multiply by 0.5 to reduce the amplitude of the signal by half
 hat.write('docs/tutorials/renders/002-plucked-hat.ogg')
 ```
 
@@ -93,10 +95,17 @@ hat.write('docs/tutorials/renders/002-plucked-hat.ogg')
 
 <audio src="/docs/tutorials/renders/002-plucked-hat.ogg" controls></audio>
 
-We'll wrap it in a function to make it easy to reuse later on. Lets also change the 
-curve shape of the frequency boundries to a different shape each time the function is 
+We'll wrap it in a function to make it easy to reuse later on. Lets also make the 
+curve shape of the frequency boundries change to a different shape each time the function is 
 called and a single hat sound is rendered, to give it a little bit of a shimmery imperfect 
-sound. We'll also accept a length param to be able to vary the length of the hat.
+feel. We'll also accept a length param to be able to vary the length of the hat. 
+
+> *Note:* Keep in mind the amplitude envelope is a fixed size and so as the hat length varies, 
+> the character of the envelope will change with it. The decay time will be longer for longer sounds, etc. 
+> To maintain a fixed decay time over a variable length, one other approach would be to generate a 
+> new ADSR envelope (recall SoundBuffer.adsr() from the first tutorial!) for each hat, and give it a fixed 
+> decay time. We'll get into many more ways to generate wavetable shapes that can be used for 
+> amplitude envelopes and all sorts of other stuff in future tutorials.
 
 
 ```python
@@ -337,3 +346,69 @@ out.write('docs/tutorials/renders/002-kicks-and-hats-together.ogg')
 Now this is starting to sound a little more interesting:
 
 <audio src="/docs/tutorials/renders/002-kicks-and-hats-together.ogg" controls></audio>
+
+#### Pattern strings
+
+I like the phasing of the rhythms, but this doesn't really feel like a groove in 5 beats right now. 
+Before we try to fix that, lets take a look at one possible way to sequence _patterns_ in pippi.
+Our current approach works pretty well for sequencing a regular stream of events, but what if we wanted 
+to sequence an irregular pattern of events? For example lets say each ASCII character in the diagram below 
+represents half a beat (in common music notation this would be called an 8th note) and write out the first hat pattern 
+we sequenced above. An `x` is an event, and a `.` is a silence or a rest.
+
+> x.x.x.x.
+
+In our original sequence, this pattern didn't have a length, it is simply a fixed amount of time that represents 
+the interval at which we should plop down our hat sound into an output buffer.
+
+But what if we wanted to do something like this?
+
+> xx.xx..x
+
+One way to accomplish this could be to actually use the ASCII string above as a simple score. We'll count each 
+beat as it passes and use that count to look at the corresponding character in the string and treat it like a 
+lookup table which will decide if we plop down a hat, or scoot along and leave a bit of silence instead.
+
+
+```python
+# Keep track of the position in seconds so we know where to dub
+elapsed = 0
+
+# Our new magic value which will increment on each beat of the underlying grid of 1/8th notes
+count = 0 
+
+# Our quarter note beat was 0.5 seconds, but we want to switch to a grid of 8th notes
+beat = 0.5 / 2 
+
+# Literally just a python string, nothing fancy
+pat = 'xx.xx..x'
+
+out = dsp.buffer(length=30)
+
+while elapsed < 30:
+    # By taking the modulo (%) of the count and using that 
+    # to index into the pattern string, we can loop through 
+    # it forever and use it to decide if we want to make a hat or silence
+    if pat[count % len(pat)] == 'x':
+        # Keep it simple and make each hat 1 second long
+        out.dub(makehat(1), elapsed)    
+
+    # Move time forward along the beat grid of 1/8th notes
+    # and increment our beat counter
+    elapsed += beat
+    count += 1
+
+out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
+```
+
+
+
+This basic idea is actually pretty useful, and there are some helpers in 
+pippi for working with pattern strings like this, including a drum machine 
+abstraction which also eliminates most of the dub pattern boilerplate for you. 
+
+There is a trade-off: the drum machine is much more quick to set up and use for 
+many common use cases, but the dub pattern is much more flexible for specialized 
+sequencing.
+
+

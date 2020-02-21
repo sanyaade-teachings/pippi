@@ -2,20 +2,18 @@
 from pippi import dsp
 
 lowhz = dsp.win('hannin', 9000, 11000)
-
-# Graph it
-lowhz.graph('docs/tutorials/figures/002-lowhz-hann-curve.png')
-
 highhz = dsp.win('hannin', 12000, 14000)
 
-from pippi import noise 
-
-hat = noise.bln('sine', dsp.MS*80, lowhz, highhz)
+# Graph it
+lowhz.graph('docs/tutorials/figures/002-hann-curve.png')
 
 pluckout = dsp.win('pluckout')
 pluckout.graph('docs/tutorials/figures/002-pluckout.png')
 
-hat = hat.env(pluckout) * 0.5 # Finally multiply by half to reduce the amplitude of the signal
+from pippi import noise 
+
+hat = noise.bln('sine', dsp.MS*80, lowhz, highhz)
+hat = hat.env(pluckout) * 0.5 # Also multiply by 0.5 to reduce the amplitude of the signal by half
 hat.write('docs/tutorials/renders/002-plucked-hat.ogg')
 
 
@@ -161,3 +159,32 @@ hats = fx.lpf(hats, 3000)
 # Mix the kicks and the hats
 out.dub(hats)
 out.write('docs/tutorials/renders/002-kicks-and-hats-together.ogg')
+
+# Keep track of the position in seconds so we know where to dub
+elapsed = 0
+
+# Our new magic value which will increment on each beat of the underlying grid of 1/8th notes
+count = 0 
+
+# Our quarter note beat was 0.5 seconds, but we want to switch to a grid of 8th notes
+beat = 0.5 / 2 
+
+# Literally just a python string, nothing fancy
+pat = 'xx.xx..x'
+
+out = dsp.buffer(length=30)
+
+while elapsed < 30:
+    # By taking the modulo (%) of the count and using that 
+    # to index into the pattern string, we can loop through 
+    # it forever and use it to decide if we want to make a hat or silence
+    if pat[count % len(pat)] == 'x':
+        # Keep it simple and make each hat 1 second long
+        out.dub(makehat(1), elapsed)    
+
+    # Move time forward along the beat grid of 1/8th notes
+    # and increment our beat counter
+    elapsed += beat
+    count += 1
+
+out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
