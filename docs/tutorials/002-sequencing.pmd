@@ -17,6 +17,8 @@ values from one section of one buffer onto the values from another section of
 a different buffer. This can happen at all sorts of levels and a useful pattern 
 for doing it is basically just a bit of normal python.
 
+#### A hat synth
+
 We'll get some more into synthesis in future tutorials, but for fun lets demonstrate 
 the dub pattern by synthesizing some percussion-ish sounds with the `noise` module.
 
@@ -86,11 +88,13 @@ def makehat(length=dsp.MS*80):
     return noise.bln('sine', length, lowhz, highhz).env(pluckout) * 0.5
 ```
 
+#### Lining up the hats in a row
+
 Ok, now that we can make a hi hat sound on demand, lets try sequencing a series of 
 hi hat hits in a row, evenly spaced at half-second intervals, and vary the length of the 
 hat randomly from 100ms to 1s as we go.
 
-Remember our output buffer `out`? For this simple but very useful form of the dub pattern, 
+For this simple but very useful form of the dub pattern, 
 we'll keep track of our position inside the buffer as we go, and dub our hat sounds into 
 it as we go.
 
@@ -123,6 +127,8 @@ out.write('docs/tutorials/renders/002-hats-on-ice.ogg')
 Behold! Our fabulous hi hats:
 
 <audio src="/docs/tutorials/renders/002-hats-on-ice.ogg" controls></audio>
+
+#### Smearing the hats across time
 
 Pretty boring but it can keep a steady beat! Before we introduce some other sequencing tools, I want to
 point out that this pattern might seem obvious and simplistic, but it's a very powerful way to design a 
@@ -173,4 +179,122 @@ And our irregular sequence of hi hats:
 
 <audio src="/docs/tutorials/renders/002-hats-slipping-on-ice.ogg" controls></audio>
 
+#### A rhythmic smear of hats, and a kick
 
+Lets try something similar that suggests a more regular pattern.
+
+First, here's another function to generate a simple kick drum type sound that adds a bit 
+of bite with bitcrushing and a lowpass filter from the `fx` module.
+
+```python
+def makekick(length=0.15):
+    out = noise.bln('square', length, [dsp.rand(80, 100), dsp.rand(50, 100)], [dsp.rand(150, 200), dsp.rand(50, 70)])
+    out = fx.crush(out, dsp.rand(6,10), dsp.rand(11000, 44100))
+    out = fx.lpf(out, 200).vspeed([1, 0.5])
+    return out.env('pluckout').taper(0.02) * dsp.rand(0.6, 1)
+```
+
+It sounds like this:
+
+```python
+kick = makekick()
+kick.write('docs/tutorials/renders/002-kick.ogg')
+```
+
+<audio src="/docs/tutorials/renders/002-kick.ogg" controls></audio>
+
+Ok, ok lets make a basic clap type sound too.
+
+```python
+
+def makeclap(length=dsp.MS*80):
+    lowhz = dsp.win('rnd', 3000, 6000)
+    highhz = dsp.win('rnd', 2000, 8000)
+    return noise.bln('tri', length, lowhz, highhz).env(pluckout)
+```
+
+Lets say we want to make a pattern that has a five beat groove. We can adapt 
+our approaches above to play a kick once every five beats, a smear of hats that 
+coalesce over a period of six beats, phasing against the 5 beat kicks while another 
+layer of hats keep the beat. Ready?
+
+```python
+
+from pippi import shapes
+
+hat_lfo = dsp.win(shapes.win('sine'), 0.01, 1.1) # More on the shapes module later... 
+clap_lfo = dsp.win(shapes.win('sine'), 0.01, 0.1) 
+kick_lfo = dsp.win(shapes.win('sine'), 0.05, 0.1) # A variation for the kicks
+time_lfo = dsp.win('hann', 0.001, 0.2) # We'll use the same LFO for the hat smears, but in a different way...
+out = dsp.buffer(length=30) 
+hats = dsp.buffer(length=30) 
+
+# We'll say a beat is 200ms
+beat = 0.2
+
+# First, lay down the kicks
+elapsed = 0 
+while elapsed < 30:
+    pos = elapsed / 30
+    kicklength = kick_lfo.interp(pos) 
+    kick = makekick(kicklength)
+    out.dub(kick, elapsed)
+
+    # A little trick to sometimes add a second quieter 
+    # follow-on kick half a beat after the first
+    if dsp.rand() > 0.95:
+        kick = makekick(kicklength) * dsp.rand(0.5, 0.8)
+        out.dub(kick, elapsed + (beat/2))
+
+    # Move the position forward again...
+    elapsed += beat * 5
+
+# Now the hats
+elapsed = 0 
+while elapsed < 30:
+    pos = elapsed / 30
+    hatlength = hat_lfo.interp(pos) 
+    hat = makehat(hatlength)
+    hats.dub(hat, elapsed)
+    elapsed += beat
+
+# Now the claps
+elapsed = beat * 2
+while elapsed < 30:
+    pos = elapsed / 30
+    claplength = clap_lfo.interp(pos) 
+    clap = makeclap(claplength)
+    hats.dub(clap, elapsed)
+    elapsed += beat * 3
+
+
+# Now the smeary-hats
+elapsed = 0 
+phase = 0
+beatsix = beat * 6 # We'll mess with the beat, so store the original for later
+while elapsed < 30:
+    hatlength = hat_lfo.interp(elapsed / 30) 
+    hat = makehat(hatlength) * 0.2 # Turn the smears down a bit
+    hats.dub(hat, elapsed)
+
+    # We're reading through the time LFO every 6 
+    # beats by keeping a phase for the LFO and 
+    # resetting it if it overflows
+    beat = time_lfo.interp(phase / beatsix)
+    elapsed += beat
+    phase += beat
+
+    if phase > beatsix:
+        phase -= beatsix
+
+# Add a butterworth lowpass with a 3k cutoff
+hats = fx.lpf(hats, 3000)
+
+# Mix the kicks and the hats
+out.dub(hats)
+out.write('docs/tutorials/renders/002-kicks-and-hats-together.ogg')
+```
+
+Now this is starting to sound a little more interesting:
+
+<audio src="/docs/tutorials/renders/002-kicks-and-hats-together.ogg" controls></audio>
