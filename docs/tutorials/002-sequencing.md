@@ -500,6 +500,8 @@ out.write('docs/tutorials/renders/002-drum-machine-1.ogg')
 
 <audio src="/docs/tutorials/renders/002-drum-machine-1.ogg" controls></audio>
 
+The master tempo grid can be given as a curve:
+
 
 ```python
 beat = dsp.win('hannout', 0.02, 1)
@@ -514,14 +516,22 @@ out.write('docs/tutorials/renders/002-drum-machine-2.ogg')
 
 
 
+<audio src="/docs/tutorials/renders/002-drum-machine-2.ogg" controls></audio>
+
+Or you can add a `smear` multiplier which will be sampled on every beat, and 
+used as a multipler for the beat. This multiplies the beat for the second channel 
+of hats named `s` here by 0.5 or half speed at first, and then moves upward through 
+a sampled half-hann window shape until it gets the beat up to three times its original speed 
+by the end of the render.
+
 
 ```python
 beat = 60 / 88
 smear = dsp.win('hannin', 0.5, 3)
 dm = rhythm.Seq(beat)
-#dm.add('h', hatpat, makehat, div=4)
-#dm.add('k', kikpat, makekick, div=2)
-#dm.add('c', clapat, makeclap, div=2)
+dm.add('h', hatpat, makehat, div=4)
+dm.add('k', kikpat, makekick, div=2)
+dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4, smear=smear)
 out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-3.ogg')
@@ -529,3 +539,4 @@ out.write('docs/tutorials/renders/002-drum-machine-3.ogg')
 
 
 
+<audio src="/docs/tutorials/renders/002-drum-machine-3.ogg" controls></audio>
