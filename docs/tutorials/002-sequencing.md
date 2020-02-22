@@ -347,7 +347,7 @@ Now this is starting to sound a little more interesting:
 
 <audio src="/docs/tutorials/renders/002-kicks-and-hats-together.ogg" controls></audio>
 
-#### Pattern strings
+### Pattern strings
 
 I like the phasing of the rhythms, but this doesn't really feel like a groove in 5 beats right now. 
 Before we try to fix that, lets take a look at one possible way to sequence _patterns_ in pippi.
@@ -411,9 +411,9 @@ There is a trade-off: the drum machine is much more quick to set up and use for
 many common use cases, but the dub pattern is much more flexible for specialized 
 sequencing.
 
-#### A drum machine
+### A drum machine
 
-One of the helpers we can use to parse pattern strings is the drum machine abstraction available via the dsp module.
+One of the helpers we can use to parse pattern strings is the drum machine abstraction available via the `rhythm` module.
 
 Making a new drum machine is pretty straightforward, there is only one param: tempo. Lets start with say... 88bpm for now.
 
@@ -421,8 +421,8 @@ Making a new drum machine is pretty straightforward, there is only one param: te
 ```python
 from pippi import rhythm
 
-# The seq helper returns a Seq drum machine instance
-dm = rhythm.seq(88) 
+# Create a new Seq drum machine instance
+dm = rhythm.Seq(88) 
 
 # Lets make a new hi hat pattern
 # ...and patterns for our other instruments

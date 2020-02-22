@@ -32,7 +32,7 @@ class TestRhythm(TestCase):
 
     def test_topositions(self):
         for pattern, beat, length, result in test_topositions:
-            pattern = rhythm.topositions(pattern, beat, length)
+            pattern = rhythm.onsets(pattern, beat, length)
             self.assertEqual(pattern, result)
 
        

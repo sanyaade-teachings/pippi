@@ -191,8 +191,8 @@ out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
 
 from pippi import rhythm
 
-# The seq helper returns a Seq drum machine instance
-dm = rhythm.seq(88) 
+# Create a new Seq drum machine instance
+dm = rhythm.Seq(88) 
 
 # Lets make a new hi hat pattern
 # ...and patterns for our other instruments
