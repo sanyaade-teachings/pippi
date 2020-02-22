@@ -188,3 +188,6 @@ while elapsed < 30:
     count += 1
 
 out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
+
+# The seq helper returns a DrumMachine instance
+dm = dsp.seq(88)

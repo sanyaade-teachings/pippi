@@ -6,12 +6,6 @@ Source code: [https://github.com/luvsound/pippi](https://github.com/luvsound/pip
 
 Documentation: [https://pippi.world](https://pippi.world)
 
-<small>
-
-[Source code for the wonderful example of Pippi's graphing feature pictured below](https://github.com/luvsound/pippi/blob/master/tests/test_graph.py#L19)
-
-</small>
-
 ![Pippi: Computer music with python](banner.png)
 
 ## What is this?

@@ -165,7 +165,7 @@ cpdef object choice(list choices):
 cpdef void seed(object value=None):
     _rand.seed(value)
 
-def redrum(*args, **kwargs):
+def seq(*args, **kwargs):
     return dm.DrumMachine(*args, **kwargs)
 
 def find(pattern, channels=2, samplerate=44100):

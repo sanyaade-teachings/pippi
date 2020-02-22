@@ -411,4 +411,15 @@ There is a trade-off: the drum machine is much more quick to set up and use for
 many common use cases, but the dub pattern is much more flexible for specialized 
 sequencing.
 
+#### Yes, there's a drum machine abstraction
+
+One of the helpers we can use to parse pattern strings is the drum machine abstraction available via the dsp module.
+
+Making a new drum machine is pretty straightforward, there is only one param: tempo. Lets start with say... 88bpm for now.
+
+
+```python
+# The seq helper returns a DrumMachine instance
+dm = dsp.seq(88)
+```
 

@@ -1611,9 +1611,9 @@ struct __pyx_opt_args_5pippi_4rand_randint {
 struct __pyx_opt_args_5pippi_5lists_scale;
 struct __pyx_opt_args_5pippi_5lists_snap;
 
-/* "lists.pxd":4
- * 
+/* "lists.pxd":5
  * cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh, bint log)
+ * cdef double[:] _scaleinplace(double[:] out, double fromlow, double fromhigh, double tolow, double tohigh, bint log)
  * cpdef list scale(list source, double fromlow=*, double fromhigh=*, double tolow=*, double tohigh=*, bint log=*)             # <<<<<<<<<<<<<<
  * cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern)
  * cdef double[:] _snap_mult(double[:] out, double[:] source, double mult)
@@ -1627,7 +1627,7 @@ struct __pyx_opt_args_5pippi_5lists_scale {
   int log;
 };
 
-/* "lists.pxd":7
+/* "lists.pxd":8
  * cdef double[:] _snap_pattern(double[:] out, double[:] source, double[:] pattern)
  * cdef double[:] _snap_mult(double[:] out, double[:] source, double mult)
  * cpdef list snap(list source, double mult=*, object pattern=*)             # <<<<<<<<<<<<<<
@@ -2950,6 +2950,8 @@ static int *__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE = 0;
 #define __pyx_v_5pippi_8defaults_DEFAULT_WTSIZE (*__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE)
 static double *__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH = 0;
 #define __pyx_v_5pippi_8defaults_MIN_PULSEWIDTH (*__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH)
+static double *__pyx_vp_5pippi_8defaults_MIN_FLOAT = 0;
+#define __pyx_v_5pippi_8defaults_MIN_FLOAT (*__pyx_vp_5pippi_8defaults_MIN_FLOAT)
 
 /* Module declarations from 'pippi.fx' */
 
@@ -3069,6 +3071,7 @@ static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
 static const char __pyx_k_out[] = "out";
 static const char __pyx_k_pos[] = "pos";
+static const char __pyx_k_seq[] = "seq";
 static const char __pyx_k_Pool[] = "Pool";
 static const char __pyx_k_args[] = "args";
 static const char __pyx_k_base[] = "base";
@@ -3126,7 +3129,6 @@ static const char __pyx_k_name_2[] = "__name__";
 static const char __pyx_k_params[] = "params";
 static const char __pyx_k_pickle[] = "pickle";
 static const char __pyx_k_random[] = "random";
-static const char __pyx_k_redrum[] = "redrum";
 static const char __pyx_k_reduce[] = "__reduce__";
 static const char __pyx_k_result[] = "result";
 static const char __pyx_k_sounds[] = "sounds";
@@ -3350,7 +3352,6 @@ static PyObject *__pyx_n_s_random;
 static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_read;
 static PyObject *__pyx_n_s_recursive;
-static PyObject *__pyx_n_s_redrum;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
@@ -3358,6 +3359,7 @@ static PyObject *__pyx_n_s_reps;
 static PyObject *__pyx_n_s_result;
 static PyObject *__pyx_n_s_samplerate;
 static PyObject *__pyx_n_s_send;
+static PyObject *__pyx_n_s_seq;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_shape;
@@ -3404,7 +3406,7 @@ static PyObject *__pyx_pf_5pippi_3dsp_24rand(CYTHON_UNUSED PyObject *__pyx_self,
 static PyObject *__pyx_pf_5pippi_3dsp_26randint(CYTHON_UNUSED PyObject *__pyx_self, int __pyx_v_low, int __pyx_v_high); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_28choice(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_choices); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_30seed(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_value); /* proto */
-static PyObject *__pyx_pf_5pippi_3dsp_32redrum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs); /* proto */
+static PyObject *__pyx_pf_5pippi_3dsp_32seq(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_34find(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_pattern, PyObject *__pyx_v_channels, PyObject *__pyx_v_samplerate); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_37pool(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_callback, PyObject *__pyx_v_reps, PyObject *__pyx_v_params, PyObject *__pyx_v_processes); /* proto */
 static PyObject *__pyx_pf_5pippi_3dsp_39fill(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_data, PyObject *__pyx_v_length); /* proto */
@@ -7391,7 +7393,7 @@ static void __pyx_f_5pippi_3dsp_seed(CYTHON_UNUSED int __pyx_skip_dispatch, stru
  * cpdef void seed(object value=None):
  *     _rand.seed(value)             # <<<<<<<<<<<<<<
  * 
- * def redrum(*args, **kwargs):
+ * def seq(*args, **kwargs):
  */
   __pyx_t_1.__pyx_n = 1;
   __pyx_t_1.value = __pyx_v_value;
@@ -7495,21 +7497,21 @@ static PyObject *__pyx_pf_5pippi_3dsp_30seed(CYTHON_UNUSED PyObject *__pyx_self,
 /* "pippi/dsp.pyx":168
  *     _rand.seed(value)
  * 
- * def redrum(*args, **kwargs):             # <<<<<<<<<<<<<<
+ * def seq(*args, **kwargs):             # <<<<<<<<<<<<<<
  *     return dm.DrumMachine(*args, **kwargs)
  * 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5pippi_3dsp_33redrum(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5pippi_3dsp_33redrum = {"redrum", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_3dsp_33redrum, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5pippi_3dsp_33redrum(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_5pippi_3dsp_33seq(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_5pippi_3dsp_33seq = {"seq", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5pippi_3dsp_33seq, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5pippi_3dsp_33seq(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_args = 0;
   PyObject *__pyx_v_kwargs = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
-  __Pyx_RefNannySetupContext("redrum (wrapper)", 0);
-  if (unlikely(__pyx_kwds) && unlikely(!__Pyx_CheckKeywordStrings(__pyx_kwds, "redrum", 1))) return NULL;
+  __Pyx_RefNannySetupContext("seq (wrapper)", 0);
+  if (unlikely(__pyx_kwds) && unlikely(!__Pyx_CheckKeywordStrings(__pyx_kwds, "seq", 1))) return NULL;
   if (unlikely(__pyx_kwds)) {
     __pyx_v_kwargs = PyDict_Copy(__pyx_kwds); if (unlikely(!__pyx_v_kwargs)) return NULL;
     __Pyx_GOTREF(__pyx_v_kwargs);
@@ -7518,7 +7520,7 @@ static PyObject *__pyx_pw_5pippi_3dsp_33redrum(PyObject *__pyx_self, PyObject *_
   }
   __Pyx_INCREF(__pyx_args);
   __pyx_v_args = __pyx_args;
-  __pyx_r = __pyx_pf_5pippi_3dsp_32redrum(__pyx_self, __pyx_v_args, __pyx_v_kwargs);
+  __pyx_r = __pyx_pf_5pippi_3dsp_32seq(__pyx_self, __pyx_v_args, __pyx_v_kwargs);
 
   /* function exit code */
   __Pyx_XDECREF(__pyx_v_args);
@@ -7527,16 +7529,16 @@ static PyObject *__pyx_pw_5pippi_3dsp_33redrum(PyObject *__pyx_self, PyObject *_
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_3dsp_32redrum(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs) {
+static PyObject *__pyx_pf_5pippi_3dsp_32seq(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_args, PyObject *__pyx_v_kwargs) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  __Pyx_RefNannySetupContext("redrum", 0);
+  __Pyx_RefNannySetupContext("seq", 0);
 
   /* "pippi/dsp.pyx":169
  * 
- * def redrum(*args, **kwargs):
+ * def seq(*args, **kwargs):
  *     return dm.DrumMachine(*args, **kwargs)             # <<<<<<<<<<<<<<
  * 
  * def find(pattern, channels=2, samplerate=44100):
@@ -7557,7 +7559,7 @@ static PyObject *__pyx_pf_5pippi_3dsp_32redrum(CYTHON_UNUSED PyObject *__pyx_sel
   /* "pippi/dsp.pyx":168
  *     _rand.seed(value)
  * 
- * def redrum(*args, **kwargs):             # <<<<<<<<<<<<<<
+ * def seq(*args, **kwargs):             # <<<<<<<<<<<<<<
  *     return dm.DrumMachine(*args, **kwargs)
  * 
  */
@@ -7566,7 +7568,7 @@ static PyObject *__pyx_pf_5pippi_3dsp_32redrum(CYTHON_UNUSED PyObject *__pyx_sel
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_AddTraceback("pippi.dsp.redrum", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pippi.dsp.seq", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -22627,7 +22629,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_read, __pyx_k_read, sizeof(__pyx_k_read), 0, 0, 1, 1},
   {&__pyx_n_s_recursive, __pyx_k_recursive, sizeof(__pyx_k_recursive), 0, 0, 1, 1},
-  {&__pyx_n_s_redrum, __pyx_k_redrum, sizeof(__pyx_k_redrum), 0, 0, 1, 1},
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
@@ -22635,6 +22636,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_result, __pyx_k_result, sizeof(__pyx_k_result), 0, 0, 1, 1},
   {&__pyx_n_s_samplerate, __pyx_k_samplerate, sizeof(__pyx_k_samplerate), 0, 0, 1, 1},
   {&__pyx_n_s_send, __pyx_k_send, sizeof(__pyx_k_send), 0, 0, 1, 1},
+  {&__pyx_n_s_seq, __pyx_k_seq, sizeof(__pyx_k_seq), 0, 0, 1, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
@@ -22914,14 +22916,14 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "pippi/dsp.pyx":168
  *     _rand.seed(value)
  * 
- * def redrum(*args, **kwargs):             # <<<<<<<<<<<<<<
+ * def seq(*args, **kwargs):             # <<<<<<<<<<<<<<
  *     return dm.DrumMachine(*args, **kwargs)
  * 
  */
   __pyx_tuple__24 = PyTuple_Pack(2, __pyx_n_s_args, __pyx_n_s_kwargs); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__24);
   __Pyx_GIVEREF(__pyx_tuple__24);
-  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARARGS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pippi_dsp_pyx, __pyx_n_s_redrum, 168, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(0, 0, 2, 0, CO_OPTIMIZED|CO_NEWLOCALS|CO_VARARGS|CO_VARKEYWORDS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pippi_dsp_pyx, __pyx_n_s_seq, 168, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 168, __pyx_L1_error)
 
   /* "pippi/dsp.pyx":171
  *     return dm.DrumMachine(*args, **kwargs)
@@ -23246,6 +23248,7 @@ static int __Pyx_modinit_variable_import_code(void) {
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_SOUNDFILE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_SOUNDFILE, "PyObject *") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "DEFAULT_WTSIZE", (void **)&__pyx_vp_5pippi_8defaults_DEFAULT_WTSIZE, "int") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportVoidPtr(__pyx_t_2, "MIN_PULSEWIDTH", (void **)&__pyx_vp_5pippi_8defaults_MIN_PULSEWIDTH, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportVoidPtr(__pyx_t_2, "MIN_FLOAT", (void **)&__pyx_vp_5pippi_8defaults_MIN_FLOAT, "double") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
@@ -23619,13 +23622,13 @@ if (!__Pyx_RefNanny) {
   /* "pippi/dsp.pyx":168
  *     _rand.seed(value)
  * 
- * def redrum(*args, **kwargs):             # <<<<<<<<<<<<<<
+ * def seq(*args, **kwargs):             # <<<<<<<<<<<<<<
  *     return dm.DrumMachine(*args, **kwargs)
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5pippi_3dsp_33redrum, NULL, __pyx_n_s_pippi_dsp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5pippi_3dsp_33seq, NULL, __pyx_n_s_pippi_dsp); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_redrum, __pyx_t_1) < 0) __PYX_ERR(0, 168, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_seq, __pyx_t_1) < 0) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "pippi/dsp.pyx":171
