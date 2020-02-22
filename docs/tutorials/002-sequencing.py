@@ -192,7 +192,8 @@ out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
 from pippi import rhythm
 
 # Create a new Seq drum machine instance
-dm = rhythm.Seq(88) 
+bpm = 60.0 / 88.0 # 88 beats per minute in seconds
+dm = rhythm.Seq(bpm) 
 
 # Lets make a new hi hat pattern
 # ...and patterns for our other instruments
@@ -232,3 +233,22 @@ dm.add('c', clapat, makeclap, div=2)
 # Render 30 seconds of what we have so far...
 out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-1.ogg')
+
+beat = dsp.win('hannout', 0.02, 1)
+dm = rhythm.Seq(beat)
+dm.add('h', hatpat, makehat, div=4)
+dm.add('k', kikpat, makekick, div=2)
+dm.add('c', clapat, makeclap, div=2)
+dm.add('s', 'xxxx', makehat, div=4)
+out = dm.play(30)
+out.write('docs/tutorials/renders/002-drum-machine-2.ogg')
+
+beat = 60 / 88
+smear = dsp.win('hannin', 0.5, 3)
+dm = rhythm.Seq(beat)
+#dm.add('h', hatpat, makehat, div=4)
+#dm.add('k', kikpat, makekick, div=2)
+#dm.add('c', clapat, makeclap, div=2)
+dm.add('s', 'xxxx', makehat, div=4, smear=smear)
+out = dm.play(30)
+out.write('docs/tutorials/renders/002-drum-machine-3.ogg')

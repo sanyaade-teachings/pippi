@@ -12,6 +12,7 @@ from pippi cimport rand
 import pyparsing
 import numpy as np
 
+MIN_BEAT = 0.0001
 REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
 
 CLAVE = {
@@ -27,7 +28,7 @@ BELL = CLAVE['bell']
 TRESILLO = CLAVE['tresillo']
 
 
-cdef list _onsetswing(list onsets, double amount, double beat):
+cdef list _onsetswing(list onsets, double amount, double[:] beat, double length):
     """ Add MPC-style swing to a list of onsets.
         Amount is a value between 0 and 1, which 
         maps to a swing amount between 0% and 75%.
@@ -45,91 +46,80 @@ cdef list _onsetswing(list onsets, double amount, double beat):
 
     cdef int i = 0
     cdef double onset = 0
-    cdef double delay_amount = beat * amount * 0.75
+    #cdef double delay_amount = beat * amount * 0.75
 
     for i, onset in enumerate(onsets):
         if i % 2 == 1:
-            onsets[i] += delay_amount
+            onsets[i] += interpolation._linear_pos(beat, onset/length) * amount * 0.75
 
     return onsets
 
-cdef list _topositions(object p, double beat, double length, wavetables.Wavetable lfo=None):
+cdef list _topositions(object p, double[:] beat, double length, double[:] smear):
     cdef double pos = 0
     cdef int count = 0
     cdef double delay = 0
     cdef double div = 1
+    cdef double _beat
     cdef list out = []
 
     while pos < length:
         index = count % len(p)
         event = p[index]
-
-        if lfo is not None:
-            delay += interpolation._linear_pos(lfo.data, pos/length)
-            pos += delay
+        _beat = interpolation._linear_pos(beat, pos/<double>length)
+        _beat *= interpolation._linear_pos(smear, pos/<double>length)
+        _beat = max(MIN_BEAT, _beat)
 
         if event in REST_SYMBOLS:
             count += 1
-            pos += beat
+            pos += _beat
             continue
 
         elif event == '[':
             end = p.find(']', index) - 1
             div = len(p[index : end])
-            beat /= div
+            _beat /= div
             count += 1
             continue
 
         elif event == ']':
-            beat *= div
+            _beat *= div
             count += 1
             continue
 
         out += [ pos ]
-        pos += beat
+        pos += _beat
         count += 1
 
     return out
 
 cdef list _frompattern(
     object pat,            # Pattern
-    double bpm=120.0,      # Tempo in beats per minute
+    double[:] beat,        # Length of a beat in seconds -- may be given as a curve
     double length=1,       # Output length in seconds 
     double swing=0,        # MPC swing amount 0-1
     double div=1,          # Beat subdivision
-    object lfo=None,       # Apply lfo tempo modulation across pattern (string, iterable, soundbuffer, etc)
-    double delay=0,        # Fixed delay in seconds added to each onset
+    object smear=1.0,      # Beat modulation
 ):
-    """ Onsets from ascii
-    """
-    bpm = bpm if bpm > 0 else np.nextafter(0, 1)
-    beat = (60. / bpm) / div
-
-    positions = _topositions(pat, beat, length, lfo)
-    positions = _onsetswing(positions, swing, beat)
-
-    if delay > 0:
-        positions = [ pos + delay for pos in positions ]
-
+    cdef double[:] _smear = wavetables.to_window(smear)
+    cdef double[:] _beat = np.divide(beat, div)
+    positions = _topositions(pat, _beat, length, _smear)
+    positions = _onsetswing(positions, swing, _beat, length)
     return positions
 
 
 cdef class Seq:
-    def __init__(Seq self, object bpm=None):
-        if bpm is None:
-            bpm = 120.0
-        self.bpm = bpm
+    def __init__(Seq self, object beat=0.2):
+        self.beat = wavetables.to_window(beat)
         self.drums = {}
 
     def add(self, name, 
             pattern=None, 
             callback=None, 
             double div=1, 
-            double delay=0,
             double swing=0, 
             barcallback=None, 
-            lfo=None,
             sounds=None, 
+            smear=1.0
         ):
         self.drums[name] = dict(
             name=name, 
@@ -139,8 +129,7 @@ cdef class Seq:
             barcallback=barcallback, 
             div=div, 
             swing=swing, 
-            lfo=lfo, 
-            delay=delay
+            smear=smear,
         )
 
     def update(self, name, **kwargs):
@@ -159,12 +148,11 @@ cdef class Seq:
             bar = SoundBuffer(length=length)
             onsets = _frompattern(
                         drum['pattern'], 
-                        bpm=self.bpm, 
+                        beat=self.beat, 
                         length=length, 
                         swing=drum['swing'], 
                         div=drum['div'], 
-                        lfo=drum['lfo'], 
-                        delay=drum['delay'],
+                        smear=drum['smear']
                     )
 
             count = 0
@@ -201,10 +189,12 @@ def pgen(numbeats, div=1, offset=0, reps=None, reverse=False):
 
     return pat
 
-def onsets(pattern, beat=0.2, length=30, lfo=None, start=0):
+def onsets(pattern, beat=0.2, length=30, smear=1):
     """ Patterns to onset lists
     """
-    return _topositions(pattern, beat, length, lfo)
+    cdef double[:] _beat = wavetables.to_window(beat)
+    cdef double[:] _smear = wavetables.to_window(smear)
+    return _topositions(pattern, _beat, length, _smear)
 
 def eu(length, numbeats, offset=0, reps=None, reverse=False):
     """ A euclidian pattern generator

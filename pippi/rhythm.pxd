@@ -3,7 +3,7 @@
 from pippi.wavetables cimport Wavetable
 
 cdef class Seq:
-    cdef double bpm
+    cdef double[:] beat
     cdef public dict drums
 
 
