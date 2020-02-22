@@ -440,7 +440,7 @@ Lets set the hi hats to a grid of 16th notes or a div value of 4 (a quarter note
 by four) and the others to 8th notes or a div value of 2 which will set the width 
 of the underlying grid each instrument's patterns will be sequenced over.
 
-> *Note:* _yes_, fractional value for `div` are OK for odd phasing and polyrhythms
+> *Note:* _yes_, fractional values for `div` can be used to do more phasing and polyrhythms.
 
 ```python
 dm.add('h', hatpat, makehat, div=4)
