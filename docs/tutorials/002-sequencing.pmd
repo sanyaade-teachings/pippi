@@ -375,14 +375,81 @@ There is a trade-off: the drum machine is much more quick to set up and use for
 many common use cases, but the dub pattern is much more flexible for specialized 
 sequencing.
 
-#### Yes, there's a drum machine abstraction
+#### A drum machine
 
 One of the helpers we can use to parse pattern strings is the drum machine abstraction available via the dsp module.
 
 Making a new drum machine is pretty straightforward, there is only one param: tempo. Lets start with say... 88bpm for now.
 
 ```python
-# The seq helper returns a DrumMachine instance
-dm = dsp.seq(88) 
+from pippi import rhythm
 
+# The seq helper returns a Seq drum machine instance
+dm = rhythm.seq(88) 
 
+# Lets make a new hi hat pattern
+# ...and patterns for our other instruments
+hatpat = 'xxx.x..x.'
+kikpat = 'x.x..'
+clapat = '.x..x'
+```
+
+Before we can add these new patterns to the drum machine, we need to adjust our 
+drum generator functions to use a signature compatible with the drum machine. 
+It's a little bit of annoying overhead, but the only extra param we need to add is 
+the count -- this is the same type of count from our first implementation above. 
+Every time the drum machine generates a sound, it passes the current count to the 
+drum callback. You can do interesting things with this but for now we'll just ignore it.
+
+Our new callbacks:
+
+```python
+
+hat_lfo = dsp.win(shapes.win('sine'), 0.01, 1.1)
+kick_lfo = dsp.win(shapes.win('sine'), 0.05, 0.1)
+clap_lfo = dsp.win(shapes.win('sine'), 0.01, 0.1) 
+time_lfo = dsp.win('hann', 0.001, 0.2)
+
+def makehat(pos, count):
+    length = hat_lfo.interp(pos)
+    lowhz = dsp.win('rnd', 9000, 11000)
+    highhz = dsp.win('rnd', 12000, 14000)
+    return noise.bln('sine', length, lowhz, highhz).env('pluckout') * 0.5
+
+def makekick(pos, count=0):
+    length = kick_lfo.interp(pos)
+    out = noise.bln('square', length, [dsp.rand(80, 100), dsp.rand(50, 100)], [dsp.rand(150, 200), dsp.rand(50, 70)])
+    out = fx.crush(out, dsp.rand(6,10), dsp.rand(11000, 44100))
+    out = fx.lpf(out, 200).vspeed([1, 0.5])
+    return out.env('pluckout').taper(0.02) * dsp.rand(0.6, 1)
+
+def makeclap(pos, count):
+    length = clap_lfo.interp(pos)
+    lowhz = dsp.win('rnd', 3000, 6000)
+    highhz = dsp.win('rnd', 2000, 8000)
+    return noise.bln('tri', length, lowhz, highhz).env('pluckout')
+```
+
+To add patterns and tell the Seq what to do with them, we'll call 
+`add()`, give them an arbitrary name (so we can update params between renders)
+as well as: a pattern string, a reference to the function callback that actually 
+generates the sound, and (to start) a `div` param, which can be used to scale the grid 
+per instrument based on the drum machine's tempo.
+
+Lets set the hi hats to a grid of 16th notes or a div value of 4 (a quarter note divided 
+by four) and the others to 8th notes or a div value of 2 which will set the width 
+of the underlying grid each instrument's patterns will be sequenced over.
+
+> *Note:* _yes_, fractional value for `div` are OK for odd phasing and polyrhythms
+
+```python
+dm.add('h', hatpat, makehat, div=4)
+dm.add('k', kikpat, makekick, div=2)
+dm.add('c', clapat, makeclap, div=2)
+
+# Render 30 seconds of what we have so far...
+out = dm.play(30)
+out.write('docs/tutorials/renders/002-drum-machine-1.ogg')
+```
+
+<audio src="/docs/tutorials/renders/002-drum-machine-1.ogg" controls></audio>

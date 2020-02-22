@@ -13,7 +13,6 @@ from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable, _randline
 from pippi cimport rand as _rand
-from pippi import drummachine as dm
 from pippi cimport lists
 
 # Just a shorthand for MS in scripts. 
@@ -164,9 +163,6 @@ cpdef object choice(list choices):
 
 cpdef void seed(object value=None):
     _rand.seed(value)
-
-def seq(*args, **kwargs):
-    return dm.DrumMachine(*args, **kwargs)
 
 def find(pattern, channels=2, samplerate=44100):
     """ Glob for files matching a given pattern and return a generator 

@@ -189,5 +189,46 @@ while elapsed < 30:
 
 out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
 
-# The seq helper returns a DrumMachine instance
-dm = dsp.seq(88)
+from pippi import rhythm
+
+# The seq helper returns a Seq drum machine instance
+dm = rhythm.seq(88) 
+
+# Lets make a new hi hat pattern
+# ...and patterns for our other instruments
+hatpat = 'xxx.x..x.'
+kikpat = 'x.x..'
+clapat = '.x..x'
+
+
+hat_lfo = dsp.win(shapes.win('sine'), 0.01, 1.1)
+kick_lfo = dsp.win(shapes.win('sine'), 0.05, 0.1)
+clap_lfo = dsp.win(shapes.win('sine'), 0.01, 0.1) 
+time_lfo = dsp.win('hann', 0.001, 0.2)
+
+def makehat(pos, count):
+    length = hat_lfo.interp(pos)
+    lowhz = dsp.win('rnd', 9000, 11000)
+    highhz = dsp.win('rnd', 12000, 14000)
+    return noise.bln('sine', length, lowhz, highhz).env('pluckout') * 0.5
+
+def makekick(pos, count=0):
+    length = kick_lfo.interp(pos)
+    out = noise.bln('square', length, [dsp.rand(80, 100), dsp.rand(50, 100)], [dsp.rand(150, 200), dsp.rand(50, 70)])
+    out = fx.crush(out, dsp.rand(6,10), dsp.rand(11000, 44100))
+    out = fx.lpf(out, 200).vspeed([1, 0.5])
+    return out.env('pluckout').taper(0.02) * dsp.rand(0.6, 1)
+
+def makeclap(pos, count):
+    length = clap_lfo.interp(pos)
+    lowhz = dsp.win('rnd', 3000, 6000)
+    highhz = dsp.win('rnd', 2000, 8000)
+    return noise.bln('tri', length, lowhz, highhz).env('pluckout')
+
+dm.add('h', hatpat, makehat, div=4)
+dm.add('k', kikpat, makekick, div=2)
+dm.add('c', clapat, makeclap, div=2)
+
+# Render 30 seconds of what we have so far...
+out = dm.play(30)
+out.write('docs/tutorials/renders/002-drum-machine-1.ogg')

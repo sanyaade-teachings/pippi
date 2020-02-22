@@ -6,6 +6,9 @@
 from pippi cimport wavetables
 from pippi cimport interpolation
 from pippi cimport dsp
+from pippi.soundbuffer cimport SoundBuffer
+from pippi cimport seq as _seq
+from pippi cimport rand
 import pyparsing
 import numpy as np
 
@@ -18,8 +21,83 @@ CLAVE = {
     'tresillo': 'x..x..x.', 
 }
 
+SON = CLAVE['son']
+RUMBA = CLAVE['rumba']
+BELL = CLAVE['bell']
+TRESILLO = CLAVE['tresillo']
 
-cpdef list pattern(
+cdef class Seq:
+    def __init__(Seq self, object bpm=None):
+        if bpm is None:
+            bpm = 120.0
+        self.bpm = bpm
+        self.drums = {}
+
+    cpdef void add(Seq self, 
+            str name, 
+            object pattern=None, 
+            object callback=None, 
+            object sounds=None, 
+            object barcallback=None, 
+            double swing=0, 
+            double div=1, 
+            object lfo=None,
+            double delay=0
+        ):
+        self.drums[name] = dict(
+            name=name, 
+            pattern=pattern, 
+            sounds=list(sounds or []), 
+            callback=callback, 
+            barcallback=barcallback, 
+            div=div, 
+            swing=swing, 
+            lfo=lfo, 
+            delay=delay
+        )
+
+    def update(self, name, **kwargs):
+        self.drums[name].update(kwargs)
+
+    cpdef SoundBuffer play(Seq self, double length):
+        cdef SoundBuffer out = SoundBuffer(length=length)
+        cdef SoundBuffer bar
+        cdef dict drum
+        cdef list onsets
+        cdef double onset
+        cdef SoundBuffer clang
+        cdef int count
+
+        for k, drum in self.drums.items():
+            bar = SoundBuffer(length=length)
+            onsets = frompattern(
+                        drum['pattern'], 
+                        bpm=self.bpm, 
+                        length=length, 
+                        swing=drum['swing'], 
+                        div=drum['div'], 
+                        lfo=drum['lfo'], 
+                        delay=drum['delay'],
+                    )
+
+            count = 0
+            for onset in onsets:
+                if drum.get('callback', None) is not None:
+                    clang = drum['callback'](onset/length, count)
+                elif len(drum['sounds']) > 0:
+                    clang = SoundBuffer(filename=str(rand.choice(drum['sounds'])))
+                else:
+                    clang = SoundBuffer()
+                bar.dub(clang, onset)
+                count += 1
+
+            if drum.get('barcallback', None) is not None:
+                bar = drum['barcallback'](bar)
+            out.dub(bar)
+
+        return out
+
+cpdef list frompattern(
     object pat,            # Pattern
     double bpm=120.0,      # Tempo in beats per minute
     double length=1,       # Output length in seconds 
@@ -31,7 +109,7 @@ cpdef list pattern(
     """ Onsets from ascii
     """
     bpm = bpm if bpm > 0 else np.nextafter(0, 1)
-    beat = (60 / bpm) / div
+    beat = (60. / bpm) / div
 
     positions = topositions(pat, beat, length, lfo)
     positions = onsetswing(positions, swing, beat)
@@ -213,4 +291,8 @@ def repeat(onsets, reps):
         out += [ onset + (rep * total) for onset in onsets ]
 
     return out
+
+def seq(*args, **kwargs):
+    return Seq(*args, **kwargs)
+
 
