@@ -88,12 +88,12 @@ from pippi import noise
 
 hat = noise.bln('sine', dsp.MS*80, lowhz, highhz)
 hat = hat.env(pluckout) * 0.5 # Also multiply by 0.5 to reduce the amplitude of the signal by half
-hat.write('docs/tutorials/renders/002-plucked-hat.ogg')
+hat.write('docs/tutorials/renders/002-plucked-hat.flac')
 ```
 
 
 
-<audio src="/docs/tutorials/renders/002-plucked-hat.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-plucked-hat.flac" controls></audio>
 
 We'll wrap it in a function to make it easy to reuse later on. Lets also make the 
 curve shape of the frequency boundries change to a different shape each time the function is 
@@ -150,7 +150,7 @@ while elapsed < 30:
     out.dub(hat, elapsed) # Finally, we dub the hat into the output buffer at the current time
     elapsed += 0.5 # and move our position forward again a half second so we can do it all again!
 
-out.write('docs/tutorials/renders/002-hats-on-ice.ogg')
+out.write('docs/tutorials/renders/002-hats-on-ice.flac')
 ```
 
 
@@ -159,7 +159,7 @@ out.write('docs/tutorials/renders/002-hats-on-ice.ogg')
 
 Behold! Our fabulous hi hats:
 
-<audio src="/docs/tutorials/renders/002-hats-on-ice.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-hats-on-ice.flac" controls></audio>
 
 #### Smearing the hats across time
 
@@ -202,7 +202,7 @@ while elapsed < 30:
 
 # Add a butterworth lowpass with a 3k cutoff
 out = fx.lpf(out, 3000)
-out.write('docs/tutorials/renders/002-hats-slipping-on-ice.ogg')
+out.write('docs/tutorials/renders/002-hats-slipping-on-ice.flac')
 ```
 
 
@@ -213,7 +213,7 @@ Here's our time LFO:
 
 And our irregular sequence of hi hats:
 
-<audio src="/docs/tutorials/renders/002-hats-slipping-on-ice.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-hats-slipping-on-ice.flac" controls></audio>
 
 #### A rhythmic smear of hats, and a kick
 
@@ -238,12 +238,12 @@ It sounds like this:
 
 ```python
 kick = makekick()
-kick.write('docs/tutorials/renders/002-kick.ogg')
+kick.write('docs/tutorials/renders/002-kick.flac')
 ```
 
 
 
-<audio src="/docs/tutorials/renders/002-kick.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-kick.flac" controls></audio>
 
 Ok, ok lets make a basic clap type sound too.
 
@@ -338,14 +338,14 @@ hats = fx.lpf(hats, 3000)
 
 # Mix the kicks and the hats
 out.dub(hats)
-out.write('docs/tutorials/renders/002-kicks-and-hats-together.ogg')
+out.write('docs/tutorials/renders/002-kicks-and-hats-together.flac')
 ```
 
 
 
 Now this is starting to sound a little more interesting:
 
-<audio src="/docs/tutorials/renders/002-kicks-and-hats-together.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-kicks-and-hats-together.flac" controls></audio>
 
 ### Pattern strings
 
@@ -398,7 +398,7 @@ while elapsed < 30:
     elapsed += beat
     count += 1
 
-out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
+out.write('docs/tutorials/renders/002-a-hat-pattern.flac')
 ```
 
 
@@ -493,12 +493,12 @@ dm.add('c', clapat, makeclap, div=2)
 
 # Render 30 seconds of what we have so far...
 out = dm.play(30)
-out.write('docs/tutorials/renders/002-drum-machine-1.ogg')
+out.write('docs/tutorials/renders/002-drum-machine-1.flac')
 ```
 
 
 
-<audio src="/docs/tutorials/renders/002-drum-machine-1.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-1.flac" controls></audio>
 
 The master tempo grid can be given as a curve:
 
@@ -511,12 +511,12 @@ dm.add('k', kikpat, makekick, div=2)
 dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4)
 out = dm.play(30)
-out.write('docs/tutorials/renders/002-drum-machine-2.ogg')
+out.write('docs/tutorials/renders/002-drum-machine-2.flac')
 ```
 
 
 
-<audio src="/docs/tutorials/renders/002-drum-machine-2.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-2.flac" controls></audio>
 
 Or you can add a `smear` multiplier which will be sampled on every beat, and 
 used as a multipler for the beat. This multiplies the beat for the second channel 
@@ -534,9 +534,9 @@ dm.add('k', kikpat, makekick, div=2)
 dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4, smear=smear)
 out = dm.play(30)
-out.write('docs/tutorials/renders/002-drum-machine-3.ogg')
+out.write('docs/tutorials/renders/002-drum-machine-3.flac')
 ```
 
 
 
-<audio src="/docs/tutorials/renders/002-drum-machine-3.ogg" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-3.flac" controls></audio>

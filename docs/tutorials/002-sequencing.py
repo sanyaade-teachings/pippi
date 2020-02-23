@@ -14,7 +14,7 @@ from pippi import noise
 
 hat = noise.bln('sine', dsp.MS*80, lowhz, highhz)
 hat = hat.env(pluckout) * 0.5 # Also multiply by 0.5 to reduce the amplitude of the signal by half
-hat.write('docs/tutorials/renders/002-plucked-hat.ogg')
+hat.write('docs/tutorials/renders/002-plucked-hat.flac')
 
 
 def makehat(length=dsp.MS*80):
@@ -36,7 +36,7 @@ while elapsed < 30:
     out.dub(hat, elapsed) # Finally, we dub the hat into the output buffer at the current time
     elapsed += 0.5 # and move our position forward again a half second so we can do it all again!
 
-out.write('docs/tutorials/renders/002-hats-on-ice.ogg')
+out.write('docs/tutorials/renders/002-hats-on-ice.flac')
 
 from pippi import fx # The hats sound nice with a butterworth lowpass
 
@@ -68,7 +68,7 @@ while elapsed < 30:
 
 # Add a butterworth lowpass with a 3k cutoff
 out = fx.lpf(out, 3000)
-out.write('docs/tutorials/renders/002-hats-slipping-on-ice.ogg')
+out.write('docs/tutorials/renders/002-hats-slipping-on-ice.flac')
 
 def makekick(length=0.15):
     out = noise.bln('square', length, [dsp.rand(80, 100), dsp.rand(50, 100)], [dsp.rand(150, 200), dsp.rand(50, 70)])
@@ -77,7 +77,7 @@ def makekick(length=0.15):
     return out.env('pluckout').taper(0.02) * dsp.rand(0.6, 1)
 
 kick = makekick()
-kick.write('docs/tutorials/renders/002-kick.ogg')
+kick.write('docs/tutorials/renders/002-kick.flac')
 
 
 def makeclap(length=dsp.MS*80):
@@ -158,7 +158,7 @@ hats = fx.lpf(hats, 3000)
 
 # Mix the kicks and the hats
 out.dub(hats)
-out.write('docs/tutorials/renders/002-kicks-and-hats-together.ogg')
+out.write('docs/tutorials/renders/002-kicks-and-hats-together.flac')
 
 # Keep track of the position in seconds so we know where to dub
 elapsed = 0
@@ -187,7 +187,7 @@ while elapsed < 30:
     elapsed += beat
     count += 1
 
-out.write('docs/tutorials/renders/002-a-hat-pattern.ogg')
+out.write('docs/tutorials/renders/002-a-hat-pattern.flac')
 
 from pippi import rhythm
 
@@ -232,7 +232,7 @@ dm.add('c', clapat, makeclap, div=2)
 
 # Render 30 seconds of what we have so far...
 out = dm.play(30)
-out.write('docs/tutorials/renders/002-drum-machine-1.ogg')
+out.write('docs/tutorials/renders/002-drum-machine-1.flac')
 
 beat = dsp.win('hannout', 0.02, 1)
 dm = rhythm.Seq(beat)
@@ -241,7 +241,7 @@ dm.add('k', kikpat, makekick, div=2)
 dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4)
 out = dm.play(30)
-out.write('docs/tutorials/renders/002-drum-machine-2.ogg')
+out.write('docs/tutorials/renders/002-drum-machine-2.flac')
 
 beat = 60 / 88
 smear = dsp.win('hannin', 0.5, 3)
@@ -251,4 +251,4 @@ dm.add('k', kikpat, makekick, div=2)
 dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4, smear=smear)
 out = dm.play(30)
-out.write('docs/tutorials/renders/002-drum-machine-3.ogg')
+out.write('docs/tutorials/renders/002-drum-machine-3.flac')
