@@ -192,8 +192,8 @@ out.write('docs/tutorials/renders/002-a-hat-pattern.flac')
 from pippi import rhythm
 
 # Create a new Seq drum machine instance
-bpm = 60.0 / 88.0 # 88 beats per minute in seconds
-dm = rhythm.Seq(bpm) 
+beat = 60 / 88 # 88 beats per minute in seconds
+dm = rhythm.Seq(beat) 
 
 # Lets make a new hi hat pattern
 # ...and patterns for our other instruments
@@ -213,7 +213,7 @@ def makehat(pos, count):
     highhz = dsp.win('rnd', 12000, 14000)
     return noise.bln('sine', length, lowhz, highhz).env('pluckout') * 0.5
 
-def makekick(pos, count=0):
+def makekick(pos, count):
     length = kick_lfo.interp(pos)
     out = noise.bln('square', length, [dsp.rand(80, 100), dsp.rand(50, 100)], [dsp.rand(150, 200), dsp.rand(50, 70)])
     out = fx.crush(out, dsp.rand(6,10), dsp.rand(11000, 44100))

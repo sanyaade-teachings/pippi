@@ -413,17 +413,20 @@ sequencing.
 
 ### A drum machine
 
-One of the helpers we can use to parse pattern strings is the drum machine abstraction available via the `rhythm` module.
+One of the helpers we can use to parse pattern strings is the drum machine abstraction available 
+via the `rhythm` module.
 
-Making a new drum machine is pretty straightforward, there is only one param: tempo. Lets start with say... 88bpm for now.
+Making a new drum machine is pretty straightforward, there is only one param: the beat length in 
+seconds. Lets start with 88bpm for now, which can be expressed in terms of seconds as `60 / 88` 
+or just as `0.6818` seconds. This will designate the underlying rhythmic grid for the sequencer.
 
 
 ```python
 from pippi import rhythm
 
 # Create a new Seq drum machine instance
-bpm = 60.0 / 88.0 # 88 beats per minute in seconds
-dm = rhythm.Seq(bpm) 
+beat = 60 / 88 # 88 beats per minute in seconds
+dm = rhythm.Seq(beat) 
 
 # Lets make a new hi hat pattern
 # ...and patterns for our other instruments
@@ -436,10 +439,11 @@ clapat = '.x..x'
 
 Before we can add these new patterns to the drum machine, we need to adjust our 
 drum generator functions to use a signature compatible with the drum machine. 
-It's a little bit of annoying overhead, but the only extra param we need to add is 
-the count -- this is the same type of count from our first implementation above. 
-Every time the drum machine generates a sound, it passes the current count to the 
-drum callback. You can do interesting things with this but for now we'll just ignore it.
+`Seq` expects drum callbacks to accept two params: `pos` (a float between 0 and 1) and 
+`count` which is an integer that monotonically increases from zero as each beat in 
+this channel is processed. There are plenty of interesting things that can be done 
+with `count` but for the moment we'll just use the `pos` value in our callback to 
+know at what point to sample an interpolated value from our various LFOs.
 
 Our new callbacks:
 
@@ -457,7 +461,7 @@ def makehat(pos, count):
     highhz = dsp.win('rnd', 12000, 14000)
     return noise.bln('sine', length, lowhz, highhz).env('pluckout') * 0.5
 
-def makekick(pos, count=0):
+def makekick(pos, count):
     length = kick_lfo.interp(pos)
     out = noise.bln('square', length, [dsp.rand(80, 100), dsp.rand(50, 100)], [dsp.rand(150, 200), dsp.rand(50, 70)])
     out = fx.crush(out, dsp.rand(6,10), dsp.rand(11000, 44100))
@@ -473,8 +477,8 @@ def makeclap(pos, count):
 
 
 
-To add patterns and tell the Seq what to do with them, we'll call 
-`add()`, give them an arbitrary name (so we can update params between renders)
+To add patterns and tell the `Seq` what to do with them, we'll call 
+`add()`, give them an arbitrary name (so we can do things like update params between renders)
 as well as: a pattern string, a reference to the function callback that actually 
 generates the sound, and (to start) a `div` param, which can be used to scale the grid 
 per instrument based on the drum machine's tempo.
@@ -483,7 +487,8 @@ Lets set the hi hats to a grid of 16th notes or a div value of 4 (a quarter note
 by four) and the others to 8th notes or a div value of 2 which will set the width 
 of the underlying grid each instrument's patterns will be sequenced over.
 
-> *Note:* _yes_, fractional values for `div` can be used to do more phasing and polyrhythms.
+> *Note:* zeros aren't allowed _but_ fractional values (`1.2`, `3/4`, `math.pi`, etc) for `div` 
+> can be given for easy phasing and oddball polyrhythms.
 
 
 ```python
