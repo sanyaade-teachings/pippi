@@ -15,3 +15,6 @@ cdef extern from "fft.h":
 
 cdef double[:] _conv(double[:] x, double[:] y)
 cpdef double[:,:] conv(double[:,:] src, double[:,:] impulse)
+
+cpdef SoundBuffer itransform(SoundBuffer real, SoundBuffer imag)
+cpdef tuple transform(SoundBuffer snd)
