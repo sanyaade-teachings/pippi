@@ -12,14 +12,21 @@ class TestFFT(TestCase):
 
     def test_fft_transform(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
-        mod = dsp.win('sine')
+        snd2 = dsp.read('tests/sounds/LittleTikes-B1.wav').cut(0, 1)
+        mod = dsp.buffer(dsp.win('sine', wtsize=len(snd))).remix(1).remix(2)
 
         # Transform
-        real, imag = fft.transform(snd)
+        real1, imag1 = fft.transform(snd)
+        real2, imag2 = fft.transform(snd2)
 
         # Do stuff
-        imag = real * mod
-        real = imag * mod
+        imag = real1 * real2
+        real = imag1 * imag2
+
+        mag, arg = fft.to_polar(real, imag)
+
+        #mag = fx.lpf(mag, 100)
+        real, imag = fft.to_xy(mag, arg)
 
         # Inverse Transform
         out = fft.itransform(real, imag)
