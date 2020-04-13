@@ -95,7 +95,10 @@ cpdef tuple to_polar(SoundBuffer real, SoundBuffer imag):
             mag[i,c] = math.sqrt((_real[i,c] * _real[i,c]) + (_imag[i,c] * _imag[i,c]))
 
             # Calculate the argument / angle of the complex vector
-            arg[i,c] = math.atan(_imag[i,c] / _real[i,c])
+            if _real[i,c] == 0:
+                arg[i,c] = 0
+            else:
+                arg[i,c] = math.atan(_imag[i,c] / _real[i,c])
 
     return (
         SoundBuffer(mag, channels=channels, samplerate=real.samplerate), 
@@ -166,5 +169,38 @@ cpdef SoundBuffer itransform(SoundBuffer real, SoundBuffer imag):
 
     return SoundBuffer(out, channels=channels, samplerate=real.samplerate)
 
+def passthru(pos, real, imag):
+    return real, imag
 
+cpdef SoundBuffer process(SoundBuffer snd, object blocksize=0.01, object length=None, object callback=None, object window=None):
+    cdef double olength = snd.dur
+    cdef double _length = <double>(length or olength)
+    cdef double samplerate = <double>snd.samplerate
+    cdef long framelength = <long>(_length * samplerate)
+    cdef SoundBuffer out = SoundBuffer(length=_length)
+    cdef double[:] _blocksize = to_window(blocksize)
 
+    cdef SoundBuffer rblock
+    cdef SoundBuffer iblock
+    cdef SoundBuffer block
+
+    cdef double pos = 0
+    cdef double elapsed = 0
+    cdef double bs = _blocksize[0]
+    cdef double taper = (1/samplerate) * 20
+
+    if callback is None:
+        callback = passthru
+
+    cdef double[:] win = to_window(window or 'sine')
+
+    while elapsed <= _length:
+        pos = elapsed / _length
+        bs = _linear_pos(_blocksize, pos)
+        rblock, iblock = transform(snd.cut(pos*olength, bs).env(win))
+        rblock, iblock = callback(pos, rblock, iblock)
+        block = itransform(rblock, iblock).taper(taper)
+        out.dub(block, elapsed)
+        elapsed += bs/2
+
+    return out

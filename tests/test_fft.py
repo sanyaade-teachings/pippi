@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pippi import dsp, fft, fx
+from pippi import dsp, fft, fx, shapes
 
 class TestFFT(TestCase):
     def test_fft_convolve_real(self):
@@ -34,4 +34,16 @@ class TestFFT(TestCase):
         out.write('tests/renders/fft_transform.wav')
 
 
+    def test_fft_process(self):
+        snd = dsp.read('tests/sounds/guitar1s.wav')
+        length = 2
 
+        def cb(pos, real, imag):
+            mag, arg = fft.to_polar(real, imag)
+            mag = fx.lpf(mag, pos * 5000 + 100)
+            return fft.to_xy(mag, arg)
+           
+        bs = dsp.win(shapes.win('sine'), 0.05, 0.3)
+        out = fft.process(snd, bs, length, callback=cb)
+        out = fx.norm(out, 1)
+        out.write('tests/renders/fft_process.wav')

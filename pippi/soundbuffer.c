@@ -1943,6 +1943,20 @@ struct __pyx_opt_args_5pippi_9soundpipe_paulstretch {
   int __pyx_n;
   int samplerate;
 };
+struct __pyx_opt_args_5pippi_3fft_overlapadd;
+
+/* "fft.pxd":23
+ * cpdef tuple transform(SoundBuffer snd)
+ * cpdef SoundBuffer itransform(SoundBuffer real, SoundBuffer imag)
+ * cpdef SoundBuffer overlapadd(SoundBuffer snd, object blocksize=*, object length=*, object callback=*, object window=*)             # <<<<<<<<<<<<<<
+ */
+struct __pyx_opt_args_5pippi_3fft_overlapadd {
+  int __pyx_n;
+  PyObject *blocksize;
+  PyObject *length;
+  PyObject *callback;
+  PyObject *window;
+};
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_convolve;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch;
