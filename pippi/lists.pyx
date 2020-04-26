@@ -5,6 +5,8 @@ cimport numpy as np
 from pippi.wavetables cimport to_window
 from libc cimport math
 
+np.import_array()
+
 cdef double[:] _scale(double[:] out, double[:] source, double fromlow, double fromhigh, double tolow, double tohigh, bint log):
     cdef int i = 0
     cdef double v = 0

@@ -208,15 +208,6 @@ DEFAULT_RATIOS = TERRY
 DEFAULT_SCALE = MAJOR
 
 
-def mtof(midi_note):
-    return 2**((midi_note-69)/12.0) * 440
-
-def ftom(freq):
-    return math.log(freq / 440.0, 2) * 12 + 69
-
-def ftomi(freq):
-    return int(round(ftom(freq)))
-
 def parse_pitch_class(note, octave=None):
     note = note.lower()
     if re.match('[a-zA-Z]#?b?\d+', note) is not None:
@@ -547,4 +538,4 @@ class Parser:
             events += [(pos, cluster)]
             
 
-        self.parsed = parsed
+        #self.parsed = parsed

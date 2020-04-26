@@ -5,11 +5,7 @@ from Cython.Build import cythonize
 import numpy as np
 
 ext_modules = cythonize([
-        Extension('pippi.bar', ['pippi/bar.pyx'],
-            libraries=['soundpipe'], 
-            library_dirs=['/usr/local/lib'],
-            include_dirs=[np.get_include(), '/usr/local/include']
-        ),
+
         Extension('pippi.defaults', ['pippi/defaults.pyx']), 
         Extension('pippi.dsp', ['pippi/dsp.pyx']), 
         Extension('pippi.fx', ['pippi/fx.pyx'],
@@ -35,25 +31,33 @@ ext_modules = cythonize([
         ), 
         Extension('pippi.graph', ['pippi/graph.pyx']), 
         Extension('pippi.interpolation', ['pippi/interpolation.pyx']),
-        Extension('pippi.noise', ['pippi/noise.pyx'], 
+        Extension('pippi.noise', ['pippi/noise/noise.pyx'], 
             include_dirs=[np.get_include()], 
         ), 
         Extension('pippi.shapes', ['pippi/shapes.pyx'], 
             include_dirs=[np.get_include()], 
         ), 
-        Extension('pippi.oscs', ['pippi/oscs.pyx']), 
-        Extension('pippi.dss', ['pippi/dss.pyx']), 
-        Extension('pippi.fold', ['pippi/fold.pyx']), 
-        Extension('pippi.osc', ['pippi/osc.pyx']), 
-        Extension('pippi.osc2d', ['pippi/osc2d.pyx']), 
-        Extension('pippi.pulsar', ['pippi/pulsar.pyx']), 
-        Extension('pippi.pulsar2d', ['pippi/pulsar2d.pyx']), 
-        Extension('pippi.pluck', ['pippi/pluck.pyx']), 
-        Extension('pippi.alias', ['pippi/alias.pyx']), 
-        Extension('pippi.tukey', ['pippi/tukey.pyx']), 
+
+        # Oscs
+        Extension('pippi.bar', ['pippi/oscs/bar.pyx'],
+            libraries=['soundpipe'], 
+            library_dirs=['/usr/local/lib'],
+            include_dirs=[np.get_include(), '/usr/local/include']
+        ),
+        Extension('pippi.oscs', ['pippi/oscs/oscs.pyx']), 
+        Extension('pippi.dss', ['pippi/oscs/dss.pyx']), 
+        Extension('pippi.fold', ['pippi/oscs/fold.pyx']), 
+        Extension('pippi.osc', ['pippi/oscs/osc.pyx']), 
+        Extension('pippi.osc2d', ['pippi/oscs/osc2d.pyx']), 
+        Extension('pippi.pulsar', ['pippi/oscs/pulsar.pyx']), 
+        Extension('pippi.pulsar2d', ['pippi/oscs/pulsar2d.pyx']), 
+        Extension('pippi.pluck', ['pippi/oscs/pluck.pyx']), 
+        Extension('pippi.alias', ['pippi/oscs/alias.pyx']), 
+        Extension('pippi.tukey', ['pippi/oscs/tukey.pyx']), 
 
         Extension('pippi.rhythm', ['pippi/rhythm.pyx']), 
         Extension('pippi.rand', ['pippi/rand.pyx']), 
+
         Extension('pippi.soundbuffer', ['pippi/soundbuffer.pyx'], 
             include_dirs=['modules/fft', np.get_include()], 
         ), 
@@ -69,8 +73,16 @@ ext_modules = cythonize([
         Extension('pippi.wavetables', ['pippi/wavetables.pyx'],
             include_dirs=[np.get_include()], 
         ),
+
+        # Tuning / scales / harmony / melody
+        Extension('pippi.midi', ['pippi/tune/midi.pyx']), 
+        Extension('pippi.old', ['pippi/tune/old.pyx']), 
+        Extension('pippi.slonimsky', ['pippi/tune/slonimsky.pyx'], 
+            include_dirs=[np.get_include()], 
+        ),
+        Extension('pippi.tune', ['pippi/tune/tune.pyx']), 
     ], 
-    annotate=True
+    annotate=True, 
 ) 
 
 with open('README.md') as f:
