@@ -286,10 +286,10 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(snd + 2, dsp.buffer([3,4,5]))
         self.assertEqual(snd, dsp.buffer([1,2,3]))
 
-        self.assertEqual(snd + dsp.buffer([1,3,5]), dsp.buffer([2,5,8]))
+        self.assertEqual(snd + dsp.buffer([1,3,5]), dsp.buffer([1,2,3,1,3,5]))
         self.assertEqual(snd, dsp.buffer([1,2,3]))
 
-        self.assertEqual(dsp.buffer([1,3,5]) + snd, dsp.buffer([2,5,8]))
+        self.assertEqual(dsp.buffer([1,3,5]) + snd, dsp.buffer([1,3,5,1,2,3]))
         self.assertEqual(snd, dsp.buffer([1,2,3]))
 
         snd += 2
@@ -298,6 +298,10 @@ class TestSoundBuffer(TestCase):
     def test_sub_soundbuffers(self):
         snd = dsp.buffer([1,2,3])
         self.assertEqual(len(snd), 3)
+
+        self.assertEqual(snd - 1.5, dsp.buffer([-0.5, 0.5, 1.5]))
+        self.assertEqual(snd, dsp.buffer([1,2,3]))
+
         self.assertEqual(snd - 2, dsp.buffer([-1,0,1]))
         self.assertEqual(snd, dsp.buffer([1,2,3]))
 

@@ -535,7 +535,7 @@ cdef class SoundBuffer:
 
         if isinstance(value, numbers.Real):
             out = np.subtract(self.frames, value)
-        if isinstance(value, SoundBuffer):
+        elif isinstance(value, SoundBuffer):
             out = np.subtract(self.frames, value.frames)
         else:
             try:
@@ -551,13 +551,15 @@ cdef class SoundBuffer:
         """
         if isinstance(value, numbers.Real):
             self.frames = np.subtract(self.frames, value)
-        if isinstance(value, SoundBuffer):
+        elif isinstance(value, SoundBuffer):
             self.frames = np.subtract(self.frames, value.frames)
         else:
             try:
                 self.frames = np.subtract(self.frames, value.frames)
             except TypeError as e:
                 return NotImplemented
+
+        return self
 
     def __rsub__(self, value):
         return self - value
