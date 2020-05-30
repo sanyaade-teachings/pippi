@@ -1,6 +1,10 @@
 [tool.portray]
 output_dir = "pippi.world"
 
+[tool.portray.mkdocs.theme]
+name = "material"
+logo = "pippi.svg"
+
 [[tool.portray.mkdocs.nav]]
 Home = "README.md"
 

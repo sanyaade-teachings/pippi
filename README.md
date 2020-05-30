@@ -40,23 +40,23 @@ not-so-common transformations to sounds and control structures.
 
 It comes with several oscs:
 
-    - Pulsar - a pulsar synthesis engine
-    - Pulsar2d - a 2d morphing pulsar synthesis engine
-    - Tukey - a tukey-window-based osc with waveshape modulation between square-like and sine-like
-    - Osc - an everyday wavetable osc
-    - Osc2d - a 2d morphing wavetable osc
-    - Fold - an infinite folding wavetable osc
-    - Bar - a bar physical model (from Soundpipe)
-    - Pluck - a plucked string physical model (adapted from JOS)
-    - Alias - a highly aliased pulse train osc
+- Pulsar - a pulsar synthesis engine
+- Pulsar2d - a 2d morphing pulsar synthesis engine
+- Tukey - a tukey-window-based osc with waveshape modulation between square-like and sine-like
+- Osc - an everyday wavetable osc
+- Osc2d - a 2d morphing wavetable osc
+- Fold - an infinite folding wavetable osc
+- Bar - a bar physical model (from Soundpipe)
+- Pluck - a plucked string physical model (adapted from JOS)
+- Alias - a highly aliased pulse train osc
 
 And many built-in effects and transformations:
 
-    - Easy independent control over pitch and speed for any `SoundBuffer`
-    - Paulstretch
-    - Several forms of waveshaping and distortion including a crossover distortion ported from supercollider
-    - Sweapable highpass, lowpass, bandpass and band reject butterworth filters from Soundpipe
-    - Lots more!
+- Easy independent control over pitch and speed for any `SoundBuffer`
+- Paulstretch
+- Several forms of waveshaping and distortion including a crossover distortion ported from supercollider
+- Sweapable highpass, lowpass, bandpass and band reject butterworth filters from Soundpipe
+- Lots more!
 
 As well as support for pitch and harmony transformations and non-standard tuning systems
 
