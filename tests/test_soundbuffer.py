@@ -280,6 +280,11 @@ class TestSoundBuffer(TestCase):
         snd *= 2
         self.assertEqual(snd, dsp.buffer([2,4,6]))
 
+        snd = dsp.buffer([1,2,3])
+        mul = dsp.buffer([2,2,2])
+        snd *= mul
+        self.assertEqual(snd, dsp.buffer([2,4,6]))
+
     def test_add_soundbuffers(self):
         snd = dsp.buffer([1,2,3])
         self.assertEqual(len(snd), 3)
