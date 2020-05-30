@@ -365,7 +365,34 @@ cdef class SoundBuffer:
     def __iand__(SoundBuffer self, object value):
         """ Mix in place two SoundBuffers or two 2d arrays with compatible dimensions
         """
-        self.frames = np.add(self.frames, value[:len(self.frames)])
+        # TODO: avoid a copy for cases where internal buffer 
+        # is greater than or equal to the length of the value
+        cdef double[:,:] out
+        cdef double[:,:] a, b
+        cdef int i, c
+
+        if isinstance(value, SoundBuffer):
+            if len(self.frames) > len(value.frames):
+                a = self.frames
+                b = value.frames
+            else:
+                a = value.frames
+                b = self.frames
+
+        else:
+            if len(self.frames) > len(value):
+                a = self.frames
+                b = np.array(value, dtype='d')
+            else:
+                a = np.array(value, dtype='d')
+                b = self.frames
+
+        out = a.copy()
+        for i in range(len(b)):
+            for c in range(self.channels):
+                out[i,c] += b[i,c]
+
+        self.frames = out
         return self
 
     def __rand__(SoundBuffer self, object value):

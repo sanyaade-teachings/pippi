@@ -23,6 +23,15 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound)
 
+    def test_mix_operator(self):
+        snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+
+        snd1 &= snd2
+
+        self.assertEqual(snd1.dur, snd2.dur)
+
+
     def test_create_stereo_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         self.assertEqual(len(sound), 44100)
