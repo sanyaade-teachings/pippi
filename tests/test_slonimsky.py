@@ -5,7 +5,6 @@ class TestSlonimsky(TestCase):
     def test_principle_tones(self):
         note = 110
         intervals = range(1, 12)
-        #intervals = [5]
 
         events = []
         pos = 0
@@ -17,7 +16,6 @@ class TestSlonimsky(TestCase):
             freqs = [ (r[1][0] / r[1][1]) * r[0] * note for r in freqs ]
 
             for freq in freqs:
-                print(interval, freq)
                 events += [dict(
                     start=pos, 
                     length=0.5, 
@@ -28,7 +26,6 @@ class TestSlonimsky(TestCase):
 
                 pos += 0.2
 
-    
         out = soundfont.playall("tests/sounds/florestan-gm.sf2", events)
         out = fx.norm(out, 0.75)
         out.write('tests/renders/slonimsky_intervals-1-12-principle-scales.wav')

@@ -5330,6 +5330,7 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
   double __pyx_v_div;
   double __pyx_v__beat;
   PyObject *__pyx_v_out = 0;
+  CYTHON_UNUSED int __pyx_v_subdiv;
   PyObject *__pyx_v_index = NULL;
   PyObject *__pyx_v_event = NULL;
   PyObject *__pyx_v_end = NULL;
@@ -5386,16 +5387,25 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  *     cdef double div = 1
  *     cdef double _beat
  *     cdef list out = []             # <<<<<<<<<<<<<<
+ *     cdef bint subdiv = False
  * 
- *     while pos < length:
  */
   __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 63, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_out = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "pippi/rhythm.pyx":65
+  /* "pippi/rhythm.pyx":64
+ *     cdef double _beat
  *     cdef list out = []
+ *     cdef bint subdiv = False             # <<<<<<<<<<<<<<
+ * 
+ *     while pos < length:
+ */
+  __pyx_v_subdiv = 0;
+
+  /* "pippi/rhythm.pyx":66
+ *     cdef bint subdiv = False
  * 
  *     while pos < length:             # <<<<<<<<<<<<<<
  *         index = count % len(p)
@@ -5405,36 +5415,36 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
     __pyx_t_2 = ((__pyx_v_pos < __pyx_v_length) != 0);
     if (!__pyx_t_2) break;
 
-    /* "pippi/rhythm.pyx":66
+    /* "pippi/rhythm.pyx":67
  * 
  *     while pos < length:
  *         index = count % len(p)             # <<<<<<<<<<<<<<
  *         event = p[index]
  *         _beat = interpolation._linear_pos(beat, pos/<double>length)
  */
-    __pyx_t_3 = PyObject_Length(__pyx_v_p); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 66, __pyx_L1_error)
+    __pyx_t_3 = PyObject_Length(__pyx_v_p); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 67, __pyx_L1_error)
     if (unlikely(__pyx_t_3 == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-      __PYX_ERR(0, 66, __pyx_L1_error)
+      __PYX_ERR(0, 67, __pyx_L1_error)
     }
-    __pyx_t_1 = PyInt_FromSsize_t(__Pyx_mod_Py_ssize_t(__pyx_v_count, __pyx_t_3)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 66, __pyx_L1_error)
+    __pyx_t_1 = PyInt_FromSsize_t(__Pyx_mod_Py_ssize_t(__pyx_v_count, __pyx_t_3)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_XDECREF_SET(__pyx_v_index, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "pippi/rhythm.pyx":67
+    /* "pippi/rhythm.pyx":68
  *     while pos < length:
  *         index = count % len(p)
  *         event = p[index]             # <<<<<<<<<<<<<<
  *         _beat = interpolation._linear_pos(beat, pos/<double>length)
  *         _beat *= interpolation._linear_pos(smear, pos/<double>length)
  */
-    __pyx_t_1 = __Pyx_PyObject_GetItem(__pyx_v_p, __pyx_v_index); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 67, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetItem(__pyx_v_p, __pyx_v_index); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 68, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_XDECREF_SET(__pyx_v_event, __pyx_t_1);
     __pyx_t_1 = 0;
 
-    /* "pippi/rhythm.pyx":68
+    /* "pippi/rhythm.pyx":69
  *         index = count % len(p)
  *         event = p[index]
  *         _beat = interpolation._linear_pos(beat, pos/<double>length)             # <<<<<<<<<<<<<<
@@ -5443,11 +5453,11 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  */
     if (unlikely(((double)__pyx_v_length) == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 68, __pyx_L1_error)
+      __PYX_ERR(0, 69, __pyx_L1_error)
     }
     __pyx_v__beat = __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_beat, (__pyx_v_pos / ((double)__pyx_v_length)));
 
-    /* "pippi/rhythm.pyx":69
+    /* "pippi/rhythm.pyx":70
  *         event = p[index]
  *         _beat = interpolation._linear_pos(beat, pos/<double>length)
  *         _beat *= interpolation._linear_pos(smear, pos/<double>length)             # <<<<<<<<<<<<<<
@@ -5456,11 +5466,11 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  */
     if (unlikely(((double)__pyx_v_length) == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 69, __pyx_L1_error)
+      __PYX_ERR(0, 70, __pyx_L1_error)
     }
     __pyx_v__beat = (__pyx_v__beat * __pyx_f_5pippi_13interpolation__linear_pos(__pyx_v_smear, (__pyx_v_pos / ((double)__pyx_v_length))));
 
-    /* "pippi/rhythm.pyx":70
+    /* "pippi/rhythm.pyx":71
  *         _beat = interpolation._linear_pos(beat, pos/<double>length)
  *         _beat *= interpolation._linear_pos(smear, pos/<double>length)
  *         _beat = max(MIN_BEAT, _beat)             # <<<<<<<<<<<<<<
@@ -5468,16 +5478,16 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  *         if event in REST_SYMBOLS:
  */
     __pyx_t_4 = __pyx_v__beat;
-    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_MIN_BEAT); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_MIN_BEAT); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_6 = PyFloat_FromDouble(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_6 = PyFloat_FromDouble(__pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = PyObject_RichCompare(__pyx_t_6, __pyx_t_1, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_7 = PyObject_RichCompare(__pyx_t_6, __pyx_t_1, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     if (__pyx_t_2) {
-      __pyx_t_7 = PyFloat_FromDouble(__pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 70, __pyx_L1_error)
+      __pyx_t_7 = PyFloat_FromDouble(__pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 71, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __pyx_t_5 = __pyx_t_7;
       __pyx_t_7 = 0;
@@ -5486,78 +5496,82 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
       __pyx_t_5 = __pyx_t_1;
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 70, __pyx_L1_error)
+    __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_t_5); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 71, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_v__beat = __pyx_t_4;
 
-    /* "pippi/rhythm.pyx":72
+    /* "pippi/rhythm.pyx":73
  *         _beat = max(MIN_BEAT, _beat)
  * 
  *         if event in REST_SYMBOLS:             # <<<<<<<<<<<<<<
  *             count += 1
- *             pos += _beat
+ *             pos += _beat / div
  */
-    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_REST_SYMBOLS); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_REST_SYMBOLS); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_v_event, __pyx_t_5, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 72, __pyx_L1_error)
+    __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_v_event, __pyx_t_5, Py_EQ)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 73, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_8 = (__pyx_t_2 != 0);
     if (__pyx_t_8) {
 
-      /* "pippi/rhythm.pyx":73
+      /* "pippi/rhythm.pyx":74
  * 
  *         if event in REST_SYMBOLS:
  *             count += 1             # <<<<<<<<<<<<<<
- *             pos += _beat
+ *             pos += _beat / div
  *             continue
  */
       __pyx_v_count = (__pyx_v_count + 1);
 
-      /* "pippi/rhythm.pyx":74
+      /* "pippi/rhythm.pyx":75
  *         if event in REST_SYMBOLS:
  *             count += 1
- *             pos += _beat             # <<<<<<<<<<<<<<
+ *             pos += _beat / div             # <<<<<<<<<<<<<<
  *             continue
  * 
  */
-      __pyx_v_pos = (__pyx_v_pos + __pyx_v__beat);
+      if (unlikely(__pyx_v_div == 0)) {
+        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+        __PYX_ERR(0, 75, __pyx_L1_error)
+      }
+      __pyx_v_pos = (__pyx_v_pos + (__pyx_v__beat / __pyx_v_div));
 
-      /* "pippi/rhythm.pyx":75
+      /* "pippi/rhythm.pyx":76
  *             count += 1
- *             pos += _beat
+ *             pos += _beat / div
  *             continue             # <<<<<<<<<<<<<<
  * 
  *         elif event == '[':
  */
       goto __pyx_L3_continue;
 
-      /* "pippi/rhythm.pyx":72
+      /* "pippi/rhythm.pyx":73
  *         _beat = max(MIN_BEAT, _beat)
  * 
  *         if event in REST_SYMBOLS:             # <<<<<<<<<<<<<<
  *             count += 1
- *             pos += _beat
+ *             pos += _beat / div
  */
     }
 
-    /* "pippi/rhythm.pyx":77
+    /* "pippi/rhythm.pyx":78
  *             continue
  * 
  *         elif event == '[':             # <<<<<<<<<<<<<<
  *             end = p.find(']', index) - 1
  *             div = len(p[index : end])
  */
-    __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_event, __pyx_kp_u_, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 77, __pyx_L1_error)
+    __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_event, __pyx_kp_u_, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 78, __pyx_L1_error)
     if (__pyx_t_8) {
 
-      /* "pippi/rhythm.pyx":78
+      /* "pippi/rhythm.pyx":79
  * 
  *         elif event == '[':
  *             end = p.find(']', index) - 1             # <<<<<<<<<<<<<<
  *             div = len(p[index : end])
- *             _beat /= div
+ *             count += 1
  */
-      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_p, __pyx_n_s_find); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_p, __pyx_n_s_find); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __pyx_t_7 = NULL;
       __pyx_t_9 = 0;
@@ -5575,45 +5589,32 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
         PyObject *__pyx_callargs[3] = {__pyx_t_7, __pyx_kp_u__2, __pyx_v_index};
         __pyx_t_5 = __Pyx_PyObject_FastCall(__pyx_t_1, __pyx_callargs+1-__pyx_t_9, 2+__pyx_t_9);
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 78, __pyx_L1_error)
+        if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 79, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
       }
-      __pyx_t_1 = __Pyx_PyInt_SubtractObjC(__pyx_t_5, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 78, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyInt_SubtractObjC(__pyx_t_5, __pyx_int_1, 1, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_XDECREF_SET(__pyx_v_end, __pyx_t_1);
       __pyx_t_1 = 0;
 
-      /* "pippi/rhythm.pyx":79
+      /* "pippi/rhythm.pyx":80
  *         elif event == '[':
  *             end = p.find(']', index) - 1
  *             div = len(p[index : end])             # <<<<<<<<<<<<<<
- *             _beat /= div
- *             count += 1
- */
-      __pyx_t_1 = __Pyx_PyObject_GetSlice(__pyx_v_p, 0, 0, &__pyx_v_index, &__pyx_v_end, NULL, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_3 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 79, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_v_div = __pyx_t_3;
-
-      /* "pippi/rhythm.pyx":80
- *             end = p.find(']', index) - 1
- *             div = len(p[index : end])
- *             _beat /= div             # <<<<<<<<<<<<<<
  *             count += 1
  *             continue
  */
-      if (unlikely(__pyx_v_div == 0)) {
-        PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-        __PYX_ERR(0, 80, __pyx_L1_error)
-      }
-      __pyx_v__beat = (__pyx_v__beat / __pyx_v_div);
+      __pyx_t_1 = __Pyx_PyObject_GetSlice(__pyx_v_p, 0, 0, &__pyx_v_index, &__pyx_v_end, NULL, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_1);
+      __pyx_t_3 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 80, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __pyx_v_div = __pyx_t_3;
 
       /* "pippi/rhythm.pyx":81
+ *             end = p.find(']', index) - 1
  *             div = len(p[index : end])
- *             _beat /= div
  *             count += 1             # <<<<<<<<<<<<<<
  *             continue
  * 
@@ -5621,7 +5622,7 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
       __pyx_v_count = (__pyx_v_count + 1);
 
       /* "pippi/rhythm.pyx":82
- *             _beat /= div
+ *             div = len(p[index : end])
  *             count += 1
  *             continue             # <<<<<<<<<<<<<<
  * 
@@ -5629,7 +5630,7 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  */
       goto __pyx_L3_continue;
 
-      /* "pippi/rhythm.pyx":77
+      /* "pippi/rhythm.pyx":78
  *             continue
  * 
  *         elif event == '[':             # <<<<<<<<<<<<<<
@@ -5642,7 +5643,7 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  *             continue
  * 
  *         elif event == ']':             # <<<<<<<<<<<<<<
- *             _beat *= div
+ *             div = 1
  *             count += 1
  */
     __pyx_t_8 = (__Pyx_PyUnicode_Equals(__pyx_v_event, __pyx_kp_u__2, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 84, __pyx_L1_error)
@@ -5651,15 +5652,15 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
       /* "pippi/rhythm.pyx":85
  * 
  *         elif event == ']':
- *             _beat *= div             # <<<<<<<<<<<<<<
+ *             div = 1             # <<<<<<<<<<<<<<
  *             count += 1
  *             continue
  */
-      __pyx_v__beat = (__pyx_v__beat * __pyx_v_div);
+      __pyx_v_div = 1.0;
 
       /* "pippi/rhythm.pyx":86
  *         elif event == ']':
- *             _beat *= div
+ *             div = 1
  *             count += 1             # <<<<<<<<<<<<<<
  *             continue
  * 
@@ -5667,7 +5668,7 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
       __pyx_v_count = (__pyx_v_count + 1);
 
       /* "pippi/rhythm.pyx":87
- *             _beat *= div
+ *             div = 1
  *             count += 1
  *             continue             # <<<<<<<<<<<<<<
  * 
@@ -5679,7 +5680,7 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  *             continue
  * 
  *         elif event == ']':             # <<<<<<<<<<<<<<
- *             _beat *= div
+ *             div = 1
  *             count += 1
  */
     }
@@ -5688,7 +5689,7 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
  *             continue
  * 
  *         out += [ pos ]             # <<<<<<<<<<<<<<
- *         pos += _beat
+ *         pos += _beat / div
  *         count += 1
  */
     __pyx_t_1 = PyFloat_FromDouble(__pyx_v_pos); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 89, __pyx_L1_error)
@@ -5707,15 +5708,19 @@ static PyObject *__pyx_f_5pippi_6rhythm__topositions(PyObject *__pyx_v_p, __Pyx_
     /* "pippi/rhythm.pyx":90
  * 
  *         out += [ pos ]
- *         pos += _beat             # <<<<<<<<<<<<<<
+ *         pos += _beat / div             # <<<<<<<<<<<<<<
  *         count += 1
  * 
  */
-    __pyx_v_pos = (__pyx_v_pos + __pyx_v__beat);
+    if (unlikely(__pyx_v_div == 0)) {
+      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+      __PYX_ERR(0, 90, __pyx_L1_error)
+    }
+    __pyx_v_pos = (__pyx_v_pos + (__pyx_v__beat / __pyx_v_div));
 
     /* "pippi/rhythm.pyx":91
  *         out += [ pos ]
- *         pos += _beat
+ *         pos += _beat / div
  *         count += 1             # <<<<<<<<<<<<<<
  * 
  *     return out

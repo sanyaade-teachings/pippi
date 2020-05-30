@@ -61,6 +61,7 @@ cdef list _topositions(object p, double[:] beat, double length, double[:] smear)
     cdef double div = 1
     cdef double _beat
     cdef list out = []
+    cdef bint subdiv = False
 
     while pos < length:
         index = count % len(p)
@@ -71,23 +72,22 @@ cdef list _topositions(object p, double[:] beat, double length, double[:] smear)
 
         if event in REST_SYMBOLS:
             count += 1
-            pos += _beat
+            pos += _beat / div
             continue
 
         elif event == '[':
             end = p.find(']', index) - 1
             div = len(p[index : end])
-            _beat /= div
             count += 1
             continue
 
         elif event == ']':
-            _beat *= div
+            div = 1
             count += 1
             continue
 
         out += [ pos ]
-        pos += _beat
+        pos += _beat / div
         count += 1
 
     return out
