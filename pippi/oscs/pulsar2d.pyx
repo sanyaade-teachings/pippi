@@ -26,7 +26,7 @@ cdef class Pulsar2d:
             object wt_mod=None, 
             object win_mod=None, 
 
-            tuple burst=None,
+            object burst=None,
             object mask=0.0,
 
             int channels=DEFAULT_CHANNELS,
@@ -46,8 +46,8 @@ cdef class Pulsar2d:
         self.mask = wts.to_window(mask)
 
         if burst is not None:
-            self.burst_length = burst[0] + burst[1]
-            self.burst = np.array(([1]*burst[0]) + ([0]*burst[1]), dtype='long')
+            self.burst_length = len(burst)
+            self.burst = np.array(burst, dtype='long')
         else:
             self.burst_length = 1
             self.burst = np.array([1], dtype='long')
@@ -170,38 +170,42 @@ cdef class Pulsar2d:
 
         for i in range(length):
             freq = interpolation._linear_point(self.freq, self.freq_phase)
-            pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)
-            amp = interpolation._linear_point(self.amp, self.amp_phase)
-            self.wt_pos = interpolation._linear_point(self.wt_mod, self.wt_mod_phase)
-            self.win_pos = interpolation._linear_point(self.win_mod, self.win_mod_phase)
             mask_prob = interpolation._linear_point(self.mask, self.mask_phase)
             burst = self.burst[<int>self.burst_phase]
 
+            pulsewidth = max(interpolation._linear_point(self.pulsewidth, self.pw_phase), MIN_PULSEWIDTH)
             ipulsewidth = 1.0/pulsewidth
             wt_boundry_p = <int>max((ipulsewidth * self.wt_length)-1, 1)
             win_boundry_p = <int>max((ipulsewidth * self.win_length)-1, 1)
 
-            if self.wt_count == 1:
-                sample = interpolation._linear_point(self.wavetables[0], self.wt_phase, pulsewidth) 
-            else:
-                wi_phase = self.wt_pos * (self.wt_count-2)
-                wi = <int>wi_phase
-                wi_frac = wi_phase - wi
-                wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
-                wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)
-                sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
+            if burst > 0 and mask > 0:
+                amp = interpolation._linear_point(self.amp, self.amp_phase)
+                self.wt_pos = interpolation._linear_point(self.wt_mod, self.wt_mod_phase)
+                self.win_pos = interpolation._linear_point(self.win_mod, self.win_mod_phase)
 
-            if self.win_count == 1:
-                sample *= interpolation._linear_point(self.windows[0], self.win_phase, pulsewidth)
-            else:
-                wi_phase = self.win_pos * (self.win_count-2)
-                wi = <int>wi_phase
-                wi_frac = wi_phase - wi
-                win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
-                win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)
-                sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)
+                if self.wt_count == 1:
+                    sample = interpolation._linear_point(self.wavetables[0], self.wt_phase, pulsewidth) 
+                else:
+                    wi_phase = self.wt_pos * (self.wt_count-2)
+                    wi = <int>wi_phase
+                    wi_frac = wi_phase - wi
+                    wt_out_a = interpolation._linear_point(self.wavetables[wi], self.wt_phase, pulsewidth)
+                    wt_out_b = interpolation._linear_point(self.wavetables[wi+1], self.wt_phase, pulsewidth)
+                    sample = (1.0 - wi_frac) * wt_out_a + (wi_frac * wt_out_b)
 
-            sample *= amp * burst * mask
+                if self.win_count == 1:
+                    sample *= interpolation._linear_point(self.windows[0], self.win_phase, pulsewidth)
+                else:
+                    wi_phase = self.win_pos * (self.win_count-2)
+                    wi = <int>wi_phase
+                    wi_frac = wi_phase - wi
+                    win_out_a = interpolation._linear_point(self.windows[wi], self.win_phase, pulsewidth)
+                    win_out_b = interpolation._linear_point(self.windows[wi+1], self.win_phase, pulsewidth)
+                    sample *= (1.0 - wi_frac) * win_out_a + (wi_frac * win_out_b)
+
+                sample *= amp
+            else:
+                sample = 0
 
             self.freq_phase += freq_phase_inc
             self.amp_phase += amp_phase_inc

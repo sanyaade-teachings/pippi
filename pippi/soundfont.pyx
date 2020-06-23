@@ -67,8 +67,6 @@ cdef double[:,:] render(str font, list events, int voice, int channels, int samp
     cdef dict channel_map = { c+1: [] for c in range(16) }
     cdef dict event_map = {} 
 
-    # TODO: handle microtones with pitch bend
-
     while True:
         for msg in messages:
             if msg['pos'] > elapsed:
