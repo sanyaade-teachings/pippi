@@ -1,10 +1,14 @@
 #cython: language_level=3
 
-import numpy as np
 import numbers
 import random
-cimport cython
 import math
+
+cimport cython
+import numpy as np
+cimport numpy as np
+
+from pippi cimport fft
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
 from pippi.interpolation cimport _linear_point, _linear_pos
@@ -475,11 +479,86 @@ cpdef SoundBuffer mincer(SoundBuffer snd, double length, object position, object
     cdef double[:] pitch_lfo = wavetables.to_window(pitch)
     return SoundBuffer(soundpipe.mincer(snd.frames, length, time_lfo, amp, pitch_lfo, wtsize, snd.samplerate), channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer convolve(SoundBuffer snd, double[:] impulse, bool normalize=True):
-    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
-    cdef int _normalize = 1 if normalize else 0
-    snd.frames = _fir(snd.frames, out, impulse, normalize)
-    return snd
+cdef double[:,:] _to_impulse(object impulse, int channels):
+    cdef double[:,:] _impulse
+    cdef double[:] _wt
+
+    if isinstance(impulse, str):
+        _wt = wavetables.to_window(impulse)
+        _impulse = np.hstack([ _wt for _ in range(channels) ])
+
+    elif isinstance(impulse, Wavetable):
+        _impulse = np.hstack([ np.reshape(impulse.data, (-1, 1)) for _ in range(channels) ])
+
+    elif isinstance(impulse, SoundBuffer):
+        if impulse.channels != channels:
+            _impulse = impulse.remix(channels).frames
+        else:
+            _impulse = impulse.frames
+
+    else:
+        raise TypeError('Could not convolve impulse of type %s' % type(impulse))
+
+    return _impulse
+
+cpdef SoundBuffer convolve(SoundBuffer snd, object impulse, bint norm=True):
+    cdef double[:,:] _impulse = _to_impulse(impulse, snd.channels)
+    cdef double[:,:] out = fft.conv(snd.frames, _impulse)
+
+    if norm:
+        out = _norm(out, snd.mag)
+
+    return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
+
+cpdef SoundBuffer tconvolve(SoundBuffer snd, object impulse, bool normalize=True):
+    cdef double[:,:] _impulse = _to_impulse(impulse, snd.channels)
+
+    cdef int i=0, c=0, j=0
+    cdef int framelength = len(snd)
+    cdef int impulselength = len(_impulse)
+    cdef double maxval     
+
+    cdef double[:,:] out = np.zeros((len(snd) + impulselength, snd.channels), dtype='d')
+
+    if normalize:
+        maxval = _mag(snd.frames)
+
+    for i in range(framelength):
+        for c in range(snd.channels):
+            for j in range(impulselength):
+                out[i+j,c] += snd.frames[i,c] * _impulse[j,c]
+
+    if normalize:
+        out = _norm(out, maxval)
+
+    return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
+
+cpdef SoundBuffer wconvolve(SoundBuffer snd, SoundBuffer impulse, bool normalize=True):
+    cdef double[:,:] _impulse = _to_impulse(impulse, snd.channels)
+
+    cdef int i=0, c=0, j=0
+    cdef int framelength = len(snd)
+    cdef int impulselength = len(_impulse)
+    cdef int windowlength = max(16, impulselength // 50)
+    cdef int offset = 0
+    cdef double maxval     
+
+    cdef double[:,:] out = np.zeros((len(snd) + windowlength, snd.channels), dtype='d')
+
+    if normalize:
+        maxval = _mag(snd.frames)
+
+    for i in range(framelength):
+        pos = <double>i/<double>framelength
+        offset = <int>(pos * (impulselength-windowlength))
+        for c in range(snd.channels):
+            for j in range(windowlength):
+                out[i+j,c] += snd.frames[i,c] * _impulse[j+offset,c]
+
+    if normalize:
+        out = _norm(out, maxval)
+
+    return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
 
 cpdef SoundBuffer go(SoundBuffer snd, 
                           object factor,

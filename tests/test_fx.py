@@ -13,6 +13,31 @@ class TestFx(TestCase):
         snd = snd + g
         snd.write('tests/renders/fx_vspeed.wav')
 
+    def test_convolve(self):
+        sound = dsp.read('tests/sounds/guitar1s.wav')
+        impulse = dsp.read('tests/sounds/LittleTikes-A1.wav')
+
+        out = fx.convolve(sound, impulse)
+        out.write('tests/renders/fx_convolve_guitar_littletikes.wav')
+
+        impulse = dsp.win('sinc')
+        out = fx.convolve(sound, impulse)
+        out.write('tests/renders/fx_convolve_guitar_sinc.wav')
+
+    def test_tconvolve(self):
+        sound = dsp.read('tests/sounds/guitar1s.wav')
+        impulse = dsp.win('sinc')
+
+        out = fx.tconvolve(sound, impulse)
+        out.write('tests/renders/fx_tconvolve_guitar_sinc.wav')
+
+    def test_wconvolve(self):
+        sound = dsp.read('tests/sounds/guitar1s.wav')
+        impulse = dsp.read('tests/sounds/LittleTikes-A1.wav')
+
+        out = fx.wconvolve(sound, impulse)
+        out.write('tests/renders/fx_wconvolve_guitar_littletikes.wav')
+
     def test_crossfade(self):
         snd1 = dsp.read('tests/sounds/linux.wav').cut(0, 3)
         snd2 = dsp.read('tests/sounds/guitar10s.wav').cut(0, 3)

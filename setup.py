@@ -11,7 +11,7 @@ ext_modules = cythonize([
         Extension('pippi.fx', ['pippi/fx.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
-            include_dirs=['/usr/local/include']
+            include_dirs=['/usr/local/include', 'modules/fft', np.get_include()]
         ),
         Extension('pippi.grains', ['pippi/grains.pyx'],
             libraries=['soundpipe'], 
