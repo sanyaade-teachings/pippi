@@ -518,7 +518,7 @@ cpdef SoundBuffer tconvolve(SoundBuffer snd, object impulse, bool normalize=True
     cdef int impulselength = len(_impulse)
     cdef double maxval     
 
-    cdef double[:,:] out = np.zeros((len(snd) + impulselength, snd.channels), dtype='d')
+    cdef double[:,:] out = np.zeros((framelength + impulselength, snd.channels), dtype='d')
 
     if normalize:
         maxval = _mag(snd.frames)
@@ -533,24 +533,39 @@ cpdef SoundBuffer tconvolve(SoundBuffer snd, object impulse, bool normalize=True
 
     return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
 
-cpdef SoundBuffer wconvolve(SoundBuffer snd, SoundBuffer impulse, bool normalize=True):
+cpdef SoundBuffer wconvolve(SoundBuffer snd, SoundBuffer impulse, object wsize=None, object grid=None, bool normalize=True):
+    if wsize is None:
+        wsize = 0.02
+
+    if grid is None:
+        grid = 'phasor'
+
+    cdef double[:] _wsize = wavetables.to_window(wsize)
+    cdef double[:] _grid = wavetables.to_window(grid)
+
     cdef double[:,:] _impulse = _to_impulse(impulse, snd.channels)
 
     cdef int i=0, c=0, j=0
     cdef int framelength = len(snd)
     cdef int impulselength = len(_impulse)
-    cdef int windowlength = max(16, impulselength // 50)
+    cdef int windowlength 
+    cdef double w = 1
     cdef int offset = 0
     cdef double maxval     
+    cdef double g = 0
+    cdef int outlength = framelength + impulselength
 
-    cdef double[:,:] out = np.zeros((len(snd) + windowlength, snd.channels), dtype='d')
+    cdef double[:,:] out = np.zeros((outlength, snd.channels), dtype='d')
 
     if normalize:
         maxval = _mag(snd.frames)
 
     for i in range(framelength):
         pos = <double>i/<double>framelength
-        offset = <int>(pos * (impulselength-windowlength))
+        g = _linear_pos(_grid, pos)
+        w = _linear_pos(_wsize, pos)
+        windowlength = max(16, <int>(impulselength * w))
+        offset = <int>(g * (impulselength-windowlength))
         for c in range(snd.channels):
             for j in range(windowlength):
                 out[i+j,c] += snd.frames[i,c] * _impulse[j+offset,c]
