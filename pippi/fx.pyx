@@ -533,6 +533,10 @@ cpdef SoundBuffer tconvolve(SoundBuffer snd, object impulse, bool normalize=True
 
     return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.initializedcheck(False)
+@cython.cdivision(True)
 cpdef SoundBuffer wconvolve(SoundBuffer snd, SoundBuffer impulse, object wsize=None, object grid=None, bool normalize=True):
     if wsize is None:
         wsize = 0.02
@@ -560,15 +564,16 @@ cpdef SoundBuffer wconvolve(SoundBuffer snd, SoundBuffer impulse, object wsize=N
     if normalize:
         maxval = _mag(snd.frames)
 
-    for i in range(framelength):
-        pos = <double>i/<double>framelength
-        g = _linear_pos(_grid, pos)
-        w = _linear_pos(_wsize, pos)
-        windowlength = max(16, <int>(impulselength * w))
-        offset = <int>(g * (impulselength-windowlength))
-        for c in range(snd.channels):
-            for j in range(windowlength):
-                out[i+j,c] += snd.frames[i,c] * _impulse[j+offset,c]
+    with nogil:
+        for i in range(framelength):
+            pos = <double>i/<double>framelength
+            g = _linear_pos(_grid, pos)
+            w = _linear_pos(_wsize, pos)
+            windowlength = max(16, <int>(impulselength * w))
+            offset = <int>(g * (impulselength-windowlength))
+            for c in range(snd.channels):
+                for j in range(windowlength):
+                    out[i+j,c] += snd.frames[i,c] * _impulse[j+offset,c]
 
     if normalize:
         out = _norm(out, maxval)

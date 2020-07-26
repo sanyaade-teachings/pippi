@@ -286,6 +286,75 @@ body.cython { font-family: courier; font-size: 12; }
 .cython.score-252 {background-color: #FFFF09;}
 .cython.score-253 {background-color: #FFFF09;}
 .cython.score-254 {background-color: #FFFF09;}
+.cython .hll { background-color: #ffffcc }
+.cython  { background: #f8f8f8; }
+.cython .c { color: #408080; font-style: italic } /* Comment */
+.cython .err { border: 1px solid #FF0000 } /* Error */
+.cython .k { color: #008000; font-weight: bold } /* Keyword */
+.cython .o { color: #666666 } /* Operator */
+.cython .ch { color: #408080; font-style: italic } /* Comment.Hashbang */
+.cython .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+.cython .cp { color: #BC7A00 } /* Comment.Preproc */
+.cython .cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
+.cython .c1 { color: #408080; font-style: italic } /* Comment.Single */
+.cython .cs { color: #408080; font-style: italic } /* Comment.Special */
+.cython .gd { color: #A00000 } /* Generic.Deleted */
+.cython .ge { font-style: italic } /* Generic.Emph */
+.cython .gr { color: #FF0000 } /* Generic.Error */
+.cython .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.cython .gi { color: #00A000 } /* Generic.Inserted */
+.cython .go { color: #888888 } /* Generic.Output */
+.cython .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.cython .gs { font-weight: bold } /* Generic.Strong */
+.cython .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.cython .gt { color: #0044DD } /* Generic.Traceback */
+.cython .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.cython .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.cython .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.cython .kp { color: #008000 } /* Keyword.Pseudo */
+.cython .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.cython .kt { color: #B00040 } /* Keyword.Type */
+.cython .m { color: #666666 } /* Literal.Number */
+.cython .s { color: #BA2121 } /* Literal.String */
+.cython .na { color: #7D9029 } /* Name.Attribute */
+.cython .nb { color: #008000 } /* Name.Builtin */
+.cython .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+.cython .no { color: #880000 } /* Name.Constant */
+.cython .nd { color: #AA22FF } /* Name.Decorator */
+.cython .ni { color: #999999; font-weight: bold } /* Name.Entity */
+.cython .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+.cython .nf { color: #0000FF } /* Name.Function */
+.cython .nl { color: #A0A000 } /* Name.Label */
+.cython .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+.cython .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.cython .nv { color: #19177C } /* Name.Variable */
+.cython .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+.cython .w { color: #bbbbbb } /* Text.Whitespace */
+.cython .mb { color: #666666 } /* Literal.Number.Bin */
+.cython .mf { color: #666666 } /* Literal.Number.Float */
+.cython .mh { color: #666666 } /* Literal.Number.Hex */
+.cython .mi { color: #666666 } /* Literal.Number.Integer */
+.cython .mo { color: #666666 } /* Literal.Number.Oct */
+.cython .sa { color: #BA2121 } /* Literal.String.Affix */
+.cython .sb { color: #BA2121 } /* Literal.String.Backtick */
+.cython .sc { color: #BA2121 } /* Literal.String.Char */
+.cython .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.cython .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.cython .s2 { color: #BA2121 } /* Literal.String.Double */
+.cython .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
+.cython .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.cython .si { color: #BB6688; font-weight: bold } /* Literal.String.Interpol */
+.cython .sx { color: #008000 } /* Literal.String.Other */
+.cython .sr { color: #BB6688 } /* Literal.String.Regex */
+.cython .s1 { color: #BA2121 } /* Literal.String.Single */
+.cython .ss { color: #19177C } /* Literal.String.Symbol */
+.cython .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.cython .fm { color: #0000FF } /* Name.Function.Magic */
+.cython .vc { color: #19177C } /* Name.Variable.Class */
+.cython .vg { color: #19177C } /* Name.Variable.Global */
+.cython .vi { color: #19177C } /* Name.Variable.Instance */
+.cython .vm { color: #19177C } /* Name.Variable.Magic */
+.cython .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 </head>
 <body class="cython">
@@ -295,9 +364,9 @@ body.cython { font-family: courier; font-size: 12; }
     Click on a line that starts with a "<code>+</code>" to see the C code that Cython generated for it.
 </p>
 <p>Raw output: <a href="oscs.c">oscs.c</a></p>
-<div class="cython"><pre class="cython line score-0">&#xA0;<span class="">01</span>: #cython: language_level=3</pre>
+<div class="cython"><pre class="cython line score-0">&#xA0;<span class="">01</span>: <span class="c">#cython: language_level=3</span></pre>
 <pre class="cython line score-0">&#xA0;<span class="">02</span>: </pre>
-<pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">03</span>: from pippi.dss import DSS</pre>
+<pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">03</span>: <span class="k">from</span> <span class="nn">pippi.dss</span> <span class="k">import</span> <span class="n">DSS</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 3, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_DSS);
@@ -316,7 +385,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">04</span>: from pippi.fold import Fold</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">04</span>: <span class="k">from</span> <span class="nn">pippi.fold</span> <span class="k">import</span> <span class="n">Fold</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Fold);
@@ -335,7 +404,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">05</span>: from pippi.osc import Osc</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">05</span>: <span class="k">from</span> <span class="nn">pippi.osc</span> <span class="k">import</span> <span class="n">Osc</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 5, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Osc);
@@ -354,7 +423,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">06</span>: from pippi.osc2d import Osc2d</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">06</span>: <span class="k">from</span> <span class="nn">pippi.osc2d</span> <span class="k">import</span> <span class="n">Osc2d</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Osc2d);
@@ -373,7 +442,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">07</span>: from pippi.pulsar import Pulsar</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">07</span>: <span class="k">from</span> <span class="nn">pippi.pulsar</span> <span class="k">import</span> <span class="n">Pulsar</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pulsar);
@@ -392,7 +461,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">08</span>: from pippi.pulsar2d import Pulsar2d</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">08</span>: <span class="k">from</span> <span class="nn">pippi.pulsar2d</span> <span class="k">import</span> <span class="n">Pulsar2d</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pulsar2d);
@@ -411,7 +480,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">09</span>: from pippi.pluck import Pluck</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">09</span>: <span class="k">from</span> <span class="nn">pippi.pluck</span> <span class="k">import</span> <span class="n">Pluck</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pluck);
@@ -430,7 +499,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">10</span>: from pippi.alias import Alias</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">10</span>: <span class="k">from</span> <span class="nn">pippi.alias</span> <span class="k">import</span> <span class="n">Alias</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Alias);
@@ -449,7 +518,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">11</span>: from pippi.bar import Bar</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">11</span>: <span class="k">from</span> <span class="nn">pippi.bar</span> <span class="k">import</span> <span class="n">Bar</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Bar);
@@ -468,7 +537,7 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">12</span>: from pippi.tukey import Tukey</pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">12</span>: <span class="k">from</span> <span class="nn">pippi.tukey</span> <span class="k">import</span> <span class="n">Tukey</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Tukey);
