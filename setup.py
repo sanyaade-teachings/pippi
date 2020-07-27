@@ -46,6 +46,7 @@ ext_modules = cythonize([
         ),
         Extension('pippi.oscs', ['pippi/oscs/oscs.pyx']), 
         Extension('pippi.dss', ['pippi/oscs/dss.pyx']), 
+        Extension('pippi.drunk', ['pippi/oscs/drunk.pyx']), 
         Extension('pippi.fold', ['pippi/oscs/fold.pyx']), 
         Extension('pippi.osc', ['pippi/oscs/osc.pyx']), 
         Extension('pippi.osc2d', ['pippi/oscs/osc2d.pyx']), 

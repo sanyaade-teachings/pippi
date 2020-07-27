@@ -156,6 +156,17 @@ cdef double[:] _mul1d(double[:] output, double[:] values):
 
     return out
 
+cdef double[:] _drink(double[:] wt, double width, double minval, double maxval, bint wrap):
+    cdef int i = 0
+    cdef wlength = len(wt)
+
+    for i in range(wlength):
+        wt[i] = max(minval, min(wt[i] + rand.rand(-width, width), maxval))
+
+    if wrap:
+        wt[wlength-1] = wt[0]
+    
+    return wt
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -549,21 +560,14 @@ cdef class Wavetable:
         cdef double[:] _impulse = to_window(impulse)
         return Wavetable(_fir(self.data, _impulse, norm))
 
-    cpdef void drink(Wavetable self, double width=0.1, object minval=None, object maxval=None, list indexes=None, bint wrap=False):
+    cpdef void drink(Wavetable self, double width=0.1, object minval=None, object maxval=None, bint wrap=False):
         if minval is None:
             minval = np.min(self.data)
 
         if maxval is None:
             maxval = np.max(self.data)
 
-        if indexes is None:
-            indexes = list(range(len(self.data)))
-
-        for i in indexes:
-            self.data[i] = max(minval, min(self.data[i] + rand.rand(-width, width), maxval))
-
-        if wrap:
-            self.data[len(self.data)-1] = self.data[0]
+        self.data = _drink(self.data, width, minval, maxval, wrap)
 
     cpdef Wavetable harmonics(Wavetable self, object harmonics=None, object weights=None):
         if harmonics is None:

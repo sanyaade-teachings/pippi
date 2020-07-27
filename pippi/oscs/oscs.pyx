@@ -1,6 +1,7 @@
 #cython: language_level=3
 
 from pippi.dss import DSS
+from pippi.drunk import Drunk
 from pippi.fold import Fold
 from pippi.osc import Osc
 from pippi.osc2d import Osc2d

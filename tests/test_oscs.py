@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase
 
-from pippi.oscs import Osc, Osc2d, Pulsar, Pulsar2d, Alias, Bar, Tukey
+from pippi.oscs import Drunk, Osc, Osc2d, Pulsar, Pulsar2d, Alias, Bar, Tukey
 from pippi.soundbuffer import SoundBuffer
 from pippi.wavesets import Waveset
 from pippi import dsp, fx, tune, shapes
@@ -34,6 +34,29 @@ class TestOscs(TestCase):
         out = osc.play(length)
         out.write('tests/renders/osc_guitar_wt.wav')
         self.assertEqual(len(out), int(length * out.samplerate))
+
+    def test_create_drunk(self):
+        out = Drunk(10, freq=200).play(10)
+        out.write('tests/renders/osc_drunk-wdefault.wav')
+
+        #out = Drunk(10, width=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
+        #out.write('tests/renders/osc_drunk-whann-0.01-0.05.wav')
+
+        #out = Drunk(10, width=1, freq=200).play(10)
+        #out.write('tests/renders/osc_drunk-w1.wav')
+
+        """
+        # a fun bit o' drone
+        length = 60 * 18
+        out = dsp.buffer(length=length)
+        freqs = tune.chord('i11')
+        for freq in freqs:
+            l = Drunk(dsp.randint(4, 30), freq=freq).play(length).pan(dsp.rand())
+            out.dub(l)
+        out = fx.lpf(out, max(freqs)*2)
+        out = fx.norm(out, 0.8)
+        out.write('tests/renders/osc_drunk-chord-10x.wav')
+        """
 
     def test_create_wt_stack(self):
         wtA = [ random.random() for _ in range(random.randint(10, 1000)) ]
