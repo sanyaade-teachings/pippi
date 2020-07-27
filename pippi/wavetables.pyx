@@ -158,7 +158,7 @@ cdef double[:] _mul1d(double[:] output, double[:] values):
 
 cdef double[:] _drink(double[:] wt, double width, double minval, double maxval, bint wrap):
     cdef int i = 0
-    cdef wlength = len(wt)
+    cdef int wlength = len(wt)
 
     for i in range(wlength):
         wt[i] = max(minval, min(wt[i] + rand.rand(-width, width), maxval))
