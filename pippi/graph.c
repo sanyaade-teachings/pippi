@@ -1124,11 +1124,24 @@ struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
+struct __pyx_opt_args_5pippi_13interpolation__hermite_point;
 struct __pyx_opt_args_5pippi_13interpolation__linear_point;
 struct __pyx_opt_args_5pippi_13interpolation_linear_point;
 
-/* "interpolation.pxd":3
- * #cython: language_level=3
+/* "interpolation.pxd":4
+ * 
+ * cdef double _hermite_pos(double[:] data, double pos)
+ * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*)             # <<<<<<<<<<<<<<
+ * 
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
+ */
+struct __pyx_opt_args_5pippi_13interpolation__hermite_point {
+  int __pyx_n;
+  double pulsewidth;
+};
+
+/* "interpolation.pxd":6
+ * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*)
  * 
  * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)
@@ -1139,7 +1152,7 @@ struct __pyx_opt_args_5pippi_13interpolation__linear_point {
   double pulsewidth;
 };
 
-/* "interpolation.pxd":4
+/* "interpolation.pxd":7
  * 
  * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)             # <<<<<<<<<<<<<<
@@ -1185,7 +1198,7 @@ struct __pyx_opt_args_5pippi_10wavetables_seesaw;
 
 /* "pippi/wavetables.pxd":5
  * cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
- * cdef double[:] _drink(double[:] wt, double width, double minval, double maxval, bint wrap)
+ * cdef double[:] _drink(double[:] wt, double width, double minval, double maxval)
  * cdef double[:] _fir(double[:] data, double[:] impulse, bint norm=*)             # <<<<<<<<<<<<<<
  * cdef double _mag(double[:] data)
  * cdef double[:] _normalize(double[:] data, double ceiling)
@@ -1212,7 +1225,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_clip {
  *     cpdef Wavetable cut(Wavetable self, int start, int length)
  *     cpdef Wavetable rcut(Wavetable self, int length)
  *     cpdef Wavetable convolve(Wavetable self, object impulse, bint norm=*)             # <<<<<<<<<<<<<<
- *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, bint wrap=*)
+ *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*)
  *     cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)
  */
 struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_convolve {
@@ -1223,7 +1236,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_convolve {
 /* "pippi/wavetables.pxd":21
  *     cpdef Wavetable rcut(Wavetable self, int length)
  *     cpdef Wavetable convolve(Wavetable self, object impulse, bint norm=*)
- *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, bint wrap=*)             # <<<<<<<<<<<<<<
+ *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*)             # <<<<<<<<<<<<<<
  *     cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)
  *     cpdef Wavetable env(Wavetable self, str window_type=*)
  */
@@ -1232,12 +1245,11 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_drink {
   double width;
   PyObject *minval;
   PyObject *maxval;
-  int wrap;
 };
 
 /* "pippi/wavetables.pxd":22
  *     cpdef Wavetable convolve(Wavetable self, object impulse, bint norm=*)
- *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, bint wrap=*)
+ *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*)
  *     cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)             # <<<<<<<<<<<<<<
  *     cpdef Wavetable env(Wavetable self, str window_type=*)
  *     cpdef double max(Wavetable self)
@@ -1249,7 +1261,7 @@ struct __pyx_opt_args_5pippi_10wavetables_9Wavetable_harmonics {
 };
 
 /* "pippi/wavetables.pxd":23
- *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*, bint wrap=*)
+ *     cpdef void drink(Wavetable self, double width=*, object minval=*, object maxval=*)
  *     cpdef Wavetable harmonics(Wavetable self, object harmonics=*, object weights=*)
  *     cpdef Wavetable env(Wavetable self, str window_type=*)             # <<<<<<<<<<<<<<
  *     cpdef double max(Wavetable self)

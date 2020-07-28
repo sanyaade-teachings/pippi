@@ -5,41 +5,66 @@ cimport cython
 from libc cimport math
 from pippi.wavetables cimport to_wavetable
 
-ctypedef double (*get_sample_t)(double x, double y0, double y1, double y2, double y3)
+# Use these for function pointers in critical loops 
+# when interpolation scheme can be set at runtime
+ctypedef double (*hermite_point_t)(double[:] data, double phase, double pulsewidth)
+ctypedef double (*linear_point_t)(double[:] data, double phase, double pulsewidth)
+ctypedef double (*trunc_point_t)(double[:] data, double phase, double pulsewidth)
+
+ctypedef double (*hermite_pos_t)(double[:] data, double pos)
+ctypedef double (*linear_pos_t)(double[:] data, double pos)
+ctypedef double (*trunc_pos_t)(double[:] data, double pos)
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double hermite_get_sample(double x, double y0, double y1, double y2, double y3):
-    """ Taken from version #2 by James McCartney 
-        http://musicdsp.org/showone.php?id=93
-    """
+cdef double _hermite_pos(double[:] data, double pos) nogil:
+    return _hermite_point(data, pos * <double>(len(data)-1))
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _hermite_point(double[:] data, double phase, double pulsewidth=1) nogil:
+    cdef int dlength = <int>len(data)
+    cdef int boundry = dlength - 1
+
+    if dlength == 1:
+        return data[0]
+
+    elif dlength < 1 or pulsewidth == 0:
+        return 0
+
+    phase *= 1.0/pulsewidth
+
+    cdef double frac = phase - <int>phase
+    cdef int i1 = <int>phase
+    cdef int i2 = i1 + 1
+    cdef int i3 = i2 + 1
+    cdef int i0 = i1 - 1
+
+    cdef double y0 = 0
+    cdef double y1 = 0
+    cdef double y2 = 0
+    cdef double y3 = 0
+
+    if i0 >= 0:
+        y0 = data[i0]
+
+    if i1 <= boundry:
+        y1 = data[i1]
+
+    if i2 <= boundry:
+        y2 = data[i2]
+
+    if i3 <= boundry:
+        y3 = data[i3]
+
+    # This part taken from version #2 by James McCartney 
+    # https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html
     cdef double c0 = y1
     cdef double c1 = 0.5 * (y2 - y0)
     cdef double c3 = 1.5 * (y1 - y2) + 0.5 * (y3 - y0)
     cdef double c2 = y0 - y1 + c1 - c3
-
-    return ((c3 * x + c2) * x + c1) * x + c0
-
-cdef double[:] _hermite(double[:] data, int length):
-    cdef int fi = 0
-    cdef double[:] out = np.zeros(length)
-    cdef get_sample_t get_sample = hermite_get_sample
-    cdef int datalen = len(data)
-    cdef int i0, i1, i2 = 0
-    cdef int pos = 0
-    cdef double x = 0
-
-    for fi in range(length):
-        x = fi / <double>length
-        pos = <int>(x * datalen)
-
-        i0 = (pos - 1) % datalen
-        i1 = (pos + 1) % datalen
-        i2 = (pos + 2) % datalen
-
-        out[fi] = get_sample(x, data[i0], data[pos], data[i1], data[i2])
-
-    return out
+    return ((c3 * frac + c2) * frac + c1) * frac + c0
 
 
 @cython.boundscheck(False)

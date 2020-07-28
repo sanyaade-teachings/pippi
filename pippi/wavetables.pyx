@@ -156,15 +156,12 @@ cdef double[:] _mul1d(double[:] output, double[:] values):
 
     return out
 
-cdef double[:] _drink(double[:] wt, double width, double minval, double maxval, bint wrap):
+cdef double[:] _drink(double[:] wt, double width, double minval, double maxval):
     cdef int i = 0
-    cdef int wlength = len(wt)
+    cdef int wlength = len(wt)-2
 
     for i in range(wlength):
-        wt[i] = max(minval, min(wt[i] + rand.rand(-width, width), maxval))
-
-    if wrap:
-        wt[wlength-1] = wt[0]
+        wt[i+1] = max(minval, min(wt[i+1] + rand.rand(-width, width), maxval))
     
     return wt
 
@@ -431,7 +428,7 @@ cdef class Wavetable:
 
     def __getitem__(self, position):
         if isinstance(position, int):
-            return self.data[position]
+            return self.data[<int>position]
         return Wavetable(self.data[position])
 
     def __len__(self):
@@ -560,14 +557,14 @@ cdef class Wavetable:
         cdef double[:] _impulse = to_window(impulse)
         return Wavetable(_fir(self.data, _impulse, norm))
 
-    cpdef void drink(Wavetable self, double width=0.1, object minval=None, object maxval=None, bint wrap=False):
+    cpdef void drink(Wavetable self, double width=0.1, object minval=None, object maxval=None):
         if minval is None:
             minval = np.min(self.data)
 
         if maxval is None:
             maxval = np.max(self.data)
 
-        self.data = _drink(self.data, width, minval, maxval, wrap)
+        self.data = _drink(self.data, width, minval, maxval)
 
     cpdef Wavetable harmonics(Wavetable self, object harmonics=None, object weights=None):
         if harmonics is None:
@@ -806,6 +803,8 @@ cdef class Wavetable:
             return interpolation._linear_pos(self.data, pos)
         elif _method == TRUNC:
             return interpolation._trunc_pos(self.data, pos)
+        elif _method == HERMITE:
+            return interpolation._hermite_pos(self.data, pos)
         else:
             raise ValueError('%s is not a valid interpolation method' % method)
 

@@ -49,11 +49,11 @@ class TestOscs(TestCase):
         # a fun bit o' drone
         length = 60 * 18
         out = dsp.buffer(length=length)
-        freqs = tune.chord('i11')
+        freqs = tune.chord('I', octave=1)
         for freq in freqs:
-            l = Drunk(dsp.randint(4, 30), freq=freq).play(length).pan(dsp.rand())
-            out.dub(l)
-        out = fx.lpf(out, max(freqs)*2)
+            for o in range(3):
+                l = Drunk(dsp.randint(4, 12), width=0.05, freq=freq * 2**o).play(length).pan(dsp.rand())
+                out.dub(l)
         out = fx.norm(out, 0.8)
         out.write('tests/renders/osc_drunk-chord-10x.wav')
         """
