@@ -39,8 +39,8 @@ class TestOscs(TestCase):
         out = Drunk(10, freq=200).play(10)
         out.write('tests/renders/osc_drunk-wdefault.wav')
 
-        #out = Drunk(10, width=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
-        #out.write('tests/renders/osc_drunk-whann-0.01-0.05.wav')
+        out = Drunk(10, width=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
+        out.write('tests/renders/osc_drunk-whann-0.01-0.05.wav')
 
         #out = Drunk(10, width=1, freq=200).play(10)
         #out.write('tests/renders/osc_drunk-w1.wav')
