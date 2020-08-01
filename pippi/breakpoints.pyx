@@ -47,10 +47,6 @@ cdef class Breakpoint:
 
         qsort(<void*>self.points, self.numpoints, sizeof(Point), ct)
 
-        for i in range(self.numpoints):
-            print(self.points[i].x, self.points[i].y)
-        print()
-
         self.out = np.zeros(self.wtsize, dtype='d')
 
     def render(self):
@@ -62,7 +58,7 @@ cdef class Breakpoint:
         cdef double b
         cdef double m 
 
-        for pi in range(self.numpoints-1):
+        while pi < self.numpoints-1:
             p1 = self.points[pi]
             p2 = self.points[pi + 1]
             x1 = <int>(p1.x * self.wtsize)
@@ -72,12 +68,11 @@ cdef class Breakpoint:
                 continue
 
             b = p1.y
-            #m = (p2.y - p1.y) / (p2.x - p1.x)
-            m = ((p2.y*2-1) - (p1.y*2-1)) / (p2.x - p1.x)
-            #print('W', pi, 'b', b, 'm', m, 'width', width, 'x1', x1, 'x2', x2)
-            print('W', x1 + width, b, m)
+            m = (p2.y - p1.y) / (x2 - x1)
             for x in range(width):
                 self.out[x1 + x] = m * x + b
+
+            pi += 1
 
     def drink(self, double width, double minval=-1, double maxval=1):
         cdef int i = 0
