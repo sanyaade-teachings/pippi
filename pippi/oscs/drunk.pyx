@@ -6,7 +6,6 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport rand
 from pippi cimport wavetables
 from pippi cimport interpolation
-from pippi.breakpoints cimport Breakpoint
 
 cimport cython
 cdef inline int DEFAULT_SAMPLERATE = 44100
@@ -29,10 +28,8 @@ cdef class Drunk:
             int samplerate=DEFAULT_SAMPLERATE,
         ):
 
-        #self.points = points
         self.wtsize = wtsize
         self.numpoints = points
-        self.points = Breakpoint(points, wtsize)
         self.freq = wavetables.to_wavetable(freq, wtsize)
         self.width = wavetables.to_wavetable(width, wtsize)
         self.amp = wavetables.to_window(amp, wtsize)
@@ -45,8 +42,7 @@ cdef class Drunk:
         self.channels = channels
         self.samplerate = samplerate
 
-        #self.wavetable = np.array([0] + [ rand.rand(-1, 1) for _ in range(points) ] + [0], dtype='d')
-        self.wavetable = self.points.towavetable().data
+        self.wavetable = np.array([0] + [ rand.rand(-1, 1) for _ in range(points) ] + [0], dtype='d')
 
     def play(self, length):
         framelength = <int>(length * self.samplerate)
@@ -66,16 +62,14 @@ cdef class Drunk:
         cdef double width_phase_inc = ilength * width_boundry
         cdef double amp_phase_inc = ilength * amp_boundry
 
-        #cdef double wt_phase_inc = (1.0 / self.samplerate) * self.numpoints
-        cdef double wt_phase_inc = (1.0 / self.samplerate) * self.wtsize
+        cdef double wt_phase_inc = (1.0 / self.samplerate) * self.numpoints
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
         for i in range(length):
             freq = interpolation._linear_point(self.freq, self.freq_phase)
             width = interpolation._linear_point(self.width, self.width_phase)
             amp = interpolation._linear_point(self.amp, self.amp_phase)
-            #sample = interpolation._hermite_point(self.wavetable, self.wt_phase) * amp
-            sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
+            sample = interpolation._hermite_point(self.wavetable, self.wt_phase) * amp
 
             self.freq_phase += freq_phase_inc
             self.width_phase += width_phase_inc
@@ -83,9 +77,7 @@ cdef class Drunk:
             self.wt_phase += freq * wt_phase_inc
 
             if self.wt_phase >= wt_boundry:
-                self.points.drink(width, -1, 1)
-                self.wavetable = self.points.towavetable().data
-                #self.wavetable = wavetables._drink(self.wavetable, width, -1, 1)
+                self.wavetable = wavetables._drink(self.wavetable, width, -1, 1)
 
             while self.wt_phase >= wt_boundry:
                 self.wt_phase -= wt_boundry

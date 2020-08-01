@@ -1,13 +1,10 @@
 #cython: language_level=3
 
-from pippi.breakpoints cimport Breakpoint
-
 cdef class Drunk:
     cdef public double[:] freq
     cdef public double[:] width
     cdef public double[:] amp
     cdef public double[:] wavetable
-    cdef public Breakpoint points
 
     cdef double freq_phase
     cdef double width_phase
