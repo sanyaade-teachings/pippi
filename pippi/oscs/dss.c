@@ -3891,6 +3891,7 @@ static PyTypeObject *__pyx_ptype_5pippi_11breakpoints_Breakpoint = 0;
 /* Module declarations from "pippi.interpolation" */
 #if !CYTHON_COMPILING_IN_LIMITED_API
 #endif
+static double (*__pyx_f_5pippi_13interpolation__hermite_point)(__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__hermite_point *__pyx_optional_args); /*proto*/
 static double (*__pyx_f_5pippi_13interpolation__linear_point)(__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args); /*proto*/
 
 /* Module declarations from "cython.view" */
@@ -5129,7 +5130,7 @@ static PyObject *__pyx_f_5pippi_3dss_3DSS__play(struct __pyx_obj_5pippi_3dss_DSS
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)
  *             width = interpolation._linear_point(self.width, self.width_phase)             # <<<<<<<<<<<<<<
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)
- *             sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
+ *             sample = interpolation._hermite_point(self.wavetable, self.wt_phase) * amp
  */
     if (unlikely(!__pyx_v_self->width.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 73, __pyx_L1_error)}
     __pyx_v_width = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->width, __pyx_v_self->width_phase, NULL);
@@ -5138,7 +5139,7 @@ static PyObject *__pyx_f_5pippi_3dss_3DSS__play(struct __pyx_obj_5pippi_3dss_DSS
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)
  *             width = interpolation._linear_point(self.width, self.width_phase)
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)             # <<<<<<<<<<<<<<
- *             sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
+ *             sample = interpolation._hermite_point(self.wavetable, self.wt_phase) * amp
  * 
  */
     if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 74, __pyx_L1_error)}
@@ -5147,15 +5148,15 @@ static PyObject *__pyx_f_5pippi_3dss_3DSS__play(struct __pyx_obj_5pippi_3dss_DSS
     /* "pippi/oscs/dss.pyx":75
  *             width = interpolation._linear_point(self.width, self.width_phase)
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)
- *             sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp             # <<<<<<<<<<<<<<
+ *             sample = interpolation._hermite_point(self.wavetable, self.wt_phase) * amp             # <<<<<<<<<<<<<<
  * 
  *             self.freq_phase += freq_phase_inc
  */
     if (unlikely(!__pyx_v_self->wavetable.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 75, __pyx_L1_error)}
-    __pyx_v_sample = (__pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->wavetable, __pyx_v_self->wt_phase, NULL) * __pyx_v_amp);
+    __pyx_v_sample = (__pyx_f_5pippi_13interpolation__hermite_point(__pyx_v_self->wavetable, __pyx_v_self->wt_phase, NULL) * __pyx_v_amp);
 
     /* "pippi/oscs/dss.pyx":77
- *             sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
+ *             sample = interpolation._hermite_point(self.wavetable, self.wt_phase) * amp
  * 
  *             self.freq_phase += freq_phase_inc             # <<<<<<<<<<<<<<
  *             self.width_phase += width_phase_inc
@@ -21632,6 +21633,7 @@ static int __Pyx_modinit_function_import_code(void) {
   if (__Pyx_ImportFunction(__pyx_t_1, "to_wavetable", (void (**)(void))&__pyx_f_5pippi_10wavetables_to_wavetable, "__Pyx_memviewslice (PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_10wavetables_to_wavetable *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_2 = PyImport_ImportModule("pippi.interpolation"); if (!__pyx_t_2) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_2, "_hermite_point", (void (**)(void))&__pyx_f_5pippi_13interpolation__hermite_point, "double (__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__hermite_point *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_2, "_linear_point", (void (**)(void))&__pyx_f_5pippi_13interpolation__linear_point, "double (__Pyx_memviewslice, double, struct __pyx_opt_args_5pippi_13interpolation__linear_point *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_RefNannyFinishContext();

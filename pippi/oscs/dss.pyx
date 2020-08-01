@@ -72,7 +72,7 @@ cdef class DSS:
             freq = interpolation._linear_point(self.freq, self.freq_phase)
             width = interpolation._linear_point(self.width, self.width_phase)
             amp = interpolation._linear_point(self.amp, self.amp_phase)
-            sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
+            sample = interpolation._hermite_point(self.wavetable, self.wt_phase) * amp
 
             self.freq_phase += freq_phase_inc
             self.width_phase += width_phase_inc
