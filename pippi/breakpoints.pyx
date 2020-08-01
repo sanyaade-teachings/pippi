@@ -65,6 +65,7 @@ cdef class Breakpoint:
             x2 = <int>(p2.x * self.wtsize)
             width = x2 - x1
             if width == 0:
+                pi += 1
                 continue
 
             b = p1.y

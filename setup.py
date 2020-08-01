@@ -48,7 +48,7 @@ ext_modules = cythonize([
             include_dirs=[np.get_include(), '/usr/local/include']
         ),
         Extension('pippi.oscs', ['pippi/oscs/oscs.pyx']), 
-        #Extension('pippi.dss', ['pippi/oscs/dss.pyx']), 
+        Extension('pippi.dss', ['pippi/oscs/dss.pyx']), 
         Extension('pippi.drunk', ['pippi/oscs/drunk.pyx']), 
         Extension('pippi.fold', ['pippi/oscs/fold.pyx']), 
         Extension('pippi.osc', ['pippi/oscs/osc.pyx']), 
