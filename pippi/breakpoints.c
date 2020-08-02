@@ -3363,6 +3363,8 @@ typedef struct {
   PyObject *__pyx_n_s_x;
   PyObject *__pyx_n_s_x1;
   PyObject *__pyx_n_s_x2;
+  PyObject *__pyx_n_s_xwidth;
+  PyObject *__pyx_n_s_ywidth;
   PyObject *__pyx_n_s_zeros;
   PyObject *__pyx_int_0;
   PyObject *__pyx_int_1;
@@ -3640,6 +3642,8 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_x);
   Py_CLEAR(clear_module_state->__pyx_n_s_x1);
   Py_CLEAR(clear_module_state->__pyx_n_s_x2);
+  Py_CLEAR(clear_module_state->__pyx_n_s_xwidth);
+  Py_CLEAR(clear_module_state->__pyx_n_s_ywidth);
   Py_CLEAR(clear_module_state->__pyx_n_s_zeros);
   Py_CLEAR(clear_module_state->__pyx_int_0);
   Py_CLEAR(clear_module_state->__pyx_int_1);
@@ -3904,6 +3908,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_x);
   Py_VISIT(traverse_module_state->__pyx_n_s_x1);
   Py_VISIT(traverse_module_state->__pyx_n_s_x2);
+  Py_VISIT(traverse_module_state->__pyx_n_s_xwidth);
+  Py_VISIT(traverse_module_state->__pyx_n_s_ywidth);
   Py_VISIT(traverse_module_state->__pyx_n_s_zeros);
   Py_VISIT(traverse_module_state->__pyx_int_0);
   Py_VISIT(traverse_module_state->__pyx_int_1);
@@ -4168,6 +4174,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_x __pyx_mstate_global->__pyx_n_s_x
 #define __pyx_n_s_x1 __pyx_mstate_global->__pyx_n_s_x1
 #define __pyx_n_s_x2 __pyx_mstate_global->__pyx_n_s_x2
+#define __pyx_n_s_xwidth __pyx_mstate_global->__pyx_n_s_xwidth
+#define __pyx_n_s_ywidth __pyx_mstate_global->__pyx_n_s_ywidth
 #define __pyx_n_s_zeros __pyx_mstate_global->__pyx_n_s_zeros
 #define __pyx_int_0 __pyx_mstate_global->__pyx_int_0
 #define __pyx_int_1 __pyx_mstate_global->__pyx_int_1
@@ -4532,6 +4540,8 @@ static const char __pyx_k_struct[] = "struct";
 static const char __pyx_k_unpack[] = "unpack";
 static const char __pyx_k_update[] = "update";
 static const char __pyx_k_wtsize[] = "wtsize";
+static const char __pyx_k_xwidth[] = "xwidth";
+static const char __pyx_k_ywidth[] = "ywidth";
 static const char __pyx_k_fortran[] = "fortran";
 static const char __pyx_k_memview[] = "memview";
 static const char __pyx_k_Ellipsis[] = "Ellipsis";
@@ -4780,11 +4790,13 @@ static PyObject *__pyx_n_s_wtsize;
 static PyObject *__pyx_n_s_x;
 static PyObject *__pyx_n_s_x1;
 static PyObject *__pyx_n_s_x2;
+static PyObject *__pyx_n_s_xwidth;
+static PyObject *__pyx_n_s_ywidth;
 static PyObject *__pyx_n_s_zeros;
 #endif
 static int __pyx_pf_5pippi_11breakpoints_10Breakpoint___cinit__(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self, int __pyx_v_numpoints, int __pyx_v_wtsize); /* proto */
 static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_2render(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self, double __pyx_v_width, double __pyx_v_minval, double __pyx_v_maxval); /* proto */
+static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self, double __pyx_v_xwidth, double __pyx_v_ywidth, double __pyx_v_minval, double __pyx_v_maxval); /* proto */
 static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_6towavetable(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self); /* proto */
 static void __pyx_pf_5pippi_11breakpoints_10Breakpoint_8__dealloc__(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_10__reduce_cython__(CYTHON_UNUSED struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self); /* proto */
@@ -5535,7 +5547,7 @@ static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_2render(struct __pyx
  * 
  *             pi += 1             # <<<<<<<<<<<<<<
  * 
- *     def drink(self, double width, double minval=-1, double maxval=1):
+ *     def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):
  */
     __pyx_v_pi = (__pyx_v_pi + 1);
     __pyx_L3_continue:;
@@ -5564,7 +5576,7 @@ static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_2render(struct __pyx
 /* "pippi/breakpoints.pyx":78
  *             pi += 1
  * 
- *     def drink(self, double width, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
+ *     def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
  *         cdef int i = 0
  *         for i in range(self.numpoints-2):
  */
@@ -5585,7 +5597,8 @@ PyObject *const *__pyx_args, Py_ssize_t __pyx_nargs, PyObject *__pyx_kwds
 PyObject *__pyx_args, PyObject *__pyx_kwds
 #endif
 ) {
-  double __pyx_v_width;
+  double __pyx_v_xwidth;
+  double __pyx_v_ywidth;
   double __pyx_v_minval;
   double __pyx_v_maxval;
   #if !CYTHON_METH_FASTCALL
@@ -5597,14 +5610,16 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   __Pyx_RefNannySetupContext("drink (wrapper)", 0);
   {
     #if CYTHON_COMPILING_IN_LIMITED_API
-    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_width,&__pyx_n_s_minval,&__pyx_n_s_maxval,0};
+    PyObject **__pyx_pyargnames[] = {&__pyx_n_s_xwidth,&__pyx_n_s_ywidth,&__pyx_n_s_minval,&__pyx_n_s_maxval,0};
     #else
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_width,&__pyx_n_s_minval,&__pyx_n_s_maxval,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_xwidth,&__pyx_n_s_ywidth,&__pyx_n_s_minval,&__pyx_n_s_maxval,0};
     #endif
-    PyObject* values[3] = {0,0,0};
+    PyObject* values[4] = {0,0,0,0};
     if (__pyx_kwds) {
       Py_ssize_t kw_args;
       switch (__pyx_nargs) {
+        case  4: values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
@@ -5617,21 +5632,28 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       kw_args = __Pyx_NumKwargs_FASTCALL(__pyx_kwds);
       switch (__pyx_nargs) {
         case  0:
-        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_width)) != 0)) kw_args--;
+        if (likely((values[0] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_xwidth)) != 0)) kw_args--;
         else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
-        if (kw_args > 0) {
-          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_minval);
-          if (value) { values[1] = value; kw_args--; }
-          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+        if (likely((values[1] = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_ywidth)) != 0)) kw_args--;
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+        else {
+          __Pyx_RaiseArgtupleInvalid("drink", 0, 2, 4, 1); __PYX_ERR(0, 78, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (kw_args > 0) {
-          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_maxval);
+          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_minval);
           if (value) { values[2] = value; kw_args--; }
+          else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_GetKwValue_FASTCALL(__pyx_kwds, __pyx_kwvalues, __pyx_n_s_maxval);
+          if (value) { values[3] = value; kw_args--; }
           else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
         }
       }
@@ -5641,43 +5663,45 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       }
     } else {
       switch (__pyx_nargs) {
+        case  4: values[3] = __Pyx_Arg_FASTCALL(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = __Pyx_Arg_FASTCALL(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = __Pyx_Arg_FASTCALL(__pyx_args, 1);
-        CYTHON_FALLTHROUGH;
-        case  1: values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
+        values[0] = __Pyx_Arg_FASTCALL(__pyx_args, 0);
         break;
         default: goto __pyx_L5_argtuple_error;
       }
     }
-    __pyx_v_width = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_width == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
-    if (values[1]) {
-      __pyx_v_minval = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_minval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+    __pyx_v_xwidth = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_xwidth == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+    __pyx_v_ywidth = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_ywidth == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+    if (values[2]) {
+      __pyx_v_minval = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_minval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
     } else {
       __pyx_v_minval = ((double)-1.0);
     }
-    if (values[2]) {
-      __pyx_v_maxval = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_maxval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+    if (values[3]) {
+      __pyx_v_maxval = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_maxval == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
     } else {
       __pyx_v_maxval = ((double)1.0);
     }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("drink", 0, 1, 3, __pyx_nargs); __PYX_ERR(0, 78, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("drink", 0, 2, 4, __pyx_nargs); __PYX_ERR(0, 78, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("pippi.breakpoints.Breakpoint.drink", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(((struct __pyx_obj_5pippi_11breakpoints_Breakpoint *)__pyx_v_self), __pyx_v_width, __pyx_v_minval, __pyx_v_maxval);
+  __pyx_r = __pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(((struct __pyx_obj_5pippi_11breakpoints_Breakpoint *)__pyx_v_self), __pyx_v_xwidth, __pyx_v_ywidth, __pyx_v_minval, __pyx_v_maxval);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self, double __pyx_v_width, double __pyx_v_minval, double __pyx_v_maxval) {
+static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(struct __pyx_obj_5pippi_11breakpoints_Breakpoint *__pyx_v_self, double __pyx_v_xwidth, double __pyx_v_ywidth, double __pyx_v_minval, double __pyx_v_maxval) {
   int __pyx_v_i;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
@@ -5688,24 +5712,23 @@ static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(struct __pyx_
   double __pyx_t_5;
   struct __pyx_opt_args_5pippi_4rand_rand __pyx_t_6;
   double __pyx_t_7;
-  long __pyx_t_8;
   __Pyx_RefNannySetupContext("drink", 0);
 
   /* "pippi/breakpoints.pyx":79
  * 
- *     def drink(self, double width, double minval=-1, double maxval=1):
+ *     def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):
  *         cdef int i = 0             # <<<<<<<<<<<<<<
  *         for i in range(self.numpoints-2):
- *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-width, width), maxval))
+ *             self.points[i+1].x = max(xwidth, min(self.points[i+1].x + rand.rand(-xwidth, xwidth), 1-xwidth))
  */
   __pyx_v_i = 0;
 
   /* "pippi/breakpoints.pyx":80
- *     def drink(self, double width, double minval=-1, double maxval=1):
+ *     def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):
  *         cdef int i = 0
  *         for i in range(self.numpoints-2):             # <<<<<<<<<<<<<<
- *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-width, width), maxval))
- *             self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))
+ *             self.points[i+1].x = max(xwidth, min(self.points[i+1].x + rand.rand(-xwidth, xwidth), 1-xwidth))
+ *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))
  */
   __pyx_t_1 = (__pyx_v_self->numpoints - 2);
   __pyx_t_2 = __pyx_t_1;
@@ -5715,62 +5738,62 @@ static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(struct __pyx_
     /* "pippi/breakpoints.pyx":81
  *         cdef int i = 0
  *         for i in range(self.numpoints-2):
- *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-width, width), maxval))             # <<<<<<<<<<<<<<
- *             self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))
+ *             self.points[i+1].x = max(xwidth, min(self.points[i+1].x + rand.rand(-xwidth, xwidth), 1-xwidth))             # <<<<<<<<<<<<<<
+ *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))
  * 
  */
-    __pyx_t_4 = __pyx_v_maxval;
+    __pyx_t_4 = (1.0 - __pyx_v_xwidth);
     __pyx_t_6.__pyx_n = 2;
-    __pyx_t_6.low = (-__pyx_v_width);
-    __pyx_t_6.high = __pyx_v_width;
+    __pyx_t_6.low = (-__pyx_v_xwidth);
+    __pyx_t_6.high = __pyx_v_xwidth;
     __pyx_t_5 = __pyx_f_5pippi_4rand_rand(0, &__pyx_t_6); 
-    __pyx_t_7 = ((__pyx_v_self->points[(__pyx_v_i + 1)]).y + __pyx_t_5);
+    __pyx_t_7 = ((__pyx_v_self->points[(__pyx_v_i + 1)]).x + __pyx_t_5);
     if (((__pyx_t_4 < __pyx_t_7) != 0)) {
       __pyx_t_5 = __pyx_t_4;
     } else {
       __pyx_t_5 = __pyx_t_7;
     }
     __pyx_t_4 = __pyx_t_5;
-    __pyx_t_5 = __pyx_v_minval;
+    __pyx_t_5 = __pyx_v_xwidth;
     if (((__pyx_t_4 > __pyx_t_5) != 0)) {
       __pyx_t_7 = __pyx_t_4;
     } else {
       __pyx_t_7 = __pyx_t_5;
     }
-    (__pyx_v_self->points[(__pyx_v_i + 1)]).y = __pyx_t_7;
+    (__pyx_v_self->points[(__pyx_v_i + 1)]).x = __pyx_t_7;
 
     /* "pippi/breakpoints.pyx":82
  *         for i in range(self.numpoints-2):
- *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-width, width), maxval))
- *             self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))             # <<<<<<<<<<<<<<
+ *             self.points[i+1].x = max(xwidth, min(self.points[i+1].x + rand.rand(-xwidth, xwidth), 1-xwidth))
+ *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))             # <<<<<<<<<<<<<<
  * 
  *     def towavetable(self):
  */
-    __pyx_t_8 = 1;
+    __pyx_t_7 = __pyx_v_maxval;
     __pyx_t_6.__pyx_n = 2;
-    __pyx_t_6.low = (-__pyx_v_width);
-    __pyx_t_6.high = __pyx_v_width;
-    __pyx_t_7 = __pyx_f_5pippi_4rand_rand(0, &__pyx_t_6); 
-    __pyx_t_4 = ((__pyx_v_self->points[(__pyx_v_i + 1)]).x + __pyx_t_7);
-    if (((__pyx_t_8 < __pyx_t_4) != 0)) {
-      __pyx_t_7 = __pyx_t_8;
+    __pyx_t_6.low = (-__pyx_v_ywidth);
+    __pyx_t_6.high = __pyx_v_ywidth;
+    __pyx_t_4 = __pyx_f_5pippi_4rand_rand(0, &__pyx_t_6); 
+    __pyx_t_5 = ((__pyx_v_self->points[(__pyx_v_i + 1)]).y + __pyx_t_4);
+    if (((__pyx_t_7 < __pyx_t_5) != 0)) {
+      __pyx_t_4 = __pyx_t_7;
     } else {
-      __pyx_t_7 = __pyx_t_4;
+      __pyx_t_4 = __pyx_t_5;
     }
-    __pyx_t_4 = __pyx_t_7;
-    __pyx_t_8 = 0;
-    if (((__pyx_t_4 > __pyx_t_8) != 0)) {
-      __pyx_t_7 = __pyx_t_4;
+    __pyx_t_7 = __pyx_t_4;
+    __pyx_t_4 = __pyx_v_minval;
+    if (((__pyx_t_7 > __pyx_t_4) != 0)) {
+      __pyx_t_5 = __pyx_t_7;
     } else {
-      __pyx_t_7 = __pyx_t_8;
+      __pyx_t_5 = __pyx_t_4;
     }
-    (__pyx_v_self->points[(__pyx_v_i + 1)]).x = __pyx_t_7;
+    (__pyx_v_self->points[(__pyx_v_i + 1)]).y = __pyx_t_5;
   }
 
   /* "pippi/breakpoints.pyx":78
  *             pi += 1
  * 
- *     def drink(self, double width, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
+ *     def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
  *         cdef int i = 0
  *         for i in range(self.numpoints-2):
  */
@@ -5783,7 +5806,7 @@ static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_4drink(struct __pyx_
 }
 
 /* "pippi/breakpoints.pyx":84
- *             self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))
+ *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))
  * 
  *     def towavetable(self):             # <<<<<<<<<<<<<<
  *         self.render()
@@ -5864,7 +5887,7 @@ static PyObject *__pyx_pf_5pippi_11breakpoints_10Breakpoint_6towavetable(struct 
   goto __pyx_L0;
 
   /* "pippi/breakpoints.pyx":84
- *             self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))
+ *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))
  * 
  *     def towavetable(self):             # <<<<<<<<<<<<<<
  *         self.render()
@@ -22558,6 +22581,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_x, sizeof(__pyx_k_x), 0, 0, 1, 1},
   {0, __pyx_k_x1, sizeof(__pyx_k_x1), 0, 0, 1, 1},
   {0, __pyx_k_x2, sizeof(__pyx_k_x2), 0, 0, 1, 1},
+  {0, __pyx_k_xwidth, sizeof(__pyx_k_xwidth), 0, 0, 1, 1},
+  {0, __pyx_k_ywidth, sizeof(__pyx_k_ywidth), 0, 0, 1, 1},
   {0, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   #else
   {&__pyx_n_s_ASCII, __pyx_k_ASCII, sizeof(__pyx_k_ASCII), 0, 0, 1, 1},
@@ -22715,6 +22740,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_x, __pyx_k_x, sizeof(__pyx_k_x), 0, 0, 1, 1},
   {&__pyx_n_s_x1, __pyx_k_x1, sizeof(__pyx_k_x1), 0, 0, 1, 1},
   {&__pyx_n_s_x2, __pyx_k_x2, sizeof(__pyx_k_x2), 0, 0, 1, 1},
+  {&__pyx_n_s_xwidth, __pyx_k_xwidth, sizeof(__pyx_k_xwidth), 0, 0, 1, 1},
+  {&__pyx_n_s_ywidth, __pyx_k_ywidth, sizeof(__pyx_k_ywidth), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   #endif
   {0, 0, 0, 0, 0, 0, 0}
@@ -23042,17 +23069,17 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   /* "pippi/breakpoints.pyx":78
  *             pi += 1
  * 
- *     def drink(self, double width, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
+ *     def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
  *         cdef int i = 0
  *         for i in range(self.numpoints-2):
  */
-  __pyx_tuple__31 = PyTuple_Pack(5, __pyx_n_s_self, __pyx_n_s_width, __pyx_n_s_minval, __pyx_n_s_maxval, __pyx_n_s_i); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_tuple__31 = PyTuple_Pack(6, __pyx_n_s_self, __pyx_n_s_xwidth, __pyx_n_s_ywidth, __pyx_n_s_minval, __pyx_n_s_maxval, __pyx_n_s_i); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(0, 78, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__31);
   __Pyx_GIVEREF(__pyx_tuple__31);
-  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(4, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pippi_breakpoints_pyx, __pyx_n_s_drink, 78, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_codeobj__32 = (PyObject*)__Pyx_PyCode_New(5, 0, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__31, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pippi_breakpoints_pyx, __pyx_n_s_drink, 78, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__32)) __PYX_ERR(0, 78, __pyx_L1_error)
 
   /* "pippi/breakpoints.pyx":84
- *             self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))
+ *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))
  * 
  *     def towavetable(self):             # <<<<<<<<<<<<<<
  *         self.render()
@@ -23464,7 +23491,9 @@ if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_InitString(__pyx_string_tab[152], &__pyx_n_s_x) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[153], &__pyx_n_s_x1) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[154], &__pyx_n_s_x2) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[155], &__pyx_n_s_zeros) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[155], &__pyx_n_s_xwidth) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[156], &__pyx_n_s_ywidth) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[157], &__pyx_n_s_zeros) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
@@ -24040,7 +24069,7 @@ if (!__Pyx_RefNanny) {
     /* "pippi/breakpoints.pyx":78
  *             pi += 1
  * 
- *     def drink(self, double width, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
+ *     def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):             # <<<<<<<<<<<<<<
  *         cdef int i = 0
  *         for i in range(self.numpoints-2):
  */
@@ -24058,7 +24087,7 @@ if (!__Pyx_RefNanny) {
     PyType_Modified(__pyx_ptype_5pippi_11breakpoints_Breakpoint);
 
     /* "pippi/breakpoints.pyx":84
- *             self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))
+ *             self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))
  * 
  *     def towavetable(self):             # <<<<<<<<<<<<<<
  *         self.render()

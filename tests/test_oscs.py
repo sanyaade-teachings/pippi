@@ -59,13 +59,13 @@ class TestOscs(TestCase):
         """
 
     def test_create_dss(self):
-        out = DSS(10, freq=200).play(10)
+        out = DSS(10, ywidth=0.1, xwidth=0.001, freq=100).play(10)
         out.write('tests/renders/osc_dss-wdefault.wav')
 
-        out = DSS(10, width=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
+        out = DSS(10, ywidth=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
         out.write('tests/renders/osc_dss-whann-0.01-0.05.wav')
 
-        out = DSS(10, width=1, freq=200).play(10)
+        out = DSS(10, ywidth=1, freq=200).play(10)
         out.write('tests/renders/osc_dss-w1.wav')
 
 

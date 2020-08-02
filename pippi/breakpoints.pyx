@@ -75,11 +75,11 @@ cdef class Breakpoint:
 
             pi += 1
 
-    def drink(self, double width, double minval=-1, double maxval=1):
+    def drink(self, double xwidth, double ywidth, double minval=-1, double maxval=1):
         cdef int i = 0
         for i in range(self.numpoints-2):
-            self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-width, width), maxval))
-            self.points[i+1].x = max(0, min(self.points[i+1].x + rand.rand(-width, width), 1))
+            self.points[i+1].x = max(xwidth, min(self.points[i+1].x + rand.rand(-xwidth, xwidth), 1-xwidth))
+            self.points[i+1].y = max(minval, min(self.points[i+1].y + rand.rand(-ywidth, ywidth), maxval))
 
     def towavetable(self):
         self.render()
