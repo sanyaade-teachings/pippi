@@ -423,156 +423,175 @@ body.cython { font-family: courier; font-size: 12; }
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">06</span>: <span class="k">from</span> <span class="nn">pippi.osc</span> <span class="k">import</span> <span class="n">Osc</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">06</span>: <span class="k">from</span> <span class="nn">pippi.fm</span> <span class="k">import</span> <span class="n">FM</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Osc);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Osc);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Osc);
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_osc, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_FM);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_FM);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_FM);
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_fm, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Osc);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_FM);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 6, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Osc, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 6, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_FM, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 6, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">07</span>: <span class="k">from</span> <span class="nn">pippi.osc2d</span> <span class="k">import</span> <span class="n">Osc2d</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">07</span>: <span class="k">from</span> <span class="nn">pippi.osc</span> <span class="k">import</span> <span class="n">Osc</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Osc2d);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Osc2d);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Osc2d);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_osc2d, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Osc);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Osc);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Osc);
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_osc, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Osc2d);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)</span>
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Osc);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 7, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Osc2d, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 7, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Osc, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 7, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">08</span>: <span class="k">from</span> <span class="nn">pippi.pulsar</span> <span class="k">import</span> <span class="n">Pulsar</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">08</span>: <span class="k">from</span> <span class="nn">pippi.osc2d</span> <span class="k">import</span> <span class="n">Osc2d</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pulsar);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Pulsar);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Pulsar);
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_pulsar, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Osc2d);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Osc2d);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Osc2d);
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_osc2d, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Pulsar);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Osc2d);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 8, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Pulsar, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 8, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Osc2d, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 8, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">09</span>: <span class="k">from</span> <span class="nn">pippi.pulsar2d</span> <span class="k">import</span> <span class="n">Pulsar2d</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">09</span>: <span class="k">from</span> <span class="nn">pippi.pulsar</span> <span class="k">import</span> <span class="n">Pulsar</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pulsar2d);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Pulsar2d);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Pulsar2d);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_pulsar2d, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pulsar);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Pulsar);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Pulsar);
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_pulsar, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Pulsar2d);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)</span>
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Pulsar);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 9, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Pulsar2d, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 9, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Pulsar, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 9, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">10</span>: <span class="k">from</span> <span class="nn">pippi.pluck</span> <span class="k">import</span> <span class="n">Pluck</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">10</span>: <span class="k">from</span> <span class="nn">pippi.pulsar2d</span> <span class="k">import</span> <span class="n">Pulsar2d</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pluck);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Pluck);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Pluck);
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_pluck, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pulsar2d);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Pulsar2d);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Pulsar2d);
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_pulsar2d, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Pluck);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Pulsar2d);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 10, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Pluck, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 10, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Pulsar2d, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 10, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">11</span>: <span class="k">from</span> <span class="nn">pippi.alias</span> <span class="k">import</span> <span class="n">Alias</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">11</span>: <span class="k">from</span> <span class="nn">pippi.pluck</span> <span class="k">import</span> <span class="n">Pluck</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Alias);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Alias);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Alias);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_alias, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Pluck);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Pluck);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Pluck);
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_pluck, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Alias);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)</span>
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Pluck);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 11, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Alias, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 11, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Pluck, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 11, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">12</span>: <span class="k">from</span> <span class="nn">pippi.bar</span> <span class="k">import</span> <span class="n">Bar</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">12</span>: <span class="k">from</span> <span class="nn">pippi.alias</span> <span class="k">import</span> <span class="n">Alias</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Bar);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Bar);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Bar);
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_bar, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Alias);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Alias);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Alias);
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_alias, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Bar);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)</span>
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Alias);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 12, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Bar, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 12, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Alias, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 12, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">13</span>: <span class="k">from</span> <span class="nn">pippi.tukey</span> <span class="k">import</span> <span class="n">Tukey</span></pre>
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">13</span>: <span class="k">from</span> <span class="nn">pippi.bar</span> <span class="k">import</span> <span class="n">Bar</span></pre>
 <pre class='cython code score-24 '>    __pyx_t_1 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
-    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Tukey);
-    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Tukey);
-    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Tukey);
-    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_tukey, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 13, __pyx_L1_error)</span>
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Bar);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Bar);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_1, 0, __pyx_n_s_Bar);
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_bar, __pyx_t_1, 0);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 13, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Tukey);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)</span>
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_2, __pyx_n_s_Bar);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)</span>
     <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 13, __pyx_L1_error)</span>
       #endif
-      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Tukey, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 13, __pyx_L1_error)</span>
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Bar, __pyx_t_1) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 13, __pyx_L1_error)</span>
     }
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
     <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
+</pre><pre class="cython line score-24" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">14</span>: <span class="k">from</span> <span class="nn">pippi.tukey</span> <span class="k">import</span> <span class="n">Tukey</span></pre>
+<pre class='cython code score-24 '>    __pyx_t_2 = <span class='py_c_api'>PyList_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)</span>
+    <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
+    <span class='pyx_macro_api'>__Pyx_INCREF</span>(__pyx_n_s_Tukey);
+    <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_n_s_Tukey);
+    <span class='py_macro_api'>PyList_SET_ITEM</span>(__pyx_t_2, 0, __pyx_n_s_Tukey);
+    __pyx_t_1 = <span class='pyx_c_api'>__Pyx_Import</span>(__pyx_n_s_pippi_tukey, __pyx_t_2, 0);<span class='error_goto'> if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)</span>
+    <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_1);
+    <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = <span class='pyx_c_api'>__Pyx_ImportFrom</span>(__pyx_t_1, __pyx_n_s_Tukey);<span class='error_goto'> if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)</span>
+    <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_2);
+    {
+      #if CYTHON_COMPILING_IN_LIMITED_API
+      PyObject *__pyx_d = <span class='py_c_api'>PyModule_GetDict</span>(__pyx_m);<span class='error_goto'> if (unlikely(!__pyx_d)) __PYX_ERR(0, 14, __pyx_L1_error)</span>
+      #endif
+      if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_d, __pyx_n_s_Tukey, __pyx_t_2) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 14, __pyx_L1_error)</span>
+    }
+    <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_2); __pyx_t_2 = 0;
+    <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_1); __pyx_t_1 = 0;
 </pre></div></body></html>

@@ -1,7 +1,7 @@
 import random
 from unittest import TestCase
 
-from pippi.oscs import Drunk, Osc, Osc2d, Pulsar, Pulsar2d, Alias, Bar, Tukey, DSS
+from pippi.oscs import Drunk, Osc, Osc2d, Pulsar, Pulsar2d, Alias, Bar, Tukey, DSS, FM
 from pippi.soundbuffer import SoundBuffer
 from pippi.wavesets import Waveset
 from pippi import dsp, fx, tune, shapes
@@ -59,15 +59,18 @@ class TestOscs(TestCase):
         """
 
     def test_create_dss(self):
-        out = DSS(10, ywidth=0.1, xwidth=0.001, freq=100).play(10)
+        out = DSS(10, ywidth=0.1, xwidth=0.001, freq=100).play(1)
         out.write('tests/renders/osc_dss-wdefault.wav')
 
-        out = DSS(10, ywidth=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
+        out = DSS(10, ywidth=dsp.win('hann', 0.01, 0.05), freq=200).play(1)
         out.write('tests/renders/osc_dss-whann-0.01-0.05.wav')
 
-        out = DSS(10, ywidth=1, freq=200).play(10)
+        out = DSS(10, ywidth=1, freq=200).play(1)
         out.write('tests/renders/osc_dss-w1.wav')
 
+    def test_create_fm(self):
+        out = FM('sine', 'sine', freq=200, ratio=2, index=dsp.win('hannout', 0.5, 0.95)).play(3).env('pluckout') * 0.5
+        out.write('tests/renders/osc_fm-basic.wav')
 
     def test_create_wt_stack(self):
         wtA = [ random.random() for _ in range(random.randint(10, 1000)) ]

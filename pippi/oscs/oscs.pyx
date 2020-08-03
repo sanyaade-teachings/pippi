@@ -3,6 +3,7 @@
 from pippi.dss import DSS
 from pippi.drunk import Drunk
 from pippi.fold import Fold
+from pippi.fm import FM
 from pippi.osc import Osc
 from pippi.osc2d import Osc2d
 from pippi.pulsar import Pulsar

@@ -1235,6 +1235,7 @@ typedef struct {
   PyObject *__pyx_n_s_Bar;
   PyObject *__pyx_n_s_DSS;
   PyObject *__pyx_n_s_Drunk;
+  PyObject *__pyx_n_s_FM;
   PyObject *__pyx_n_s_Fold;
   PyObject *__pyx_n_s_Osc;
   PyObject *__pyx_n_s_Osc2d;
@@ -1250,6 +1251,7 @@ typedef struct {
   PyObject *__pyx_n_s_pippi_bar;
   PyObject *__pyx_n_s_pippi_drunk;
   PyObject *__pyx_n_s_pippi_dss;
+  PyObject *__pyx_n_s_pippi_fm;
   PyObject *__pyx_n_s_pippi_fold;
   PyObject *__pyx_n_s_pippi_osc;
   PyObject *__pyx_n_s_pippi_osc2d;
@@ -1293,6 +1295,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_Bar);
   Py_CLEAR(clear_module_state->__pyx_n_s_DSS);
   Py_CLEAR(clear_module_state->__pyx_n_s_Drunk);
+  Py_CLEAR(clear_module_state->__pyx_n_s_FM);
   Py_CLEAR(clear_module_state->__pyx_n_s_Fold);
   Py_CLEAR(clear_module_state->__pyx_n_s_Osc);
   Py_CLEAR(clear_module_state->__pyx_n_s_Osc2d);
@@ -1308,6 +1311,7 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_pippi_bar);
   Py_CLEAR(clear_module_state->__pyx_n_s_pippi_drunk);
   Py_CLEAR(clear_module_state->__pyx_n_s_pippi_dss);
+  Py_CLEAR(clear_module_state->__pyx_n_s_pippi_fm);
   Py_CLEAR(clear_module_state->__pyx_n_s_pippi_fold);
   Py_CLEAR(clear_module_state->__pyx_n_s_pippi_osc);
   Py_CLEAR(clear_module_state->__pyx_n_s_pippi_osc2d);
@@ -1338,6 +1342,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_Bar);
   Py_VISIT(traverse_module_state->__pyx_n_s_DSS);
   Py_VISIT(traverse_module_state->__pyx_n_s_Drunk);
+  Py_VISIT(traverse_module_state->__pyx_n_s_FM);
   Py_VISIT(traverse_module_state->__pyx_n_s_Fold);
   Py_VISIT(traverse_module_state->__pyx_n_s_Osc);
   Py_VISIT(traverse_module_state->__pyx_n_s_Osc2d);
@@ -1353,6 +1358,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_pippi_bar);
   Py_VISIT(traverse_module_state->__pyx_n_s_pippi_drunk);
   Py_VISIT(traverse_module_state->__pyx_n_s_pippi_dss);
+  Py_VISIT(traverse_module_state->__pyx_n_s_pippi_fm);
   Py_VISIT(traverse_module_state->__pyx_n_s_pippi_fold);
   Py_VISIT(traverse_module_state->__pyx_n_s_pippi_osc);
   Py_VISIT(traverse_module_state->__pyx_n_s_pippi_osc2d);
@@ -1383,6 +1389,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_Bar __pyx_mstate_global->__pyx_n_s_Bar
 #define __pyx_n_s_DSS __pyx_mstate_global->__pyx_n_s_DSS
 #define __pyx_n_s_Drunk __pyx_mstate_global->__pyx_n_s_Drunk
+#define __pyx_n_s_FM __pyx_mstate_global->__pyx_n_s_FM
 #define __pyx_n_s_Fold __pyx_mstate_global->__pyx_n_s_Fold
 #define __pyx_n_s_Osc __pyx_mstate_global->__pyx_n_s_Osc
 #define __pyx_n_s_Osc2d __pyx_mstate_global->__pyx_n_s_Osc2d
@@ -1398,6 +1405,7 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_pippi_bar __pyx_mstate_global->__pyx_n_s_pippi_bar
 #define __pyx_n_s_pippi_drunk __pyx_mstate_global->__pyx_n_s_pippi_drunk
 #define __pyx_n_s_pippi_dss __pyx_mstate_global->__pyx_n_s_pippi_dss
+#define __pyx_n_s_pippi_fm __pyx_mstate_global->__pyx_n_s_pippi_fm
 #define __pyx_n_s_pippi_fold __pyx_mstate_global->__pyx_n_s_pippi_fold
 #define __pyx_n_s_pippi_osc __pyx_mstate_global->__pyx_n_s_pippi_osc
 #define __pyx_n_s_pippi_osc2d __pyx_mstate_global->__pyx_n_s_pippi_osc2d
@@ -1416,6 +1424,7 @@ extern int __pyx_module_is_main_pippi__oscs;
 int __pyx_module_is_main_pippi__oscs = 0;
 
 /* Implementation of "pippi.oscs" */
+static const char __pyx_k_FM[] = "FM";
 static const char __pyx_k_Bar[] = "Bar";
 static const char __pyx_k_DSS[] = "DSS";
 static const char __pyx_k_Osc[] = "Osc";
@@ -1431,6 +1440,7 @@ static const char __pyx_k_Tukey[] = "Tukey";
 static const char __pyx_k_Pulsar[] = "Pulsar";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_Pulsar2d[] = "Pulsar2d";
+static const char __pyx_k_pippi_fm[] = "pippi.fm";
 static const char __pyx_k_pippi_bar[] = "pippi.bar";
 static const char __pyx_k_pippi_dss[] = "pippi.dss";
 static const char __pyx_k_pippi_osc[] = "pippi.osc";
@@ -1448,6 +1458,7 @@ static PyObject *__pyx_n_s_Alias;
 static PyObject *__pyx_n_s_Bar;
 static PyObject *__pyx_n_s_DSS;
 static PyObject *__pyx_n_s_Drunk;
+static PyObject *__pyx_n_s_FM;
 static PyObject *__pyx_n_s_Fold;
 static PyObject *__pyx_n_s_Osc;
 static PyObject *__pyx_n_s_Osc2d;
@@ -1463,6 +1474,7 @@ static PyObject *__pyx_n_s_pippi_alias;
 static PyObject *__pyx_n_s_pippi_bar;
 static PyObject *__pyx_n_s_pippi_drunk;
 static PyObject *__pyx_n_s_pippi_dss;
+static PyObject *__pyx_n_s_pippi_fm;
 static PyObject *__pyx_n_s_pippi_fold;
 static PyObject *__pyx_n_s_pippi_osc;
 static PyObject *__pyx_n_s_pippi_osc2d;
@@ -1545,6 +1557,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_Bar, sizeof(__pyx_k_Bar), 0, 0, 1, 1},
   {0, __pyx_k_DSS, sizeof(__pyx_k_DSS), 0, 0, 1, 1},
   {0, __pyx_k_Drunk, sizeof(__pyx_k_Drunk), 0, 0, 1, 1},
+  {0, __pyx_k_FM, sizeof(__pyx_k_FM), 0, 0, 1, 1},
   {0, __pyx_k_Fold, sizeof(__pyx_k_Fold), 0, 0, 1, 1},
   {0, __pyx_k_Osc, sizeof(__pyx_k_Osc), 0, 0, 1, 1},
   {0, __pyx_k_Osc2d, sizeof(__pyx_k_Osc2d), 0, 0, 1, 1},
@@ -1560,6 +1573,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, __pyx_k_pippi_bar, sizeof(__pyx_k_pippi_bar), 0, 0, 1, 1},
   {0, __pyx_k_pippi_drunk, sizeof(__pyx_k_pippi_drunk), 0, 0, 1, 1},
   {0, __pyx_k_pippi_dss, sizeof(__pyx_k_pippi_dss), 0, 0, 1, 1},
+  {0, __pyx_k_pippi_fm, sizeof(__pyx_k_pippi_fm), 0, 0, 1, 1},
   {0, __pyx_k_pippi_fold, sizeof(__pyx_k_pippi_fold), 0, 0, 1, 1},
   {0, __pyx_k_pippi_osc, sizeof(__pyx_k_pippi_osc), 0, 0, 1, 1},
   {0, __pyx_k_pippi_osc2d, sizeof(__pyx_k_pippi_osc2d), 0, 0, 1, 1},
@@ -1573,6 +1587,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_Bar, __pyx_k_Bar, sizeof(__pyx_k_Bar), 0, 0, 1, 1},
   {&__pyx_n_s_DSS, __pyx_k_DSS, sizeof(__pyx_k_DSS), 0, 0, 1, 1},
   {&__pyx_n_s_Drunk, __pyx_k_Drunk, sizeof(__pyx_k_Drunk), 0, 0, 1, 1},
+  {&__pyx_n_s_FM, __pyx_k_FM, sizeof(__pyx_k_FM), 0, 0, 1, 1},
   {&__pyx_n_s_Fold, __pyx_k_Fold, sizeof(__pyx_k_Fold), 0, 0, 1, 1},
   {&__pyx_n_s_Osc, __pyx_k_Osc, sizeof(__pyx_k_Osc), 0, 0, 1, 1},
   {&__pyx_n_s_Osc2d, __pyx_k_Osc2d, sizeof(__pyx_k_Osc2d), 0, 0, 1, 1},
@@ -1588,6 +1603,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_pippi_bar, __pyx_k_pippi_bar, sizeof(__pyx_k_pippi_bar), 0, 0, 1, 1},
   {&__pyx_n_s_pippi_drunk, __pyx_k_pippi_drunk, sizeof(__pyx_k_pippi_drunk), 0, 0, 1, 1},
   {&__pyx_n_s_pippi_dss, __pyx_k_pippi_dss, sizeof(__pyx_k_pippi_dss), 0, 0, 1, 1},
+  {&__pyx_n_s_pippi_fm, __pyx_k_pippi_fm, sizeof(__pyx_k_pippi_fm), 0, 0, 1, 1},
   {&__pyx_n_s_pippi_fold, __pyx_k_pippi_fold, sizeof(__pyx_k_pippi_fold), 0, 0, 1, 1},
   {&__pyx_n_s_pippi_osc, __pyx_k_pippi_osc, sizeof(__pyx_k_pippi_osc), 0, 0, 1, 1},
   {&__pyx_n_s_pippi_osc2d, __pyx_k_pippi_osc2d, sizeof(__pyx_k_pippi_osc2d), 0, 0, 1, 1},
@@ -1616,29 +1632,31 @@ static CYTHON_SMALL_CODE int __Pyx_InitGlobals(void) {
   if (__Pyx_InitString(__pyx_string_tab[1], &__pyx_n_s_Bar) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[2], &__pyx_n_s_DSS) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   if (__Pyx_InitString(__pyx_string_tab[3], &__pyx_n_s_Drunk) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[4], &__pyx_n_s_Fold) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[5], &__pyx_n_s_Osc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[6], &__pyx_n_s_Osc2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[7], &__pyx_n_s_Pluck) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[8], &__pyx_n_s_Pulsar) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[9], &__pyx_n_s_Pulsar2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[10], &__pyx_n_s_Tukey) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[11], &__pyx_n_s_cline_in_traceback) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[12], &__pyx_n_s_import) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[13], &__pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[14], &__pyx_n_s_name) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[15], &__pyx_n_s_pippi_alias) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[16], &__pyx_n_s_pippi_bar) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[17], &__pyx_n_s_pippi_drunk) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[18], &__pyx_n_s_pippi_dss) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[19], &__pyx_n_s_pippi_fold) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[20], &__pyx_n_s_pippi_osc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[21], &__pyx_n_s_pippi_osc2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[22], &__pyx_n_s_pippi_pluck) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[23], &__pyx_n_s_pippi_pulsar) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[24], &__pyx_n_s_pippi_pulsar2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[25], &__pyx_n_s_pippi_tukey) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
-  if (__Pyx_InitString(__pyx_string_tab[26], &__pyx_n_s_test) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[4], &__pyx_n_s_FM) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[5], &__pyx_n_s_Fold) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[6], &__pyx_n_s_Osc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[7], &__pyx_n_s_Osc2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[8], &__pyx_n_s_Pluck) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[9], &__pyx_n_s_Pulsar) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[10], &__pyx_n_s_Pulsar2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[11], &__pyx_n_s_Tukey) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[12], &__pyx_n_s_cline_in_traceback) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[13], &__pyx_n_s_import) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[14], &__pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[15], &__pyx_n_s_name) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[16], &__pyx_n_s_pippi_alias) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[17], &__pyx_n_s_pippi_bar) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[18], &__pyx_n_s_pippi_drunk) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[19], &__pyx_n_s_pippi_dss) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[20], &__pyx_n_s_pippi_fm) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[21], &__pyx_n_s_pippi_fold) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[22], &__pyx_n_s_pippi_osc) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[23], &__pyx_n_s_pippi_osc2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[24], &__pyx_n_s_pippi_pluck) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[25], &__pyx_n_s_pippi_pulsar) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[26], &__pyx_n_s_pippi_pulsar2d) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[27], &__pyx_n_s_pippi_tukey) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  if (__Pyx_InitString(__pyx_string_tab[28], &__pyx_n_s_test) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   #endif
   #if !CYTHON_COMPILING_IN_LIMITED_API
   if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
@@ -1961,7 +1979,7 @@ if (!__Pyx_RefNanny) {
  * from pippi.dss import DSS
  * from pippi.drunk import Drunk             # <<<<<<<<<<<<<<
  * from pippi.fold import Fold
- * from pippi.osc import Osc
+ * from pippi.fm import FM
  */
     __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 4, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -1986,8 +2004,8 @@ if (!__Pyx_RefNanny) {
  * from pippi.dss import DSS
  * from pippi.drunk import Drunk
  * from pippi.fold import Fold             # <<<<<<<<<<<<<<
+ * from pippi.fm import FM
  * from pippi.osc import Osc
- * from pippi.osc2d import Osc2d
  */
     __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 5, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
@@ -2011,221 +2029,247 @@ if (!__Pyx_RefNanny) {
     /* "pippi/oscs/oscs.pyx":6
  * from pippi.drunk import Drunk
  * from pippi.fold import Fold
- * from pippi.osc import Osc             # <<<<<<<<<<<<<<
+ * from pippi.fm import FM             # <<<<<<<<<<<<<<
+ * from pippi.osc import Osc
  * from pippi.osc2d import Osc2d
- * from pippi.pulsar import Pulsar
  */
     __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_INCREF(__pyx_n_s_Osc);
-    __Pyx_GIVEREF(__pyx_n_s_Osc);
-    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Osc);
-    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_osc, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
+    __Pyx_INCREF(__pyx_n_s_FM);
+    __Pyx_GIVEREF(__pyx_n_s_FM);
+    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_FM);
+    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_fm, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 6, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Osc); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_FM); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 6, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 6, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Osc, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_FM, __pyx_t_2) < 0) __PYX_ERR(0, 6, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "pippi/oscs/oscs.pyx":7
  * from pippi.fold import Fold
- * from pippi.osc import Osc
- * from pippi.osc2d import Osc2d             # <<<<<<<<<<<<<<
+ * from pippi.fm import FM
+ * from pippi.osc import Osc             # <<<<<<<<<<<<<<
+ * from pippi.osc2d import Osc2d
  * from pippi.pulsar import Pulsar
- * from pippi.pulsar2d import Pulsar2d
  */
     __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_INCREF(__pyx_n_s_Osc2d);
-    __Pyx_GIVEREF(__pyx_n_s_Osc2d);
-    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Osc2d);
-    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_osc2d, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
+    __Pyx_INCREF(__pyx_n_s_Osc);
+    __Pyx_GIVEREF(__pyx_n_s_Osc);
+    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Osc);
+    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_osc, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Osc2d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Osc); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 7, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Osc2d, __pyx_t_1) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Osc, __pyx_t_1) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
     /* "pippi/oscs/oscs.pyx":8
+ * from pippi.fm import FM
+ * from pippi.osc import Osc
+ * from pippi.osc2d import Osc2d             # <<<<<<<<<<<<<<
+ * from pippi.pulsar import Pulsar
+ * from pippi.pulsar2d import Pulsar2d
+ */
+    __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_INCREF(__pyx_n_s_Osc2d);
+    __Pyx_GIVEREF(__pyx_n_s_Osc2d);
+    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Osc2d);
+    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_osc2d, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Osc2d); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      #if CYTHON_COMPILING_IN_LIMITED_API
+      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 8, __pyx_L1_error)
+      #endif
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Osc2d, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+    }
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+    /* "pippi/oscs/oscs.pyx":9
  * from pippi.osc import Osc
  * from pippi.osc2d import Osc2d
  * from pippi.pulsar import Pulsar             # <<<<<<<<<<<<<<
  * from pippi.pulsar2d import Pulsar2d
  * from pippi.pluck import Pluck
  */
-    __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_n_s_Pulsar);
     __Pyx_GIVEREF(__pyx_n_s_Pulsar);
-    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Pulsar);
-    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_pulsar, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Pulsar); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
+    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Pulsar);
+    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_pulsar, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Pulsar); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
-      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 8, __pyx_L1_error)
+      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 9, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Pulsar, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Pulsar, __pyx_t_1) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
     }
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "pippi/oscs/oscs.pyx":9
+    /* "pippi/oscs/oscs.pyx":10
  * from pippi.osc2d import Osc2d
  * from pippi.pulsar import Pulsar
  * from pippi.pulsar2d import Pulsar2d             # <<<<<<<<<<<<<<
  * from pippi.pluck import Pluck
  * from pippi.alias import Alias
  */
-    __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_n_s_Pulsar2d);
     __Pyx_GIVEREF(__pyx_n_s_Pulsar2d);
-    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Pulsar2d);
-    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_pulsar2d, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 9, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Pulsar2d); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
+    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Pulsar2d);
+    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_pulsar2d, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Pulsar2d); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
-      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 9, __pyx_L1_error)
+      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 10, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Pulsar2d, __pyx_t_1) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Pulsar2d, __pyx_t_2) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
     }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "pippi/oscs/oscs.pyx":10
+    /* "pippi/oscs/oscs.pyx":11
  * from pippi.pulsar import Pulsar
  * from pippi.pulsar2d import Pulsar2d
  * from pippi.pluck import Pluck             # <<<<<<<<<<<<<<
  * from pippi.alias import Alias
  * from pippi.bar import Bar
  */
-    __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_n_s_Pluck);
     __Pyx_GIVEREF(__pyx_n_s_Pluck);
-    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Pluck);
-    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_pluck, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Pluck); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
+    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Pluck);
+    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_pluck, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Pluck); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
-      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 10, __pyx_L1_error)
+      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 11, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Pluck, __pyx_t_2) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Pluck, __pyx_t_1) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
     }
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "pippi/oscs/oscs.pyx":11
+    /* "pippi/oscs/oscs.pyx":12
  * from pippi.pulsar2d import Pulsar2d
  * from pippi.pluck import Pluck
  * from pippi.alias import Alias             # <<<<<<<<<<<<<<
  * from pippi.bar import Bar
  * from pippi.tukey import Tukey
  */
-    __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_INCREF(__pyx_n_s_Alias);
-    __Pyx_GIVEREF(__pyx_n_s_Alias);
-    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Alias);
-    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_alias, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Alias); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 11, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_1);
-    {
-      #if CYTHON_COMPILING_IN_LIMITED_API
-      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 11, __pyx_L1_error)
-      #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Alias, __pyx_t_1) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
-    }
-    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-    /* "pippi/oscs/oscs.pyx":12
- * from pippi.pluck import Pluck
- * from pippi.alias import Alias
- * from pippi.bar import Bar             # <<<<<<<<<<<<<<
- * from pippi.tukey import Tukey
- */
     __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_INCREF(__pyx_n_s_Bar);
-    __Pyx_GIVEREF(__pyx_n_s_Bar);
-    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Bar);
-    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_bar, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
+    __Pyx_INCREF(__pyx_n_s_Alias);
+    __Pyx_GIVEREF(__pyx_n_s_Alias);
+    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Alias);
+    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_alias, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Bar); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Alias); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 12, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Bar, __pyx_t_2) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Alias, __pyx_t_2) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "pippi/oscs/oscs.pyx":13
+ * from pippi.pluck import Pluck
  * from pippi.alias import Alias
- * from pippi.bar import Bar
- * from pippi.tukey import Tukey             # <<<<<<<<<<<<<<
+ * from pippi.bar import Bar             # <<<<<<<<<<<<<<
+ * from pippi.tukey import Tukey
  */
     __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_INCREF(__pyx_n_s_Tukey);
-    __Pyx_GIVEREF(__pyx_n_s_Tukey);
-    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Tukey);
-    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_tukey, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __Pyx_INCREF(__pyx_n_s_Bar);
+    __Pyx_GIVEREF(__pyx_n_s_Bar);
+    PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_Bar);
+    __pyx_t_2 = __Pyx_Import(__pyx_n_s_pippi_bar, __pyx_t_1, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 13, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Tukey); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_Bar); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 13, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Tukey, __pyx_t_1) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Bar, __pyx_t_1) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+    /* "pippi/oscs/oscs.pyx":14
+ * from pippi.alias import Alias
+ * from pippi.bar import Bar
+ * from pippi.tukey import Tukey             # <<<<<<<<<<<<<<
+ */
+    __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_INCREF(__pyx_n_s_Tukey);
+    __Pyx_GIVEREF(__pyx_n_s_Tukey);
+    PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_Tukey);
+    __pyx_t_1 = __Pyx_Import(__pyx_n_s_pippi_tukey, __pyx_t_2, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_Tukey); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    {
+      #if CYTHON_COMPILING_IN_LIMITED_API
+      PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 14, __pyx_L1_error)
+      #endif
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_Tukey, __pyx_t_2) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+    }
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
     /* "pippi/oscs/oscs.pyx":1
  * #cython: language_level=3             # <<<<<<<<<<<<<<
  * 
  * from pippi.dss import DSS
  */
-    __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
     {
       #if CYTHON_COMPILING_IN_LIMITED_API
       PyObject *__pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 1, __pyx_L1_error)
       #endif
-      if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     }
 
     /*--- Wrapped vars code ---*/
