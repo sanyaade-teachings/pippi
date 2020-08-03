@@ -42,12 +42,14 @@ ext_modules = cythonize([
         ), 
 
         # Oscs
+        Extension('pippi.oscs', ['pippi/oscs/oscs.pyx']), 
+
+        Extension('pippi.alias', ['pippi/oscs/alias.pyx']), 
         Extension('pippi.bar', ['pippi/oscs/bar.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
             include_dirs=[np.get_include(), '/usr/local/include']
         ),
-        Extension('pippi.oscs', ['pippi/oscs/oscs.pyx']), 
         Extension('pippi.dss', ['pippi/oscs/dss.pyx']), 
         Extension('pippi.drunk', ['pippi/oscs/drunk.pyx']), 
         Extension('pippi.fold', ['pippi/oscs/fold.pyx']), 
@@ -57,7 +59,7 @@ ext_modules = cythonize([
         Extension('pippi.pulsar', ['pippi/oscs/pulsar.pyx']), 
         Extension('pippi.pulsar2d', ['pippi/oscs/pulsar2d.pyx']), 
         Extension('pippi.pluck', ['pippi/oscs/pluck.pyx']), 
-        Extension('pippi.alias', ['pippi/oscs/alias.pyx']), 
+        Extension('pippi.sineosc', ['pippi/oscs/sineosc.pyx']), 
         Extension('pippi.tukey', ['pippi/oscs/tukey.pyx']), 
 
         Extension('pippi.rhythm', ['pippi/rhythm.pyx']), 

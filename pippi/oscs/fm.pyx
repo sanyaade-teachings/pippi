@@ -54,7 +54,7 @@ cdef class FM:
 
     cdef object _play(self, int length):
         cdef int i = 0
-        cdef double sample, freq, ratio, index, amp, carr, mod, mfreq, cfreq
+        cdef double sample, freq, ratio, index, amp, mod, mfreq, cfreq
         cdef double ilength = 1.0 / length
 
         cdef int freq_boundry = max(len(self.freq)-1, 1)
@@ -77,13 +77,14 @@ cdef class FM:
             freq = interpolation._linear_point(self.freq, self.freq_phase)
             ratio = interpolation._linear_point(self.ratio, self.ratio_phase)
             index = interpolation._linear_point(self.index, self.index_phase)
+
             amp = interpolation._linear_point(self.amp, self.amp_phase)
+            mamp = freq * index * ratio
 
-            sample = interpolation._linear_point(self.carrier, self.cwt_phase)
-            mod = abs(interpolation._linear_point(self.modulator, self.mwt_phase))
+            mod = interpolation._hermite_point(self.modulator, self.mwt_phase) * mamp
+            sample = interpolation._hermite_point(self.carrier, self.cwt_phase) * amp
 
-            mod = mod * index * ratio * freq
-            cfreq = freq + (mod * freq * ratio * index)
+            cfreq = abs(freq + mod)
             mfreq = freq * ratio
 
             self.freq_phase += freq_phase_inc
@@ -112,7 +113,7 @@ cdef class FM:
                 self.index_phase -= index_boundry
 
             for channel in range(self.channels):
-                out[i][channel] = sample * amp
+                out[i][channel] = sample
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
