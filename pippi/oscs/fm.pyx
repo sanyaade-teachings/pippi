@@ -67,6 +67,7 @@ cdef class FM:
         cdef int i = 0
         cdef double sample, freq, ratio, index, amp, mod, mfreq, cfreq
         cdef double ilength = 1.0 / length
+        cdef double isamplerate = 1.0 / self.samplerate
 
         cdef int freq_boundry = max(len(self.freq)-1, 1)
         cdef int ratio_boundry = max(len(self.ratio)-1, 1)
@@ -80,8 +81,9 @@ cdef class FM:
         cdef double index_phase_inc = ilength * index_boundry
         cdef double amp_phase_inc = ilength * amp_boundry
 
-        cdef double cwt_phase_inc = (1.0 / self.samplerate) * self.wtsize
-        cdef double mwt_phase_inc = (1.0 / self.samplerate) * self.wtsize
+        cdef double cwt_phase_inc = isamplerate * self.wtsize
+        cdef double mwt_phase_inc = isamplerate * self.wtsize
+
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
         for i in range(length):
@@ -103,17 +105,12 @@ cdef class FM:
             self.index_phase += index_phase_inc
             self.amp_phase += amp_phase_inc
 
-            if cfreq > 0:
-                self.cwt_phase += cfreq * cwt_phase_inc
-            else:
-                self.cwt_phase -= cfreq * cwt_phase_inc
+            self.cwt_phase += cfreq * cwt_phase_inc
+            self.mwt_phase += mfreq * mwt_phase_inc
 
-            if mfreq > 0:
-                self.mwt_phase += mfreq * mwt_phase_inc
-            else:
-                self.mwt_phase -= mfreq * mwt_phase_inc
-
-            while self.cwt_phase >= cwt_boundry:
+            if self.cwt_phase < 0:
+                self.cwt_phase += cwt_boundry
+            elif self.cwt_phase >= cwt_boundry:
                 self.cwt_phase -= cwt_boundry
 
             while self.mwt_phase >= mwt_boundry:
