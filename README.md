@@ -40,19 +40,19 @@ not-so-common transformations to sounds and control structures.
 
 It comes with several oscs:
 
-- Alias - a highly aliased pulse train osc
-- Bar - a bar physical model (from Soundpipe)
-- Drunk - does a drunk walk on the y axis over a fixed set of random points w/hermite interpolation for smooth waveshapes (kind of like dynamic stochastic synthesis in one dimension)
-- DSS - a basic implementation of dynamic stochastic synthesis that does a drunk walk in two dimensions over a random set of breakpoints
-- FM - a basic two operator FM synth w/harmonicity ratio * modulation index controls
-- Fold - an infinite folding wavetable osc
-- Osc - an everyday wavetable osc
-- Osc2d - a 2d morphing wavetable osc
-- Pluck - a plucked string physical model (adapted from JOS)
-- Pulsar - a pulsar synthesis engine
-- Pulsar2d - a 2d morphing pulsar synthesis engine
-- SineOsc - a simple sinewave osc (doesn't use wavetables)
-- Tukey - a tukey-window-based osc with waveshape modulation between square-like and sine-like
+- `Alias` - a highly aliased pulse train osc
+- `Bar` - a bar physical model (from Soundpipe)
+- `Drunk` - does a drunk walk on the y axis over a fixed set of random points w/hermite interpolation for smooth waveshapes (kind of like dynamic stochastic synthesis in one dimension)
+- `DSS` - a basic implementation of dynamic stochastic synthesis that does a drunk walk in two dimensions over a random set of breakpoints
+- `FM` - a basic two operator FM synth w/harmonicity ratio & modulation index controls
+- `Fold` - an infinite folding wavetable osc
+- `Osc` - an everyday wavetable osc
+- `Osc2d` - a 2d morphing wavetable osc
+- `Pluck` - a plucked string physical model (adapted from JOS)
+- `Pulsar` - a pulsar synthesis engine
+- `Pulsar2d` - a 2d morphing pulsar synthesis engine (pairs well with a stack of wavetables extracted with the `Waveset` module)
+- `SineOsc` - a simple sinewave osc (doesn't use wavetables)
+- `Tukey` - a tukey-window-based osc with waveshape modulation between square-like and sine-like
 
 And many built-in effects and transformations:
 
