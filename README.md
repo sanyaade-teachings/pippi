@@ -169,4 +169,8 @@ If you need to build sources from a clean slate (sometimes updates to `pxd` file
 
 [Pixeldroid](https://github.com/pixeldroid/fonts) for their OFL licensed console font used for labeling graphs.
 
+[@noisesmith@sonomu.club](https://sonomu.club/@noisesmith) for introducing me to the modulation param on tukey windows
 
+[James McCartney](https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html) for his implementation of hermite interpolation used in the `Wavetable` module and elsewhere.
+
+[guest](http://www.muffwiggler.com/forum/viewtopic.php?p=1586526#1586526) for their clever wavefolding implementation which the `Fold` osc is based on.
