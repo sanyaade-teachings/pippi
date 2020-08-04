@@ -42,6 +42,8 @@ It comes with several oscs:
 
 - Alias - a highly aliased pulse train osc
 - Bar - a bar physical model (from Soundpipe)
+- Drunk - does a drunk walk on the y axis over a fixed set of random points w/hermite interpolation for smooth waveshapes (kind of like dynamic stochastic synthesis in one dimension)
+- DSS - a basic implementation of dynamic stochastic synthesis that does a drunk walk in two dimensions over a random set of breakpoints
 - FM - a basic two operator FM synth w/harmonicity ratio * modulation index controls
 - Fold - an infinite folding wavetable osc
 - Osc - an everyday wavetable osc
