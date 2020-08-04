@@ -69,7 +69,7 @@ class TestOscs(TestCase):
         out.write('tests/renders/osc_dss-w1.wav')
 
     def test_create_fm(self):
-        out = FM(freq=130.81, ratio=2.8, index=[2,0]).play(5).env('hannout') * 0.4
+        out = FM('sine', 'sine', freq=130.81, ratio=2.8, index=[6,0]).play(5).env('hannout') * 0.4
         out.write('tests/renders/osc_fm-basic.wav')
 
     def test_create_sineosc(self):
