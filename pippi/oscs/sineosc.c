@@ -4627,6 +4627,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
   double __pyx_v_freq;
   double __pyx_v_amp;
   double __pyx_v_ilength;
+  double __pyx_v_isamplerate;
   int __pyx_v_freq_boundry;
   int __pyx_v_amp_boundry;
   double __pyx_v_freq_phase_inc;
@@ -4668,8 +4669,8 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
  *         cdef int i = 0
  *         cdef double sample, freq, amp
  *         cdef double ilength = 1.0 / length             # <<<<<<<<<<<<<<
+ *         cdef double isamplerate = 1.0 / self.samplerate
  * 
- *         cdef int freq_boundry = max(len(self.freq)-1, 1)
  */
   if (unlikely(__pyx_v_length == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
@@ -4677,15 +4678,28 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
   }
   __pyx_v_ilength = (1.0 / ((double)__pyx_v_length));
 
-  /* "pippi/oscs/sineosc.pyx":49
+  /* "pippi/oscs/sineosc.pyx":48
+ *         cdef double sample, freq, amp
  *         cdef double ilength = 1.0 / length
+ *         cdef double isamplerate = 1.0 / self.samplerate             # <<<<<<<<<<<<<<
+ * 
+ *         cdef int freq_boundry = max(len(self.freq)-1, 1)
+ */
+  if (unlikely(__pyx_v_self->samplerate == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+    __PYX_ERR(0, 48, __pyx_L1_error)
+  }
+  __pyx_v_isamplerate = (1.0 / ((double)__pyx_v_self->samplerate));
+
+  /* "pippi/oscs/sineosc.pyx":50
+ *         cdef double isamplerate = 1.0 / self.samplerate
  * 
  *         cdef int freq_boundry = max(len(self.freq)-1, 1)             # <<<<<<<<<<<<<<
  *         cdef int amp_boundry = max(len(self.amp)-1, 1)
  * 
  */
   __pyx_t_1 = 1;
-  if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 49, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 50, __pyx_L1_error)}
   __pyx_t_2 = __Pyx_MemoryView_Len(__pyx_v_self->freq); 
   __pyx_t_3 = (__pyx_t_2 - 1);
   if (((__pyx_t_1 > __pyx_t_3) != 0)) {
@@ -4695,7 +4709,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
   }
   __pyx_v_freq_boundry = __pyx_t_2;
 
-  /* "pippi/oscs/sineosc.pyx":50
+  /* "pippi/oscs/sineosc.pyx":51
  * 
  *         cdef int freq_boundry = max(len(self.freq)-1, 1)
  *         cdef int amp_boundry = max(len(self.amp)-1, 1)             # <<<<<<<<<<<<<<
@@ -4703,7 +4717,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
  *         cdef double freq_phase_inc = ilength * freq_boundry
  */
   __pyx_t_1 = 1;
-  if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 50, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 51, __pyx_L1_error)}
   __pyx_t_2 = __Pyx_MemoryView_Len(__pyx_v_self->amp); 
   __pyx_t_3 = (__pyx_t_2 - 1);
   if (((__pyx_t_1 > __pyx_t_3) != 0)) {
@@ -4713,7 +4727,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
   }
   __pyx_v_amp_boundry = __pyx_t_2;
 
-  /* "pippi/oscs/sineosc.pyx":52
+  /* "pippi/oscs/sineosc.pyx":53
  *         cdef int amp_boundry = max(len(self.amp)-1, 1)
  * 
  *         cdef double freq_phase_inc = ilength * freq_boundry             # <<<<<<<<<<<<<<
@@ -4722,7 +4736,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
  */
   __pyx_v_freq_phase_inc = (__pyx_v_ilength * __pyx_v_freq_boundry);
 
-  /* "pippi/oscs/sineosc.pyx":53
+  /* "pippi/oscs/sineosc.pyx":54
  * 
  *         cdef double freq_phase_inc = ilength * freq_boundry
  *         cdef double amp_phase_inc = ilength * amp_boundry             # <<<<<<<<<<<<<<
@@ -4731,23 +4745,23 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
  */
   __pyx_v_amp_phase_inc = (__pyx_v_ilength * __pyx_v_amp_boundry);
 
-  /* "pippi/oscs/sineosc.pyx":55
+  /* "pippi/oscs/sineosc.pyx":56
  *         cdef double amp_phase_inc = ilength * amp_boundry
  * 
  *         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')             # <<<<<<<<<<<<<<
  * 
  *         for i in range(length):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_zeros); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_length); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
@@ -4755,26 +4769,26 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
   PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_6);
   __pyx_t_4 = 0;
   __pyx_t_6 = 0;
-  __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 55, __pyx_L1_error)
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 55, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_n_u_d) < 0) __PYX_ERR(0, 56, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 55, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_t_4, PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 56, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_out = __pyx_t_8;
   __pyx_t_8.memview = NULL;
   __pyx_t_8.data = NULL;
 
-  /* "pippi/oscs/sineosc.pyx":57
+  /* "pippi/oscs/sineosc.pyx":58
  *         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
  * 
  *         for i in range(length):             # <<<<<<<<<<<<<<
@@ -4786,27 +4800,27 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
   for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
     __pyx_v_i = __pyx_t_11;
 
-    /* "pippi/oscs/sineosc.pyx":58
+    /* "pippi/oscs/sineosc.pyx":59
  * 
  *         for i in range(length):
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)             # <<<<<<<<<<<<<<
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)
  *             sample = math.sin(2*math.pi * self.osc_phase) * amp
  */
-    if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 58, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->freq.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 59, __pyx_L1_error)}
     __pyx_v_freq = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->freq, __pyx_v_self->freq_phase, NULL);
 
-    /* "pippi/oscs/sineosc.pyx":59
+    /* "pippi/oscs/sineosc.pyx":60
  *         for i in range(length):
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)             # <<<<<<<<<<<<<<
  *             sample = math.sin(2*math.pi * self.osc_phase) * amp
  * 
  */
-    if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 59, __pyx_L1_error)}
+    if (unlikely(!__pyx_v_self->amp.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 60, __pyx_L1_error)}
     __pyx_v_amp = __pyx_f_5pippi_13interpolation__linear_point(__pyx_v_self->amp, __pyx_v_self->amp_phase, NULL);
 
-    /* "pippi/oscs/sineosc.pyx":60
+    /* "pippi/oscs/sineosc.pyx":61
  *             freq = interpolation._linear_point(self.freq, self.freq_phase)
  *             amp = interpolation._linear_point(self.amp, self.amp_phase)
  *             sample = math.sin(2*math.pi * self.osc_phase) * amp             # <<<<<<<<<<<<<<
@@ -4815,39 +4829,35 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
  */
     __pyx_v_sample = (sin(((2.0 * M_PI) * __pyx_v_self->osc_phase)) * __pyx_v_amp);
 
-    /* "pippi/oscs/sineosc.pyx":62
+    /* "pippi/oscs/sineosc.pyx":63
  *             sample = math.sin(2*math.pi * self.osc_phase) * amp
  * 
  *             self.freq_phase += freq_phase_inc             # <<<<<<<<<<<<<<
  *             self.amp_phase += amp_phase_inc
- *             self.osc_phase += freq * (1.0/self.samplerate)
+ *             self.osc_phase += freq * isamplerate
  */
     __pyx_v_self->freq_phase = (__pyx_v_self->freq_phase + __pyx_v_freq_phase_inc);
 
-    /* "pippi/oscs/sineosc.pyx":63
+    /* "pippi/oscs/sineosc.pyx":64
  * 
  *             self.freq_phase += freq_phase_inc
  *             self.amp_phase += amp_phase_inc             # <<<<<<<<<<<<<<
- *             self.osc_phase += freq * (1.0/self.samplerate)
+ *             self.osc_phase += freq * isamplerate
  * 
  */
     __pyx_v_self->amp_phase = (__pyx_v_self->amp_phase + __pyx_v_amp_phase_inc);
 
-    /* "pippi/oscs/sineosc.pyx":64
+    /* "pippi/oscs/sineosc.pyx":65
  *             self.freq_phase += freq_phase_inc
  *             self.amp_phase += amp_phase_inc
- *             self.osc_phase += freq * (1.0/self.samplerate)             # <<<<<<<<<<<<<<
+ *             self.osc_phase += freq * isamplerate             # <<<<<<<<<<<<<<
  * 
  *             while self.osc_phase >= 1:
  */
-    if (unlikely(__pyx_v_self->samplerate == 0)) {
-      PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      __PYX_ERR(0, 64, __pyx_L1_error)
-    }
-    __pyx_v_self->osc_phase = (__pyx_v_self->osc_phase + (__pyx_v_freq * (1.0 / ((double)__pyx_v_self->samplerate))));
+    __pyx_v_self->osc_phase = (__pyx_v_self->osc_phase + (__pyx_v_freq * __pyx_v_isamplerate));
 
-    /* "pippi/oscs/sineosc.pyx":66
- *             self.osc_phase += freq * (1.0/self.samplerate)
+    /* "pippi/oscs/sineosc.pyx":67
+ *             self.osc_phase += freq * isamplerate
  * 
  *             while self.osc_phase >= 1:             # <<<<<<<<<<<<<<
  *                 self.osc_phase -= 1
@@ -4857,7 +4867,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
       __pyx_t_12 = ((__pyx_v_self->osc_phase >= 1.0) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/sineosc.pyx":67
+      /* "pippi/oscs/sineosc.pyx":68
  * 
  *             while self.osc_phase >= 1:
  *                 self.osc_phase -= 1             # <<<<<<<<<<<<<<
@@ -4867,7 +4877,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
       __pyx_v_self->osc_phase = (__pyx_v_self->osc_phase - 1.0);
     }
 
-    /* "pippi/oscs/sineosc.pyx":69
+    /* "pippi/oscs/sineosc.pyx":70
  *                 self.osc_phase -= 1
  * 
  *             while self.amp_phase >= amp_boundry:             # <<<<<<<<<<<<<<
@@ -4878,7 +4888,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
       __pyx_t_12 = ((__pyx_v_self->amp_phase >= __pyx_v_amp_boundry) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/sineosc.pyx":70
+      /* "pippi/oscs/sineosc.pyx":71
  * 
  *             while self.amp_phase >= amp_boundry:
  *                 self.amp_phase -= amp_boundry             # <<<<<<<<<<<<<<
@@ -4888,7 +4898,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
       __pyx_v_self->amp_phase = (__pyx_v_self->amp_phase - __pyx_v_amp_boundry);
     }
 
-    /* "pippi/oscs/sineosc.pyx":72
+    /* "pippi/oscs/sineosc.pyx":73
  *                 self.amp_phase -= amp_boundry
  * 
  *             while self.freq_phase >= freq_boundry:             # <<<<<<<<<<<<<<
@@ -4899,7 +4909,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
       __pyx_t_12 = ((__pyx_v_self->freq_phase >= __pyx_v_freq_boundry) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/sineosc.pyx":73
+      /* "pippi/oscs/sineosc.pyx":74
  * 
  *             while self.freq_phase >= freq_boundry:
  *                 self.freq_phase -= freq_boundry             # <<<<<<<<<<<<<<
@@ -4909,7 +4919,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
       __pyx_v_self->freq_phase = (__pyx_v_self->freq_phase - __pyx_v_freq_boundry);
     }
 
-    /* "pippi/oscs/sineosc.pyx":75
+    /* "pippi/oscs/sineosc.pyx":76
  *                 self.freq_phase -= freq_boundry
  * 
  *             for channel in range(self.channels):             # <<<<<<<<<<<<<<
@@ -4921,7 +4931,7 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
     for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
       __pyx_v_channel = __pyx_t_15;
 
-      /* "pippi/oscs/sineosc.pyx":76
+      /* "pippi/oscs/sineosc.pyx":77
  * 
  *             for channel in range(self.channels):
  *                 out[i][channel] = sample             # <<<<<<<<<<<<<<
@@ -4941,37 +4951,37 @@ static PyObject *__pyx_f_5pippi_7sineosc_7SineOsc__play(struct __pyx_obj_5pippi_
       } else if (unlikely(__pyx_t_17 >= __pyx_v_out.shape[1])) __pyx_t_18 = 1;
       if (unlikely(__pyx_t_18 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_18);
-        __PYX_ERR(0, 76, __pyx_L1_error)
+        __PYX_ERR(0, 77, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_16 * __pyx_v_out.strides[0]) ) + __pyx_t_17 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
     }
   }
 
-  /* "pippi/oscs/sineosc.pyx":78
+  /* "pippi/oscs/sineosc.pyx":79
  *                 out[i][channel] = sample
  * 
  *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) < 0) __PYX_ERR(0, 78, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) < 0) __PYX_ERR(0, 78, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 78, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 79, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -19814,7 +19824,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 58, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 134, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 149, __pyx_L1_error)

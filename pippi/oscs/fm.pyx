@@ -7,6 +7,8 @@ from pippi cimport wavetables
 from pippi cimport interpolation
 
 cimport cython
+from libc cimport math
+
 cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
 cdef inline double MIN_PULSEWIDTH = 0.0001
@@ -56,6 +58,7 @@ cdef class FM:
         cdef int i = 0
         cdef double sample, freq, ratio, index, amp, mod, mfreq, cfreq
         cdef double ilength = 1.0 / length
+        cdef double isamplerate = 1.0 / self.samplerate
 
         cdef int freq_boundry = max(len(self.freq)-1, 1)
         cdef int ratio_boundry = max(len(self.ratio)-1, 1)
@@ -63,6 +66,9 @@ cdef class FM:
         cdef int amp_boundry = max(len(self.amp)-1, 1)
         cdef int cwt_boundry = max(len(self.carrier)-1, 1)
         cdef int mwt_boundry = max(len(self.modulator)-1, 1)
+
+        cwt_boundry = 1
+        mwt_boundry = 1
 
         cdef double freq_phase_inc = ilength * freq_boundry
         cdef double ratio_phase_inc = ilength * ratio_boundry
@@ -81,8 +87,8 @@ cdef class FM:
             amp = interpolation._linear_point(self.amp, self.amp_phase)
             mamp = freq * index * ratio
 
-            mod = interpolation._hermite_point(self.modulator, self.mwt_phase) * mamp
-            sample = interpolation._hermite_point(self.carrier, self.cwt_phase) * amp
+            mod = math.sin(2*math.pi * self.mwt_phase) * mamp
+            sample = math.sin(2*math.pi * self.cwt_phase) * amp
 
             cfreq = abs(freq + mod)
             mfreq = freq * ratio
@@ -91,8 +97,9 @@ cdef class FM:
             self.ratio_phase += ratio_phase_inc
             self.index_phase += index_phase_inc
             self.amp_phase += amp_phase_inc
-            self.cwt_phase += cfreq * cwt_phase_inc
-            self.mwt_phase += mfreq * mwt_phase_inc
+
+            self.cwt_phase += cfreq * isamplerate
+            self.mwt_phase += mfreq * isamplerate
 
             while self.cwt_phase >= cwt_boundry:
                 self.cwt_phase -= cwt_boundry
