@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pippi import dsp, interpolation, wavetables, fx, oscs
+from pippi import dsp, interpolation, wavetables, fx, oscs, noise
 import numpy as np
 import random
 
@@ -212,4 +212,12 @@ class TestFx(TestCase):
         snd = oscs.SineOsc(freq=[30, 10000], amp=10).play(1)
         out = clipper.process(snd)
         out.write('tests/renders/fx_zenerclipperbl.wav')
+
+    def test_svf(self):
+        snd = dsp.read('tests/sounds/guitar1s.wav')
+        svf = fx.SVF()
+        freq = [0,0.49]
+        out = svf.process(snd, freq, 0.5)
+        out = fx.norm(out, 1)
+        out.write('tests/renders/fx_svf.wav')
 

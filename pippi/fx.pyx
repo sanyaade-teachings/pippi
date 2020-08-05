@@ -8,6 +8,10 @@ cimport cython
 import numpy as np
 cimport numpy as np
 
+from libc cimport math
+
+from math import pi as PI
+
 from pippi cimport fft
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
@@ -680,3 +684,90 @@ cdef class ZenerClipperBL:
                 out[i,c] = self._process(snd.frames[i,c])                
 
         return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
+
+cdef class SVF:
+    def __cinit__(SVF self):
+        self.Az = [0, 0, 0, 0]
+        self.Bz = [0, 0]
+        self.CLPz = [0, 0]
+        self.CBPz = [0, 0]
+        self.CHPz = [0, 0]
+        self.DLPz = 0
+        self.DBPz = 0
+        self.DHPz = 0
+
+        self.X = [0, 0]
+
+        self.lpOut = 0
+        self.bpOut = 0
+        self.hpOut = 0
+
+    cdef void _setParams(SVF self, double freq, double res):
+        cdef double g = math.tan(PI * freq)
+        cdef double k = 2. - 2. * res
+
+        cdef double a1 = 1. / (1. + g * (g + k))
+        cdef double a2 = g * a1
+        cdef double a3 = g * a2
+
+        self.Az[0] = 2. * a1 - 1.
+        self.Az[1] = -2. * a2
+        self.Az[2] = 2. * a2
+        self.Az[3] = 1. - 2. * a3
+
+        self.Bz[0] = 2. * a2
+        self.Bz[1] = 2. * a3
+
+        self.CLPz[0] = a2
+        self.CLPz[1] = 1. - a3
+
+        self.CBPz[0] = a1
+        self.CBPz[1] = -a2
+
+        self.CHPz[0] = -k * a1 - a2
+        self.CHPz[1] = k * a2 - (1. - a3)
+
+        self.DLPz = a3
+        self.DBPz = a2
+        self.DHPz = 1. - k * a2 - a3
+
+    cdef double _process(SVF self, double val):
+        self.lpOut = val * self.DLPz + self.X[0] * self.CLPz[0] + self.X[1] * self.CLPz[1]
+        self.bpOut = val * self.DBPz + self.X[0] * self.CBPz[0] + self.X[1] * self.CBPz[1]
+        self.hpOut = val * self.DHPz + self.X[0] * self.CHPz[0] + self.X[1] * self.CHPz[1]
+
+        self.X[0] = val * self.Bz[0] + self.X[0] * self.Az[0] + self.X[1] * self.Az[1]
+        self.X[1] = val * self.Bz[0] + self.X[0] * self.Az[2] + self.X[1] * self.Az[3]
+
+        return self.lpOut
+
+    cpdef SoundBuffer process(SVF self, SoundBuffer snd, object freq=None, object res=None):
+        cdef int length = len(snd)
+
+        if freq is None:
+            freq = 0.1
+
+        if res is None:
+            res = 0
+
+        cdef double[:] _freq = wavetables.to_window(freq)
+        cdef double[:] _res = wavetables.to_window(res)
+
+        cdef int c = 0
+        cdef int i = 0
+        cdef double f 
+        cdef double r
+        cdef double pos = 0
+
+        cdef double[:,:] out = np.zeros((length, snd.channels), dtype='d')
+        for c in range(snd.channels):
+            for i in range(length):
+                pos = <double>i / length
+                f = _linear_pos(_freq, pos)
+                r = _linear_pos(_res, pos)
+                self._setParams(f, r)
+
+                out[i,c] = self._process(snd.frames[i,c])                
+
+        return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
+        
