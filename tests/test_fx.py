@@ -203,3 +203,13 @@ class TestFx(TestCase):
         out = fx.brf(snd, freq)
         out.write('tests/renders/fx_brf.wav')
 
+    def test_zenerclipper(self):
+        snd = oscs.SineOsc(freq=[30, 10000], amp=10).play(1)
+        out = snd.clip()
+        out.write('tests/renders/fx_zenerclipperbl-raw.wav')
+
+        clipper = fx.ZenerClipperBL()
+        snd = oscs.SineOsc(freq=[30, 10000], amp=10).play(1)
+        out = clipper.process(snd)
+        out.write('tests/renders/fx_zenerclipperbl.wav')
+

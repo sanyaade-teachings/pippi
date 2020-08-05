@@ -1070,55 +1070,52 @@ static PyObject *__pyx_pf_5pippi_2fm_2FM_2play(struct __pyx_obj_5pippi_2fm_FM *_
 </pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">114</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">cwt_phase</span> <span class="o">-=</span> <span class="n">cwt_boundry</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_self-&gt;cwt_phase = (__pyx_v_self-&gt;cwt_phase - __pyx_v_cwt_boundry);
 </pre><pre class="cython line score-0">&#xA0;<span class="">115</span>: </pre>
-<pre class="cython line score-0">&#xA0;<span class="">116</span>:             <span class="c">#while self.cwt_phase &gt;= cwt_boundry:</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">117</span>:             <span class="c">#    self.cwt_phase -= cwt_boundry</span></pre>
-<pre class="cython line score-0">&#xA0;<span class="">118</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">119</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">mwt_phase</span> <span class="o">&gt;=</span> <span class="n">mwt_boundry</span><span class="p">:</span></pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">116</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">mwt_phase</span> <span class="o">&gt;=</span> <span class="n">mwt_boundry</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    while (1) {
       __pyx_t_12 = ((__pyx_v_self-&gt;mwt_phase &gt;= __pyx_v_mwt_boundry) != 0);
       if (!__pyx_t_12) break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">120</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">mwt_phase</span> <span class="o">-=</span> <span class="n">mwt_boundry</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">117</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">mwt_phase</span> <span class="o">-=</span> <span class="n">mwt_boundry</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_self-&gt;mwt_phase = (__pyx_v_self-&gt;mwt_phase - __pyx_v_mwt_boundry);
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">121</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">122</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">amp_phase</span> <span class="o">&gt;=</span> <span class="n">amp_boundry</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">118</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">119</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">amp_phase</span> <span class="o">&gt;=</span> <span class="n">amp_boundry</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    while (1) {
       __pyx_t_12 = ((__pyx_v_self-&gt;amp_phase &gt;= __pyx_v_amp_boundry) != 0);
       if (!__pyx_t_12) break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">123</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">amp_phase</span> <span class="o">-=</span> <span class="n">amp_boundry</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">120</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">amp_phase</span> <span class="o">-=</span> <span class="n">amp_boundry</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_self-&gt;amp_phase = (__pyx_v_self-&gt;amp_phase - __pyx_v_amp_boundry);
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">124</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">125</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_phase</span> <span class="o">&gt;=</span> <span class="n">freq_boundry</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">121</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">122</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq_phase</span> <span class="o">&gt;=</span> <span class="n">freq_boundry</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    while (1) {
       __pyx_t_12 = ((__pyx_v_self-&gt;freq_phase &gt;= __pyx_v_freq_boundry) != 0);
       if (!__pyx_t_12) break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">126</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">freq_phase</span> <span class="o">-=</span> <span class="n">freq_boundry</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">123</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">freq_phase</span> <span class="o">-=</span> <span class="n">freq_boundry</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_self-&gt;freq_phase = (__pyx_v_self-&gt;freq_phase - __pyx_v_freq_boundry);
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">127</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">128</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio_phase</span> <span class="o">&gt;=</span> <span class="n">ratio_boundry</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">124</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">125</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio_phase</span> <span class="o">&gt;=</span> <span class="n">ratio_boundry</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    while (1) {
       __pyx_t_12 = ((__pyx_v_self-&gt;ratio_phase &gt;= __pyx_v_ratio_boundry) != 0);
       if (!__pyx_t_12) break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">129</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">ratio_phase</span> <span class="o">-=</span> <span class="n">ratio_boundry</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">126</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">ratio_phase</span> <span class="o">-=</span> <span class="n">ratio_boundry</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_self-&gt;ratio_phase = (__pyx_v_self-&gt;ratio_phase - __pyx_v_ratio_boundry);
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">130</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">131</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_phase</span> <span class="o">&gt;=</span> <span class="n">index_boundry</span><span class="p">:</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">127</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">128</span>:             <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_phase</span> <span class="o">&gt;=</span> <span class="n">index_boundry</span><span class="p">:</span></pre>
 <pre class='cython code score-0 '>    while (1) {
       __pyx_t_12 = ((__pyx_v_self-&gt;index_phase &gt;= __pyx_v_index_boundry) != 0);
       if (!__pyx_t_12) break;
-</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">132</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">index_phase</span> <span class="o">-=</span> <span class="n">index_boundry</span></pre>
+</pre><pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">129</span>:                 <span class="bp">self</span><span class="o">.</span><span class="n">index_phase</span> <span class="o">-=</span> <span class="n">index_boundry</span></pre>
 <pre class='cython code score-0 '>      __pyx_v_self-&gt;index_phase = (__pyx_v_self-&gt;index_phase - __pyx_v_index_boundry);
     }
-</pre><pre class="cython line score-0">&#xA0;<span class="">133</span>: </pre>
-<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">134</span>:             <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">):</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">130</span>: </pre>
+<pre class="cython line score-0" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">131</span>:             <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">):</span></pre>
 <pre class='cython code score-0 '>    __pyx_t_13 = __pyx_v_self-&gt;channels;
     __pyx_t_14 = __pyx_t_13;
     for (__pyx_t_15 = 0; __pyx_t_15 &lt; __pyx_t_14; __pyx_t_15+=1) {
       __pyx_v_channel = __pyx_t_15;
-</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">135</span>:                 <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample</span></pre>
+</pre><pre class="cython line score-2" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">132</span>:                 <span class="n">out</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample</span></pre>
 <pre class='cython code score-2 '>      __pyx_t_16 = __pyx_v_i;
       __pyx_t_17 = __pyx_v_channel;
       __pyx_t_18 = -1;
@@ -1132,37 +1129,37 @@ static PyObject *__pyx_pf_5pippi_2fm_2FM_2play(struct __pyx_obj_5pippi_2fm_FM *_
       } else if (unlikely(__pyx_t_17 &gt;= __pyx_v_out.shape[1])) __pyx_t_18 = 1;
       if (unlikely(__pyx_t_18 != -1)) {
         <span class='pyx_c_api'>__Pyx_RaiseBufferIndexError</span>(__pyx_t_18);
-        <span class='error_goto'>__PYX_ERR(0, 135, __pyx_L1_error)</span>
+        <span class='error_goto'>__PYX_ERR(0, 132, __pyx_L1_error)</span>
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_16 * __pyx_v_out.strides[0]) ) + __pyx_t_17 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
     }
   }
-</pre><pre class="cython line score-0">&#xA0;<span class="">136</span>: </pre>
-<pre class="cython line score-29" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">137</span>:         <span class="k">return</span> <span class="n">SoundBuffer</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span> <span class="n">samplerate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">samplerate</span><span class="p">)</span></pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">133</span>: </pre>
+<pre class="cython line score-29" onclick="(function(s){s.display=s.display==='block'?'none':'block'})(this.nextElementSibling.style)">+<span class="">134</span>:         <span class="k">return</span> <span class="n">SoundBuffer</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span> <span class="n">samplerate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">samplerate</span><span class="p">)</span></pre>
 <pre class='cython code score-29 '>  <span class='pyx_macro_api'>__Pyx_XDECREF</span>(__pyx_r);
-  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);;<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 137, __pyx_L1_error)</span>
+  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);;<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
-  __pyx_t_7 = <span class='py_c_api'>PyTuple_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 137, __pyx_L1_error)</span>
+  __pyx_t_7 = <span class='py_c_api'>PyTuple_New</span>(1);<span class='error_goto'> if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_7);
   <span class='refnanny'>__Pyx_GIVEREF</span>(__pyx_t_4);
   <span class='py_macro_api'>PyTuple_SET_ITEM</span>(__pyx_t_7, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyDict_NewPresized</span>(2);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 137, __pyx_L1_error)</span>
+  __pyx_t_4 = <span class='pyx_c_api'>__Pyx_PyDict_NewPresized</span>(2);<span class='error_goto'> if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_4);
-  __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(__pyx_v_self-&gt;channels);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 137, __pyx_L1_error)</span>
+  __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(__pyx_v_self-&gt;channels);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
-  if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 137, __pyx_L1_error)</span>
+  if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(__pyx_v_self-&gt;samplerate);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 137, __pyx_L1_error)</span>
+  __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyInt_From_int</span>(__pyx_v_self-&gt;samplerate);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
-  if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 137, __pyx_L1_error)</span>
+  if (<span class='py_c_api'>PyDict_SetItem</span>(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) &lt; 0) <span class='error_goto'>__PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyObject_Call</span>(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_7, __pyx_t_4);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 137, __pyx_L1_error)</span>
+  __pyx_t_6 = <span class='pyx_c_api'>__Pyx_PyObject_Call</span>(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_7, __pyx_t_4);<span class='error_goto'> if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 134, __pyx_L1_error)</span>
   <span class='refnanny'>__Pyx_GOTREF</span>(__pyx_t_6);
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_7); __pyx_t_7 = 0;
   <span class='pyx_macro_api'>__Pyx_DECREF</span>(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
-</pre><pre class="cython line score-0">&#xA0;<span class="">138</span>: </pre>
+</pre><pre class="cython line score-0">&#xA0;<span class="">135</span>: </pre>
 </div></body></html>

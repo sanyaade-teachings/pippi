@@ -628,4 +628,55 @@ cpdef SoundBuffer go(SoundBuffer snd,
     if wet < 1:
         out.dub(snd * abs(wet-1), 0)
 
+
     return out
+
+
+cdef class ZenerClipperBL:
+    cdef double _clip(ZenerClipperBL self, double val):
+        cdef double out
+
+        if val < -1:
+            out = -4. / 5.
+        else:
+            out = val - val**5 / 5.
+        
+        if val < 1:
+            return out
+        else:
+            return 4. / 5.
+
+    cdef double _integratedClip(ZenerClipperBL self, double val):
+        cdef double out
+
+        if val < -1:
+            out = -4 / 5. * val - (1/3.0)
+        else:
+            out = (val * val) / 2.0 - val**6 / 30.0
+
+        if val < 1:
+            return out
+        else:
+            return 4./5.0 * val - 1./3.0
+            
+    cdef double _process(ZenerClipperBL self, double val):
+        cdef double out
+
+        if abs(val - self.lastIn) < .000001:
+            out = self._clip((val + self.lastIn)/2.0)
+        else:
+            out = (self._integratedClip(val) - self._integratedClip(self.lastIn)) / (val - self.lastIn)
+
+        self.lastIn = val
+        return out
+
+    cpdef SoundBuffer process(ZenerClipperBL self, SoundBuffer snd):
+        cdef int length = len(snd)
+        cdef int c = 0
+        cdef int i = 0
+        cdef double[:,:] out = np.zeros((length, snd.channels), dtype='d')
+        for c in range(snd.channels):
+            for i in range(length):
+                out[i,c] = self._process(snd.frames[i,c])                
+
+        return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)

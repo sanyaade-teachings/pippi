@@ -5431,7 +5431,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
  *             elif self.cwt_phase >= cwt_boundry:
  *                 self.cwt_phase -= cwt_boundry             # <<<<<<<<<<<<<<
  * 
- *             #while self.cwt_phase >= cwt_boundry:
+ *             while self.mwt_phase >= mwt_boundry:
  */
       __pyx_v_self->cwt_phase = (__pyx_v_self->cwt_phase - __pyx_v_cwt_boundry);
 
@@ -5445,8 +5445,8 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
     }
     __pyx_L5:;
 
-    /* "pippi/oscs/fm.pyx":119
- *             #    self.cwt_phase -= cwt_boundry
+    /* "pippi/oscs/fm.pyx":116
+ *                 self.cwt_phase -= cwt_boundry
  * 
  *             while self.mwt_phase >= mwt_boundry:             # <<<<<<<<<<<<<<
  *                 self.mwt_phase -= mwt_boundry
@@ -5456,7 +5456,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_t_12 = ((__pyx_v_self->mwt_phase >= __pyx_v_mwt_boundry) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/fm.pyx":120
+      /* "pippi/oscs/fm.pyx":117
  * 
  *             while self.mwt_phase >= mwt_boundry:
  *                 self.mwt_phase -= mwt_boundry             # <<<<<<<<<<<<<<
@@ -5466,7 +5466,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_v_self->mwt_phase = (__pyx_v_self->mwt_phase - __pyx_v_mwt_boundry);
     }
 
-    /* "pippi/oscs/fm.pyx":122
+    /* "pippi/oscs/fm.pyx":119
  *                 self.mwt_phase -= mwt_boundry
  * 
  *             while self.amp_phase >= amp_boundry:             # <<<<<<<<<<<<<<
@@ -5477,7 +5477,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_t_12 = ((__pyx_v_self->amp_phase >= __pyx_v_amp_boundry) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/fm.pyx":123
+      /* "pippi/oscs/fm.pyx":120
  * 
  *             while self.amp_phase >= amp_boundry:
  *                 self.amp_phase -= amp_boundry             # <<<<<<<<<<<<<<
@@ -5487,7 +5487,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_v_self->amp_phase = (__pyx_v_self->amp_phase - __pyx_v_amp_boundry);
     }
 
-    /* "pippi/oscs/fm.pyx":125
+    /* "pippi/oscs/fm.pyx":122
  *                 self.amp_phase -= amp_boundry
  * 
  *             while self.freq_phase >= freq_boundry:             # <<<<<<<<<<<<<<
@@ -5498,7 +5498,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_t_12 = ((__pyx_v_self->freq_phase >= __pyx_v_freq_boundry) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/fm.pyx":126
+      /* "pippi/oscs/fm.pyx":123
  * 
  *             while self.freq_phase >= freq_boundry:
  *                 self.freq_phase -= freq_boundry             # <<<<<<<<<<<<<<
@@ -5508,7 +5508,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_v_self->freq_phase = (__pyx_v_self->freq_phase - __pyx_v_freq_boundry);
     }
 
-    /* "pippi/oscs/fm.pyx":128
+    /* "pippi/oscs/fm.pyx":125
  *                 self.freq_phase -= freq_boundry
  * 
  *             while self.ratio_phase >= ratio_boundry:             # <<<<<<<<<<<<<<
@@ -5519,7 +5519,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_t_12 = ((__pyx_v_self->ratio_phase >= __pyx_v_ratio_boundry) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/fm.pyx":129
+      /* "pippi/oscs/fm.pyx":126
  * 
  *             while self.ratio_phase >= ratio_boundry:
  *                 self.ratio_phase -= ratio_boundry             # <<<<<<<<<<<<<<
@@ -5529,7 +5529,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_v_self->ratio_phase = (__pyx_v_self->ratio_phase - __pyx_v_ratio_boundry);
     }
 
-    /* "pippi/oscs/fm.pyx":131
+    /* "pippi/oscs/fm.pyx":128
  *                 self.ratio_phase -= ratio_boundry
  * 
  *             while self.index_phase >= index_boundry:             # <<<<<<<<<<<<<<
@@ -5540,7 +5540,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_t_12 = ((__pyx_v_self->index_phase >= __pyx_v_index_boundry) != 0);
       if (!__pyx_t_12) break;
 
-      /* "pippi/oscs/fm.pyx":132
+      /* "pippi/oscs/fm.pyx":129
  * 
  *             while self.index_phase >= index_boundry:
  *                 self.index_phase -= index_boundry             # <<<<<<<<<<<<<<
@@ -5550,7 +5550,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       __pyx_v_self->index_phase = (__pyx_v_self->index_phase - __pyx_v_index_boundry);
     }
 
-    /* "pippi/oscs/fm.pyx":134
+    /* "pippi/oscs/fm.pyx":131
  *                 self.index_phase -= index_boundry
  * 
  *             for channel in range(self.channels):             # <<<<<<<<<<<<<<
@@ -5562,7 +5562,7 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
     for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
       __pyx_v_channel = __pyx_t_15;
 
-      /* "pippi/oscs/fm.pyx":135
+      /* "pippi/oscs/fm.pyx":132
  * 
  *             for channel in range(self.channels):
  *                 out[i][channel] = sample             # <<<<<<<<<<<<<<
@@ -5582,37 +5582,37 @@ static PyObject *__pyx_f_5pippi_2fm_2FM__play(struct __pyx_obj_5pippi_2fm_FM *__
       } else if (unlikely(__pyx_t_17 >= __pyx_v_out.shape[1])) __pyx_t_18 = 1;
       if (unlikely(__pyx_t_18 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_18);
-        __PYX_ERR(0, 135, __pyx_L1_error)
+        __PYX_ERR(0, 132, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_16 * __pyx_v_out.strides[0]) ) + __pyx_t_17 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
     }
   }
 
-  /* "pippi/oscs/fm.pyx":137
+  /* "pippi/oscs/fm.pyx":134
  *                 out[i][channel] = sample
  * 
  *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_4 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) < 0) __PYX_ERR(0, 137, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_channels, __pyx_t_6) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) < 0) __PYX_ERR(0, 137, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_samplerate, __pyx_t_6) < 0) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 137, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 134, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
