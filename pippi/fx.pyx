@@ -736,8 +736,11 @@ cdef class SVF:
         self.bpOut = val * self.DBPz + self.X[0] * self.CBPz[0] + self.X[1] * self.CBPz[1]
         self.hpOut = val * self.DHPz + self.X[0] * self.CHPz[0] + self.X[1] * self.CHPz[1]
 
-        self.X[0] = val * self.Bz[0] + self.X[0] * self.Az[0] + self.X[1] * self.Az[1]
-        self.X[1] = val * self.Bz[0] + self.X[0] * self.Az[2] + self.X[1] * self.Az[3]
+        cdef double X0 = val * self.Bz[0] + self.X[0] * self.Az[0] + self.X[1] * self.Az[1]
+        cdef double X1 = val * self.Bz[1] + self.X[0] * self.Az[2] + self.X[1] * self.Az[3]
+
+        self.X[0] = X0
+        self.X[1] = X1
 
         return self.lpOut
 
@@ -755,7 +758,7 @@ cdef class SVF:
 
         cdef int c = 0
         cdef int i = 0
-        cdef double f 
+        cdef double f
         cdef double r
         cdef double pos = 0
 
@@ -767,7 +770,7 @@ cdef class SVF:
                 r = _linear_pos(_res, pos)
                 self._setParams(f, r)
 
-                out[i,c] = self._process(snd.frames[i,c])                
+                out[i,c] = self._process(snd.frames[i,c])
 
         return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
         

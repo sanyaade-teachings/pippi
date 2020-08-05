@@ -217,7 +217,7 @@ class TestFx(TestCase):
         snd = dsp.read('tests/sounds/guitar1s.wav')
         svf = fx.SVF()
         freq = [0,0.49]
-        out = svf.process(snd, freq, 0.5)
+        out = svf.process(snd, freq, 0.99)
         out = fx.norm(out, 1)
         out.write('tests/renders/fx_svf.wav')
 
