@@ -174,3 +174,5 @@ If you need to build sources from a clean slate (sometimes updates to `pxd` file
 [James McCartney](https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html) for his implementation of hermite interpolation used in the `Wavetable` module and elsewhere.
 
 [guest](http://www.muffwiggler.com/forum/viewtopic.php?p=1586526#1586526) for their clever wavefolding implementation which the `Fold` osc is based on.
+
+[Starling Labs](https://starling.space/) for their zener diode softclip simulation and state variable filter implementation available in the `fx` module.
