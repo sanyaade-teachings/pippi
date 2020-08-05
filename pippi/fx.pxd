@@ -9,12 +9,9 @@ cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
 cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
 cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
 
-cdef class ZenerClipperBL:
-    cdef double lastIn
-    cdef double _clip(ZenerClipperBL self, double val)
-    cdef double _integratedClip(ZenerClipperBL self, double val)
-    cdef double _process(ZenerClipperBL self, double val)
-    cpdef SoundBuffer process(ZenerClipperBL self, SoundBuffer snd)
+cdef double _blsc_integrated_clip(double val)
+cdef tuple _blsc_process(double val, double lastval)
+cpdef SoundBuffer blsoftclip(SoundBuffer snd)
 
 cdef class SVF:
     cdef double[4] Az 

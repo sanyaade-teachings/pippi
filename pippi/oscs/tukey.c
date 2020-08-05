@@ -1666,8 +1666,8 @@ struct __pyx_opt_args_5pippi_13interpolation_linear_point;
 
 /* "interpolation.pxd":4
  * 
- * cdef double _hermite_pos(double[:] data, double pos)
- * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*)             # <<<<<<<<<<<<<<
+ * cdef double _hermite_pos(double[:] data, double pos) nogil
+ * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
  * 
  * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
  */
@@ -1677,7 +1677,7 @@ struct __pyx_opt_args_5pippi_13interpolation__hermite_point {
 };
 
 /* "interpolation.pxd":6
- * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*)
+ * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*) nogil
  * 
  * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)

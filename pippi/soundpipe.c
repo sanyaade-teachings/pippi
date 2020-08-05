@@ -1132,11 +1132,24 @@ struct __pyx_array_obj;
 struct __pyx_MemviewEnum_obj;
 struct __pyx_memoryview_obj;
 struct __pyx_memoryviewslice_obj;
+struct __pyx_opt_args_5pippi_13interpolation__hermite_point;
 struct __pyx_opt_args_5pippi_13interpolation__linear_point;
 struct __pyx_opt_args_5pippi_13interpolation_linear_point;
 
-/* "interpolation.pxd":3
- * #cython: language_level=3
+/* "interpolation.pxd":4
+ * 
+ * cdef double _hermite_pos(double[:] data, double pos) nogil
+ * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
+ * 
+ * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
+ */
+struct __pyx_opt_args_5pippi_13interpolation__hermite_point {
+  int __pyx_n;
+  double pulsewidth;
+};
+
+/* "interpolation.pxd":6
+ * cdef double _hermite_point(double[:] data, double phase, double pulsewidth=*) nogil
  * 
  * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil             # <<<<<<<<<<<<<<
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)
@@ -1147,7 +1160,7 @@ struct __pyx_opt_args_5pippi_13interpolation__linear_point {
   double pulsewidth;
 };
 
-/* "interpolation.pxd":4
+/* "interpolation.pxd":7
  * 
  * cdef double _linear_point(double[:] data, double phase, double pulsewidth=*) nogil
  * cpdef double linear_point(double[:] data, double phase, double pulsewidth=*)             # <<<<<<<<<<<<<<

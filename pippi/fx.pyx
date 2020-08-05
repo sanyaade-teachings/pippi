@@ -106,6 +106,55 @@ cpdef SoundBuffer softclip(SoundBuffer snd):
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
     return SoundBuffer(_softclip(snd.frames, out))
 
+
+cdef double _blsc_integrated_clip(double val):
+    cdef double out
+
+    if val < -1:
+        out = -4 / 5. * val - (1/3.0)
+    else:
+        out = (val * val) / 2.0 - val**6 / 30.0
+
+    if val < 1:
+        return out
+    else:
+        return 4./5.0 * val - 1./3.0
+        
+cdef tuple _blsc_process(double val, double lastval):
+    cdef double out
+    cdef double _val = val # preserve original val to pass back as lastval
+
+    if abs(val - lastval) < .000001:
+        val = (val + lastval)/2.0
+
+        if val < -1:
+            out = -4. / 5.
+        else:
+            out = val - val**5 / 5.
+        
+        if val >= 1:
+            out = 4. / 5.
+
+    else:
+        out = (_blsc_integrated_clip(val) - _blsc_integrated_clip(lastval)) / (val - lastval)
+
+    return out, _val
+
+cpdef SoundBuffer blsoftclip(SoundBuffer snd):
+    """ Zener diode clipping simulation implemented by Will Mitchell of Starling Labs
+    """
+    cdef int length = len(snd)
+    cdef int c = 0
+    cdef int i = 0
+    cdef double lastval = 0
+    cdef double[:,:] out = np.zeros((length, snd.channels), dtype='d')
+    for c in range(snd.channels):
+        for i in range(length):
+            out[i,c], lastval = _blsc_process(snd.frames[i,c], lastval)                
+
+    return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
+
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
@@ -635,55 +684,6 @@ cpdef SoundBuffer go(SoundBuffer snd,
 
     return out
 
-
-cdef class ZenerClipperBL:
-    cdef double _clip(ZenerClipperBL self, double val):
-        cdef double out
-
-        if val < -1:
-            out = -4. / 5.
-        else:
-            out = val - val**5 / 5.
-        
-        if val < 1:
-            return out
-        else:
-            return 4. / 5.
-
-    cdef double _integratedClip(ZenerClipperBL self, double val):
-        cdef double out
-
-        if val < -1:
-            out = -4 / 5. * val - (1/3.0)
-        else:
-            out = (val * val) / 2.0 - val**6 / 30.0
-
-        if val < 1:
-            return out
-        else:
-            return 4./5.0 * val - 1./3.0
-            
-    cdef double _process(ZenerClipperBL self, double val):
-        cdef double out
-
-        if abs(val - self.lastIn) < .000001:
-            out = self._clip((val + self.lastIn)/2.0)
-        else:
-            out = (self._integratedClip(val) - self._integratedClip(self.lastIn)) / (val - self.lastIn)
-
-        self.lastIn = val
-        return out
-
-    cpdef SoundBuffer process(ZenerClipperBL self, SoundBuffer snd):
-        cdef int length = len(snd)
-        cdef int c = 0
-        cdef int i = 0
-        cdef double[:,:] out = np.zeros((length, snd.channels), dtype='d')
-        for c in range(snd.channels):
-            for i in range(length):
-                out[i,c] = self._process(snd.frames[i,c])                
-
-        return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
 
 cdef class SVF:
     def __cinit__(SVF self):

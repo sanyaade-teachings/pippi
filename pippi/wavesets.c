@@ -1367,7 +1367,6 @@ static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(do
 /*--- Type declarations ---*/
 struct __pyx_obj_5pippi_10wavetables_Wavetable;
 struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer;
-struct __pyx_obj_5pippi_2fx_ZenerClipperBL;
 struct __pyx_obj_5pippi_2fx_SVF;
 struct __pyx_obj_5pippi_8wavesets_Waveset;
 struct __pyx_array_obj;
@@ -2036,14 +2035,14 @@ struct __pyx_opt_args_5pippi_2fx_envelope_follower {
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
  * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)             # <<<<<<<<<<<<<<
  * 
- * cdef class ZenerClipperBL:
+ * cdef double _blsc_integrated_clip(double val)
  */
 struct __pyx_opt_args_5pippi_2fx_widen {
   int __pyx_n;
   PyObject *width;
 };
 
-/* "pippi/fx.pxd":37
+/* "pippi/fx.pxd":34
  *     cdef void _setParams(SVF self, double freq, double res)
  *     cdef double _process(SVF self, double val)
  *     cpdef SoundBuffer process(SVF self, SoundBuffer snd, object freq=*, object res=*)             # <<<<<<<<<<<<<<
@@ -2383,22 +2382,8 @@ struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer {
 };
 
 
-/* "pippi/fx.pxd":12
- * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
- * 
- * cdef class ZenerClipperBL:             # <<<<<<<<<<<<<<
- *     cdef double lastIn
- *     cdef double _clip(ZenerClipperBL self, double val)
- */
-struct __pyx_obj_5pippi_2fx_ZenerClipperBL {
-  PyObject_HEAD
-  struct __pyx_vtabstruct_5pippi_2fx_ZenerClipperBL *__pyx_vtab;
-  double lastIn;
-};
-
-
-/* "pippi/fx.pxd":19
- *     cpdef SoundBuffer process(ZenerClipperBL self, SoundBuffer snd)
+/* "pippi/fx.pxd":16
+ * cpdef SoundBuffer blsoftclip(SoundBuffer snd)
  * 
  * cdef class SVF:             # <<<<<<<<<<<<<<
  *     cdef double[4] Az
@@ -2586,25 +2571,8 @@ struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
 static struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer;
 
 
-/* "pippi/fx.pxd":12
- * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
- * 
- * cdef class ZenerClipperBL:             # <<<<<<<<<<<<<<
- *     cdef double lastIn
- *     cdef double _clip(ZenerClipperBL self, double val)
- */
-
-struct __pyx_vtabstruct_5pippi_2fx_ZenerClipperBL {
-  double (*_clip)(struct __pyx_obj_5pippi_2fx_ZenerClipperBL *, double);
-  double (*_integratedClip)(struct __pyx_obj_5pippi_2fx_ZenerClipperBL *, double);
-  double (*_process)(struct __pyx_obj_5pippi_2fx_ZenerClipperBL *, double);
-  struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*process)(struct __pyx_obj_5pippi_2fx_ZenerClipperBL *, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch);
-};
-static struct __pyx_vtabstruct_5pippi_2fx_ZenerClipperBL *__pyx_vtabptr_5pippi_2fx_ZenerClipperBL;
-
-
-/* "pippi/fx.pxd":19
- *     cpdef SoundBuffer process(ZenerClipperBL self, SoundBuffer snd)
+/* "pippi/fx.pxd":16
+ * cpdef SoundBuffer blsoftclip(SoundBuffer snd)
  * 
  * cdef class SVF:             # <<<<<<<<<<<<<<
  *     cdef double[4] Az
@@ -3609,7 +3577,6 @@ typedef struct {
   #endif
   PyTypeObject *__pyx_ptype_5pippi_10wavetables_Wavetable;
   PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer;
-  PyTypeObject *__pyx_ptype_5pippi_2fx_ZenerClipperBL;
   PyTypeObject *__pyx_ptype_5pippi_2fx_SVF;
   PyTypeObject *__pyx_ptype_7cpython_4type_type;
   PyTypeObject *__pyx_ptype_5numpy_dtype;
@@ -3944,7 +3911,6 @@ static int __pyx_m_clear(PyObject *m) {
   #endif
   Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_10wavetables_Wavetable);
   Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_11soundbuffer_SoundBuffer);
-  Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_2fx_ZenerClipperBL);
   Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_2fx_SVF);
   Py_CLEAR(clear_module_state->__pyx_ptype_7cpython_4type_type);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_dtype);
@@ -4266,7 +4232,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   #endif
   Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_10wavetables_Wavetable);
   Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_11soundbuffer_SoundBuffer);
-  Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_2fx_ZenerClipperBL);
   Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_2fx_SVF);
   Py_VISIT(traverse_module_state->__pyx_ptype_7cpython_4type_type);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_dtype);
@@ -4588,7 +4553,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #endif
 #define __pyx_ptype_5pippi_10wavetables_Wavetable __pyx_mstate_global->__pyx_ptype_5pippi_10wavetables_Wavetable
 #define __pyx_ptype_5pippi_11soundbuffer_SoundBuffer __pyx_mstate_global->__pyx_ptype_5pippi_11soundbuffer_SoundBuffer
-#define __pyx_ptype_5pippi_2fx_ZenerClipperBL __pyx_mstate_global->__pyx_ptype_5pippi_2fx_ZenerClipperBL
 #define __pyx_ptype_5pippi_2fx_SVF __pyx_mstate_global->__pyx_ptype_5pippi_2fx_SVF
 #define __pyx_ptype_7cpython_4type_type __pyx_mstate_global->__pyx_ptype_7cpython_4type_type
 #define __pyx_ptype_5numpy_dtype __pyx_mstate_global->__pyx_ptype_5numpy_dtype
@@ -5029,7 +4993,6 @@ static double *__pyx_vp_5pippi_8defaults_MIN_FLOAT = 0;
 
 /* Module declarations from "pippi.fx" */
 #if !CYTHON_COMPILING_IN_LIMITED_API
-static PyTypeObject *__pyx_ptype_5pippi_2fx_ZenerClipperBL = 0;
 static PyTypeObject *__pyx_ptype_5pippi_2fx_SVF = 0;
 #endif
 static __Pyx_memviewslice (*__pyx_f_5pippi_2fx__norm)(__Pyx_memviewslice, double); /*proto*/
@@ -30465,14 +30428,11 @@ static int __Pyx_modinit_type_import_code(void) {
    if (!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer) __PYX_ERR(5, 10, __pyx_L1_error)
   __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(5, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.fx"); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 12, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.fx"); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_5pippi_2fx_ZenerClipperBL = __Pyx_ImportType(__pyx_t_1, "pippi.fx", "ZenerClipperBL", sizeof(struct __pyx_obj_5pippi_2fx_ZenerClipperBL), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_2fx_ZenerClipperBL) __PYX_ERR(6, 12, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_2fx_ZenerClipperBL = (struct __pyx_vtabstruct_5pippi_2fx_ZenerClipperBL*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_ZenerClipperBL); if (unlikely(!__pyx_vtabptr_5pippi_2fx_ZenerClipperBL)) __PYX_ERR(6, 12, __pyx_L1_error)
   __pyx_ptype_5pippi_2fx_SVF = __Pyx_ImportType(__pyx_t_1, "pippi.fx", "SVF", sizeof(struct __pyx_obj_5pippi_2fx_SVF), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_2fx_SVF) __PYX_ERR(6, 19, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_2fx_SVF = (struct __pyx_vtabstruct_5pippi_2fx_SVF*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_SVF); if (unlikely(!__pyx_vtabptr_5pippi_2fx_SVF)) __PYX_ERR(6, 19, __pyx_L1_error)
+   if (!__pyx_ptype_5pippi_2fx_SVF) __PYX_ERR(6, 16, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_2fx_SVF = (struct __pyx_vtabstruct_5pippi_2fx_SVF*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_SVF); if (unlikely(!__pyx_vtabptr_5pippi_2fx_SVF)) __PYX_ERR(6, 16, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
