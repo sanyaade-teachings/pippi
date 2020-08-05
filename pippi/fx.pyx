@@ -83,31 +83,7 @@ cpdef SoundBuffer distort(SoundBuffer snd):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cdef double[:,:] _softclip(double[:,:] snd, double[:,:] out):
-    """ Soft clip ported from supercollider """
-    cdef int i=0, c=0
-    cdef unsigned int framelength = len(snd)
-    cdef int channels = snd.shape[1]
-    cdef double mags=0, s=0
-
-    for i in range(framelength):
-        for c in range(channels):
-            mags = abs(snd[i,c])
-            s = snd[i,c]
-            if mags <= 0.5:
-                out[i,c] = s
-            else:
-                out[i,c] = (mags - 0.25) / s
-
-    return out
-
-cpdef SoundBuffer softclip(SoundBuffer snd):
-    """ Soft clip ported from supercollider """
-    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
-    return SoundBuffer(_softclip(snd.frames, out))
-
-
-cdef double _blsc_integrated_clip(double val):
+cdef double _blsc_integrated_clip(double val) nogil:
     cdef double out
 
     if val < -1:
@@ -119,40 +95,44 @@ cdef double _blsc_integrated_clip(double val):
         return out
     else:
         return 4./5.0 * val - 1./3.0
-        
-cdef tuple _blsc_process(double val, double lastval):
-    cdef double out
-    cdef double _val = val # preserve original val to pass back as lastval
 
-    if abs(val - lastval) < .000001:
-        val = (val + lastval)/2.0
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil:
+    cdef double val=0, lastval=0, sample=0
+    cdef int c=0, i=0
+    cdef int channels = snd.shape[1]
+    cdef int length = len(snd)
 
-        if val < -1:
-            out = -4. / 5.
-        else:
-            out = val - val**5 / 5.
-        
-        if val >= 1:
-            out = 4. / 5.
+    for c in range(channels):
+        lastval = 0
+        for i in range(length):
+            val = snd[i,c]
+            if abs(val - lastval) < .000001:
+                sample = (val + lastval)/2.0
 
-    else:
-        out = (_blsc_integrated_clip(val) - _blsc_integrated_clip(lastval)) / (val - lastval)
+                if val < -1:
+                    sample = -4. / 5.
+                else:
+                    sample = sample - sample**5 / 5.
+                
+                if sample >= 1:
+                    sample = 4. / 5.
 
-    return out, _val
+            else:
+                sample = (_blsc_integrated_clip(val) - _blsc_integrated_clip(lastval)) / (val - lastval)
 
-cpdef SoundBuffer blsoftclip(SoundBuffer snd):
+            out[i,c] = sample
+            lastval = val
+
+    return out
+
+cpdef SoundBuffer softclip(SoundBuffer snd):
     """ Zener diode clipping simulation implemented by Will Mitchell of Starling Labs
     """
-    cdef int length = len(snd)
-    cdef int c = 0
-    cdef int i = 0
-    cdef double lastval = 0
-    cdef double[:,:] out = np.zeros((length, snd.channels), dtype='d')
-    for c in range(snd.channels):
-        for i in range(length):
-            out[i,c], lastval = _blsc_process(snd.frames[i,c], lastval)                
-
-    return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
+    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
+    return SoundBuffer(_softclip(out, snd.frames), channels=snd.channels, samplerate=snd.samplerate)
 
 
 @cython.boundscheck(False)

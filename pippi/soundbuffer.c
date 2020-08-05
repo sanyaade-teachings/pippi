@@ -2197,14 +2197,14 @@ struct __pyx_opt_args_5pippi_2fx_envelope_follower {
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
  * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)             # <<<<<<<<<<<<<<
  * 
- * cdef double _blsc_integrated_clip(double val)
+ * cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil
  */
 struct __pyx_opt_args_5pippi_2fx_widen {
   int __pyx_n;
   PyObject *width;
 };
 
-/* "fx.pxd":34
+/* "fx.pxd":33
  *     cdef void _setParams(SVF self, double freq, double res)
  *     cdef double _process(SVF self, double val)
  *     cpdef SoundBuffer process(SVF self, SoundBuffer snd, object freq=*, object res=*)             # <<<<<<<<<<<<<<
@@ -2378,8 +2378,8 @@ struct __pyx_obj_5pippi_8wavesets_Waveset {
 };
 
 
-/* "fx.pxd":16
- * cpdef SoundBuffer blsoftclip(SoundBuffer snd)
+/* "fx.pxd":15
+ * cpdef SoundBuffer softclip(SoundBuffer snd)
  * 
  * cdef class SVF:             # <<<<<<<<<<<<<<
  *     cdef double[4] Az
@@ -2650,8 +2650,8 @@ struct __pyx_vtabstruct_5pippi_8wavesets_Waveset {
 static struct __pyx_vtabstruct_5pippi_8wavesets_Waveset *__pyx_vtabptr_5pippi_8wavesets_Waveset;
 
 
-/* "fx.pxd":16
- * cpdef SoundBuffer blsoftclip(SoundBuffer snd)
+/* "fx.pxd":15
+ * cpdef SoundBuffer softclip(SoundBuffer snd)
  * 
  * cdef class SVF:             # <<<<<<<<<<<<<<
  *     cdef double[4] Az
@@ -6041,7 +6041,7 @@ static PyTypeObject *__pyx_ptype_5pippi_2fx_SVF = 0;
 #endif
 static __Pyx_memviewslice (*__pyx_f_5pippi_2fx__norm)(__Pyx_memviewslice, double); /*proto*/
 static struct __pyx_obj_5pippi_10wavetables_Wavetable *(*__pyx_f_5pippi_2fx_envelope_follower)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_2fx_envelope_follower *__pyx_optional_args); /*proto*/
-static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*__pyx_f_5pippi_2fx_blsoftclip)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch); /*proto*/
+static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*__pyx_f_5pippi_2fx_softclip)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch); /*proto*/
 
 /* Module declarations from "pippi.fft" */
 #if !CYTHON_COMPILING_IN_LIMITED_API
@@ -16175,7 +16175,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_46clip(struct __pyx
  *         return SoundBuffer(np.clip(self.frames, minval, maxval), channels=self.channels, samplerate=self.samplerate)
  * 
  *     def softclip(SoundBuffer self):             # <<<<<<<<<<<<<<
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  */
 
@@ -16203,12 +16203,12 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_48softclip(struct _
   /* "pippi/soundbuffer.pyx":636
  * 
  *     def softclip(SoundBuffer self):
- *         return fx.blsoftclip(self)             # <<<<<<<<<<<<<<
+ *         return fx.softclip(self)             # <<<<<<<<<<<<<<
  * 
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=True):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_2fx_blsoftclip(__pyx_v_self, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 636, __pyx_L1_error)
+  __pyx_t_1 = ((PyObject *)__pyx_f_5pippi_2fx_softclip(__pyx_v_self, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 636, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -16218,7 +16218,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_48softclip(struct _
  *         return SoundBuffer(np.clip(self.frames, minval, maxval), channels=self.channels, samplerate=self.samplerate)
  * 
  *     def softclip(SoundBuffer self):             # <<<<<<<<<<<<<<
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  */
 
@@ -16234,7 +16234,7 @@ static PyObject *__pyx_pf_5pippi_11soundbuffer_11SoundBuffer_48softclip(struct _
 }
 
 /* "pippi/soundbuffer.pyx":638
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=True):             # <<<<<<<<<<<<<<
  *         cdef double[:,:] _impulse
@@ -16674,7 +16674,7 @@ static struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *__pyx_f_5pippi_11sound
   goto __pyx_L0;
 
   /* "pippi/soundbuffer.pyx":638
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=True):             # <<<<<<<<<<<<<<
  *         cdef double[:,:] _impulse
@@ -42075,7 +42075,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  *         return SoundBuffer(np.clip(self.frames, minval, maxval), channels=self.channels, samplerate=self.samplerate)
  * 
  *     def softclip(SoundBuffer self):             # <<<<<<<<<<<<<<
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  */
   __pyx_tuple__58 = PyTuple_Pack(1, __pyx_n_s_self); if (unlikely(!__pyx_tuple__58)) __PYX_ERR(0, 635, __pyx_L1_error)
@@ -42084,7 +42084,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __pyx_codeobj__59 = (PyObject*)__Pyx_PyCode_New(1, 0, 0, 1, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__58, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_pippi_soundbuffer_pyx, __pyx_n_s_softclip, 635, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__59)) __PYX_ERR(0, 635, __pyx_L1_error)
 
   /* "pippi/soundbuffer.pyx":638
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=True):             # <<<<<<<<<<<<<<
  *         cdef double[:,:] _impulse
@@ -43368,11 +43368,11 @@ static int __Pyx_modinit_type_import_code(void) {
    if (!__pyx_ptype_5pippi_8wavesets_Waveset) __PYX_ERR(6, 6, __pyx_L1_error)
   __pyx_vtabptr_5pippi_8wavesets_Waveset = (struct __pyx_vtabstruct_5pippi_8wavesets_Waveset*)__Pyx_GetVtable(__pyx_ptype_5pippi_8wavesets_Waveset); if (unlikely(!__pyx_vtabptr_5pippi_8wavesets_Waveset)) __PYX_ERR(6, 6, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.fx"); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 16, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.fx"); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_5pippi_2fx_SVF = __Pyx_ImportType(__pyx_t_1, "pippi.fx", "SVF", sizeof(struct __pyx_obj_5pippi_2fx_SVF), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_2fx_SVF) __PYX_ERR(7, 16, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_2fx_SVF = (struct __pyx_vtabstruct_5pippi_2fx_SVF*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_SVF); if (unlikely(!__pyx_vtabptr_5pippi_2fx_SVF)) __PYX_ERR(7, 16, __pyx_L1_error)
+   if (!__pyx_ptype_5pippi_2fx_SVF) __PYX_ERR(7, 15, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_2fx_SVF = (struct __pyx_vtabstruct_5pippi_2fx_SVF*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_SVF); if (unlikely(!__pyx_vtabptr_5pippi_2fx_SVF)) __PYX_ERR(7, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyImport_ImportModule("pippi.grains"); if (unlikely(!__pyx_t_1)) __PYX_ERR(8, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -43472,7 +43472,7 @@ static int __Pyx_modinit_function_import_code(void) {
   __pyx_t_4 = PyImport_ImportModule("pippi.fx"); if (!__pyx_t_4) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_4, "_norm", (void (**)(void))&__pyx_f_5pippi_2fx__norm, "__Pyx_memviewslice (__Pyx_memviewslice, double)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_4, "envelope_follower", (void (**)(void))&__pyx_f_5pippi_2fx_envelope_follower, "struct __pyx_obj_5pippi_10wavetables_Wavetable *(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_2fx_envelope_follower *__pyx_optional_args)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  if (__Pyx_ImportFunction(__pyx_t_4, "blsoftclip", (void (**)(void))&__pyx_f_5pippi_2fx_blsoftclip, "struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  if (__Pyx_ImportFunction(__pyx_t_4, "softclip", (void (**)(void))&__pyx_f_5pippi_2fx_softclip, "struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_5 = PyImport_ImportModule("pippi.fft"); if (!__pyx_t_5) __PYX_ERR(0, 1, __pyx_L1_error)
   if (__Pyx_ImportFunction(__pyx_t_5, "conv", (void (**)(void))&__pyx_f_5pippi_3fft_conv, "__Pyx_memviewslice (__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch)") < 0) __PYX_ERR(0, 1, __pyx_L1_error)
@@ -44067,7 +44067,7 @@ if (!__Pyx_RefNanny) {
  *         return SoundBuffer(np.clip(self.frames, minval, maxval), channels=self.channels, samplerate=self.samplerate)
  * 
  *     def softclip(SoundBuffer self):             # <<<<<<<<<<<<<<
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  */
     #if CYTHON_COMPILING_IN_LIMITED_API
@@ -44084,7 +44084,7 @@ if (!__Pyx_RefNanny) {
     PyType_Modified(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer);
 
     /* "pippi/soundbuffer.pyx":638
- *         return fx.blsoftclip(self)
+ *         return fx.softclip(self)
  * 
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=True):             # <<<<<<<<<<<<<<
  *         cdef double[:,:] _impulse

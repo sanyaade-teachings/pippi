@@ -9,9 +9,8 @@ cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
 cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
 cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
 
-cdef double _blsc_integrated_clip(double val)
-cdef tuple _blsc_process(double val, double lastval)
-cpdef SoundBuffer blsoftclip(SoundBuffer snd)
+cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil
+cpdef SoundBuffer softclip(SoundBuffer snd)
 
 cdef class SVF:
     cdef double[4] Az 

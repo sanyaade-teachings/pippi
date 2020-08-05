@@ -2035,14 +2035,14 @@ struct __pyx_opt_args_5pippi_2fx_envelope_follower {
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
  * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)             # <<<<<<<<<<<<<<
  * 
- * cdef double _blsc_integrated_clip(double val)
+ * cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil
  */
 struct __pyx_opt_args_5pippi_2fx_widen {
   int __pyx_n;
   PyObject *width;
 };
 
-/* "pippi/fx.pxd":34
+/* "pippi/fx.pxd":33
  *     cdef void _setParams(SVF self, double freq, double res)
  *     cdef double _process(SVF self, double val)
  *     cpdef SoundBuffer process(SVF self, SoundBuffer snd, object freq=*, object res=*)             # <<<<<<<<<<<<<<
@@ -2382,8 +2382,8 @@ struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer {
 };
 
 
-/* "pippi/fx.pxd":16
- * cpdef SoundBuffer blsoftclip(SoundBuffer snd)
+/* "pippi/fx.pxd":15
+ * cpdef SoundBuffer softclip(SoundBuffer snd)
  * 
  * cdef class SVF:             # <<<<<<<<<<<<<<
  *     cdef double[4] Az
@@ -2571,8 +2571,8 @@ struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
 static struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer *__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer;
 
 
-/* "pippi/fx.pxd":16
- * cpdef SoundBuffer blsoftclip(SoundBuffer snd)
+/* "pippi/fx.pxd":15
+ * cpdef SoundBuffer softclip(SoundBuffer snd)
  * 
  * cdef class SVF:             # <<<<<<<<<<<<<<
  *     cdef double[4] Az
@@ -30428,11 +30428,11 @@ static int __Pyx_modinit_type_import_code(void) {
    if (!__pyx_ptype_5pippi_11soundbuffer_SoundBuffer) __PYX_ERR(5, 10, __pyx_L1_error)
   __pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer = (struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer*)__Pyx_GetVtable(__pyx_ptype_5pippi_11soundbuffer_SoundBuffer); if (unlikely(!__pyx_vtabptr_5pippi_11soundbuffer_SoundBuffer)) __PYX_ERR(5, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.fx"); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 16, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.fx"); if (unlikely(!__pyx_t_1)) __PYX_ERR(6, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_5pippi_2fx_SVF = __Pyx_ImportType(__pyx_t_1, "pippi.fx", "SVF", sizeof(struct __pyx_obj_5pippi_2fx_SVF), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_2fx_SVF) __PYX_ERR(6, 16, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_2fx_SVF = (struct __pyx_vtabstruct_5pippi_2fx_SVF*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_SVF); if (unlikely(!__pyx_vtabptr_5pippi_2fx_SVF)) __PYX_ERR(6, 16, __pyx_L1_error)
+   if (!__pyx_ptype_5pippi_2fx_SVF) __PYX_ERR(6, 15, __pyx_L1_error)
+  __pyx_vtabptr_5pippi_2fx_SVF = (struct __pyx_vtabstruct_5pippi_2fx_SVF*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_SVF); if (unlikely(!__pyx_vtabptr_5pippi_2fx_SVF)) __PYX_ERR(6, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = PyImport_ImportModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 9, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

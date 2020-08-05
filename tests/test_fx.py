@@ -203,14 +203,9 @@ class TestFx(TestCase):
         out = fx.brf(snd, freq)
         out.write('tests/renders/fx_brf.wav')
 
-    def test_scsoftclip(self):
-        out = oscs.SineOsc(freq=[30, 10000], amp=10).play(1)
-        out = fx.softclip(out)
-        out.write('tests/renders/fx_softclip-sc.wav')
-
-    def test_blsoftclip(self):
+    def test_softclip(self):
         out = oscs.SineOsc(freq=[30, 10000], amp=10).play(1).softclip()
-        out.write('tests/renders/fx_softclip-diode.wav')
+        out.write('tests/renders/fx_softclip.wav')
 
     def test_svf(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
