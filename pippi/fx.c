@@ -7990,23 +7990,23 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__softclip(__Pyx_memviewslice __pyx_
  *             if abs(val - lastval) < .000001:
  *                 sample = (val + lastval)/2.0             # <<<<<<<<<<<<<<
  * 
- *                 if val < -1:
+ *                 if sample < -1:
  */
         __pyx_v_sample = ((__pyx_v_val + __pyx_v_lastval) / 2.0);
 
         /* "pippi/fx.pyx":115
  *                 sample = (val + lastval)/2.0
  * 
- *                 if val < -1:             # <<<<<<<<<<<<<<
+ *                 if sample < -1:             # <<<<<<<<<<<<<<
  *                     sample = -4. / 5.
  *                 else:
  */
-        __pyx_t_10 = ((__pyx_v_val < -1.0) != 0);
+        __pyx_t_10 = ((__pyx_v_sample < -1.0) != 0);
         if (__pyx_t_10) {
 
           /* "pippi/fx.pyx":116
  * 
- *                 if val < -1:
+ *                 if sample < -1:
  *                     sample = -4. / 5.             # <<<<<<<<<<<<<<
  *                 else:
  *                     sample = sample - sample**5 / 5.
@@ -8016,7 +8016,7 @@ static __Pyx_memviewslice __pyx_f_5pippi_2fx__softclip(__Pyx_memviewslice __pyx_
           /* "pippi/fx.pyx":115
  *                 sample = (val + lastval)/2.0
  * 
- *                 if val < -1:             # <<<<<<<<<<<<<<
+ *                 if sample < -1:             # <<<<<<<<<<<<<<
  *                     sample = -4. / 5.
  *                 else:
  */

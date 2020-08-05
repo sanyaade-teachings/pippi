@@ -112,7 +112,7 @@ cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil:
             if abs(val - lastval) < .000001:
                 sample = (val + lastval)/2.0
 
-                if val < -1:
+                if sample < -1:
                     sample = -4. / 5.
                 else:
                     sample = sample - sample**5 / 5.
