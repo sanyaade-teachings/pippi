@@ -18,7 +18,8 @@ cdef class Osc:
             self, 
             object wavetable=None, 
             object freq=440.0, 
-            object amp=1.0, 
+            object amp=1.0,
+            object pm=0.0,
             double phase=0, 
 
             int wtsize=4096,
@@ -28,10 +29,12 @@ cdef class Osc:
 
         self.freq = wavetables.to_wavetable(freq, self.wtsize)
         self.amp = wavetables.to_window(amp, self.wtsize)
+        self.pm = wavetables.to_wavetable(pm, self.wtsize)
 
         self.wt_phase = phase
         self.freq_phase = phase
         self.amp_phase = phase
+        self.pm_phase = phase
 
         self.channels = channels
         self.samplerate = samplerate
@@ -45,15 +48,18 @@ cdef class Osc:
 
     cdef object _play(self, int length):
         cdef int i = 0
-        cdef double sample, freq, amp
+        cdef double sample, freq, amp, pm
+        cdef double lastpm = 0
         cdef double ilength = 1.0 / length
 
         cdef int freq_boundry = max(len(self.freq)-1, 1)
         cdef int amp_boundry = max(len(self.amp)-1, 1)
         cdef int wt_boundry = max(len(self.wavetable)-1, 1)
+        cdef int pm_boundry = max(len(self.pm)-1, 1)
 
         cdef double freq_phase_inc = ilength * freq_boundry
         cdef double amp_phase_inc = ilength * amp_boundry
+        cdef double pm_phase_inc = ilength * pm_boundry
 
         cdef double wt_phase_inc = (1.0 / self.samplerate) * self.wtsize
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
@@ -61,13 +67,19 @@ cdef class Osc:
         for i in range(length):
             freq = interpolation._linear_point(self.freq, self.freq_phase)
             amp = interpolation._linear_point(self.amp, self.amp_phase)
+            pm = interpolation._linear_point(self.pm, self.pm_phase)
             sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
 
             self.freq_phase += freq_phase_inc
             self.amp_phase += amp_phase_inc
+            self.pm_phase += pm_phase_inc
             self.wt_phase += freq * wt_phase_inc
+            #self.wt_phase += pm - lastpm
+            #lastpm = pm
 
-            while self.wt_phase >= wt_boundry:
+            if self.wt_phase < 0:
+                self.wt_phase += wt_boundry
+            elif self.wt_phase >= wt_boundry:
                 self.wt_phase -= wt_boundry
 
             while self.amp_phase >= amp_boundry:
@@ -75,6 +87,9 @@ cdef class Osc:
 
             while self.freq_phase >= freq_boundry:
                 self.freq_phase -= freq_boundry
+
+            while self.pm_phase >= pm_boundry:
+                self.pm_phase -= pm_boundry
 
             for channel in range(self.channels):
                 out[i][channel] = sample

@@ -207,6 +207,7 @@ class TestFx(TestCase):
         out = oscs.SineOsc(freq=[30, 10000], amp=10).play(1).softclip()
         out.write('tests/renders/fx_softclip.wav')
 
+    """
     def test_svf(self):
         snd = dsp.read('tests/sounds/guitar1s.wav')
         svf = fx.SVF()
@@ -214,4 +215,4 @@ class TestFx(TestCase):
         out = svf.process(snd, freq, 0.99)
         out = fx.norm(out, 1)
         out.write('tests/renders/fx_svf.wav')
-
+    """

@@ -664,7 +664,7 @@ cpdef SoundBuffer go(SoundBuffer snd,
 
     return out
 
-
+"""
 cdef class SVF:
     def __cinit__(SVF self):
         self.Az = [0, 0, 0, 0]
@@ -682,7 +682,7 @@ cdef class SVF:
         self.bpOut = 0
         self.hpOut = 0
 
-    cdef void _setParams(SVF self, double freq, double res):
+    cdef void _updateCoeffs(SVF self, double freq, double res):
         cdef double g = math.tan(PI * freq)
         cdef double k = 2. - 2. * res
 
@@ -698,31 +698,36 @@ cdef class SVF:
         self.Bz[0] = 2. * a2
         self.Bz[1] = 2. * a3
 
+        return a1, a2, a3, k
+
+    cdef double _outputHP(SVF self, double val, a1, a2, a3, k):
+        # highpass
+        cdef double C0 = -k * a1 - a2
+        cdef double C1 = k * a2 - (1. - a3)
+        cdef double D = 1. - k * a2 - a3
+
+        return val * D + self.X[0] * C0 + self.X[1] * C1
+
+    cdef double _outputLP(SVF self, double val, a1, a2, a3, k):
+        # lowpass
         self.CLPz[0] = a2
         self.CLPz[1] = 1. - a3
+        self.DLPz = a3
+        return val * self.DLPz + self.X[0] * self.CLPz[0] + self.X[1] * self.CLPz[1]
 
+    cdef double _outputBP(SVF self, double val, a1, a2, a3, k):
+        # bandpass
         self.CBPz[0] = a1
         self.CBPz[1] = -a2
-
-        self.CHPz[0] = -k * a1 - a2
-        self.CHPz[1] = k * a2 - (1. - a3)
-
-        self.DLPz = a3
         self.DBPz = a2
-        self.DHPz = 1. - k * a2 - a3
+        return  val * self.DBPz + self.X[0] * self.CBPz[0] + self.X[1] * self.CBPz[1]
 
-    cdef double _process(SVF self, double val):
-        self.lpOut = val * self.DLPz + self.X[0] * self.CLPz[0] + self.X[1] * self.CLPz[1]
-        self.bpOut = val * self.DBPz + self.X[0] * self.CBPz[0] + self.X[1] * self.CBPz[1]
-        self.hpOut = val * self.DHPz + self.X[0] * self.CHPz[0] + self.X[1] * self.CHPz[1]
-
+    cdef double _updateState(SVF self, double val):
         cdef double X0 = val * self.Bz[0] + self.X[0] * self.Az[0] + self.X[1] * self.Az[1]
         cdef double X1 = val * self.Bz[1] + self.X[0] * self.Az[2] + self.X[1] * self.Az[3]
 
         self.X[0] = X0
         self.X[1] = X1
-
-        return self.lpOut
 
     cpdef SoundBuffer process(SVF self, SoundBuffer snd, object freq=None, object res=None):
         cdef int length = len(snd)
@@ -746,11 +751,11 @@ cdef class SVF:
         for c in range(snd.channels):
             for i in range(length):
                 pos = <double>i / length
-                f = _linear_pos(_freq, pos)
-                r = _linear_pos(_res, pos)
+                f = min(_linear_pos(_freq, pos) / snd.samplerate, 0.49)
+                r = min(_linear_pos(_res, pos), 0.99999999)
                 self._setParams(f, r)
 
                 out[i,c] = self._process(snd.frames[i,c])
 
         return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
-        
+"""

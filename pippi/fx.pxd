@@ -12,6 +12,7 @@ cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
 cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil
 cpdef SoundBuffer softclip(SoundBuffer snd)
 
+"""
 cdef class SVF:
     cdef double[4] Az 
     cdef double[2] Bz
@@ -31,4 +32,4 @@ cdef class SVF:
     cdef void _setParams(SVF self, double freq, double res)
     cdef double _process(SVF self, double val)
     cpdef SoundBuffer process(SVF self, SoundBuffer snd, object freq=*, object res=*)
-
+"""

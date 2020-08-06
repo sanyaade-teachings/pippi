@@ -1045,7 +1045,6 @@ static const char *__pyx_f[] = {
   "pippi/wavetables.pxd",
   "type.pxd",
   "pippi/wavesets.pxd",
-  "pippi/fx.pxd",
   "pippi/grains.pxd",
 };
 /* ForceInitThreads.proto */
@@ -1373,7 +1372,6 @@ static CYTHON_INLINE __pyx_t_double_complex __pyx_t_double_complex_from_parts(do
 /*--- Type declarations ---*/
 struct __pyx_obj_5pippi_10wavetables_Wavetable;
 struct __pyx_obj_5pippi_8wavesets_Waveset;
-struct __pyx_obj_5pippi_2fx_SVF;
 struct __pyx_obj_5pippi_6grains_Cloud;
 struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer;
 struct __pyx_obj_5pippi_11soundbuffer___pyx_scope_struct____eq__;
@@ -2154,7 +2152,6 @@ struct __pyx_opt_args_5pippi_2fx__fir;
 struct __pyx_opt_args_5pippi_2fx_fir;
 struct __pyx_opt_args_5pippi_2fx_envelope_follower;
 struct __pyx_opt_args_5pippi_2fx_widen;
-struct __pyx_opt_args_5pippi_2fx_3SVF_process;
 
 /* "fx.pxd":7
  * 
@@ -2202,18 +2199,6 @@ struct __pyx_opt_args_5pippi_2fx_envelope_follower {
 struct __pyx_opt_args_5pippi_2fx_widen {
   int __pyx_n;
   PyObject *width;
-};
-
-/* "fx.pxd":33
- *     cdef void _setParams(SVF self, double freq, double res)
- *     cdef double _process(SVF self, double val)
- *     cpdef SoundBuffer process(SVF self, SoundBuffer snd, object freq=*, object res=*)             # <<<<<<<<<<<<<<
- * 
- */
-struct __pyx_opt_args_5pippi_2fx_3SVF_process {
-  int __pyx_n;
-  PyObject *freq;
-  PyObject *res;
 };
 struct __pyx_opt_args_5pippi_3fft_process;
 
@@ -2375,31 +2360,6 @@ struct __pyx_obj_5pippi_8wavesets_Waveset {
   int max_length;
   int min_length;
   int samplerate;
-};
-
-
-/* "fx.pxd":15
- * cpdef SoundBuffer softclip(SoundBuffer snd)
- * 
- * cdef class SVF:             # <<<<<<<<<<<<<<
- *     cdef double[4] Az
- *     cdef double[2] Bz
- */
-struct __pyx_obj_5pippi_2fx_SVF {
-  PyObject_HEAD
-  struct __pyx_vtabstruct_5pippi_2fx_SVF *__pyx_vtab;
-  double Az[4];
-  double Bz[2];
-  double CLPz[2];
-  double CBPz[2];
-  double CHPz[2];
-  double DLPz;
-  double DBPz;
-  double DHPz;
-  double X[2];
-  double lpOut;
-  double bpOut;
-  double hpOut;
 };
 
 
@@ -2648,22 +2608,6 @@ struct __pyx_vtabstruct_5pippi_8wavesets_Waveset {
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*render)(struct __pyx_obj_5pippi_8wavesets_Waveset *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_8wavesets_7Waveset_render *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_5pippi_8wavesets_Waveset *__pyx_vtabptr_5pippi_8wavesets_Waveset;
-
-
-/* "fx.pxd":15
- * cpdef SoundBuffer softclip(SoundBuffer snd)
- * 
- * cdef class SVF:             # <<<<<<<<<<<<<<
- *     cdef double[4] Az
- *     cdef double[2] Bz
- */
-
-struct __pyx_vtabstruct_5pippi_2fx_SVF {
-  void (*_setParams)(struct __pyx_obj_5pippi_2fx_SVF *, double, double);
-  double (*_process)(struct __pyx_obj_5pippi_2fx_SVF *, double);
-  struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*process)(struct __pyx_obj_5pippi_2fx_SVF *, struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_2fx_3SVF_process *__pyx_optional_args);
-};
-static struct __pyx_vtabstruct_5pippi_2fx_SVF *__pyx_vtabptr_5pippi_2fx_SVF;
 
 
 /* "pippi/soundbuffer.pyx":175
@@ -3831,7 +3775,6 @@ typedef struct {
   PyTypeObject *__pyx_ptype_5numpy_ndarray;
   PyTypeObject *__pyx_ptype_5numpy_ufunc;
   PyTypeObject *__pyx_ptype_5pippi_8wavesets_Waveset;
-  PyTypeObject *__pyx_ptype_5pippi_2fx_SVF;
   PyTypeObject *__pyx_ptype_5pippi_6grains_Cloud;
   PyTypeObject *__pyx_ptype_5pippi_11soundbuffer_SoundBuffer;
   PyObject *__pyx_type_5pippi_11soundbuffer_SoundBuffer;
@@ -4352,7 +4295,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_ndarray);
   Py_CLEAR(clear_module_state->__pyx_ptype_5numpy_ufunc);
   Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_8wavesets_Waveset);
-  Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_2fx_SVF);
   Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_6grains_Cloud);
   Py_CLEAR(clear_module_state->__pyx_ptype_5pippi_11soundbuffer_SoundBuffer);
   Py_CLEAR(clear_module_state->__pyx_type_5pippi_11soundbuffer_SoundBuffer);
@@ -4860,7 +4802,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_ndarray);
   Py_VISIT(traverse_module_state->__pyx_ptype_5numpy_ufunc);
   Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_8wavesets_Waveset);
-  Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_2fx_SVF);
   Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_6grains_Cloud);
   Py_VISIT(traverse_module_state->__pyx_ptype_5pippi_11soundbuffer_SoundBuffer);
   Py_VISIT(traverse_module_state->__pyx_type_5pippi_11soundbuffer_SoundBuffer);
@@ -5368,7 +5309,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_ptype_5numpy_ndarray __pyx_mstate_global->__pyx_ptype_5numpy_ndarray
 #define __pyx_ptype_5numpy_ufunc __pyx_mstate_global->__pyx_ptype_5numpy_ufunc
 #define __pyx_ptype_5pippi_8wavesets_Waveset __pyx_mstate_global->__pyx_ptype_5pippi_8wavesets_Waveset
-#define __pyx_ptype_5pippi_2fx_SVF __pyx_mstate_global->__pyx_ptype_5pippi_2fx_SVF
 #define __pyx_ptype_5pippi_6grains_Cloud __pyx_mstate_global->__pyx_ptype_5pippi_6grains_Cloud
 #define __pyx_ptype_5pippi_11soundbuffer_SoundBuffer __pyx_mstate_global->__pyx_ptype_5pippi_11soundbuffer_SoundBuffer
 #define __pyx_type_5pippi_11soundbuffer_SoundBuffer __pyx_mstate_global->__pyx_type_5pippi_11soundbuffer_SoundBuffer
@@ -6037,7 +5977,6 @@ static __Pyx_memviewslice (*__pyx_f_5pippi_13interpolation__linear)(__Pyx_memvie
 
 /* Module declarations from "pippi.fx" */
 #if !CYTHON_COMPILING_IN_LIMITED_API
-static PyTypeObject *__pyx_ptype_5pippi_2fx_SVF = 0;
 #endif
 static __Pyx_memviewslice (*__pyx_f_5pippi_2fx__norm)(__Pyx_memviewslice, double); /*proto*/
 static struct __pyx_obj_5pippi_10wavetables_Wavetable *(*__pyx_f_5pippi_2fx_envelope_follower)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_2fx_envelope_follower *__pyx_optional_args); /*proto*/
@@ -43368,16 +43307,10 @@ static int __Pyx_modinit_type_import_code(void) {
    if (!__pyx_ptype_5pippi_8wavesets_Waveset) __PYX_ERR(6, 6, __pyx_L1_error)
   __pyx_vtabptr_5pippi_8wavesets_Waveset = (struct __pyx_vtabstruct_5pippi_8wavesets_Waveset*)__Pyx_GetVtable(__pyx_ptype_5pippi_8wavesets_Waveset); if (unlikely(!__pyx_vtabptr_5pippi_8wavesets_Waveset)) __PYX_ERR(6, 6, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.fx"); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 15, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_ptype_5pippi_2fx_SVF = __Pyx_ImportType(__pyx_t_1, "pippi.fx", "SVF", sizeof(struct __pyx_obj_5pippi_2fx_SVF), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_2fx_SVF) __PYX_ERR(7, 15, __pyx_L1_error)
-  __pyx_vtabptr_5pippi_2fx_SVF = (struct __pyx_vtabstruct_5pippi_2fx_SVF*)__Pyx_GetVtable(__pyx_ptype_5pippi_2fx_SVF); if (unlikely(!__pyx_vtabptr_5pippi_2fx_SVF)) __PYX_ERR(7, 15, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyImport_ImportModule("pippi.grains"); if (unlikely(!__pyx_t_1)) __PYX_ERR(8, 5, __pyx_L1_error)
+  __pyx_t_1 = PyImport_ImportModule("pippi.grains"); if (unlikely(!__pyx_t_1)) __PYX_ERR(7, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_ptype_5pippi_6grains_Cloud = __Pyx_ImportType(__pyx_t_1, "pippi.grains", "Cloud", sizeof(struct __pyx_obj_5pippi_6grains_Cloud), __Pyx_ImportType_CheckSize_Warn);
-   if (!__pyx_ptype_5pippi_6grains_Cloud) __PYX_ERR(8, 5, __pyx_L1_error)
+   if (!__pyx_ptype_5pippi_6grains_Cloud) __PYX_ERR(7, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_RefNannyFinishContext();
   return 0;
