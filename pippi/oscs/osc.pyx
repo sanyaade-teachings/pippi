@@ -74,8 +74,8 @@ cdef class Osc:
             self.amp_phase += amp_phase_inc
             self.pm_phase += pm_phase_inc
             self.wt_phase += freq * wt_phase_inc
-            #self.wt_phase += pm - lastpm
-            #lastpm = pm
+            self.wt_phase += (pm - lastpm) * wt_boundry * .5
+            lastpm = pm
 
             if self.wt_phase < 0:
                 self.wt_phase += wt_boundry

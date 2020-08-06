@@ -7,6 +7,11 @@ from pippi.wavesets import Waveset
 from pippi import dsp, fx, tune, shapes
 
 class TestOscs(TestCase):
+    def test_pm_osc(self):
+        pmtest = Osc('sine', freq=[0, 1000, 0]).play(1).env('tri')
+        out = Osc('sine', pm = pmtest).play(1)
+        out.write('tests/renders/osc_pm.wav')
+
     def test_fm_osc(self):
         pm = Osc('sine', freq=200.0).play(1).env('tri') * 1000
         out = Osc('sine', freq=pm).play(1)
