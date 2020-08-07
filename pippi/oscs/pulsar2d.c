@@ -5058,67 +5058,67 @@ static int __pyx_pf_5pippi_8pulsar2d_8Pulsar2d___cinit__(struct __pyx_obj_5pippi
  *             self.burst = np.array([1], dtype='long')
  * 
  *         self.wt_phase = phase             # <<<<<<<<<<<<<<
- *         self.win_phase = phase
- *         self.freq_phase = phase
+ *         self.win_phase = 0
+ *         self.freq_phase = 0
  */
   __pyx_v_self->wt_phase = __pyx_v_phase;
 
   /* "pippi/oscs/pulsar2d.pyx":63
  * 
  *         self.wt_phase = phase
- *         self.win_phase = phase             # <<<<<<<<<<<<<<
- *         self.freq_phase = phase
- *         self.pw_phase = phase
+ *         self.win_phase = 0             # <<<<<<<<<<<<<<
+ *         self.freq_phase = 0
+ *         self.pw_phase = 0
  */
-  __pyx_v_self->win_phase = __pyx_v_phase;
+  __pyx_v_self->win_phase = 0.0;
 
   /* "pippi/oscs/pulsar2d.pyx":64
  *         self.wt_phase = phase
- *         self.win_phase = phase
- *         self.freq_phase = phase             # <<<<<<<<<<<<<<
- *         self.pw_phase = phase
- *         self.amp_phase = phase
+ *         self.win_phase = 0
+ *         self.freq_phase = 0             # <<<<<<<<<<<<<<
+ *         self.pw_phase = 0
+ *         self.amp_phase = 0
  */
-  __pyx_v_self->freq_phase = __pyx_v_phase;
+  __pyx_v_self->freq_phase = 0.0;
 
   /* "pippi/oscs/pulsar2d.pyx":65
- *         self.win_phase = phase
- *         self.freq_phase = phase
- *         self.pw_phase = phase             # <<<<<<<<<<<<<<
- *         self.amp_phase = phase
- *         self.burst_phase = phase
+ *         self.win_phase = 0
+ *         self.freq_phase = 0
+ *         self.pw_phase = 0             # <<<<<<<<<<<<<<
+ *         self.amp_phase = 0
+ *         self.burst_phase = 0
  */
-  __pyx_v_self->pw_phase = __pyx_v_phase;
+  __pyx_v_self->pw_phase = 0.0;
 
   /* "pippi/oscs/pulsar2d.pyx":66
- *         self.freq_phase = phase
- *         self.pw_phase = phase
- *         self.amp_phase = phase             # <<<<<<<<<<<<<<
- *         self.burst_phase = phase
- *         self.mask_phase = phase
+ *         self.freq_phase = 0
+ *         self.pw_phase = 0
+ *         self.amp_phase = 0             # <<<<<<<<<<<<<<
+ *         self.burst_phase = 0
+ *         self.mask_phase = 0
  */
-  __pyx_v_self->amp_phase = __pyx_v_phase;
+  __pyx_v_self->amp_phase = 0.0;
 
   /* "pippi/oscs/pulsar2d.pyx":67
- *         self.pw_phase = phase
- *         self.amp_phase = phase
- *         self.burst_phase = phase             # <<<<<<<<<<<<<<
- *         self.mask_phase = phase
+ *         self.pw_phase = 0
+ *         self.amp_phase = 0
+ *         self.burst_phase = 0             # <<<<<<<<<<<<<<
+ *         self.mask_phase = 0
  * 
  */
-  __pyx_v_self->burst_phase = __pyx_v_phase;
+  __pyx_v_self->burst_phase = 0.0;
 
   /* "pippi/oscs/pulsar2d.pyx":68
- *         self.amp_phase = phase
- *         self.burst_phase = phase
- *         self.mask_phase = phase             # <<<<<<<<<<<<<<
+ *         self.amp_phase = 0
+ *         self.burst_phase = 0
+ *         self.mask_phase = 0             # <<<<<<<<<<<<<<
  * 
  *         self.channels = channels
  */
-  __pyx_v_self->mask_phase = __pyx_v_phase;
+  __pyx_v_self->mask_phase = 0.0;
 
   /* "pippi/oscs/pulsar2d.pyx":70
- *         self.mask_phase = phase
+ *         self.mask_phase = 0
  * 
  *         self.channels = channels             # <<<<<<<<<<<<<<
  *         self.samplerate = samplerate
@@ -7321,7 +7321,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
  *                 else:
  *                     mask = 1             # <<<<<<<<<<<<<<
  * 
- *             while self.wt_phase >= wt_boundry_p:
+ *             if self.wt_phase < 0:
  */
       /*else*/ {
         __pyx_v_mask = 1;
@@ -7340,25 +7340,62 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
     /* "pippi/oscs/pulsar2d.pyx":233
  *                     mask = 1
  * 
- *             while self.wt_phase >= wt_boundry_p:             # <<<<<<<<<<<<<<
- *                 self.wt_phase -= wt_boundry_p
- * 
+ *             if self.wt_phase < 0:             # <<<<<<<<<<<<<<
+ *                 self.wt_phase += wt_boundry_p
+ *             elif self.wt_phase >= wt_boundry_p:
  */
-    while (1) {
-      __pyx_t_19 = ((__pyx_v_self->wt_phase >= __pyx_v_wt_boundry_p) != 0);
-      if (!__pyx_t_19) break;
+    __pyx_t_19 = ((__pyx_v_self->wt_phase < 0.0) != 0);
+    if (__pyx_t_19) {
 
       /* "pippi/oscs/pulsar2d.pyx":234
  * 
- *             while self.wt_phase >= wt_boundry_p:
+ *             if self.wt_phase < 0:
+ *                 self.wt_phase += wt_boundry_p             # <<<<<<<<<<<<<<
+ *             elif self.wt_phase >= wt_boundry_p:
+ *                 self.wt_phase -= wt_boundry_p
+ */
+      __pyx_v_self->wt_phase = (__pyx_v_self->wt_phase + __pyx_v_wt_boundry_p);
+
+      /* "pippi/oscs/pulsar2d.pyx":233
+ *                     mask = 1
+ * 
+ *             if self.wt_phase < 0:             # <<<<<<<<<<<<<<
+ *                 self.wt_phase += wt_boundry_p
+ *             elif self.wt_phase >= wt_boundry_p:
+ */
+      goto __pyx_L12;
+    }
+
+    /* "pippi/oscs/pulsar2d.pyx":235
+ *             if self.wt_phase < 0:
+ *                 self.wt_phase += wt_boundry_p
+ *             elif self.wt_phase >= wt_boundry_p:             # <<<<<<<<<<<<<<
+ *                 self.wt_phase -= wt_boundry_p
+ * 
+ */
+    __pyx_t_19 = ((__pyx_v_self->wt_phase >= __pyx_v_wt_boundry_p) != 0);
+    if (__pyx_t_19) {
+
+      /* "pippi/oscs/pulsar2d.pyx":236
+ *                 self.wt_phase += wt_boundry_p
+ *             elif self.wt_phase >= wt_boundry_p:
  *                 self.wt_phase -= wt_boundry_p             # <<<<<<<<<<<<<<
  * 
  *             while self.win_phase >= win_boundry_p:
  */
       __pyx_v_self->wt_phase = (__pyx_v_self->wt_phase - __pyx_v_wt_boundry_p);
-    }
 
-    /* "pippi/oscs/pulsar2d.pyx":236
+      /* "pippi/oscs/pulsar2d.pyx":235
+ *             if self.wt_phase < 0:
+ *                 self.wt_phase += wt_boundry_p
+ *             elif self.wt_phase >= wt_boundry_p:             # <<<<<<<<<<<<<<
+ *                 self.wt_phase -= wt_boundry_p
+ * 
+ */
+    }
+    __pyx_L12:;
+
+    /* "pippi/oscs/pulsar2d.pyx":238
  *                 self.wt_phase -= wt_boundry_p
  * 
  *             while self.win_phase >= win_boundry_p:             # <<<<<<<<<<<<<<
@@ -7369,7 +7406,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->win_phase >= __pyx_v_win_boundry_p) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":237
+      /* "pippi/oscs/pulsar2d.pyx":239
  * 
  *             while self.win_phase >= win_boundry_p:
  *                 self.win_phase -= win_boundry_p             # <<<<<<<<<<<<<<
@@ -7379,7 +7416,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->win_phase = (__pyx_v_self->win_phase - __pyx_v_win_boundry_p);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":239
+    /* "pippi/oscs/pulsar2d.pyx":241
  *                 self.win_phase -= win_boundry_p
  * 
  *             while self.wt_mod_phase >= wt_mod_boundry:             # <<<<<<<<<<<<<<
@@ -7390,7 +7427,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->wt_mod_phase >= __pyx_v_wt_mod_boundry) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":240
+      /* "pippi/oscs/pulsar2d.pyx":242
  * 
  *             while self.wt_mod_phase >= wt_mod_boundry:
  *                 self.wt_mod_phase -= wt_mod_boundry             # <<<<<<<<<<<<<<
@@ -7400,7 +7437,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->wt_mod_phase = (__pyx_v_self->wt_mod_phase - __pyx_v_wt_mod_boundry);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":242
+    /* "pippi/oscs/pulsar2d.pyx":244
  *                 self.wt_mod_phase -= wt_mod_boundry
  * 
  *             while self.win_mod_phase >= win_mod_boundry:             # <<<<<<<<<<<<<<
@@ -7411,7 +7448,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->win_mod_phase >= __pyx_v_win_mod_boundry) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":243
+      /* "pippi/oscs/pulsar2d.pyx":245
  * 
  *             while self.win_mod_phase >= win_mod_boundry:
  *                 self.win_mod_phase -= win_mod_boundry             # <<<<<<<<<<<<<<
@@ -7421,7 +7458,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->win_mod_phase = (__pyx_v_self->win_mod_phase - __pyx_v_win_mod_boundry);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":245
+    /* "pippi/oscs/pulsar2d.pyx":247
  *                 self.win_mod_phase -= win_mod_boundry
  * 
  *             while self.pw_phase >= pw_boundry:             # <<<<<<<<<<<<<<
@@ -7432,7 +7469,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->pw_phase >= __pyx_v_pw_boundry) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":246
+      /* "pippi/oscs/pulsar2d.pyx":248
  * 
  *             while self.pw_phase >= pw_boundry:
  *                 self.pw_phase -= pw_boundry             # <<<<<<<<<<<<<<
@@ -7442,7 +7479,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->pw_phase = (__pyx_v_self->pw_phase - __pyx_v_pw_boundry);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":248
+    /* "pippi/oscs/pulsar2d.pyx":250
  *                 self.pw_phase -= pw_boundry
  * 
  *             while self.amp_phase >= amp_boundry:             # <<<<<<<<<<<<<<
@@ -7453,7 +7490,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->amp_phase >= __pyx_v_amp_boundry) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":249
+      /* "pippi/oscs/pulsar2d.pyx":251
  * 
  *             while self.amp_phase >= amp_boundry:
  *                 self.amp_phase -= amp_boundry             # <<<<<<<<<<<<<<
@@ -7463,7 +7500,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->amp_phase = (__pyx_v_self->amp_phase - __pyx_v_amp_boundry);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":251
+    /* "pippi/oscs/pulsar2d.pyx":253
  *                 self.amp_phase -= amp_boundry
  * 
  *             while self.freq_phase >= freq_boundry:             # <<<<<<<<<<<<<<
@@ -7474,7 +7511,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->freq_phase >= __pyx_v_freq_boundry) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":252
+      /* "pippi/oscs/pulsar2d.pyx":254
  * 
  *             while self.freq_phase >= freq_boundry:
  *                 self.freq_phase -= freq_boundry             # <<<<<<<<<<<<<<
@@ -7484,7 +7521,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->freq_phase = (__pyx_v_self->freq_phase - __pyx_v_freq_boundry);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":254
+    /* "pippi/oscs/pulsar2d.pyx":256
  *                 self.freq_phase -= freq_boundry
  * 
  *             while self.mask_phase >= mask_boundry:             # <<<<<<<<<<<<<<
@@ -7495,7 +7532,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->mask_phase >= __pyx_v_mask_boundry) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":255
+      /* "pippi/oscs/pulsar2d.pyx":257
  * 
  *             while self.mask_phase >= mask_boundry:
  *                 self.mask_phase -= mask_boundry             # <<<<<<<<<<<<<<
@@ -7505,7 +7542,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->mask_phase = (__pyx_v_self->mask_phase - __pyx_v_mask_boundry);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":257
+    /* "pippi/oscs/pulsar2d.pyx":259
  *                 self.mask_phase -= mask_boundry
  * 
  *             while self.burst_phase >= burst_boundry:             # <<<<<<<<<<<<<<
@@ -7516,7 +7553,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_t_19 = ((__pyx_v_self->burst_phase >= __pyx_v_burst_boundry) != 0);
       if (!__pyx_t_19) break;
 
-      /* "pippi/oscs/pulsar2d.pyx":258
+      /* "pippi/oscs/pulsar2d.pyx":260
  * 
  *             while self.burst_phase >= burst_boundry:
  *                 self.burst_phase -= burst_boundry             # <<<<<<<<<<<<<<
@@ -7526,7 +7563,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       __pyx_v_self->burst_phase = (__pyx_v_self->burst_phase - __pyx_v_burst_boundry);
     }
 
-    /* "pippi/oscs/pulsar2d.pyx":260
+    /* "pippi/oscs/pulsar2d.pyx":262
  *                 self.burst_phase -= burst_boundry
  * 
  *             for channel in range(self.channels):             # <<<<<<<<<<<<<<
@@ -7538,7 +7575,7 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
     for (__pyx_t_24 = 0; __pyx_t_24 < __pyx_t_23; __pyx_t_24+=1) {
       __pyx_v_channel = __pyx_t_24;
 
-      /* "pippi/oscs/pulsar2d.pyx":261
+      /* "pippi/oscs/pulsar2d.pyx":263
  * 
  *             for channel in range(self.channels):
  *                 out[i][channel] = sample             # <<<<<<<<<<<<<<
@@ -7558,37 +7595,37 @@ __pyx_v_win_out_b = __pyx_f_5pippi_13interpolation__linear_point_pw(__pyx_t_21, 
       } else if (unlikely(__pyx_t_25 >= __pyx_v_out.shape[1])) __pyx_t_26 = 1;
       if (unlikely(__pyx_t_26 != -1)) {
         __Pyx_RaiseBufferIndexError(__pyx_t_26);
-        __PYX_ERR(0, 261, __pyx_L1_error)
+        __PYX_ERR(0, 263, __pyx_L1_error)
       }
       *((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_out.data + __pyx_t_14 * __pyx_v_out.strides[0]) ) + __pyx_t_25 * __pyx_v_out.strides[1]) )) = __pyx_v_sample;
     }
   }
 
-  /* "pippi/oscs/pulsar2d.pyx":263
+  /* "pippi/oscs/pulsar2d.pyx":265
  *                 out[i][channel] = sample
  * 
  *         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)             # <<<<<<<<<<<<<<
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_t_1 = __pyx_memoryview_fromslice(__pyx_v_out, 2, (PyObject *(*)(char *)) __pyx_memview_get_double, (int (*)(char *, PyObject *)) __pyx_memview_set_double, 0);; if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 263, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_channels, __pyx_t_3) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->samplerate); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 263, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_samplerate, __pyx_t_3) < 0) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5pippi_11soundbuffer_SoundBuffer), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 265, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;

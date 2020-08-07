@@ -1993,9 +1993,9 @@ struct __pyx_opt_args_5pippi_2fx_envelope_follower;
 struct __pyx_opt_args_5pippi_2fx_widen;
 struct __pyx_t_5pippi_2fx_SVFData;
 typedef struct __pyx_t_5pippi_2fx_SVFData __pyx_t_5pippi_2fx_SVFData;
-struct __pyx_opt_args_5pippi_2fx_svf_hp;
-struct __pyx_opt_args_5pippi_2fx_svf_lp;
-struct __pyx_opt_args_5pippi_2fx_svf_bp;
+struct __pyx_opt_args_5pippi_2fx_hpf;
+struct __pyx_opt_args_5pippi_2fx_lpf;
+struct __pyx_opt_args_5pippi_2fx_bpf;
 
 /* "pippi/fx.pxd":7
  * 
@@ -2075,11 +2075,11 @@ struct __pyx_t_5pippi_2fx_SVFData {
 /* "pippi/fx.pxd":28
  *     double k
  * 
- * cpdef SoundBuffer svf_hp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
- * cpdef SoundBuffer svf_lp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
- * cpdef SoundBuffer svf_bp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
+ * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
+ * cpdef SoundBuffer bpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
  */
-struct __pyx_opt_args_5pippi_2fx_svf_hp {
+struct __pyx_opt_args_5pippi_2fx_hpf {
   int __pyx_n;
   PyObject *freq;
   PyObject *res;
@@ -2088,11 +2088,12 @@ struct __pyx_opt_args_5pippi_2fx_svf_hp {
 
 /* "pippi/fx.pxd":29
  * 
- * cpdef SoundBuffer svf_hp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
- * cpdef SoundBuffer svf_lp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
- * cpdef SoundBuffer svf_bp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
+ * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
+ * cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer bpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
+ * 
  */
-struct __pyx_opt_args_5pippi_2fx_svf_lp {
+struct __pyx_opt_args_5pippi_2fx_lpf {
   int __pyx_n;
   PyObject *freq;
   PyObject *res;
@@ -2100,11 +2101,13 @@ struct __pyx_opt_args_5pippi_2fx_svf_lp {
 };
 
 /* "pippi/fx.pxd":30
- * cpdef SoundBuffer svf_hp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
- * cpdef SoundBuffer svf_lp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
- * cpdef SoundBuffer svf_bp(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
+ * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
+ * cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
+ * cpdef SoundBuffer bpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
+ * 
+ * cpdef SoundBuffer buttlpf(SoundBuffer snd, object freq)
  */
-struct __pyx_opt_args_5pippi_2fx_svf_bp {
+struct __pyx_opt_args_5pippi_2fx_bpf {
   int __pyx_n;
   PyObject *freq;
   PyObject *res;

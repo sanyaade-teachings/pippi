@@ -60,12 +60,12 @@ cdef class Pulsar2d:
             self.burst = np.array([1], dtype='long')
 
         self.wt_phase = phase
-        self.win_phase = phase
-        self.freq_phase = phase
-        self.pw_phase = phase
-        self.amp_phase = phase
-        self.burst_phase = phase
-        self.mask_phase = phase
+        self.win_phase = 0
+        self.freq_phase = 0
+        self.pw_phase = 0
+        self.amp_phase = 0
+        self.burst_phase = 0
+        self.mask_phase = 0
 
         self.channels = channels
         self.samplerate = samplerate
@@ -230,7 +230,9 @@ cdef class Pulsar2d:
                 else:
                     mask = 1
 
-            while self.wt_phase >= wt_boundry_p:
+            if self.wt_phase < 0:
+                self.wt_phase += wt_boundry_p
+            elif self.wt_phase >= wt_boundry_p:
                 self.wt_phase -= wt_boundry_p
 
             while self.win_phase >= win_boundry_p:
