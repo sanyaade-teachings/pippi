@@ -2151,6 +2151,7 @@ typedef double (*__pyx_t_5pippi_13interpolation_interp_point_pw_t)(__Pyx_memview
 typedef double (*__pyx_t_5pippi_13interpolation_interp_pos_t)(__Pyx_memviewslice, double);
 struct __pyx_opt_args_5pippi_2fx__fir;
 struct __pyx_opt_args_5pippi_2fx_fir;
+struct __pyx_opt_args_5pippi_2fx_fold;
 struct __pyx_opt_args_5pippi_2fx_envelope_follower;
 struct __pyx_opt_args_5pippi_2fx_widen;
 struct __pyx_t_5pippi_2fx_SVFData;
@@ -2164,7 +2165,7 @@ struct __pyx_opt_args_5pippi_2fx_bpf;
  * cdef double[:,:] _norm(double[:,:] snd, double ceiling)
  * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=*)             # <<<<<<<<<<<<<<
  * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
- * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
+ * 
  */
 struct __pyx_opt_args_5pippi_2fx__fir {
   int __pyx_n;
@@ -2175,17 +2176,30 @@ struct __pyx_opt_args_5pippi_2fx__fir {
  * cdef double[:,:] _norm(double[:,:] snd, double ceiling)
  * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=*)
  * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)             # <<<<<<<<<<<<<<
- * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
- * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
+ * 
+ * cdef double _fold_point(double sample, double last, double samplerate)
  */
 struct __pyx_opt_args_5pippi_2fx_fir {
   int __pyx_n;
   int normalize;
 };
 
-/* "fx.pxd":9
- * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=*)
- * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
+/* "fx.pxd":12
+ * cdef double _fold_point(double sample, double last, double samplerate)
+ * cdef double[:,:] _fold(double[:,:] out, double[:,:] snd, double[:] amp, double samplerate)
+ * cpdef SoundBuffer fold(SoundBuffer snd, object amp=*, bint norm=*)             # <<<<<<<<<<<<<<
+ * 
+ * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
+ */
+struct __pyx_opt_args_5pippi_2fx_fold {
+  int __pyx_n;
+  PyObject *amp;
+  int norm;
+};
+
+/* "fx.pxd":14
+ * cpdef SoundBuffer fold(SoundBuffer snd, object amp=*, bint norm=*)
+ * 
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)             # <<<<<<<<<<<<<<
  * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
  * 
@@ -2195,8 +2209,8 @@ struct __pyx_opt_args_5pippi_2fx_envelope_follower {
   double window;
 };
 
-/* "fx.pxd":10
- * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
+/* "fx.pxd":15
+ * 
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
  * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)             # <<<<<<<<<<<<<<
  * 
@@ -2207,7 +2221,7 @@ struct __pyx_opt_args_5pippi_2fx_widen {
   PyObject *width;
 };
 
-/* "fx.pxd":15
+/* "fx.pxd":20
  * cpdef SoundBuffer softclip(SoundBuffer snd)
  * 
  * ctypedef double (*svf_filter_t)(SVFData* data, double val)             # <<<<<<<<<<<<<<
@@ -2216,7 +2230,7 @@ struct __pyx_opt_args_5pippi_2fx_widen {
  */
 typedef double (*__pyx_t_5pippi_2fx_svf_filter_t)(__pyx_t_5pippi_2fx_SVFData *, double);
 
-/* "fx.pxd":17
+/* "fx.pxd":22
  * ctypedef double (*svf_filter_t)(SVFData* data, double val)
  * 
  * ctypedef struct SVFData:             # <<<<<<<<<<<<<<
@@ -2234,7 +2248,7 @@ struct __pyx_t_5pippi_2fx_SVFData {
   double k;
 };
 
-/* "fx.pxd":28
+/* "fx.pxd":33
  *     double k
  * 
  * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
@@ -2248,7 +2262,7 @@ struct __pyx_opt_args_5pippi_2fx_hpf {
   int norm;
 };
 
-/* "fx.pxd":29
+/* "fx.pxd":34
  * 
  * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
  * cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
@@ -2262,7 +2276,7 @@ struct __pyx_opt_args_5pippi_2fx_lpf {
   int norm;
 };
 
-/* "fx.pxd":30
+/* "fx.pxd":35
  * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
  * cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
  * cpdef SoundBuffer bpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<

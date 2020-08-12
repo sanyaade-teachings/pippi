@@ -40,4 +40,6 @@ cdef extern from "soundpipe.h":
     int sp_buthp_init(sp_data*, sp_buthp*)
     int sp_buthp_compute(sp_data*, sp_buthp*, double*, double*)
 
-cpdef list split(SoundBuffer snd, double interval=*, list freqs=*, object drift=*, double driftwidth=*)
+cpdef list split(SoundBuffer snd, double interval=*, object drift=*, double driftwidth=*, double minfreq=*)
+cpdef list customsplit(SoundBuffer snd, list freqs)
+
