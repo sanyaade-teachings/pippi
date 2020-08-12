@@ -33,6 +33,7 @@ class TestMultiband(TestCase):
         out.write('tests/renders/multiband_customsplit-reconstruct.wav')
 
     def test_spread(self):
+        dsp.seed()
         g = dsp.read('tests/sounds/guitar10s.wav')
         out = multiband.spread(g)
         out.write('tests/renders/multiband_spread-0.5.wav')
