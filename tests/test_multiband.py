@@ -13,6 +13,15 @@ class TestMultiband(TestCase):
         out = fx.norm(out, 1)
         out.write('tests/renders/multiband_split-reconstruct.wav')
 
+    def test_split_and_drift(self):
+        g = dsp.read('tests/sounds/guitar10s.wav')
+        bands = multiband.split(g, 3, 'hann', 100)
+        for i, b in enumerate(bands):
+            b.write('tests/renders/multiband_split-drift-band%02d.wav' % i)
+        out = dsp.mix(bands)
+        out = fx.norm(out, 1)
+        out.write('tests/renders/multiband_split-drift-reconstruct.wav')
+
     def test_customsplit(self):
         g = dsp.read('tests/sounds/guitar10s.wav')
         freqs = [400, 3000, 3005, 10000]

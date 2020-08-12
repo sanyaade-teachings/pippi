@@ -82,7 +82,15 @@ cdef double[:,:] _extract_band(double[:,:] snd, double[:,:] out, double[:] minfr
 cdef double mtof(double note):
     return 2**((note-69)/12.0) * 440.0
 
-cpdef list split(SoundBuffer snd, double interval=3, object drift=None, double driftwidth=0, double minfreq=40):
+cdef double[:] _driftfreq(double[:] freq, double[:] curve):
+    cdef int length = len(freq)
+    cdef int i = 0
+    for i in range(length):
+        pos = <double>i / length
+        freq[i] -= interpolation._linear_pos(curve, pos)
+    return freq
+
+cpdef list split(SoundBuffer snd, double interval=3, object drift=None, double driftwidth=0):
     cdef int length = len(snd)
     cdef int channels = snd.channels
 
@@ -97,24 +105,24 @@ cpdef list split(SoundBuffer snd, double interval=3, object drift=None, double d
         _drift = wavetables.to_window(0)
     else: 
         _drift = wavetables.to_window(drift)
-        _drift = _scaleinplace(_drift, np.min(_drift), np.max(_drift), 0, driftwidth, False)
+        _drift = _scaleinplace(_drift, np.min(_drift), np.max(_drift), 0, driftwidth/2.0, False)
 
     _minfreq = wavetables.to_window(0)
-    _maxfreq = wavetables.to_window(mtof(interval))
+    _maxfreq = _driftfreq(wavetables.to_window(mtof(interval)), _drift)
     band = _extract_band(snd.frames, band, _minfreq, _maxfreq)
     out += [ SoundBuffer(band.copy(), channels=channels, samplerate=snd.samplerate) ]
 
     cdef double note = interval
 
     while mtof(note+interval) < MAXFREQ:
-        _minfreq = wavetables.to_window(mtof(note))
-        _maxfreq = wavetables.to_window(mtof(note+interval))
+        _minfreq = _driftfreq(wavetables.to_window(mtof(note)), _drift)
+        _maxfreq = _driftfreq(wavetables.to_window(mtof(note+interval)), _drift)
         band = _extract_band(snd.frames, band, _minfreq, _maxfreq)
         out += [ SoundBuffer(band.copy(), channels=channels, samplerate=snd.samplerate) ]
         note += interval
 
     if mtof(note) < MAXFREQ:
-        _minfreq = wavetables.to_window(mtof(note))
+        _minfreq = _driftfreq(wavetables.to_window(mtof(note)), _drift)
         _maxfreq = wavetables.to_window(MAXFREQ)
         band = _extract_band(snd.frames, band, _minfreq, _maxfreq)
         out += [ SoundBuffer(band.copy(), channels=channels, samplerate=snd.samplerate) ]
