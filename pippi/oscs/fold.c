@@ -1574,6 +1574,7 @@ struct __pyx_opt_args_5pippi_10wavetables_seesaw {
 };
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_convolve;
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_pan;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose;
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_trim;
@@ -1584,7 +1585,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_toenv;
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)             # <<<<<<<<<<<<<<
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=*)
- *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
+ *     cpdef SoundBuffer pan(SoundBuffer self, object pos=*, str method=*)
  */
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
   int __pyx_n;
@@ -1598,8 +1599,8 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr {
  *     cdef void _fill(SoundBuffer self, double[:,:] frames)
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=*)             # <<<<<<<<<<<<<<
+ *     cpdef SoundBuffer pan(SoundBuffer self, object pos=*, str method=*)
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
- *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
  */
 struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_convolve {
   int __pyx_n;
@@ -1609,6 +1610,19 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_convolve {
 /* "pippi/soundbuffer.pxd":19
  *     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
  *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=*)
+ *     cpdef SoundBuffer pan(SoundBuffer self, object pos=*, str method=*)             # <<<<<<<<<<<<<<
+ *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
+ *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
+ */
+struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_pan {
+  int __pyx_n;
+  PyObject *pos;
+  PyObject *method;
+};
+
+/* "pippi/soundbuffer.pxd":20
+ *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=*)
+ *     cpdef SoundBuffer pan(SoundBuffer self, object pos=*, str method=*)
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)             # <<<<<<<<<<<<<<
  *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
  *     cpdef SoundBuffer trim(SoundBuffer self, bint start=*, bint end=*, double threshold=*, int window=*)
@@ -1619,8 +1633,8 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch {
   double amp;
 };
 
-/* "pippi/soundbuffer.pxd":20
- *     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=*)
+/* "pippi/soundbuffer.pxd":21
+ *     cpdef SoundBuffer pan(SoundBuffer self, object pos=*, str method=*)
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
  *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)             # <<<<<<<<<<<<<<
  *     cpdef SoundBuffer trim(SoundBuffer self, bint start=*, bint end=*, double threshold=*, int window=*)
@@ -1633,7 +1647,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose {
   double amp;
 };
 
-/* "pippi/soundbuffer.pxd":21
+/* "pippi/soundbuffer.pxd":22
  *     cpdef SoundBuffer stretch(SoundBuffer self, double length, object position=*, double amp=*)
  *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
  *     cpdef SoundBuffer trim(SoundBuffer self, bint start=*, bint end=*, double threshold=*, int window=*)             # <<<<<<<<<<<<<<
@@ -1648,7 +1662,7 @@ struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_trim {
   int window;
 };
 
-/* "pippi/soundbuffer.pxd":22
+/* "pippi/soundbuffer.pxd":23
  *     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=*, object position=*, double amp=*)
  *     cpdef SoundBuffer trim(SoundBuffer self, bint start=*, bint end=*, double threshold=*, int window=*)
  *     cpdef Wavetable toenv(SoundBuffer self, double window=*)             # <<<<<<<<<<<<<<
@@ -1710,9 +1724,9 @@ struct __pyx_opt_args_5pippi_2fx_hpf;
 struct __pyx_opt_args_5pippi_2fx_lpf;
 struct __pyx_opt_args_5pippi_2fx_bpf;
 
-/* "pippi/fx.pxd":7
+/* "pippi/fx.pxd":9
+ * cpdef SoundBuffer norm(SoundBuffer snd, double ceiling)
  * 
- * cdef double[:,:] _norm(double[:,:] snd, double ceiling)
  * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=*)             # <<<<<<<<<<<<<<
  * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)
  * 
@@ -1722,8 +1736,8 @@ struct __pyx_opt_args_5pippi_2fx__fir {
   int norm;
 };
 
-/* "pippi/fx.pxd":8
- * cdef double[:,:] _norm(double[:,:] snd, double ceiling)
+/* "pippi/fx.pxd":10
+ * 
  * cdef double[:,:] _fir(double[:,:] snd, double[:,:] out, double[:] impulse, bint norm=*)
  * cpdef SoundBuffer fir(SoundBuffer snd, object impulse, bint normalize=*)             # <<<<<<<<<<<<<<
  * 
@@ -1734,7 +1748,7 @@ struct __pyx_opt_args_5pippi_2fx_fir {
   int normalize;
 };
 
-/* "pippi/fx.pxd":12
+/* "pippi/fx.pxd":14
  * cdef double _fold_point(double sample, double last, double samplerate)
  * cdef double[:,:] _fold(double[:,:] out, double[:,:] snd, double[:] amp, double samplerate)
  * cpdef SoundBuffer fold(SoundBuffer snd, object amp=*, bint norm=*)             # <<<<<<<<<<<<<<
@@ -1747,7 +1761,7 @@ struct __pyx_opt_args_5pippi_2fx_fold {
   int norm;
 };
 
-/* "pippi/fx.pxd":14
+/* "pippi/fx.pxd":16
  * cpdef SoundBuffer fold(SoundBuffer snd, object amp=*, bint norm=*)
  * 
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)             # <<<<<<<<<<<<<<
@@ -1759,7 +1773,7 @@ struct __pyx_opt_args_5pippi_2fx_envelope_follower {
   double window;
 };
 
-/* "pippi/fx.pxd":15
+/* "pippi/fx.pxd":17
  * 
  * cpdef Wavetable envelope_follower(SoundBuffer snd, double window=*)
  * cpdef SoundBuffer widen(SoundBuffer snd, object width=*)             # <<<<<<<<<<<<<<
@@ -1771,7 +1785,7 @@ struct __pyx_opt_args_5pippi_2fx_widen {
   PyObject *width;
 };
 
-/* "pippi/fx.pxd":20
+/* "pippi/fx.pxd":22
  * cpdef SoundBuffer softclip(SoundBuffer snd)
  * 
  * ctypedef double (*svf_filter_t)(SVFData* data, double val)             # <<<<<<<<<<<<<<
@@ -1780,7 +1794,7 @@ struct __pyx_opt_args_5pippi_2fx_widen {
  */
 typedef double (*__pyx_t_5pippi_2fx_svf_filter_t)(__pyx_t_5pippi_2fx_SVFData *, double);
 
-/* "pippi/fx.pxd":22
+/* "pippi/fx.pxd":24
  * ctypedef double (*svf_filter_t)(SVFData* data, double val)
  * 
  * ctypedef struct SVFData:             # <<<<<<<<<<<<<<
@@ -1798,7 +1812,7 @@ struct __pyx_t_5pippi_2fx_SVFData {
   double k;
 };
 
-/* "pippi/fx.pxd":33
+/* "pippi/fx.pxd":35
  *     double k
  * 
  * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
@@ -1812,7 +1826,7 @@ struct __pyx_opt_args_5pippi_2fx_hpf {
   int norm;
 };
 
-/* "pippi/fx.pxd":34
+/* "pippi/fx.pxd":36
  * 
  * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
  * cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
@@ -1826,7 +1840,7 @@ struct __pyx_opt_args_5pippi_2fx_lpf {
   int norm;
 };
 
-/* "pippi/fx.pxd":35
+/* "pippi/fx.pxd":37
  * cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
  * cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
  * cpdef SoundBuffer bpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)             # <<<<<<<<<<<<<<
@@ -1858,7 +1872,7 @@ struct __pyx_obj_5pippi_10wavetables_Wavetable {
 
 
 /* "pippi/soundbuffer.pxd":10
- * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method)
+ * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double[:] pos, int method)
  * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
  *     cdef public int samplerate
@@ -2021,7 +2035,7 @@ static struct __pyx_vtabstruct_5pippi_10wavetables_Wavetable *__pyx_vtabptr_5pip
 
 
 /* "pippi/soundbuffer.pxd":10
- * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double pos, int method)
+ * cdef double[:,:] _pan(double[:,:] out, int length, int channels, double[:] pos, int method)
  * 
  * cdef class SoundBuffer:             # <<<<<<<<<<<<<<
  *     cdef public int samplerate
@@ -2033,6 +2047,7 @@ struct __pyx_vtabstruct_5pippi_11soundbuffer_SoundBuffer {
   void (*_fill)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, __Pyx_memviewslice);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*adsr)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_adsr *__pyx_optional_args);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*convolve)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_convolve *__pyx_optional_args);
+  struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*pan)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_pan *__pyx_optional_args);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*stretch)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, double, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_stretch *__pyx_optional_args);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*transpose)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, PyObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_transpose *__pyx_optional_args);
   struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *(*trim)(struct __pyx_obj_5pippi_11soundbuffer_SoundBuffer *, int __pyx_skip_dispatch, struct __pyx_opt_args_5pippi_11soundbuffer_11SoundBuffer_trim *__pyx_optional_args);

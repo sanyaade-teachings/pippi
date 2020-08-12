@@ -2,6 +2,8 @@
 
 from pippi cimport interpolation
 from pippi cimport wavetables
+from pippi cimport shapes
+from pippi cimport fx
 from pippi.lists cimport _scaleinplace
 from libc.stdlib cimport malloc, free
 import numpy as np
@@ -158,3 +160,16 @@ cpdef list customsplit(SoundBuffer snd, list freqs):
     out += [ SoundBuffer(band.copy(), channels=channels, samplerate=snd.samplerate) ]
 
     return out
+
+cpdef SoundBuffer spread(SoundBuffer snd, double amount=0.5):
+    cdef SoundBuffer out = SoundBuffer(length=snd.dur, channels=snd.channels, samplerate=snd.samplerate)
+
+    amount = max(min(0.5, amount), 0)
+
+    cdef list bands = split(snd)
+    for b in bands:
+        curve = wavetables.Wavetable(shapes.win('hann', length=snd.dur/4), 0.5-amount, 0.5+amount)
+        out.dub(b.pan(curve))
+
+    return fx.norm(out, snd.mag)
+
