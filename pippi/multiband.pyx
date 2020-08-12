@@ -8,7 +8,6 @@ import numpy as np
 
 cdef double[:,:] _extract_band(double[:,:] snd, double[:,:] out, double[:] minfreq, double[:] maxfreq):
     cdef sp_data* sp
-    cdef sp_bal* bal
     cdef sp_buthp* buthp1
     cdef sp_buthp* buthp2
     cdef sp_butlp* butlp1
@@ -29,9 +28,6 @@ cdef double[:,:] _extract_band(double[:,:] snd, double[:,:] out, double[:] minfr
     sp_create(&sp)
 
     for c in range(channels):
-        sp_bal_create(&bal)
-        sp_bal_init(sp, bal)
-
         sp_buthp_create(&buthp1)
         sp_buthp_create(&buthp2)
         sp_buthp_init(sp, buthp1)
@@ -55,15 +51,15 @@ cdef double[:,:] _extract_band(double[:,:] snd, double[:,:] out, double[:] minfr
 
             sample = <double>snd[i,c]
 
-            sp_buthp_compute(sp, buthp1, &sample, &filtered)
-            sp_buthp_compute(sp, buthp2, &filtered, &filtered)
-            sp_butlp_compute(sp, butlp1, &filtered, &filtered)
-            sp_butlp_compute(sp, butlp2, &filtered, &filtered)
-            sp_bal_compute(sp, bal, &filtered, &sample, &output)
+            if _maxfreq < 20000:
+                sp_buthp_compute(sp, buthp1, &sample, &filtered)
+                sp_buthp_compute(sp, buthp2, &filtered, &filtered)
+
+            if _minfreq > 1:
+                sp_butlp_compute(sp, butlp1, &filtered, &filtered)
+                sp_butlp_compute(sp, butlp2, &filtered, &output)
 
             out[i,c] = <double>output
-
-        sp_bal_destroy(&bal)
 
         sp_buthp_destroy(&buthp1)
         sp_buthp_destroy(&buthp2)
@@ -75,7 +71,10 @@ cdef double[:,:] _extract_band(double[:,:] snd, double[:,:] out, double[:] minfr
 
     return out
 
-cpdef list split(SoundBuffer snd, double bandwidth=100, double drift=0):
+cdef double mtof(double note):
+    return 2**((note-69)/12.0) * 440.0
+
+cpdef list split(SoundBuffer snd, double interval=3, list freqs=None, object drift=None, double driftwidth=0):
     cdef int length = len(snd)
     cdef int channels = snd.channels
 
@@ -87,16 +86,22 @@ cpdef list split(SoundBuffer snd, double bandwidth=100, double drift=0):
 
     cdef double freq = 0
 
-    while freq+bandwidth < 20000:
-        minfreq = wavetables.to_window(freq)
-        maxfreq = wavetables.to_window(freq + bandwidth)
+    minfreq = wavetables.to_window(0)
+    maxfreq = wavetables.to_window(mtof(interval))
+    band = _extract_band(snd.frames, band, minfreq, maxfreq)
+    out += [ SoundBuffer(band.copy(), channels=channels, samplerate=snd.samplerate) ]
+
+    cdef double note = interval
+
+    while mtof(note+interval) < 20000:
+        minfreq = wavetables.to_window(mtof(note))
+        maxfreq = wavetables.to_window(mtof(note+interval))
         band = _extract_band(snd.frames, band, minfreq, maxfreq)
         out += [ SoundBuffer(band.copy(), channels=channels, samplerate=snd.samplerate) ]
+        note += interval
 
-        freq += bandwidth
-
-    if freq < 20000:
-        minfreq = wavetables.to_window(freq)
+    if mtof(note) < 20000:
+        minfreq = wavetables.to_window(mtof(note))
         maxfreq = wavetables.to_window(20000)
         band = _extract_band(snd.frames, band, minfreq, maxfreq)
         out += [ SoundBuffer(band.copy(), channels=channels, samplerate=snd.samplerate) ]
