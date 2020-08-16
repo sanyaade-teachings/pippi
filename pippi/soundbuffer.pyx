@@ -840,8 +840,16 @@ cdef class SoundBuffer:
             If a second length is given, iterate in randomly-sized 
             grains, given the minimum and maximum sizes.
         """
+        minlength = min(max(0, minlength), self.dur)
+        if maxlength > 0:
+            maxlength = min(self.dur, maxlength)
+
+        if minlength == 0 or minlength == maxlength:
+            yield self
+            return
+
         cdef int framesread = 0
-        cdef int maxframes = <int>(maxlength * self.samplerate)
+        cdef int maxframes = <int>(maxlength * self.samplerate) 
         cdef int minframes = <int>(minlength * self.samplerate)
         cdef int grainlength = minframes
         cdef int sourcelength = len(self)
