@@ -11,6 +11,9 @@ cdef inline int DEFAULT_SAMPLERATE = 44100
 cdef inline int DEFAULT_CHANNELS = 2
 cdef inline double MIN_PULSEWIDTH = 0.0001
 
+cdef double _linear_point_osc(double[:] data, double phase, BLIData* bl_data) nogil:
+    return interpolation._linear_point(data, phase)
+
 cdef class Osc:
     """ simple wavetable osc with linear interpolation
     """
@@ -25,6 +28,8 @@ cdef class Osc:
             int wtsize=4096,
             int channels=DEFAULT_CHANNELS,
             int samplerate=DEFAULT_SAMPLERATE,
+
+            int quality = 0
         ):
 
         self.freq = wavetables.to_wavetable(freq, self.wtsize)
@@ -41,6 +46,13 @@ cdef class Osc:
         self.wtsize = wtsize
 
         self.wavetable = wavetables.to_wavetable(wavetable, self.wtsize)
+
+        if (quality > 0):
+            self.bl_data = interpolation._bli_init(quality, True)
+            self.interp_method = interpolation._bli_point
+        else:
+            self.bl_data = interpolation._bli_init(1, True)
+            self.interp_method = _linear_point_osc
 
     def play(self, length):
         framelength = <int>(length * self.samplerate)
@@ -64,18 +76,25 @@ cdef class Osc:
         cdef double wt_phase_inc = (1.0 / self.samplerate) * self.wtsize
         cdef double[:,:] out = np.zeros((length, self.channels), dtype='d')
 
+        cdef double last_inc = 1
+
         for i in range(length):
             freq = interpolation._linear_point(self.freq, self.freq_phase)
             amp = interpolation._linear_point(self.amp, self.amp_phase)
             pm = interpolation._linear_point(self.pm, self.pm_phase)
-            sample = interpolation._linear_point(self.wavetable, self.wt_phase) * amp
+            if last_inc < 1: last_inc = 1
+            self.bl_data.resampling_factor = abs(1/last_inc)
+            self.bl_data.table_length = wt_boundry
+            sample = self.interp_method(self.wavetable, self.wt_phase, self.bl_data) * amp
 
             self.freq_phase += freq_phase_inc
             self.amp_phase += amp_phase_inc
             self.pm_phase += pm_phase_inc
-            self.wt_phase += freq * wt_phase_inc
-            self.wt_phase += (pm - lastpm) * wt_boundry * .5
+            last_inc = freq * wt_phase_inc
+            last_inc += (pm - lastpm) * wt_boundry * .5
             lastpm = pm
+            self.wt_phase += last_inc
+            
 
             if self.wt_phase < 0:
                 self.wt_phase += wt_boundry
@@ -93,6 +112,7 @@ cdef class Osc:
 
             for channel in range(self.channels):
                 out[i][channel] = sample
+
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 

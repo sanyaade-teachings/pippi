@@ -4,7 +4,7 @@ import numpy as np
 cimport cython
 from libc cimport math
 from pippi.wavetables cimport to_wavetable, to_flag, LINEAR, HERMITE, TRUNC
-
+from libc.stdlib cimport malloc, free
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -179,3 +179,108 @@ cdef interp_pos_t get_pos_interpolator(str flag):
         interpolator = _linear_pos
 
     return interpolator
+
+# Starting with "A flexible sampling-rate conversion method" (Smith and Gosset 1984)
+
+cdef BLIData* _bli_init(int quality, bint loop):
+
+    cdef BLIData* data = <BLIData*>malloc(sizeof(BLIData))
+
+    data.quality = quality
+    data.samples_per_0x = 512
+    data.filter_length = quality * data.samples_per_0x
+
+    if loop: 
+        data.wrap = 1
+    else:
+        data.wrap = 0
+
+    sinc_domain = np.linspace(0, data.quality, data.filter_length)
+    sinc_sample = np.sinc(sinc_domain)
+    window = np.blackman(data.filter_length * 2)[data.filter_length:]
+    sinc_sample *= window
+
+    data.filter_table = <double*>malloc(sizeof(double) * (data.filter_length + 1))
+    for i, sample in enumerate(sinc_sample):
+        data.filter_table[i] = sample
+
+    data.filter_table[data.filter_length] = 0
+
+    return data
+
+cdef void _bli_goodbye(BLIData* data):
+
+    free(data.filter_table)
+    free(data)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _get_filter_coeff(BLIData* data, double pos) nogil:
+
+    cdef double expanded_phase = pos * data.samples_per_0x
+    cdef int left_index = <int> expanded_phase
+    cdef int right_index = left_index + 1
+    cdef double fractional_part = expanded_phase - left_index
+    return data.filter_table[left_index] * (1 - fractional_part) + data.filter_table[right_index] * fractional_part
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _bli_point(double[:] table, double point, BLIData* data) nogil:
+
+    cdef int table_length = data.table_length
+    cdef double resampling_factor = data.resampling_factor
+
+    cdef int wrap = data.wrap * (data.table_length - 1)
+    wrap += 1
+    
+    cdef int left_index = <int>point
+    cdef int right_index = (left_index + 1)
+    if right_index > (table_length - 1):
+        right_index -= wrap
+    cdef double fractional_part = point - left_index
+
+    if resampling_factor > 1: resampling_factor = 1
+
+    # start the accumulation
+    cdef double sample = 0
+    # apply the left hand side of the filter on "past wavetable samples"
+    # tricky, the first lookup in the filter is the fractional part scaled down by the resampling factor
+    cdef double filter_phasor = fractional_part * resampling_factor
+    # first sample on the chopping block is the left neighbor
+    cdef int read_index = left_index
+    cdef double coeff = 0
+
+    while filter_phasor < data.quality:
+        # # get the interpolated coefficient
+        coeff = _get_filter_coeff(data, filter_phasor)
+        # increment through the filter indices by the resampling factor
+        filter_phasor += resampling_factor
+        # for each stop in the filter table, burn a new sample value
+        sample += coeff * table[read_index]
+        # next sample on the chopping block is the previous one
+        read_index -= 1
+        if read_index < 0:
+            read_index += wrap
+
+    # apply the right hand side of the filter on "future wavetable samples"
+    # tricky, the first lookup in the filter is 1 - the fractional part scaled down by the resampling factor
+    filter_phasor = (1 - fractional_part) * resampling_factor
+    # pretty much same as the other wing but we move forward through the wavetable at each new coefficient
+    read_index = right_index
+
+    while filter_phasor < data.quality:
+        coeff = _get_filter_coeff(data, filter_phasor)
+        filter_phasor += resampling_factor
+        sample += coeff * table[read_index]
+        read_index += 1
+        if read_index > table_length - 1:
+            read_index -= wrap
+
+    # return left_index
+    return sample * resampling_factor
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double _bli_pos(double[:] table, double pos, BLIData* data) nogil:
+    return _bli_point(table, pos * data.table_length, data)
+

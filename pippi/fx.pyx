@@ -699,89 +699,176 @@ cpdef SoundBuffer go(SoundBuffer snd,
 
     return out
 
-# 2nd order state variable filters adapted from google ipython notebook by Starling Labs
+# 2nd order state variable filter cookbook adapted from google ipython notebook
 # https://github.com/google/music-synthesizer-for-android/blob/master/lab/Second%20order%20sections%20in%20matrix%20form.ipynb
-cdef double _svf_hp(SVFData* data, double val):
-    cdef double C0 = -data.k * data.a1 - data.a2
-    cdef double C1 = data.k * data.a2 - (1. - data.a3)
-    cdef double D = 1. - data.k * data.a2 - data.a3
-    return val * D + data.X[0] * C0 + data.X[1] * C1
+# trapezoidal integration from Andrew Simper http://www.cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
+cdef bint _is_2d_window(object item):
+    cdef bint all_numbers = True
+    if np.asarray(item).ndim > 1:
+        return True
+    if isinstance(item, list):
+        for thing in item:
+            if not (isinstance(thing, int) or isinstance(thing, float)):
+                all_numbers = False
+        return not all_numbers
 
-cdef double _svf_lp(SVFData* data, double val):
-    cdef double C0 = data.a2
-    cdef double C1 = 1. - data.a3
-    cdef double D = data.a3
-    return val * D + data.X[0] * C0 + data.X[1] * C1
+cdef void _svf_core(SVFData* data):
+    
+    data.res = max(min(data.res, 1), 0)
+    cdef double g = math.tan(PI * data.freq) * data.shelf
+    cdef double k = 2. - 2. * data.res
 
-cdef double _svf_bp(SVFData* data, double val):
-    cdef double C0 = data.a1
-    cdef double C1 = -data.a2
-    cdef double D = data.a2
-    return  val * D + data.X[0] * C0 + data.X[1] * C1
+    cdef double a1 = 1. / (1. + g * (g + k))
+    cdef double a2 = g * a1
+    cdef double a3 = g * a2
 
-cdef void _svf_update_coeff(SVFData* data, double freq, double res):
-    data.g = math.tan(PI * freq)
-    data.k = 2. - 2. * res
+    data.Az[0] = 2. * a1 - 1.
+    data.Az[1] = -2. * a2
+    data.Az[2] = 2. * a2
+    data.Az[3] = 1. - 2. * a3
 
-    data.a1 = 1. / (1. + data.g * (data.g + data.k))
-    data.a2 = data.g * data.a1
-    data.a3 = data.g * data.a2
+    data.Bz[0] = 2. * a2
+    data.Bz[1] = 2. * a3
 
-    data.Az[0] = 2. * data.a1 - 1.
-    data.Az[1] = -2. * data.a2
-    data.Az[2] = 2. * data.a2
-    data.Az[3] = 1. - 2. * data.a3
+    cdef double[3] C_v0 = [1, 0, 0]
+    cdef double[3] C_v1 = [a2, a1, -a2]
+    cdef double[3] C_v2 = [a3, a2, 1 - a3]
 
-    data.Bz[0] = 2. * data.a2
-    data.Bz[1] = 2. * data.a3
+    data.Cz[0] = C_v0[0] * data.M[0] + C_v1[0] * data.M[1]  + C_v2[0] * data.M[2]
+    data.Cz[1] = C_v0[1] * data.M[0] + C_v1[1] * data.M[1]  + C_v2[1] * data.M[2]
+    data.Cz[2] = C_v0[2] * data.M[0] + C_v1[2] * data.M[1]  + C_v2[2] * data.M[2]
 
-cdef SoundBuffer _svf(svf_filter_t method, SoundBuffer snd, object freq, object res, bint norm):
+cdef void _svf_lp(SVFData* data):
+    data.M = [0, 0, 1]
+    data.shelf = 1
+    _svf_core(data) 
+
+cdef void _svf_bp(SVFData* data):
+    data.M = [0, 1, 0]
+    data.shelf = 1
+    _svf_core(data)
+
+cdef void _svf_hp(SVFData* data):
+    cdef double k = 2 - 2 * data.res
+    data.M = [1, -k, -1]
+    data.shelf = 1
+    _svf_core(data)
+
+cdef void _svf_notch(SVFData* data):
+    cdef double k = 2 - 2 * data.res
+    data.M = [1, -k, 0]
+    data.shelf = 1
+    _svf_core(data)
+
+cdef void _svf_peak(SVFData* data):
+    cdef double k = 2 - 2 * data.res
+    data.M = [1, -k, -2]
+    data.shelf = 1
+    _svf_core(data)
+
+cdef void _svf_bell(SVFData* data):
+    cdef double A = 10 ** (data.gain / 40.)
+    cdef double k = 1./(data.res * A)
+    data.res = 1 - 0.5 * k
+    data.M = [1, k * (A * A - 1), 0]
+    data.shelf = 1
+    _svf_core(data)
+
+cdef void _svf_lshelf(SVFData* data):
+    cdef double A = 10 ** (data.gain / 40.)
+    cdef double k = 1./(data.res)
+    data.res = 1 - 0.5 * k
+    data.M = [1, k * (A - 1), A * A - 1]
+    data.shelf = 1/math.sqrt(A)
+    _svf_core(data)
+
+cdef void _svf_hshelf(SVFData* data):
+    cdef double A = 10 ** (data.gain / 40.)
+    cdef double A2 = A * A
+    cdef double k = 1./(data.res)
+    data.res = 1 - 0.5 * k
+    data.M = [A2, k * (A - A2), 1 - A2]
+    data.shelf = math.sqrt(A)
+    _svf_core(data)
+
+cdef SoundBuffer _svf(svf_filter_t mode, SoundBuffer snd, object freq, object res, object gain, bint norm):
     if freq is None:
         freq = 100
-
     if res is None:
         res = 0
+    if gain is None:
+        gain = 0
 
     cdef int channels = snd.channels
     cdef int length = len(snd)
     cdef int samplerate = snd.samplerate
     cdef double[:,:] frames = snd.frames
 
-    cdef double[:] _freq = wavetables.to_window(freq)
-    cdef double[:] _res = wavetables.to_window(res)
-    cdef double[:,:] out = np.zeros((length, channels), dtype='d')
+    cdef int freq_ch = 1
+    cdef double[:,:] _freq
+    window = []
+    if _is_2d_window(freq):
+        for channel in freq:
+            window.append(wavetables.to_window(channel))
+        _freq = np.asarray(window)
+        freq_ch = len(freq)
 
+    else:
+        _freq = np.asarray([wavetables.to_window(freq)])
+    
+    cdef int res_ch = 1
+    cdef double[:,:] _res
+    window = []
+    if _is_2d_window(res):
+        for channel in res:
+            window.append(wavetables.to_window(channel))
+        _res = np.asarray(window)
+        res_ch = len(res)
+    else:
+        _res = np.asarray([wavetables.to_window(res)])
+
+    cdef int gain_ch = 1
+    cdef double[:,:] _gain
+    window = []
+    if _is_2d_window(gain):
+        for channel in gain:
+            window.append(wavetables.to_window(channel))
+        _gain = np.asarray(window)
+        gain_ch = len(gain)
+    else:
+        _gain = np.asarray([wavetables.to_window(gain)])
+        
     cdef int c = 0
     cdef int i = 0
-    cdef double f
-    cdef double r
-    cdef double val
+    cdef double sample
     cdef double pos = 0
+    cdef int _freq_ch = 0
+    cdef int _res_ch = 0
+    cdef int _gain_ch = 0
 
     cdef SVFData* data = <SVFData*>malloc(sizeof(SVFData))
+    cdef double[:,:] out = np.zeros((length, channels), dtype='d')
+
     for c in range(channels):
-        data.Az = [0, 0, 0, 0]
-        data.Bz = [0, 0]
+        
         data.X = [0, 0]
 
-        data.a1 = 0
-        data.a2 = 0
-        data.a3 = 0
-        data.g = 0
-        data.k = 0
+        _freq_ch = c % freq_ch
+        _res_ch = c % res_ch
+        _gain_ch = c % gain_ch
 
         for i in range(length):
             pos = <double>i / length
-            f = min(_linear_pos(_freq, pos) / samplerate, 0.49)
-            r = min(_linear_pos(_res, pos), 0.99999999)
-            val = frames[i,c]
+            data.freq = max(min(_linear_pos(_freq[ _freq_ch], pos) / samplerate, 0.49), -.49)
+            data.res = _linear_pos(_res[_res_ch], pos)
+            data.gain = _linear_pos(_gain[_gain_ch], pos)
+            sample = frames[i,c]
 
-            _svf_update_coeff(data, f, r)
+            mode(data)
 
-            out[i,c] = method(data, val)
-
-            data.X[0] = val * data.Bz[0] + data.X[0] * data.Az[0] + data.X[1] * data.Az[1]
-            data.X[1] = val * data.Bz[1] + data.X[0] * data.Az[2] + data.X[1] * data.Az[3]
+            out[i,c] = sample * data.Cz[0] + data.X[0] * data.Cz[1] + data.X[1] * data.Cz[2]
+            data.X[0] = sample * data.Bz[0] + data.X[0] * data.Az[0] + data.X[1] * data.Az[1]
+            data.X[1] = sample * data.Bz[1] + data.X[0] * data.Az[2] + data.X[1] * data.Az[3]
 
     if norm:
         out = _norm(out, snd.mag)
@@ -791,15 +878,71 @@ cdef SoundBuffer _svf(svf_filter_t method, SoundBuffer snd, object freq, object 
     return SoundBuffer(out, channels=channels, samplerate=samplerate)   
 
 cpdef SoundBuffer hpf(SoundBuffer snd, object freq=None, object res=None, bint norm=True):
-    cdef svf_filter_t method = _svf_hp
-    return _svf(method, snd, freq, res, norm)
+    cdef svf_filter_t mode = _svf_hp
+    return _svf(mode, snd, freq, res, None, norm)
 
 cpdef SoundBuffer lpf(SoundBuffer snd, object freq=None, object res=None, bint norm=True):
-    cdef svf_filter_t method = _svf_lp
-    return _svf(method, snd, freq, res, norm)
+    cdef svf_filter_t mode = _svf_lp
+    return _svf(mode, snd, freq, res, None, norm)
 
 cpdef SoundBuffer bpf(SoundBuffer snd, object freq=None, object res=None, bint norm=True):
-    cdef svf_filter_t method = _svf_bp
-    return _svf(method, snd, freq, res, norm)
+    cdef svf_filter_t mode = _svf_bp
+    return _svf(mode, snd, freq, res, None, norm)
+
+cpdef SoundBuffer notchf(SoundBuffer snd, object freq=None, object res=None, bint norm=True):
+    cdef svf_filter_t mode = _svf_notch
+    return _svf(mode, snd, freq, res, None, norm)
+
+cpdef SoundBuffer peakf(SoundBuffer snd, object freq=None, object res=None, bint norm=True):
+    cdef svf_filter_t mode = _svf_peak
+    return _svf(mode, snd, freq, res, None, norm)
+
+cpdef SoundBuffer belleq(SoundBuffer snd, object freq=None, object q=None, object gain=None, bint norm=True):
+    cdef svf_filter_t mode = _svf_bell
+    return _svf(mode, snd, freq, q, gain, norm)
+
+cpdef SoundBuffer lshelfeq(SoundBuffer snd, object freq=None, object q=None, object gain=None, bint norm=True):
+    cdef svf_filter_t mode = _svf_lshelf
+    return _svf(mode, snd, freq, q, gain, norm)
+
+cpdef SoundBuffer hshelfeq(SoundBuffer snd, object freq=None, object q=None, object gain=None, bint norm=True):
+    cdef svf_filter_t mode = _svf_hshelf
+    return _svf(mode, snd, freq, q, gain, norm)
+
+# mid/side encoding/decoding
+
+cdef double _m_encode(double left, double right):
+    return (left + right) * .707
+
+cdef double _s_encode(double left, double right):
+    return (left - right) * .707 
+
+cdef double _l_decode(double mid, double side):
+    return (mid + side) * .707
+
+cdef double _r_decode(double mid, double side):
+    return (mid - side) * .707
+
+cpdef SoundBuffer ms_encode(SoundBuffer snd):
+    snd = snd.remix(2)
+    cdef int length = len(snd)
+    cdef double[:,:] out = np.zeros((length, 2), dtype='d')
+    cdef double[:,:] frames = snd.frames
+    for i in range(length):
+        out[i, 0] = _m_encode(snd.frames[i, 0], snd.frames[i, 1])
+        out[i, 1] = _s_encode(snd.frames[i, 0], snd.frames[i, 1])
+    return SoundBuffer(out, channels=2, samplerate=snd.samplerate)
+
+cpdef SoundBuffer ms_decode(SoundBuffer snd):
+    snd = snd.remix(2)
+    cdef int length = len(snd)
+    cdef double[:,:] out = np.zeros((length, 2), dtype='d')
+    cdef double[:,:] frames = snd.frames
+    for i in range(length):
+        out[i, 0] = _l_decode(snd.frames[i, 0], snd.frames[i, 1])
+        out[i, 1] = _r_decode(snd.frames[i, 0], snd.frames[i, 1])
+    return SoundBuffer(out, channels=2, samplerate=snd.samplerate)
+
+
 
 

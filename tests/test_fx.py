@@ -243,6 +243,86 @@ class TestFx(TestCase):
         out = fx.bpf(snd, freq, res)
         out.write('tests/renders/fx_svf_bp-r1.wav')
 
+    def test_svf_notchf(self):
+        snd = dsp.read('tests/sounds/whitenoise10s.wav')
+        freq = [20, 10000]
+        res = 0
+        out = fx.notchf(snd, freq, res)
+        out.write('tests/renders/fx_svf_notchf-r0.wav')
+
+        freq = [20, 10000]
+        res = .5
+        out = fx.notchf(snd, freq, res)
+        out.write('tests/renders/fx_svf_notchf-r1.wav')
+
+    def test_svf_peakf(self):
+        snd = dsp.read('tests/sounds/whitenoise10s.wav')
+        freq = [20, 10000]
+        res = .5
+        out = fx.peakf(snd, freq, res)
+        out.write('tests/renders/fx_svf_peakf-r0.wav')
+
+        freq = [20, 10000]
+        res = 1
+        out = fx.peakf(snd, freq, res)
+        out.write('tests/renders/fx_svf_peakf-r1.wav')
+
+    def test_svf_belleq(self):
+        snd = dsp.read('tests/sounds/whitenoise10s.wav')
+        freq = [20, 10000]
+        q = .5
+        gain = -30
+        out = fx.belleq(snd, freq, q, gain)
+        out.write('tests/renders/fx_svf_belleq-q0.wav')
+
+        freq = 600
+        q = .5
+        gain = [-30, 30]
+        out = fx.belleq(snd, freq, q, gain)
+        out.write('tests/renders/fx_svf_belleq-q1.wav')
+
+    def test_svf_hshelfeq(self):
+        snd = dsp.read('tests/sounds/whitenoise10s.wav')
+        freq = [20, 10000]
+        q = .5
+        gain = -30
+        out = fx.belleq(snd, freq, q, gain)
+        out.write('tests/renders/fx_svf_hshelfeq-q0.wav')
+
+        freq = 600
+        q = .5
+        gain = [-30, 30]
+        out = fx.belleq(snd, freq, q, gain)
+        out.write('tests/renders/fx_svf_hshelfeq-q1.wav')
+
+    def test_svf_lshelfeq(self):
+        snd = dsp.read('tests/sounds/whitenoise10s.wav')
+        freq = [20, 10000]
+        q = .5
+        gain = -30
+        out = fx.belleq(snd, freq, q, gain)
+        out.write('tests/renders/fx_svf_lshelfeq-q0.wav')
+
+        freq = 440
+        q = 8
+        gain = [-30, 30]
+        out = fx.belleq(snd, freq, q, gain)
+        out.write('tests/renders/fx_svf_lshelfeq-q1.wav')
+
+    def test_svf_stereo(self):
+        snd = dsp.read('tests/sounds/whitenoise10s.wav')
+        freql = [20, 10000]
+        freqr = [10000, 20]
+        res = [0, 1]
+        out = fx.bpf(snd, [freql, freqr], res)
+        out.write('tests/renders/fx_svf_st-r0.wav')
+
+        freq = [20, 10000]
+        resl = "sine"
+        resr = "cos"
+        out = fx.bpf(snd, freq, [resl, resr])
+        out.write('tests/renders/fx_svf_st-r1.wav')
+
     def test_fold(self):
         amp = dsp.win('hannin', 1, 10)
 
@@ -253,5 +333,17 @@ class TestFx(TestCase):
         snd = oscs.Osc('sine', freq=200).play(1)
         out = fx.fold(snd, amp)
         out.write('tests/renders/fx_fold_sine.wav')
+
+    def test_ms(self):
+
+        snd = dsp.read('tests/sounds/guitar1s.wav')
+        ms = fx.ms_encode(snd)
+        lr = fx.ms_decode(ms)
+        lr.write('tests/renders/fx_ms_parity.wav')
+
+        snd1 = oscs.Osc('sine', freq=200).play(1).pan(0)
+        snd2 = oscs.Osc('tri', freq=201).play(1).pan(1)
+        out = fx.ms_decode(snd1 & snd2)
+        out.write('tests/renders/fx_ms_detune.wav')
 
                
