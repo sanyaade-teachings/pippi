@@ -1,8 +1,5 @@
 #cython: language_level=3
 
-from pippi cimport interpolation
-from pippi.interpolation cimport BLIData
-
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
 cdef double[:] _drink(double[:] wt, double width, double minval, double maxval)
 cdef double[:] _fir(double[:] data, double[:] impulse, bint norm=*)
@@ -16,7 +13,6 @@ cdef class Wavetable:
     cdef public double lowvalue
     cdef public double highvalue
     cdef public int length
-    cdef BLIData* bl_data
 
     cpdef Wavetable clip(Wavetable self, double minval=*, double maxval=*)
     cpdef Wavetable cut(Wavetable self, int start, int length)

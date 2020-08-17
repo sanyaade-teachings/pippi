@@ -15,6 +15,7 @@ from libc.stdlib cimport malloc, realloc, calloc, free
 from libc cimport math
 
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_WTSIZE
+from pippi cimport interpolation
 from pippi cimport rand
 from pippi import graph
 from pippi.soundbuffer cimport SoundBuffer
@@ -307,8 +308,7 @@ cdef class Wavetable:
             object lowvalue=None, 
             object highvalue=None,
             int wtsize=0, 
-            bint window=False,
-            int bl_quality=0):
+            bint window=False):
         cdef bint scaled = False
         cdef bint resized = False
 
