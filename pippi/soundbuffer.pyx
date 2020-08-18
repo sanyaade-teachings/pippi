@@ -319,6 +319,9 @@ cdef class SoundBuffer:
         if isinstance(value, numbers.Real):
             out = np.add(self.frames, value)
         elif isinstance(value, SoundBuffer):
+            if value.channels != self.channels:
+                value = value.remix(self.channels)
+
             if value.frames is None:
                 out = self.frames.copy()
             else:
@@ -343,8 +346,14 @@ cdef class SoundBuffer:
             else:
                 return SoundBuffer(value, channels=self.channels, samplerate=self.samplerate)
 
+        cdef SoundBuffer out
+
         if isinstance(value, numbers.Real):
             self.frames = np.add(self.frames, value)
+        elif isinstance(value, SoundBuffer):
+            if value.channels != self.channels:
+                value = value.remix(self.channels)
+            self.dub(value, self.dur)
         else:
             try:
                 self.frames = np.vstack((self.frames, value))
@@ -929,9 +938,11 @@ cdef class SoundBuffer:
         if reps <= 1:
             return SoundBuffer(self.frames, samplerate=self.samplerate, channels=self.channels)
 
-        out = SoundBuffer(self.frames, samplerate=self.samplerate, channels=self.channels)
-        for _ in range(reps-1):
-            out += self
+        cdef double length = reps * self.dur
+        out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
+
+        for _ in range(reps):
+            out.dub(self)
 
         return out
 

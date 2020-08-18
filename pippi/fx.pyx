@@ -10,8 +10,6 @@ cimport numpy as np
 
 from libc cimport math
 
-from math import pi as PI
-
 from pippi cimport fft
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
@@ -20,6 +18,8 @@ from pippi.dsp cimport _mag
 from pippi cimport soundpipe
 from cpython cimport bool
 from libc.stdlib cimport malloc, free
+
+DEF PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164062
 
 cdef double MINDENSITY = 0.001
 
@@ -712,7 +712,11 @@ cdef bint _is_2d_window(object item):
                 all_numbers = False
         return not all_numbers
 
-cdef void _svf_core(SVFData* data):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+@cython.initializedcheck(False)
+cdef void _svf_core(SVFData* data) nogil:
     
     data.res = max(min(data.res, 1), 0)
     cdef double g = math.tan(PI * data.freq) * data.shelf
@@ -730,42 +734,73 @@ cdef void _svf_core(SVFData* data):
     data.Bz[0] = 2. * a2
     data.Bz[1] = 2. * a3
 
-    cdef double[3] C_v0 = [1, 0, 0]
-    cdef double[3] C_v1 = [a2, a1, -a2]
-    cdef double[3] C_v2 = [a3, a2, 1 - a3]
+    cdef double[3] C_v0 
+    # initializing by indexing allows nogil
+    C_v0[0] = 1
+    C_v0[1] = 0
+    C_v0[2] = 0
+
+    cdef double[3] C_v1
+    C_v1[0] = a2
+    C_v1[1] = a1
+    C_v1[2] = -a2
+
+    cdef double[3] C_v2
+    C_v2[0] = a3
+    C_v2[1] = a2
+    C_v2[2] = 1 - a3
 
     data.Cz[0] = C_v0[0] * data.M[0] + C_v1[0] * data.M[1]  + C_v2[0] * data.M[2]
     data.Cz[1] = C_v0[1] * data.M[0] + C_v1[1] * data.M[1]  + C_v2[1] * data.M[2]
     data.Cz[2] = C_v0[2] * data.M[0] + C_v1[2] * data.M[1]  + C_v2[2] * data.M[2]
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.initializedcheck(False)
 cdef void _svf_lp(SVFData* data):
     data.M = [0, 0, 1]
     data.shelf = 1
     _svf_core(data) 
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.initializedcheck(False)
 cdef void _svf_bp(SVFData* data):
     data.M = [0, 1, 0]
     data.shelf = 1
     _svf_core(data)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.initializedcheck(False)
 cdef void _svf_hp(SVFData* data):
     cdef double k = 2 - 2 * data.res
     data.M = [1, -k, -1]
     data.shelf = 1
     _svf_core(data)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.initializedcheck(False)
 cdef void _svf_notch(SVFData* data):
     cdef double k = 2 - 2 * data.res
     data.M = [1, -k, 0]
     data.shelf = 1
     _svf_core(data)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.initializedcheck(False)
 cdef void _svf_peak(SVFData* data):
     cdef double k = 2 - 2 * data.res
     data.M = [1, -k, -2]
     data.shelf = 1
     _svf_core(data)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+@cython.initializedcheck(False)
 cdef void _svf_bell(SVFData* data):
     cdef double A = 10 ** (data.gain / 40.)
     cdef double k = 1./(data.res * A)
@@ -774,6 +809,10 @@ cdef void _svf_bell(SVFData* data):
     data.shelf = 1
     _svf_core(data)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+@cython.initializedcheck(False)
 cdef void _svf_lshelf(SVFData* data):
     cdef double A = 10 ** (data.gain / 40.)
     cdef double k = 1./(data.res)
@@ -782,6 +821,10 @@ cdef void _svf_lshelf(SVFData* data):
     data.shelf = 1/math.sqrt(A)
     _svf_core(data)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+@cython.initializedcheck(False)
 cdef void _svf_hshelf(SVFData* data):
     cdef double A = 10 ** (data.gain / 40.)
     cdef double A2 = A * A
@@ -791,6 +834,10 @@ cdef void _svf_hshelf(SVFData* data):
     data.shelf = math.sqrt(A)
     _svf_core(data)
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+@cython.initializedcheck(False)
 cdef SoundBuffer _svf(svf_filter_t mode, SoundBuffer snd, object freq, object res, object gain, bint norm):
     if freq is None:
         freq = 100

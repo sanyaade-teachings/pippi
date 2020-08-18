@@ -97,6 +97,7 @@ ext_modules = cythonize([
         Extension('pippi.tune', ['pippi/tune/tune.pyx']), 
     ], 
     annotate=True, 
+    compiler_directives={'profile': False},
 ) 
 
 with open('README.md') as f:

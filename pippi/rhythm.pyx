@@ -5,6 +5,7 @@
 
 from pippi cimport wavetables
 from pippi cimport interpolation
+from pippi import dsp
 from pippi cimport dsp
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport seq as _seq
@@ -106,6 +107,29 @@ cdef list _frompattern(
     positions = _onsetswing(positions, swing, _beat, length)
     return positions
 
+def makebar(str k, dict drum, double length, list onsets, bint stems, str stemsdir):
+    cdef SoundBuffer clang
+    cdef SoundBuffer bar = SoundBuffer(length=length)
+    cdef int count = 0
+    cdef double onset
+
+    for onset in onsets:
+        if drum.get('callback', None) is not None:
+            clang = drum['callback'](onset/length, count)
+        elif len(drum['sounds']) > 0:
+            clang = SoundBuffer(filename=str(rand.choice(drum['sounds'])))
+        else:
+            clang = SoundBuffer()
+        bar.dub(clang, onset)
+        count += 1
+
+    if drum.get('barcallback', None) is not None:
+        bar = drum['barcallback'](bar)
+
+    if stems:
+        bar.write('%sstem-%s.wav' % (stemsdir, k))
+
+    return k, bar
 
 cdef class Seq:
     def __init__(Seq self, object beat=0.2):
@@ -135,39 +159,26 @@ cdef class Seq:
     def update(self, name, **kwargs):
         self.drums[name].update(kwargs)
 
-    def play(self, double length):
+    def play(self, double length, bint stems=False, str stemsdir=''):
         cdef SoundBuffer out = SoundBuffer(length=length)
-        cdef SoundBuffer bar
         cdef dict drum
-        cdef list onsets
-        cdef double onset
-        cdef SoundBuffer clang
-        cdef int count
 
+        cdef list onsets 
+        cdef list params = []
         for k, drum in self.drums.items():
-            bar = SoundBuffer(length=length)
             onsets = _frompattern(
-                        drum['pattern'], 
-                        beat=self.beat, 
-                        length=length, 
-                        swing=drum['swing'], 
-                        div=drum['div'], 
-                        smear=drum['smear']
-                    )
+                drum['pattern'], 
+                beat=self.beat, 
+                length=length, 
+                swing=drum['swing'], 
+                div=drum['div'], 
+                smear=drum['smear']
+            )
 
-            count = 0
-            for onset in onsets:
-                if drum.get('callback', None) is not None:
-                    clang = drum['callback'](onset/length, count)
-                elif len(drum['sounds']) > 0:
-                    clang = SoundBuffer(filename=str(rand.choice(drum['sounds'])))
-                else:
-                    clang = SoundBuffer()
-                bar.dub(clang, onset)
-                count += 1
-
-            if drum.get('barcallback', None) is not None:
-                bar = drum['barcallback'](bar)
+            params += [(k, drum, length, onsets, stems, stemsdir)]
+       
+        out = SoundBuffer(length=length)
+        for k, bar in dsp.pool(makebar, params=params):
             out.dub(bar)
 
         return out

@@ -19,7 +19,7 @@ cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
 cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil
 cpdef SoundBuffer softclip(SoundBuffer snd)
 
-ctypedef void (*svf_filter_t)(SVFData* data) 
+ctypedef void (*svf_filter_t)(SVFData* data)
 
 ctypedef struct SVFData:
     double[4] Az 
