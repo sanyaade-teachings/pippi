@@ -183,6 +183,159 @@ cdef class Seq:
 
         return out
 
+cdef class MetaSeq:
+    def __init__(MetaSeq self, object beat=0.2):
+        self.beat = wavetables.to_window(beat)
+        self.instruments = {}
+
+    def add(self, name, 
+            pattern=None, 
+            callback=None, 
+            double div=1, 
+            int numbeats=4,
+            double swing=0, 
+            barcallback=None, 
+            sounds=None, 
+            smear=1.0
+        ):
+        self.instruments[name] = dict(
+            name=name, 
+            pattern=pattern, 
+            sounds=list(sounds or []), 
+            callback=callback, 
+            barcallback=barcallback, 
+            numbeats=numbeats,
+            div=div, 
+            swing=swing, 
+            smear=smear,
+        )
+
+    def update(self, name, **kwargs):
+        self.instruments[name].update(kwargs)
+
+    def _onsetswing(self, list onsets, double amount, double[:] beat):
+        if amount <= 0:
+            return onsets
+
+        cdef int i = 0
+        cdef double onset = 0
+
+        for i, onset in enumerate(onsets):
+            if i % 2 == 1:
+                onsets[i] += interpolation._linear_pos(beat, <double>i/len(onsets)) * amount * 0.75
+
+        return onsets
+
+    def _topositions(self, object p, double[:] beat, double[:] smear):
+        cdef double pos = 0
+        cdef int count = 0
+        cdef double delay = 0
+        cdef double div = 1
+        cdef double _beat
+        cdef list out = []
+        cdef bint subdiv = False
+        cdef int numbeats = len(p)
+
+        while count < numbeats:
+            index = count % len(p)
+            event = p[index]
+            _beat = interpolation._linear_pos(beat, count/<double>numbeats)
+            _beat *= interpolation._linear_pos(smear, count/<double>numbeats)
+            _beat = max(MIN_BEAT, _beat)
+
+            if event in REST_SYMBOLS:
+                count += 1
+                pos += _beat / div
+                continue
+
+            elif event == '[':
+                end = p.find(']', index) - 1
+                div = len(p[index : end])
+                count += 1
+                continue
+
+            elif event == ']':
+                div = 1
+                count += 1
+                continue
+
+            out += [ pos ]
+            pos += _beat / div
+            count += 1
+
+        return pos, out
+
+    def _frompattern(
+        self,
+        object pat,            # Pattern
+        double[:] beat,        # Length of a beat in seconds -- may be given as a curve
+        double swing=0,        # MPC swing amount 0-1
+        double div=1,          # Beat subdivision
+        object smear=1.0,      # Beat modulation
+    ):
+        cdef double[:] _smear = wavetables.to_window(smear)
+        cdef double[:] _beat = np.divide(beat, div)
+
+        length, positions = self._topositions(pat, _beat, _smear)
+        positions = self._onsetswing(positions, swing, _beat)
+
+        return length, positions
+
+    def _expandpatterns(self, dict patterns, str patternseq, int numbeats):
+        cdef str pattern = ''
+        cdef str empty = '.' * numbeats
+        for patternname in patternseq:
+            if patternname not in patterns:
+                pattern += empty
+                continue
+
+            for i in range(numbeats):
+                pattern += patterns[patternname][i % len(patterns[patternname])]
+        
+        return pattern
+
+    def score(self, dict score, int barlength=4, bint stems=False, str stemsdir=''):
+        cdef double length, sectionlength
+        cdef dict instrument
+        cdef list onsets, params
+        cdef int subsectioncount
+        cdef SoundBuffer out = SoundBuffer()
+
+        mainposition = 0
+        for sectionname in score.get('seq', []):
+            section = score[sectionname]
+            sectionlength = 0
+
+            # Build params
+            params = []
+            for k, instrument in self.instruments.items():
+                if k not in section:
+                    continue
+
+                expandedpattern = self._expandpatterns(instrument['pattern'], section[k], barlength * instrument['div'])
+
+                # for section in score, get subsection bars...
+                length, onsets = self._frompattern(
+                    expandedpattern,
+                    beat=self.beat, 
+                    swing=instrument['swing'], 
+                    div=instrument['div'], 
+                    smear=instrument['smear']
+                )
+
+                params += [(k, instrument, length, onsets, stems, stemsdir)]
+                sectionlength = max(sectionlength, length)
+           
+            sectionout = SoundBuffer(length=sectionlength)
+            for k, bar in dsp.pool(makebar, params=params):
+                sectionout.dub(bar)
+
+            out.dub(sectionout, mainposition)
+            mainposition += sectionlength
+
+        return out
+
+
 def pgen(numbeats, div=1, offset=0, reps=None, reverse=False):
     """ Pattern creation helper
     """
