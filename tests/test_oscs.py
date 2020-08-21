@@ -114,14 +114,13 @@ class TestOscs(TestCase):
         self.assertEqual(len(out), int(length * out.samplerate))
 
     def test_create_tukey(self):
-        osc = Tukey()
         length = 10
         shape = dsp.win(shapes.win('sine', length=3), 0, 0.5)
         chord = tune.chord('i9', octave=2)
         out = dsp.buffer(length=length)
         for freq in chord:
             freq = dsp.wt('sinc', freq, freq*4)
-            l = osc.play(length, freq, shape)
+            l = Tukey(freq=freq, shape=shape).play(length)
             l = l.pan(dsp.rand())
             out.dub(l)
         out = fx.norm(out, 0.8)
