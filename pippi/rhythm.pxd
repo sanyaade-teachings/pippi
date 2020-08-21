@@ -4,9 +4,6 @@ from pippi.wavetables cimport Wavetable
 
 cdef class Seq:
     cdef double[:] beat
-    cdef public dict drums
-
-cdef class MetaSeq:
-    cdef double[:] beat
     cdef public dict instruments
+
 

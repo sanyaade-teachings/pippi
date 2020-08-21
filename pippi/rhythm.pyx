@@ -131,60 +131,9 @@ def makebar(str k, dict drum, double length, list onsets, bint stems, str stemsd
 
     return k, bar
 
+
 cdef class Seq:
-    def __init__(Seq self, object beat=0.2):
-        self.beat = wavetables.to_window(beat)
-        self.drums = {}
-
-    def add(self, name, 
-            pattern=None, 
-            callback=None, 
-            double div=1, 
-            double swing=0, 
-            barcallback=None, 
-            sounds=None, 
-            smear=1.0
-        ):
-        self.drums[name] = dict(
-            name=name, 
-            pattern=pattern, 
-            sounds=list(sounds or []), 
-            callback=callback, 
-            barcallback=barcallback, 
-            div=div, 
-            swing=swing, 
-            smear=smear,
-        )
-
-    def update(self, name, **kwargs):
-        self.drums[name].update(kwargs)
-
-    def play(self, double length, bint stems=False, str stemsdir=''):
-        cdef SoundBuffer out = SoundBuffer(length=length)
-        cdef dict drum
-
-        cdef list onsets 
-        cdef list params = []
-        for k, drum in self.drums.items():
-            onsets = _frompattern(
-                drum['pattern'], 
-                beat=self.beat, 
-                length=length, 
-                swing=drum['swing'], 
-                div=drum['div'], 
-                smear=drum['smear']
-            )
-
-            params += [(k, drum, length, onsets, stems, stemsdir)]
-       
-        out = SoundBuffer(length=length)
-        for k, bar in dsp.pool(makebar, params=params):
-            out.dub(bar)
-
-        return out
-
-cdef class MetaSeq:
-    def __init__(MetaSeq self, object beat=0.2):
+    def __init__(self, object beat=0.2):
         self.beat = wavetables.to_window(beat)
         self.instruments = {}
 
@@ -212,6 +161,7 @@ cdef class MetaSeq:
 
     def update(self, name, **kwargs):
         self.instruments[name].update(kwargs)
+
 
     def _onsetswing(self, list onsets, double amount, double[:] beat):
         if amount <= 0:
@@ -294,7 +244,43 @@ cdef class MetaSeq:
         
         return pattern
 
-    def score(self, dict score, int barlength=4, bint stems=False, str stemsdir=''):
+    def play(self, int numbeats, str patseq=None, bint stems=False, str stemsdir='', bint pool=False):
+        cdef SoundBuffer out = SoundBuffer()
+        cdef dict instrument
+
+        cdef list onsets 
+        cdef list params = []
+        for k, instrument in self.instruments.items():
+            pat = instrument['pattern']
+            if isinstance(pat, dict) and patseq is not None:
+                expanded = self._expandpatterns(pat, patseq, numbeats * instrument['div'])
+            else:
+                if isinstance(pat, dict):
+                    pat = pat.items()[0]
+                expanded = [ pat[i % len(pat)] for i in range(numbeats) ]
+
+            length, onsets = self._frompattern(
+                expanded, 
+                beat=self.beat, 
+                swing=instrument['swing'], 
+                div=instrument['div'], 
+                smear=instrument['smear']
+            )
+
+            params += [(k, instrument, length, onsets, stems, stemsdir)]
+       
+        out = SoundBuffer(length=length)
+        if pool: 
+            for k, bar in dsp.pool(makebar, params=params):
+                out.dub(bar)
+        else:
+            for p in params:
+                k, bar = makebar(*p)
+                out.dub(bar)
+
+        return out
+
+    def score(self, dict score, int barlength=4, bint stems=False, str stemsdir='', bint pool=False):
         cdef double length, sectionlength
         cdef dict instrument
         cdef list onsets, params
@@ -327,8 +313,13 @@ cdef class MetaSeq:
                 sectionlength = max(sectionlength, length)
            
             sectionout = SoundBuffer(length=sectionlength)
-            for k, bar in dsp.pool(makebar, params=params):
-                sectionout.dub(bar)
+            if pool: 
+                for k, bar in dsp.pool(makebar, params=params):
+                    sectionout.dub(bar)
+            else:
+                for p in params:
+                    k, bar = makebar(*p)
+                    sectionout.dub(bar)
 
             out.dub(sectionout, mainposition)
             mainposition += sectionlength
