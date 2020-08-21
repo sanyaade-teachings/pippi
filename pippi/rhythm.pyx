@@ -29,102 +29,24 @@ BELL = CLAVE['bell']
 TRESILLO = CLAVE['tresillo']
 
 
-cdef list _onsetswing(list onsets, double amount, double[:] beat, double length):
-    """ Add MPC-style swing to a list of onsets.
-        Amount is a value between 0 and 1, which 
-        maps to a swing amount between 0% and 75%.
-        Every odd onset will be delayed by
-            
-            beat length * swing amount
-
-        This will only really work like MPC swing 
-        when there is a run of notes, as rests 
-        are not represented in onset lists (and 
-        MPC swing just delays the upbeats).
-    """
-    if amount <= 0:
-        return onsets
-
-    cdef int i = 0
-    cdef double onset = 0
-    #cdef double delay_amount = beat * amount * 0.75
-
-    for i, onset in enumerate(onsets):
-        if i % 2 == 1:
-            onsets[i] += interpolation._linear_pos(beat, onset/length) * amount * 0.75
-
-    return onsets
-
-cdef list _topositions(object p, double[:] beat, double length, double[:] smear):
-    cdef double pos = 0
-    cdef int count = 0
-    cdef double delay = 0
-    cdef double div = 1
-    cdef double _beat
-    cdef list out = []
-    cdef bint subdiv = False
-
-    while pos < length:
-        index = count % len(p)
-        event = p[index]
-        _beat = interpolation._linear_pos(beat, pos/<double>length)
-        _beat *= interpolation._linear_pos(smear, pos/<double>length)
-        _beat = max(MIN_BEAT, _beat)
-
-        if event in REST_SYMBOLS:
-            count += 1
-            pos += _beat / div
-            continue
-
-        elif event == '[':
-            end = p.find(']', index) - 1
-            div = len(p[index : end])
-            count += 1
-            continue
-
-        elif event == ']':
-            div = 1
-            count += 1
-            continue
-
-        out += [ pos ]
-        pos += _beat / div
-        count += 1
-
-    return out
-
-cdef list _frompattern(
-    object pat,            # Pattern
-    double[:] beat,        # Length of a beat in seconds -- may be given as a curve
-    double length=1,       # Output length in seconds 
-    double swing=0,        # MPC swing amount 0-1
-    double div=1,          # Beat subdivision
-    object smear=1.0,      # Beat modulation
-):
-    cdef double[:] _smear = wavetables.to_window(smear)
-    cdef double[:] _beat = np.divide(beat, div)
-    positions = _topositions(pat, _beat, length, _smear)
-    positions = _onsetswing(positions, swing, _beat, length)
-    return positions
-
-def makebar(str k, dict drum, double length, list onsets, bint stems, str stemsdir):
+def makebar(str k, dict instrument, double length, list onsets, bint stems, str stemsdir):
     cdef SoundBuffer clang
     cdef SoundBuffer bar = SoundBuffer(length=length)
     cdef int count = 0
     cdef double onset
 
     for onset in onsets:
-        if drum.get('callback', None) is not None:
-            clang = drum['callback'](onset/length, count)
-        elif len(drum['sounds']) > 0:
-            clang = SoundBuffer(filename=str(rand.choice(drum['sounds'])))
+        if instrument.get('callback', None) is not None:
+            clang = instrument['callback'](onset/length, count)
+        elif len(instrument['sounds']) > 0:
+            clang = SoundBuffer(filename=str(rand.choice(instrument['sounds'])))
         else:
             clang = SoundBuffer()
         bar.dub(clang, onset)
         count += 1
 
-    if drum.get('barcallback', None) is not None:
-        bar = drum['barcallback'](bar)
+    if instrument.get('barcallback', None) is not None:
+        bar = instrument['barcallback'](bar)
 
     if stems:
         bar.write('%sstem-%s.wav' % (stemsdir, k))
@@ -164,6 +86,18 @@ cdef class Seq:
 
 
     def _onsetswing(self, list onsets, double amount, double[:] beat):
+        """ Add MPC-style swing to a list of onsets.
+            Amount is a value between 0 and 1, which 
+            maps to a swing amount between 0% and 75%.
+            Every odd onset will be delayed by
+                
+                beat length * swing amount
+
+            This will only really work like MPC swing 
+            when there is a run of notes, as rests 
+            are not represented in onset lists (and 
+            MPC swing just delays the upbeats).
+        """
         if amount <= 0:
             return onsets
 
@@ -298,7 +232,11 @@ cdef class Seq:
                 if k not in section:
                     continue
 
-                expandedpattern = self._expandpatterns(instrument['pattern'], section[k], barlength * instrument['div'])
+                pat = instrument['pattern']
+                if isinstance(pat, str):
+                    pat = {'a': pat}
+
+                expandedpattern = self._expandpatterns(pat, section[k], barlength * instrument['div'])
 
                 # for section in score, get subsection bars...
                 length, onsets = self._frompattern(
@@ -344,12 +282,48 @@ def pgen(numbeats, div=1, offset=0, reps=None, reverse=False):
 
     return pat
 
-def onsets(pattern, beat=0.2, length=30, smear=1):
+def onsets(pattern, object beat=0.2, double length=30, object smear=1):
     """ Patterns to onset lists
     """
     cdef double[:] _beat = wavetables.to_window(beat)
     cdef double[:] _smear = wavetables.to_window(smear)
-    return _topositions(pattern, _beat, length, _smear)
+    cdef double pos = 0
+    cdef int count = 0
+    cdef double delay = 0
+    cdef double div = 1
+    cdef double _b
+    cdef list out = []
+    cdef bint subdiv = False
+
+    while pos < length:
+        index = count % len(pattern)
+        event = pattern[index]
+        _b = interpolation._linear_pos(_beat, pos/<double>length)
+        _b *= interpolation._linear_pos(_smear, pos/<double>length)
+        _b = max(MIN_BEAT, _b)
+
+        if event in REST_SYMBOLS:
+            count += 1
+            pos += _b / div
+            continue
+
+        elif event == '[':
+            end = pattern.find(']', index) - 1
+            div = len(pattern[index : end])
+            count += 1
+            continue
+
+        elif event == ']':
+            div = 1
+            count += 1
+            continue
+
+        out += [ pos ]
+        pos += _b / div
+        count += 1
+
+    return out
+
 
 def eu(length, numbeats, offset=0, reps=None, reverse=False):
     """ A euclidian pattern generator
