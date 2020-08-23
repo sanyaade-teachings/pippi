@@ -3,6 +3,8 @@
 """ Some helpers for building and transforming onset lists
 """
 
+from inspect import signature
+
 from pippi cimport wavetables
 from pippi cimport interpolation
 from pippi import dsp
@@ -29,15 +31,32 @@ BELL = CLAVE['bell']
 TRESILLO = CLAVE['tresillo']
 
 
-def makebar(str k, dict instrument, double length, list onsets, bint stems, str stemsdir):
+def makebar(str k, dict instrument, double length, list onsets, bint stems, str stemsdir, str sectionname, int sectionindex):
     cdef SoundBuffer clang
     cdef SoundBuffer bar = SoundBuffer(length=length)
     cdef int count = 0
     cdef double onset
 
+    cdef dict ctx = {
+        'pos': 0, 
+        'count': 0, 
+        'sectionname': sectionname, 
+        'sectionindex': sectionindex,
+    }
+
+    cdef bint showwarning = False
+
     for onset in onsets:
+        ctx['pos'] = onset/length
+        ctx['count'] = count
         if instrument.get('callback', None) is not None:
-            clang = instrument['callback'](onset/length, count)
+            sig = signature(instrument['callback'])
+            if len(sig.parameters) > 1:
+                showwarning = True
+                clang = instrument['callback'](onset/length, count)
+            else:
+                clang = instrument['callback'](ctx)
+
         elif len(instrument['sounds']) > 0:
             clang = SoundBuffer(filename=str(rand.choice(instrument['sounds'])))
         else:
@@ -49,8 +68,10 @@ def makebar(str k, dict instrument, double length, list onsets, bint stems, str 
         bar = instrument['barcallback'](bar)
 
     if stems:
-        bar.write('%sstem-%s.wav' % (stemsdir, k))
+        bar.write('%sstem-%s-%s-%s.wav' % (stemsdir, ctx['sectionname'], ctx['sectionindex'], k))
 
+    if showwarning:
+        print('WARNING: using old-style callback')
     return k, bar
 
 
@@ -201,7 +222,7 @@ cdef class Seq:
                 smear=instrument['smear']
             )
 
-            params += [(k, instrument, length, onsets, stems, stemsdir)]
+            params += [(k, instrument, length, onsets, stems, stemsdir, None, 0)]
        
         out = SoundBuffer(length=length)
         if pool: 
@@ -222,6 +243,7 @@ cdef class Seq:
         cdef SoundBuffer out = SoundBuffer()
 
         mainposition = 0
+        cdef int sectionindex = 0
         for sectionname in score.get('seq', []):
             section = score[sectionname]
             sectionlength = 0
@@ -247,7 +269,7 @@ cdef class Seq:
                     smear=instrument['smear']
                 )
 
-                params += [(k, instrument, length, onsets, stems, stemsdir)]
+                params += [(k, instrument, length, onsets, stems, stemsdir, sectionname, sectionindex)]
                 sectionlength = max(sectionlength, length)
            
             sectionout = SoundBuffer(length=sectionlength)
@@ -261,6 +283,7 @@ cdef class Seq:
 
             out.dub(sectionout, mainposition)
             mainposition += sectionlength
+            sectionindex += 1
 
         return out
 

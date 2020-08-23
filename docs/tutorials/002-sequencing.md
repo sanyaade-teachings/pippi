@@ -501,6 +501,12 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-1.flac')
 ```
 
+```
+WARNING: using old-style callback
+WARNING: using old-style callback
+WARNING: using old-style callback
+```
+
 
 
 <audio src="/docs/tutorials/renders/002-drum-machine-1.flac" controls></audio>
@@ -517,6 +523,13 @@ dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4)
 out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-2.flac')
+```
+
+```
+WARNING: using old-style callback
+WARNING: using old-style callback
+WARNING: using old-style callback
+WARNING: using old-style callback
 ```
 
 
@@ -540,6 +553,13 @@ dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4, smear=smear)
 out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-3.flac')
+```
+
+```
+WARNING: using old-style callback
+WARNING: using old-style callback
+WARNING: using old-style callback
+WARNING: using old-style callback
 ```
 
 
