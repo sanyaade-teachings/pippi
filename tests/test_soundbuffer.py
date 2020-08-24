@@ -31,6 +31,23 @@ class TestSoundBuffer(TestCase):
 
         self.assertEqual(snd1.dur, snd2.dur)
 
+    def test_mix_mismatched_channels(self):
+        snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav').remix(1)
+        snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+        channels = max(snd1.channels, snd2.channels)
+
+        out = snd1 & snd2
+        self.assertEqual(out.channels, channels)
+
+        out = snd2 & snd1
+        self.assertEqual(out.channels, channels)
+
+        snd2 &= snd1
+        self.assertEqual(snd2.channels, channels)
+        self.assertEqual(snd1.channels, 1) # Right side should have no side effects
+
+        snd1 &= snd2
+        self.assertEqual(snd1.channels, channels)
 
     def test_create_stereo_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')

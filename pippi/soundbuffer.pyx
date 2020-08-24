@@ -385,6 +385,7 @@ cdef class SoundBuffer:
         cdef double[:,:] out
         cdef double[:,:] a, b
         cdef int i, c
+        cdef int channels = self.channels
 
         if isinstance(value, SoundBuffer):
             if len(self.frames) > len(value.frames):
@@ -402,12 +403,18 @@ cdef class SoundBuffer:
                 a = np.array(value, dtype='d')
                 b = self.frames
 
+        if a.shape[1] > b.shape[1]:
+            b = _remix(b, len(b), a.shape[1])
+            channels = a.shape[1]
+        elif b.shape[1] > a.shape[1]:
+            a = _remix(a, len(a), b.shape[1])
+
         out = a.copy()
         for i in range(len(b)):
-            for c in range(self.channels):
+            for c in range(channels):
                 out[i,c] += b[i,c]
 
-        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+        return SoundBuffer(out, channels=channels, samplerate=self.samplerate)
 
     def __iand__(SoundBuffer self, object value):
         """ Mix in place two SoundBuffers or two 2d arrays with compatible dimensions
@@ -417,6 +424,7 @@ cdef class SoundBuffer:
         cdef double[:,:] out
         cdef double[:,:] a, b
         cdef int i, c
+        cdef int channels = self.channels
 
         if isinstance(value, SoundBuffer):
             if len(self.frames) > len(value.frames):
@@ -434,12 +442,19 @@ cdef class SoundBuffer:
                 a = np.array(value, dtype='d')
                 b = self.frames
 
+        if a.shape[1] > b.shape[1]:
+            b = _remix(b, len(b), a.shape[1])
+            channels = a.shape[1]
+        elif b.shape[1] > a.shape[1]:
+            a = _remix(a, len(a), b.shape[1])
+
         out = a.copy()
         for i in range(len(b)):
-            for c in range(self.channels):
+            for c in range(channels):
                 out[i,c] += b[i,c]
 
         self.frames = out
+        self.channels = channels
         return self
 
     def __rand__(SoundBuffer self, object value):
