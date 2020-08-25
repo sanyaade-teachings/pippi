@@ -43,3 +43,5 @@ cdef extern from "soundpipe.h":
 cpdef list split(SoundBuffer snd, double interval=*, object drift=*, double driftwidth=*)
 cpdef list customsplit(SoundBuffer snd, list freqs)
 
+cpdef SoundBuffer spread(SoundBuffer snd, double amount=*)
+cpdef SoundBuffer smear(SoundBuffer snd, double amount=*)

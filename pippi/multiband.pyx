@@ -173,3 +173,14 @@ cpdef SoundBuffer spread(SoundBuffer snd, double amount=0.5):
 
     return fx.norm(out, snd.mag)
 
+cpdef SoundBuffer smear(SoundBuffer snd, double amount=0.01):
+    cdef SoundBuffer out = SoundBuffer(length=snd.dur, channels=snd.channels, samplerate=snd.samplerate)
+    cdef wavetables.Wavetable curve 
+
+    cdef list bands = split(snd)
+    for b in bands:
+        curve = wavetables.Wavetable('phasor', 0, 1-amount) & wavetables.Wavetable(shapes.win('hann', length=snd.dur/3), 0, amount)
+        out.dub(b.stretch(b.dur, position=curve))
+
+    return fx.norm(out, snd.mag)
+
