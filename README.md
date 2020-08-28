@@ -31,13 +31,13 @@ both = sound1 & sound2
 # Apply a skewed hann Wavetable as an envelope to a sound
 enveloped = sound * dsp.win('hann').skewed(0.6)
 
-# Or the same, via a shortcut method on the `SoundBuffer`
-enveloped = sound.env('hann')
+# Or just a sine envelope via a shortcut method on the `SoundBuffer`
+enveloped = sound.env('sine')
 
 # Synthesize a 10 second graincloud from the sound, 
 # with grain length modulating between 20ms and 2s 
-# over a hann shaped curve.
-cloudy = enveloped.cloud(10, grainlength=dsp.win('hann', dsp.MS*20, 2))
+# over a triangle shaped curve.
+cloudy = enveloped.cloud(10, grainlength=dsp.win('tri', dsp.MS*20, 2))
 ```
 
 It comes with several oscs:
