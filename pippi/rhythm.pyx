@@ -194,8 +194,25 @@ cdef class Seq:
                 pattern += empty
                 continue
 
-            for i in range(numbeats):
-                pattern += patterns[patternname][i % len(patterns[patternname])]
+            if isinstance(patterns[patternname], str):
+                for i in range(numbeats):
+                    pattern += patterns[patternname][i % len(patterns[patternname])]
+ 
+            else:
+                try:
+                    pat = patterns[patternname]()
+                except TypeError as e:
+                    print('WARNING: invalid pattern of type', type(patterns[patternname]))
+                    continue
+
+                for i in range(numbeats):
+                    try:
+                        val = next(pat)
+                    except StopIteration as e:
+                        pat = patterns[patternname]()
+                        val = next(pat)
+
+                    pattern += val
         
         return pattern
 
