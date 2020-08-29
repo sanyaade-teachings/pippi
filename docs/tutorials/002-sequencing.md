@@ -408,6 +408,8 @@ out.write('docs/tutorials/renders/002-a-hat-pattern.flac')
 
 
 
+<audio src="/docs/tutorials/renders/002-a-hat-pattern.flac" controls></audio>
+
 This basic idea is actually pretty useful, and there are some helpers in 
 pippi for working with pattern strings like this, including a drum machine 
 abstraction which also eliminates most of the dub pattern boilerplate for you. 
