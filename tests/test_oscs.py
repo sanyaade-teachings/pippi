@@ -27,6 +27,10 @@ class TestOscs(TestCase):
         out = Osc('sine', freq=pm).play(1)
         out.write('tests/renders/osc_fm.wav')
 
+        pm = Osc('sine', freq=[200.0, 300, 400], freq_interpolator='trunc').play(1).env('tri') * 1000
+        out = Osc('sine', freq=pm).play(1)
+        out.write('tests/renders/osc_fm_trunc.wav')
+
     def test_fold_osc(self):
         out = Fold('sine', freq=200, amp=[1,10]).play(1)
         out = fx.norm(out, 1)
@@ -90,6 +94,10 @@ class TestOscs(TestCase):
     def test_create_fm(self):
         out = FM('sine', 'sine', freq=130.81, ratio=2.8, index=[6,0]).play(5).env('hannout') * 0.4
         out.write('tests/renders/osc_fm-basic.wav')
+
+        out = FM('sine', 'sine', freq=[130.81, 300, 500], ratio=2.8, index=[6,0], freq_interpolator='trunc').play(5).env('hannout') * 0.4
+        out.write('tests/renders/osc_fm-basic_trunc.wav')
+
 
     def test_create_sineosc(self):
         out = SineOsc(freq=130.81).play(5).env('hannout') * 0.25
