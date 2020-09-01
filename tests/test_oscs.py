@@ -67,31 +67,25 @@ class TestOscs(TestCase):
         out = Drunk(10, width=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
         out.write('tests/renders/osc_drunk-whann-0.01-0.05.wav')
 
-        out = Drunk(10, width=1, freq=200).play(10)
-        out.write('tests/renders/osc_drunk-w1.wav')
-
-        """
-        # a fun bit o' drone
-        length = 60 * 18
-        out = dsp.buffer(length=length)
-        freqs = tune.chord('I', octave=1)
-        for freq in freqs:
-            for o in range(3):
-                l = Drunk(dsp.randint(4, 12), width=0.05, freq=freq * 2**o).play(length).pan(dsp.rand())
-                out.dub(l)
-        out = fx.norm(out, 0.8)
-        out.write('tests/renders/osc_drunk-chord-10x.wav')
-        """
+        out = Drunk(10, 
+            freq=[200,300,400,600]*8, 
+            freq_interpolator='trunc'
+        ).play(10)
+        out.write('tests/renders/osc_drunk-trunc-freq.wav')
 
     def test_create_dss(self):
-        out = DSS(10, ywidth=0.1, xwidth=0.001, freq=100).play(1)
+        out = DSS(10, ywidth=0.1, xwidth=0.001, freq=100).play(10)
         out.write('tests/renders/osc_dss-wdefault.wav')
 
-        out = DSS(10, ywidth=dsp.win('hann', 0.01, 0.05), freq=200).play(1)
+        out = DSS(10, ywidth=dsp.win('hann', 0.01, 0.05), freq=200).play(10)
         out.write('tests/renders/osc_dss-whann-0.01-0.05.wav')
 
-        out = DSS(10, ywidth=1, freq=200).play(1)
+        out = DSS(10, ywidth=1, freq=200).play(10)
         out.write('tests/renders/osc_dss-w1.wav')
+
+        out = DSS(10, freq=[200,300,150,1500], freq_interpolator='trunc').play(10)
+        out.write('tests/renders/osc_dss-freq-trunc.wav')
+
 
     def test_create_fm(self):
         out = FM('sine', 'sine', freq=130.81, ratio=2.8, index=[6,0]).play(5).env('hannout') * 0.4
