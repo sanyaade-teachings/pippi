@@ -86,8 +86,8 @@ cdef class DSS:
         cdef int wt_boundry = max(len(self.wavetable)-1, 1)
         cdef int fwidth_boundry = max(len(self.fwidth)-1, 1)
         cdef int awidth_boundry = max(len(self.awidth)-1, 1)
-        cdef int fbound_boundry = max(len(self.fwidth)-1, 1)
-        cdef int abound_boundry = max(len(self.awidth)-1, 1)
+        cdef int fbound_boundry = max(len(self.fbound)-1, 1)
+        cdef int abound_boundry = max(len(self.abound)-1, 1)
 
         cdef double freq_phase_inc = ilength * freq_boundry
         cdef double xwidth_phase_inc = ilength * xwidth_boundry
