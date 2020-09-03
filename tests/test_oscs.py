@@ -36,6 +36,10 @@ class TestOscs(TestCase):
         out = fx.norm(out, 1)
         out.write('tests/renders/osc_fold.wav')
 
+        out = Fold('sine', freq=[200, 300, 700, 900]*3, amp=[1,10], freq_interpolator='trunc').play(1)
+        out = fx.norm(out, 1)
+        out.write('tests/renders/osc_fold_trunc.wav')
+
     def test_create_sinewave(self):
         osc = Osc('sine', freq=200.0)
         length = 1
