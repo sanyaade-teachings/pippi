@@ -107,17 +107,17 @@ class TestOscs(TestCase):
         out = SineOsc(freq=130.81).play(5).env('hannout') * 0.25
         out.write('tests/renders/osc_sineosc-basic.wav')
 
-    def test_create_wt_stack(self):
+    def test_create_osc2d(self):
         wtA = [ random.random() for _ in range(random.randint(10, 1000)) ]
         wtB = dsp.wt([ random.random() for _ in range(random.randint(10, 1000)) ])
         wtC = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         stack = ['rnd', wtA, wtB, wtC] * 10
-        osc = Osc2d(stack, freq=200.0)
-        length = 10
-        out = osc.play(length)
+
+        out = Osc2d(stack, freq=200.0).play(10)
         out.write('tests/renders/osc2d_RND_randlist_randwt_guitar_10x.wav')
 
-        self.assertEqual(len(out), int(length * out.samplerate))
+        out = Osc2d(['tri', 'sine'], freq=[200.0, 400, 600], freq_interpolator='trunc').play(10)
+        out.write('tests/renders/osc2d_freq_trunc.wav')
 
     def test_create_tukey(self):
         length = 10
