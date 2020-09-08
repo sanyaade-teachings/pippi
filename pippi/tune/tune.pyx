@@ -4,6 +4,7 @@
 #cimport numpy as np
 #np.import_array()
 
+from pippi.chords import *
 from pippi.midi cimport *
 from pippi.midi import *
 from pippi.old import *
