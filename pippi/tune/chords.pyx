@@ -53,24 +53,35 @@ PROGRESSIONS = {
 }
 
 
-def get_freq_from_chord_name(name, root=440, octave=3, ratios=JUST):
-    # No current refs internally...
-    index = get_chord_root_index(name)
-    freq = ratios[index]
-    freq = root * (freq[0] / freq[1]) * 2**octave
-
-    return freq
-
 def next_chord(name):
     # No current refs internally... used w/ PROGRESSIONS
     name = strip_chord(name)
     return random.choice(PROGRESSIONS[name])
 
 def strip_chord(name):
-    root = re.sub('[#b+/*^0-9]+', '', name)
+    root = re.sub('[#b+*^0-9]+', '', name)
     return root.lower()
 
-def get_chord_root_index(name):
+def name_to_extension(name):
+    return re.sub(MATCH_ROMAN + '[/*+]?', '', name)
+
+def name_to_quality(name):
+    quality = '-' if name.islower() else '^'
+    return '*' if re.match(MATCH_ROMAN + '[*]', name) is not None else quality
+
+def name_to_intervals(name):
+    quality = name_to_quality(name)
+    extension = name_to_extension(name) 
+
+    intervals = BASE_QUALITIES[quality]
+
+    if extension != '':
+        intervals = intervals + EXTENSIONS[extension]
+
+    return intervals
+
+def name_to_index(name):
+    # Chord name to index
     root = CHORD_ROMANS[strip_chord(name)]
 
     if '#' in name:
@@ -81,27 +92,6 @@ def get_chord_root_index(name):
 
     return root % 12
 
-def get_quality(name):
-    quality = '-' if name.islower() else '^'
-    quality = '*' if re.match(MATCH_ROMAN + '[*]', name) is not None else quality
-
-    return quality
-
-def get_extension(name):
-    return re.sub(MATCH_ROMAN + '[/*+]?', '', name)
-
-def get_intervals(name):
-    quality = get_quality(name)
-    extension = get_extension(name)
-
-    chord = BASE_QUALITIES[quality]
-
-    if extension != '':
-        chord = chord + EXTENSIONS[extension]
-
-    return chord
-
-
 def chord(name, key=None, octave=3, ratios=None):
     if key is None:
         key = DEFAULT_KEY
@@ -110,13 +100,13 @@ def chord(name, key=None, octave=3, ratios=None):
         ratios = DEFAULT_RATIOS
 
     key = ntf(key, octave, ratios)
-    root = ratios[get_chord_root_index(name)]
+    root = ratios[name_to_index(name)]
     root = key * (root[0] / root[1])
 
     name = re.sub('[#b]+', '', name)
-    chord = get_intervals(name)
-    chord = [ get_ratio_from_interval(iv, ratios) for iv in chord ]
-    chord = [ root * ratio for ratio in chord ]
+    intervals = name_to_intervals(name)
+    _ratios = [ get_ratio_from_interval(iv, ratios) for iv in intervals ]
+    chord = [ root * ratio for ratio in _ratios ]
 
     return chord
 
