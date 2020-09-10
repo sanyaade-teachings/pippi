@@ -6,6 +6,7 @@ from pippi.old import DEFAULT_KEY, DEFAULT_RATIOS, JUST, ntf, get_ratio_from_int
 
 
 MATCH_ROMAN = '[ivIV]?[ivIV]?[iI]?'
+MATCH_BASE = '[#b/+*^0-9]+'
 
 CHORD_ROMANS = {
     'i': 0,
@@ -25,13 +26,33 @@ BASE_QUALITIES = {
 }
 
 EXTENSIONS = {
-    '7': ['m7'],               # dominant 7th
-    '^7': ['M7'],              # major 7th
-    '9': ['m7', 'M9'],         # dominant 9th
-    '^9': ['M7', 'M9'],        # major 9th
-    '11': ['m7', 'M9', 'P11'], # dominant 11th
+    # 7ths
+    '7': ['m7'],        
+    '-7': ['m7'],              
+    '^7': ['M7'],         
+
+    # 9ths
+    '9': ['m7', 'M9'],     
+    '-9': ['m7', 'M9'],      
+    '^9': ['M7', 'M9'],       
+
+    # 11ths
+    '11': ['m7', 'M9', 'P11'],
+    '-11': ['m7', 'M9', 'P11'],
     '^11': ['M7', 'M9', 'P11'],
-    '69': ['M6', 'M9'],        # dominant 6/9
+
+    # 13ths
+    '13': ['m7', 'M9', 'P11', 'm13'], 
+    '-13': ['m7', 'M9', 'P11', 'm13'],
+    '^13': ['M7', 'M9', 'P11', 'M13'],
+
+    # 15ths
+    '15': ['m7', 'M9', 'P11', 'm13', 'P15'], 
+    '-15': ['m7', 'M9', 'P11', 'm13', 'P15'],
+    '^15': ['M7', 'M9', 'P11', 'M13', 'P15'],
+
+    # Add 6/9
+    '69': ['M6', 'M9'],  
     '6': ['M6'],        
 }
 
@@ -55,14 +76,12 @@ PROGRESSIONS = {
 
 def next_chord(name):
     # No current refs internally... used w/ PROGRESSIONS
-    name = strip_chord(name)
-    return random.choice(PROGRESSIONS[name])
-
-def strip_chord(name):
-    root = re.sub('[#b+*^0-9]+', '', name)
-    return root.lower()
+    base_name = re.sub(MATCH_BASE, '', name)
+    return random.choice(PROGRESSIONS[base_name])
 
 def name_to_extension(name):
+    if '/' in name:
+        name = name.split('/')[0]
     return re.sub(MATCH_ROMAN + '[/*+]?', '', name)
 
 def name_to_quality(name):
@@ -82,7 +101,8 @@ def name_to_intervals(name):
 
 def name_to_index(name):
     # Chord name to index
-    root = CHORD_ROMANS[strip_chord(name)]
+    root = re.sub('[#b/+*^0-9]+', '', name).lower()
+    root = CHORD_ROMANS[root]
 
     if '#' in name:
         root += 1
@@ -92,6 +112,40 @@ def name_to_index(name):
 
     return root % 12
 
+def key_to_freq(key, octave, ratios, name=None):
+    if name is None:
+        name = 'I'
+
+    # Get the root freq from the key
+    base_freq = ntf(key, octave, ratios)
+
+    # Get the root interval from the chord roman
+    root_interval = ratios[name_to_index(name)]
+
+    # Calc root freq from the key & root interval
+    return base_freq * (root_interval[0] / root_interval[1])
+
+def name_to_bass(name, key, octave, ratios):
+    # FIXME this works but is dumb
+    if '/' not in name:
+        return None
+    return chord(name.split('/')[1], key, octave, ratios)[0]
+
+def intervals(intervals, name=None, key=None, octave=3, ratios=None):
+    if key is None:
+        key = DEFAULT_KEY
+
+    if ratios is None:
+        ratios = DEFAULT_RATIOS
+
+    if isinstance(intervals, str):
+        intervals = [ interval for interval in intervals.split(' ') if interval != '' ]
+
+    root_freq = key_to_freq(key, octave, ratios, name)
+
+    _ratios = [ get_ratio_from_interval(interval, ratios) for interval in intervals ]
+    return [ root_freq * ratio for ratio in _ratios ]
+
 def chord(name, key=None, octave=3, ratios=None):
     if key is None:
         key = DEFAULT_KEY
@@ -99,16 +153,24 @@ def chord(name, key=None, octave=3, ratios=None):
     if ratios is None:
         ratios = DEFAULT_RATIOS
 
-    key = ntf(key, octave, ratios)
-    root = ratios[name_to_index(name)]
-    root = key * (root[0] / root[1])
+    root_freq = key_to_freq(key, octave, ratios, name)
+    bass = name_to_bass(name, key, octave, ratios)
 
+    # Strip # and b from chord name
     name = re.sub('[#b]+', '', name)
-    intervals = name_to_intervals(name)
-    _ratios = [ get_ratio_from_interval(iv, ratios) for iv in intervals ]
-    chord = [ root * ratio for ratio in _ratios ]
 
-    return chord
+    # Get chord intervals
+    intervals = name_to_intervals(name)
+
+    _ratios = [ get_ratio_from_interval(iv, ratios) for iv in intervals ]
+    freqs = [ root_freq * ratio for ratio in _ratios ]
+
+    if bass is not None:
+        if bass > freqs[0]:
+            bass /= 2.0
+        freqs = [ bass ] + freqs
+
+    return freqs
 
 def chords(names, key=None, octave=3, ratios=JUST):
     if key is None:

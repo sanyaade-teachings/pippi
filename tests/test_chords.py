@@ -38,6 +38,10 @@ class TestChords(TestCase):
         assert tune.chord('I7', key='a', octave=4, ratios=tune.JUST) == [440.0, 550.0, 660.0, 792.0] 
         assert tune.chord('I7', key='a', octave=3, ratios=tune.JUST) == [220.0, 275.0, 330.0, 396.0] 
 
+    def test_get_chord_from_intervals(self):
+        assert tune.intervals('P1 M3 P5 m7', name='I', key='a', octave=4, ratios=tune.JUST) == [440.0, 550.0, 660.0, 792.0] 
+        assert tune.intervals('P1 M3 P5 m7', name='I', key='a', octave=3, ratios=tune.JUST) == [220.0, 275.0, 330.0, 396.0] 
+
     def test_get_ratio_from_interval(self):
         assert tune.get_ratio_from_interval('P1', tune.JUST) == 1.0
         assert tune.get_ratio_from_interval('P5', tune.JUST) == 1.5
@@ -46,6 +50,6 @@ class TestChords(TestCase):
         assert tune.get_ratio_from_interval('P15', tune.JUST) == 4.0
 
     def test_sub_bass_movements(self):
-        freqs = tune.chord('ii/I', key='a', octave=4, ratios=tune.JUST)
+        freqs = tune.chord('ii/i', key='a', octave=4, ratios=tune.JUST)
         self.assertEqual(freqs[0], 440.0)
 
