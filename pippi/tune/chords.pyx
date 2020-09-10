@@ -3,6 +3,7 @@
 import re
 import random # FIXME use internal choice
 from pippi.old import DEFAULT_KEY, DEFAULT_RATIOS, JUST, ntf, get_ratio_from_interval
+from pippi.lists cimport rotate
 
 
 MATCH_ROMAN = '[ivIV]?[ivIV]?[iI]?'
@@ -148,7 +149,7 @@ def intervals(intervals, name=None, key=None, octave=3, ratios=None):
     _ratios = [ get_ratio_from_interval(interval, ratios) for interval in intervals ]
     return [ root_freq * ratio for ratio in _ratios ]
 
-def chord(name, key=None, octave=3, ratios=None):
+def chord(name, key=None, octave=3, ratios=None, inversion=None):
     if key is None:
         key = DEFAULT_KEY
 
@@ -166,6 +167,9 @@ def chord(name, key=None, octave=3, ratios=None):
 
     _ratios = [ get_ratio_from_interval(iv, ratios) for iv in intervals ]
     freqs = [ root_freq * ratio for ratio in _ratios ]
+
+    if inversion is not None:
+        freqs = rotate(freqs, inversion)
 
     if bass is not None:
         if bass > freqs[0]:
