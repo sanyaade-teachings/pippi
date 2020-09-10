@@ -216,7 +216,7 @@ class TestOscs(TestCase):
         out.write('tests/renders/osc_waveset_pulsar2d.wav')
 
     def test_freq_interpolation_pulsar2d(self):
-        freqs = tune.fromdegrees([1,3,5,9,2,4,6,5,1], octave=3, root='a') * 10
+        freqs = tune.degrees([1,3,5,9,2,4,6,5,1], octave=3, key='a') * 10
         out = Pulsar2d(['sine', 'tri', 'square', 'hann'], ['hann'], 
             freq=freqs, 
             freq_interpolator='trunc',

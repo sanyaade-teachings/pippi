@@ -2,7 +2,11 @@
 
 import re
 import random # FIXME use internal choice
-from pippi.old import DEFAULT_KEY, DEFAULT_RATIOS, JUST, ntf, get_ratio_from_interval
+from pippi.defaults cimport DEFAULT_KEY
+from pippi.scales cimport DEFAULT_RATIOS
+from pippi.scales import JUST
+from pippi.frequtils import ntf, key_to_freq
+from pippi.intervals import get_ratio_from_interval
 from pippi.lists cimport rotate
 
 
@@ -100,7 +104,7 @@ def name_to_intervals(name):
 
     return intervals
 
-def name_to_index(name):
+cpdef name_to_index(name):
     # Chord name to index
     root = re.sub('[#b/+*^0-9]+', '', name).lower()
     root = CHORD_ROMANS[root]
@@ -113,19 +117,6 @@ def name_to_index(name):
 
     return root % 12
 
-def key_to_freq(key, octave, ratios, name=None):
-    if name is None:
-        name = 'I'
-
-    # Get the root freq from the key
-    base_freq = ntf(key, octave, ratios)
-
-    # Get the root interval from the chord roman
-    root_interval = ratios[name_to_index(name)]
-
-    # Calc root freq from the key & root interval
-    return base_freq * (root_interval[0] / root_interval[1])
-
 def name_to_bass(name, key, octave, ratios):
     # FIXME this works but is dumb
     if '/' not in name:
@@ -133,21 +124,6 @@ def name_to_bass(name, key, octave, ratios):
     bass = chord(name.split('/')[1], key, octave, ratios)[0]
     name = name.split('/')[0]
     return name, bass    
-
-def intervals(intervals, name=None, key=None, octave=3, ratios=None):
-    if key is None:
-        key = DEFAULT_KEY
-
-    if ratios is None:
-        ratios = DEFAULT_RATIOS
-
-    if isinstance(intervals, str):
-        intervals = [ interval for interval in intervals.split(' ') if interval != '' ]
-
-    root_freq = key_to_freq(key, octave, ratios, name)
-
-    _ratios = [ get_ratio_from_interval(interval, ratios) for interval in intervals ]
-    return [ root_freq * ratio for ratio in _ratios ]
 
 def chord(name, key=None, octave=3, ratios=None, inversion=None):
     if key is None:
