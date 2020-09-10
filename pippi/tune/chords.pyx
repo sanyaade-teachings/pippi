@@ -128,8 +128,10 @@ def key_to_freq(key, octave, ratios, name=None):
 def name_to_bass(name, key, octave, ratios):
     # FIXME this works but is dumb
     if '/' not in name:
-        return None
-    return chord(name.split('/')[1], key, octave, ratios)[0]
+        return name, None
+    bass = chord(name.split('/')[1], key, octave, ratios)[0]
+    name = name.split('/')[0]
+    return name, bass    
 
 def intervals(intervals, name=None, key=None, octave=3, ratios=None):
     if key is None:
@@ -153,8 +155,8 @@ def chord(name, key=None, octave=3, ratios=None):
     if ratios is None:
         ratios = DEFAULT_RATIOS
 
+    name, bass = name_to_bass(name, key, octave, ratios)
     root_freq = key_to_freq(key, octave, ratios, name)
-    bass = name_to_bass(name, key, octave, ratios)
 
     # Strip # and b from chord name
     name = re.sub('[#b]+', '', name)
