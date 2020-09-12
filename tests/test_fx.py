@@ -335,7 +335,6 @@ class TestFx(TestCase):
         out.write('tests/renders/fx_fold_sine.wav')
 
     def test_ms(self):
-
         snd = dsp.read('tests/sounds/guitar1s.wav')
         ms = fx.ms_encode(snd)
         lr = fx.ms_decode(ms)
@@ -345,5 +344,45 @@ class TestFx(TestCase):
         snd2 = oscs.Osc('tri', freq=201).play(1).pan(1)
         out = fx.ms_decode(snd1 & snd2)
         out.write('tests/renders/fx_ms_detune.wav')
+
+    def test_decimate(self):
+        length = 4
+        oversample = 5
+        sweep = np.logspace(0, 9 + oversample, 512 * length, base = 2) * 40
+        tone = oscs.Osc('sine', freq=sweep, samplerate=(48000 * 2**oversample)).play(length)
+
+        snd = fx.decimate(tone, oversample)
+        snd.write('tests/renders/fx_decimate.wav')
+
+    def test_upsample(self):
+        length = 8
+        oversample = 1
+        sweep = np.logspace(0, 9, 512 * length, base = 2) * 24
+        snd = oscs.Osc('sine', freq=sweep, samplerate=24000).play(length)
+        snd = fx.upsample(snd, oversample)
+        snd.write('tests/renders/fx_upsample.wav')
+
+    def test_repitch(self):
+        length = .25
+        oversample = 1
+        sweep = np.logspace(0, 9, 512, base = 2) * 24
+        osc = oscs.Osc('sine', freq=sweep, samplerate=12000).play(length)
+        sample = dsp.read('tests/sounds/guitar1s.wav')
+        snd = fx.repitch(sample, 4, 20)
+        snd.write('tests/renders/fx_resample_up.wav')
+        snd = fx.repitch(sample, 1/4, 20)
+        snd.write('tests/renders/fx_resample_down.wav')
+        snd = fx.resample(osc, 4, 20)
+        snd.write('tests/renders/fx_resample_upsample.wav')
+
+    def test_vspeed2(self):
+        quality = 20
+        sample = dsp.read('tests/sounds/linux.wav')
+        snd = fx.vspeed2(sample, [1, 2, 1], quality)
+        snd.write('tests/renders/fx_vspeed2.wav')
+        snd = fx.vspeed2(sample, -1, 20)
+        snd.write('tests/renders/fx_vspeed2_rev.wav')
+        snd = fx.vspeed2(sample, [-1, 2, 1], 20)
+        snd.write('tests/renders/fx_vspeed2_bipolar.wav')
 
                
