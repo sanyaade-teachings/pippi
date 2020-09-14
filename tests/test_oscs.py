@@ -107,6 +107,10 @@ class TestOscs(TestCase):
         out = SineOsc(freq=130.81).play(5).env('hannout') * 0.25
         out.write('tests/renders/osc_sineosc-basic.wav')
 
+        out = SineOsc(freq=[130.81, 300, 456.32]*8, freq_interpolator='trunc').play(5).env('hannout') * 0.25
+        out.write('tests/renders/osc_sineosc-trunc.wav')
+
+
     def test_create_osc2d(self):
         wtA = [ random.random() for _ in range(random.randint(10, 1000)) ]
         wtB = dsp.wt([ random.random() for _ in range(random.randint(10, 1000)) ])
@@ -143,7 +147,18 @@ class TestOscs(TestCase):
         length = 10
         out = osc.play(length)
         out.write('tests/renders/osc_pulsar.wav')
-        self.assertEqual(len(out), int(length * out.samplerate))
+
+        osc = Pulsar(
+                'sine', 
+                window='sine', 
+                pulsewidth=dsp.wt('tri', 0, 1), 
+                freq=[200.0, 210, 220, 300, 310, 320]*4, 
+                freq_interpolator='trunc',
+                amp=0.2
+            )
+        length = 10
+        out = osc.play(length)
+        out.write('tests/renders/osc_pulsar_trunc.wav')
 
     def test_pulsar_burst(self):
         osc = Pulsar(
