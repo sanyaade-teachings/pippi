@@ -13,10 +13,11 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi.lists cimport rotate
 from pippi cimport seq as _seq
 from pippi cimport rand
+from pippi.events cimport Event
 import numpy as np
 
 MIN_BEAT = 0.0001
-REST_SYMBOLS = set(('0', '.', ' ', '-', 0, False))
+REST_SYMBOLS = set(('.', '-', False, None))
 
 CLAVE = {
     'son':      'x..x..x...x.x...', 
@@ -37,18 +38,22 @@ def makebar(str k, dict instrument, double length, list onsets, bint stems, str 
     cdef int count = 0
     cdef double onset
 
+    """
     cdef dict ctx = {
         'pos': 0, 
         'count': 0, 
         'sectionname': sectionname, 
         'sectionindex': sectionindex,
     }
+    """
+
+    cdef Event ctx = Event(count=0, sectionname=sectionname, sectionindex=sectionindex)
 
     cdef bint showwarning = False
 
     for onset in onsets:
-        ctx['pos'] = onset/length
-        ctx['count'] = count
+        ctx.pos = onset/length
+        ctx.count = count
         if instrument.get('callback', None) is not None:
             sig = signature(instrument['callback'])
             if len(sig.parameters) > 1:
@@ -68,7 +73,7 @@ def makebar(str k, dict instrument, double length, list onsets, bint stems, str 
         bar = instrument['barcallback'](bar)
 
     if stems:
-        bar.write('%sstem-%s-%s-%s.wav' % (stemsdir, ctx['sectionname'], ctx['sectionindex'], k))
+        bar.write('%sstem-%s-%s-%s.wav' % (stemsdir, ctx.sectionname, ctx.sectionindex, k))
 
     if showwarning:
         print('WARNING: using old-style callback')

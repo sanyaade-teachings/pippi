@@ -9,6 +9,8 @@ import random
 cimport cython
 import soundfile
 
+from pippi.events cimport Event
+from pippi.events cimport render as _render
 from pippi.soundbuffer import SoundBuffer
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable, _randline
@@ -77,6 +79,12 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
     
 cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
     return _randline(numpoints, lowvalue, highvalue, wtsize)
+
+def event(*args, **kwargs):
+    return Event(*args, **kwargs)
+
+cpdef SoundBuffer render(list events, object callback):
+    return _render(events, callback)
 
 cpdef Wavetable wt(object values, 
         object lowvalue=None, 

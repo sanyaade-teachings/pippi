@@ -460,20 +460,20 @@ clap_lfo = dsp.win(shapes.win('sine'), 0.01, 0.1)
 time_lfo = dsp.win('hann', 0.001, 0.2)
 
 def makehat(ctx):
-    length = hat_lfo.interp(ctx['pos'])
+    length = hat_lfo.interp(ctx.pos)
     lowhz = dsp.win('rnd', 9000, 11000)
     highhz = dsp.win('rnd', 12000, 14000)
     return noise.bln('sine', length, lowhz, highhz).env('pluckout') * 0.5
 
 def makekick(ctx):
-    length = kick_lfo.interp(ctx['pos'])
+    length = kick_lfo.interp(ctx.pos)
     out = noise.bln('square', length, [dsp.rand(80, 100), dsp.rand(50, 100)], [dsp.rand(150, 200), dsp.rand(50, 70)])
     out = fx.crush(out, dsp.rand(6,10), dsp.rand(11000, 44100))
     out = fx.lpf(out, 200).vspeed([1, 0.5])
     return out.env('pluckout').taper(0.02) * dsp.rand(0.6, 1)
 
 def makeclap(ctx):
-    length = clap_lfo.interp(ctx['pos'])
+    length = clap_lfo.interp(ctx.pos)
     lowhz = dsp.win('rnd', 3000, 6000)
     highhz = dsp.win('rnd', 2000, 8000)
     return noise.bln('tri', length, lowhz, highhz).env('pluckout')
