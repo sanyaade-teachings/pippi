@@ -12,4 +12,4 @@ cdef class Event:
     cdef dict _params
     cdef object _before
 
-cdef SoundBuffer render(list events, object callback)
+cdef SoundBuffer render(list events, object callback, int channels, int samplerate)

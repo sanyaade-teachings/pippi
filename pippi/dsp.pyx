@@ -17,6 +17,7 @@ from pippi.wavetables cimport Wavetable, _randline
 from pippi.wavesets cimport Waveset
 from pippi cimport rand as _rand
 from pippi cimport lists
+from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 
 # Just a shorthand for MS in scripts. 
 # For example:
@@ -83,8 +84,8 @@ cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, i
 def event(*args, **kwargs):
     return Event(*args, **kwargs)
 
-cpdef SoundBuffer render(list events, object callback):
-    return _render(events, callback)
+cpdef SoundBuffer render(list events, object callback, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE):
+    return _render(events, callback, channels, samplerate)
 
 cpdef Wavetable wt(object values, 
         object lowvalue=None, 

@@ -37,9 +37,9 @@ cdef class Event:
             return default
         return self._params.get(key, default)
 
-cdef SoundBuffer render(list events, object callback):
+cdef SoundBuffer render(list events, object callback, int channels, int samplerate):
     cdef double end = events[-1].onset + events[-1].length
-    cdef SoundBuffer out = SoundBuffer(length=end)
+    cdef SoundBuffer out = SoundBuffer(length=end, channels=channels, samplerate=samplerate)
 
     cdef int count = 0
     cdef double pos = 0
@@ -49,6 +49,8 @@ cdef SoundBuffer render(list events, object callback):
     for event in events:
         event.count = count
         event.pos = (event.onset or 0) / end
+        event._params['channels'] = channels
+        event._params['samplerate'] = samplerate
 
         if event._before is not None:
             event.before = event._before(event)
