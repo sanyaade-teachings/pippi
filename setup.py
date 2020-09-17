@@ -49,6 +49,10 @@ ext_modules = cythonize([
             include_dirs=[np.get_include()], 
         ), 
 
+        Extension('pippi.mir', ['pippi/mir.pyx'],
+            include_dirs=[np.get_include()], 
+        ),
+
         # Oscs
         Extension('pippi.oscs', ['pippi/oscs/oscs.pyx']), 
 

@@ -2,7 +2,7 @@
 
 from pippi cimport interpolation
 from pippi cimport wavetables
-from pippi cimport shapes
+from pippi import shapes
 from pippi cimport fx
 from pippi.lists cimport _scaleinplace
 from libc.stdlib cimport malloc, free
