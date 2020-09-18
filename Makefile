@@ -3,6 +3,9 @@
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
 
+test-events:
+	python -m unittest tests/test_events.py -v
+
 test-chords:
 	python -m unittest tests/test_chords.py -v
 

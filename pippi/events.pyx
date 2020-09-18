@@ -2,6 +2,8 @@
 
 from pippi.soundbuffer cimport SoundBuffer
 
+cdef tuple reserved = ('onset', 'length', 'freq', 'amp', 'pos', 'count')
+
 cdef class Event:
     def __cinit__(self, 
             double onset=0,
@@ -32,10 +34,17 @@ cdef class Event:
     def __getattr__(self, key):
         return self.get(key)
 
+    def __setattr__(self, key, value):
+        if key not in self._params and key not in reserved:
+            self._params[key] = value
+        else:
+            super().__setattr__(key, value)
+
     def get(self, key, default=None):
-        if self._params is None:
-            return default
-        return self._params.get(key, default)
+        if key in self._params:
+            return self._params.get(key, default)
+        else:
+            self._params[key] = default
 
 cdef SoundBuffer render(list events, object callback, int channels, int samplerate):
     cdef double end = events[-1].onset + events[-1].length

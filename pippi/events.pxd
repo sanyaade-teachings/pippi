@@ -9,7 +9,7 @@ cdef class Event:
     cdef public double amp
     cdef public double pos
     cdef public int count
-    cdef dict _params
+    cdef public dict _params
     cdef object _before
 
 cdef SoundBuffer render(list events, object callback, int channels, int samplerate)
