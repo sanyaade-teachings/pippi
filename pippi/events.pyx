@@ -35,10 +35,10 @@ cdef class Event:
         return self.get(key)
 
     def __setattr__(self, key, value):
-        if key not in self._params and key not in reserved:
+        if key not in reserved:
             self._params[key] = value
         else:
-            super().__setattr__(key, value)
+            super(self).__setattr__(key, value)
 
     def get(self, key, default=None):
         if key in self._params:

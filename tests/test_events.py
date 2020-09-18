@@ -12,4 +12,6 @@ class TestEvents(TestCase):
         e = Event(foo='bar')         
         e.baz = 2
         self.assertEqual(e.baz, 2)
+        e.baz = 1
+        self.assertEqual(e.baz, 1)
 
