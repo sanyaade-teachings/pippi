@@ -6,6 +6,9 @@ test:
 test-events:
 	python -m unittest tests/test_events.py -v
 
+test-mir:
+	python -m unittest tests/test_mir.py -v
+
 test-chords:
 	python -m unittest tests/test_chords.py -v
 
