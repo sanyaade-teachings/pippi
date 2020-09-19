@@ -32,3 +32,22 @@ class TestMIR(TestCase):
             count += 1
         out.write('tests/renders/mir_segments.wav')
 
+    def test_features(self):
+        snd = dsp.read('tests/sounds/linux.wav')
+
+        wt = mir.bandwidth(snd)
+        wt.graph('tests/renders/mir_feature_bandwidth.png')
+
+        wt = mir.flatness(snd)
+        wt.graph('tests/renders/mir_feature_flatness.png')
+
+        wt = mir.rolloff(snd)
+        wt.graph('tests/renders/mir_feature_rolloff.png')
+
+        wt = mir.centroid(snd)
+        wt.graph('tests/renders/mir_feature_centroid.png')
+
+        wt = mir.contrast(snd)
+        wt.graph('tests/renders/mir_feature_contrast.png')
+
+

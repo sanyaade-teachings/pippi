@@ -4,6 +4,7 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable
 
 import aubio
+import librosa
 import numpy as np
 cimport numpy as np
 
@@ -12,8 +13,28 @@ DEFAULT_HOPSIZE = DEFAULT_WINSIZE//2
 
 np.import_array()
 
-cpdef float[:] flatten(SoundBuffer snd):
+cpdef np.ndarray flatten(SoundBuffer snd):
     return np.asarray(snd.remix(1).frames, dtype='f').flatten()
+
+cpdef Wavetable bandwidth(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
+    cdef np.ndarray wt = librosa.feature.spectral_bandwidth(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    return Wavetable(wt.transpose().astype('d').flatten())
+
+cpdef Wavetable flatness(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
+    cdef np.ndarray wt = librosa.feature.spectral_flatness(y=flatten(snd), n_fft=winsize)
+    return Wavetable(wt.transpose().astype('d').flatten())
+
+cpdef Wavetable rolloff(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
+    cdef np.ndarray wt = librosa.feature.spectral_rolloff(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    return Wavetable(wt.transpose().astype('d').flatten())
+
+cpdef Wavetable centroid(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
+    cdef np.ndarray wt = librosa.feature.spectral_centroid(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    return Wavetable(wt.transpose().astype('d').flatten())
+
+cpdef Wavetable contrast(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
+    cdef np.ndarray wt = librosa.feature.spectral_contrast(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    return Wavetable(wt.transpose().astype('d').flatten())
 
 cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, int winsize=DEFAULT_WINSIZE, int hopsize=DEFAULT_HOPSIZE, bint backfill=True):
     o = aubio.pitch('yin', winsize, hopsize, snd.samplerate)

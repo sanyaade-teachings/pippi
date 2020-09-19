@@ -126,6 +126,8 @@ setup(
     packages=['pippi', 'pippi.tune'],
     ext_modules=ext_modules, 
     install_requires=[
+        'aubio', 
+        'librosa',
         'numpy', 
         'Pillow', 
         'PySoundFile'
