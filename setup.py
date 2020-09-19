@@ -74,6 +74,7 @@ ext_modules = cythonize([
         Extension('pippi.sineosc', ['pippi/oscs/sineosc.pyx']), 
         Extension('pippi.tukey', ['pippi/oscs/tukey.pyx']), 
 
+        Extension('pippi.midi', ['pippi/midi.pyx']), 
         Extension('pippi.rhythm', ['pippi/rhythm.pyx']), 
         Extension('pippi.rand', ['pippi/rand.pyx']), 
 
@@ -96,7 +97,6 @@ ext_modules = cythonize([
         ),
 
         # Tuning / scales / harmony / melody
-        Extension('pippi.midi', ['pippi/tune/midi.pyx']), 
         Extension('pippi.scales', ['pippi/tune/scales.pyx']), 
         Extension('pippi.intervals', ['pippi/tune/intervals.pyx']), 
         Extension('pippi.frequtils', ['pippi/tune/frequtils.pyx']), 
