@@ -4,6 +4,9 @@ from pippi.soundbuffer cimport SoundBuffer
 
 cdef tuple reserved = ('onset', 'length', 'freq', 'amp', 'pos', 'count')
 
+cpdef object rebuild_event(double onset, double length, double freq, double amp, double pos, int count, object before, dict params):
+    return Event(onset, length, freq, amp, pos, count, before, params)
+
 cdef class Event:
     def __cinit__(self, 
             double onset=0,
@@ -30,6 +33,9 @@ cdef class Event:
         params.update(kwargs)
 
         self._params = params
+
+    def __reduce__(self):
+        return (rebuild_event, (self.onset, self.length, self.freq, self.amp, self.pos, self.count, self._before, self._params))
 
     def __getattr__(self, key):
         return self.get(key)
