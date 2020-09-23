@@ -120,6 +120,7 @@ cdef double[:,:] render(str font, list events, int voice, int channels, int samp
             break
 
     free(block)
+    tsf_close(TSF)
 
     return out
 
