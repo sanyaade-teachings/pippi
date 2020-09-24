@@ -682,9 +682,8 @@ cpdef SoundBuffer go(SoundBuffer snd,
 
     while pos < outlen:
         grain = snd.cut(pos, grainlength)
-        clip = random.triangular(minclip, maxclip)
         grain *= random.triangular(0, factor * wet)
-        grain = grain.clip(-clip, clip)
+        grain = grain.softclip()
         out.dub(grain * window.data, pos)
 
         pos += (grainlength/2) * (1/density)
