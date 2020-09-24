@@ -1297,6 +1297,30 @@ cpdef SoundBuffer vspeed2(SoundBuffer snd, object speed, int quality=5, bint nor
     return _vspeed2(snd, speed, quality, normalize)
 
 
+cpdef SoundBuffer weave(SoundBuffer snd, double threshold=0.1, bint above=True):
+    # Only output samples above or below the threshold
+    # Inspired by the Wovenland 2 recordings by Toshiya Tsunoda & Taku Unami
 
+    cdef long length = len(snd)
+    cdef int channels = snd.channels
+    cdef int samplerate = snd.samplerate
 
+    cdef double[:,:] out = np.zeros((length, channels), dtype='d')
+
+    cdef long i = 0
+    cdef long c = 0
+
+    if above:
+        for c in range(channels):
+            for i in range(length):
+                if abs(snd.frames[i,c]) >= threshold:
+                    out[i,c] = snd.frames[i,c]
+
+    else:
+        for c in range(channels):
+            for i in range(length):
+                if abs(snd.frames[i,c]) <= threshold:
+                    out[i,c] = snd.frames[i,c]
+
+    return SoundBuffer(out, channels=channels, samplerate=samplerate)
 
