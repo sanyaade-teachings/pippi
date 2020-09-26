@@ -11,7 +11,7 @@ cdef class SoundBuffer:
     cdef public int channels
     cdef public double[:,:] frames
 
-    cdef void _dub(SoundBuffer self, SoundBuffer sound, int framepos)
+    cdef void _dub(SoundBuffer self, SoundBuffer sound, long framepos)
     cdef void _fill(SoundBuffer self, double[:,:] frames)
     cpdef SoundBuffer adsr(SoundBuffer self, double a=*, double d=*, double s=*, double r=*)
     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=*)

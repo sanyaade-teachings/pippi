@@ -9,7 +9,6 @@ import numpy as np
 cimport numpy as np
 
 DEFAULT_WINSIZE = 4096
-DEFAULT_HOPSIZE = DEFAULT_WINSIZE//2
 
 np.import_array()
 
@@ -36,8 +35,72 @@ cpdef Wavetable contrast(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
     cdef np.ndarray wt = librosa.feature.spectral_contrast(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
 
-cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, int winsize=DEFAULT_WINSIZE, int hopsize=DEFAULT_HOPSIZE, bint backfill=True):
-    o = aubio.pitch('yin', winsize, hopsize, snd.samplerate)
+cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, int winsize=DEFAULT_WINSIZE, bint backfill=True):
+    """ Returns a wavetable of non-zero frequencies detected which exceed the confidence threshold given. Frequencies are 
+        held until the next detection to avoid zeros and outliers. Depending on the input, you may need to play with the 
+        tolerance value and the window size to tune the behavior. The default detection method is `yinfast`. 
+
+        Example:
+
+            pitches = mir.pitch(snd, 0.8, 'yinfast')
+
+        Methods:
+
+        This routine is a wrapper for [aubio](https://aubio.org)'s pitch detection. 
+        Summaries of the detection methods were taken from: https://aubio.org/manual/latest/cli.html#manpages
+        Part of that man page was copied and slightly modified for formatting per the terms of the GPL license 
+        which the original page was published under. Please see the above link for details.
+
+        `schmitt` - Schmitt trigger
+
+        > This pitch extraction method implements a Schmitt trigger to estimate the
+        > period of a signal. It is computationally very inexpensive, but also very
+        > sensitive to noise.
+
+        `fcomb` - a fast harmonic comb filter
+
+        > This pitch extraction method implements a fast harmonic comb filter to
+        > determine the fundamental frequency of a harmonic sound.
+
+        `mcomb` - multiple-comb filter
+
+        > This fundamental frequency estimation algorithm implements spectral
+        > flattening, multi-comb filtering and peak histogramming.
+
+        `specacf` - Spectral auto-correlation function
+
+        `yin` - YIN algorithm
+
+        > This algorithm was developed by A. de Cheveigne and H. Kawahara and
+        > was first published in:
+        > 
+        > De Cheveigné, A., Kawahara, H. (2002) "YIN, a fundamental frequency
+        > estimator for speech and music", J. Acoust. Soc. Am. 111, 1917-1930.
+
+        `yinfft` - Yinfft algorithm
+
+        > This algorithm was derived from the YIN algorithm. In this implementation, a
+        > Fourier transform is used to compute a tapered square difference function,
+        > which allows spectral weighting. Because the difference function is tapered,
+        > the selection of the period is simplified.
+        > 
+        > Paul Brossier, Automatic annotation of musical audio for interactive systems,
+        > Chapter 3, Pitch Analysis, PhD thesis, Centre for Digital music, Queen Mary
+        > University of London, London, UK, 2006.
+
+        `yinfast` - YIN algorithm (accelerated)
+
+        > An optimised implementation of the YIN algorithm, yielding results identical
+        > to the original YIN algorithm, while reducing its computational cost from
+        > O(n^2) to O(n log(n)).
+    """
+
+    if method is None:
+        method = 'yinfast'
+
+    cdef int hopsize = winsize//2
+
+    o = aubio.pitch(method, winsize, hopsize, snd.samplerate)
     o.set_tolerance(tolerance)
 
     cdef list pitches = []
@@ -63,7 +126,7 @@ cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, int winsize=DEFAULT
 
         pos += hopsize
 
-        if con < tolerance:
+        if con < tolerance or est == 0:
             pitches += [ last ]
         else:
             last = est
@@ -81,7 +144,7 @@ cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, int winsize=DEFAULT
 
     return Wavetable(pitches)
 
-cpdef list onsets(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE, int hopsize=DEFAULT_HOPSIZE, bint seconds=True):
+cpdef list onsets(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE, bint seconds=True):
     """ Returns a list of onset times in seconds detected using the given method. The default method is `specflux`. 
         An optional `seconds` argument (normally true) may be set to false to return a list of frame indexes instead 
         of seconds.
@@ -150,6 +213,8 @@ cpdef list onsets(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE,
     if method is None:
         method = 'specflux'
 
+    cdef int hopsize = winsize//2
+
     cdef int pos = 0
     cdef int total_length = len(snd)
     cdef int onset
@@ -175,11 +240,11 @@ cpdef list onsets(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE,
 
     return onsets
 
-cpdef list segments(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE, int hopsize=DEFAULT_HOPSIZE):
+cpdef list segments(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE):
     """ A wrapper for `mir.onsets` which returns a list of SoundBuffers sliced at the onset times. 
         See the documentation for `mir.onsets` for an overview of the detection methods available.
     """
-    cdef list onset_times = onsets(snd, method, winsize, hopsize, seconds=False)
+    cdef list onset_times = onsets(snd, method, winsize, seconds=False)
     cdef int last = -1
     cdef int onset = 0
     cdef list segments = []

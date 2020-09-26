@@ -206,9 +206,9 @@ cpdef SoundBuffer fold(SoundBuffer snd, object amp=1, bint norm=True):
 @cython.wraparound(False)
 @cython.cdivision(True)
 cdef double[:,:] _norm(double[:,:] snd, double ceiling):
-    cdef int i = 0
+    cdef long i = 0
     cdef int c = 0
-    cdef int framelength = len(snd)
+    cdef long framelength = len(snd)
     cdef int channels = snd.shape[1]
     cdef double normval = 1
     cdef double maxval = _mag(snd)

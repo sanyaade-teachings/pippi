@@ -302,6 +302,8 @@ cdef double[:] _normalize(double[:] data, double ceiling):
 
     return data
 
+cpdef object rebuild_wavetable(double[:] data):
+    return Wavetable(data)
 
 cdef class Wavetable:
     def __cinit__(self, object values, 
@@ -334,6 +336,8 @@ cdef class Wavetable:
         if scaled:
             self.data = _scaleinplace(self.data, np.min(self.data), np.max(self.data), self.lowvalue, self.highvalue, False)
 
+    def __reduce__(self):
+        return (rebuild_wavetable, (np.asarray(self.data),))
 
     ##################################
     # (+) Concatenation operator (+) #
