@@ -17,6 +17,7 @@ from pippi.wavetables cimport Wavetable, _randline
 from pippi.wavesets cimport Waveset
 from pippi cimport rand as _rand
 from pippi cimport lists
+from pippi.sounddb cimport SoundDB
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 
 # Just a shorthand for MS in scripts. 
@@ -80,6 +81,9 @@ cpdef SoundBuffer mix(list sounds, align_end=False):
     
 cpdef Wavetable randline(int numpoints, double lowvalue=0, double highvalue=1, int wtsize=4096):
     return _randline(numpoints, lowvalue, highvalue, wtsize)
+
+cpdef SoundDB injest(SoundBuffer snd, str dbname=None, object dbpath=None, bint overwrite=False):
+    return SoundDB(snd, dbname, dbpath, overwrite)
 
 def event(*args, **kwargs):
     return Event(*args, **kwargs)

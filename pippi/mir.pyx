@@ -8,31 +8,46 @@ import librosa
 import numpy as np
 cimport numpy as np
 
-DEFAULT_WINSIZE = 4096
+cdef int DEFAULT_WINSIZE = 4096
 
 np.import_array()
 
 cpdef np.ndarray flatten(SoundBuffer snd):
     return np.asarray(snd.remix(1).frames, dtype='f').flatten()
 
+cdef np.ndarray _bandwidth(np.ndarray snd, int samplerate, int winsize):
+    return librosa.feature.spectral_bandwidth(y=snd, sr=samplerate, n_fft=winsize)
+
 cpdef Wavetable bandwidth(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
-    cdef np.ndarray wt = librosa.feature.spectral_bandwidth(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    cdef np.ndarray wt = _bandwidth(flatten(snd), snd.samplerate, winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
+
+cdef np.ndarray _flatness(np.ndarray snd, int winsize):
+    return librosa.feature.spectral_flatness(y=snd, n_fft=winsize)
 
 cpdef Wavetable flatness(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
-    cdef np.ndarray wt = librosa.feature.spectral_flatness(y=flatten(snd), n_fft=winsize)
+    cdef np.ndarray wt = _flatness(flatten(snd), winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
+
+cdef np.ndarray _rolloff(np.ndarray snd, int samplerate, int winsize):
+    return librosa.feature.spectral_rolloff(y=snd, sr=samplerate, n_fft=winsize)
 
 cpdef Wavetable rolloff(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
-    cdef np.ndarray wt = librosa.feature.spectral_rolloff(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    cdef np.ndarray wt = _rolloff(flatten(snd), snd.samplerate, winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
+
+cdef np.ndarray _centroid(np.ndarray snd, int samplerate, int winsize):
+    return librosa.feature.spectral_centroid(y=snd, sr=samplerate, n_fft=winsize)
 
 cpdef Wavetable centroid(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
-    cdef np.ndarray wt = librosa.feature.spectral_centroid(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    cdef np.ndarray wt = _centroid(flatten(snd), snd.samplerate, winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
 
+cdef np.ndarray _contrast(np.ndarray snd, int samplerate, int winsize):
+    return librosa.feature.spectral_contrast(y=snd, sr=samplerate, n_fft=winsize)
+
 cpdef Wavetable contrast(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
-    cdef np.ndarray wt = librosa.feature.spectral_contrast(y=flatten(snd), sr=snd.samplerate, n_fft=winsize)
+    cdef np.ndarray wt = _contrast(flatten(snd), snd.samplerate, winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
 
 cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, int winsize=DEFAULT_WINSIZE, bint backfill=True):
