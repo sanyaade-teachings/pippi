@@ -4,6 +4,7 @@ import glob
 import math
 import multiprocessing as mp
 import numpy as np
+from pathlib import Path
 import random
 
 cimport cython
@@ -168,6 +169,9 @@ cpdef SoundBuffer read(object filename, double length=-1, double start=0):
         `Path` instance from the standard library `pathlib` module.
     """
     return SoundBuffer(filename=str(filename), length=length, start=start)
+
+cpdef list readall(str path, double length=-1, double start=0):
+    return [ read(filename, length, start) for filename in Path('.').glob(path) ]
 
 cpdef double rand(double low=0, double high=1):
     return _rand.rand(low, high)

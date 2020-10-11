@@ -16,6 +16,7 @@ cpdef Wavetable win(object values, object lowvalue=*, object highvalue=*, int wt
 cpdef SoundBuffer stack(list sounds)
 cpdef SoundBuffer buffer(object frames=*, double length=*, int channels=*, int samplerate=*)
 cpdef SoundBuffer read(object filename, double length=*, double start=*)
+cpdef list readall(str path, double length=*, double start=*)
 cpdef double rand(double low=*, double high=*)
 cpdef int randint(int low=*, int high=*)
 cpdef object choice(list choices)
