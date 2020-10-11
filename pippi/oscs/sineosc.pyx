@@ -5,6 +5,7 @@ import numpy as np
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
 from pippi cimport interpolation
+from pippi.defaults cimport PI
 
 from libc cimport math
 cimport cython
@@ -53,6 +54,7 @@ cdef class SineOsc:
         cdef double sample, freq, amp
         cdef double ilength = 1.0 / length
         cdef double isamplerate = 1.0 / self.samplerate
+        cdef double PI2 = PI*2
 
         cdef int freq_boundry = max(len(self.freq)-1, 1)
         cdef int amp_boundry = max(len(self.amp)-1, 1)
@@ -65,7 +67,7 @@ cdef class SineOsc:
         for i in range(length):
             freq = self.freq_interpolator(self.freq, self.freq_phase)
             amp = interpolation._linear_point(self.amp, self.amp_phase)
-            sample = math.sin(2*math.pi * self.osc_phase) * amp
+            sample = math.sin(PI2 * self.osc_phase) * amp
 
             self.freq_phase += freq_phase_inc
             self.amp_phase += amp_phase_inc

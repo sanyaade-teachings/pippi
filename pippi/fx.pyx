@@ -15,11 +15,11 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport wavetables
 from pippi.interpolation cimport _linear_point, _linear_pos, _bli_init, _bli_point, BLIData
 from pippi.dsp cimport _mag
+from pippi.defaults cimport PI
 from pippi cimport soundpipe
 from cpython cimport bool
 from libc.stdlib cimport malloc, free
 
-DEF PI = 3.1415926535897932384626433832795028841971693993751058209749445923078164062
 
 cdef double MINDENSITY = 0.001
 

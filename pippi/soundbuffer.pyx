@@ -16,7 +16,7 @@ from pippi cimport interpolation
 from pippi cimport fx
 from pippi cimport fft
 from pippi import graph
-from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE
+from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE, PI
 from pippi cimport grains
 from pippi cimport soundpipe
 
@@ -29,6 +29,7 @@ cdef double[:,:] _pan(double[:,:] out, int length, int channels, double[:] _pos,
     cdef int channel = 0
     cdef double pos = 0
     cdef double p = 0
+    cdef double PIH = PI / 2.0
 
     if method == CONSTANT:
         for channel in range(channels):
@@ -66,13 +67,13 @@ cdef double[:,:] _pan(double[:,:] out, int length, int channels, double[:] _pos,
                 for i in range(length):
                     p = <double>i / length
                     pos = interpolation._linear_pos(_pos, p)
-                    left = math.sin(pos * (math.pi / 2))
+                    left = math.sin(pos * PIH)
                     out[i, channel] *= left
             else:
                 for i in range(length):
                     p = <double>i / length
                     pos = interpolation._linear_pos(_pos, p)
-                    right = math.cos(pos * (math.pi / 2))
+                    right = math.cos(pos * PIH)
                     out[i, channel] *= right
 
     elif method == GOGINS:
@@ -81,13 +82,13 @@ cdef double[:,:] _pan(double[:,:] out, int length, int channels, double[:] _pos,
                 for i in range(length):
                     p = <double>i / length
                     pos = interpolation._linear_pos(_pos, p)
-                    left = math.sin((pos + 0.5) * (math.pi / 2))
+                    left = math.sin((pos + 0.5) * PIH)
                     out[i, channel] *= left
             else:
                 for i in range(length):
                     p = <double>i / length
                     pos = interpolation._linear_pos(_pos, p)
-                    right = math.cos((pos + 0.5) * (math.pi / 2))
+                    right = math.cos((pos + 0.5) * PIH)
                     out[i, channel] *= right
 
     return out

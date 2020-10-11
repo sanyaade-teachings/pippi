@@ -14,7 +14,7 @@ from cpython.array cimport array, clone
 from libc.stdlib cimport malloc, realloc, calloc, free
 from libc cimport math
 
-from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_WTSIZE
+from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_WTSIZE, PI
 from pippi cimport interpolation
 from pippi cimport rand
 from pippi import graph
@@ -924,16 +924,16 @@ cdef double[:] _window(int window_type, int length):
         wt = _window(window_type, length)
 
     elif window_type == SINE:
-        wt = np.sin(np.linspace(0, np.pi, length, dtype='d'))
+        wt = np.sin(np.linspace(0, PI, length, dtype='d'))
 
     elif window_type == SINEIN:
-        wt = np.sin(np.linspace(0, np.pi/2, length, dtype='d'))
+        wt = np.sin(np.linspace(0, PI/2, length, dtype='d'))
 
     elif window_type == SINEOUT:
-        wt = np.sin(np.linspace(np.pi/2, np.pi, length, dtype='d'))
+        wt = np.sin(np.linspace(PI/2, PI, length, dtype='d'))
 
     elif window_type == COS:
-        wt = (np.cos(np.linspace(0, np.pi*2, length, dtype='d')) + 1) * 0.5
+        wt = (np.cos(np.linspace(0, PI*2, length, dtype='d')) + 1) * 0.5
 
     elif window_type == TRI:
         wt = np.bartlett(length)

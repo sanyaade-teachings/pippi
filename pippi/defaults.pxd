@@ -8,3 +8,4 @@ cdef double MIN_PULSEWIDTH
 cdef double MIN_FLOAT
 cdef str DEFAULT_KEY
 cdef double a0
+cdef double PI

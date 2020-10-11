@@ -3,7 +3,7 @@
 from libc cimport math
 
 from pippi cimport wavetables, interpolation
-from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
+from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE, PI
 from pippi.soundbuffer cimport SoundBuffer
 
 import numpy as np
@@ -44,6 +44,7 @@ cdef class Tukey:
         cdef long _length = <long>(length * self.samplerate)
         cdef double[:,:] out = np.zeros((_length, self.channels))
         cdef int direction = 1
+        cdef double PI2 = PI*2
 
         while i < _length:
             pos = <double>i / <double>_length
@@ -53,7 +54,7 @@ cdef class Tukey:
 
             f = self.freq_interpolator(self.freq, pos)
 
-            a = (2*math.pi) / r
+            a = PI2 / r
 
             # Implementation based on https://www.mathworks.com/help/signal/ref/tukeywin.html
             if self.phase <= r / 2:
