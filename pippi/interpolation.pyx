@@ -131,7 +131,7 @@ cpdef double[:] trunc(object data, int length):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef double _trunc_point(double[:] data, double phase) nogil:
-    return data[<int>phase % (len(data)-1)]
+    return data[<int>phase % len(data)]
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

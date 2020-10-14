@@ -99,7 +99,7 @@ cpdef Wavetable wt(object values,
     ):
     return Wavetable(values, lowvalue, highvalue, wtsize, False)
 
-cpdef Waveset ws(object values=None, int crossings=3, int offset=-1, int limit=-1, int modulo=1, int samplerate=-1, list wavesets=None):
+cpdef Waveset ws(object values=None, object crossings=3, int offset=-1, int limit=-1, int modulo=1, int samplerate=-1, list wavesets=None):
     return Waveset(values, crossings, offset, limit, modulo, samplerate, wavesets)
 
 cpdef Wavetable win(object values, 

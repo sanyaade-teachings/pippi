@@ -136,7 +136,7 @@ cdef class Seq:
 
         return onsets
 
-    def _topositions(self, object p, double[:] beat, double[:] smear):
+    def _topositions(self, str p, double[:] beat, double[:] smear):
         cdef double pos = 0
         cdef int count = 0
         cdef double delay = 0
@@ -147,7 +147,7 @@ cdef class Seq:
         cdef int numbeats = len(p)
 
         while count < numbeats:
-            index = count % len(p)
+            index = count % numbeats 
             event = p[index]
             _beat = interpolation._linear_pos(beat, count/<double>numbeats)
             _beat *= interpolation._linear_pos(smear, count/<double>numbeats)
@@ -160,7 +160,7 @@ cdef class Seq:
 
             elif event == '[':
                 end = p.find(']', index) - 1
-                div = len(p[index : end])
+                div = len(p[index:end])
                 count += 1
                 continue
 
@@ -177,7 +177,7 @@ cdef class Seq:
 
     def _frompattern(
         self,
-        object pat,            # Pattern
+        str pat,               # Pattern
         double[:] beat,        # Length of a beat in seconds -- may be given as a curve
         double swing=0,        # MPC swing amount 0-1
         double div=1,          # Beat subdivision
@@ -224,7 +224,7 @@ cdef class Seq:
     def play(self, int numbeats, str patseq=None, bint stems=False, str stemsdir='', bint pool=False):
         cdef SoundBuffer out = SoundBuffer()
         cdef dict instrument
-
+        cdef str expanded
         cdef list onsets 
         cdef list params = []
         cdef int adjusted_numbeats
@@ -236,7 +236,7 @@ cdef class Seq:
             else:
                 if isinstance(pat, dict):
                     pat = pat.items()[0]
-                expanded = [ pat[i % len(pat)] for i in range(adjusted_numbeats) ]
+                expanded = ''.join([ pat[i % len(pat)] for i in range(adjusted_numbeats) ])
 
             length, onsets = self._frompattern(
                 expanded, 

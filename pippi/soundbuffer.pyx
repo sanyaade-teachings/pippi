@@ -951,13 +951,16 @@ cdef class SoundBuffer:
 
     def repeat(self, int reps=2):
         if reps <= 1:
-            return SoundBuffer(self.frames, samplerate=self.samplerate, channels=self.channels)
+            return self
 
         cdef double length = reps * self.dur
         out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
 
-        for _ in range(reps):
-            out.dub(self)
+        cdef double pos = 0
+        cdef int r = 0
+        for r in range(reps):
+            out.dub(self, pos)
+            pos += self.dur
 
         return out
 
