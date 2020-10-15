@@ -37,6 +37,7 @@ def makebar(str k, dict instrument, double length, list onsets, bint stems, str 
     cdef SoundBuffer bar = SoundBuffer(length=length)
     cdef int count = 0
     cdef double onset
+    cdef double beat
 
     """
     cdef dict ctx = {
@@ -51,9 +52,11 @@ def makebar(str k, dict instrument, double length, list onsets, bint stems, str 
 
     cdef bint showwarning = False
 
-    for onset in onsets:
+    for onset, event, beat in onsets:
         ctx.pos = onset/length
         ctx.count = count
+        ctx.event = event
+        ctx.beat = beat
         if instrument.get('callback', None) is not None:
             sig = signature(instrument['callback'])
             if len(sig.parameters) > 1:
@@ -111,7 +114,7 @@ cdef class Seq:
         self.instruments[name].update(kwargs)
 
 
-    def _onsetswing(self, list onsets, double amount, double[:] beat):
+    def _onsetswing(self, list onsets, double amount):
         """ Add MPC-style swing to a list of onsets.
             Amount is a value between 0 and 1, which 
             maps to a swing amount between 0% and 75%.
@@ -130,9 +133,10 @@ cdef class Seq:
         cdef int i = 0
         cdef double onset = 0
 
-        for i, onset in enumerate(onsets):
+        for onset, event, beat in onsets:
             if i % 2 == 1:
-                onsets[i] += interpolation._linear_pos(beat, <double>i/len(onsets)) * amount * 0.75
+                onsets[i][0] += beat * amount * 0.75
+            i += 1
 
         return onsets
 
@@ -169,7 +173,7 @@ cdef class Seq:
                 count += 1
                 continue
 
-            out += [ pos ]
+            out += [[pos, event, _beat]]
             pos += _beat / div
             count += 1
 
@@ -187,7 +191,7 @@ cdef class Seq:
         cdef double[:] _beat = np.divide(beat, div)
 
         length, positions = self._topositions(pat, _beat, _smear)
-        positions = self._onsetswing(positions, swing, _beat)
+        positions = self._onsetswing(positions, swing)
 
         return length, positions
 
