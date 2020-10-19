@@ -32,7 +32,7 @@ BELL = CLAVE['bell']
 TRESILLO = CLAVE['tresillo']
 
 
-def makebar(str k, dict instrument, double length, list onsets, bint stems, str stemsdir, str sectionname, int sectionindex):
+def makesection(str k, dict instrument, double length, list onsets, bint stems, str stemsdir, str sectionname, int sectionindex):
     cdef SoundBuffer clang
     cdef SoundBuffer bar = SoundBuffer(length=length)
     cdef int count = 0
@@ -48,15 +48,17 @@ def makebar(str k, dict instrument, double length, list onsets, bint stems, str 
     }
     """
 
-    cdef Event ctx = Event(count=0, sectionname=sectionname, sectionindex=sectionindex)
+    cdef Event ctx = Event(count=0, sectionname=sectionname, sectionindex=sectionindex, length=length)
 
     cdef bint showwarning = False
 
     for onset, event, beat in onsets:
         ctx.pos = onset/length
+        ctx.onset = onset
         ctx.count = count
         ctx.event = event
         ctx.beat = beat
+
         if instrument.get('callback', None) is not None:
             sig = signature(instrument['callback'])
             if len(sig.parameters) > 1:
@@ -254,11 +256,11 @@ cdef class Seq:
        
         out = SoundBuffer(length=length)
         if pool: 
-            for k, bar in dsp.pool(makebar, params=params):
+            for k, bar in dsp.pool(makesection, params=params):
                 out.dub(bar)
         else:
             for p in params:
-                k, bar = makebar(*p)
+                k, bar = makesection(*p)
                 out.dub(bar)
 
         return out
@@ -302,11 +304,11 @@ cdef class Seq:
            
             sectionout = SoundBuffer(length=sectionlength)
             if pool: 
-                for k, bar in dsp.pool(makebar, params=params):
+                for k, bar in dsp.pool(makesection, params=params):
                     sectionout.dub(bar)
             else:
                 for p in params:
-                    k, bar = makebar(*p)
+                    k, bar = makesection(*p)
                     sectionout.dub(bar)
 
             out.dub(sectionout, mainposition)
