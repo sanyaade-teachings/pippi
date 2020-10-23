@@ -3,7 +3,7 @@ Cython==3.0a6
 librosa==0.8.0
 mido==1.2.9
 numpy==1.19.2
-Pillow==8.0.0
+Pillow==8.0.1
 PySoundFile==0.9.0.post1
 python-rtmidi==1.4.6
 wheel==0.35.1
