@@ -1,7 +1,10 @@
-.PHONY: test test-chords test-multiband test-breakpoints test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph test-slonimsky test-rhythm build docs deploy
+.PHONY: test test-hyperupic test-chords test-multiband test-breakpoints test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph test-slonimsky test-rhythm build docs deploy
 
 test:
 	python -m unittest discover -s tests -p 'test_*.py' -v
+
+test-hyperupic:
+	python -m unittest tests/test_hyperupic.py -v
 
 test-events:
 	python -m unittest tests/test_events.py -v

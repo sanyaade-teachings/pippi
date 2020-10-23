@@ -40,6 +40,10 @@ ext_modules = cythonize([
         Extension('pippi.fft', ['modules/fft/fft.c', 'pippi/fft.pyx'], 
             include_dirs=['modules/fft', np.get_include()], 
         ), 
+
+        Extension('pippi.hyperupic', ['pippi/hyperupic.pyx'],
+            include_dirs=[np.get_include()], 
+        ), 
         Extension('pippi.graph', ['pippi/graph.pyx']), 
         Extension('pippi.interpolation', ['pippi/interpolation.pyx']),
         Extension('pippi.noise', ['pippi/noise/noise.pyx'], 
