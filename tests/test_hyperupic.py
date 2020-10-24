@@ -11,9 +11,17 @@ class TestHyperUPIC(TestCase):
 
     def test_render_image(self):
         length = 30
-        degrees = list(range(1,33))
+        degrees = list(range(1,65))
         freqs = tune.degrees(degrees, octave=2)
 
-        out = hyperupic.render('tests/images/louis.jpg', freqs, length)
-        out.write('tests/renders/hyperupic-render.wav')
+        out = hyperupic.sineosc('tests/images/louis.jpg', freqs, length) * 0.6
+        out.write('tests/renders/hyperupic-sineosc-render.wav')
+
+        snd = dsp.read('tests/sounds/living.wav')
+        out = hyperupic.bandpass('tests/images/louis.jpg', freqs, snd)
+        out.write('tests/renders/hyperupic-bandpass-render.wav')
+
+        snd = dsp.read('tests/sounds/guitar1s.wav')
+        out = hyperupic.pulsar('tests/images/louis.jpg', freqs, snd, length)
+        out.write('tests/renders/hyperupic-pulsar-render.wav')
 
