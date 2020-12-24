@@ -23,9 +23,9 @@ class TestGraph(TestCase):
         l = dsp.read('tests/sounds/linux.wav')
         g = dsp.read('tests/sounds/guitar1s.wav')
 
-        f = fx.crossover(l, dsp.win('phasor', 0, 1), dsp.rand(0.1, 0.3), dsp.win('rnd', 0, 1)).graph(fontsize=dsp.rand(60, 100), label='Weird FX')
-        ws = Waveset(g).substitute('sine').graph(fontsize=dsp.rand(60, 100), label='Waveset Manipulation')
-        ps = oscs.Pulsar2d(freq=dsp.rand(10,80), pulsewidth=shapes.win('hann')).play(2).graph(fontsize=dsp.rand(60,100), label='Pulsar Synthesis')
+        f = fx.crossover(l, dsp.win('phasor', 0, 1), dsp.rand(0.1, 0.3), dsp.win('rnd', 0, 1)).graph(fontsize=50, label='Weird FX')
+        ws = Waveset(g).substitute('sine').graph(fontsize=50, label='Waveset Manipulation')
+        ps = oscs.Pulsar2d(freq=dsp.rand(10,80), pulsewidth=shapes.win('hann')).play(2).graph(fontsize=50, label='Pulsar Synthesis')
 
         wt = shapes.win('hann', length=0.4) * shapes.win('sine') * shapes.win('rnd')
         wt.graph('tests/renders/graph_sandwich_board.png', 
@@ -34,7 +34,7 @@ class TestGraph(TestCase):
                 height=340, 
                 label='Pippi: Computer Music With Python',
                 stroke=30,
-                fontsize=80,
+                fontsize=30,
             )
 
         # For the readme
