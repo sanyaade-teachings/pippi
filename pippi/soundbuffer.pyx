@@ -853,6 +853,22 @@ cdef class SoundBuffer:
 
         return out[:length]
 
+    def blocks(self, int blocksize=2048):
+        if blocksize < 1:
+            blocksize = 1
+        cdef double[:,:] block = np.zeros((blocksize, self.channels), dtype='d')
+        cdef int framesread=0, i=0, c=0
+        cdef int sourcelength = len(self)
+        while framesread < sourcelength:
+            for i in range(blocksize):
+                for c in range(self.channels):
+                    try:
+                        block[i,c] = self.frames[framesread+i,c]
+                    except IndexError:
+                        block[i,c] = 0
+            yield SoundBuffer(block, channels=self.channels, samplerate=self.samplerate)
+            framesread += blocksize
+
     def grains(self, double minlength, double maxlength=-1):
         """ Iterate over the buffer in fixed-size grains.
             If a second length is given, iterate in randomly-sized 

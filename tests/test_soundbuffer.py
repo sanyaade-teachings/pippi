@@ -129,6 +129,12 @@ class TestSoundBuffer(TestCase):
         sound.write(filename.format('ogg'))
         self.assertTrue(path.isfile(filename.format('ogg')))
 
+    def test_split_into_blocks(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 0.11)
+        blocksize = 2048
+        for block in sound.blocks(blocksize):
+            self.assertEqual(len(block), blocksize)
+
     def test_split_buffer(self):
         def _split(length):
             sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
