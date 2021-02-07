@@ -67,7 +67,7 @@ cdef double[:,:] render(str font, list events, int voice, int channels, int samp
     cdef int channel = 0
 
     cdef list messages = parsemessages(events, samplerate)
-    cdef dict channel_map = { c+1: [] for c in range(16) }
+    cdef dict channel_map = { c: [] for c in range(16) }
     cdef dict event_map = {} 
 
     while True:
@@ -76,7 +76,8 @@ cdef double[:,:] render(str font, list events, int voice, int channels, int samp
                 break
 
             if msg['pos'] <= elapsed:
-                tsf_channel_set_presetnumber(TSF, channel, msg['instrument'], False)
+                tsf_channel_set_presetnumber(TSF, channel, msg['instrument'], 0)
+                #tsf_channel_set_presetindex(TSF, channel, msg['instrument'])
 
                 if msg['type'] == NOTE_ON:
                     channel = -1

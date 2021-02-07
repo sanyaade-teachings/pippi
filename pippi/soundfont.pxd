@@ -14,7 +14,7 @@ cdef extern from "tsf.h":
     tsf* tsf_load_filename(const char* filename)
     tsf* tsf_close(tsf* f)
     void tsf_set_output(tsf* f, TSFOutputMode outputmode, int samplerate, float global_gain_db)
-    void tsf_note_on(tsf* f, int preset_index, int key, float vel)
+    void tsf_note_on(tsf* f, int preset_index, int key, float vel, double frac)
     void tsf_note_off(tsf* f, int preset_index, int key)
     void tsf_render_float(tsf* f, float* buffer, int samples, int flag_mixing)
     void tsf_reset(tsf* f)
@@ -24,6 +24,7 @@ cdef extern from "tsf.h":
     void tsf_channel_note_off_all(tsf* f, int channel)
     void tsf_channel_set_pitchwheel(tsf* f, int channel, int pitch_wheel)
     void tsf_channel_midi_control(tsf* f, int channel, int controller, int control_value)
+    int tsf_channel_set_presetindex(tsf* f, int channel, int preset_number)
     int tsf_channel_set_presetnumber(tsf* f, int channel, int preset_number, int flag_mididrums)
     int tsf_active_voice_count(tsf* f)
    
