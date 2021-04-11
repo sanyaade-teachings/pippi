@@ -741,6 +741,20 @@ cdef class SoundBuffer:
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
+    def fcut(self, long start=0, long length=1):
+        """ Copy a portion of this soundbuffer, returning 
+            a new soundbuffer with the selected slice.
+
+            Identical to `cut` except `start` and `length` 
+            should be given in frames instead of seconds.
+        """
+        cdef long end = length + start
+        cdef double[:,:] out = np.zeros((length, self.channels))
+        if end > start:
+            out[0:length] = self.frames[start:end]
+
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+
     def rcut(self, double length=1):
         """ Copy a portion of this SoundBuffer of the 
             given length in seconds starting from a random 
