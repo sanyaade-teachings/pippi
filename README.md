@@ -123,14 +123,6 @@ Pippi requires python 3.6+ which can be found here:
 
     https://www.python.org/downloads/
 
-The 3.5.x branch of python might work too, but is untested.
-
-*_Sadly for the moment pippi is not compatible with python 3.9!_*
-
-We're waiting on a regression to be fixed with the fantastic `numba` library which is a dependency of `librosa` -- the library we use for some music information retrieval features.
-
-> raspbian buster users: you must install the `libatlas-base-dev` package with `apt` to build the latest version of numpy.
-
 To install pippi:
 
 - Clone this repository locally: `git clone https://github.com/luvsound/pippi.git`
