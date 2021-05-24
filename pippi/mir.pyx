@@ -4,9 +4,15 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable
 
 import aubio
-import librosa
 import numpy as np
 cimport numpy as np
+
+try:
+    # librosa depends on numba which is not supported at all on some platforms
+    import librosa
+except ImportError as e:
+    pass
+
 
 cdef int DEFAULT_WINSIZE = 4096
 

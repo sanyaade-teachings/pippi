@@ -82,7 +82,18 @@ clean:
 	rm -rf pippi/*.so
 	rm -rf pippi/**/*.so
 
+rpi-install:
+	sudo apt update -y
+	sudo apt upgrade -y
+	sudo apt install python3-pillow python3-numpy python3-aubio python3-mido python3-rtmidi
+	pip install --upgrade pip
+	pip install -r rpi-requirements.txt
+	git submodule update --init
+	cd modules/Soundpipe && make && sudo make install
+	python setup.py develop
+
 install:
+	pip install --upgrade pip
 	pip install -r requirements.txt
 	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install
