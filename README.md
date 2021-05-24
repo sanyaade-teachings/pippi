@@ -129,9 +129,9 @@ To install pippi:
 - _(Optional but recommended)_ Create a virtualenv somewhere where you want to work: `cd /my/pippi/projects; python3 -m venv venv; source venv/bin/activate`
 - _(With your virtualenv active)_ Go back to the pippi source directory `cd /path/to/pippi` and run `make install` 
 
-**Raspberry Pi OS:**
-
-Use the same steps as above, but create your virtualenv with `python3 -m venv --system-site-packages venv` and run `make rpi-install`.
+> **Raspberry Pi OS:**
+> 
+> Use the same steps as above, but create your virtualenv with `python3 -m venv --system-site-packages venv` and run `make rpi-install`.
 
 The final command does a few things:
 
