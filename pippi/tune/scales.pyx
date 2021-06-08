@@ -70,6 +70,7 @@ LOUIS = (
 # scale mappings
 MAJOR = (0, 2, 4, 5, 7, 9, 11)
 MINOR = (0, 2, 3, 5, 7, 8, 10)
+WHOLETONE = (0, 2, 4, 6, 8, 10)
 CHROMATIC = tuple(range(12))
 
 # notated as semitone deviations from 
@@ -83,6 +84,7 @@ SCALES = {
     'oriental': (0, 2-1, 4, 5, 7-1, 9, 11-1),
     'double_harmonic': (0, 2-1, 4, 5, 7, 9-1, 11),
     'enigmatic': (0, 2-1, 4, 5+1, 7+1, 9+1, 11),
+    'wholetone': WHOLETONE,
 }
 
 cdef tuple DEFAULT_RATIOS = TERRY
