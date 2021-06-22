@@ -26,3 +26,6 @@ pippi.log
 
 venv
 .cache
+
+modules/libpippi/renders/*.wav
+modules/libpippi/build
