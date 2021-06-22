@@ -1,5 +1,11 @@
 #cython: language_level=3
 
+cdef extern from "pippicore.h":
+    ctypedef struct lpwavetable_factory_t:
+        pass
+
+    extern const lpwavetable_factory_t LPWavetable 
+
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
 cdef double[:] _drink(double[:] wt, double width, double minval, double maxval)
 cdef double[:] _fir(double[:] data, double[:] impulse, bint norm=*)

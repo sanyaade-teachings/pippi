@@ -7,9 +7,9 @@ from libc.math cimport round
 
 cpdef void seed(object value=None):
     if value is None:
-        srand(time(NULL))
+        LPRand.seed(time(NULL))
     else:
-        srand(<unsigned int>value)
+        LPRand.seed(<unsigned int>value)
 
 cpdef double rand(double low=0, double high=1):
     return (_rand()/<double>RAND_MAX) * (high-low) + low
