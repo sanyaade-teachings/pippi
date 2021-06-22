@@ -1055,7 +1055,7 @@ cdef double[:] _wavetable(int wavetable_type, int length):
 
     return wt
 
-cpdef double[:] wavetable(int wavetable_type, int length, double[:] data=None):
+cpdef double[:] wavetable(int wavetable_type, int length, double[:] data):
     if data is not None:
         return interpolation._linear(data, length)
 

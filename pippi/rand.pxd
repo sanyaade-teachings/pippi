@@ -2,7 +2,7 @@
 
 cdef extern from "pippicore.h":
     ctypedef struct lprand_t:
-        pass
+        void (*seed)(int)
 
     extern const lprand_t LPRand
 
