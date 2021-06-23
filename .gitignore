@@ -29,3 +29,5 @@ venv
 
 modules/libpippi/renders/*.wav
 modules/libpippi/build
+
+garden/DaisyExamples
