@@ -1,0 +1,6 @@
+An in-development collection of firmwares using libpippi, 
+mostly for devices based on the electro-smith daisy.
+
+Please place the DaisyExamples repo in this directory or 
+just tweak the makefiles to your liking.
+
