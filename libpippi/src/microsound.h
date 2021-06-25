@@ -27,6 +27,7 @@ typedef struct lpcloud_t {
     size_t numgrains;
     size_t maxlength;
     size_t minlength;
+    lpfloat_t speed;
     lpfloat_t grainamp;
     lpbuffer_t * window;
     lpbuffer_t * current_frame;

@@ -17,6 +17,7 @@ extern "C" {
 
 using namespace daisy;
 
+MidiHandler midi;
 DaisyField hw;
 lpcloud_t * cloud;
 lptapeosc_t * osc;
@@ -34,6 +35,7 @@ void AudioCallback(float * in, float * out, size_t size) {
 
     LPRingBuffer.writefrom(cloud->rb, (lpfloat_t *)in, frames, (int)CHANNELS);
 
+    cloud->speed = (lpfloat_t)(hw.GetKnobValue(hw.KNOB_1) * 1.99 + 0.01);
     for(size_t i=0; i < frames; i++) {
         LPCloud.process(cloud);
         out[i * CHANNELS + 0] = cloud->current_frame->data[0];
@@ -41,10 +43,20 @@ void AudioCallback(float * in, float * out, size_t size) {
     }
 }
 
+void midimessage(MidiEvent m) {
+    if(m.type == NoteOn) {
+        NoteOnEvent p = m.AsNoteOn();
+        cloud->maxlength = (size_t)((p.note / 128.f) * SR + 1);
+        cloud->minlength = (size_t)(cloud->maxlength * 0.1 + 1);
+    }
+}
+
+
 int main(void) {
     hw.Init();
     hw.SetAudioBlockSize(BS);
     SR = (int)hw.AudioSampleRate();
+    midi.Init(MidiHandler::INPUT_MODE_UART1, MidiHandler::OUTPUT_MODE_NONE);
 
     //LPRand.rand_base = LPRand.logistic_rand;
     //LPRand.logistic_seed = 3.998f;
@@ -57,6 +69,14 @@ int main(void) {
     //osc = LPTapeOsc.create(rb, 4800.f);
     //cloud->osc->offset = -4800.f;
 
+    midi.StartReceive();
     hw.StartAdc();
     hw.StartAudio(AudioCallback);
+
+    for(;;) {
+        midi.Listen();
+        while(midi.HasEvents()) {
+            midimessage(midi.PopEvent());
+        }
+    }
 }

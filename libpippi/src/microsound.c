@@ -77,6 +77,7 @@ lpcloud_t * cloud_create(int numstreams, size_t maxgrainlength, size_t mingrainl
     cloud->grains = (lpgrain_t **)LPMemoryPool.alloc(cloud->numgrains, sizeof(lpgrain_t *));
     cloud->grainamp = (1.f / cloud->numgrains);
     cloud->current_frame = LPBuffer.create(1, channels, samplerate);
+    cloud->speed = 1.f;
 
     grainlength = LPRand.rand((lpfloat_t)cloud->minlength, (lpfloat_t)cloud->maxlength);
 
@@ -100,8 +101,7 @@ void cloud_process(lpcloud_t * c) {
     }
 
     for(i=0; i < c->numgrains; i++) {
-        c->grains[i]->speed = LPRand.rand(1.f, 3.f);
-        /*c->grains[i]->length = LPRand.rand(c->minlength, c->maxlength) * (1.f / c->grains[i]->speed);*/
+        c->grains[i]->speed = c->speed;
         c->grains[i]->length = LPRand.rand(c->minlength, c->maxlength);
         c->grains[i]->offset = LPRand.rand(0.f, c->rb->length - c->grains[i]->length - 1.f);
 
