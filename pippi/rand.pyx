@@ -23,6 +23,19 @@ cpdef void randmethod(str method='normal'):
     else:
         LPRand.rand_base = LPRand.stdlib
 
+cpdef dict randdump():
+    return dict(
+        logistic_seed = LPRand.logistic_seed,
+        logistic_x = LPRand.logistic_x,
+        lorenz_timestep = LPRand.lorenz_timestep,
+        lorenz_x = LPRand.lorenz_x,
+        lorenz_y = LPRand.lorenz_y,
+        lorenz_z = LPRand.lorenz_z,
+        lorenz_a = LPRand.lorenz_a,
+        lorenz_b = LPRand.lorenz_b,
+        lorenz_c = LPRand.lorenz_c
+    )
+
 def randparams(domain=None, **kwargs):
     if domain is None:
         return None

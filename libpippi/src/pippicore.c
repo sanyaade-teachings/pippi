@@ -96,34 +96,55 @@ lpfloat_t rand_base_logistic(lpfloat_t low, lpfloat_t high) {
     return LPRand.logistic_x * (high-low) + low;
 }
 
-/* Lorenz attractor implementations lightly adapted with permission from Greg Cope's helpful 
- * overview page: https://www.algosome.com/articles/lorenz-attractor-programming-code.html
- * Please consider Greg Cope's routines to be included here under an MIT license.
+/* The three Lorenz attractor implementations (lorenzX, lorenzY, lorenzZ) 
+ * were lightly adapted with permission from Greg Cope's helpful overview: 
+ *      https://www.algosome.com/articles/lorenz-attractor-programming-code.html
+ * Please consider those routines to be included here under an MIT license.
  */
-lpfloat_t rand_base_lorenzX(lpfloat_t low, lpfloat_t high) {
+lpfloat_t lorenzX(lpfloat_t low, lpfloat_t high) {
     LPRand.lorenz_x = LPRand.lorenz_x + LPRand.lorenz_timestep * LPRand.lorenz_a * (LPRand.lorenz_y - LPRand.lorenz_x);
     return LPRand.lorenz_x * (high-low) + low;
 }
 
-lpfloat_t rand_base_lorenzY(lpfloat_t low, lpfloat_t high) {
+lpfloat_t lorenzY(lpfloat_t low, lpfloat_t high) {
     LPRand.lorenz_y = LPRand.lorenz_y + LPRand.lorenz_timestep * (LPRand.lorenz_x * (LPRand.lorenz_b - LPRand.lorenz_z) - LPRand.lorenz_y);
     return LPRand.lorenz_y * (high-low) + low;
 }
 
-lpfloat_t rand_base_lorenzZ(lpfloat_t low, lpfloat_t high) {
+lpfloat_t lorenzZ(lpfloat_t low, lpfloat_t high) {
     LPRand.lorenz_z = LPRand.lorenz_z + LPRand.lorenz_timestep * (LPRand.lorenz_x * LPRand.lorenz_y - LPRand.lorenz_c * LPRand.lorenz_z);
     return LPRand.lorenz_z * (high-low) + low;
 }
 
-/* This will iterate all three lorenz equations and multiply the result. 
- * The individual values are all still available at: 
- *     Rand.lorenz_x, Rand.lorenz_y, Rand.lorenz_z
- */
+lpfloat_t rand_base_lorenzX(lpfloat_t low, lpfloat_t high) {
+    lpfloat_t x, y, z;
+    x = lorenzX(0.f, 1.f);
+    y = lorenzY(0.f, 1.f);
+    z = lorenzZ(0.f, 1.f);
+    return x * (high-low) + low;
+}
+
+lpfloat_t rand_base_lorenzY(lpfloat_t low, lpfloat_t high) {
+    lpfloat_t x, y, z;
+    x = lorenzX(0.f, 1.f);
+    y = lorenzY(0.f, 1.f);
+    z = lorenzZ(0.f, 1.f);
+    return y * (high-low) + low;
+}
+
+lpfloat_t rand_base_lorenzZ(lpfloat_t low, lpfloat_t high) {
+    lpfloat_t x, y, z;
+    x = lorenzX(0.f, 1.f);
+    y = lorenzY(0.f, 1.f);
+    z = lorenzZ(0.f, 1.f);
+    return z * (high-low) + low;
+}
+
 lpfloat_t rand_base_lorenz(lpfloat_t low, lpfloat_t high) {
     lpfloat_t x, y, z;
-    x = rand_base_lorenzX(0.f, 1.f);
-    y = rand_base_lorenzY(0.f, 1.f);
-    z = rand_base_lorenzZ(0.f, 1.f);
+    x = lorenzX(0.f, 1.f);
+    y = lorenzY(0.f, 1.f);
+    z = lorenzZ(0.f, 1.f);
     return x * y * z * (high-low) + low;
 }
 

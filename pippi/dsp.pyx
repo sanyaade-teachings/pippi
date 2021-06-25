@@ -192,6 +192,9 @@ cpdef void randmethod(str method='normal'):
 def randparams(domain=None, **kwargs):
     _randparams(domain, **kwargs)
 
+cpdef dict randdump():
+    return _rand.randdump()
+
 def find(pattern, channels=2, samplerate=44100):
     """ Glob for files matching a given pattern and return a generator 
         that will `yield` each file as a `SoundBuffer`
