@@ -76,6 +76,7 @@ typedef struct lprand_t {
 
     void (*seed)(int);
 
+    lpfloat_t (*stdlib)(lpfloat_t, lpfloat_t);
     lpfloat_t (*logistic)(lpfloat_t, lpfloat_t);
 
     lpfloat_t (*lorenz)(lpfloat_t, lpfloat_t);

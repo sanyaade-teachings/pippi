@@ -70,7 +70,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     LORENZ_TIMESTEP_DEFAULT, \
     LORENZ_X_DEFAULT, LORENZ_Y_DEFAULT, LORENZ_Z_DEFAULT, \
     LORENZ_A_DEFAULT, LORENZ_B_DEFAULT, LORENZ_C_DEFAULT, \
-    rand_seed, rand_base_logistic, \
+    rand_seed, rand_base_stdlib, rand_base_logistic, \
     rand_base_lorenz, rand_base_lorenzX, rand_base_lorenzY, rand_base_lorenzZ, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
@@ -149,7 +149,8 @@ int rand_randbool(void) {
 }
 
 int rand_choice(int numchoices) {
-    assert(numchoices > 1);
+    assert(numchoices > 0);
+    if(numchoices == 1) return 0;
     return rand_randint(0, numchoices-1);
 }
 

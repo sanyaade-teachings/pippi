@@ -17,6 +17,7 @@ from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable, _randline
 from pippi.wavesets cimport Waveset
 from pippi cimport rand as _rand
+from pippi.rand import randparams as _randparams
 from pippi cimport lists
 from pippi.sounddb cimport SoundDB
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
@@ -184,6 +185,12 @@ cpdef object choice(list choices):
 
 cpdef void seed(object value=None):
     _rand.seed(value)
+
+cpdef void randmethod(str method='normal'):
+    _rand.randmethod(method)
+
+def randparams(domain=None, **kwargs):
+    _randparams(domain, **kwargs)
 
 def find(pattern, channels=2, samplerate=44100):
     """ Glob for files matching a given pattern and return a generator 
