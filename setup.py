@@ -103,6 +103,12 @@ ext_modules = cythonize([
         Extension('pippi.wavesets', ['pippi/wavesets.pyx'], 
             include_dirs=INCLUDES, 
         ), 
+        Extension('pippi.buffers', [
+                'libpippi/src/pippicore.c',
+                'pippi/buffers.pyx',
+            ],
+            include_dirs=INCLUDES, 
+        ),
         Extension('pippi.wavetables', [
                 'libpippi/src/pippicore.c',
                 'pippi/wavetables.pyx',
@@ -123,6 +129,7 @@ ext_modules = cythonize([
     ], 
     annotate=True, 
     compiler_directives={'profile': False},
+    gdb_debug=True,
 ) 
 
 with open('README.md') as f:
@@ -130,7 +137,7 @@ with open('README.md') as f:
 
 setup(
     name='pippi',
-    version='2.0.0-beta-4',
+    version='2.0.0-beta-5',
     description='Computer music with Python',
     long_description=readme,
     long_description_content_type='text/markdown',

@@ -1023,6 +1023,8 @@ cpdef double[:] adsr(int length, int attack, int decay, double sustain, int rele
 
 cdef double[:] _wavetable(int wavetable_type, int length):
     cdef double[:] wt
+    cdef lpbuffer_t * lpbuf
+    cdef lpfloat_t * lpwt
 
     if wavetable_type == RND:
         wavetable_type = ALL_WAVETABLES[rand.randint(0, LEN_WAVETABLES-1)]

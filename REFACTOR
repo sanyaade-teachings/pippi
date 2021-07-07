@@ -1,0 +1,32 @@
+Just some refactoring notes...
+
+# SoundBuffer
+
+## addition or concatination
+
+- [ ] in-place add
+- [ ] add and copy
+- [ ] concatinate
+
+## subtraction
+
+- [ ] in-place subtract
+- [ ] subtract and copy
+
+## multiplication
+
+- [X] in-place multiplication
+- [X] mult and copy
+
+## division
+
+- [ ] in-place division
+- [ ] divide and copy
+
+## mix operator
+
+- [ ] in-place mix
+- [ ] mix into copy
+- [ ] right-aligned / left-aligned mixes
+
+

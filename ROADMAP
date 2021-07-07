@@ -1,0 +1,33 @@
+v2 beta 5
+
+This version introduces libpippi, and starts the process of 
+removing or refactoring libraries where needed so this thing 
+can be a simple `pip install pippi` away again.
+
+I'll note progress here as I go:
+
+    - Replaced rand module implementation with libpippi's LPRand 
+      module including new chaotic backends to drive all rand 
+      interfaces with the logistic map or lorenz attractors instead 
+      of a pseudo-random normal distribution which is the default.
+
+    - Made a first pass at a new SoundBuffer which wraps libpippi 
+      lpbuffer_t structs and implements the python buffer protocol.
+      
+    - Added basic support for multiplication to new SoundBuffers
+
+v2 beta 4
+
+This long-in-development beta introduced some new libraries, 
+and some packaging issues I never managed to sort out, so all 
+updates since this beta was started aren't available on pypi.
+
+This version also brought with it a *ton* of new features, some 
+speculative, many actively in use. I should have been keeping track 
+of what I added when during the beta process, but I didn't!
+
+v2 beta 3
+
+The most recent version available on pypi. 
+Lacking in most of the fun stuff.
+

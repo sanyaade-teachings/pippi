@@ -1,10 +1,45 @@
 #cython: language_level=3
 
 cdef extern from "pippicore.h":
+    ctypedef double lpfloat_t
+
+    ctypedef struct lpbuffer_t:
+        lpfloat_t * data
+        size_t length
+        int samplerate
+        int channels
+
+        lpfloat_t phase
+        size_t boundry
+        size_t pos
+
     ctypedef struct lpwavetable_factory_t:
-        pass
+        lpbuffer_t * (*create)(const char * name, size_t length)
+        void (*destroy)(lpbuffer_t *)
+
+    ctypedef struct lpwindow_factory_t:
+        lpbuffer_t * (*create)(const char * name, size_t length)
+        void (*destroy)(lpbuffer_t *)
+
+    ctypedef struct lpmemorypool_t:
+        unsigned char * pool
+        size_t poolsize
+        size_t pos
+
+    ctypedef struct lpmemorypool_factory_t:
+        unsigned char * pool
+        size_t poolsize
+        size_t pos
+
+        void (*init)(unsigned char *, size_t)
+        lpmemorypool_t * (*custom_init)(unsigned char *, size_t)
+        void * (*alloc)(size_t, size_t)
+        void * (*custom_alloc)(lpmemorypool_t *, size_t, size_t)
+        void (*free)(void *)
 
     extern const lpwavetable_factory_t LPWavetable 
+    extern const lpwindow_factory_t LPWindow
+    extern lpmemorypool_factory_t LPMemoryPool
 
 cdef double[:] _adsr(int framelength, int attack, int decay, double sustain, int release)
 cdef double[:] _drink(double[:] wt, double width, double minval, double maxval)

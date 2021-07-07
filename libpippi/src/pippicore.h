@@ -36,7 +36,7 @@ typedef double lpfloat_t;
 
 /* Core datatypes */
 typedef struct lpbuffer_t {
-    lpfloat_t* data;
+    lpfloat_t * data;
     size_t length;
     int samplerate;
     int channels;
@@ -93,10 +93,13 @@ typedef struct lprand_t {
 
 typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
+    void (*copy)(lpbuffer_t *, lpbuffer_t *);
     void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t);
     lpfloat_t (*play)(lpbuffer_t *, lpfloat_t);
     lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *);
     void (*multiply)(lpbuffer_t *, lpbuffer_t *);
+    void (*multiply_scalar)(lpbuffer_t *, lpfloat_t);
+    int (*buffers_are_equal)(lpbuffer_t *, lpbuffer_t *);
     void (*dub)(lpbuffer_t *, lpbuffer_t *);
     void (*env)(lpbuffer_t *, lpbuffer_t *);
     void (*destroy)(lpbuffer_t *);
@@ -141,12 +144,12 @@ typedef struct lpinterpolation_factory_t {
 } lpinterpolation_factory_t;
 
 typedef struct lpwavetable_factory_t {
-    lpbuffer_t* (*create)(const char * name, size_t length);
+    lpbuffer_t * (*create)(const char * name, size_t length);
     void (*destroy)(lpbuffer_t*);
 } lpwavetable_factory_t;
 
 typedef struct lpwindow_factory_t {
-    lpbuffer_t* (*create)(const char * name, size_t length);
+    lpbuffer_t * (*create)(const char * name, size_t length);
     void (*destroy)(lpbuffer_t*);
 } lpwindow_factory_t;
 

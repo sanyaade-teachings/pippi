@@ -1,6 +1,6 @@
 # Pippi: Computer Music With Python
 
-v2.0.0 - Beta 4 (In Development)
+v2.0.0 - Beta 5 (In Development)
 
 Source code: [https://github.com/luvsound/pippi](https://github.com/luvsound/pippi)
 

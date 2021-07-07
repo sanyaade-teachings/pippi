@@ -26,12 +26,15 @@ int rand_randbool(void);
 int rand_choice(int numchoices);
 
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
+void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max);
 void multiply_buffer(lpbuffer_t * a, lpbuffer_t * b);
+void scalar_multiply_buffer(lpbuffer_t * a, lpfloat_t b);
+int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b);
 void dub_buffer(lpbuffer_t * a, lpbuffer_t * b);
 void env_buffer(lpbuffer_t * buf, lpbuffer_t * env);
 lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
-lpbuffer_t * copy_buffer(lpbuffer_t * buf);
+void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 void destroy_buffer(lpbuffer_t * buf);
 
@@ -74,7 +77,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_lorenz, rand_base_lorenzX, rand_base_lorenzY, rand_base_lorenzZ, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
-const lpbuffer_factory_t LPBuffer = { create_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, dub_buffer, env_buffer, destroy_buffer };
+const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, buffers_are_equal, dub_buffer, env_buffer, destroy_buffer };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, destroy_wavetable };
@@ -190,6 +193,19 @@ lpbuffer_t * create_buffer(size_t length, int channels, int samplerate) {
     return buf;
 }
 
+void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest) {
+    size_t i, c;
+
+    assert(src->length == dest->length);
+    assert(src->channels == dest->channels);
+
+    for(i=0; i < src->length; i++) {
+        for(c=0; c < src->channels; c++) {
+            dest->data[i * src->channels + c] = src->data[i * src->channels + c];
+        }
+    }
+}
+
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max) {
     size_t i, c;
     int idx;
@@ -246,20 +262,40 @@ lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length) {
 }
 
 void multiply_buffer(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length;
-    int i, c, j;
+    size_t length, i, c, j;
     length = (a->length <= b->length) ? a->length : b->length;
     for(i=0; i < length; i++) {
         for(c=0; c < a->channels; c++) {
-            j = b->channels % c;
+            j = c % b->channels;
             a->data[i * a->channels + c] *= b->data[i * b->channels + j];
         }
     }
 }
 
+void scalar_multiply_buffer(lpbuffer_t * a, lpfloat_t b) {
+    size_t i, c;
+    for(i=0; i < a->length; i++) {
+        for(c=0; c < a->channels; c++) {
+            a->data[i * a->channels + c] *= b;
+        }
+    }
+}
+
+int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b) {
+    size_t i, c;
+    if(a->length != b->length) return 0;
+    if(a->channels != b->channels) return 0;
+    for(i=0; i < a->length; i++) {
+        for(c=0; c < a->channels; c++) {
+            if(a->data[i * a->channels + c] != b->data[i * a->channels + c]) return 0;
+        }
+    }
+    return 1;
+}
+
 void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
     lpfloat_t pos, value;
-    int i, c;
+    size_t i, c;
 
     assert(env->length > 0);
 
@@ -273,8 +309,7 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
 }
 
 void dub_buffer(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length;
-    int i, c, j;
+    size_t length, i, c, j;
     length = (a->length <= b->length) ? a->length : b->length;
     for(i=0; i < length; i++) {
         for(c=0; c < a->channels; c++) {
@@ -316,8 +351,10 @@ lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 void destroy_buffer(lpbuffer_t * buf) {
-    LPMemoryPool.free(buf->data);
-    LPMemoryPool.free(buf);
+    if(buf != NULL) {
+        LPMemoryPool.free(buf->data);
+        LPMemoryPool.free(buf);
+    }
 }
 
 /* RingBuffers
@@ -490,7 +527,7 @@ void * memorypool_alloc(size_t itemcount, size_t itemsize) {
 
 void memorypool_free(void * ptr) {
 #ifndef LP_STATIC
-    free(ptr);
+    if(ptr != NULL) free(ptr);
 #endif
 }
 
