@@ -4,14 +4,14 @@ Just some refactoring notes...
 
 ## addition or concatination
 
-- [ ] in-place add
-- [ ] add and copy
-- [ ] concatinate
+- [X] in-place add
+- [X] add and copy
+- [X] concatinate
 
 ## subtraction
 
-- [ ] in-place subtract
-- [ ] subtract and copy
+- [X] in-place subtract
+- [X] subtract and copy
 
 ## multiplication
 

@@ -212,6 +212,70 @@ cdef class SoundBuffer:
     def __radd__(SoundBuffer self, object value):
         return self + value
 
+    def __sub__(SoundBuffer self, object value):
+        cdef Py_ssize_t i, c
+        cdef lpbuffer_t * data
+        cdef SoundBuffer tmp
+
+        if self.buffer == NULL:
+            if isinstance(value, numbers.Real):
+                return SoundBuffer(channels=self.channels, samplerate=self.samplerate)
+
+            elif isinstance(value, SoundBuffer):
+                return value.copy()
+
+            else:
+                return SoundBuffer(value, channels=self.channels, samplerate=self.samplerate)
+
+        data = LPBuffer.create(self.buffer.length, self.buffer.channels, self.buffer.samplerate)
+        LPBuffer.copy(self.buffer, data)
+
+        if isinstance(value, numbers.Real):
+            LPBuffer.subtract_scalar(data, <lpfloat_t>value)
+
+        elif isinstance(value, SoundBuffer):
+            LPBuffer.subtract(data, (<SoundBuffer>value).buffer)
+
+        else:
+            try:
+                tmp = SoundBuffer(value)
+                LPBuffer.subtract(data, tmp.buffer)
+            except Exception as e:
+                return NotImplemented
+
+        return SoundBuffer.fromlpbuffer(data)
+
+    def __isub__(SoundBuffer self, object value):
+        cdef Py_ssize_t i, c
+
+        if self.buffer == NULL:
+            if isinstance(value, numbers.Real):
+                return self
+
+            elif isinstance(value, SoundBuffer):
+                return value.copy()
+
+            else:
+                return SoundBuffer(value, channels=self.channels, samplerate=self.samplerate)
+
+        if isinstance(value, numbers.Real):
+            LPBuffer.subtract_scalar(self.buffer, <lpfloat_t>value)
+
+        elif isinstance(value, SoundBuffer):
+            LPBuffer.subtract(self.buffer, (<SoundBuffer>value).buffer)
+
+        else:
+            try:
+                tmp = SoundBuffer(value)
+                LPBuffer.subtract(self.buffer, tmp.buffer)
+            except Exception as e:
+                return NotImplemented
+
+        return self
+
+    def __rsub__(SoundBuffer self, object value):
+        return self - value
+
     def __mul__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
         cdef lpbuffer_t * data = LPBuffer.create(self.buffer.length, self.buffer.channels, self.buffer.samplerate)

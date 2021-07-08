@@ -68,7 +68,6 @@ class TestNewBuffer(TestCase):
         snd += 2
         self.assertEqual(snd, dsp.buffer([3,4,5]))
 
-    """
     def test_sub_soundbuffers(self):
         snd = dsp.buffer([1,2,3])
         self.assertEqual(len(snd), 3)
@@ -87,8 +86,6 @@ class TestNewBuffer(TestCase):
 
         snd -= 2
         self.assertEqual(snd, dsp.buffer([-1,0,1]))
-    """
-
 
     """
     def test_slice_frame(self):

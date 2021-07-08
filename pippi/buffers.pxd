@@ -47,6 +47,8 @@ cdef extern from "pippicore.h":
         void (*multiply_scalar)(lpbuffer_t *, lpfloat_t)
         void (*add)(lpbuffer_t *, lpbuffer_t *)
         void (*add_scalar)(lpbuffer_t *, lpfloat_t)
+        void (*subtract)(lpbuffer_t *, lpbuffer_t *)
+        void (*subtract_scalar)(lpbuffer_t *, lpfloat_t)
         lpbuffer_t * (*concat)(lpbuffer_t *, lpbuffer_t *)
         int (*buffers_are_equal)(lpbuffer_t *, lpbuffer_t *)
         void (*dub)(lpbuffer_t *, lpbuffer_t *)
