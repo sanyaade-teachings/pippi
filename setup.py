@@ -6,6 +6,7 @@ import numpy as np
 
 INCLUDES = ['libpippi/src', '/usr/local/include', np.get_include()]
 CSOURCES = ['libpippi/src/pippicore.c']
+MACROS = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 
 ext_modules = cythonize([
         Extension('pippi.breakpoints', ['pippi/breakpoints.pyx'],
@@ -15,117 +16,210 @@ ext_modules = cythonize([
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
             include_dirs=INCLUDES,
+            define_macros=MACROS
         ), 
-        Extension('pippi.events', ['pippi/events.pyx'], include_dirs=INCLUDES),
+        Extension('pippi.events', ['pippi/events.pyx'], include_dirs=INCLUDES, define_macros=MACROS),
 
         Extension('pippi.defaults', ['pippi/defaults.pyx']), 
-        Extension('pippi.dsp', ['pippi/dsp.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.dsp', ['pippi/dsp.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
         Extension('pippi.fx', ['pippi/fx.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
-            include_dirs=INCLUDES + ['modules/fft']
+            include_dirs=INCLUDES + ['modules/fft'],
+            define_macros=MACROS
         ),
         Extension('pippi.grains', ['pippi/grains.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
-            include_dirs=INCLUDES
+            include_dirs=INCLUDES,
+            define_macros=MACROS
         ),
         Extension('pippi.lists', ['pippi/lists.pyx'],
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ),
         Extension('pippi.sampler', ['pippi/sampler.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
-            include_dirs=INCLUDES
+            include_dirs=INCLUDES,
+            define_macros=MACROS
         ),
         Extension('pippi.fft', ['modules/fft/fft.c', 'pippi/fft.pyx'], 
             include_dirs=INCLUDES + ['modules/fft'], 
+            define_macros=MACROS
         ), 
 
         Extension('pippi.hyperupic', ['pippi/hyperupic.pyx'],
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ), 
-        Extension('pippi.graph', ['pippi/graph.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.interpolation', ['pippi/interpolation.pyx'], include_dirs=INCLUDES),
-        Extension('pippi.noise', ['pippi/noise/noise.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.graph', ['pippi/graph.pyx'], 
+            include_dirs=INCLUDES, 
+            define_macros=MACROS
+        ), 
+        Extension('pippi.interpolation', ['pippi/interpolation.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ),
+        Extension('pippi.noise', ['pippi/noise/noise.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
         Extension('pippi.shapes', ['pippi/shapes.pyx'], 
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ), 
 
         Extension('pippi.sounddb', ['pippi/sounddb.pyx'],
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ), 
         Extension('pippi.mir', ['pippi/mir.pyx'],
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ),
 
         # Oscs
-        Extension('pippi.oscs', ['pippi/oscs/oscs.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.oscs', ['pippi/oscs/oscs.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
 
-        Extension('pippi.alias', ['pippi/oscs/alias.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.alias', ['pippi/oscs/alias.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
         Extension('pippi.bar', ['pippi/oscs/bar.pyx'],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ),
-        Extension('pippi.dss', ['pippi/oscs/dss.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.drunk', ['pippi/oscs/drunk.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.fold', ['pippi/oscs/fold.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.fm', ['pippi/oscs/fm.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.osc', ['pippi/oscs/osc.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.osc2d', ['pippi/oscs/osc2d.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.pulsar', ['pippi/oscs/pulsar.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.pulsar2d', ['pippi/oscs/pulsar2d.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.pluck', ['pippi/oscs/pluck.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.sineosc', ['pippi/oscs/sineosc.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.tukey', ['pippi/oscs/tukey.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.dss', ['pippi/oscs/dss.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.drunk', ['pippi/oscs/drunk.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.fold', ['pippi/oscs/fold.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.fm', ['pippi/oscs/fm.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.osc', ['pippi/oscs/osc.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.osc2d', ['pippi/oscs/osc2d.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.pulsar', ['pippi/oscs/pulsar.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.pulsar2d', ['pippi/oscs/pulsar2d.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.pluck', ['pippi/oscs/pluck.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.sineosc', ['pippi/oscs/sineosc.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.tukey', ['pippi/oscs/tukey.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
 
-        Extension('pippi.midi', ['pippi/midi.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.rhythm', ['pippi/rhythm.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.midi', ['pippi/midi.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.rhythm', ['pippi/rhythm.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
         Extension('pippi.rand', [
                 'libpippi/src/pippicore.c',
                 'pippi/rand.pyx',
             ], 
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ), 
 
         Extension('pippi.soundbuffer', ['pippi/soundbuffer.pyx'], 
             include_dirs= INCLUDES + ['modules/fft'], 
+            define_macros=MACROS
         ), 
         Extension('pippi.soundfont', ['pippi/soundfont.pyx'], 
             include_dirs= INCLUDES + ['modules/TinySoundFont'], 
+            define_macros=MACROS
         ), 
         Extension('pippi.soundpipe', ['pippi/soundpipe.pyx'], 
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
-            include_dirs=['/usr/local/include']
+            include_dirs=['/usr/local/include'],
         ), 
         Extension('pippi.wavesets', ['pippi/wavesets.pyx'], 
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ), 
         Extension('pippi.buffers', [
                 'libpippi/src/pippicore.c',
                 'pippi/buffers.pyx',
             ],
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ),
         Extension('pippi.wavetables', [
                 'libpippi/src/pippicore.c',
                 'pippi/wavetables.pyx',
             ],
             include_dirs=INCLUDES, 
+            define_macros=MACROS
         ),
 
         # Tuning / scales / harmony / melody
-        Extension('pippi.scales', ['pippi/tune/scales.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.intervals', ['pippi/tune/intervals.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.frequtils', ['pippi/tune/frequtils.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.chords', ['pippi/tune/chords.pyx'], include_dirs=INCLUDES), 
-        Extension('pippi.old', ['pippi/tune/old.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.scales', ['pippi/tune/scales.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.intervals', ['pippi/tune/intervals.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.frequtils', ['pippi/tune/frequtils.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.chords', ['pippi/tune/chords.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
+        Extension('pippi.old', ['pippi/tune/old.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
         Extension('pippi.slonimsky', ['pippi/tune/slonimsky.pyx'], 
             include_dirs=[np.get_include()], 
+            define_macros=MACROS
         ),
-        Extension('pippi.tune', ['pippi/tune/tune.pyx'], include_dirs=INCLUDES), 
+        Extension('pippi.tune', ['pippi/tune/tune.pyx'], 
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ), 
     ], 
     annotate=True, 
     compiler_directives={'profile': False},

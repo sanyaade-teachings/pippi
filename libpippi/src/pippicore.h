@@ -103,6 +103,8 @@ typedef struct lpbuffer_factory_t {
     void (*add_scalar)(lpbuffer_t *, lpfloat_t);
     void (*subtract)(lpbuffer_t *, lpbuffer_t *);
     void (*subtract_scalar)(lpbuffer_t *, lpfloat_t);
+    void (*divide)(lpbuffer_t *, lpbuffer_t *);
+    void (*divide_scalar)(lpbuffer_t *, lpfloat_t);
     lpbuffer_t * (*concat)(lpbuffer_t *, lpbuffer_t *);
     int (*buffers_are_equal)(lpbuffer_t *, lpbuffer_t *);
     void (*dub)(lpbuffer_t *, lpbuffer_t *);

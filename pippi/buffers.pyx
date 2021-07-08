@@ -274,7 +274,7 @@ cdef class SoundBuffer:
         return self
 
     def __rsub__(SoundBuffer self, object value):
-        return self - value
+        return value - self
 
     def __mul__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
@@ -326,5 +326,69 @@ cdef class SoundBuffer:
 
     def __rmul__(SoundBuffer self, object value):
         return self * value
+
+    def __div__(SoundBuffer self, object value):
+        cdef Py_ssize_t i, c
+        cdef lpbuffer_t * data
+        cdef SoundBuffer tmp
+
+        if self.buffer == NULL:
+            if isinstance(value, numbers.Real):
+                return SoundBuffer(channels=self.channels, samplerate=self.samplerate)
+
+            elif isinstance(value, SoundBuffer):
+                return value.copy()
+
+            else:
+                return SoundBuffer(value, channels=self.channels, samplerate=self.samplerate)
+
+        data = LPBuffer.create(self.buffer.length, self.buffer.channels, self.buffer.samplerate)
+        LPBuffer.copy(self.buffer, data)
+
+        if isinstance(value, numbers.Real):
+            LPBuffer.divide_scalar(data, <lpfloat_t>value)
+
+        elif isinstance(value, SoundBuffer):
+            LPBuffer.divide(data, (<SoundBuffer>value).buffer)
+
+        else:
+            try:
+                tmp = SoundBuffer(value)
+                LPBuffer.divide(data, (<SoundBuffer>value).buffer)
+            except Exception as e:
+                return NotImplemented
+
+        return SoundBuffer.fromlpbuffer(data)
+
+    def __idiv__(SoundBuffer self, object value):
+        cdef Py_ssize_t i, c
+
+        if self.buffer == NULL:
+            if isinstance(value, numbers.Real):
+                return self
+
+            elif isinstance(value, SoundBuffer):
+                return value.copy()
+
+            else:
+                return SoundBuffer(value, channels=self.channels, samplerate=self.samplerate)
+
+        if isinstance(value, numbers.Real):
+            LPBuffer.divide_scalar(self.buffer, <lpfloat_t>value)
+
+        elif isinstance(value, SoundBuffer):
+            LPBuffer.divide(self.buffer, (<SoundBuffer>value).buffer)
+
+        else:
+            try:
+                tmp = SoundBuffer(value)
+                LPBuffer.divide(self.buffer, tmp.buffer)
+            except Exception as e:
+                return NotImplemented
+
+        return self
+
+    def __rdiv__(SoundBuffer self, object value):
+        return value / self
 
 

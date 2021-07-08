@@ -87,6 +87,29 @@ class TestNewBuffer(TestCase):
         snd -= 2
         self.assertEqual(snd, dsp.buffer([-1,0,1]))
 
+    def test_div_soundbuffers(self):
+        snd = dsp.buffer([1,2,3])
+        self.assertEqual(len(snd), 3)
+
+        self.assertEqual(snd / 1.5, dsp.buffer([1/1.5, 2/1.5, 3/1.5]))
+        self.assertEqual(snd, dsp.buffer([1,2,3]))
+
+        self.assertEqual(snd / 2, dsp.buffer([1/2, 2/2, 2/3]))
+        self.assertEqual(snd, dsp.buffer([1,2,3]))
+
+        self.assertEqual(snd / 0, dsp.buffer([0,0,0]))
+        self.assertEqual(snd, dsp.buffer([1,2,3]))
+
+        self.assertEqual(snd / dsp.buffer([1,3,5]), dsp.buffer([1/1, 2/3, 3/5]))
+        self.assertEqual(snd, dsp.buffer([1,2,3]))
+
+        self.assertEqual(dsp.buffer([1,3,5]) / snd, dsp.buffer([1/1, 3/2, 5/3]))
+        self.assertEqual(snd, dsp.buffer([1,2,3]))
+
+        snd /= 2
+        self.assertEqual(snd, dsp.buffer([1/2, 2/2, 3/2]))
+
+
     """
     def test_slice_frame(self):
         # A SoundBuffer should return a single frame 

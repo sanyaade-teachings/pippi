@@ -34,6 +34,8 @@ void add_buffers(lpbuffer_t * a, lpbuffer_t * b);
 void scalar_add_buffer(lpbuffer_t * a, lpfloat_t b);
 void subtract_buffers(lpbuffer_t * a, lpbuffer_t * b);
 void scalar_subtract_buffer(lpbuffer_t * a, lpfloat_t b);
+void divide_buffers(lpbuffer_t * a, lpbuffer_t * b);
+void scalar_divide_buffer(lpbuffer_t * a, lpfloat_t b);
 lpbuffer_t * concat_buffers(lpbuffer_t * a, lpbuffer_t * b);
 int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b);
 void dub_buffer(lpbuffer_t * a, lpbuffer_t * b);
@@ -82,7 +84,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_lorenz, rand_base_lorenzX, rand_base_lorenzY, rand_base_lorenzZ, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
-const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, concat_buffers, buffers_are_equal, dub_buffer, env_buffer, destroy_buffer };
+const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, dub_buffer, env_buffer, destroy_buffer };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, destroy_wavetable };
@@ -350,6 +352,37 @@ void scalar_subtract_buffer(lpbuffer_t * a, lpfloat_t b) {
     }
 }
 
+void divide_buffers(lpbuffer_t * a, lpbuffer_t * b) {
+    size_t length, i, c, j;
+    length = (a->length <= b->length) ? a->length : b->length;
+    for(i=0; i < length; i++) {
+        for(c=0; c < a->channels; c++) {
+            j = c % b->channels;
+            if(b->data[i * b->channels + j] == 0) {
+                a->data[i * a->channels + c] = 0.f;
+            } else {
+                a->data[i * a->channels + c] /= b->data[i * b->channels + j];
+            }
+        }
+    }
+}
+
+void scalar_divide_buffer(lpbuffer_t * a, lpfloat_t b) {
+    size_t i, c;
+    if(b == 0) {
+        for(i=0; i < a->length; i++) {
+            for(c=0; c < a->channels; c++) {
+                a->data[i * a->channels + c] = 0.f;
+            }
+        }
+    } else {
+        for(i=0; i < a->length; i++) {
+            for(c=0; c < a->channels; c++) {
+                a->data[i * a->channels + c] /= b;
+            }
+        }
+    }
+}
 
 int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b) {
     size_t i, c;
