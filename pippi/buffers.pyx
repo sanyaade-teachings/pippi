@@ -16,6 +16,7 @@ class SoundBufferError(Exception):
     pass
 
 @cython.final
+@cython.total_ordering
 cdef class SoundBuffer:
     cdef lpbuffer_t * buffer
     cdef Py_ssize_t shape[2]
@@ -100,14 +101,6 @@ cdef class SoundBuffer:
         out.buffer = buffer
         return out
 
-    ################################
-    #        DUNDERVILLE           #
-    #                              # 
-    # These dunder methods define  #
-    # the SoundBuffer data model.  #
-    #                              #
-    # See notes below.             #
-    ################################
     def __bool__(self):
         return bool(len(self))
 
@@ -116,6 +109,11 @@ cdef class SoundBuffer:
 
     def __repr__(self):
         return 'SoundBuffer(samplerate=%s, channels=%s, frames=%s, dur=%.2f)' % (self.samplerate, self.channels, len(self.frames), self.dur)
+
+    def __ge__(self, other):
+        if not isinstance(other, SoundBuffer):
+            return NotImplemented
+        return self.buffer.length >= (<SoundBuffer>other).buffer.length
 
     def __eq__(self, other):
         if not isinstance(other, SoundBuffer):
@@ -150,84 +148,69 @@ cdef class SoundBuffer:
     def __len__(self):
         return 0 if self.buffer == NULL else <int>self.buffer.length
 
-    #############################################################
-    # (+) Addition / concatenation operator                     #
-    #                                                           #
-    # - Adding two soundbuffers will concatenate them.          #
-    #                                                           #
-    # - Adding a soundbuffer to a list-like type will           #
-    #   convert the list into a soundbuffer and concatenate     #
-    #   them.                                                   #
-    #                                                           #
-    # - Adding a numeric value to a soundbuffer will            #
-    #   add the value to each sample of each channel of         #
-    #   the soundbuffer.                                        #
-    #############################################################
-    """
     def __add__(SoundBuffer self, object value):
-        # Adding something to an empty buffer
+        cdef Py_ssize_t i, c
+        cdef lpbuffer_t * data
+        cdef SoundBuffer tmp
+
         if self.buffer == NULL:
             if isinstance(value, numbers.Real):
-                # Numeric operands return an empty SoundBuffer
                 return SoundBuffer(channels=self.channels, samplerate=self.samplerate)
 
             elif isinstance(value, SoundBuffer):
-                # SoundBuffer operands return a copy of themselves
                 return value.copy()
 
             else:
-                # Other types try to return a SoundBuffer created from the data
                 return SoundBuffer(value, channels=self.channels, samplerate=self.samplerate)
 
-        cdef double[:,:] out = np.zeros((sef.buffer.length, self.buffer.channels))
-
         if isinstance(value, numbers.Real):
-            out = np.add(self.frames, value)
-        elif isinstance(value, SoundBuffer):
-            if value.channels != self.channels:
-                value = value.remix(self.channels)
+            data = LPBuffer.create(self.buffer.length, self.buffer.channels, self.buffer.samplerate)
+            LPBuffer.copy(self.buffer, data)
+            LPBuffer.add_scalar(data, <lpfloat_t>value)
 
-            if value.frames is None:
-                out = self.frames.copy()
-            else:
-                out = np.vstack((self.frames, value.frames))
+        elif isinstance(value, SoundBuffer):
+            data = LPBuffer.concat(self.buffer, (<SoundBuffer>value).buffer)
+
         else:
             try:
-                out = np.vstack((self.frames, value))
-            except TypeError as e:
+                tmp = SoundBuffer(value)
+                data = LPBuffer.concat(self.buffer, tmp.buffer)
+            except Exception as e:
                 return NotImplemented
 
-        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
+        return SoundBuffer.fromlpbuffer(data)
 
     def __iadd__(SoundBuffer self, object value):
-        if self.frames is None:
+        cdef Py_ssize_t i, c
+
+        if self.buffer == NULL:
             if isinstance(value, numbers.Real):
                 return self
+
             elif isinstance(value, SoundBuffer):
                 return value.copy()
+
             else:
                 return SoundBuffer(value, channels=self.channels, samplerate=self.samplerate)
 
-        cdef SoundBuffer out
 
         if isinstance(value, numbers.Real):
-            self.frames = np.add(self.frames, value)
+            LPBuffer.add_scalar(self.buffer, <lpfloat_t>value)
+
         elif isinstance(value, SoundBuffer):
-            if value.channels != self.channels:
-                value = value.remix(self.channels)
-            self.dub(value, self.dur)
+            LPBuffer.add(self.buffer, (<SoundBuffer>value).buffer)
+
         else:
             try:
-                self.frames = np.vstack((self.frames, value))
-            except TypeError as e:
+                tmp = SoundBuffer(value)
+                LPBuffer.add(self.buffer, tmp.buffer)
+            except Exception as e:
                 return NotImplemented
 
         return self
 
     def __radd__(SoundBuffer self, object value):
         return self + value
-
-    """
 
     def __mul__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
