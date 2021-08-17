@@ -54,60 +54,64 @@ class TestNewBuffer(TestCase):
         self.assertEqual(snd, result)
 
     def test_add_soundbuffers(self):
-        snd = dsp.buffer([1,2,3])
+        snd = SoundBuffer([1,2,3])
         self.assertEqual(len(snd), 3)
-        self.assertEqual(snd + 2, dsp.buffer([3,4,5]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd + 2, SoundBuffer([3,4,5]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(snd + dsp.buffer([1,3,5]), dsp.buffer([1,2,3,1,3,5]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        r = snd + SoundBuffer([1,3,5])
+        for v in r:
+            print(v)
 
-        self.assertEqual(dsp.buffer([1,3,5]) + snd, dsp.buffer([1,3,5,1,2,3]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd + SoundBuffer([1,3,5]), SoundBuffer([1,2,3,1,3,5]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
+
+        self.assertEqual(SoundBuffer([1,3,5]) + snd, SoundBuffer([1,3,5,1,2,3]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
         snd += 2
-        self.assertEqual(snd, dsp.buffer([3,4,5]))
+        self.assertEqual(snd, SoundBuffer([3,4,5]))
 
     def test_sub_soundbuffers(self):
-        snd = dsp.buffer([1,2,3])
+        snd = SoundBuffer([1,2,3])
         self.assertEqual(len(snd), 3)
 
-        self.assertEqual(snd - 1.5, dsp.buffer([-0.5, 0.5, 1.5]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd - 1.5, SoundBuffer([-0.5, 0.5, 1.5]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(snd - 2, dsp.buffer([-1,0,1]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd - 2, SoundBuffer([-1,0,1]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(snd - dsp.buffer([1,3,5]), dsp.buffer([0,-1,-2]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd - SoundBuffer([1,3,5]), SoundBuffer([0,-1,-2]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(dsp.buffer([1,3,5]) - snd, dsp.buffer([0,1,2]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(SoundBuffer([1,3,5]) - snd, SoundBuffer([0,1,2]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
         snd -= 2
-        self.assertEqual(snd, dsp.buffer([-1,0,1]))
+        self.assertEqual(snd, SoundBuffer([-1,0,1]))
 
     def test_div_soundbuffers(self):
-        snd = dsp.buffer([1,2,3])
+        snd = SoundBuffer([1,2,3])
         self.assertEqual(len(snd), 3)
 
-        self.assertEqual(snd / 1.5, dsp.buffer([1/1.5, 2/1.5, 3/1.5]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd / 1.5, SoundBuffer([1/1.5, 2/1.5, 3/1.5]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(snd / 2, dsp.buffer([1/2, 2/2, 2/3]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd / 2, SoundBuffer([1/2, 2/2, 2/3]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(snd / 0, dsp.buffer([0,0,0]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd / 0, SoundBuffer([0,0,0]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(snd / dsp.buffer([1,3,5]), dsp.buffer([1/1, 2/3, 3/5]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(snd / SoundBuffer([1,3,5]), SoundBuffer([1/1, 2/3, 3/5]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(dsp.buffer([1,3,5]) / snd, dsp.buffer([1/1, 3/2, 5/3]))
-        self.assertEqual(snd, dsp.buffer([1,2,3]))
+        self.assertEqual(SoundBuffer([1,3,5]) / snd, SoundBuffer([1/1, 3/2, 5/3]))
+        self.assertEqual(snd, SoundBuffer([1,2,3]))
 
         snd /= 2
-        self.assertEqual(snd, dsp.buffer([1/2, 2/2, 3/2]))
+        self.assertEqual(snd, SoundBuffer([1/2, 2/2, 3/2]))
 
 
     """
@@ -205,7 +209,7 @@ class TestNewBuffer(TestCase):
         wt = dsp.wt('sine', wtsize=4096)
         self.assertTrue(len(wt) == 4096)
 
-        snd = dsp.buffer(wt)
+        snd = SoundBuffer(wt)
         self.assertTrue(len(snd) == 4096)
         self.assertTrue(snd[100][0] != 0)
 

@@ -118,7 +118,7 @@ cdef class SoundBuffer:
     def __eq__(self, other):
         if not isinstance(other, SoundBuffer):
             return False
-        return LPBuffer.buffers_are_equal(self.buffer, (<SoundBuffer>other).buffer) != 0
+        return LPBuffer.buffers_are_close(self.buffer, (<SoundBuffer>other).buffer, 1000) != 0
 
     def __getbuffer__(SoundBuffer self, Py_buffer * buffer, int flags):
         cdef Py_ssize_t itemsize = sizeof(self.buffer.data[0])
@@ -274,7 +274,7 @@ cdef class SoundBuffer:
         return self
 
     def __rsub__(SoundBuffer self, object value):
-        return value - self
+        return self - value 
 
     def __mul__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
@@ -327,10 +327,11 @@ cdef class SoundBuffer:
     def __rmul__(SoundBuffer self, object value):
         return self * value
 
-    def __div__(SoundBuffer self, object value):
+    def __truediv__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
         cdef lpbuffer_t * data
         cdef SoundBuffer tmp
+        print('truediv')
 
         if self.buffer == NULL:
             if isinstance(value, numbers.Real):
@@ -346,6 +347,7 @@ cdef class SoundBuffer:
         LPBuffer.copy(self.buffer, data)
 
         if isinstance(value, numbers.Real):
+            print('div real', value)
             LPBuffer.divide_scalar(data, <lpfloat_t>value)
 
         elif isinstance(value, SoundBuffer):
@@ -360,8 +362,9 @@ cdef class SoundBuffer:
 
         return SoundBuffer.fromlpbuffer(data)
 
-    def __idiv__(SoundBuffer self, object value):
+    def __itruediv__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
+        print('itruediv')
 
         if self.buffer == NULL:
             if isinstance(value, numbers.Real):
@@ -388,7 +391,8 @@ cdef class SoundBuffer:
 
         return self
 
-    def __rdiv__(SoundBuffer self, object value):
-        return value / self
+    def __rtruediv__(SoundBuffer self, object value):
+        print('rtruediv')
+        return self / value 
 
 
