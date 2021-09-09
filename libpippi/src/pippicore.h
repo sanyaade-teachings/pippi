@@ -189,4 +189,12 @@ extern const lpinterpolation_factory_t LPInterpolation;
  */
 lpfloat_t lpzapgremlins(lpfloat_t x);
 
+/* These are little value scaling helper routines. */
+/* lpwv wraps a given value between min and max through probably wrong basic arethmetic */
+lpfloat_t lpwv(lpfloat_t value, lpfloat_t min, lpfloat_t max);
+/* lpsv scales a value normally 0-1 to a custom min and max range */
+lpfloat_t lpsv(lpfloat_t value, lpfloat_t min, lpfloat_t max);
+/* lpsvf does the same but allows a custom from and to range (like from -1 to 1) */
+lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, lpfloat_t to);
+
 #endif

@@ -5,6 +5,9 @@ time ./build/pulsarosc
 echo "Rendering sineosc example..."
 time ./build/sineosc
 
+echo "Rendering tukeyosc example..."
+time ./build/tukeyosc
+
 echo "Rendering ring_buffer example..."
 time ./build/ring_buffer
 

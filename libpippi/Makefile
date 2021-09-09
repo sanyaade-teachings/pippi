@@ -5,6 +5,7 @@ default: all
 ALLSOURCES = src/oscs.sine.c \
 	src/oscs.pulsar.c \
 	src/oscs.tape.c \
+	src/oscs.tukey.c \
 	src/microsound.c \
 	src/mir.c \
 	src/soundfile.c \
@@ -22,6 +23,9 @@ all:
 	
 	echo "Building sineosc.c example...";
 	gcc -g -std=c89 -Wall -pedantic -lm -Isrc -Ivendor examples/sineosc.c $(ALLSOURCES) -o build/sineosc
+
+	echo "Building tukeyosc.c example...";
+	gcc -g -std=c89 -Wall -pedantic -lm -Isrc -Ivendor examples/tukeyosc.c $(ALLSOURCES) -o build/tukeyosc
 
 	echo "Building ring_buffer.c example...";
 	gcc -g -std=c89 -Wall -pedantic -lm -Isrc -Ivendor examples/ring_buffer.c $(ALLSOURCES) -o build/ring_buffer

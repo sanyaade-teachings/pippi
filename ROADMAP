@@ -14,7 +14,9 @@ I'll note progress here as I go:
     - Made a first pass at a new SoundBuffer which wraps libpippi 
       lpbuffer_t structs and implements the python buffer protocol.
       
-    - Added basic support for multiplication to new SoundBuffers
+    - Added support for multiplication to new SoundBuffers
+    - Added support for concatination, addition and subtraction to new SoundBuffers
+    - Added support for true and floor division to new SoundBuffers
 
 v2 beta 4
 
