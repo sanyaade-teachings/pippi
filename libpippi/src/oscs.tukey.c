@@ -27,12 +27,12 @@ lpfloat_t process_tukeyosc(lptukeyosc_t* osc) {
     a = PI2 / osc->shape;
 
     /* Implementation based on https://www.mathworks.com/help/signal/ref/tukeywin.html */
-    if(osc->phase <= r / 2.f) {
-        sample = 0.5 * (1.f + cos(a * (osc->phase - r / 2.f)));
-    } else if(osc->phase < 1 - (r/2)) {
+    if(osc->phase <= osc->shape / 2.f) {
+        sample = 0.5 * (1.f + cos(a * (osc->phase - osc->shape / 2.f)));
+    } else if(osc->phase < 1 - (osc->shape/2)) {
         sample = 1.f;
     } else {
-        sample = 0.5f * (1.f + cos(a * (osc->phase - 1.f + r / 2.f)));
+        sample = 0.5f * (1.f + cos(a * (osc->phase - 1.f + osc->shape / 2.f)));
     }
 
     sample *= osc->direction;

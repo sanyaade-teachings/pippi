@@ -5,23 +5,24 @@
 #define CHANNELS 2
 
 int main() {
-    lpfloat_t minfreq, maxfreq, amp, sample;
+    lpfloat_t amp, sample;
     size_t i, c, length;
     lpbuffer_t * freq_lfo;
+    lpbuffer_t * shape_lfo;
     lpbuffer_t * out;
     lptukeyosc_t * osc;
 
-    minfreq = 80.0;
-    maxfreq = 800.0;
     amp = 0.2;
 
     length = 10 * SR;
 
     /* Make an LFO table to use as a frequency curve for the osc */
-    freq_lfo = LPWindow.create("tukey", BS);
-
+    freq_lfo = LPWindow.create("sine", BS);
     /* Scale it from a range of -1 to 1 to a range of minfreq to maxfreq */
-    LPBuffer.scale(freq_lfo, 0, 1, minfreq, maxfreq);
+    LPBuffer.scale(freq_lfo, 0, 1, 80.f, 200.f);
+
+    shape_lfo = LPWindow.create("sine", BS);
+    LPBuffer.scale(shape_lfo, 0, 1, 0.f, 1.f);
 
     out = LPBuffer.create(length, CHANNELS, SR);
     osc = LPTukeyOsc.create();
@@ -29,6 +30,7 @@ int main() {
 
     for(i=0; i < length; i++) {
         osc->freq = LPInterpolation.linear_pos(freq_lfo, (double)i/length);
+        osc->shape = LPInterpolation.linear_pos(shape_lfo, (double)i/length);
         sample = LPTukeyOsc.process(osc) * amp;
         for(c=0; c < CHANNELS; c++) {
             out->data[i * CHANNELS + c] = sample;
