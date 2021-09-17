@@ -19,7 +19,7 @@ lptukeyosc_t * create_tukeyosc(void) {
 }
 
 lpfloat_t process_tukeyosc(lptukeyosc_t* osc) {
-    lpfloat_t pos, a, r, sample, direction;
+    lpfloat_t a, sample;
 
     if(osc->shape < 0.00001f) osc->shape = 0.00001f;
     if(osc->shape > 1.f) osc->shape = 1.f;

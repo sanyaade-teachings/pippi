@@ -48,6 +48,19 @@ typedef struct lpbuffer_t {
     size_t pos;
 } lpbuffer_t;
 
+typedef struct lpstack_t {
+    lpbuffer_t ** stack;
+    size_t length;
+    lpfloat_t phase; /* Pos within table */
+    lpfloat_t pos; /* Pos within stack */
+} lpstack_t;
+
+typedef struct lparray_t {
+    int * data;
+    size_t length;
+    lpfloat_t phase;
+} lparray_t;
+
 /* Users may create custom memorypools. 
  * If the primary memorypool is active, 
  * it will be used to allocate the pool.
@@ -91,6 +104,12 @@ typedef struct lprand_t {
     int (*choice)(int);
 } lprand_t;
 
+typedef struct lparray_factory_t {
+    lparray_t * (*create)(size_t);
+    lparray_t * (*create_from)(char *, size_t);
+    void (*destroy)(lparray_t *);
+} lparray_factory_t;
+
 typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
@@ -111,6 +130,7 @@ typedef struct lpbuffer_factory_t {
     void (*dub)(lpbuffer_t *, lpbuffer_t *);
     void (*env)(lpbuffer_t *, lpbuffer_t *);
     void (*destroy)(lpbuffer_t *);
+    void (*destroy_stack)(lpstack_t *);
 } lpbuffer_factory_t;
 
 typedef struct lpringbuffer_factory_t {
@@ -153,16 +173,20 @@ typedef struct lpinterpolation_factory_t {
 
 typedef struct lpwavetable_factory_t {
     lpbuffer_t * (*create)(const char * name, size_t length);
+    lpstack_t * (*create_stack)(char * stacknames, size_t paramlength, size_t wtlength);
     void (*destroy)(lpbuffer_t*);
 } lpwavetable_factory_t;
 
 typedef struct lpwindow_factory_t {
     lpbuffer_t * (*create)(const char * name, size_t length);
+    lpstack_t * (*create_stack)(char * stacknames, size_t paramlength, size_t wtlength);
     void (*destroy)(lpbuffer_t*);
 } lpwindow_factory_t;
 
 
+
 /* Interfaces */
+extern const lparray_factory_t LPArray;
 extern const lpbuffer_factory_t LPBuffer;
 extern const lpringbuffer_factory_t LPRingBuffer;
 

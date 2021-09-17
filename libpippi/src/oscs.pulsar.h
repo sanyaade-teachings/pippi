@@ -4,31 +4,14 @@
 #include "pippicore.h"
 
 typedef struct lppulsarosc_t {
-    lpbuffer_t ** wts;   /* Wavetable stack */
-    lpbuffer_t ** wins;  /* Window stack */
-    int numwts;    /* Number of wts in stack */
-    int numwins;   /* Number of wins in stack */
+    lpstack_t * wts;   /* Wavetable stack */
+    lpstack_t * wins;  /* Window stack */
+    lparray_t * burst;    /* Burst table - null always on */
 
-    lpbuffer_t * mod;   /* Pulsewidth modulation table */
-    lpbuffer_t * morph; /* Morph table */
-    int * burst;    /* Burst table */
-
-    int tablesize; /* All tables should be this size */
-
+    lpfloat_t saturation; /* Probability of all pulses to no pulses */
+    lpfloat_t pulsewidth;
     lpfloat_t samplerate;
-
-    int boundry;
-    int morphboundry;
-    int burstboundry;
-    int burstphase;
-
-    lpfloat_t phase;
-    lpfloat_t modphase;
-    lpfloat_t morphphase;
     lpfloat_t freq;
-    lpfloat_t modfreq;
-    lpfloat_t morphfreq;
-    lpfloat_t inc;
 } lppulsarosc_t;
 
 typedef struct lppulsarosc_factory_t {

@@ -1,93 +1,16 @@
 #include "oscs.pulsar.h"
 
-/* TODO these belong somewhere else... */
-
-/* Create a wavetable stack from a string literal */
-void parsewts(lpbuffer_t ** wts, char* str, int numwts, int tablesize) {
-    char sep[] = ",";
-    char* name = strtok(str, sep);
-    int i = 0;
-    while(name != NULL) {
-        wts[i] = LPWavetable.create(name, tablesize);
-        name = strtok(NULL, sep);
-        i += 1;
-    }
-}
-
-/* Create a window stack from a string literal */
-void parsewins(lpbuffer_t ** wins, char* str, int numwins, int tablesize) {
-    char sep[] = ",";
-    char* name = strtok(str, sep);
-    int i = 0;
-    while(name != NULL) {
-        wins[i] = LPWindow.create(name, tablesize);
-        name = strtok(NULL, sep);
-        i += 1;
-    }
-}
-
-/* Create a burst table from a string literal */
-void parseburst(int * burst, char * str, int numbursts) {
-    char sep[] = ",";
-    char * name = strtok(str, sep);
-    int i = 0;
-
-    burst[i] = atoi(name);
-    while(name != NULL) {
-        name = strtok(NULL, sep);
-        if(name != NULL) burst[i] = atoi(name);
-        i += 1;
-    }
-}
-
 lppulsarosc_t * create_pulsarosc(void) {
-    /* Default args */
-    lpfloat_t samplerate = 44100.0;
-    int tablesize = 4096;
-    lpfloat_t freq = 220.0;
-    lpfloat_t modfreq = 0.03;
-    lpfloat_t morphfreq = 0.3;
-
-    /* FIXME -- better defaults */
-    char wts[] = "sine,square,tri,sine";
-    char wins[] = "sine,hann,sine";
-    char burst[] = "1,1,0,1";
-
-    int numwts = 4;
-    int numwins = 3;
-    int numbursts = 4;
-
     lppulsarosc_t * p = (lppulsarosc_t *)LPMemoryPool.alloc(1, sizeof(lppulsarosc_t));
 
-    p->wts = (lpbuffer_t **)LPMemoryPool.alloc(numwts, sizeof(lpbuffer_t *));
-    p->wins = (lpbuffer_t **)LPMemoryPool.alloc(numwins, sizeof(lpbuffer_t *));
-    p->burst = (int*)LPMemoryPool.alloc(numbursts, sizeof(int));
+    p->wts = NULL;
+    p->wins = NULL;
+    p->burst = NULL;
 
-    parsewts(p->wts, wts, numwts, tablesize);
-    parsewins(p->wins, wins, numwins, tablesize);
-    parseburst(p->burst, burst, numbursts);
-
-    p->numwts = numwts;
-    p->numwins = numwins;
-    p->samplerate = samplerate;
-
-    p->boundry = tablesize - 1;
-    p->morphboundry = numwts - 1;
-    p->burstboundry = numbursts - 1;
-    if(p->burstboundry <= 1) p->burst = NULL; /* Disable burst for single value tables */
-
-    p->mod = LPWindow.create("sine", tablesize);
-    p->morph = LPWindow.create("sine", tablesize);
-
-    p->burstphase = 0;
-    p->phase = 0;
-    p->modphase = 0;
-
-    p->freq = freq;
-    p->modfreq = modfreq;
-    p->morphfreq = morphfreq;
-
-    p->inc = (1.0/samplerate) * p->boundry;
+    p->saturation = 1.f;
+    p->pulsewidth = 1.f;
+    p->samplerate = DEFAULT_SAMPLERATE;
+    p->freq = 220.0;
 
     return p;
 }
@@ -97,99 +20,93 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
      * is zero, skip everything except phase incrementing and return 
      * a zero down the line.
      */
-    lpfloat_t pw = LPInterpolation.linear(p->mod, p->modphase);
-    lpfloat_t ipw = 0;
-
-    lpfloat_t sample = 0;
-    lpfloat_t mod = 0;
-    lpfloat_t burst = 1;
-    lpfloat_t morphpos = 0;
-
-    lpfloat_t wtmorphpos, wtmorphfrac, a, b;
-    int wtmorphidx, wtmorphmul;
-
+    lpfloat_t ipw, isr, sample, mod, burst, a, b;
+    lpfloat_t wtmorphpos, wtmorphfrac;
     lpfloat_t winmorphpos, winmorphfrac;
+    int wtmorphidx, wtmorphmul;
     int winmorphidx, winmorphmul;
 
-    if(pw > 0) ipw = 1.0/pw;
+    /* The wavetable and window stacks must be populated by the user after creation */
+    assert(p->wts != NULL);
+    assert(p->wins != NULL);
 
-    if(p->burst != NULL) {
-        burst = p->burst[p->burstphase];
+    ipw = 0.f;
+    sample = 0.f;
+    mod = 0.f;
+    burst = 1.f;
+    isr = 1.f / p->samplerate;
+
+    if(p->pulsewidth > 0) ipw = 1.0/p->pulsewidth;
+
+    if(p->burst != NULL && p->burst->data != NULL && p->burst->phase < p->burst->length) {
+        burst = p->burst->data[(int)p->burst->phase];
+    }
+
+    if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
+        printf("Jackpot!\n");
+        burst = 0; 
     }
 
     if(ipw > 0 && burst > 0) {
-        morphpos = LPInterpolation.linear(p->morph, p->morphphase);
-
-        assert(p->numwts >= 1);
-        if(p->numwts == 1) {
+        if(p->wts->length == 1) {
             /* If there is just a single wavetable in the stack, get the current value */
-            sample = LPInterpolation.linear(p->wts[0], p->phase * ipw);
+            sample = LPInterpolation.linear(p->wts->stack[0], p->wts->phase * ipw);
+            printf("Single wavetable in stack\n");
         } else {
             /* If there are multiple wavetables in the stack, get their values  
              * and then interpolate the value at the morph position between them.
              */
-            wtmorphmul = p->numwts-1 > 1 ? p->numwts-1 : 1;
-            wtmorphpos = morphpos * wtmorphmul;
+            wtmorphmul = p->wts->length-1 > 1 ? p->wts->length-1 : 1;
+            wtmorphpos = p->wts->pos * wtmorphmul;
             wtmorphidx = (int)wtmorphpos;
             wtmorphfrac = wtmorphpos - wtmorphidx;
-            a = LPInterpolation.linear(p->wts[wtmorphidx], p->phase * ipw);
-            b = LPInterpolation.linear(p->wts[wtmorphidx+1], p->phase * ipw);
+            a = LPInterpolation.linear_pos(p->wts->stack[wtmorphidx], p->wts->phase * ipw);
+            b = LPInterpolation.linear_pos(p->wts->stack[wtmorphidx+1], p->wts->phase * ipw);
             sample = (1.0 - wtmorphfrac) * a + (wtmorphfrac * b);
         }
 
-        assert(p->numwins >= 1);
-        if(p->numwins == 1) {
+        if(p->wins->length == 1) {
             /* If there is just a single window in the stack, get the current value */
-            mod = LPInterpolation.linear(p->wins[0], p->phase * ipw);
+            mod = LPInterpolation.linear(p->wins->stack[0], p->wins->phase * ipw);
+            printf("Single window in stack\n");
         } else {
             /* If there are multiple wavetables in the stack, get their values 
              * and then interpolate the value at the morph position between them.
              */
-            winmorphmul = p->numwins-1 > 1 ? p->numwins-1 : 1;
-            winmorphpos = morphpos * winmorphmul;
+            winmorphmul = p->wins->length-1 > 1 ? p->wins->length-1 : 1;
+            winmorphpos = p->wins->pos * winmorphmul;
             winmorphidx = (int)winmorphpos;
             winmorphfrac = winmorphpos - winmorphidx;
-            a = LPInterpolation.linear(p->wins[winmorphidx], p->phase * ipw);
-            b = LPInterpolation.linear(p->wins[winmorphidx+1], p->phase * ipw);
+            a = LPInterpolation.linear_pos(p->wins->stack[winmorphidx], p->wins->phase * ipw);
+            b = LPInterpolation.linear_pos(p->wins->stack[winmorphidx+1], p->wins->phase * ipw);
             mod = (1.0 - winmorphfrac) * a + (winmorphfrac * b);
         }
+    } else {
+        printf("Silence! ipw: %f burst: %f saturation: %f pulsewidth: %f\n", (float)ipw, (float)burst, (float)p->saturation, (float)p->pulsewidth);
     }
 
     /* Increment the wavetable/window phase, pulsewidth/mod phase & the morph phase */
-    p->phase += p->inc * p->freq;
-    p->modphase += p->inc * p->modfreq;
-    p->morphphase += p->inc * p->morphfreq;
+    p->wts->phase += isr * p->freq;
+    p->wins->phase += isr * p->freq;
 
     /* Increment the burst phase on pulse boundries */
-    if(p->phase >= p->boundry) {
-        p->burstphase += 1;
+    if(p->burst != NULL && p->wins->phase >= p->wins->length) {
+        p->burst->phase += 1;
     }
 
     /* Prevent phase overflow by subtracting the boundries if they have been passed */
-    if(p->phase >= p->boundry) p->phase -= p->boundry;
-    if(p->modphase >= p->boundry) p->modphase -= p->boundry;
-    if(p->morphphase >= p->boundry) p->morphphase -= p->boundry;
-    if(p->burstphase >= p->burstboundry) p->burstphase -= p->burstboundry;
+    if(p->wts->phase >= 1.f) p->wts->phase -= 1.f;
+    if(p->wins->phase >= 1.f) p->wins->phase -= 1.f;
+    if(p->burst != NULL && p->burst->phase >= p->burst->length) p->burst->phase -= p->burst->length;
 
     /* Multiply the wavetable value by the window value */
     return sample * mod;
 }
 
 void destroy_pulsarosc(lppulsarosc_t* p) {
-    int i;
-    for(i=0; i < p->numwts; i++) {
-        LPMemoryPool.free(p->wts[i]);
-    }
-
-    for(i=0; i < p->numwins; i++) {
-        LPMemoryPool.free(p->wins[i]);
-    }
-
-    LPMemoryPool.free(p->wts);
-    LPMemoryPool.free(p->wins);
-    LPMemoryPool.free(p->mod);
-    LPMemoryPool.free(p->morph);
-    LPMemoryPool.free(p->burst);
+    LPBuffer.destroy_stack(p->wts);
+    LPBuffer.destroy_stack(p->wins);
+    LPArray.destroy(p->burst);
     LPMemoryPool.free(p);
 }
 

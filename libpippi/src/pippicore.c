@@ -25,6 +25,10 @@ int rand_randint(int low, int high);
 int rand_randbool(void);
 int rand_choice(int numchoices);
 
+lparray_t * create_array_from(char * str, size_t length);
+lparray_t * create_array(size_t length);
+void destroy_array(lparray_t * array);
+
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max);
@@ -45,6 +49,7 @@ lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 void destroy_buffer(lpbuffer_t * buf);
+void destroy_stack(lpstack_t * stack);
 
 lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate);
 void ringbuffer_fill(lpbuffer_t * ringbuf, lpbuffer_t * buf, int offset);
@@ -71,9 +76,11 @@ lpfloat_t interpolate_linear_pos(lpbuffer_t * buf, lpfloat_t pos);
 lpbuffer_t * param_create_from_float(lpfloat_t value);
 lpbuffer_t * param_create_from_int(int value);
 
-lpbuffer_t* create_wavetable(const char * name, size_t length);
+lpbuffer_t * create_wavetable(const char * name, size_t length);
+lpstack_t * create_wavetable_stack(char * stacknames, size_t paramlength, size_t wtlength);
 void destroy_wavetable(lpbuffer_t* buf);
 lpbuffer_t* create_window(const char * name, size_t length);
+lpstack_t * create_window_stack(char * stacknames, size_t paramlength, size_t wtlength);
 void destroy_window(lpbuffer_t* buf);
 
 /* Populate interfaces */
@@ -85,11 +92,12 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_lorenz, rand_base_lorenzX, rand_base_lorenzY, rand_base_lorenzZ, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
-const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer };
+const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
+const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
-const lpwavetable_factory_t LPWavetable = { create_wavetable, destroy_wavetable };
-const lpwindow_factory_t LPWindow = { create_window, destroy_window };
+const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
+const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
 
 /** Rand
@@ -128,25 +136,25 @@ lpfloat_t lorenzZ(lpfloat_t low, lpfloat_t high) {
 }
 
 lpfloat_t rand_base_lorenzX(lpfloat_t low, lpfloat_t high) {
-    lpfloat_t x, y, z;
+    lpfloat_t x;
     x = lorenzX(0.f, 1.f);
-    y = lorenzY(0.f, 1.f);
-    z = lorenzZ(0.f, 1.f);
+    lorenzY(0.f, 1.f);
+    lorenzZ(0.f, 1.f);
     return x * (high-low) + low;
 }
 
 lpfloat_t rand_base_lorenzY(lpfloat_t low, lpfloat_t high) {
-    lpfloat_t x, y, z;
-    x = lorenzX(0.f, 1.f);
+    lpfloat_t y;
+    lorenzX(0.f, 1.f);
     y = lorenzY(0.f, 1.f);
-    z = lorenzZ(0.f, 1.f);
+    lorenzZ(0.f, 1.f);
     return y * (high-low) + low;
 }
 
 lpfloat_t rand_base_lorenzZ(lpfloat_t low, lpfloat_t high) {
-    lpfloat_t x, y, z;
-    x = lorenzX(0.f, 1.f);
-    y = lorenzY(0.f, 1.f);
+    lpfloat_t z;
+    lorenzX(0.f, 1.f);
+    lorenzY(0.f, 1.f);
     z = lorenzZ(0.f, 1.f);
     return z * (high-low) + low;
 }
@@ -184,6 +192,62 @@ int rand_choice(int numchoices) {
     assert(numchoices > 0);
     if(numchoices == 1) return 0;
     return rand_randint(0, numchoices-1);
+}
+
+lparray_t * create_array(size_t length) {
+    int i = 0;
+    lparray_t * array = (lparray_t*)LPMemoryPool.alloc(1, sizeof(lparray_t));
+    array->data = (int*)LPMemoryPool.alloc(length, sizeof(int));
+    array->length = length;
+    for(i=0; i < array->length; i++) {
+        array->data[i] = 0;
+    }
+    array->phase = 0.f;
+    return array;
+}
+
+lparray_t * create_array_from(char * str, size_t length) {
+    const char sep[] = ",";
+    char * haystack;
+    char * name;
+    int i;
+    lparray_t * array;
+
+    haystack = (char *)LPMemoryPool.alloc(length, sizeof(char));
+    memcpy(haystack, str, length);
+    name = strtok(haystack, sep);
+
+    i = 0;
+    while(name != NULL) { 
+        name = strtok(NULL, sep);
+        i++; 
+    }
+
+    array = (lparray_t*)LPMemoryPool.alloc(1, sizeof(lparray_t));
+    array->data = (int*)LPMemoryPool.alloc(i, sizeof(int));
+
+    i = 0;
+    memcpy(haystack, str, length);
+    name = strtok(haystack, sep);
+    array->data[i] = atoi(name);
+    while(name != NULL) {
+        name = strtok(NULL, sep);
+        if(name != NULL) array->data[i] = atoi(name);
+        i += 1;
+    }
+
+    LPMemoryPool.free(haystack);
+
+    return array;
+}
+
+void destroy_array(lparray_t * array) {
+    if(array != NULL) {
+        if(array->data != NULL) {
+            LPMemoryPool.free(array->data);
+        }
+        LPMemoryPool.free(array);
+    }
 }
 
 /* Buffer
@@ -405,7 +469,7 @@ int buffers_are_close(lpbuffer_t * a, lpbuffer_t * b, int d) {
     for(i=0; i < a->length; i++) {
         for(c=0; c < a->channels; c++) {
             atmp = floor(a->data[i * a->channels + c] * d);
-            btmp = round(b->data[i * a->channels + c] * d);
+            btmp = floor(b->data[i * a->channels + c] * d);
             if(atmp != btmp) return 0;
         }
     }
@@ -476,6 +540,18 @@ void destroy_buffer(lpbuffer_t * buf) {
         LPMemoryPool.free(buf);
     }
 }
+
+void destroy_stack(lpstack_t * stack) {
+    int i;
+    if(stack->stack != NULL) {
+        for(i=0; i < stack->length; i++) {
+            LPBuffer.destroy(stack->stack[i]);
+        }
+        /*LPMemoryPool.free(stack->stack);*/
+    }
+    LPMemoryPool.free(stack);
+}
+
 
 /* RingBuffers
  */
@@ -774,9 +850,48 @@ lpbuffer_t* create_wavetable(const char * name, size_t length) {
     return buf;
 }
 
+lpstack_t * create_wavetable_stack(char * stacknames, size_t paramlength, size_t wtlength) {
+    const char * sep = ",";
+    char * haystack;
+    char * name;
+    lpstack_t * stack;
+    int i;
+
+    haystack = (char *)LPMemoryPool.alloc(paramlength, sizeof(char));
+    memcpy(haystack, stacknames, paramlength);
+
+    i = 0;
+    name = strtok(haystack, sep);
+    while(name != NULL) { 
+        name = strtok(NULL, sep);
+        i++; 
+    }
+
+    stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
+    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(i, sizeof(lpbuffer_t *));
+    stack->length = i;
+    stack->phase = 0.f;
+    stack->pos = 0.f;
+
+    i = 0;
+    memcpy(haystack, stacknames, paramlength);
+    name = strtok(haystack, sep);
+    while(name != NULL) {
+        stack->stack[i] = LPWavetable.create(name, wtlength);
+        name = strtok(NULL, sep);
+        i += 1;
+    }
+
+    LPMemoryPool.free(haystack);
+
+    return stack;
+}
+
+
 void destroy_wavetable(lpbuffer_t* buf) {
     LPBuffer.destroy(buf);
 }
+
 
 /* Window generators
  *
@@ -841,7 +956,7 @@ char * random_window(void) {
 
 
 /* create a window (0 to 1) */
-lpbuffer_t* create_window(const char * name, size_t length) {
+lpbuffer_t * create_window(const char * name, size_t length) {
     lpbuffer_t* buf = LPBuffer.create(length, 1, -1);
     if(strcmp(name, SINE) == 0) {
         window_sine(buf->data, length);            
@@ -859,6 +974,42 @@ lpbuffer_t* create_window(const char * name, size_t length) {
     return buf;
 }
 
+lpstack_t * create_window_stack(char * stacknames, size_t paramlength, size_t wtlength) {
+    const char sep[] = ",";
+    char * haystack;
+    char * name;
+    lpstack_t * stack;
+    int i;
+
+    haystack = (char *)LPMemoryPool.alloc(paramlength, sizeof(char));
+    memcpy(haystack, stacknames, paramlength);
+
+    i = 0;
+    name = strtok(haystack, sep);
+    while(name != NULL) { 
+        name = strtok(NULL, sep);
+        i++; 
+    }
+
+    stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
+    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(i, sizeof(lpbuffer_t *));
+    stack->length = i;
+    stack->phase = 0.f;
+    stack->pos = 0.f;
+
+    i = 0;
+    memcpy(haystack, stacknames, paramlength);
+    name = strtok(haystack, sep);
+    while(name != NULL) {
+        stack->stack[i] = LPWindow.create(name, wtlength);
+        name = strtok(NULL, sep);
+        i += 1;
+    }
+
+    LPMemoryPool.free(haystack);
+
+    return stack;
+}
 
 void destroy_window(lpbuffer_t* buf) {
     LPBuffer.destroy(buf);
