@@ -17,11 +17,11 @@ int main() {
     length = 10 * SR;
 
     /* Make an LFO table to use as a frequency curve for the osc */
-    freq_lfo = LPWindow.create("sine", BS);
+    freq_lfo = LPWindow.create(WIN_SINE, BS);
     /* Scale it from a range of -1 to 1 to a range of minfreq to maxfreq */
     LPBuffer.scale(freq_lfo, 0, 1, 80.f, 200.f);
 
-    shape_lfo = LPWindow.create("sine", BS);
+    shape_lfo = LPWindow.create(WIN_SINE, BS);
     LPBuffer.scale(shape_lfo, 0, 1, 0.f, 1.f);
 
     out = LPBuffer.create(length, CHANNELS, SR);

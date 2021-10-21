@@ -69,7 +69,7 @@ lpcloud_t * cloud_create(int numstreams, size_t maxgrainlength, size_t mingrainl
     lpfloat_t grainlength;
 
     cloud = (lpcloud_t *)LPMemoryPool.alloc(1, sizeof(lpcloud_t));
-    cloud->window = LPWavetable.create("hann", 4096);
+    cloud->window = LPWavetable.create(WT_HANN, 4096);
     cloud->rb = LPRingBuffer.create(rblength, channels, samplerate);
     cloud->maxlength = maxgrainlength;
     cloud->minlength = mingrainlength;

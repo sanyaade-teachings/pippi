@@ -4,6 +4,7 @@
 /* std includes */
 #include <assert.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,15 +25,28 @@ typedef double lpfloat_t;
 #define PI2 (PI*2.0)
 #endif
 
-#define SINE "sine"
-#define SQUARE "square"
-#define TRI "tri"
-#define PHASOR "phasor"
-#define HANN "hann"
-#define RND "rnd"
+enum Wavetables {
+    WT_SINE,
+    WT_SQUARE, 
+    WT_TRI, 
+    WT_PHASOR, 
+    WT_HANN, 
+    WT_RND,
+    NUM_WAVETABLES
+};
+
+enum Windows {
+    WIN_SINE,
+    WIN_TRI, 
+    WIN_PHASOR, 
+    WIN_HANN, 
+    WIN_RND,
+    NUM_WINDOWS
+};
 
 #define DEFAULT_CHANNELS 2
 #define DEFAULT_SAMPLERATE 48000
+#define DEFAULT_TABLESIZE 4096
 
 /* Core datatypes */
 typedef struct lpbuffer_t {
@@ -106,7 +120,7 @@ typedef struct lprand_t {
 
 typedef struct lparray_factory_t {
     lparray_t * (*create)(size_t);
-    lparray_t * (*create_from)(char *, size_t);
+    lparray_t * (*create_from)(int, ...);
     void (*destroy)(lparray_t *);
 } lparray_factory_t;
 
@@ -172,14 +186,14 @@ typedef struct lpinterpolation_factory_t {
 } lpinterpolation_factory_t;
 
 typedef struct lpwavetable_factory_t {
-    lpbuffer_t * (*create)(const char * name, size_t length);
-    lpstack_t * (*create_stack)(char * stacknames, size_t paramlength, size_t wtlength);
+    lpbuffer_t * (*create)(int name, size_t length);
+    lpstack_t * (*create_stack)(int numtables, ...);
     void (*destroy)(lpbuffer_t*);
 } lpwavetable_factory_t;
 
 typedef struct lpwindow_factory_t {
-    lpbuffer_t * (*create)(const char * name, size_t length);
-    lpstack_t * (*create_stack)(char * stacknames, size_t paramlength, size_t wtlength);
+    lpbuffer_t * (*create)(int name, size_t length);
+    lpstack_t * (*create_stack)(int numtables, ...);
     void (*destroy)(lpbuffer_t*);
 } lpwindow_factory_t;
 

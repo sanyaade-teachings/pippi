@@ -40,12 +40,12 @@ int main() {
 
     /* Make an LFO table to use as a frequency curve for the osc */
     for(i=0; i < PARTIALS; i++) {
-        freq[i] = LPWindow.create("rnd", BS);
+        freq[i] = LPWindow.create(WIN_RND, BS);
         minfreq = (basefreq * (i+1)) + logistic(-freqdrift, 0.f);
         maxfreq = (basefreq * (i+1)) + logistic(0.f, freqdrift);
         LPBuffer.scale(freq[i], 0, 1, minfreq, maxfreq);
 
-        amp[i] = LPWindow.create("rnd", BS);
+        amp[i] = LPWindow.create(WIN_RND, BS);
         LPBuffer.scale(amp[i], 0, 1, 0.f, LPRand.rand(ampdrift * 0.1, ampdrift));
 
         osc[i] = LPSineOsc.create();

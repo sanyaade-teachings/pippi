@@ -22,7 +22,7 @@ int main() {
     sineamp = LPParam.from_float(0.2f);
     sine = LPSineOsc.render(sineosc, length, sinefreq, sineamp, CHANNELS);
 
-    speeds = LPWindow.create("tri", BS);
+    speeds = LPWindow.create(WIN_TRI, BS);
     LPBuffer.scale(speeds, 0, 1, 0.5f, 2.f);
 
     out = LPBuffer.create(length, CHANNELS, SR);

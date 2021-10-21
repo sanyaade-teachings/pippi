@@ -34,7 +34,7 @@ int main() {
     /* Setup the LPSineOsc params */
     freq = LPParam.from_float(2000.0f);
     amp = LPParam.from_float(0.2f);
-    env = LPWindow.create("sine", 128);
+    env = LPWindow.create(WIN_SINE, 128);
 
     osc = LPSineOsc.create();
     osc->samplerate = SR;

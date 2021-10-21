@@ -4,10 +4,6 @@
 #define CHANNELS 2
 #define SR 48000
 
-char WTSTACK[] = "sine,square,tri,sine"; /* 21 */
-char WINSTACK[] = "sine,hann,sine"; /* 15 */
-char BURST[] = "1,1,0,1"; /* 8 */
-
 int main() {
     size_t length = SR * 60;
     size_t i, c, v;
@@ -25,9 +21,9 @@ int main() {
         oscs[i]->freq = freqs[i];
         oscs[i]->saturation = 1;
         oscs[i]->pulsewidth = LPRand.rand(0.01, 1);
-        oscs[i]->wts = LPWavetable.create_stack(WTSTACK, 21, 4096);
-        oscs[i]->wins = LPWindow.create_stack(WINSTACK, 15, 4096);
-        oscs[i]->burst = LPArray.create_from(BURST, 8);
+        oscs[i]->wts = LPWavetable.create_stack(4, WT_SINE, WT_SQUARE, WT_TRI, WT_SINE);
+        oscs[i]->wins = LPWindow.create_stack(3, WIN_SINE, WIN_HANN, WIN_SINE);
+        oscs[i]->burst = LPArray.create_from(4, 1, 1, 0, 1);
     }
 
     for(i=0; i < length; i++) {

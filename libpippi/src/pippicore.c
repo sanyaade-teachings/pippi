@@ -25,7 +25,7 @@ int rand_randint(int low, int high);
 int rand_randbool(void);
 int rand_choice(int numchoices);
 
-lparray_t * create_array_from(char * str, size_t length);
+lparray_t * create_array_from(int numvalues, ...);
 lparray_t * create_array(size_t length);
 void destroy_array(lparray_t * array);
 
@@ -76,11 +76,11 @@ lpfloat_t interpolate_linear_pos(lpbuffer_t * buf, lpfloat_t pos);
 lpbuffer_t * param_create_from_float(lpfloat_t value);
 lpbuffer_t * param_create_from_int(int value);
 
-lpbuffer_t * create_wavetable(const char * name, size_t length);
-lpstack_t * create_wavetable_stack(char * stacknames, size_t paramlength, size_t wtlength);
+lpbuffer_t * create_wavetable(int name, size_t length);
+lpstack_t * create_wavetable_stack(int numtables, ...);
 void destroy_wavetable(lpbuffer_t* buf);
-lpbuffer_t* create_window(const char * name, size_t length);
-lpstack_t * create_window_stack(char * stacknames, size_t paramlength, size_t wtlength);
+lpbuffer_t* create_window(int name, size_t length);
+lpstack_t * create_window_stack(int numtables, ...);
 void destroy_window(lpbuffer_t* buf);
 
 /* Populate interfaces */
@@ -206,37 +206,21 @@ lparray_t * create_array(size_t length) {
     return array;
 }
 
-lparray_t * create_array_from(char * str, size_t length) {
-    const char sep[] = ",";
-    char * haystack;
-    char * name;
-    int i;
+lparray_t * create_array_from(int numvalues, ...) {
+    va_list vl;
     lparray_t * array;
+    int i;
 
-    haystack = (char *)LPMemoryPool.alloc(length, sizeof(char));
-    memcpy(haystack, str, length);
-    name = strtok(haystack, sep);
-
-    i = 0;
-    while(name != NULL) { 
-        name = strtok(NULL, sep);
-        i++; 
-    }
+    va_start(vl, numvalues);
 
     array = (lparray_t*)LPMemoryPool.alloc(1, sizeof(lparray_t));
-    array->data = (int*)LPMemoryPool.alloc(i, sizeof(int));
+    array->data = (int*)LPMemoryPool.alloc(numvalues, sizeof(int));
 
-    i = 0;
-    memcpy(haystack, str, length);
-    name = strtok(haystack, sep);
-    array->data[i] = atoi(name);
-    while(name != NULL) {
-        name = strtok(NULL, sep);
-        if(name != NULL) array->data[i] = atoi(name);
-        i += 1;
+    for(i=0; i < numvalues; i++) {
+        array->data[i] = va_arg(vl, int);
     }
 
-    LPMemoryPool.free(haystack);
+    va_end(vl);
 
     return array;
 }
@@ -836,53 +820,41 @@ void wavetable_tri(lpfloat_t* out, int length) {
 
 
 /* create a wavetable (-1 to 1) */
-lpbuffer_t* create_wavetable(const char * name, size_t length) {
+lpbuffer_t* create_wavetable(int name, size_t length) {
     lpbuffer_t* buf = LPBuffer.create(length, 1, -1);
-    if(strcmp(name, SINE) == 0) {
+    if(name == WT_SINE) {
         wavetable_sine(buf->data, length);            
-    } else if (strcmp(name, TRI) == 0) {
+    } else if (name == WT_TRI) {
         wavetable_tri(buf->data, length);            
-    } else if (strcmp(name, SQUARE) == 0) {
+    } else if (name == WT_SQUARE) {
         wavetable_square(buf->data, length);            
+    } else if (name == WT_RND) {
+        return create_wavetable(rand_choice(NUM_WAVETABLES), length);
     } else {
         wavetable_sine(buf->data, length);            
     }
     return buf;
 }
 
-lpstack_t * create_wavetable_stack(char * stacknames, size_t paramlength, size_t wtlength) {
-    const char * sep = ",";
-    char * haystack;
-    char * name;
+lpstack_t * create_wavetable_stack(int numtables, ...) {
+    va_list vl;
     lpstack_t * stack;
-    int i;
+    int i, name;
 
-    haystack = (char *)LPMemoryPool.alloc(paramlength, sizeof(char));
-    memcpy(haystack, stacknames, paramlength);
-
-    i = 0;
-    name = strtok(haystack, sep);
-    while(name != NULL) { 
-        name = strtok(NULL, sep);
-        i++; 
-    }
+    va_start(vl, numtables);
 
     stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
-    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(i, sizeof(lpbuffer_t *));
-    stack->length = i;
+    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(numtables, sizeof(lpbuffer_t *));
+    stack->length = numtables;
     stack->phase = 0.f;
     stack->pos = 0.f;
 
-    i = 0;
-    memcpy(haystack, stacknames, paramlength);
-    name = strtok(haystack, sep);
-    while(name != NULL) {
-        stack->stack[i] = LPWavetable.create(name, wtlength);
-        name = strtok(NULL, sep);
-        i += 1;
+    for(i=0; i < numtables; i++) {
+        name = va_arg(vl, int);
+        stack->stack[i] = LPWavetable.create(name, DEFAULT_TABLESIZE); 
     }
 
-    LPMemoryPool.free(haystack);
+    va_end(vl);
 
     return stack;
 }
@@ -927,86 +899,45 @@ void window_hanning(lpfloat_t* out, int length) {
     }
 }
 
-char * random_window(void) {
-    char * name;
-    int choice = rand_choice(4);
-    switch (choice) {
-        case 0:
-            name = (char *)PHASOR;
-            break;
-
-        case 1:
-            name = (char *)TRI;
-            break;
-
-        case 2:
-            name = (char *)SINE;
-            break;
-
-        case 3:
-            name = (char *)HANN;
-            break;
-
-        default:
-            name = (char *)SINE;
-    }
-
-    return name;
-}
-
 
 /* create a window (0 to 1) */
-lpbuffer_t * create_window(const char * name, size_t length) {
+lpbuffer_t * create_window(int name, size_t length) {
     lpbuffer_t* buf = LPBuffer.create(length, 1, -1);
-    if(strcmp(name, SINE) == 0) {
+    if(name == WIN_SINE) {
         window_sine(buf->data, length);            
-    } else if (strcmp(name, TRI) == 0) {
+    } else if (name == WIN_TRI) {
         window_tri(buf->data, length);            
-    } else if (strcmp(name, PHASOR) == 0) {
+    } else if (name == WIN_PHASOR) {
         window_phasor(buf->data, length);            
-    } else if (strcmp(name, HANN) == 0) {
+    } else if (name == WIN_HANN) {
         window_hanning(buf->data, length);            
-    } else if (strcmp(name, RND) == 0) {
-        return create_window(random_window(), length);
+    } else if (name == WIN_RND) {
+        return create_window(rand_choice(NUM_WINDOWS), length);
     } else {
         window_sine(buf->data, length);            
     }
     return buf;
 }
 
-lpstack_t * create_window_stack(char * stacknames, size_t paramlength, size_t wtlength) {
-    const char sep[] = ",";
-    char * haystack;
-    char * name;
+lpstack_t * create_window_stack(int numtables, ...) {
+    va_list vl;
     lpstack_t * stack;
-    int i;
+    int i, name;
 
-    haystack = (char *)LPMemoryPool.alloc(paramlength, sizeof(char));
-    memcpy(haystack, stacknames, paramlength);
-
-    i = 0;
-    name = strtok(haystack, sep);
-    while(name != NULL) { 
-        name = strtok(NULL, sep);
-        i++; 
-    }
+    va_start(vl, numtables);
 
     stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
-    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(i, sizeof(lpbuffer_t *));
-    stack->length = i;
+    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(numtables, sizeof(lpbuffer_t *));
+    stack->length = numtables;
     stack->phase = 0.f;
     stack->pos = 0.f;
 
-    i = 0;
-    memcpy(haystack, stacknames, paramlength);
-    name = strtok(haystack, sep);
-    while(name != NULL) {
-        stack->stack[i] = LPWindow.create(name, wtlength);
-        name = strtok(NULL, sep);
-        i += 1;
+    for(i=0; i < numtables; i++) {
+        name = va_arg(vl, int);
+        stack->stack[i] = LPWindow.create(name, DEFAULT_TABLESIZE); 
     }
 
-    LPMemoryPool.free(haystack);
+    va_end(vl);
 
     return stack;
 }

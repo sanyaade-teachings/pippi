@@ -21,7 +21,7 @@ int main() {
 
     freq = LPParam.from_float(200.0f);
     amp = LPParam.from_float(0.3f);
-    env = LPWindow.create("sine", 4096);
+    env = LPWindow.create(WIN_SINE, 4096);
     ringbuf = LPRingBuffer.create(SR, CHANNELS, SR); /* 1 second ring buffer */
 
     length = 4410;
