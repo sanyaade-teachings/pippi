@@ -11,7 +11,8 @@ lpbuffer_t * read_soundfile(const char * path) {
     lpbuffer_t * out;
     drwav_uint64 frames;
     float * data;
-    int i, c;
+    drwav_uint64 i;
+    unsigned int c;
 
     data = (float *)drwav_open_file_and_read_pcm_frames_f32(path, &channels, &samplerate, &frames, NULL);
     if (data == NULL) {
@@ -34,7 +35,8 @@ void write_soundfile(const char * path, lpbuffer_t * buf) {
     float * tmpbuf;
     drwav wav;
     drwav_data_format format;
-    int i, c;
+    size_t i;
+    int c;
 
     int channels = buf->channels;
     tmpbuf = (float *)LPMemoryPool.alloc(LP_SOUNDFILE_BUFSIZE * buf->channels, sizeof(float));

@@ -43,7 +43,6 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     }
 
     if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
-        printf("Jackpot!\n");
         burst = 0; 
     }
 
@@ -51,13 +50,12 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
         if(p->wts->length == 1) {
             /* If there is just a single wavetable in the stack, get the current value */
             sample = LPInterpolation.linear(p->wts->stack[0], p->wts->phase * ipw);
-            printf("Single wavetable in stack\n");
         } else {
             /* If there are multiple wavetables in the stack, get their values  
              * and then interpolate the value at the morph position between them.
              */
             wtmorphmul = p->wts->length-1 > 1 ? p->wts->length-1 : 1;
-            wtmorphpos = p->wts->pos * wtmorphmul;
+            wtmorphpos = lpwv(p->wts->pos, 0, 1) * wtmorphmul;
             wtmorphidx = (int)wtmorphpos;
             wtmorphfrac = wtmorphpos - wtmorphidx;
             a = LPInterpolation.linear_pos(p->wts->stack[wtmorphidx], p->wts->phase * ipw);
@@ -68,7 +66,6 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
         if(p->wins->length == 1) {
             /* If there is just a single window in the stack, get the current value */
             mod = LPInterpolation.linear(p->wins->stack[0], p->wins->phase * ipw);
-            printf("Single window in stack\n");
         } else {
             /* If there are multiple wavetables in the stack, get their values 
              * and then interpolate the value at the morph position between them.
@@ -81,9 +78,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
             b = LPInterpolation.linear_pos(p->wins->stack[winmorphidx+1], p->wins->phase * ipw);
             mod = (1.0 - winmorphfrac) * a + (winmorphfrac * b);
         }
-    } else {
-        printf("Silence! ipw: %f burst: %f saturation: %f pulsewidth: %f\n", (float)ipw, (float)burst, (float)p->saturation, (float)p->pulsewidth);
-    }
+    } 
 
     /* Increment the wavetable/window phase, pulsewidth/mod phase & the morph phase */
     p->wts->phase += isr * p->freq;

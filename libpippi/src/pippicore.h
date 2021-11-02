@@ -151,8 +151,8 @@ typedef struct lpringbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
     void (*fill)(lpbuffer_t *, lpbuffer_t *, int);
     lpbuffer_t * (*read)(lpbuffer_t *, size_t);
-    void (*readinto)(lpbuffer_t *, lpfloat_t *, int, int);
-    void (*writefrom)(lpbuffer_t *, lpfloat_t *, int, int);
+    void (*readinto)(lpbuffer_t *, lpfloat_t *, size_t, int);
+    void (*writefrom)(lpbuffer_t *, lpfloat_t *, size_t, int);
     void (*write)(lpbuffer_t *, lpbuffer_t *);
     lpfloat_t (*readone)(lpbuffer_t *, int);
     void (*writeone)(lpbuffer_t *, lpfloat_t);
@@ -228,7 +228,7 @@ extern const lpinterpolation_factory_t LPInterpolation;
 lpfloat_t lpzapgremlins(lpfloat_t x);
 
 /* These are little value scaling helper routines. */
-/* lpwv wraps a given value between min and max through probably wrong basic arethmetic */
+/* lpwv wraps a given value between min and max through probably wrong basic arithmetic */
 lpfloat_t lpwv(lpfloat_t value, lpfloat_t min, lpfloat_t max);
 /* lpsv scales a value normally 0-1 to a custom min and max range */
 lpfloat_t lpsv(lpfloat_t value, lpfloat_t min, lpfloat_t max);

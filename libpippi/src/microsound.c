@@ -65,7 +65,7 @@ void grain_destroy(lpgrain_t * g) {
 
 lpcloud_t * cloud_create(int numstreams, size_t maxgrainlength, size_t mingrainlength, size_t rblength, int channels, int samplerate) {
     lpcloud_t * cloud;
-    int i;
+    size_t i;
     lpfloat_t grainlength;
 
     cloud = (lpcloud_t *)LPMemoryPool.alloc(1, sizeof(lpcloud_t));
@@ -95,22 +95,23 @@ lpcloud_t * cloud_create(int numstreams, size_t maxgrainlength, size_t mingrainl
 
 void cloud_process(lpcloud_t * c) {
     int i;
+    size_t j;
 
     for(i=0; i < c->current_frame->channels; i++) {
         c->current_frame->data[i] = 0.f;
     }
 
-    for(i=0; i < c->numgrains; i++) {
-        c->grains[i]->speed = c->speed;
-        c->grains[i]->length = LPRand.rand(c->minlength, c->maxlength);
-        c->grains[i]->offset = LPRand.rand(0.f, c->rb->length - c->grains[i]->length - 1.f);
+    for(j=0; j < c->numgrains; j++) {
+        c->grains[j]->speed = c->speed;
+        c->grains[j]->length = LPRand.rand(c->minlength, c->maxlength);
+        c->grains[j]->offset = LPRand.rand(0.f, c->rb->length - c->grains[j]->length - 1.f);
 
-        grain_process(c->grains[i], c->current_frame);
+        grain_process(c->grains[j], c->current_frame);
     }
 }
 
 void cloud_destroy(lpcloud_t * c) {
-    int i;
+    size_t i;
     for(i=0; i < c->numgrains; i++) {
         LPMemoryPool.free(c->grains[i]);
     }

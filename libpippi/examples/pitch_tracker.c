@@ -14,7 +14,8 @@ int main() {
     lpsineosc_t * osc;
     lpsineosc_t * osc2;
     lpyin_t * yin;
-    int i, c;
+    size_t i;
+    int c;
     lpfloat_t p, last_p;
 
     minfreq = 80.0;

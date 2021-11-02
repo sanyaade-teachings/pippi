@@ -55,7 +55,8 @@ void process_tapeosc(lptapeosc_t * osc) {
 lpbuffer_t * render_tapeosc(lptapeosc_t * osc, size_t length, lpbuffer_t * freq, lpbuffer_t * amp, int channels) {
     lpbuffer_t * out;
     lpfloat_t _amp;
-    size_t i, c;
+    size_t i;
+    int c;
     float pos;
 
     pos = 0.f;

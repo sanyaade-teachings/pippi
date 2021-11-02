@@ -2,7 +2,7 @@ import tempfile
 import random
 
 from unittest import TestCase
-from pippi import rhythm
+from pippi import rhythm, oscs
 
 test_eu_patterns = [
     ((6, 3, 0, None, False), [1,0,1,0,1,0]), 
@@ -37,4 +37,27 @@ class TestRhythm(TestCase):
             pattern = rhythm.onsets(pattern, beat, length)
             self.assertEqual(pattern, result)
 
-       
+    def test_seq_score(self):
+        def makebloop(ctx):
+            return oscs.SineOsc(freq=200).play(0.2).env('pluckout') * 0.1
+
+        bpm = 60 / 88
+
+        bloop_patterns = {
+            'a': 'xx..',
+            'b': '.x.x',
+        }
+
+        score = {
+            'a': {
+                'bloops': 'aaaa',
+            },
+            'seq': 'aa',
+        }
+
+        seq = rhythm.Seq(bpm)
+        seq.add('bloops', pattern=bloop_patterns, callback=makebloop)
+
+        out = seq.score(score)
+
+        out.write('tests/renders/rhythm-seq-score.wav')

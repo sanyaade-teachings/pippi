@@ -21,7 +21,8 @@ int main() {
     lpsineosc_t * osc;
     lpscheduler_t * s;
 
-    int i, c;
+    size_t i;
+    int c;
     size_t output_length;
 
     /* Setup the scheduler */

@@ -55,9 +55,9 @@ lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate);
 void ringbuffer_fill(lpbuffer_t * ringbuf, lpbuffer_t * buf, int offset);
 lpfloat_t ringbuffer_readone(lpbuffer_t * ringbuf, int offset);
 lpbuffer_t * ringbuffer_read(lpbuffer_t * ringbuf, size_t length);
-void ringbuffer_readinto(lpbuffer_t * ringbuf, lpfloat_t * data, int length, int channels);
+void ringbuffer_readinto(lpbuffer_t * ringbuf, lpfloat_t * data, size_t length, int channels);
 void ringbuffer_writeone(lpbuffer_t * ringbuf, lpfloat_t sample);
-void ringbuffer_writefrom(lpbuffer_t * ringbuf, lpfloat_t * data, int length, int channels);
+void ringbuffer_writefrom(lpbuffer_t * ringbuf, lpfloat_t * data, size_t length, int channels);
 void ringbuffer_write(lpbuffer_t * ringbuf, lpbuffer_t * buf);
 void ringbuffer_dub(lpbuffer_t * buf, lpbuffer_t * src);
 void ringbuffer_destroy(lpbuffer_t * buf);
@@ -195,7 +195,7 @@ int rand_choice(int numchoices) {
 }
 
 lparray_t * create_array(size_t length) {
-    int i = 0;
+    size_t i = 0;
     lparray_t * array = (lparray_t*)LPMemoryPool.alloc(1, sizeof(lparray_t));
     array->data = (int*)LPMemoryPool.alloc(length, sizeof(int));
     array->length = length;
@@ -250,7 +250,8 @@ lpbuffer_t * create_buffer(size_t length, int channels, int samplerate) {
 }
 
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest) {
-    size_t i, c;
+    size_t i;
+    int c;
 
     assert(src->length == dest->length);
     assert(src->channels == dest->channels);
@@ -263,8 +264,8 @@ void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest) {
 }
 
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max) {
-    size_t i, c;
-    int idx;
+    size_t i;
+    int c, idx;
     lpfloat_t from_diff, to_diff;
 
     to_diff = to_max - to_min;;
@@ -303,7 +304,8 @@ lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed) {
 lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length) {
     lpbuffer_t * out;
     lpfloat_t pos;
-    int i, c;
+    size_t i;
+    int c;
 
     assert(length > 1);
     out = create_buffer(length, buf->channels, buf->samplerate);
@@ -318,7 +320,8 @@ lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length) {
 }
 
 void multiply_buffer(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length, i, c, j;
+    size_t length, i;
+    int c, j;
     length = (a->length <= b->length) ? a->length : b->length;
     for(i=0; i < length; i++) {
         for(c=0; c < a->channels; c++) {
@@ -329,7 +332,8 @@ void multiply_buffer(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 void scalar_multiply_buffer(lpbuffer_t * a, lpfloat_t b) {
-    size_t i, c;
+    size_t i;
+    int c;
     for(i=0; i < a->length; i++) {
         for(c=0; c < a->channels; c++) {
             a->data[i * a->channels + c] *= b;
@@ -362,7 +366,8 @@ lpbuffer_t * concat_buffers(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 void add_buffers(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length, i, c, j;
+    size_t length, i;
+    int c, j;
     length = (a->length <= b->length) ? a->length : b->length;
     for(i=0; i < length; i++) {
         for(c=0; c < a->channels; c++) {
@@ -373,7 +378,8 @@ void add_buffers(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 void scalar_add_buffer(lpbuffer_t * a, lpfloat_t b) {
-    size_t i, c;
+    size_t i;
+    int c;
     for(i=0; i < a->length; i++) {
         for(c=0; c < a->channels; c++) {
             a->data[i * a->channels + c] += b;
@@ -382,7 +388,8 @@ void scalar_add_buffer(lpbuffer_t * a, lpfloat_t b) {
 }
 
 void subtract_buffers(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length, i, c, j;
+    size_t length, i;
+    int c, j;
     length = (a->length <= b->length) ? a->length : b->length;
     for(i=0; i < length; i++) {
         for(c=0; c < a->channels; c++) {
@@ -393,7 +400,8 @@ void subtract_buffers(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 void scalar_subtract_buffer(lpbuffer_t * a, lpfloat_t b) {
-    size_t i, c;
+    size_t i;
+    int c;
     for(i=0; i < a->length; i++) {
         for(c=0; c < a->channels; c++) {
             a->data[i * a->channels + c] -= b;
@@ -402,7 +410,8 @@ void scalar_subtract_buffer(lpbuffer_t * a, lpfloat_t b) {
 }
 
 void divide_buffers(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length, i, c, j;
+    size_t length, i;
+    int c, j;
     length = (a->length <= b->length) ? a->length : b->length;
     for(i=0; i < length; i++) {
         for(c=0; c < a->channels; c++) {
@@ -417,7 +426,8 @@ void divide_buffers(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 void scalar_divide_buffer(lpbuffer_t * a, lpfloat_t b) {
-    size_t i, c;
+    size_t i;
+    int c;
     if(b == 0) {
         for(i=0; i < a->length; i++) {
             for(c=0; c < a->channels; c++) {
@@ -434,7 +444,8 @@ void scalar_divide_buffer(lpbuffer_t * a, lpfloat_t b) {
 }
 
 int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t i, c;
+    size_t i;
+    int c;
     if(a->length != b->length) return 0;
     if(a->channels != b->channels) return 0;
     for(i=0; i < a->length; i++) {
@@ -446,7 +457,8 @@ int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 int buffers_are_close(lpbuffer_t * a, lpbuffer_t * b, int d) {
-    size_t i, c;
+    size_t i;
+    int c;
     long atmp, btmp;
     if(a->length != b->length) return 0;
     if(a->channels != b->channels) return 0;
@@ -463,7 +475,8 @@ int buffers_are_close(lpbuffer_t * a, lpbuffer_t * b, int d) {
 
 void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
     lpfloat_t pos, value;
-    size_t i, c;
+    size_t i;
+    int c;
 
     assert(env->length > 0);
 
@@ -477,7 +490,8 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
 }
 
 void dub_buffer(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length, i, c, j;
+    size_t length, i;
+    int c, j;
     length = (a->length <= b->length) ? a->length : b->length;
     for(i=0; i < length; i++) {
         for(c=0; c < a->channels; c++) {
@@ -488,7 +502,8 @@ void dub_buffer(lpbuffer_t * a, lpbuffer_t * b) {
 }
 
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b) {
-    int max_channels, max_samplerate, i, c;
+    int max_channels, max_samplerate, c;
+    size_t i;
     lpbuffer_t * out;
     lpbuffer_t * longest;
     lpbuffer_t * shortest;
@@ -526,7 +541,7 @@ void destroy_buffer(lpbuffer_t * buf) {
 }
 
 void destroy_stack(lpstack_t * stack) {
-    int i;
+    size_t i;
     if(stack->stack != NULL) {
         for(i=0; i < stack->length; i++) {
             LPBuffer.destroy(stack->stack[i]);
@@ -548,7 +563,8 @@ lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate) {
 }
 
 void ringbuffer_fill(lpbuffer_t * ringbuf, lpbuffer_t * buf, int offset) {
-    int i, c;
+    size_t i;
+    int c;
     size_t pos = ringbuf->pos - buf->length - offset;
     pos = pos % ringbuf->length;
     for(i=0; i < buf->length; i++) {
@@ -565,8 +581,9 @@ lpfloat_t ringbuffer_readone(lpbuffer_t * ringbuf, int offset) {
     return ringbuf->data[(ringbuf->pos - offset) % ringbuf->length];
 }
 
-void ringbuffer_readinto(lpbuffer_t * ringbuf, lpfloat_t * data, int length, int channels) {
-    int i, c;
+void ringbuffer_readinto(lpbuffer_t * ringbuf, lpfloat_t * data, size_t length, int channels) {
+    size_t i;
+    int c;
     size_t pos = ringbuf->pos - length;
     pos = pos % ringbuf->length;
 
@@ -581,7 +598,8 @@ void ringbuffer_readinto(lpbuffer_t * ringbuf, lpfloat_t * data, int length, int
 }
 
 lpbuffer_t * ringbuffer_read(lpbuffer_t * ringbuf, size_t length) {
-    int i, c;
+    size_t i;
+    int c;
     size_t pos = ringbuf->pos - length;
     lpbuffer_t * out;
 
@@ -605,8 +623,9 @@ void ringbuffer_writeone(lpbuffer_t * ringbuf, lpfloat_t sample) {
     ringbuf->pos = ringbuf->pos % ringbuf->length;
 }
 
-void ringbuffer_writefrom(lpbuffer_t * ringbuf, lpfloat_t * data, int length, int channels) {
-    int i, c, j;
+void ringbuffer_writefrom(lpbuffer_t * ringbuf, lpfloat_t * data, size_t length, int channels) {
+    size_t i;
+    int c, j;
     for(i=0; i < length; i++) {
         for(c=0; c < ringbuf->channels; c++) {
             j = c % channels;
@@ -619,7 +638,8 @@ void ringbuffer_writefrom(lpbuffer_t * ringbuf, lpfloat_t * data, int length, in
 }
 
 void ringbuffer_write(lpbuffer_t * ringbuf, lpbuffer_t * buf) {
-    int i, c, j;
+    size_t i;
+    int c, j;
     for(i=0; i < buf->length; i++) {
         for(c=0; c < ringbuf->channels; c++) {
             j = c % buf->channels;
@@ -632,7 +652,8 @@ void ringbuffer_write(lpbuffer_t * ringbuf, lpbuffer_t * buf) {
 }
 
 void ringbuffer_dub(lpbuffer_t * buf, lpbuffer_t * src) {
-    int i, c, j;
+    size_t i;
+    int c, j;
     for(i=0; i < src->length; i++) {
         for(c=0; c < buf->channels; c++) {
             j = c % src->channels;
