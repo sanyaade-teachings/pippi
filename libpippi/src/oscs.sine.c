@@ -10,21 +10,21 @@ const lpsineosc_factory_t LPSineOsc = { create_sineosc, process_sineosc, render_
 
 lpsineosc_t * create_sineosc(void) {
     lpsineosc_t * osc = (lpsineosc_t *)LPMemoryPool.alloc(1, sizeof(lpsineosc_t));
-    osc->phase = 0;
-    osc->freq = 220.0;
-    osc->samplerate = 48000.0;
+    osc->phase = 0.f;
+    osc->freq = 220.0f;
+    osc->samplerate = 48000.0f;
     return osc;
 }
 
 lpfloat_t process_sineosc(lpsineosc_t* osc) {
     lpfloat_t sample;
     
-    sample = sin(PI2 * osc->phase);
+    sample = sin((lpfloat_t)PI2 * osc->phase);
 
-    osc->phase += osc->freq * (1.0/osc->samplerate);
+    osc->phase += osc->freq * (1.0f/osc->samplerate);
 
     while(osc->phase >= 1) {
-        osc->phase -= 1;
+        osc->phase -= 1.0f;
     }
 
     return sample;

@@ -290,7 +290,14 @@ void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfl
 }
 
 void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos) {
-
+    size_t i;
+    int c;
+    for(i=0; i < buf->length; i++) {
+        for(c=0; c < buf->channels-1; c += 2) {
+            buf->data[i * buf->channels + c] *= (lpfloat_t)sqrt(interpolate_linear_pos(pos, pos->phase));
+            buf->data[i * buf->channels + c+1] *= (lpfloat_t)sqrt(1.f-interpolate_linear_pos(pos, pos->phase));
+        }
+    }
 }
 
 lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed) {
@@ -729,6 +736,8 @@ void * memorypool_alloc(size_t itemcount, size_t itemsize) {
 void memorypool_free(void * ptr) {
 #ifndef LP_STATIC
     if(ptr != NULL) free(ptr);
+#else
+    (void)ptr;
 #endif
 }
 
@@ -778,8 +787,8 @@ lpfloat_t interpolate_hermite(lpbuffer_t* buf, lpfloat_t phase) {
      * https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html
      */
     c0 = y1;
-    c1 = 0.5 * (y2 - y0);
-    c3 = 1.5 * (y1 - y2) + 0.5 * (y3 - y0);
+    c1 = 0.5f * (y2 - y0);
+    c3 = 1.5f * (y1 - y2) + 0.5f * (y3 - y0);
     c2 = y0 - y1 + c1 - c3;
     return ((c3 * frac + c2) * frac + c1) * frac + c0;
 }
@@ -797,12 +806,12 @@ lpfloat_t interpolate_linear(lpbuffer_t* buf, lpfloat_t phase) {
     frac = phase - (int)phase;
     i = (int)phase;
 
-    if (i >= buf->length-1 || i < 0) return 0;
+    if (i >= buf->length-1 || i == 0) return 0;
 
     a = buf->data[i];
     b = buf->data[i+1];
 
-    return (1.0 - frac) * a + (frac * b);
+    return (1.0f - frac) * a + (frac * b);
 }
 
 lpfloat_t interpolate_linear_pos(lpbuffer_t* buf, lpfloat_t pos) {
@@ -817,17 +826,17 @@ lpfloat_t interpolate_linear_pos(lpbuffer_t* buf, lpfloat_t pos) {
 void wavetable_sine(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
-        out[i] = sin((i/(lpfloat_t)length) * PI * 2.0);         
+        out[i] = sin((i/(lpfloat_t)length) * (lpfloat_t)PI * 2.0f);
     }
 }
 
 void wavetable_square(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
-        if(i < (length/2.0)) {
-            out[i] = 0.9999;
+        if(i < (length/2.0f)) {
+            out[i] = 0.9999f;
         } else {
-            out[i] = -0.9999;
+            out[i] = -0.9999f;
         }
     }
 }
@@ -835,7 +844,7 @@ void wavetable_square(lpfloat_t* out, int length) {
 void wavetable_tri(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
-        out[i] = fabs((i/(lpfloat_t)length) * 2.0 - 1.0) * 2.0 - 1.0;      
+        out[i] = (lpfloat_t)fabs((i/(lpfloat_t)length) * 2.0f - 1.0f) * 2.0f - 1.0f;
     }
 }
 
@@ -901,14 +910,14 @@ void window_phasor(lpfloat_t* out, int length) {
 void window_tri(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
-        out[i] = fabs((i/(lpfloat_t)length) * 2.0 - 1.0);      
+        out[i] = fabs((i/(lpfloat_t)length) * 2.0f - 1.0f);
     }
 }
 
 void window_sine(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
-        out[i] = sin((i/(lpfloat_t)length) * PI);         
+        out[i] = (lpfloat_t)sin((i/(lpfloat_t)length) * (lpfloat_t)PI);         
     }
 }
 
@@ -916,7 +925,7 @@ void window_hanning(lpfloat_t* out, int length) {
     int i;
     assert(length > 1);
     for(i=0; i < length; i++) {
-        out[i] = 0.5 - 0.5 * cos(2.0 * PI * i / (length-1.0));
+        out[i] = 0.5f - 0.5f * (lpfloat_t)cos(2.0f * (lpfloat_t)PI * i / (length-1.0f));
     }
 }
 

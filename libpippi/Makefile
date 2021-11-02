@@ -12,7 +12,7 @@ ALLSOURCES = src/oscs.sine.c \
 	src/scheduler.c \
 	src/pippicore.c
 
-FLAGS = -g -std=c89 -Wall -Wsign-compare -pedantic -lm -Isrc -Ivendor
+FLAGS = -g -std=c89 -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
 
 wavetables:
 	./scripts/build_static_wavetables.sh
@@ -39,7 +39,7 @@ all:
 	gcc $(FLAGS) examples/pitch_tracker.c $(ALLSOURCES) -o build/pitch_tracker
 
 	echo "Building memory_pool.c example...";
-	gcc $(FLAGS) -DLP_FLOAT -DLP_STATIC examples/memory_pool.c src/oscs.sine.c src/soundfile.c src/pippicore.c -o build/memorypool
+	gcc $(FLAGS) -Wdouble-promotion -DLP_FLOAT -DLP_STATIC examples/memory_pool.c src/oscs.sine.c src/soundfile.c src/pippicore.c -o build/memorypool
 
 	echo "Building scheduler.c example...";
 	gcc $(FLAGS) examples/scheduler.c $(ALLSOURCES) -o build/scheduler
