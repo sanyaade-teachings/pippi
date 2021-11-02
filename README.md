@@ -157,6 +157,8 @@ There are also shortcuts to run only certain groups of tests, like `test-waveset
 
 ## Hacking
 
+> NOTE: the default branch is now called `main`. Run `bash scripts/rename_default_branch.sh` to update your local clone if needed.
+
 While hacking on pippi itself, running `make build` will recompile the cython extensions.
 
 If you need to build sources from a clean slate (sometimes updates to `pxd` files require this) then run `make clean build` instead.
