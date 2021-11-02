@@ -31,3 +31,4 @@ libpippi/renders/*.wav
 libpippi/build
 
 garden/DaisyExamples
+garden/**/**/build/*

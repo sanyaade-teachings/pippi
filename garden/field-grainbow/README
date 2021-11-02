@@ -1,9 +1,0 @@
-In-development
-
-To build:
-
-    make
-
-Flash:
-
-    make program-dfu

@@ -1,6 +1,22 @@
-An in-development collection of firmwares using libpippi, 
-mostly for devices based on the electro-smith daisy.
+An in-development collection of firmwares using libpippi:
 
-Please place the DaisyExamples repo in this directory or 
-just tweak the makefiles to your liking.
+    Electro-smith Petal
+    Electro-smith Patch
+    Electro-smith Field
+    Electro-smith Pod
+
+All this is in a pretty early stage, feel free to poke around 
+but stuff is currently broke and unkempt as these things go.
+
+To install and build the DaisyExamples repo which includes 
+the libdaisy library and tooling needed for these firmware 
+please run the `update.sh` script after installing the arm 
+toolchain for your system:
+
+    bash update.sh
+
+ARM toolchain / environment setup notes from electro-smith:
+
+    https://github.com/electro-smith/DaisyWiki/wiki
+
 
