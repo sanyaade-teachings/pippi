@@ -143,7 +143,8 @@ cdef class SoundBuffer:
         pass
 
     def __getitem__(self, position):
-        return self.frames[position]
+        cdef double[:,:] mv = memoryview(self)
+        return tuple([ v for v in mv[position] ])
 
     def __len__(self):
         return 0 if self.buffer == NULL else <int>self.buffer.length

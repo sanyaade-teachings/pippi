@@ -60,6 +60,7 @@ class TestNewBuffer(TestCase):
         self.assertEqual(snd, SoundBuffer([1,2,3]))
 
         r = snd + SoundBuffer([1,3,5])
+        print(len(r))
         for v in r:
             print(v)
 
