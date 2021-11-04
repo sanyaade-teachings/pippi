@@ -365,7 +365,7 @@ lpbuffer_t * concat_buffers(lpbuffer_t * a, lpbuffer_t * b) {
 
     for(i=a->length; i < length; i++) {
         for(c=0; c < channels; c++) {
-            out->data[i * channels + c] = b->data[i * channels + c];
+            out->data[i * channels + c] = b->data[(i-a->length) * channels + c];
         }
     }
 
