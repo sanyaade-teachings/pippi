@@ -128,7 +128,6 @@ class TestNewBuffer(TestCase):
         indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
 
         for frame_index in indices:
-            print('fi', type(frame_index), frame_index)
             frame = sound[frame_index]
             self.assertTrue(isinstance(frame, tuple))
             self.assertEqual(len(frame), sound.channels)
@@ -151,9 +150,7 @@ class TestNewBuffer(TestCase):
         indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
 
         for frame_index in indices:
-            print('fi', type(frame_index), frame_index)
             for channel_index in range(sound.channels):
-                print('ci', type(channel_index), channel_index)
                 sample = sound[frame_index][channel_index]
                 self.assertTrue(isinstance(sample, float))
 

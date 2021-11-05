@@ -36,7 +36,7 @@ cdef class SoundBuffer:
 
         if filename is not None:
             # Filename will always override frames input
-            frames, samplerate, _ = sndio.read(filename, framelength, start * samplerate, dtype=np.float64, force_2d=True)
+            frames, samplerate, _ = sndio.read(filename, None if framelength==0 else framelength, start * samplerate, dtype=np.float64, force_2d=True)
             channels = frames.shape[1]
 
         if frames is None and length > 0:
@@ -54,9 +54,14 @@ cdef class SoundBuffer:
                     channels = frames.shape[1] 
 
                 self.buffer = LPBuffer.create(framelength, channels, samplerate)
-                for i in range(framelength):
-                    for c in range(channels):
-                        self.buffer.data[i * channels + c] = frames[i * channels + c]
+                if channels == 1:
+                    for i in range(framelength):
+                        self.buffer.data[i] = frames[i]
+
+                else:
+                    for i in range(framelength):
+                        for c in range(channels):
+                            self.buffer.data[i * channels + c] = frames[i][c]
 
             except Exception as e:
                 raise SoundBufferError('Invalid source for SoundBuffer. Got frames of type %s' % type(frames)) from e
@@ -144,7 +149,9 @@ cdef class SoundBuffer:
 
     def __getitem__(self, position):
         cdef double[:,:] mv = memoryview(self)
-        return tuple([ v for v in mv[position] ])
+        if position >= self.buffer.length:
+            raise IndexError('Cannot read index %s from buffer of length %s' % (position, self.buffer.length))
+        return tuple([ mv[position][v] for v in range(self.channels) ])
 
     def __len__(self):
         return 0 if self.buffer == NULL else <int>self.buffer.length
