@@ -244,7 +244,7 @@ setup(
         'aubio', 
         'numpy', 
         'Pillow', 
-        'PySoundFile'
+        'pysndfile'
     ], 
     keywords='algorithmic computer music', 
     python_requires='>=3',

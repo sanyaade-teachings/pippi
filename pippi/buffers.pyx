@@ -7,7 +7,7 @@ import numbers
 cimport cython
 cimport numpy as np
 import numpy as np
-import soundfile
+from pysndfile import sndio
 
 DEFAULT_CHANNELS = 2
 DEFAULT_SAMPLERATE = 44100
@@ -36,7 +36,7 @@ cdef class SoundBuffer:
 
         if filename is not None:
             # Filename will always override frames input
-            frames, samplerate = soundfile.read(filename, framelength, start * samplerate, dtype='float64', fill_value=0, always_2d=True)
+            frames, samplerate, _ = sndio.read(filename, framelength, start * samplerate, dtype=np.float64, force_2d=True)
             channels = frames.shape[1]
 
         if frames is None and length > 0:

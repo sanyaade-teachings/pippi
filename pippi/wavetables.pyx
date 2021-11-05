@@ -4,7 +4,7 @@ import collections
 import numbers
 
 cimport cython
-import soundfile
+from pysndfile import sndio
 cimport numpy as np
 import numpy as np
 import re
@@ -841,7 +841,7 @@ cdef class Wavetable:
     cpdef void write(Wavetable self, object path=None, int samplerate=DEFAULT_SAMPLERATE):
         if path is None:
             path = 'wavetable.wav'
-        soundfile.write(path, self.data, samplerate)
+        sndio.write(path, np.asarray(self.data), samplerate)
 
 
 cdef tuple _parse_polyseg(str score, int length, int wtlength):
@@ -1064,7 +1064,7 @@ cpdef double[:] wavetable(int wavetable_type, int length, double[:] data):
     return _wavetable(wavetable_type, length)
 
 cpdef double[:] fromfile(unicode filename, int length):
-    wt, _ = soundfile.read(filename, dtype='d')
+    wt, _, _ = sndio.read(filename, dtype=np.float64)
     if len(wt) == length:
         return wt
 

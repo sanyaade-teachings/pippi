@@ -8,7 +8,7 @@ from pathlib import Path
 import random
 
 cimport cython
-import soundfile
+from pysndfile import sndio
 
 from pippi.events cimport Event
 from pippi.events cimport render as _render
@@ -159,11 +159,11 @@ cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, i
     return SoundBuffer.__new__(SoundBuffer, frames=frames, length=length, channels=channels, samplerate=samplerate)
 
 cpdef Wavetable load(object filename):
-    frames, samplerate = soundfile.read(filename, dtype='float64', always_2d=False)
+    frames, samplerate, _ = sndio.read(filename, dtype=np.float64, force_2d=False)
     return Wavetable(frames)
 
 cpdef SoundBuffer read(object filename, double length=-1, double start=0):
-    """ Read a soundfile from disk and return a `SoundBuffer` with its contents.
+    """ Read a pysndfile from disk and return a `SoundBuffer` with its contents.
         May include a start position and length in seconds to read a segment from a large file.
 
         The `filename` param is always converted to a string, so it is safe to pass a 

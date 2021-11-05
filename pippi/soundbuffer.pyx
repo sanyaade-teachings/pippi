@@ -4,7 +4,7 @@ import numbers
 import random
 import reprlib
 
-import soundfile
+from pysndfile import sndio
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -219,7 +219,7 @@ cdef class SoundBuffer:
         of the soundfile being read. (Or don't!)
         Overflows (reading beyond the boundries of the file) are filled with silence so the length 
         param is always respected and will return a SoundBuffer of the requested length. This is 
-        just a wrapper around pysndfile's soundfile.read method.
+        just a wrapper around pysndfile's sndio.PySndfile().read method.
 
         Data loaded via the `buf` keyword must be interpretable by cython as a memoryview on a 2D array 
         of doubles. (A numpy ndarray for example.)
@@ -257,7 +257,7 @@ cdef class SoundBuffer:
 
         if filename is not None:
             framestart = <int>(start * self.samplerate)
-            self.frames, self.samplerate = soundfile.read(filename, framelength, framestart, dtype='float64', fill_value=0, always_2d=True)
+            self.frames, self.samplerate, _ = sndio.read(filename, framelength, framestart, dtype=np.float64, force_2d=True)
             self.channels = self.frames.shape[1]
 
         elif buf is not None:
@@ -1120,7 +1120,7 @@ cdef class SoundBuffer:
         """ Write the contents of this buffer to disk 
             in the given audio file format. (WAV, AIFF, AU)
         """
-        return soundfile.write(filename, self.frames, self.samplerate)
+        return sndio.write(filename, np.asarray(self.frames), self.samplerate)
 
 
 cpdef object rebuild_buffer(double[:,:] frames, int channels, int samplerate):

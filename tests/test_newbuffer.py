@@ -115,7 +115,6 @@ class TestNewBuffer(TestCase):
         self.assertEqual(snd, SoundBuffer([1/2, 2/2, 3/2]))
 
 
-    """
     def test_slice_frame(self):
         # A SoundBuffer should return a single frame 
         #    when sliced into one-dimensionally like:
@@ -129,6 +128,7 @@ class TestNewBuffer(TestCase):
         indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
 
         for frame_index in indices:
+            print('fi', type(frame_index), frame_index)
             frame = sound[frame_index]
             self.assertTrue(isinstance(frame, tuple))
             self.assertEqual(len(frame), sound.channels)
@@ -151,11 +151,13 @@ class TestNewBuffer(TestCase):
         indices = (0, -1, len(sound) // 2, -(len(sound) // 2))
 
         for frame_index in indices:
+            print('fi', type(frame_index), frame_index)
             for channel_index in range(sound.channels):
+                print('ci', type(channel_index), channel_index)
                 sample = sound[frame_index][channel_index]
                 self.assertTrue(isinstance(sample, float))
 
-
+"""
     def test_mix_operator(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
@@ -353,9 +355,7 @@ class TestNewBuffer(TestCase):
 
             pan_right = sound.pan(1, method=pan_method)
             self.assertEqual(pan_right[random.randint(0, len(pan_right))][1], 0)
-    """
 
-    """
     def test_pad_sound_with_silence(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
@@ -403,7 +403,4 @@ class TestNewBuffer(TestCase):
 
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
-    """
-
-    """
-    """
+"""
