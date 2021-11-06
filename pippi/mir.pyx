@@ -7,11 +7,12 @@ import aubio
 import numpy as np
 cimport numpy as np
 
+import librosa
 try:
     # librosa depends on numba which is not supported at all on some platforms
     import librosa
 except ImportError as e:
-    pass
+    print('Warning: could not load librosa. Please install librosa to use the feature extraction procedures in the mir module.')
 
 
 cdef int DEFAULT_WINSIZE = 4096

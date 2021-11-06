@@ -245,7 +245,8 @@ setup(
         'librosa',
         'numpy', 
         'Pillow', 
-        'pysndfile'
+        'pysndfile', 
+        'PySoundFile' # librosa seems to break without this - FIXME: remove librosa
     ], 
     keywords='algorithmic computer music', 
     python_requires='>=3',
