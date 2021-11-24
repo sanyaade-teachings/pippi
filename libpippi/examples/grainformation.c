@@ -9,7 +9,7 @@ int main() {
     lpbuffer_t * out;
     lpbuffer_t * freq;
     lpbuffer_t * amp;
-    lpcloud_t * cloud;
+    lpformation_t * formation;
     lpsineosc_t * osc;
 
     length = 10 * SR;
@@ -18,7 +18,7 @@ int main() {
     mingrainlength = SR/10.;
 
     out = LPBuffer.create(length, CHANNELS, SR);
-    cloud = LPCloud.create(numgrains, maxgrainlength, mingrainlength, length, CHANNELS, SR);
+    formation = LPFormation.create(numgrains, maxgrainlength, mingrainlength, length, CHANNELS, SR);
 
     /* Render a sine tone and fill the ringbuffer with it, 
      * to simulate a live input. */
@@ -29,26 +29,26 @@ int main() {
     amp = LPParam.from_float(0.8f);
 
     fake_input = LPSineOsc.render(osc, length, freq, amp, CHANNELS);
-    LPRingBuffer.write(cloud->rb, fake_input);
+    LPRingBuffer.write(formation->rb, fake_input);
 
-    LPSoundFile.write("renders/graincloud-rb-out.wav", cloud->rb);
+    LPSoundFile.write("renders/grainformation-rb-out.wav", formation->rb);
 
-    /* Render each frame of the graincloud */
+    /* Render each frame of the grainformation */
     for(i=0; i < length; i++) {
-        LPCloud.process(cloud);
+        LPFormation.process(formation);
         for(c=0; c < CHANNELS; c++) {
-            out->data[i * CHANNELS + c] = cloud->current_frame->data[c];
+            out->data[i * CHANNELS + c] = formation->current_frame->data[c];
         }
     }
 
-    LPSoundFile.write("renders/graincloud-out.wav", out);
+    LPSoundFile.write("renders/grainformation-out.wav", out);
 
     LPSineOsc.destroy(osc);
     LPBuffer.destroy(freq);
     LPBuffer.destroy(amp);
     LPBuffer.destroy(out);
     LPBuffer.destroy(fake_input);
-    LPCloud.destroy(cloud);
+    LPFormation.destroy(formation);
 
     return 0;
 }

@@ -7,7 +7,6 @@ import aubio
 import numpy as np
 cimport numpy as np
 
-import librosa
 try:
     # librosa depends on numba which is not supported at all on some platforms
     import librosa
@@ -57,7 +56,7 @@ cpdef Wavetable contrast(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
     cdef np.ndarray wt = _contrast(flatten(snd), snd.samplerate, winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
 
-cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, int winsize=DEFAULT_WINSIZE, bint backfill=True):
+cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, int winsize=DEFAULT_WINSIZE, bint backfill=True, double autotune=0):
     """ Returns a wavetable of non-zero frequencies detected which exceed the confidence threshold given. Frequencies are 
         held until the next detection to avoid zeros and outliers. Depending on the input, you may need to play with the 
         tolerance value and the window size to tune the behavior. The default detection method is `yinfast`. 
@@ -138,31 +137,59 @@ cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, in
     cdef float[:] src = flatten(snd)
     cdef float[:] chunk
 
-    while True:
-        chunk = src[pos:pos+hopsize]
-        if len(chunk) < hopsize:
-            break
+    if autotune > 0:
+        while True:
+            chunk = src[pos:pos+hopsize]
+            if len(chunk) < hopsize:
+                break
 
-        est = o(np.asarray(chunk))[0]
-        con = o.get_confidence()
+            est = o(np.asarray(chunk))[0]
+            con = o.get_confidence()
 
-        pos += hopsize
+            pos += hopsize
 
-        if con < tolerance or est == 0:
-            pitches += [ last ]
-        else:
-            last = est
-            pitches += [ est ]
+            if con < tolerance or est == 0:
+                pitches += [ last ]
+            else:
+                last = autotune / est
+                pitches += [ autotune / est ]
 
-            if first_stable_index < 0:
-                first_stable_index = count
-                first_stable_pitch = est
+                if first_stable_index < 0:
+                    first_stable_index = count
+                    first_stable_pitch = autotune / est
 
-        count += 1
+            count += 1
 
-    if backfill and first_stable_index > 0:
-        for i in range(first_stable_index):
-            pitches[i] = first_stable_pitch
+        if backfill and first_stable_index > 0:
+            for i in range(first_stable_index):
+                pitches[i] = first_stable_pitch
+
+    else:
+        while True:
+            chunk = src[pos:pos+hopsize]
+            if len(chunk) < hopsize:
+                break
+
+            est = o(np.asarray(chunk))[0]
+            con = o.get_confidence()
+
+            pos += hopsize
+
+            if con < tolerance or est == 0:
+                pitches += [ last ]
+            else:
+                last = est
+                pitches += [ est ]
+
+                if first_stable_index < 0:
+                    first_stable_index = count
+                    first_stable_pitch = est
+
+            count += 1
+
+        if backfill and first_stable_index > 0:
+            for i in range(first_stable_index):
+                pitches[i] = first_stable_pitch
 
     return Wavetable(pitches)
 

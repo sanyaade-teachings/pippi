@@ -14,6 +14,10 @@ ALLSOURCES = src/oscs.sine.c \
 
 FLAGS = -g -std=c89 -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
 
+clean:
+	rm build/*
+	rm renders/*.wav
+
 wavetables:
 	./scripts/build_static_wavetables.sh
 
@@ -47,18 +51,20 @@ all:
 	echo "Building additive_synthesis.c example...";
 	gcc $(FLAGS) examples/additive_synthesis.c $(ALLSOURCES) -o build/additive_synthesis
 
-	echo "Building graincloud.c example...";
-	gcc $(FLAGS) examples/graincloud.c $(ALLSOURCES) -o build/graincloud
+	echo "Building grainformation.c example...";
+	gcc $(FLAGS) examples/grainformation.c $(ALLSOURCES) -o build/grainformation
 
-	echo "Building graincloud2.c example...";
-	gcc $(FLAGS) examples/graincloud2.c $(ALLSOURCES) -o build/graincloud2
+	echo "Building grainformation2.c example...";
+	gcc $(FLAGS) examples/grainformation2.c $(ALLSOURCES) -o build/grainformation2
 
 	echo "Building tapeosc.c example...";
 	gcc $(FLAGS) examples/tapeosc.c $(ALLSOURCES) -o build/tapeosc
 
+	echo "Building tapeosc2.c example...";
+	gcc $(FLAGS) examples/tapeosc2.c $(ALLSOURCES) -o build/tapeosc2
+
 	echo "Building readsoundfile.c example...";
 	gcc $(FLAGS) examples/readsoundfile.c $(ALLSOURCES) -o build/readsoundfile
-
 
 	echo "Rendering examples..."
 	./scripts/render_examples.sh

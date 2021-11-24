@@ -5,34 +5,36 @@
 #include "oscs.tape.h"
 
 typedef struct lpgrain_t {
-    lpfloat_t length;
-    lpfloat_t offset;
+    lpfloat_t length; /* grainlength == tapeosc range */
+    lpfloat_t offset; /* grainoffset == tapeosc offset */
 
     lptapeosc_t * osc;
 
     lpfloat_t phase;
-    lpfloat_t pan;
+    lpfloat_t pan; /* pan position across all tapeosc->buf channels */
     lpfloat_t amp;
-    lpfloat_t speed;
-    lpfloat_t spread;
-    lpfloat_t jitter;
+    lpfloat_t speed; /* grain tapeosc playback speed (does not modulate grainlength) */
+    lpfloat_t jitter; /* on the read offset */
+    lpfloat_t skew; /* phase distortion on the grain window */
 
     lpbuffer_t * window;
-    lpfloat_t window_phase;
-    lpfloat_t window_phaseinc;
 } lpgrain_t;
 
-typedef struct lpcloud_t {
+typedef struct lpformation_t {
     lpgrain_t ** grains;
     size_t numgrains;
     size_t maxlength;
     size_t minlength;
+    lpfloat_t spread; /* pan spread */
     lpfloat_t speed;
+    lpfloat_t scrub;
+    lpfloat_t offset;
+    lpfloat_t skew;
     lpfloat_t grainamp;
     lpbuffer_t * window;
     lpbuffer_t * current_frame;
     lpbuffer_t * rb;
-} lpcloud_t;
+} lpformation_t;
 
 typedef struct lpgrain_factory_t {
     lpgrain_t * (*create)(lpfloat_t, lpbuffer_t *, lpbuffer_t *);
@@ -40,13 +42,13 @@ typedef struct lpgrain_factory_t {
     void (*destroy)(lpgrain_t *);
 } lpgrain_factory_t;
 
-typedef struct lpcloud_factory_t {
-    lpcloud_t * (*create)(int, size_t, size_t, size_t, int, int);
-    void (*process)(lpcloud_t *);
-    void (*destroy)(lpcloud_t *);
-} lpcloud_factory_t;
+typedef struct lpformation_factory_t {
+    lpformation_t * (*create)(int, size_t, size_t, size_t, int, int);
+    void (*process)(lpformation_t *);
+    void (*destroy)(lpformation_t *);
+} lpformation_factory_t;
 
 extern const lpgrain_factory_t LPGrain;
-extern const lpcloud_factory_t LPCloud;
+extern const lpformation_factory_t LPFormation;
 
 #endif

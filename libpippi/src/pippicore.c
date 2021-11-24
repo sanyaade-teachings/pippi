@@ -51,6 +51,8 @@ lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 void destroy_buffer(lpbuffer_t * buf);
 void destroy_stack(lpstack_t * stack);
 
+lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
+
 lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate);
 void ringbuffer_fill(lpbuffer_t * ringbuf, lpbuffer_t * buf, int offset);
 lpfloat_t ringbuffer_readone(lpbuffer_t * ringbuf, int offset);
@@ -72,6 +74,7 @@ lpfloat_t interpolate_hermite(lpbuffer_t * buf, lpfloat_t phase);
 lpfloat_t interpolate_hermite_pos(lpbuffer_t * buf, lpfloat_t pos);
 lpfloat_t interpolate_linear(lpbuffer_t * buf, lpfloat_t phase);
 lpfloat_t interpolate_linear_pos(lpbuffer_t * buf, lpfloat_t pos);
+lpfloat_t interpolate_linear_channel(lpbuffer_t* buf, lpfloat_t phase, int channel);
 
 lpbuffer_t * param_create_from_float(lpfloat_t value);
 lpbuffer_t * param_create_from_int(int value);
@@ -94,11 +97,12 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
 const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
-const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_hermite_pos, interpolate_hermite };
+const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
+const lpfx_factory_t LPFX = { read_skewed_buffer };
 
 /** Rand
  */
@@ -558,6 +562,22 @@ void destroy_stack(lpstack_t * stack) {
     LPMemoryPool.free(stack);
 }
 
+/* Basic FX / waveshaping
+ */
+lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew) {
+    lpfloat_t warp, m, pos;
+
+    m = 0.5f - skew;
+
+    pos = phase / buf->length;
+    if(phase < skew) {
+        warp = m * (pos / skew);
+    } else {
+        warp = m * ((1.f-pos) / (1.f-skew));
+    }
+
+    return LPInterpolation.linear(buf, (phase + (warp * buf->length)) * freq);
+}
 
 /* RingBuffers
  */
@@ -797,6 +817,27 @@ lpfloat_t interpolate_hermite_pos(lpbuffer_t* buf, lpfloat_t pos) {
     return interpolate_hermite(buf, pos * buf->length);
 }
 
+/* Interpolated read from a multichannel buffer
+ */
+lpfloat_t interpolate_linear_channel(lpbuffer_t* buf, lpfloat_t phase, int channel) {
+    lpfloat_t frac, a, b;
+    size_t i;
+
+    if(buf->length == 1) return buf->data[0];
+    
+    frac = phase - (int)phase;
+    i = (int)phase;
+
+    if (i >= buf->length-1 || i == 0) return 0;
+
+    a = buf->data[i * buf->channels + channel];
+    b = buf->data[(i+1) * buf->channels + channel];
+
+    return (1.0f - frac) * a + (frac * b);
+}
+
+/* Interpolated read from a single channel buffer
+ */
 lpfloat_t interpolate_linear(lpbuffer_t* buf, lpfloat_t phase) {
     lpfloat_t frac, a, b;
     size_t i;

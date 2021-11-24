@@ -179,10 +179,11 @@ typedef struct lpmemorypool_factory_t {
 } lpmemorypool_factory_t;
 
 typedef struct lpinterpolation_factory_t {
-    lpfloat_t (*linear_pos)(lpbuffer_t*, lpfloat_t);
-    lpfloat_t (*linear)(lpbuffer_t*, lpfloat_t);
-    lpfloat_t (*hermite_pos)(lpbuffer_t*, lpfloat_t);
-    lpfloat_t (*hermite)(lpbuffer_t*, lpfloat_t);
+    lpfloat_t (*linear_pos)(lpbuffer_t *, lpfloat_t);
+    lpfloat_t (*linear)(lpbuffer_t *, lpfloat_t);
+    lpfloat_t (*interpolate_linear_channel)(lpbuffer_t *, lpfloat_t, int);
+    lpfloat_t (*hermite_pos)(lpbuffer_t *, lpfloat_t);
+    lpfloat_t (*hermite)(lpbuffer_t *, lpfloat_t);
 } lpinterpolation_factory_t;
 
 typedef struct lpwavetable_factory_t {
@@ -197,7 +198,9 @@ typedef struct lpwindow_factory_t {
     void (*destroy)(lpbuffer_t*);
 } lpwindow_factory_t;
 
-
+typedef struct lpfx_factory_t {
+    lpfloat_t (*read_skewed_buffer)(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
+} lpfx_factory_t;
 
 /* Interfaces */
 extern const lparray_factory_t LPArray;
@@ -206,6 +209,7 @@ extern const lpringbuffer_factory_t LPRingBuffer;
 
 extern const lpwavetable_factory_t LPWavetable;
 extern const lpwindow_factory_t LPWindow;
+extern const lpfx_factory_t LPFX;
 
 extern lprand_t LPRand;
 extern const lpparam_factory_t LPParam;

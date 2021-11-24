@@ -37,9 +37,9 @@ lpsineosc_t * lfo1;
 lpsineosc_t * lfo2;
 lpsineosc_t * lfo3;
 
-lpfloat_t f1 = 100.f;
-lpfloat_t f2 = 200.f;
-lpfloat_t f3 = 300.f;
+lpfloat_t f1 = 73.3333333f;
+lpfloat_t f2 = 88.f * 2;
+lpfloat_t f3 = 110.f * 2;
 
 float k1, k2, k3, k4, k5, k6;
 bool footswitchOn;

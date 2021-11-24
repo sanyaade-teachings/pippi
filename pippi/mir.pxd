@@ -23,7 +23,7 @@ cpdef Wavetable centroid(SoundBuffer snd, int winsize=*)
 cdef np.ndarray _contrast(np.ndarray snd, int samplerate, int winsize)
 cpdef Wavetable contrast(SoundBuffer snd, int winsize=*)
 
-cpdef Wavetable pitch(SoundBuffer snd, double tolerance=*, str method=*, int winsize=*, bint backfill=*)
+cpdef Wavetable pitch(SoundBuffer snd, double tolerance=*, str method=*, int winsize=*, bint backfill=*, double autotune=*)
 
 cpdef list onsets(SoundBuffer snd, str method=*, int winsize=*, bint seconds=*)
 cpdef list segments(SoundBuffer snd, str method=*, int winsize=*)

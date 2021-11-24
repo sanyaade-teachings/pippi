@@ -164,6 +164,42 @@ cdef double[:] _mul1d(double[:] output, double[:] values):
 
     return out
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double[:] _idiv1d(double[:] output, double[:] values):
+    cdef int i = 0
+    cdef int framelength = len(output)
+
+    if <int>len(values) != framelength:
+        values = interpolation._linear(values, framelength)
+
+    for i in range(framelength):
+        if values[i] == 0:
+            output[i] = 0
+        else:
+            output[i] /= values[i]
+
+    return output
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef double[:] _div1d(double[:] output, double[:] values):
+    cdef int i = 0
+    cdef int framelength = len(output)
+    cdef double[:] out = np.zeros(framelength, dtype='d')
+
+    if <int>len(values) != framelength:
+        values = interpolation._linear(values, framelength)
+
+    for i in range(framelength):
+        if values[i] == 0:
+            out[i] = 0
+        else:
+            out[i] = output[i] / values[i]
+
+    return out
+
+
 cdef double[:] _drink(double[:] wt, double width, double minval, double maxval):
     cdef int i = 0
     cdef int wlength = len(wt)-2
@@ -495,6 +531,48 @@ cdef class Wavetable:
 
     def __rmul__(self, value):
         return self * value
+
+    #############################
+    # (/) Division operator (/) #
+    #############################
+
+    def __div__(self, value):
+        cdef double[:] out
+
+        if not isinstance(self, Wavetable):
+            return NotImplemented
+
+        if isinstance(value, numbers.Real):
+            out = np.divide(self.data, value)
+        elif isinstance(value, Wavetable):
+            out = _div1d(self.data, value.data)
+        elif isinstance(value, list):
+            out = _div1d(self.data, np.array(value, dtype='d'))
+        else:
+            try:
+                out = _div1d(self.data, np.array(value, dtype='d'))
+            except TypeError:
+                return NotImplemented
+
+        return Wavetable(out)
+
+    def __idiv__(self, value):
+        if isinstance(value, numbers.Real):
+            self.data = np.divide(self.data, value)
+        elif isinstance(value, Wavetable):
+            self.data = _idiv1d(self.data, value.data)
+        elif isinstance(value, list):
+            self.data = _idiv1d(self.data, np.array(value, dtype='d'))
+        else:
+            try:
+                self.data = _idiv1d(self.data, np.array(value, dtype='d'))
+            except TypeError:
+                return NotImplemented
+
+        return self
+
+    def __rdiv__(self, value):
+        return self / value
 
 
     ################################

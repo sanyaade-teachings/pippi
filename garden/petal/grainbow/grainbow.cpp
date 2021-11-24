@@ -2,9 +2,9 @@
 #include "daisy_petal.h"
 
 extern "C" {
-#include "../../libpippi/src/pippicore.h"
-#include "../../libpippi/src/oscs.tape.h"
-#include "../../libpippi/src/microsound.h"
+#include "../../../libpippi/src/pippicore.h"
+#include "../../../libpippi/src/oscs.tape.h"
+#include "../../../libpippi/src/microsound.h"
 }
 
 
@@ -13,12 +13,12 @@ extern "C" {
 
 #define POOLSIZE 67108864
 
-#define VOICES 4
+#define VOICES 1
 
-#define NUMGRAINS 3
-#define RBSIZE 480000
-#define MAXGRAINLENGTH 48000
-#define MINGRAINLENGTH 48
+#define NUMGRAINS 1
+#define RBSIZE 100000
+#define MAXGRAINLENGTH 10000
+#define MINGRAINLENGTH 4800
 
 
 #define NUM_KNOBS 6
@@ -43,11 +43,7 @@ int SR;
 uint32_t now, last_led_update;
 uint32_t led_period = 5;
 
-lpcloud_t * cloud;
-lpfloat_t freqs[VOICES] = {220., 330., 440., 550.};
-lpfloat_t morphs[VOICES] = {0.1, 0.2, 0.3, 0.4};
-lpfloat_t mods[VOICES] = {0.01, 0.02, 0.03, 0.04};
-
+lpformation_t * formation;
 
 controls_t controls;
 /*grain_t * grains[NUM_GRAINS * 2];*/
@@ -64,13 +60,13 @@ void callback(AudioHandle::InterleavingInputBuffer  in,
 
     size_t frames = size/CHANNELS;
 
-    LPRingBuffer.writefrom(cloud->rb, (lpfloat_t *)in, frames, (int)CHANNELS);
+    LPRingBuffer.writefrom(formation->rb, (lpfloat_t *)in, frames, (int)CHANNELS);
 
-    cloud->speed = (lpfloat_t)(hw.GetKnobValue(hw.KNOB_1) * 1.99 + 0.01);
+    formation->speed = (lpfloat_t)(hw.GetKnobValue(hw.KNOB_1) * 1.99 + 0.01);
     for(size_t i=0; i < frames; i++) {
-        LPCloud.process(cloud);
-        out[i * CHANNELS + 0] = cloud->current_frame->data[0];
-        out[i * CHANNELS + 1] = cloud->current_frame->data[1];
+        LPFormation.process(formation);
+        out[i * CHANNELS + 0] = formation->current_frame->data[0];
+        out[i * CHANNELS + 1] = formation->current_frame->data[1];
     }
 }
 
@@ -83,7 +79,7 @@ int main(void) {
     LPRand.seed(888);
     LPMemoryPool.init((unsigned char *)pool, POOLSIZE);
 
-    cloud = LPCloud.create(NUMGRAINS, MAXGRAINLENGTH, MINGRAINLENGTH, RBSIZE, CHANNELS, SR);
+    formation = LPFormation.create(NUMGRAINS, MAXGRAINLENGTH, MINGRAINLENGTH, RBSIZE, CHANNELS, SR);
 
     hw.StartAdc();
     hw.StartAudio(callback);
