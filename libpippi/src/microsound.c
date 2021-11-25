@@ -9,9 +9,6 @@ lpgrain_t * grain_create(lpfloat_t length, lpbuffer_t * window, lpbuffer_t * sou
     g->offset = 0.f;
     g->osc = LPTapeOsc.create(source, length);
 
-    /* start ringbuffer read from offset */
-    /*g->osc->offset = -length;*/
-
     g->pan = 0.5f;
     g->amp = 1.f;
     g->jitter = 0.f;
@@ -89,7 +86,7 @@ lpformation_t * formation_create(int numstreams, size_t maxgrainlength, size_t m
 void formation_process(lpformation_t * c) {
     int i;
     size_t j;
-    lpfloat_t grainlength;
+    lpfloat_t grainlength, pan;
 
     for(i=0; i < c->current_frame->channels; i++) {
         c->current_frame->data[i] = 0.f;
@@ -122,10 +119,10 @@ void formation_process(lpformation_t * c) {
             }
         }
 
-        /* FIXME scale pan range to spread */
         if(c->spread > 0) {
-            c->grains[j]->pan = LPRand.rand(0.f, 1.f);
-            c->grains[j+1]->pan = LPRand.rand(0.f, 1.f);
+            pan = 0.5f + LPRand.rand(-.5f, 0.5f) * c->spread;
+            c->grains[j]->pan = pan;
+            c->grains[j+1]->pan = pan;
         }
     }
 }

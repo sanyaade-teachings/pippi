@@ -52,6 +52,7 @@ void destroy_buffer(lpbuffer_t * buf);
 void destroy_stack(lpstack_t * stack);
 
 lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
+lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
 
 lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate);
 void ringbuffer_fill(lpbuffer_t * ringbuf, lpbuffer_t * buf, int offset);
@@ -102,7 +103,7 @@ const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_i
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
-const lpfx_factory_t LPFX = { read_skewed_buffer };
+const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1 };
 
 /** Rand
  */
@@ -577,6 +578,12 @@ lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, 
     }
 
     return LPInterpolation.linear(buf, (phase + (warp * buf->length)) * freq);
+}
+
+lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate) {
+    lpfloat_t gamma = 1.f - (lpfloat_t)exp(-(2.f * (lpfloat_t)PI) * (cutoff/samplerate));
+    *y = (1.f - gamma) * (*y) + gamma * x;
+    return *y;
 }
 
 /* RingBuffers

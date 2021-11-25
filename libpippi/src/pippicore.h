@@ -200,6 +200,7 @@ typedef struct lpwindow_factory_t {
 
 typedef struct lpfx_factory_t {
     lpfloat_t (*read_skewed_buffer)(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
+    lpfloat_t (*lpf1)(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
 } lpfx_factory_t;
 
 /* Interfaces */
