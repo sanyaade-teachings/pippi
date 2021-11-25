@@ -9,9 +9,9 @@ int main() {
     lpbuffer_t * out;
     lpbuffer_t * skew;
     lpbuffer_t * scrub;
-    lpbuffer_t * cutoffs;
+    lpshapes_t * cutoffs;
     lpbuffer_t * spread;
-    lpbuffer_t * maxgrainlength;
+    lpshapes_t * maxgrainlength;
     lpformation_t * formation;
     lpfloat_t pos, cutoff;
     lpfloat_t ys[CHANNELS];
@@ -29,14 +29,18 @@ int main() {
     spread = LPWindow.create(WT_HANN, 4096);
     skew = LPWindow.create(WT_HANN, 4096);
     scrub = LPWindow.create(WT_HANN, 4096);
-    cutoffs = LPWindow.create(WT_TRI, 4096);
-    maxgrainlength = LPWindow.create(WT_HANN, 4096);
+
+    cutoffs = LPShapes.win(WIN_TRI);
+    cutoffs->maxfreq = 0.5f;
+    maxgrainlength = LPShapes.win(WIN_HANN);
+    maxgrainlength->maxfreq = 0.5f;
 
     LPBuffer.scale(spread, 0, 1, 0.f, 1.f);
-    LPBuffer.scale(cutoffs, 0, 1, 20.f, 1000.f);
     LPBuffer.scale(skew, 0, 1, 0.f, 1.f);
     LPBuffer.scale(scrub, 0, 1, 0.03f, 0.2f);
-    LPBuffer.scale(maxgrainlength, 0, 1, mingrainlength, mingrainlength * 100);
+
+    LPBuffer.scale(cutoffs->wt, 0, 1, 20.f, 1000.f);
+    LPBuffer.scale(maxgrainlength->wt, 0, 1, mingrainlength, mingrainlength * 100);
 
     formation->speed = 1.f;
 
@@ -48,8 +52,8 @@ int main() {
         formation->spread = LPInterpolation.linear_pos(spread, pos);
         formation->skew = 1 - LPInterpolation.linear_pos(skew, pos);
         formation->scrub = LPInterpolation.linear_pos(scrub, pos);
-        formation->maxlength = LPInterpolation.linear_pos(maxgrainlength, pos);
-        cutoff = LPInterpolation.linear_pos(cutoffs, pos);
+        cutoff = LPShapes.process(cutoffs);
+        formation->maxlength = LPShapes.process(maxgrainlength);
 
         LPFormation.process(formation);
 
@@ -63,6 +67,8 @@ int main() {
     LPBuffer.destroy(out);
     LPBuffer.destroy(snd);
     LPFormation.destroy(formation);
+    LPShapes.destroy(cutoffs);
+    LPShapes.destroy(maxgrainlength);
 
     return 0;
 }

@@ -25,6 +25,10 @@ typedef double lpfloat_t;
 #define PI2 (PI*2.0)
 #endif
 
+#ifndef EULER
+#define EULER 2.718281828459045235360287471352662497757247093
+#endif
+
 enum Wavetables {
     WT_SINE,
     WT_SQUARE, 
@@ -239,5 +243,9 @@ lpfloat_t lpwv(lpfloat_t value, lpfloat_t min, lpfloat_t max);
 lpfloat_t lpsv(lpfloat_t value, lpfloat_t min, lpfloat_t max);
 /* lpsvf does the same but allows a custom from and to range (like from -1 to 1) */
 lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, lpfloat_t to);
+
+#ifndef fmax
+lpfloat_t fmax(lpfloat_t a, lpfloat_t b);
+#endif
 
 #endif

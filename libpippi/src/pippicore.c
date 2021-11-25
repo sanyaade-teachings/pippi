@@ -1061,3 +1061,12 @@ lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, l
     if(delta <= 0) return 0;
     return (value/delta) * (max-min) + min;
 }
+
+#ifndef fmax
+lpfloat_t fmax(lpfloat_t a, lpfloat_t b) {
+    if(a > b) return a;
+    return b;
+}
+#endif
+
+

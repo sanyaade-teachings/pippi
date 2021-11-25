@@ -8,6 +8,7 @@
 #include "microsound.h"
 #include "mir.h"
 #include "scheduler.h"
+#include "shapes.h"
 #include "soundfile.h"
 
 
