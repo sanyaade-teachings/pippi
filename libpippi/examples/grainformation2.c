@@ -7,17 +7,26 @@ int main() {
     size_t i, c, length, numgrains, mingrainlength;
     lpbuffer_t * snd;
     lpbuffer_t * out;
-    lpbuffer_t * skew;
-    lpbuffer_t * scrub;
+
+    lpbuffer_t * skew_wt;
+    lpbuffer_t * scrub_wt;
+    lpbuffer_t * cutoffs_wt;
+    lpbuffer_t * spread_wt;
+    lpbuffer_t * maxgrainlength_wt;
+
+    lpshapes_t * skew;
+    lpshapes_t * scrub;
     lpshapes_t * cutoffs;
-    lpbuffer_t * spread;
+    lpshapes_t * spread;
     lpshapes_t * maxgrainlength;
+
     lpformation_t * formation;
-    lpfloat_t pos, cutoff;
+
+    lpfloat_t cutoff;
     lpfloat_t ys[CHANNELS];
 
     length = 10 * SR;
-    numgrains = 100;
+    numgrains = 1000;
     mingrainlength = SR/200.f;
     ys[0] = 0.f;
     ys[1] = 0.f;
@@ -26,21 +35,25 @@ int main() {
     snd = LPSoundFile.read("../tests/sounds/living.wav");
     formation = LPFormation.create(numgrains, mingrainlength * 100, mingrainlength, length, CHANNELS, SR);
 
-    spread = LPWindow.create(WT_HANN, 4096);
-    skew = LPWindow.create(WT_HANN, 4096);
-    scrub = LPWindow.create(WT_HANN, 4096);
+    spread_wt = LPWindow.create(WT_HANN, 4096);
+    skew_wt = LPWindow.create(WT_HANN, 4096);
+    scrub_wt = LPWindow.create(WT_HANN, 4096);
+    cutoffs_wt = LPWindow.create(WT_HANN, 4096);
+    maxgrainlength_wt = LPWindow.create(WT_HANN, 4096);
 
-    cutoffs = LPShapes.win(WIN_TRI);
-    cutoffs->maxfreq = 0.5f;
-    maxgrainlength = LPShapes.win(WIN_HANN);
-    maxgrainlength->maxfreq = 0.5f;
+    LPBuffer.scale(spread_wt, 0, 1, 0.f, 1.f);
+    LPBuffer.scale(skew_wt, 0, 1, 0.5f, 1.f);
+    LPBuffer.scale(scrub_wt, 0, 1, 0.03f, 1.f);
+    LPBuffer.scale(cutoffs_wt, 0, 1, 200.f, 1000.f);
+    LPBuffer.scale(maxgrainlength_wt, 0, 1, mingrainlength, mingrainlength * 100);
 
-    LPBuffer.scale(spread, 0, 1, 0.f, 1.f);
-    LPBuffer.scale(skew, 0, 1, 0.f, 1.f);
-    LPBuffer.scale(scrub, 0, 1, 0.03f, 0.2f);
-
-    LPBuffer.scale(cutoffs->wt, 0, 1, 20.f, 1000.f);
-    LPBuffer.scale(maxgrainlength->wt, 0, 1, mingrainlength, mingrainlength * 100);
+    spread = LPShapes.create(spread_wt);
+    skew = LPShapes.create(skew_wt);
+    /*skew->maxfreq = 1000.f;*/
+    scrub = LPShapes.create(scrub_wt);
+    cutoffs = LPShapes.create(cutoffs_wt);
+    maxgrainlength = LPShapes.create(maxgrainlength_wt);
+    /*skew->maxfreq = 0.2f;*/
 
     formation->speed = 1.f;
 
@@ -48,10 +61,9 @@ int main() {
 
     /* Render each frame of the grainformation */
     for(i=0; i < length; i++) {
-        pos = (float)i / length;
-        formation->spread = LPInterpolation.linear_pos(spread, pos);
-        formation->skew = 1 - LPInterpolation.linear_pos(skew, pos);
-        formation->scrub = LPInterpolation.linear_pos(scrub, pos);
+        formation->spread = LPShapes.process(spread);
+        formation->skew = 1 - LPShapes.process(skew);
+        formation->scrub = LPShapes.process(scrub);
         cutoff = LPShapes.process(cutoffs);
         formation->maxlength = LPShapes.process(maxgrainlength);
 

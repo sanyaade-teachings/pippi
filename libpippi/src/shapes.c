@@ -24,39 +24,20 @@ lpfloat_t shapes_process(lpshapes_t * s) {
     return out;
 }
 
-lpshapes_t * shapes_create_win(int base) {
+lpshapes_t * shapes_create(lpbuffer_t * wt) {
     lpshapes_t * s;
 
     s = (lpshapes_t *)LPMemoryPool.alloc(1, sizeof(lpshapes_t));
-    s->wt = LPWindow.create(base, 4096);
+    s->wt = wt;
 
     s->density = 0.5f;
     s->periodicity = 0.5f;
-    s->stability = 0.5f;
+    s->stability = 0.25f;
 
     s->phase = 0.f;
-    s->freq = 12.f;
-    s->minfreq = 0.3f;
-    s->maxfreq = 12.f;
-    s->samplerate = DEFAULT_SAMPLERATE;
-
-    return s;
-}
-
-lpshapes_t * shapes_create_wt(int base) {
-    lpshapes_t * s;
-
-    s = (lpshapes_t *)LPMemoryPool.alloc(1, sizeof(lpshapes_t));
-    s->wt = LPWavetable.create(base, 4096);
-
-    s->density = 0.5f;
-    s->periodicity = 0.5f;
-    s->stability = 0.5f;
-
-    s->phase = 0.f;
-    s->freq = 12.f;
-    s->minfreq = 0.3f;
-    s->maxfreq = 12.f;
+    s->freq = 1.f;
+    s->minfreq = 0.05f;
+    s->maxfreq = 900.f;
     s->samplerate = DEFAULT_SAMPLERATE;
 
     return s;
@@ -66,4 +47,4 @@ void shapes_destroy(lpshapes_t * s) {
     LPMemoryPool.free(s); 
 }
 
-const lpshapes_factory_t LPShapes = { shapes_create_win, shapes_create_wt, shapes_process, shapes_destroy };
+const lpshapes_factory_t LPShapes = { shapes_create, shapes_process, shapes_destroy };

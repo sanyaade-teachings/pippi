@@ -16,8 +16,7 @@ typedef struct lpshapes_t {
 } lpshapes_t;
 
 typedef struct lpshapes_factory_t {
-    lpshapes_t * (*win)(int base);
-    lpshapes_t * (*wt)(int base);
+    lpshapes_t * (*create)(lpbuffer_t * wt);
     lpfloat_t (*process)(lpshapes_t * s);
     void (*destroy)(lpshapes_t * s);
 } lpshapes_factory_t;

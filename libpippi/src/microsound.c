@@ -76,8 +76,10 @@ lpformation_t * formation_create(int numstreams, size_t maxgrainlength, size_t m
         grainlength = LPRand.rand(formation->minlength, formation->maxlength);
         formation->grains[i] = grain_create(grainlength, formation->window, formation->rb);
         formation->grains[i]->amp = formation->grainamp;
+        formation->grains[i]->phase = LPRand.rand(0.1f, 2.f);
         formation->grains[i+1] = grain_create(grainlength, formation->window, formation->rb);
         formation->grains[i+1]->amp = formation->grainamp;
+        formation->grains[i+1]->phase = LPRand.rand(0.1f, 2.f);
     }
 
     return formation;
