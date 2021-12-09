@@ -32,6 +32,8 @@ void destroy_array(lparray_t * array);
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max);
+lpfloat_t min_buffer(lpbuffer_t * buf);
+lpfloat_t max_buffer(lpbuffer_t * buf);
 void multiply_buffer(lpbuffer_t * a, lpbuffer_t * b);
 void scalar_multiply_buffer(lpbuffer_t * a, lpfloat_t b);
 void add_buffers(lpbuffer_t * a, lpbuffer_t * b);
@@ -97,7 +99,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, min_buffer, max_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -292,6 +294,32 @@ void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfl
             buf->data[idx] = ((buf->data[idx] - from_min) / from_diff) * to_diff + to_min;
         }
     }
+}
+
+lpfloat_t min_buffer(lpbuffer_t * buf) {
+    lpfloat_t out = 0.f;
+    size_t i;
+    int c;
+
+    for(i=0; i < buf->length; i++) {
+        for(c=0; c < buf->channels; c++) {
+            out = fmin(buf->data[i * buf->channels + c], out);
+        }
+    }
+    return out;
+}
+
+lpfloat_t max_buffer(lpbuffer_t * buf) {
+    lpfloat_t out = 0.f;
+    size_t i;
+    int c;
+
+    for(i=0; i < buf->length; i++) {
+        for(c=0; c < buf->channels; c++) {
+            out = fmax(buf->data[i * buf->channels + c], out);
+        }
+    }
+    return out;
 }
 
 void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos) {
@@ -835,7 +863,7 @@ lpfloat_t interpolate_linear_channel(lpbuffer_t* buf, lpfloat_t phase, int chann
     frac = phase - (int)phase;
     i = (int)phase;
 
-    if (i >= buf->length-1 || i == 0) return 0;
+    if (i >= buf->length-1) return 0;
 
     a = buf->data[i * buf->channels + channel];
     b = buf->data[(i+1) * buf->channels + channel];
@@ -854,7 +882,7 @@ lpfloat_t interpolate_linear(lpbuffer_t* buf, lpfloat_t phase) {
     frac = phase - (int)phase;
     i = (int)phase;
 
-    if (i >= buf->length-1 || i == 0) return 0;
+    if (i >= buf->length-1) return 0;
 
     a = buf->data[i];
     b = buf->data[i+1];
@@ -1065,6 +1093,13 @@ lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, l
 #ifndef fmax
 lpfloat_t fmax(lpfloat_t a, lpfloat_t b) {
     if(a > b) return a;
+    return b;
+}
+#endif
+
+#ifndef fmin
+lpfloat_t fmin(lpfloat_t a, lpfloat_t b) {
+    if(a < b) return a;
     return b;
 }
 #endif

@@ -132,6 +132,8 @@ typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
     void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t);
+    lpfloat_t (*min)(lpbuffer_t * buf);
+    lpfloat_t (*max)(lpbuffer_t * buf);
     lpfloat_t (*play)(lpbuffer_t *, lpfloat_t);
     lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *);
     void (*multiply)(lpbuffer_t *, lpbuffer_t *);
@@ -246,6 +248,10 @@ lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, l
 
 #ifndef fmax
 lpfloat_t fmax(lpfloat_t a, lpfloat_t b);
+#endif
+
+#ifndef fmin
+lpfloat_t fmin(lpfloat_t a, lpfloat_t b);
 #endif
 
 #endif

@@ -715,6 +715,9 @@ cdef class Wavetable:
     cpdef double max(Wavetable self):
         return np.amax(self.data)
 
+    cpdef double avg(Wavetable self):
+        return np.mean(np.abs(self.data), dtype='d')
+
     cdef double[:] _leftpad(Wavetable self, object value=None, int length=-1, double mult=-1):
         cdef int _length = len(self.data)
         cdef double _value

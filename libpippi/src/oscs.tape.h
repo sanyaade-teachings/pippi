@@ -6,10 +6,11 @@
 typedef struct lptapeosc_t {
     lpfloat_t phase;
     lpfloat_t speed;
-    lpfloat_t offset;
+    lpfloat_t pulsewidth;
     lpfloat_t samplerate;
+    lpfloat_t start;
+    lpfloat_t start_increment;
     lpfloat_t range;
-    lpfloat_t _range;
     lpbuffer_t * buf;
     lpbuffer_t * current_frame;
     int gate;
@@ -18,6 +19,7 @@ typedef struct lptapeosc_t {
 typedef struct lptapeosc_factory_t {
     lptapeosc_t * (*create)(lpbuffer_t *, lpfloat_t);
     void (*process)(lptapeosc_t *);
+    void (*rewind)(lptapeosc_t *);
     lpbuffer_t * (*render)(lptapeosc_t *, size_t, lpbuffer_t *, int);
     void (*destroy)(lptapeosc_t *);
 } lptapeosc_factory_t;

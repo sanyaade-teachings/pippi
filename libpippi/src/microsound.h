@@ -6,7 +6,8 @@
 
 typedef struct lpgrain_t {
     lpfloat_t length; /* grainlength == tapeosc range */
-    lpfloat_t offset; /* grainoffset == tapeosc offset */
+    lpfloat_t window_phase_offset; 
+    lpfloat_t pulsewidth; 
 
     lptapeosc_t * osc;
 
@@ -14,7 +15,6 @@ typedef struct lpgrain_t {
     lpfloat_t pan; /* pan position across all tapeosc->buf channels */
     lpfloat_t amp;
     lpfloat_t speed; /* grain tapeosc playback speed (does not modulate grainlength) */
-    lpfloat_t jitter; /* on the read offset */
     lpfloat_t skew; /* phase distortion on the grain window */
 
     lpbuffer_t * window;
@@ -31,6 +31,7 @@ typedef struct lpformation_t {
     lpfloat_t offset;
     lpfloat_t skew;
     lpfloat_t grainamp;
+    lpfloat_t pulsewidth; 
     lpbuffer_t * window;
     lpbuffer_t * current_frame;
     lpbuffer_t * rb;

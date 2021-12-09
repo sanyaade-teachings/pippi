@@ -5,15 +5,15 @@ lpgrain_t * grain_create(lpfloat_t length, lpbuffer_t * window, lpbuffer_t * sou
 
     g = (lpgrain_t *)LPMemoryPool.alloc(1, sizeof(lpgrain_t));
     g->speed = 1.f;
+    g->pulsewidth = 1.f;
     g->length = length;
-    g->offset = 0.f;
     g->osc = LPTapeOsc.create(source, length);
 
     g->pan = 0.5f;
     g->amp = 1.f;
-    g->jitter = 0.f;
 
     g->window = window;
+    g->window_phase_offset = 0.f;
 
     return g;
 }
@@ -23,11 +23,14 @@ void grain_process(lpgrain_t * g, lpbuffer_t * out) {
     int is_odd, c;
     lpfloat_t window_phase;
 
+    g->osc->pulsewidth = g->pulsewidth;
     LPTapeOsc.process(g->osc);
-    window_phase = (g->osc->phase / g->osc->range) * g->window->length;
+    window_phase = ((g->osc->phase - g->osc->start) / g->osc->range) * g->window->length;
+    window_phase += g->window_phase_offset;
 
     for(c=0; c < out->channels; c++) {
-        sample = g->osc->current_frame->data[c] * LPFX.read_skewed_buffer(1.f, g->window, window_phase, g->skew);
+        /*sample = g->osc->current_frame->data[c] * LPFX.read_skewed_buffer(1.f, g->window, window_phase, g->skew);*/
+        sample = g->osc->current_frame->data[c] * LPInterpolation.linear(g->window, window_phase);
 
         if(g->pan != 0.5f) {
             is_odd = (2-(c & 1));
@@ -71,15 +74,17 @@ lpformation_t * formation_create(int numstreams, size_t maxgrainlength, size_t m
     formation->scrub = 1.f;
     formation->spread = 0.f;
     formation->skew = 0.f;
+    formation->pulsewidth = 1.f;
 
     for(i=0; i < formation->numgrains; i += 2) {
         grainlength = LPRand.rand(formation->minlength, formation->maxlength);
         formation->grains[i] = grain_create(grainlength, formation->window, formation->rb);
         formation->grains[i]->amp = formation->grainamp;
-        formation->grains[i]->phase = LPRand.rand(0.1f, 2.f);
+        formation->grains[i]->pulsewidth = formation->pulsewidth;
         formation->grains[i+1] = grain_create(grainlength, formation->window, formation->rb);
         formation->grains[i+1]->amp = formation->grainamp;
-        formation->grains[i+1]->phase = LPRand.rand(0.1f, 2.f);
+        formation->grains[i+1]->pulsewidth = formation->pulsewidth;
+        formation->grains[i+1]->window_phase_offset = grainlength/2.f;
     }
 
     return formation;
@@ -106,20 +111,6 @@ void formation_process(lpformation_t * c) {
         c->grains[j+1]->speed = c->speed;
         c->grains[j+1]->length = grainlength;
         grain_process(c->grains[j+1], c->current_frame);
-
-        if(c->grains[j]->osc->gate > 0) {
-            c->grains[j]->osc->offset += grainlength * c->scrub;
-            if(c->grains[j]->osc->offset > c->grains[j]->osc->buf->length) {
-                c->grains[j]->osc->offset -= c->grains[j]->osc->buf->length;
-            }
-        }
-
-        if(c->grains[j+1]->osc->gate > 0) {
-            c->grains[j+1]->osc->offset += grainlength * c->scrub;
-            if(c->grains[j+1]->osc->offset > c->grains[j]->osc->buf->length) {
-                c->grains[j+1]->osc->offset -= c->grains[j]->osc->buf->length;
-            }
-        }
 
         if(c->spread > 0) {
             pan = 0.5f + LPRand.rand(-.5f, 0.5f) * c->spread;

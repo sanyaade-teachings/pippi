@@ -4,12 +4,12 @@ default: all
 
 ALLSOURCES = src/oscs.sine.c \
 	src/oscs.pulsar.c \
+	src/oscs.shape.c \
 	src/oscs.tape.c \
 	src/oscs.tukey.c \
 	src/microsound.c \
 	src/mir.c \
 	src/soundfile.c \
-	src/shapes.c \
 	src/scheduler.c \
 	src/pippicore.c
 
