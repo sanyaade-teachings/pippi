@@ -134,6 +134,7 @@ typedef struct lpbuffer_factory_t {
     void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t);
     lpfloat_t (*min)(lpbuffer_t * buf);
     lpfloat_t (*max)(lpbuffer_t * buf);
+    lpfloat_t (*mag)(lpbuffer_t * buf);
     lpfloat_t (*play)(lpbuffer_t *, lpfloat_t);
     lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *);
     void (*multiply)(lpbuffer_t *, lpbuffer_t *);
@@ -207,6 +208,8 @@ typedef struct lpwindow_factory_t {
 typedef struct lpfx_factory_t {
     lpfloat_t (*read_skewed_buffer)(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
     lpfloat_t (*lpf1)(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
+    void (*convolve)(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
+    void (*norm)(lpbuffer_t * buf, lpfloat_t ceiling);
 } lpfx_factory_t;
 
 /* Interfaces */

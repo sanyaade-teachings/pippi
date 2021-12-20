@@ -34,6 +34,7 @@ void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max);
 lpfloat_t min_buffer(lpbuffer_t * buf);
 lpfloat_t max_buffer(lpbuffer_t * buf);
+lpfloat_t mag_buffer(lpbuffer_t * buf);
 void multiply_buffer(lpbuffer_t * a, lpbuffer_t * b);
 void scalar_multiply_buffer(lpbuffer_t * a, lpfloat_t b);
 void add_buffers(lpbuffer_t * a, lpbuffer_t * b);
@@ -55,6 +56,8 @@ void destroy_stack(lpstack_t * stack);
 
 lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
 lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
+void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
+void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling);
 
 lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate);
 void ringbuffer_fill(lpbuffer_t * ringbuf, lpbuffer_t * buf, int offset);
@@ -99,13 +102,13 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, min_buffer, max_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, mix_buffers, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
-const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1 };
+const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_convolve, fx_norm };
 
 /** Rand
  */
@@ -317,6 +320,19 @@ lpfloat_t max_buffer(lpbuffer_t * buf) {
     for(i=0; i < buf->length; i++) {
         for(c=0; c < buf->channels; c++) {
             out = fmax(buf->data[i * buf->channels + c], out);
+        }
+    }
+    return out;
+}
+
+lpfloat_t mag_buffer(lpbuffer_t * buf) {
+    lpfloat_t out = 0.f;
+    size_t i;
+    int c;
+
+    for(i=0; i < buf->length; i++) {
+        for(c=0; c < buf->channels; c++) {
+            out = fmax(fabs(buf->data[i * buf->channels + c]), out);
         }
     }
     return out;
@@ -613,6 +629,48 @@ lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t sample
     *y = (1.f - gamma) * (*y) + gamma * x;
     return *y;
 }
+
+void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling) {
+    lpfloat_t maxval, normval;
+    size_t i;
+    int c;
+
+    maxval = mag_buffer(buf);
+    normval = ceiling / maxval;
+
+    for(i=0; i < buf->length; i++) {
+        for(c=0; c < buf->channels; c++) {
+            buf->data[i * buf->channels + c] *= normval;
+        }
+    }
+}
+
+void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out) {
+    int c;
+    size_t i, j, alength, blength, outlength;
+    lpfloat_t maxval;
+
+    alength = a->length;
+    blength = b->length;
+    outlength = out->length;
+
+    assert(a->channels == b->channels);
+    assert(a->channels == out->channels);
+    assert(outlength == alength + blength + 1);
+
+    maxval = mag_buffer(a);
+
+    for(i=0; i < a->length; i++) {
+        for(c=0; c < a->channels; c++) {
+            for(j=0; j < b->length; j++) {
+                out->data[(j+i) * a->channels + c] += a->data[i * a->channels + c] * b->data[j * a->channels + c];
+            }
+        }
+    }
+
+    fx_norm(out, maxval);
+}
+
 
 /* RingBuffers
  */
