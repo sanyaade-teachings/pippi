@@ -10,8 +10,8 @@ int main() {
     samplerate = 48000;
     channels = 2;
 
-    a = LPSoundFile.read("../../pippi/tests/sounds/living.wav");
-    b = LPSoundFile.read("../../pippi/tests/sounds/guitar1s.wav");
+    a = LPSoundFile.read("../../pippi/tests/sounds/guitar10s.wav");
+    b = LPBuffer.cut(a, 100, 1000);
 
     length = a->length + b->length + 1;
 

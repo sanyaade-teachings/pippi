@@ -6,7 +6,7 @@ lpfloat_t shapeosc_process(lpshapeosc_t * s) {
     isamplerate = 1.0f/s->samplerate;
     freqwidth = s->maxfreq - s->minfreq;
 
-    s->freq = (lpfloat_t)fmax((s->density * freqwidth) + s->minfreq + LPRand.rand(freqwidth * -s->periodicity, freqwidth * s->periodicity), s->minfreq);
+    s->freq = (lpfloat_t)lpfmax((s->density * freqwidth) + s->minfreq + LPRand.rand(freqwidth * -s->periodicity, freqwidth * s->periodicity), s->minfreq);
 
     out = LPInterpolation.linear(s->wt, s->phase);
 
@@ -18,7 +18,7 @@ lpfloat_t shapeosc_process(lpshapeosc_t * s) {
     j = (lpfloat_t)log(s->stability * ((lpfloat_t)EULER-1.f) + 1.f);
     if(s->phase > s->wt->length && j > LPRand.rand(0.f,1.f)) {
         d = log(s->density * ((lpfloat_t)EULER-1) + 1);
-        s->freq = (lpfloat_t)fmax((d * freqwidth) + s->minfreq + LPRand.rand(freqwidth * -s->periodicity, freqwidth * s->periodicity), s->minfreq);
+        s->freq = (lpfloat_t)lpfmax((d * freqwidth) + s->minfreq + LPRand.rand(freqwidth * -s->periodicity, freqwidth * s->periodicity), s->minfreq);
     }
 
     while(s->phase > s->wt->length) {

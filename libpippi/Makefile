@@ -67,8 +67,8 @@ all:
 	echo "Building readsoundfile.c example...";
 	gcc $(FLAGS) examples/readsoundfile.c $(ALLSOURCES) -o build/readsoundfile
 
-	#echo "Building convolution.c example...";
-	#gcc $(FLAGS) examples/convolution.c $(ALLSOURCES) -o build/convolution
+	echo "Building convolution.c example...";
+	gcc $(FLAGS) examples/convolution.c $(ALLSOURCES) -o build/convolution
 
 	echo "Rendering examples..."
 	./scripts/render_examples.sh

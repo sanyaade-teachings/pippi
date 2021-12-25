@@ -137,6 +137,7 @@ typedef struct lpbuffer_factory_t {
     lpfloat_t (*mag)(lpbuffer_t * buf);
     lpfloat_t (*play)(lpbuffer_t *, lpfloat_t);
     lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *);
+    lpbuffer_t * (*cut)(lpbuffer_t *, size_t, size_t);
     void (*multiply)(lpbuffer_t *, lpbuffer_t *);
     void (*multiply_scalar)(lpbuffer_t *, lpfloat_t);
     void (*add)(lpbuffer_t *, lpbuffer_t *);
