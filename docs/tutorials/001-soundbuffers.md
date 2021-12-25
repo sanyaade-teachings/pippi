@@ -52,6 +52,10 @@ to any SoundBuffer.
 guitar.write('docs/tutorials/renders/001-guitar-unaltered.flac')
 ```
 
+```
+441000
+```
+
 
 
 ### Processing sounds
@@ -90,6 +94,10 @@ Save a copy -- this time as a WAV file
 slow_guitar.write('docs/tutorials/renders/001-guitar-slow.wav')
 ```
 
+```
+882000
+```
+
 
 
 <audio src="/docs/tutorials/renders/001-guitar-slow.wav" controls></audio>
@@ -110,6 +118,11 @@ print(mixed_guitars)
 
 ```
 SoundBuffer(samplerate=44100, channels=2, frames=882000, dur=20.00)
+/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
+packages/pysndfile/sndio.py:115: UserWarning:
+write_frames::warning::audio data has been clipped while writing to
+file docs/tutorials/renders/001-guitar-mixed.wav.
+  nf = sf.write_frames(data)
 ```
 
 
@@ -214,6 +227,18 @@ for speed in speeds:
 out.write('docs/tutorials/renders/001-guitar-chord.wav')
 ```
 
+```
+/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
+packages/pysndfile/sndio.py:115: UserWarning:
+write_frames::warning::audio data has been clipped while writing to
+file docs/tutorials/renders/001-guitar-chord.wav.
+  nf = sf.write_frames(data)
+```
+
+```
+377300
+```
+
 
 
 <audio src="/docs/tutorials/renders/001-guitar-chord.wav" controls></audio>
@@ -292,6 +317,10 @@ out = fx.norm(out, 1)
 
 # Save this output buffer
 out.write('docs/tutorials/renders/001-guitar-chord-enveloped.wav')
+```
+
+```
+1622491
 ```
 
 

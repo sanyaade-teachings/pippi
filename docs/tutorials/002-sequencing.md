@@ -91,6 +91,10 @@ hat = hat.env(pluckout) * 0.5 # Also multiply by 0.5 to reduce the amplitude of 
 hat.write('docs/tutorials/renders/002-plucked-hat.flac')
 ```
 
+```
+3528
+```
+
 
 
 <audio src="/docs/tutorials/renders/002-plucked-hat.flac" controls></audio>
@@ -153,6 +157,10 @@ while elapsed < 30:
 out.write('docs/tutorials/renders/002-hats-on-ice.flac')
 ```
 
+```
+1323000
+```
+
 
 
 <img src="/docs/tutorials/figures/002-sinc-win.png" title="sinc wavetable"/>
@@ -205,6 +213,18 @@ out = fx.lpf(out, 3000) * 0.5
 out.write('docs/tutorials/renders/002-hats-slipping-on-ice.flac')
 ```
 
+```
+/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
+packages/pysndfile/sndio.py:115: UserWarning:
+write_frames::warning::audio data has been clipped while writing to
+file docs/tutorials/renders/002-hats-slipping-on-ice.flac.
+  nf = sf.write_frames(data)
+```
+
+```
+1334480
+```
+
 
 
 Here's our time LFO:
@@ -241,6 +261,10 @@ kick = dsp.join([ makekick().pad(end=0.2) for _ in range(8) ]) # render a few ki
 kick.write('docs/tutorials/renders/002-kick.flac')
 ```
 
+```
+192832
+```
+
 
 
 <audio src="/docs/tutorials/renders/002-kick.flac" controls></audio>
@@ -257,6 +281,10 @@ def makeclap(length=dsp.MS*80):
 
 clap = dsp.join([ makeclap().pad(end=0.2) for _ in range(8) ]) # render a few claps
 clap.write('docs/tutorials/renders/002-clap.flac')
+```
+
+```
+98784
 ```
 
 
@@ -346,6 +374,18 @@ out.dub(hats)
 out.write('docs/tutorials/renders/002-kicks-and-hats-together.flac')
 ```
 
+```
+/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
+packages/pysndfile/sndio.py:115: UserWarning:
+write_frames::warning::audio data has been clipped while writing to
+file docs/tutorials/renders/002-kicks-and-hats-together.flac.
+  nf = sf.write_frames(data)
+```
+
+```
+1362866
+```
+
 
 
 Now this is starting to sound a little more interesting:
@@ -404,6 +444,10 @@ while elapsed < 30:
     count += 1
 
 out.write('docs/tutorials/renders/002-a-hat-pattern.flac')
+```
+
+```
+1356075
 ```
 
 
@@ -505,6 +549,18 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-1.flac')
 ```
 
+```
+/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
+packages/pysndfile/sndio.py:115: UserWarning:
+write_frames::warning::audio data has been clipped while writing to
+file docs/tutorials/renders/002-drum-machine-1.flac.
+  nf = sf.write_frames(data)
+```
+
+```
+912281
+```
+
 
 
 <audio src="/docs/tutorials/renders/002-drum-machine-1.flac" controls></audio>
@@ -521,6 +577,18 @@ dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4)
 out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-2.flac')
+```
+
+```
+/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
+packages/pysndfile/sndio.py:115: UserWarning:
+write_frames::warning::audio data has been clipped while writing to
+file docs/tutorials/renders/002-drum-machine-2.flac.
+  nf = sf.write_frames(data)
+```
+
+```
+694988
 ```
 
 
@@ -544,6 +612,18 @@ dm.add('c', clapat, makeclap, div=2)
 dm.add('s', 'xxxx', makehat, div=4, smear=smear)
 out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-3.flac')
+```
+
+```
+/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
+packages/pysndfile/sndio.py:115: UserWarning:
+write_frames::warning::audio data has been clipped while writing to
+file docs/tutorials/renders/002-drum-machine-3.flac.
+  nf = sf.write_frames(data)
+```
+
+```
+1569651
 ```
 
 
