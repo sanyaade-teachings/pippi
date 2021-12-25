@@ -249,12 +249,7 @@ lpfloat_t lpsv(lpfloat_t value, lpfloat_t min, lpfloat_t max);
 /* lpsvf does the same but allows a custom from and to range (like from -1 to 1) */
 lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, lpfloat_t to);
 
-#ifndef fmax
-lpfloat_t fmax(lpfloat_t a, lpfloat_t b);
-#endif
-
-#ifndef fmin
-lpfloat_t fmin(lpfloat_t a, lpfloat_t b);
-#endif
+lpfloat_t lpfmax(lpfloat_t a, lpfloat_t b);
+lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b);
 
 #endif

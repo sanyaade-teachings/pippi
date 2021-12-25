@@ -306,7 +306,7 @@ lpfloat_t min_buffer(lpbuffer_t * buf) {
 
     for(i=0; i < buf->length; i++) {
         for(c=0; c < buf->channels; c++) {
-            out = fmin(buf->data[i * buf->channels + c], out);
+            out = lpfmin(buf->data[i * buf->channels + c], out);
         }
     }
     return out;
@@ -319,7 +319,7 @@ lpfloat_t max_buffer(lpbuffer_t * buf) {
 
     for(i=0; i < buf->length; i++) {
         for(c=0; c < buf->channels; c++) {
-            out = fmax(buf->data[i * buf->channels + c], out);
+            out = lpfmax(buf->data[i * buf->channels + c], out);
         }
     }
     return out;
@@ -332,7 +332,7 @@ lpfloat_t mag_buffer(lpbuffer_t * buf) {
 
     for(i=0; i < buf->length; i++) {
         for(c=0; c < buf->channels; c++) {
-            out = fmax(fabs(buf->data[i * buf->channels + c]), out);
+            out = lpfmax(fabs(buf->data[i * buf->channels + c]), out);
         }
     }
     return out;
@@ -1148,18 +1148,12 @@ lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, l
     return (value/delta) * (max-min) + min;
 }
 
-#ifndef fmax
-lpfloat_t fmax(lpfloat_t a, lpfloat_t b) {
+lpfloat_t lpfmax(lpfloat_t a, lpfloat_t b) {
     if(a > b) return a;
     return b;
 }
-#endif
 
-#ifndef fmin
-lpfloat_t fmin(lpfloat_t a, lpfloat_t b) {
+lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b) {
     if(a < b) return a;
     return b;
 }
-#endif
-
-
