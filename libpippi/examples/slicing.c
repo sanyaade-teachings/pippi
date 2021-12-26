@@ -20,25 +20,21 @@ int main() {
     start = LPRand.randint(0, a->length - length);
     b = LPBuffer.cut(a, start, length);
     tlength += b->length;
-    LPSoundFile.write("renders/slicing-b.wav", b);
 
     length = LPRand.randint(50, 48000);
     start = LPRand.randint(0, a->length - length);
     c = LPBuffer.cut(a, start, length);
     tlength += c->length;
-    LPSoundFile.write("renders/slicing-c.wav", c);
 
     length = LPRand.randint(50, 48000);
     start = LPRand.randint(0, a->length - length);
     d = LPBuffer.cut(a, start, length);
     tlength += d->length;
-    LPSoundFile.write("renders/slicing-d.wav", d);
 
     length = LPRand.randint(50, 48000);
     start = LPRand.randint(0, a->length - length);
     e = LPBuffer.cut(a, start, length);
     tlength += e->length;
-    LPSoundFile.write("renders/slicing-e.wav", e);
 
     out = LPBuffer.create(tlength, a->channels, a->samplerate);
 
