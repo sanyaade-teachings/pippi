@@ -46,7 +46,7 @@ void scalar_divide_buffer(lpbuffer_t * a, lpfloat_t b);
 lpbuffer_t * concat_buffers(lpbuffer_t * a, lpbuffer_t * b);
 int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b);
 int buffers_are_close(lpbuffer_t * a, lpbuffer_t * b, int d);
-void dub_buffer(lpbuffer_t * a, lpbuffer_t * b);
+void dub_buffer(lpbuffer_t * a, lpbuffer_t * b, size_t start);
 void env_buffer(lpbuffer_t * buf, lpbuffer_t * env);
 lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
@@ -546,14 +546,18 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
     }
 }
 
-void dub_buffer(lpbuffer_t * a, lpbuffer_t * b) {
-    size_t length, i;
+void dub_buffer(lpbuffer_t * a, lpbuffer_t * b, size_t start) {
+    size_t i;
     int c, j;
-    length = (a->length <= b->length) ? a->length : b->length;
-    for(i=0; i < length; i++) {
+
+    assert(start + b->length <= a->length);
+    assert(b->length < a->length);
+    assert(a->channels == b->channels);
+
+    for(i=0; i < b->length; i++) {
         for(c=0; c < a->channels; c++) {
-            j = b->channels % c;
-            a->data[i * a->channels + c] += b->data[i * b->channels + j];
+            j = c % b->channels;
+            a->data[(i+start) * a->channels + c] += b->data[i * b->channels + j];
         }
     }
 }
@@ -571,9 +575,9 @@ lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length) {
 
     out = LPBuffer.create(length, buf->channels, buf->samplerate);
 
-    for(i=start; i < length; i++) {
+    for(i=0; i < length; i++) {
         for(c=0; c < buf->channels; c++) {
-            out->data[i * buf->channels + c] = buf->data[i * buf->channels + c];
+            out->data[i * buf->channels + c] = buf->data[(i+start) * buf->channels + c];
         }
     }
 

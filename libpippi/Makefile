@@ -70,5 +70,9 @@ all:
 	echo "Building convolution.c example...";
 	gcc $(FLAGS) examples/convolution.c $(ALLSOURCES) -o build/convolution
 
+	echo "Building slicing.c example...";
+	gcc $(FLAGS) examples/slicing.c $(ALLSOURCES) -o build/slicing
+
+
 	echo "Rendering examples..."
 	./scripts/render_examples.sh
