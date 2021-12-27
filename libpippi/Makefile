@@ -73,6 +73,8 @@ all:
 	echo "Building slicing.c example...";
 	gcc $(FLAGS) examples/slicing.c $(ALLSOURCES) -o build/slicing
 
+	echo "Building slicing2.c example...";
+	gcc $(FLAGS) examples/slicing2.c $(ALLSOURCES) -o build/slicing2
 
 	echo "Rendering examples..."
 	./scripts/render_examples.sh

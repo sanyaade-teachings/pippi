@@ -563,15 +563,12 @@ void dub_buffer(lpbuffer_t * a, lpbuffer_t * b, size_t start) {
 }
 
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length) {
-    size_t end, i;
+    size_t i;
     int c;
     lpbuffer_t * out;
 
     assert(length > 0);
-
-    end = start + length;
-
-    assert(end < buf->length);
+    assert(start + length < buf->length);
 
     out = LPBuffer.create(length, buf->channels, buf->samplerate);
 
