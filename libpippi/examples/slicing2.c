@@ -1,6 +1,6 @@
 #include "pippi.h"
 
-#define NUMCHUNKS 1000
+#define NUMCHUNKS 100
 
 int main() {
     lpbuffer_t * chunks[NUMCHUNKS];
@@ -13,7 +13,7 @@ int main() {
 
     tlength = 0;
     for(i=0; i < NUMCHUNKS; i++) {
-        length = LPRand.randint(30, 4800);
+        length = LPRand.randint(10, 10000);
         start = LPRand.randint(0, src->length - length);
         chunks[i] = LPBuffer.cut(src, start, length);
         tlength += chunks[i]->length;
