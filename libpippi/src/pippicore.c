@@ -52,6 +52,8 @@ lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length);
+lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length);
+void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos);
 void destroy_buffer(lpbuffer_t * buf);
 void destroy_stack(lpstack_t * stack);
 
@@ -103,7 +105,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, mix_buffers, cut_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -238,9 +240,7 @@ lparray_t * create_array_from(int numvalues, ...) {
 
 void destroy_array(lparray_t * array) {
     if(array != NULL) {
-        if(array->data != NULL) {
-            LPMemoryPool.free(array->data);
-        }
+        LPMemoryPool.free(array->data);
         LPMemoryPool.free(array);
     }
 }
@@ -536,11 +536,12 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
     int c;
 
     assert(env->length > 0);
+    assert(env->channels == 1);
 
     for(i=0; i < buf->length; i++) {
         pos = (lpfloat_t)i / buf->length;
+        value = interpolate_linear_pos(env, pos);
         for(c=0; c < buf->channels; c++) {
-            value = interpolate_linear_pos(env, pos);
             buf->data[i * buf->channels + c] *= value;
         }
     }

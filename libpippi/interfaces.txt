@@ -19,6 +19,63 @@ pippicore.h: assert.h, math.h, stdio.h, stdlib.h, string.h
 
     lpzapgremlins
 
+    ----
+
+    LPBuffer
+        create:
+            lpbuffer_t * create(size_t length, int channels, int samplerate)
+        copy:
+            void copy(lpbuffer_t * src, lpbuffer_t * dest)
+        scale:
+            void scale(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max)
+        min:
+            lpfloat_t min(lpbuffer_t * buf)
+        max:
+            lpfloat_t max(lpbuffer_t * buf)
+        mag:
+            lpfloat_t mag(lpbuffer_t * buf)
+        play:
+            lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed)
+        pan:
+            void pan(lpbuffer_t * buf, lpbuffer_t * pos)
+        mix:
+            lpbuffer_t * mix(lpbuffer_t * a, lpbuffer_t * b)
+        cut:
+            lpbuffer_t * cut(lpbuffer_t * buf, size_t start, size_t length)
+        resample:
+            lpbuffer_t * resample(lpbuffer_t * buf, size_t length)
+        multiply:
+            void multiply(lpbuffer_t * a, lpbuffer_t * b)
+        multiply_scalar:
+            void multiply_scalar(lpbuffer_t * a, lpfloat_t b)
+        add:
+            void add(lpbuffer_t * a, lpbuffer_t * b)
+        add_scalar:
+            void scalar_add(lpbuffer_t * a, lpfloat_t b)
+        subtract:
+            void subtract(lpbuffer_t * a, lpbuffer_t * b)
+        subtract_scalar:
+            void subtract_scalar(lpbuffer_t * a, lpfloat_t b)
+        divide:
+            void divide(lpbuffer_t * a, lpbuffer_t * b)
+        divide_scalar:
+            void divide_scalar(lpbuffer_t * a, lpfloat_t b)
+        concat:
+            lpbuffer_t * concat(lpbuffer_t * a, lpbuffer_t * b)
+        buffers_are_equal:
+            int buffers_are_equal(lpbuffer_t * a, lpbuffer_t * b)
+        buffers_are_close:
+            int buffers_are_close(lpbuffer_t * a, lpbuffer_t * b, int d)
+        dub:
+            void dub(lpbuffer_t * a, lpbuffer_t * b, size_t start)
+        env:
+            void env(lpbuffer_t * buf, lpbuffer_t * env)
+        destroy:
+            void destroy(lpbuffer_t * buf)
+        destroy_stack:
+            void destroy_stack(lpstack_t * stack)
+
+
 /* OSCS */
 oscs.pulsar.h: 
     lppulsarosc_t
