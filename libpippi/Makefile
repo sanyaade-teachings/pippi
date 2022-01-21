@@ -2,7 +2,8 @@
 
 default: all
 
-ALLSOURCES = src/oscs.sine.c \
+ALLSOURCES = vendor/fft/fft.c \
+	src/oscs.sine.c \
 	src/oscs.pulsar.c \
 	src/oscs.shape.c \
 	src/oscs.tape.c \
@@ -11,6 +12,7 @@ ALLSOURCES = src/oscs.sine.c \
 	src/mir.c \
 	src/soundfile.c \
 	src/scheduler.c \
+	src/spectral.c \
 	src/pippicore.c
 
 FLAGS = -g -std=c89 -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
@@ -69,6 +71,9 @@ all:
 
 	echo "Building convolution.c example...";
 	gcc $(FLAGS) examples/convolution.c $(ALLSOURCES) -o build/convolution
+
+	echo "Building convolution2.c example...";
+	gcc $(FLAGS) examples/convolution2.c $(ALLSOURCES) -o build/convolution2
 
 	echo "Building slicing.c example...";
 	gcc $(FLAGS) examples/slicing.c $(ALLSOURCES) -o build/slicing
