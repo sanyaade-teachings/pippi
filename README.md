@@ -179,6 +179,6 @@ If you need to build sources from a clean slate (sometimes updates to `pxd` file
 
 [James McCartney](https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html) for his implementation of hermite interpolation used in the `Wavetable` module and elsewhere.
 
-[Will Mitchell](https://starling.space/) for his zener diode softclip simulation, state variable filter implementation available in the `fx` module, and amazing work on bandlimited oscs.
+[Will Mitchell](https://github.com/liquidcitymotors/) for his zener diode softclip simulation, state variable filter implementation available in the `fx` module, and amazing work on bandlimited oscs.
 
 [Jatin Chowdhury](https://ccrma.stanford.edu/~jatin/ComplexNonlinearities/Wavefolder.html) for their lovely sounding saturating feedback wavefolder.
