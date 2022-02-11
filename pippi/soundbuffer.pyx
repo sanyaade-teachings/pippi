@@ -20,7 +20,10 @@ from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDF
 from pippi cimport grains
 from pippi cimport soundpipe
 
+np.import_array()
+
 cdef double VSPEED_MIN = 0.0001
+
 
 cdef double[:,:] _pan(double[:,:] out, int length, int channels, double[:] _pos, int method):
     cdef double left = 0.5

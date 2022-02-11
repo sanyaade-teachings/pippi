@@ -95,6 +95,9 @@ cdef double SQUARE_DUTY = 0.5
 
 SEGMENT_RE = re.compile('(?P<length>0?\.?\d+)?,?(?P<wtype>\w+),?(?P<start>0?\.?\d+)?-?(?P<end>0?\.?\d+)?')
 
+np.import_array()
+
+
 cdef int to_flag(str value):
     cdef dict flags = {
         'sine': SINE, 

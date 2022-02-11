@@ -1,4 +1,4 @@
-.PHONY: all wavetables
+.PHONY: all cython examples
 
 default: all
 
@@ -21,10 +21,12 @@ clean:
 	rm build/*
 	rm renders/*.wav
 
-wavetables:
-	./scripts/build_static_wavetables.sh
+cython:
+	echo "Building cython renderer...";
+	cython cython/renderer.pyx
+	gcc -g -std=c99 -Wall -Wextra -lm -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 examples/renderer.c $(ALLSOURCES) src/astrid.c cython/renderer.c -o build/renderer
 
-all:
+examples:
 	mkdir -p build renders
 
 	echo "Building pulsarosc.c example...";
@@ -83,3 +85,5 @@ all:
 
 	echo "Rendering examples..."
 	./scripts/render_examples.sh
+
+all: cython examples

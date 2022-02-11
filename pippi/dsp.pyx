@@ -22,6 +22,7 @@ from pippi cimport lists
 from pippi.sounddb cimport SoundDB
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 
+
 # Just a shorthand for MS in scripts. 
 # For example:
 #
