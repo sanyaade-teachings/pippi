@@ -45,6 +45,7 @@ enum Windows {
     WIN_PHASOR, 
     WIN_HANN, 
     WIN_RND,
+    WIN_RSAW,
     NUM_WINDOWS
 };
 

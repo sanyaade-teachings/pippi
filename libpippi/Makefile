@@ -3,10 +3,12 @@
 default: all
 
 ALLSOURCES = vendor/fft/fft.c \
+	src/oscs.phasor.c \
 	src/oscs.sine.c \
 	src/oscs.pulsar.c \
 	src/oscs.shape.c \
 	src/oscs.tape.c \
+	src/oscs.table.c \
 	src/oscs.tukey.c \
 	src/microsound.c \
 	src/mir.c \
@@ -31,7 +33,10 @@ examples:
 
 	echo "Building pulsarosc.c example...";
 	gcc $(FLAGS) examples/pulsarosc.c $(ALLSOURCES) -o build/pulsarosc
-	
+
+	echo "Building phasorosc.c example...";
+	gcc $(FLAGS) examples/phasorosc.c $(ALLSOURCES) -o build/phasorosc
+
 	echo "Building sineosc.c example...";
 	gcc $(FLAGS) examples/sineosc.c $(ALLSOURCES) -o build/sineosc
 
@@ -61,6 +66,9 @@ examples:
 
 	echo "Building grainformation2.c example...";
 	gcc $(FLAGS) examples/grainformation2.c $(ALLSOURCES) -o build/grainformation2
+
+	echo "Building tableosc.c example...";
+	gcc $(FLAGS) examples/tableosc.c $(ALLSOURCES) -o build/tableosc
 
 	echo "Building tapeosc.c example...";
 	gcc $(FLAGS) examples/tapeosc.c $(ALLSOURCES) -o build/tapeosc

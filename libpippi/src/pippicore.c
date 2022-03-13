@@ -1099,6 +1099,14 @@ void window_phasor(lpfloat_t* out, int length) {
     }
 }
 
+void window_reverse_sawtooth(lpfloat_t* out, int length) {
+    int i;
+    for(i=0; i < length; i++) {
+        out[i] = 1.f - (i/(lpfloat_t)length);
+    }
+}
+
+
 void window_tri(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
@@ -1135,6 +1143,8 @@ lpbuffer_t * create_window(int name, size_t length) {
         window_hanning(buf->data, length);            
     } else if (name == WIN_RND) {
         return create_window(rand_choice(NUM_WINDOWS), length);
+    } else if (name == WIN_RSAW) {
+        window_reverse_sawtooth(buf->data, length);            
     } else {
         window_sine(buf->data, length);            
     }

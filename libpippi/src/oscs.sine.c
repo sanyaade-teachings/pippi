@@ -12,7 +12,7 @@ lpsineosc_t * create_sineosc(void) {
     lpsineosc_t * osc = (lpsineosc_t *)LPMemoryPool.alloc(1, sizeof(lpsineosc_t));
     osc->phase = 0.f;
     osc->freq = 220.0f;
-    osc->samplerate = 48000.0f;
+    osc->samplerate = (lpfloat_t)DEFAULT_SAMPLERATE;
     return osc;
 }
 
