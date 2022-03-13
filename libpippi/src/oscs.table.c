@@ -13,22 +13,21 @@ lptableosc_t * create_tableosc(lpbuffer_t * buf) {
     osc->samplerate = (lpfloat_t)DEFAULT_SAMPLERATE;
     osc->gate = 0;
     osc->phase = 0.f;
-    osc->phaseinc = 1.f / (lpfloat_t)osc->samplerate;
-    osc->freq = 1.f / (lpfloat_t)buf->length;
+    osc->phaseinc = (1.f / osc->samplerate) * (lpfloat_t)buf->length;
+    osc->freq = 110.f;
 
     return osc;
 }
 
 lpfloat_t process_tableosc(lptableosc_t * osc) {
-    lpfloat_t sample, f, a, b, phase;
     int c;
+    lpfloat_t sample, f, a, b;
     size_t idxa, idxb, boundry;
 
-    phase = osc->phase;
     boundry = osc->buf->length-1;
 
-    f = phase - (int)phase;
-    idxa = (size_t)phase;
+    f = osc->phase - (int)osc->phase;
+    idxa = (size_t)osc->phase;
     idxb = idxa + 1;
 
     sample = 0.f;

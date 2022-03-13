@@ -13,7 +13,7 @@ int main() {
 
     length = 10 * SR;
 
-    win = LPWindow.create(WIN_RSAW, 512);
+    win = LPWavetable.create(WT_SINE, 512);
     out = LPBuffer.create(length, CHANNELS, SR);
 
     osc = LPTableOsc.create(win);
@@ -23,7 +23,7 @@ int main() {
     for(i=0; i < length; i++) {
         sample = LPTableOsc.process(osc);
         for(c=0; c < CHANNELS; c++) {
-            out->data[i * CHANNELS + c] = sample;
+            out->data[i * CHANNELS + c] = sample * 0.2f;
         }
     }
 
