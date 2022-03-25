@@ -165,20 +165,20 @@ If you need to build sources from a clean slate (sometimes updates to `pxd` file
 
 ## Thanks
 
-[Project Nayuki](https://www.nayuki.io/page/free-small-fft-in-multiple-languages) for a compact FFT! (Used in `SoundBuffer.convolve()`)
+[Astrid Lindgren](https://en.wikipedia.org/wiki/Astrid_Lindgren) for writing the stories about Pippi Longstocking that have inspired me as a kid and an adult.
 
-[Paul Batchelor](https://github.com/PaulBatchelor/Soundpipe) for all the goodness in Soundpipe that has made its way into Pippi. (See the `fx` and `bar` modules.)
+[Will Mitchell](https://github.com/liquidcitymotors/) who contributed a wonderful zener diode softclip simulation, a state variable filter implementation available in the `fx` module, amazing work on bandlimiting in oscs and general moral support.
 
-[Bernhard Schelling](https://zillalib.github.io/) for his TinySoundFont library used in the `soundfont` module.
+[Paul Batchelor](https://github.com/PaulBatchelor/Soundpipe) for all the lovely work pippi uses directly from Soundpipe, as well as indirectly inspired from sndkit and his writings.
 
-[Nando Florestan](http://dev.nando.audio/) for his small public domain GM soundfont used in the test suite.
+[Project Nayuki](https://www.nayuki.io/page/free-small-fft-in-multiple-languages) for a compact and understandable FFT! (Used in `SoundBuffer.convolve()`)
 
-[Pixeldroid](https://github.com/pixeldroid/fonts) for their OFL licensed console font used for labeling graphs.
-
-[@noisesmith@sonomu.club](https://sonomu.club/@noisesmith) for introducing me to the modulation param on tukey windows
+[Bernhard Schelling](https://zillalib.github.io/) for the TinySoundFont library used in the `soundfont` module.
 
 [James McCartney](https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html) for his implementation of hermite interpolation used in the `Wavetable` module and elsewhere.
 
-[Will Mitchell](https://github.com/liquidcitymotors/) for his zener diode softclip simulation, state variable filter implementation available in the `fx` module, and amazing work on bandlimiting oscs.
-
 [Jatin Chowdhury](https://ccrma.stanford.edu/~jatin/ComplexNonlinearities/Wavefolder.html) for their lovely sounding saturating feedback wavefolder.
+
+[Nando Florestan](http://dev.nando.audio/) for the small public domain GM soundfont used in the test suite.
+
+[@noisesmith@sonomu.club](https://sonomu.club/@noisesmith) who introduced me to the modulation param on tukey windows...!
