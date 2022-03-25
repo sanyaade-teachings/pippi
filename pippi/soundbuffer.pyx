@@ -3,6 +3,7 @@
 import numbers
 import random
 import reprlib
+import warnings
 
 from pysndfile import sndio
 import numpy as np
@@ -1123,7 +1124,9 @@ cdef class SoundBuffer:
         """ Write the contents of this buffer to disk 
             in the given audio file format. (WAV, AIFF, AU)
         """
-        return sndio.write(filename, np.asarray(self.frames), self.samplerate)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            sndio.write(filename, np.asarray(self.frames), self.samplerate)
 
 
 cpdef object rebuild_buffer(double[:,:] frames, int channels, int samplerate):
