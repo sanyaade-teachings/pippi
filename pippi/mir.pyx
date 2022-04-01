@@ -56,140 +56,40 @@ cpdef Wavetable contrast(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
     cdef np.ndarray wt = _contrast(flatten(snd), snd.samplerate, winsize)
     return Wavetable(wt.transpose().astype('d').flatten())
 
-cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, int winsize=DEFAULT_WINSIZE, bint backfill=True, double autotune=0):
+cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, int winsize=DEFAULT_WINSIZE, bint backfill=True, double autotune=0, double fallback=220.):
     """ Returns a wavetable of non-zero frequencies detected which exceed the confidence threshold given. Frequencies are 
         held until the next detection to avoid zeros and outliers. Depending on the input, you may need to play with the 
         tolerance value and the window size to tune the behavior. The default detection method is `yinfast`. 
 
         Example:
 
-            pitches = mir.pitch(snd, 0.8, 'yinfast')
+            pitches = mir.pitch(snd, 0.8)
 
-        Methods:
+        * Yin implementation ported from:
+        * Patrice Guyot. (2018, April 19). Fast Python 
+        * implementation of the Yin algorithm (Version v1.1.1). 
+        * Zenodo. http://doi.org/10.5281/zenodo.1220947
+        * https://github.com/patriceguyot/Yin
 
-        This routine is a wrapper for [aubio](https://aubio.org)'s pitch detection. 
-        Summaries of the detection methods were taken from: https://aubio.org/manual/latest/cli.html#manpages
-        Part of that man page was copied and slightly modified for formatting per the terms of the GPL license 
-        which the original page was published under. Please see the above link for details.
-
-        `schmitt` - Schmitt trigger
-
-        > This pitch extraction method implements a Schmitt trigger to estimate the
-        > period of a signal. It is computationally very inexpensive, but also very
-        > sensitive to noise.
-
-        `fcomb` - a fast harmonic comb filter
-
-        > This pitch extraction method implements a fast harmonic comb filter to
-        > determine the fundamental frequency of a harmonic sound.
-
-        `mcomb` - multiple-comb filter
-
-        > This fundamental frequency estimation algorithm implements spectral
-        > flattening, multi-comb filtering and peak histogramming.
-
-        `specacf` - Spectral auto-correlation function
-
-        `yin` - YIN algorithm
-
-        > This algorithm was developed by A. de Cheveigne and H. Kawahara and
-        > was first published in:
-        > 
-        > De Cheveigné, A., Kawahara, H. (2002) "YIN, a fundamental frequency
-        > estimator for speech and music", J. Acoust. Soc. Am. 111, 1917-1930.
-
-        `yinfft` - Yinfft algorithm
-
-        > This algorithm was derived from the YIN algorithm. In this implementation, a
-        > Fourier transform is used to compute a tapered square difference function,
-        > which allows spectral weighting. Because the difference function is tapered,
-        > the selection of the period is simplified.
-        > 
-        > Paul Brossier, Automatic annotation of musical audio for interactive systems,
-        > Chapter 3, Pitch Analysis, PhD thesis, Centre for Digital music, Queen Mary
-        > University of London, London, UK, 2006.
-
-        `yinfast` - YIN algorithm (accelerated)
-
-        > An optimised implementation of the YIN algorithm, yielding results identical
-        > to the original YIN algorithm, while reducing its computational cost from
-        > O(n^2) to O(n log(n)).
+        See libpippi/src/mir.c for implementation notes.
     """
 
-    if method is None:
-        method = 'yinfast'
-
-    cdef int hopsize = winsize//2
-
-    o = aubio.pitch(method, winsize, hopsize, snd.samplerate)
-    o.set_tolerance(tolerance)
+    yin = LPPitchTracker.yin_create(4096, <int>snd.samplerate)
+    yin.fallback = <lpfloat_t>fallback
 
     cdef list pitches = []
-
-    cdef int pos = 0
-    cdef int count = 0
-    cdef double est = 0
-    cdef double con = 0
-    cdef double last = 0
-    cdef int first_stable_index = -1
-    cdef double first_stable_pitch = 0
-
     cdef float[:] src = flatten(snd)
-    cdef float[:] chunk
 
-    if autotune > 0:
-        while True:
-            chunk = src[pos:pos+hopsize]
-            if len(chunk) < hopsize:
-                break
+    cdef lpfloat_t s
+    cdef lpfloat_t last_p = -1
+    cdef lpfloat_t p = 0
 
-            est = o(np.asarray(chunk))[0]
-            con = o.get_confidence()
+    for s in src:
+        p = LPPitchTracker.yin_process(yin, s);
+        if(p > 0 and p != last_p):
+            last_p = p
 
-            pos += hopsize
-
-            if con < tolerance or est == 0:
-                pitches += [ last ]
-            else:
-                last = autotune / est
-                pitches += [ autotune / est ]
-
-                if first_stable_index < 0:
-                    first_stable_index = count
-                    first_stable_pitch = autotune / est
-
-            count += 1
-
-        if backfill and first_stable_index > 0:
-            for i in range(first_stable_index):
-                pitches[i] = first_stable_pitch
-
-    else:
-        while True:
-            chunk = src[pos:pos+hopsize]
-            if len(chunk) < hopsize:
-                break
-
-            est = o(np.asarray(chunk))[0]
-            con = o.get_confidence()
-
-            pos += hopsize
-
-            if con < tolerance or est == 0:
-                pitches += [ last ]
-            else:
-                last = est
-                pitches += [ est ]
-
-                if first_stable_index < 0:
-                    first_stable_index = count
-                    first_stable_pitch = est
-
-            count += 1
-
-        if backfill and first_stable_index > 0:
-            for i in range(first_stable_index):
-                pitches[i] = first_stable_pitch
+        pitches += [ p ]
 
     return Wavetable(pitches)
 

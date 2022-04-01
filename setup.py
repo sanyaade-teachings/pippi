@@ -5,7 +5,6 @@ from Cython.Build import cythonize
 import numpy as np
 
 INCLUDES = ['libpippi/src', '/usr/local/include', np.get_include()]
-CSOURCES = ['libpippi/src/pippicore.c']
 MACROS = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 
 ext_modules = cythonize([
@@ -77,7 +76,11 @@ ext_modules = cythonize([
             include_dirs=INCLUDES, 
             define_macros=MACROS
         ), 
-        Extension('pippi.mir', ['pippi/mir.pyx'],
+        Extension('pippi.mir', [
+                'libpippi/src/pippicore.c', 
+                'libpippi/src/mir.c', 
+                'pippi/mir.pyx'
+            ],
             include_dirs=INCLUDES, 
             define_macros=MACROS
         ),
