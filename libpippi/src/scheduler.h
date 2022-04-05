@@ -24,6 +24,7 @@ typedef struct lpscheduler_t {
 typedef struct lpscheduler_factory_t {
     lpscheduler_t * (*create)(int);
     void (*tick)(lpscheduler_t *);
+    int (*is_playing)(lpscheduler_t *);
     int (*count_waiting)(lpscheduler_t *);
     int (*count_playing)(lpscheduler_t *);
     int (*count_done)(lpscheduler_t *);

@@ -26,7 +26,7 @@ clean:
 cython:
 	echo "Building cython renderer...";
 	cython cython/renderer.pyx
-	gcc -g -std=c99 -Wall -Wextra -lm -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 examples/renderer.c $(ALLSOURCES) src/astrid.c cython/renderer.c -o build/renderer
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 examples/renderer.c $(ALLSOURCES) src/astrid.c cython/renderer.c -o build/renderer
 
 examples:
 	mkdir -p build renders
@@ -91,7 +91,7 @@ examples:
 	echo "Building slicing2.c example...";
 	gcc $(FLAGS) examples/slicing2.c $(ALLSOURCES) -o build/slicing2
 
-	echo "Rendering examples..."
-	./scripts/render_examples.sh
+	#echo "Rendering examples..."
+	#./scripts/render_examples.sh
 
 all: cython examples

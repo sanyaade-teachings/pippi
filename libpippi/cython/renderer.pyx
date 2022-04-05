@@ -274,12 +274,18 @@ cdef public int astrid_load_instrument() except -1:
     logger.debug("Loaded ding.py")
     return 0
 
+cdef public int astrid_reload_instrument() except -1:
+    global ASTRID_INSTRUMENT
+
+    ASTRID_INSTRUMENT = _load_instrument('ding', 'orc/ding.py')
+    logger.debug("Loaded ding.py")
+    return 0
+
 cdef public int astrid_render_event() except -1:
     global ASTRID_RENDERS
     global ASTRID_INSTRUMENT
 
     ASTRID_RENDERS += render_event(ASTRID_INSTRUMENT, None, None)
-    print('rendered events')
     return 0
 
 cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:
@@ -289,22 +295,14 @@ cdef public int astrid_get_info(size_t * length, int * channels, int * samplerat
     channels[0] = <int>(ASTRID_RENDERS[-1].channels)
     samplerate[0] = <int>(ASTRID_RENDERS[-1].samplerate)
 
-    logger.debug('got info')
     return 0
-
-   
 
 cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:
     cdef size_t i
     cdef int c
     global ASTRID_RENDERS
 
-    logger.debug('popping snd')
     snd = ASTRID_RENDERS.pop()
-
-    logger.debug('copying data')
     for i in range(buffer.length):
         for c in range(buffer.channels):
             buffer.data[i * buffer.channels + c] = snd.frames[i][c]
-            #print(buffer.data[i * buffer.channels + c])
-    logger.debug('copied data!')

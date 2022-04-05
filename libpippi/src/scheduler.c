@@ -61,7 +61,6 @@ void start_playing(lpscheduler_t * s, lpevent_t * e) {
         printf("Cannot move this event. There is nothing in the waiting queue!\n");
     }
 
-
     prev = NULL;
     current = s->waiting_queue_head;
     while(current != e && current->next != NULL) {
@@ -300,6 +299,14 @@ int scheduler_count_done(lpscheduler_t * s) {
     return ll_count(s->garbage_stack_head);
 }
 
+int scheduler_is_playing(lpscheduler_t * s) {
+    int playing;
+    playing = 0;
+    if(scheduler_count_waiting(s) > 0) playing = 1;
+    if(scheduler_count_playing(s) > 0) playing = 1;
+    return playing;
+}
+
 void scheduler_destroy(lpscheduler_t * s) {
     /* Loop over queues and free buffers, events */
     lpevent_t * current;
@@ -338,4 +345,4 @@ void scheduler_destroy(lpscheduler_t * s) {
     LPMemoryPool.free(s);
 }
 
-const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_destroy };
+const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, scheduler_is_playing, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_destroy };
