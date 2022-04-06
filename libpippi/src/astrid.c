@@ -22,14 +22,13 @@ void handle_shutdown(int) {
 void miniaudio_callback(ma_device * device, void * pOut, const void * in, ma_uint32 count) {
     ma_uint32 i;
     float * out;
-    int c, frames;
+    int c;
     lpscheduler_t * s;
 
     s = (lpscheduler_t *)device->pUserData;
-    frames = count / CHANNELS;
     out = (float *)pOut;
 
-    for(i=0; i < frames; i++) {
+    for(i=0; i < count; i++) {
         LPScheduler.tick(s);
         for(c=0; c < CHANNELS; c++) {
             *out++ = (float)s->current_frame[c];
