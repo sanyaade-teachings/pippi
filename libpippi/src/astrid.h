@@ -1,7 +1,7 @@
 #ifndef LPASTRID
 #define LPASTRID
 
-int lprendernode_init(int argc, char * argv[]);
+int lprendernode_init();
 
 /*
 enum NodeMessage {

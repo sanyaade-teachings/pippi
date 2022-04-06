@@ -7,6 +7,7 @@
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
+
 #include "pippi.h"
 #include "renderer.h"
 
@@ -36,9 +37,8 @@ void miniaudio_callback(ma_device * device, void * pOut, const void * in, ma_uin
     }
 }
 
-int lprendernode_init(int argc, char * argv[]) {
+int lprendernode_init() {
     PyObject * pmodule;
-    wchar_t * program;
     struct sigaction action;
 
     lpbuffer_t * out;
@@ -56,18 +56,12 @@ int lprendernode_init(int argc, char * argv[]) {
 
     Py_SetPath(L"/home/hecanjog/.pyenv/versions/3.9.9/lib/python39.zip:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/lib-dynload:/home/hecanjog/.local/lib/python3.9/site-packages:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-packages:/home/hecanjog/code/pippi:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-packages/PySoundFile-0.9.0.post1-py3.9.egg");
 
-    program = Py_DecodeLocale(argv[0], NULL);
-    if(program == NULL) {
-        fprintf(stderr, "Fatal error: cannot decode argv[0], got %d arguments\n", argc);
-        exit(1);
-    }
-
     if(PyImport_AppendInittab("renderer", PyInit_renderer) == -1) {
         fprintf(stderr, "Error: could not extend in-built modules table for renderer\n");
         exit(1);
     }
 
-    Py_SetProgramName(program);
+    Py_SetProgramName(L"astrid");
     Py_Initialize();
 
     /*printf("Renderer embedded python path: %ls\n", Py_GetPath());*/
@@ -131,13 +125,11 @@ int lprendernode_init(int argc, char * argv[]) {
     }
 
     ma_device_uninit(&playback);
-    PyMem_RawFree(program);
     Py_Finalize();
     return 0;
 
 exit_with_error:
     ma_device_uninit(&playback);
-    PyMem_RawFree(program);
     Py_Finalize();
     return 1;
 }
