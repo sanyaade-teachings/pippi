@@ -16,6 +16,8 @@ typedef struct lpscheduler_t {
     int channels;
     size_t now;
     size_t event_count;
+    size_t numzeros;
+    lpfloat_t last_sum;
     lpevent_t * waiting_queue_head;
     lpevent_t * playing_stack_head;
     lpevent_t * garbage_stack_head;

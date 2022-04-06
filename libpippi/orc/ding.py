@@ -12,5 +12,5 @@ def play(ctx):
     print(freq)
     out = oscs.SineOsc(
         freq=freq
-    ).play(dsp.rand(0.1, 0.3)).env('hannout').pan(dsp.rand()) * 0.8
+    ).play(dsp.rand(0.1, 0.3)).env('pluckout').pan(dsp.rand()) * 0.8
     yield out

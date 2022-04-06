@@ -264,10 +264,14 @@ void lpscheduler_tick(lpscheduler_t * s) {
 
 void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay) {
     lpevent_t * e;
+
+    /*
+     * FIXME -- recycle events
     lpevent_t * prev;
 
     prev = NULL;
-    if(s->garbage_stack_head) {
+    if(s->garbage_stack_head != NULL) {
+        printf("Garbage stack has stuff\n");
         e = s->garbage_stack_head;
         while(e->next != NULL) {
             prev = e;
@@ -279,6 +283,10 @@ void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay)
         s->event_count += 1;
         e->id = s->event_count;
     }
+    */
+    e = (lpevent_t *)LPMemoryPool.alloc(1, sizeof(lpevent_t));
+    s->event_count += 1;
+    e->id = s->event_count;
 
     e->buf = buf;
     e->pos = 0;

@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <signal.h>
 
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
@@ -12,8 +13,13 @@
 #define CHANNELS 2
 #define SAMPLERATE 48000
 
+static volatile int astrid_is_running = 1;
 
-void astrid_mixer(ma_device * device, void * pOut, const void * in, ma_uint32 count) {
+void handle_shutdown(int) {
+    astrid_is_running = 0;
+}
+
+void miniaudio_callback(ma_device * device, void * pOut, const void * in, ma_uint32 count) {
     ma_uint32 i;
     float * out;
     int c, frames;
@@ -25,17 +31,16 @@ void astrid_mixer(ma_device * device, void * pOut, const void * in, ma_uint32 co
 
     for(i=0; i < frames; i++) {
         LPScheduler.tick(s);
-        /*ma_data_source_read_pcm_frames(s->current_frame, out, 1, NULL);*/
         for(c=0; c < CHANNELS; c++) {
             *out++ = (float)s->current_frame[c];
         }
     }
-    
 }
 
 int lprendernode_init(int argc, char * argv[]) {
     PyObject * pmodule;
     wchar_t * program;
+    struct sigaction action;
 
     lpbuffer_t * out;
     lpscheduler_t * s;
@@ -43,6 +48,9 @@ int lprendernode_init(int argc, char * argv[]) {
     size_t length;
     int channels;
     int samplerate;
+
+    action.sa_handler = handle_shutdown;
+    sigaction(SIGINT, &action, NULL);
 
     s = LPScheduler.create(CHANNELS);
     length = 0;
@@ -77,7 +85,7 @@ int lprendernode_init(int argc, char * argv[]) {
     audioconfig.playback.format = ma_format_f32;
     audioconfig.playback.channels = CHANNELS;
     audioconfig.sampleRate = SAMPLERATE;
-    audioconfig.dataCallback = astrid_mixer;
+    audioconfig.dataCallback = miniaudio_callback;
     audioconfig.pUserData = s;
 
     /* init playback device */
@@ -87,40 +95,41 @@ int lprendernode_init(int argc, char * argv[]) {
         goto exit_with_error;
     }
 
-    if(astrid_load_instrument() < 0) {
-        PyErr_Print();
-        fprintf(stderr, "Runtime Error while attempting to load astrid instrument\n");
-        goto exit_with_error;
-    }
-
-    if(astrid_render_event() < 0) {
-        PyErr_Print();
-        fprintf(stderr, "Runtime Error while rendering event from astrid instrument\n");
-        goto exit_with_error;
-    }
-
-    if(astrid_get_info(&length, &channels, &samplerate) < 0) {
-        PyErr_Print();
-        fprintf(stderr, "Runtime Error while getting info about the last rendered event\n");
-        goto exit_with_error;
-    }
-
-    out = LPBuffer.create(length, CHANNELS, SAMPLERATE);
-    if(astrid_copy_buffer(out) < 0) {
-        PyErr_Print();
-        fprintf(stderr, "Runtime Error while copying render data\n");
-        goto exit_with_error;
-    }
-    LPScheduler.schedule_event(s, out, 0);
-
     /* start playback device */
     ma_device_start(&playback);
 
-    while(LPScheduler.is_playing(s)) {
-        usleep((useconds_t)1000);
-    }
+    while(astrid_is_running) {
+        if(astrid_load_instrument() < 0) {
+            PyErr_Print();
+            fprintf(stderr, "Runtime Error while attempting to load astrid instrument\n");
+            goto exit_with_error;
+        }
 
-    LPBuffer.destroy(out);
+        if(astrid_render_event() < 0) {
+            PyErr_Print();
+            fprintf(stderr, "Runtime Error while rendering event from astrid instrument\n");
+            goto exit_with_error;
+        }
+
+        if(astrid_get_info(&length, &channels, &samplerate) < 0) {
+            PyErr_Print();
+            fprintf(stderr, "Runtime Error while getting info about the last rendered event\n");
+            goto exit_with_error;
+        }
+
+        out = LPBuffer.create(length, CHANNELS, SAMPLERATE);
+        if(astrid_copy_buffer(out) < 0) {
+            PyErr_Print();
+            fprintf(stderr, "Runtime Error while copying render data\n");
+            goto exit_with_error;
+        }
+        LPScheduler.schedule_event(s, out, 0);
+
+        while(LPScheduler.is_playing(s)) {
+            usleep((useconds_t)1000);
+        }
+        LPBuffer.destroy(out);
+    }
 
     ma_device_uninit(&playback);
     PyMem_RawFree(program);
