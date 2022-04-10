@@ -3,7 +3,7 @@
 
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
-#define MA_ENABLE_PULSEAUDIO
+#define MA_ENABLE_JACK
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
@@ -47,6 +47,7 @@ int lprendernode_init() {
     size_t length;
     int channels;
     int samplerate;
+    int buffer_count;
 
     action.sa_handler = handle_shutdown;
     sigaction(SIGINT, &action, NULL);
@@ -91,37 +92,49 @@ int lprendernode_init() {
     /* start playback device */
     ma_device_start(&playback);
 
-    while(astrid_is_running) {
-        if(astrid_load_instrument() < 0) {
-            PyErr_Print();
-            fprintf(stderr, "Runtime Error while attempting to load astrid instrument\n");
-            goto exit_with_error;
-        }
+    if(astrid_load_instrument() < 0) {
+        PyErr_Print();
+        fprintf(stderr, "Runtime Error while attempting to load astrid instrument\n");
+        goto exit_with_error;
+    }
 
+    buffer_count = 0;
+    while(astrid_is_running) {
         if(astrid_render_event() < 0) {
             PyErr_Print();
             fprintf(stderr, "Runtime Error while rendering event from astrid instrument\n");
             goto exit_with_error;
         }
 
-        if(astrid_get_info(&length, &channels, &samplerate) < 0) {
-            PyErr_Print();
-            fprintf(stderr, "Runtime Error while getting info about the last rendered event\n");
-            goto exit_with_error;
-        }
+        astrid_buffer_count(&buffer_count);
+        while(buffer_count > 0) {
+            if(astrid_get_info(&length, &channels, &samplerate) < 0) {
+                PyErr_Print();
+                fprintf(stderr, "Runtime Error while getting info about the last rendered event\n");
+                goto exit_with_error;
+            }
 
-        out = LPBuffer.create(length, CHANNELS, SAMPLERATE);
-        if(astrid_copy_buffer(out) < 0) {
-            PyErr_Print();
-            fprintf(stderr, "Runtime Error while copying render data\n");
-            goto exit_with_error;
+            out = LPBuffer.create(length, CHANNELS, SAMPLERATE);
+            if(astrid_copy_buffer(out) < 0) {
+                PyErr_Print();
+                fprintf(stderr, "Runtime Error while copying render data\n");
+                goto exit_with_error;
+            }
+            LPScheduler.schedule_event(s, out, 0);
+            astrid_buffer_count(&buffer_count);
         }
-        LPScheduler.schedule_event(s, out, 0);
 
         while(LPScheduler.is_playing(s)) {
             usleep((useconds_t)1000);
         }
-        LPBuffer.destroy(out);
+
+        /* Free memory for old buffers and events */
+        /*LPScheduler.empty(s);*/
+        if(astrid_reload_instrument() < 0) {
+            PyErr_Print();
+            fprintf(stderr, "Runtime Error while attempting to reload astrid instrument\n");
+            goto exit_with_error;
+        }
     }
 
     ma_device_uninit(&playback);

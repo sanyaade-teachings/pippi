@@ -23,6 +23,7 @@ __PYX_EXTERN_C int astrid_load_instrument(void);
 __PYX_EXTERN_C int astrid_reload_instrument(void);
 __PYX_EXTERN_C int astrid_render_event(void);
 __PYX_EXTERN_C int astrid_get_info(size_t *, int *, int *);
+__PYX_EXTERN_C int astrid_buffer_count(int *);
 __PYX_EXTERN_C int astrid_copy_buffer(lpbuffer_t *);
 
 #endif /* !__PYX_HAVE_API__renderer */

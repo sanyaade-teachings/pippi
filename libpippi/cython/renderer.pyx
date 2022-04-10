@@ -16,7 +16,6 @@ if not logger.handlers:
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
-
 cdef class SessionParamBucket:
     """ params[key] to params.key
     """
@@ -67,6 +66,10 @@ cdef class EventContext:
         #self.sampler = Sampler()
 
     def play(self, instrument_name, *params, **kwargs):
+        """ FIXME -- this should probably be a general 
+            message-passing interface, so instrument scripts
+            can invoke any astrid orchestration commands.
+        """
         if params is not None:
             params = params[0]
 
@@ -228,9 +231,6 @@ cdef list render_event(object instrument, object params, object buf_q):
     cdef EventContext ctx = instrument.create_ctx(params)
     cdef list out = []
 
-    logger.debug('preplay test')
-    instrument.renderer.play(ctx)
-
     logger.debug('getting players')
     players, loop, overlap = collect_players(instrument)
     logger.debug(str(players))
@@ -250,7 +250,6 @@ cdef list render_event(object instrument, object params, object buf_q):
             try:
                 for snd in generator:
                     out += [ snd ]
-                    pass
             except Exception as e:
                 logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))
         except Exception as e:
@@ -261,6 +260,7 @@ cdef list render_event(object instrument, object params, object buf_q):
         # execute the done callback
         instrument.renderer.done(ctx)
 
+    print('Rendered %s buffers for event %s' % (len(out), instrument))
     return out
 
 
@@ -269,16 +269,14 @@ ASTRID_INSTRUMENT = None
 
 cdef public int astrid_load_instrument() except -1:
     global ASTRID_INSTRUMENT
-
     ASTRID_INSTRUMENT = _load_instrument('ding', 'orc/ding.py')
     logger.debug("Loaded ding.py")
     return 0
 
 cdef public int astrid_reload_instrument() except -1:
     global ASTRID_INSTRUMENT
-
-    ASTRID_INSTRUMENT = _load_instrument('ding', 'orc/ding.py')
-    logger.debug("Loaded ding.py")
+    ASTRID_INSTRUMENT.reload()
+    logger.debug("Reloaded ding.py")
     return 0
 
 cdef public int astrid_render_event() except -1:
@@ -296,6 +294,10 @@ cdef public int astrid_get_info(size_t * length, int * channels, int * samplerat
     samplerate[0] = <int>(ASTRID_RENDERS[-1].samplerate)
 
     return 0
+
+cdef public int astrid_buffer_count(int * count) except -1:
+    global ASTRID_RENDERS
+    count[0] = <int>len(ASTRID_RENDERS)
 
 cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:
     cdef size_t i

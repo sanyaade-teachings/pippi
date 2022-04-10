@@ -6,6 +6,7 @@ void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay)
 void scheduler_destroy(lpscheduler_t * s);
 void start_playing(lpscheduler_t * s, lpevent_t * e);
 void scheduler_debug(lpscheduler_t * s);
+void scheduler_cleanup_nursery(lpscheduler_t * s);
 
 void ll_display(lpevent_t * head) {
     lpevent_t * current;
@@ -112,10 +113,10 @@ void stop_playing(lpscheduler_t * s, lpevent_t * e) {
     current->next = NULL;
 
     /* Add to the tail of the garbage stack */
-    if(s->garbage_stack_head == NULL) {
-        s->garbage_stack_head = e;
+    if(s->nursery_head == NULL) {
+        s->nursery_head = e;
     } else {
-        current = s->garbage_stack_head;
+        current = s->nursery_head;
         while(current->next != NULL) {
             current = (lpevent_t *)current->next;
         }
@@ -130,7 +131,7 @@ lpscheduler_t * scheduler_create(int channels) {
 
     s->waiting_queue_head = NULL;
     s->playing_stack_head = NULL;
-    s->garbage_stack_head = NULL;
+    s->nursery_head = NULL;
 
     s->channels = channels;
     s->now = 0;
@@ -240,9 +241,9 @@ void scheduler_debug(lpscheduler_t * s) {
         printf("none playing\n");
     }
 
-    if(s->garbage_stack_head) {
-        printf("%d done\n\n", ll_count(s->garbage_stack_head));
-        ll_display(s->garbage_stack_head);
+    if(s->nursery_head) {
+        printf("%d done\n\n", ll_count(s->nursery_head));
+        ll_display(s->nursery_head);
     } else {
         printf("none done\n");
     }
@@ -265,28 +266,15 @@ void lpscheduler_tick(lpscheduler_t * s) {
 void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay) {
     lpevent_t * e;
 
-    /*
-     * FIXME -- recycle events
-    lpevent_t * prev;
-
-    prev = NULL;
-    if(s->garbage_stack_head != NULL) {
-        printf("Garbage stack has stuff\n");
-        e = s->garbage_stack_head;
-        while(e->next != NULL) {
-            prev = e;
-            e = (lpevent_t *)e->next;        
-        }
-        if(prev) prev->next = NULL;
+    if(s->nursery_head != NULL) {
+        e = s->nursery_head;
+        s->nursery_head = (void *)e->next;
+        e->next = NULL; 
     } else {
         e = (lpevent_t *)LPMemoryPool.alloc(1, sizeof(lpevent_t));
         s->event_count += 1;
         e->id = s->event_count;
     }
-    */
-    e = (lpevent_t *)LPMemoryPool.alloc(1, sizeof(lpevent_t));
-    s->event_count += 1;
-    e->id = s->event_count;
 
     e->buf = buf;
     e->pos = 0;
@@ -304,7 +292,7 @@ int scheduler_count_playing(lpscheduler_t * s) {
 }
 
 int scheduler_count_done(lpscheduler_t * s) {
-    return ll_count(s->garbage_stack_head);
+    return ll_count(s->nursery_head);
 }
 
 int scheduler_is_playing(lpscheduler_t * s) {
@@ -340,8 +328,8 @@ void scheduler_destroy(lpscheduler_t * s) {
         LPMemoryPool.free(current);
     }
 
-    if(s->garbage_stack_head) {
-        current = s->garbage_stack_head;
+    if(s->nursery_head) {
+        current = s->nursery_head;
         while(current->next != NULL) {
             next = (lpevent_t *)current->next;
             LPMemoryPool.free(current);
@@ -353,4 +341,19 @@ void scheduler_destroy(lpscheduler_t * s) {
     LPMemoryPool.free(s);
 }
 
-const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, scheduler_is_playing, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_destroy };
+void scheduler_cleanup_nursery(lpscheduler_t * s) {
+    /* Loop over nursey and free buffers */
+    lpevent_t * current;
+    lpevent_t * next;
+
+    if(s->nursery_head != NULL) {
+        current = s->nursery_head;
+        while(current->next != NULL) {
+            next = (lpevent_t *)current->next;
+            LPBuffer.destroy(current->buf);
+            current = (lpevent_t *)next;        
+        }
+    }
+}
+
+const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, scheduler_is_playing, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_cleanup_nursery, scheduler_destroy };
