@@ -1,4 +1,6 @@
 #!/bin/bash
-rm -rf DaisyExamples
-git clone --recursive https://github.com/electro-smith/DaisyExamples
-(cd DaisyExamples; bash ci/build_libs.sh)
+if [ ! -d libDaisy ]; then
+    git clone https://github.com/electro-smith/libDaisy
+fi
+
+(cd libDaisy; git pull origin master; make -s clean; make -j -s)

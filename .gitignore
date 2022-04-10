@@ -30,5 +30,5 @@ venv
 libpippi/renders/*.wav
 libpippi/build
 
-garden/DaisyExamples
+garden/libDaisy
 garden/**/**/build/*
