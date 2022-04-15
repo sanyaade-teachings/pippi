@@ -52,15 +52,11 @@ to any SoundBuffer.
 guitar.write('docs/tutorials/renders/001-guitar-unaltered.flac')
 ```
 
-```
-441000
-```
-
 
 
 ### Processing sounds
 
-<audio src="/docs/tutorials/renders/001-guitar-unaltered.flac" controls></audio>
+<audio src="/docs/tutorials/renders/001-guitar-unaltered.ogg" controls></audio>
 
 Many sound transformations are available directly as methods on the SoundBuffer.
 Lets slow the guitar down to half-speed, print info about it again and then save the 
@@ -94,13 +90,9 @@ Save a copy -- this time as a WAV file
 slow_guitar.write('docs/tutorials/renders/001-guitar-slow.wav')
 ```
 
-```
-882000
-```
 
 
-
-<audio src="/docs/tutorials/renders/001-guitar-slow.wav" controls></audio>
+<audio src="/docs/tutorials/renders/001-guitar-slow.ogg" controls></audio>
 
 Pippi has many other built-in routines for sound processing which will be explored in future tutorials. 
 Check out the methods available on `SoundBuffer` and the `fx` module for more examples.
@@ -118,16 +110,11 @@ print(mixed_guitars)
 
 ```
 SoundBuffer(samplerate=44100, channels=2, frames=882000, dur=20.00)
-/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
-packages/pysndfile/sndio.py:115: UserWarning:
-write_frames::warning::audio data has been clipped while writing to
-file docs/tutorials/renders/001-guitar-mixed.wav.
-  nf = sf.write_frames(data)
 ```
 
 
 
-<audio src="/docs/tutorials/renders/001-guitar-mixed.wav" controls></audio>
+<audio src="/docs/tutorials/renders/001-guitar-mixed.ogg" controls></audio>
 
 Notice how the output buffer is the length of the longest of the two files so nothing is clipped. 
 This is true also when you mix many files at once with `dsp.mix([sound1, sound2, sound3])`.
@@ -227,21 +214,9 @@ for speed in speeds:
 out.write('docs/tutorials/renders/001-guitar-chord.wav')
 ```
 
-```
-/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
-packages/pysndfile/sndio.py:115: UserWarning:
-write_frames::warning::audio data has been clipped while writing to
-file docs/tutorials/renders/001-guitar-chord.wav.
-  nf = sf.write_frames(data)
-```
-
-```
-377300
-```
 
 
-
-<audio src="/docs/tutorials/renders/001-guitar-chord.wav" controls></audio>
+<audio src="/docs/tutorials/renders/001-guitar-chord.ogg" controls></audio>
 
 ### Envelopes, amplitude modulation and `Wavetable`s
 
@@ -319,12 +294,8 @@ out = fx.norm(out, 1)
 out.write('docs/tutorials/renders/001-guitar-chord-enveloped.wav')
 ```
 
-```
-1622491
-```
 
 
-
-<audio src="/docs/tutorials/renders/001-guitar-chord-enveloped.wav" controls></audio>
+<audio src="/docs/tutorials/renders/001-guitar-chord-enveloped.ogg" controls></audio>
 
 

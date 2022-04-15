@@ -91,13 +91,9 @@ hat = hat.env(pluckout) * 0.5 # Also multiply by 0.5 to reduce the amplitude of 
 hat.write('docs/tutorials/renders/002-plucked-hat.flac')
 ```
 
-```
-3528
-```
 
 
-
-<audio src="/docs/tutorials/renders/002-plucked-hat.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-plucked-hat.ogg" controls></audio>
 
 We'll wrap it in a function to make it easy to reuse later on. Lets also make the 
 curve shape of the frequency boundries change to a different shape each time the function is 
@@ -157,17 +153,13 @@ while elapsed < 30:
 out.write('docs/tutorials/renders/002-hats-on-ice.flac')
 ```
 
-```
-1323000
-```
-
 
 
 <img src="/docs/tutorials/figures/002-sinc-win.png" title="sinc wavetable"/>
 
 Behold! Our fabulous hi hats:
 
-<audio src="/docs/tutorials/renders/002-hats-on-ice.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-hats-on-ice.ogg" controls></audio>
 
 #### Smearing the hats across time
 
@@ -213,18 +205,6 @@ out = fx.lpf(out, 3000) * 0.5
 out.write('docs/tutorials/renders/002-hats-slipping-on-ice.flac')
 ```
 
-```
-/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
-packages/pysndfile/sndio.py:115: UserWarning:
-write_frames::warning::audio data has been clipped while writing to
-file docs/tutorials/renders/002-hats-slipping-on-ice.flac.
-  nf = sf.write_frames(data)
-```
-
-```
-1334480
-```
-
 
 
 Here's our time LFO:
@@ -233,7 +213,7 @@ Here's our time LFO:
 
 And our irregular sequence of hi hats:
 
-<audio src="/docs/tutorials/renders/002-hats-slipping-on-ice.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-hats-slipping-on-ice.ogg" controls></audio>
 
 #### A rhythmic smear of hats, and a kick
 
@@ -261,13 +241,9 @@ kick = dsp.join([ makekick().pad(end=0.2) for _ in range(8) ]) # render a few ki
 kick.write('docs/tutorials/renders/002-kick.flac')
 ```
 
-```
-192832
-```
 
 
-
-<audio src="/docs/tutorials/renders/002-kick.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-kick.ogg" controls></audio>
 
 Ok, ok lets make a basic clap type sound too.
 
@@ -283,13 +259,9 @@ clap = dsp.join([ makeclap().pad(end=0.2) for _ in range(8) ]) # render a few cl
 clap.write('docs/tutorials/renders/002-clap.flac')
 ```
 
-```
-98784
-```
 
 
-
-<audio src="/docs/tutorials/renders/002-clap.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-clap.ogg" controls></audio>
 
 Lets say we want to make a pattern that has a five beat groove. We can adapt 
 our approaches above to play a kick once every five beats, a smear of hats that 
@@ -374,23 +346,11 @@ out.dub(hats)
 out.write('docs/tutorials/renders/002-kicks-and-hats-together.flac')
 ```
 
-```
-/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
-packages/pysndfile/sndio.py:115: UserWarning:
-write_frames::warning::audio data has been clipped while writing to
-file docs/tutorials/renders/002-kicks-and-hats-together.flac.
-  nf = sf.write_frames(data)
-```
-
-```
-1362866
-```
-
 
 
 Now this is starting to sound a little more interesting:
 
-<audio src="/docs/tutorials/renders/002-kicks-and-hats-together.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-kicks-and-hats-together.ogg" controls></audio>
 
 ### Pattern strings
 
@@ -446,13 +406,9 @@ while elapsed < 30:
 out.write('docs/tutorials/renders/002-a-hat-pattern.flac')
 ```
 
-```
-1356075
-```
 
 
-
-<audio src="/docs/tutorials/renders/002-a-hat-pattern.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-a-hat-pattern.ogg" controls></audio>
 
 This basic idea is actually pretty useful, and there are some helpers in 
 pippi for working with pattern strings like this, including a drum machine 
@@ -549,21 +505,9 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-1.flac')
 ```
 
-```
-/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
-packages/pysndfile/sndio.py:115: UserWarning:
-write_frames::warning::audio data has been clipped while writing to
-file docs/tutorials/renders/002-drum-machine-1.flac.
-  nf = sf.write_frames(data)
-```
-
-```
-912281
-```
 
 
-
-<audio src="/docs/tutorials/renders/002-drum-machine-1.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-1.ogg" controls></audio>
 
 The master tempo grid can be given as a curve:
 
@@ -579,21 +523,9 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-2.flac')
 ```
 
-```
-/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
-packages/pysndfile/sndio.py:115: UserWarning:
-write_frames::warning::audio data has been clipped while writing to
-file docs/tutorials/renders/002-drum-machine-2.flac.
-  nf = sf.write_frames(data)
-```
-
-```
-694988
-```
 
 
-
-<audio src="/docs/tutorials/renders/002-drum-machine-2.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-2.ogg" controls></audio>
 
 Or you can add a `smear` multiplier which will be sampled on every beat, and 
 used as a multipler for the beat. This multiplies the beat for the second channel 
@@ -614,18 +546,6 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-3.flac')
 ```
 
-```
-/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-
-packages/pysndfile/sndio.py:115: UserWarning:
-write_frames::warning::audio data has been clipped while writing to
-file docs/tutorials/renders/002-drum-machine-3.flac.
-  nf = sf.write_frames(data)
-```
-
-```
-1569651
-```
 
 
-
-<audio src="/docs/tutorials/renders/002-drum-machine-3.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-3.ogg" controls></audio>

@@ -81,7 +81,7 @@ hat = hat.env(pluckout) * 0.5 # Also multiply by 0.5 to reduce the amplitude of 
 hat.write('docs/tutorials/renders/002-plucked-hat.flac')
 ```
 
-<audio src="/docs/tutorials/renders/002-plucked-hat.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-plucked-hat.ogg" controls></audio>
 
 We'll wrap it in a function to make it easy to reuse later on. Lets also make the 
 curve shape of the frequency boundries change to a different shape each time the function is 
@@ -141,7 +141,7 @@ out.write('docs/tutorials/renders/002-hats-on-ice.flac')
 
 Behold! Our fabulous hi hats:
 
-<audio src="/docs/tutorials/renders/002-hats-on-ice.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-hats-on-ice.ogg" controls></audio>
 
 #### Smearing the hats across time
 
@@ -192,7 +192,7 @@ Here's our time LFO:
 
 And our irregular sequence of hi hats:
 
-<audio src="/docs/tutorials/renders/002-hats-slipping-on-ice.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-hats-slipping-on-ice.ogg" controls></audio>
 
 #### A rhythmic smear of hats, and a kick
 
@@ -216,7 +216,7 @@ kick = dsp.join([ makekick().pad(end=0.2) for _ in range(8) ]) # render a few ki
 kick.write('docs/tutorials/renders/002-kick.flac')
 ```
 
-<audio src="/docs/tutorials/renders/002-kick.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-kick.ogg" controls></audio>
 
 Ok, ok lets make a basic clap type sound too.
 
@@ -232,7 +232,7 @@ clap.write('docs/tutorials/renders/002-clap.flac')
 
 ```
 
-<audio src="/docs/tutorials/renders/002-clap.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-clap.ogg" controls></audio>
 
 Lets say we want to make a pattern that has a five beat groove. We can adapt 
 our approaches above to play a kick once every five beats, a smear of hats that 
@@ -318,7 +318,7 @@ out.write('docs/tutorials/renders/002-kicks-and-hats-together.flac')
 
 Now this is starting to sound a little more interesting:
 
-<audio src="/docs/tutorials/renders/002-kicks-and-hats-together.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-kicks-and-hats-together.ogg" controls></audio>
 
 ### Pattern strings
 
@@ -373,7 +373,7 @@ while elapsed < 30:
 out.write('docs/tutorials/renders/002-a-hat-pattern.flac')
 ```
 
-<audio src="/docs/tutorials/renders/002-a-hat-pattern.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-a-hat-pattern.ogg" controls></audio>
 
 This basic idea is actually pretty useful, and there are some helpers in 
 pippi for working with pattern strings like this, including a drum machine 
@@ -463,7 +463,7 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-1.flac')
 ```
 
-<audio src="/docs/tutorials/renders/002-drum-machine-1.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-1.ogg" controls></audio>
 
 The master tempo grid can be given as a curve:
 
@@ -478,7 +478,7 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-2.flac')
 ```
 
-<audio src="/docs/tutorials/renders/002-drum-machine-2.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-2.ogg" controls></audio>
 
 Or you can add a `smear` multiplier which will be sampled on every beat, and 
 used as a multipler for the beat. This multiplies the beat for the second channel 
@@ -498,4 +498,4 @@ out = dm.play(30)
 out.write('docs/tutorials/renders/002-drum-machine-3.flac')
 ```
 
-<audio src="/docs/tutorials/renders/002-drum-machine-3.flac" controls></audio>
+<audio src="/docs/tutorials/renders/002-drum-machine-3.ogg" controls></audio>
