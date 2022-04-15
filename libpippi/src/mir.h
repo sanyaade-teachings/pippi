@@ -67,7 +67,7 @@ typedef struct lpenvelopefollower_t {
 
 typedef struct lpmir_envelopefollower_factory_t {
     lpenvelopefollower_t * (*envelopefollower_create)(lpfloat_t);
-    lpfloat_t (*envelopefollower_process)(lpenvelopefollower_t *, lpfloat_t);
+    void (*envelopefollower_process)(lpenvelopefollower_t *, lpfloat_t);
     void (*envelopefollower_destroy)(lpenvelopefollower_t *);
 } lpmir_envelopefollower_factory_t;
 

@@ -219,7 +219,7 @@ lpenvelopefollower_t * envelopefollower_create(lpfloat_t interval) {
     return env; 
 }
 
-lpfloat_t envelopefollower_process(lpenvelopefollower_t * env, lpfloat_t input) {
+void envelopefollower_process(lpenvelopefollower_t * env, lpfloat_t input) {
     env->phase += 1;
     env->last = lpfmax(env->last, lpfabs(input));
     if(env->phase >= env->interval) {
