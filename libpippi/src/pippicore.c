@@ -1225,3 +1225,9 @@ lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b) {
     if(a < b) return a;
     return b;
 }
+
+lpfloat_t lpfabs(lpfloat_t value) {
+    if(value <= 0) return value * -1;
+    return value;
+}
+

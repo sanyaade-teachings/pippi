@@ -207,6 +207,33 @@ void coyote_destroy(lpcoyote_t * od) {
     LPMemoryPool.free(od);
 }
 
+lpenvelopefollower_t * envelopefollower_create(lpfloat_t interval) {
+    lpenvelopefollower_t * env;
+
+    env = (lpenvelopefollower_t *)LPMemoryPool.alloc(1, sizeof(lpenvelopefollower_t));
+    env->value = 0.f;
+    env->last = 0.f;
+    env->phase = 0.f;
+    env->interval = interval;
+
+    return env; 
+}
+
+lpfloat_t envelopefollower_process(lpenvelopefollower_t * env, lpfloat_t input) {
+    env->phase += 1;
+    env->last = lpfmax(env->last, lpfabs(input));
+    if(env->phase >= env->interval) {
+        env->phase -= env->interval;        
+        env->value = env->last;
+    }
+}
+
+void envelopefollower_destroy(lpenvelopefollower_t * env) {
+    LPMemoryPool.free(env);
+}
+
+
 const lpmir_pitch_factory_t LPPitchTracker = { yin_create, yin_process, yin_destroy };
 const lpmir_onset_factory_t LPOnsetDetector = { coyote_create, coyote_process, coyote_destroy };
+const lpmir_envelopefollower_factory_t LPEnvelopeFollower = { envelopefollower_create, envelopefollower_process, envelopefollower_destroy };
 
