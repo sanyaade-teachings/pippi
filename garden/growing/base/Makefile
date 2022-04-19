@@ -1,13 +1,15 @@
 # Project Name
-TARGET = growing
+TARGET = base
 
 # Sources
-CPP_SOURCES = growing.cpp
+CPP_SOURCES = base.cpp
 
 # libpippi sources
 C_SOURCES += ../../../libpippi/src/pippicore.c
 C_SOURCES += ../../../libpippi/src/oscs.phasor.c
 
+# libpippi flags: enable static memory alloc 
+# & use single precision floats.
 C_DEFS += -DLP_STATIC
 C_DEFS += -DLP_FLOAT
 
