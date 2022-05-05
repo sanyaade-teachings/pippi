@@ -705,16 +705,12 @@ void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling) {
 
 void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out) {
     int c;
-    size_t i, j, alength, blength, outlength;
+    size_t i, j;
     lpfloat_t maxval;
-
-    alength = a->length;
-    blength = b->length;
-    outlength = out->length;
 
     assert(a->channels == b->channels);
     assert(a->channels == out->channels);
-    assert(outlength == alength + blength + 1);
+    assert(out->length == a->length + b->length + 1);
 
     maxval = mag_buffer(a);
 

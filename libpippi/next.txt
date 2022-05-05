@@ -1,21 +1,12 @@
 Core:
     port more wavetables & windows
 
-Buffer:
-    
-
 Microsound:
     Waveset segmentation
+        - add controls to crossing detector for optional:
+            : number of crossings that trigger a transition
+            : how many transitions allowed in a row (for modulo / masking)
 
 FX:
     port Will's SVFs from pippi
-
-SoundFile:
-    Read WAV files into lpbuffer_t
-
-Scheduler:
-    event_t should support some internal ugen abstraction (lpugen_t?)
-    what does an instrument script look like in libpippi?
-        - offline rendering vs realtime ugen graphs
-
 

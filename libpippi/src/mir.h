@@ -58,6 +58,19 @@ typedef struct lpcoyote_t {
     int gate;
 } lpcoyote_t;
 
+typedef struct lpcrossingfollower_t {
+    int value;
+    int lastsign;
+    int in_transition;
+} lpcrossingfollower_t;
+
+typedef struct lppeakfollower_t {
+    lpfloat_t value;
+    lpfloat_t last;
+    lpfloat_t phase;
+    lpfloat_t interval;
+} lppeakfollower_t;
+
 typedef struct lpenvelopefollower_t {
     lpfloat_t value;
     lpfloat_t last;
@@ -65,10 +78,23 @@ typedef struct lpenvelopefollower_t {
     lpfloat_t interval;
 } lpenvelopefollower_t;
 
+
+typedef struct lpmir_crossingfollower_factory_t {
+    lpcrossingfollower_t * (*create)();
+    void (*process)(lpcrossingfollower_t *, lpfloat_t);
+    void (*destroy)(lpcrossingfollower_t *);
+} lpmir_crossingfollower_factory_t;
+
+typedef struct lpmir_peakfollower_factory_t {
+    lppeakfollower_t * (*create)(lpfloat_t);
+    void (*process)(lppeakfollower_t *, lpfloat_t);
+    void (*destroy)(lppeakfollower_t *);
+} lpmir_peakfollower_factory_t;
+
 typedef struct lpmir_envelopefollower_factory_t {
-    lpenvelopefollower_t * (*envelopefollower_create)(lpfloat_t);
-    void (*envelopefollower_process)(lpenvelopefollower_t *, lpfloat_t);
-    void (*envelopefollower_destroy)(lpenvelopefollower_t *);
+    lpenvelopefollower_t * (*create)(lpfloat_t);
+    void (*process)(lpenvelopefollower_t *, lpfloat_t);
+    void (*destroy)(lpenvelopefollower_t *);
 } lpmir_envelopefollower_factory_t;
 
 typedef struct lpmir_pitch_factory_t {
@@ -83,7 +109,11 @@ typedef struct lpmir_onset_factory_t {
     void (*coyote_destory)(lpcoyote_t * od);
 } lpmir_onset_factory_t;
 
+
 extern const lpmir_pitch_factory_t LPPitchTracker;
 extern const lpmir_onset_factory_t LPOnsetDetector;
+extern const lpmir_envelopefollower_factory_t LPEnvelopeFollower;
+extern const lpmir_peakfollower_factory_t LPPeakFollower;
+extern const lpmir_crossingfollower_factory_t LPCrossingFollower;
 
 #endif

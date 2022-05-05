@@ -207,6 +207,9 @@ void coyote_destroy(lpcoyote_t * od) {
     LPMemoryPool.free(od);
 }
 
+/**
+ * Envelope follower
+ */
 lpenvelopefollower_t * envelopefollower_create(lpfloat_t interval) {
     lpenvelopefollower_t * env;
 
@@ -232,8 +235,70 @@ void envelopefollower_destroy(lpenvelopefollower_t * env) {
     LPMemoryPool.free(env);
 }
 
+/**
+ * Peak follower
+ */
+lppeakfollower_t * peakfollower_create(lpfloat_t interval) {
+    lppeakfollower_t * peak;
+
+    peak = (lppeakfollower_t *)LPMemoryPool.alloc(1, sizeof(lppeakfollower_t));
+    peak->value = 0.f;
+    peak->last = 0.f;
+    peak->phase = 0.f;
+    peak->interval = interval;
+
+    return peak; 
+}
+
+void peakfollower_process(lppeakfollower_t * peak, lpfloat_t input) {
+    peak->phase += 1;
+    peak->last = lpfmax(peak->last, input);
+    if(peak->phase >= peak->interval) {
+        peak->phase -= peak->interval;        
+        peak->value = peak->last;
+    }
+}
+
+void peakfollower_destroy(lppeakfollower_t * peak) {
+    LPMemoryPool.free(peak);
+}
+
+
+/**
+ * Zero crossing stream follower
+ */
+lpcrossingfollower_t * crossingfollower_create() {
+    lpcrossingfollower_t * crossing;
+
+    crossing = (lpcrossingfollower_t *)LPMemoryPool.alloc(1, sizeof(lpcrossingfollower_t));
+    crossing->value = 0;
+    crossing->lastsign = 0;
+    crossing->in_transition = 0;
+
+    return crossing; 
+}
+
+void crossingfollower_process(lpcrossingfollower_t * c, lpfloat_t input) {
+    int current;
+    current = signbit(input); 
+    if((c->lastsign && !current) || (!c->lastsign && current)) {
+        c->value = current;
+        c->in_transition = 1;
+    } else {
+        c->in_transition = 0;
+    }
+    c->lastsign = current;
+}
+
+void crossingfollower_destroy(lpcrossingfollower_t * crossing) {
+    LPMemoryPool.free(crossing);
+}
+
+
 
 const lpmir_pitch_factory_t LPPitchTracker = { yin_create, yin_process, yin_destroy };
 const lpmir_onset_factory_t LPOnsetDetector = { coyote_create, coyote_process, coyote_destroy };
 const lpmir_envelopefollower_factory_t LPEnvelopeFollower = { envelopefollower_create, envelopefollower_process, envelopefollower_destroy };
+const lpmir_peakfollower_factory_t LPPeakFollower = { peakfollower_create, peakfollower_process, peakfollower_destroy };
+const lpmir_crossingfollower_factory_t LPCrossingFollower = { crossingfollower_create, crossingfollower_process, crossingfollower_destroy };
 

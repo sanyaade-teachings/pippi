@@ -17,7 +17,7 @@ ALLSOURCES = vendor/fft/fft.c \
 	src/spectral.c \
 	src/pippicore.c
 
-FLAGS = -g -std=c89 -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
+FLAGS = -g -std=gnu11 -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
 
 clean:
 	rm build/*
@@ -90,6 +90,9 @@ examples:
 
 	echo "Building slicing2.c example...";
 	gcc $(FLAGS) examples/slicing2.c $(ALLSOURCES) -o build/slicing2
+
+	echo "Building crossings.c example...";
+	gcc $(FLAGS) examples/crossings.c $(ALLSOURCES) -o build/crossings
 
 	#echo "Rendering examples..."
 	#./scripts/render_examples.sh
