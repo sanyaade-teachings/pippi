@@ -61,7 +61,32 @@ typedef struct lpcoyote_t {
 typedef struct lpcrossingfollower_t {
     int value;
     int lastsign;
+
+    /* This will be 1 after processing 
+     * if a transition was triggered */
     int in_transition;
+
+    /* This will be 1 on a transition if 
+     * the crossing count has been reset. */
+    int ws_transition;
+
+    /* num_crossings is the number of 
+     * crossings that trigger a transition.
+     * The default is 3. 
+     * 3 is a good starting point for 
+     * waveset segmentation as it roughly 
+     * corresponds to one full cycle of a 
+     * waveform: the start, crossing up or 
+     * down in the middle, and the end.
+     *
+     * x     x     x  ... etc
+     * _.-^-._     _ 
+     *        \-_-/
+     * ^ start     ^ end
+     *       ^ middle
+     **/
+    int num_crossings;
+    int crossing_count;
 } lpcrossingfollower_t;
 
 typedef struct lppeakfollower_t {

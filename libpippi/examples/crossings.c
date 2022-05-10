@@ -23,18 +23,16 @@ int main() {
         for(c=0; c < src->channels; c++) {
             LPCrossingFollower.process(cross[c], src->data[i * src->channels + c]);
 
-            if(cross[c]->in_transition && cross[c]->value > 0) {
-                /* reset the position - new waveset */
-                wavesets[c]->pos = 0;
-            } else if(cross[c]->in_transition && cross[c]->value <= 0) {
-                /* waveset complete, copy the data somewhere */
-                 for(j=0; j < wavesets[c]->pos; j++) {
+            if(cross[c]->ws_transition) {
+                /* copy waveset to output buffer */
+                for(j=0; j < wavesets[c]->pos; j++) {
                     out->data[(wavesets[c]->boundry+j) * src->channels + c] = src->data[i * src->channels + c];
                 }
-                wavesets[c]->pos += 1;
-            } else {
-                wavesets[c]->pos += 1;
-            }
+                /* reset the position - new waveset */
+                wavesets[c]->pos = 0;
+            } 
+
+            wavesets[c]->pos += 1;
             wavesets[c]->boundry += 1;
         }
     }

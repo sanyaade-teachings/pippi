@@ -268,24 +268,33 @@ void peakfollower_destroy(lppeakfollower_t * peak) {
  * Zero crossing stream follower
  */
 lpcrossingfollower_t * crossingfollower_create() {
-    lpcrossingfollower_t * crossing;
+    lpcrossingfollower_t * c;
 
-    crossing = (lpcrossingfollower_t *)LPMemoryPool.alloc(1, sizeof(lpcrossingfollower_t));
-    crossing->value = 0;
-    crossing->lastsign = 0;
-    crossing->in_transition = 0;
+    c = (lpcrossingfollower_t *)LPMemoryPool.alloc(1, sizeof(lpcrossingfollower_t));
+    c->value = 0;
+    c->lastsign = 0;
+    c->in_transition = 0;
+    c->ws_transition = 0;
+    c->num_crossings = 3; 
+    c->crossing_count = 0;
 
-    return crossing; 
+    return c; 
 }
 
 void crossingfollower_process(lpcrossingfollower_t * c, lpfloat_t input) {
     int current;
     current = signbit(input); 
+    c->in_transition = 0;
+    c->ws_transition = 0;
     if((c->lastsign && !current) || (!c->lastsign && current)) {
+        c->crossing_count += 1;
         c->value = current;
         c->in_transition = 1;
-    } else {
-        c->in_transition = 0;
+
+        if(c->crossing_count >= c->num_crossings) {
+            c->ws_transition = 1;
+            c->crossing_count = 0;
+        }
     }
     c->lastsign = current;
 }
