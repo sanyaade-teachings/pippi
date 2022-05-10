@@ -257,6 +257,7 @@ lpbuffer_t * create_buffer(size_t length, int channels, int samplerate) {
     buf->samplerate = samplerate;
     buf->phase = 0.f;
     buf->pos = 0;
+    buf->boundry = length-1;
     buf->range = length;
     return buf;
 }

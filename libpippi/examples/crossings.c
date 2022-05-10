@@ -17,6 +17,7 @@ int main() {
     for(c=0; c < src->channels; c++) {
         cross[c] = LPCrossingFollower.create();
         wavesets[c] = LPBuffer.create(MAX_WAVESET, 1, src->samplerate);
+        wavesets[c]->boundry = 0;
     }
 
     for(i=0; i < src->length; i++) {
@@ -26,14 +27,14 @@ int main() {
             if(cross[c]->ws_transition) {
                 /* copy waveset to output buffer */
                 for(j=0; j < wavesets[c]->pos; j++) {
-                    out->data[(wavesets[c]->boundry+j) * src->channels + c] = src->data[i * src->channels + c];
+                    out->data[(wavesets[c]->boundry+j) * src->channels + c] = src->data[((i-wavesets[c]->pos) + j) * src->channels + c];
                 }
                 /* reset the position - new waveset */
+                wavesets[c]->boundry += wavesets[c]->pos;
                 wavesets[c]->pos = 0;
-            } 
-
-            wavesets[c]->pos += 1;
-            wavesets[c]->boundry += 1;
+            } else {
+                wavesets[c]->pos += 1;
+            }
         }
     }
 
