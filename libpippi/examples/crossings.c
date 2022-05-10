@@ -12,7 +12,7 @@ int main() {
     lpcrossingfollower_t * cross[MAX_CHANNELS];
 
     src = LPSoundFile.read("../../pippi/tests/sounds/living.wav");
-    out = LPBuffer.create(src->length, src->channels, src->samplerate);
+    out = LPBuffer.create(src->length*2, src->channels, src->samplerate);
 
     for(c=0; c < src->channels; c++) {
         cross[c] = LPCrossingFollower.create();
@@ -24,13 +24,14 @@ int main() {
         for(c=0; c < src->channels; c++) {
             LPCrossingFollower.process(cross[c], src->data[i * src->channels + c]);
 
-            if(cross[c]->ws_transition) {
+            if(cross[c]->ws_transition && (i % 2 == 0)) {
                 /* copy waveset to output buffer */
                 for(j=0; j < wavesets[c]->pos; j++) {
                     out->data[(wavesets[c]->boundry+j) * src->channels + c] = src->data[((i-wavesets[c]->pos) + j) * src->channels + c];
                 }
+                /* increment the read index and add a fixed padding */
+                wavesets[c]->boundry += wavesets[c]->pos + 222;
                 /* reset the position - new waveset */
-                wavesets[c]->boundry += wavesets[c]->pos;
                 wavesets[c]->pos = 0;
             } else {
                 wavesets[c]->pos += 1;
