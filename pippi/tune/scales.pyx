@@ -68,24 +68,65 @@ LOUIS = (
 )
 
 # scale mappings
-MAJOR = (0, 2, 4, 5, 7, 9, 11)
-MINOR = (0, 2, 3, 5, 7, 8, 10)
-WHOLETONE = (0, 2, 4, 6, 8, 10)
 CHROMATIC = tuple(range(12))
+MAJOR = (0, 2, 4, 5, 7, 9, 11)
+MINOR = (0, 2, 4-1, 5, 7, 9-1, 11-1)
+HARMONIC_MINOR = MINOR
+MELODIC_MINOR = (0, 2, 4-1, 5, 7, 9-1, 11)
+WHOLETONE = (0, 2, 4, 6, 8, 10)
+IONIAN = MAJOR
+DORIAN = (0, 2, 4-1, 5, 7, 9, 11-1)
+PHRYGIAN = (0, 2-1, 4-1, 5, 7, 9-1, 11-1)
+LYDIAN = (0, 2, 4, 5+1, 7, 9, 11)
+MIXOLYDIAN = (0, 2, 4, 5, 7, 9, 11-1)
+AEOLIAN = MINOR
+LOCRIAN = (0, 2-1, 4-1, 5, 7-1, 9-1, 11-1)
+SUPER_LOCRIAN = (0, 2-1, 4-1, 5-1, 7-1, 9-1, 11-1)
+NEAPOLITAN_MINOR = (0, 2-1, 4-1, 5, 7, 9-1, 11)
+NEAPOLITAN_MAJOR = (0, 2-1, 4-1, 5, 7, 9, 11)
+DOUBLE_HARMONIC = (0, 2-1, 4, 5, 7, 9-1, 11)
+ENIGMATIC = (0, 2-1, 4, 5+1, 7+1, 9+1, 11)
+HUNGARIAN_MINOR = (0, 2, 4-1, 5+1, 7, 9-1, 11)
+HUNGARIAN_MINOR_2ND_MODE = (0, 2-1, 4, 5, 7-1, 9, 11-1)
+MAJOR_LOCRIAN = (0, 2, 4, 5, 7-1, 9-1, 11-1)
+LYDIAN_MINOR = (0, 2, 4, 5+1, 7, 9-1, 11-1)
+OVERTONE = (0, 2, 4, 5+1, 7, 9, 11-1)
+LEADING_WHOLETONE = (0, 2, 4, 5+1, 7+1, 9+1, 11)
+HUNGARIAN_MAJOR = (0, 2+1, 4, 5+1, 7, 9, 11-1)
+EIGHTTONE = (0, 2-1, 4-1, 4, 5, 7-1, 9-1, 11-1)
+SYMMETRICAL = (0, 2-1, 4-1, 4, 5+1, 7, 9, 11-1)
 
 # notated as semitone deviations from 
 # a MAJOR scale for readability
-SCALES = {
-    'MAJOR': MAJOR,
-    'MINOR': MINOR,
-    'super_locrian': (0, 2-1, 4-1, 5-1, 7-1, 9-1, 11-1),
-    'neapolitan_minor': (0, 2-1, 4-1, 5, 7, 9-1, 11),
-    'neapolitan_major': (0, 2-1, 4-1, 5, 7, 9, 11),
-    'oriental': (0, 2-1, 4, 5, 7-1, 9, 11-1),
-    'double_harmonic': (0, 2-1, 4, 5, 7, 9-1, 11),
-    'enigmatic': (0, 2-1, 4, 5+1, 7+1, 9+1, 11),
-    'wholetone': WHOLETONE,
-}
+SCALES = [
+    CHROMATIC,
+    MAJOR,
+    MINOR, 
+    HARMONIC_MINOR, 
+    MELODIC_MINOR, 
+    WHOLETONE,
+    IONIAN, 
+    DORIAN, 
+    PHRYGIAN,
+    LYDIAN, 
+    MIXOLYDIAN, 
+    AEOLIAN, 
+    LOCRIAN, 
+    SUPER_LOCRIAN, 
+    NEAPOLITAN_MINOR, 
+    NEAPOLITAN_MAJOR, 
+    DOUBLE_HARMONIC, 
+    ENIGMATIC, 
+    HUNGARIAN_MINOR, 
+    HUNGARIAN_MINOR_2ND_MODE, 
+    MAJOR_LOCRIAN, 
+    LYDIAN_MINOR, 
+    OVERTONE, 
+    LEADING_WHOLETONE, 
+    HUNGARIAN_MAJOR, 
+    EIGHTTONE, 
+    SYMMETRICAL, 
+]
 
 cdef tuple DEFAULT_RATIOS = TERRY
 DEFAULT_SCALE = MAJOR

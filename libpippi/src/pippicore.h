@@ -72,6 +72,7 @@ typedef struct lpstack_t {
     size_t length;
     lpfloat_t phase; /* Pos within table */
     lpfloat_t pos; /* Pos within stack */
+    int read_index;
 } lpstack_t;
 
 typedef struct lparray_t {
@@ -131,6 +132,7 @@ typedef struct lparray_factory_t {
 
 typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
+    lpstack_t * (*create_stack)(int, size_t, int, int);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
     void (*split2)(lpbuffer_t *, lpbuffer_t *, lpbuffer_t *);
     void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t);

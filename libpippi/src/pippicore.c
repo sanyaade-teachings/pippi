@@ -30,6 +30,7 @@ lparray_t * create_array(size_t length);
 void destroy_array(lparray_t * array);
 
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
+lpstack_t * create_uniform_stack(int numbuffers, size_t buffer_length, int channels, int samplerate);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max);
 lpfloat_t min_buffer(lpbuffer_t * buf);
@@ -106,7 +107,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, copy_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_uniform_stack, copy_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -928,12 +929,10 @@ lpbuffer_t * param_create_from_int(int value) {
 lpfloat_t interpolate_hermite(lpbuffer_t* buf, lpfloat_t phase) {
     lpfloat_t y0, y1, y2, y3, frac;
     lpfloat_t c0, c1, c2, c3;
-    int i0, i1, i2, i3, boundry;
+    int i0, i1, i2, i3;
 
-    if(buf->length == 1) return buf->data[0];
-    if(buf->length < 1) return 0;
-
-    boundry = buf->length - 1;
+    if(buf->range == 1) return buf->data[0];
+    if(buf->range < 1) return 0;
 
     frac = phase - (int)phase;
     i1 = (int)phase;
@@ -947,9 +946,9 @@ lpfloat_t interpolate_hermite(lpbuffer_t* buf, lpfloat_t phase) {
     y3 = 0;
 
     if(i0 >= 0) y0 = buf->data[i0];
-    if(i1 <= boundry) y1 = buf->data[i1];
-    if(i2 <= boundry) y2 = buf->data[i2];
-    if(i3 <= boundry) y3 = buf->data[i3];
+    if(i1 <= (int)buf->boundry) y1 = buf->data[i1];
+    if(i2 <= (int)buf->boundry) y2 = buf->data[i2];
+    if(i3 <= (int)buf->boundry) y3 = buf->data[i3];
 
     /* This part was taken from version #2 by James McCartney 
      * https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html
@@ -971,12 +970,12 @@ lpfloat_t interpolate_linear_channel(lpbuffer_t* buf, lpfloat_t phase, int chann
     lpfloat_t frac, a, b;
     size_t i;
 
-    if(buf->length == 1) return buf->data[0];
+    if(buf->range == 1) return buf->data[0];
     
     frac = phase - (int)phase;
     i = (int)phase;
 
-    if (i >= buf->length-1) return 0;
+    if (i >= buf->boundry) return 0;
 
     a = buf->data[i * buf->channels + channel];
     b = buf->data[(i+1) * buf->channels + channel];
@@ -990,12 +989,12 @@ lpfloat_t interpolate_linear(lpbuffer_t* buf, lpfloat_t phase) {
     lpfloat_t frac, a, b;
     size_t i;
 
-    if(buf->length == 1) return buf->data[0];
+    if(buf->range == 1) return buf->data[0];
     
     frac = phase - (int)phase;
     i = (int)phase;
 
-    if (i >= buf->length-1) return 0;
+    if (i >= buf->boundry) return 0;
 
     a = buf->data[i];
     b = buf->data[i+1];
@@ -1074,6 +1073,24 @@ lpstack_t * create_wavetable_stack(int numtables, ...) {
     }
 
     va_end(vl);
+
+    return stack;
+}
+
+lpstack_t * create_uniform_stack(int numbuffers, size_t buffer_length, int channels, int samplerate) {
+    lpstack_t * stack;
+    int i;
+
+    stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
+    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(numbuffers, sizeof(lpbuffer_t *));
+    stack->length = numbuffers;
+    stack->phase = 0.f;
+    stack->pos = 0.f;
+    stack->read_index = 0;
+
+    for(i=0; i < numbuffers; i++) {
+        stack->stack[i] = LPBuffer.create(buffer_length, channels, samplerate); 
+    }
 
     return stack;
 }

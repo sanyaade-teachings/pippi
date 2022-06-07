@@ -19,6 +19,7 @@ lpphasorosc_t * osc1;
 lpphasorosc_t * osc2;
 lptableosc_t * env;
 lpbuffer_t * win;
+lpbuffer_t * lfo;
 lpfloat_t lpfy = 0.f;
 
 // Hook me up to the logic input 
@@ -36,6 +37,7 @@ void callback(AudioHandle::InterleavingInputBuffer  in,
     hw.ProcessAllControls();
 
     amp = LPTableOsc.process(env);
+    //freq = LPTableOsc.process(lfo);
 
     if(env->gate == 1) sole.Toggle();
     //sole.Write(env->gate == 1);
@@ -68,6 +70,7 @@ int main(void) {
     osc2->samplerate = SR;
     osc2->freq = 555.f;
 
+    lfo = LPWindow.create(WIN_SINE, 512);
     win = LPWindow.create(WIN_RSAW, 512);
     env = LPTableOsc.create(win);
     env->samplerate = SR;

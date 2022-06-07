@@ -1,5 +1,7 @@
 #cython: language_level=3
 
+from pippi.soundbuffer cimport SoundBuffer
+
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 
@@ -44,7 +46,7 @@ cdef class ParamBucket:
 
 cdef class EventContext:
     cdef public object before
-    #cdef public MidiBucket m
+    cdef public object messages
     cdef public ParamBucket p
     cdef public SessionParamBucket s
     cdef public object client
@@ -52,23 +54,24 @@ cdef class EventContext:
     cdef public object running
     cdef public object shutdown
     cdef public object stop_me
-    cdef public object bus
     cdef public object sounds
     cdef public int count
     cdef public int tick
     #cdef public object adc
     #cdef public object sampler
 
-
 cdef class Instrument:
     cdef str name
     cdef str path
+    cdef public list groups
     cdef public object renderer
     cdef object shutdown
     cdef object sounds
-
+    cdef public int playing
+    cdef public dict messages
+    cdef public dict params 
+    cdef lpbuffer_t * adc
 
 cdef tuple collect_players(object instrument)
 cdef list render_event(object instrument, object params, object buf_q)
-
 

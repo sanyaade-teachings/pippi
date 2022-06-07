@@ -3,6 +3,7 @@
 default: all
 
 ALLSOURCES = vendor/fft/fft.c \
+	src/oscs.bln.c \
 	src/oscs.phasor.c \
 	src/oscs.sine.c \
 	src/oscs.pulsar.c \
@@ -30,6 +31,12 @@ cython:
 
 examples:
 	mkdir -p build renders
+
+	echo "Building crossings.c example...";
+	gcc $(FLAGS) examples/crossings.c $(ALLSOURCES) -o build/crossings
+
+	echo "Building crossings2.c example...";
+	gcc $(FLAGS) examples/crossings2.c $(ALLSOURCES) -o build/crossings2
 
 	echo "Building pulsarosc.c example...";
 	gcc $(FLAGS) examples/pulsarosc.c $(ALLSOURCES) -o build/pulsarosc
@@ -70,6 +77,9 @@ examples:
 	echo "Building tableosc.c example...";
 	gcc $(FLAGS) examples/tableosc.c $(ALLSOURCES) -o build/tableosc
 
+	echo "Building blnosc.c example...";
+	gcc $(FLAGS) examples/blnosc.c $(ALLSOURCES) -o build/blnosc
+
 	echo "Building tapeosc.c example...";
 	gcc $(FLAGS) examples/tapeosc.c $(ALLSOURCES) -o build/tapeosc
 
@@ -90,9 +100,6 @@ examples:
 
 	echo "Building slicing2.c example...";
 	gcc $(FLAGS) examples/slicing2.c $(ALLSOURCES) -o build/slicing2
-
-	echo "Building crossings.c example...";
-	gcc $(FLAGS) examples/crossings.c $(ALLSOURCES) -o build/crossings
 
 	#echo "Rendering examples..."
 	#./scripts/render_examples.sh

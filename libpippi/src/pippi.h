@@ -1,5 +1,6 @@
 #include "pippicore.h"
 
+#include "oscs.bln.h"
 #include "oscs.phasor.h"
 #include "oscs.pulsar.h"
 #include "oscs.shape.h"

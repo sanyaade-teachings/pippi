@@ -1,13 +1,22 @@
 #cython: language_level=3
 
+import array
 import logging
 from logging.handlers import SysLogHandler
 import warnings
 import importlib
 import importlib.util
+import os
+from pathlib import Path
 import threading
 
+import redis
+
 from pippi import dsp
+from pippi.soundbuffer cimport SoundBuffer
+
+ADC_BLOCKSIZE = 256
+ADC_NAME = 'astrid-adc'
 
 logger = logging.getLogger('pippi-renderer')
 if not logger.handlers:
@@ -15,6 +24,39 @@ if not logger.handlers:
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
+
+_redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+bus = _redis.pubsub()
+
+cdef void write_to_adc(double[:,:] block, int maxblocks):
+    _redis.lpush(ADC_NAME, bytes(block))
+    _redis.ltrim(ADC_NAME, 0, maxblocks-1)
+
+cdef SoundBuffer read_from_adc(double length, tuple channels=None, double offset=0, int samplerate=48000):
+    if channels is None:
+        channels = (0,)
+
+    cdef SoundBuffer out = dsp.buffer(length, channels=len(channels), samplerate=samplerate)
+    cdef int framelength = <int>(length * samplerate)
+    cdef int numblocks = framelength // ADC_BLOCKSIZE
+    cdef double[:,:] block
+    cdef int i = (numblocks * ADC_BLOCKSIZE) - ADC_BLOCKSIZE
+    cdef int o = <int>(offset * samplerate) // ADC_BLOCKSIZE
+    o = min(o, (framelength - ADC_BLOCKSIZE) // ADC_BLOCKSIZE)
+
+    bytelist = b''.join(_redis.lrange(ADC_NAME, o, o+numblocks-1))
+    a = array.array('d', bytelist)
+
+    """
+    for b in redis.lrange(ADC_NAME, o, o+numblocks-1):
+        block = np.ndarray((ADC_BLOCKSIZE, channels), dtype='d', buffer=bytearray(b))
+        for j in range(self.blocksize):
+            for c in range(len(channels)):
+                out[i+j,c] = block[j,channels[c]-1]
+
+        i -= ADC_BLOCKSIZE
+    """
+
 
 cdef class SessionParamBucket:
     """ params[key] to params.key
@@ -53,10 +95,11 @@ cdef class EventContext:
             midi_devices=None, 
             midi_maps=None, 
             before=None,
+            messages=None,
         ):
 
         self.before = before
-        #self.m = midi.MidiBucket(midi_devices, midi_maps)
+        self.messages = messages or []
         self.p = ParamBucket(params)
         self.s = SessionParamBucket() 
         self.client = None
@@ -94,9 +137,19 @@ cdef class Instrument:
         self.path = path
         self.renderer = renderer
         self.sounds = self.load_sounds()
+        self.messages = {}
+        self.playing = <int>1
+        self.params = {}
+
+        if hasattr(renderer, 'groups') and (\
+                isinstance(renderer.groups, list) or \
+                isinstance(renderer.groups, tuple)):
+            self.groups = list(renderer.groups)
+        else:
+            self.groups = []
 
     def reload(self):
-        logger.info('Reloading instrument %s from %s' % (self.name, self.path))
+        #logger.info('Reloading instrument %s from %s' % (self.name, self.path))
         spec = importlib.util.spec_from_file_location(self.name, self.path)
         if spec is not None:
             renderer = importlib.util.module_from_spec(spec)
@@ -108,6 +161,10 @@ cdef class Instrument:
             self.renderer = renderer
         else:
             logger.error(self.path)
+
+    def flush_messages(self):
+        for k in self.messages.keys():
+            self.messages[k] = []
 
     def load_sounds(self):
         if hasattr(self.renderer, 'SOUNDS') and isinstance(self.renderer.SOUNDS, list):
@@ -141,10 +198,11 @@ cdef class Instrument:
 
         return device_aliases, midi_maps
 
-    def create_ctx(self, params):
+    def create_ctx(self, params, messages):
         device_aliases, midi_maps = self.map_midi_devices()
         return EventContext(
                     params=params, 
+                    messages=messages,
                     instrument_name=self.name, 
                     sounds=self.sounds,
                     midi_devices=device_aliases, 
@@ -157,7 +215,6 @@ class InstrumentNotFoundError(Exception):
     def __init__(self, instrument_name, *args, **kwargs):
         self.message = 'No instrument named %s found' % instrument_name
 
-
 def _load_instrument(name, path):
     """ Loads a renderer module from the script 
         at self.path 
@@ -166,7 +223,7 @@ def _load_instrument(name, path):
         InstrumentNotFoundError
     """
     try:
-        logger.info('Loading instrument %s from %s' % (name, path))
+        #logger.info('Loading instrument %s from %s' % (name, path))
         spec = importlib.util.spec_from_file_location(name, path)
         if spec is not None:
             renderer = importlib.util.module_from_spec(spec)
@@ -228,12 +285,12 @@ cdef list render_event(object instrument, object params, object buf_q):
     cdef object onset_generator
     cdef bint loop
     cdef double overlap
-    cdef EventContext ctx = instrument.create_ctx(params)
+    cdef EventContext ctx = instrument.create_ctx(instrument.params, instrument.messages)
     cdef list out = []
 
-    logger.debug('getting players')
+    #logger.debug('getting players')
     players, loop, overlap = collect_players(instrument)
-    logger.debug(str(players))
+    #logger.debug(str(players))
 
     for player, onsets in players:
         try:
@@ -260,23 +317,29 @@ cdef list render_event(object instrument, object params, object buf_q):
         # execute the done callback
         instrument.renderer.done(ctx)
 
-    print('Rendered %s buffers for event %s' % (len(out), instrument))
+    #print('Rendered %s buffers for event %s' % (len(out), instrument))
     return out
 
 
+ASTRID_ADC_BUFFERS = []
 ASTRID_RENDERS = []
 ASTRID_INSTRUMENT = None
 
 cdef public int astrid_load_instrument() except -1:
     global ASTRID_INSTRUMENT
-    ASTRID_INSTRUMENT = _load_instrument('ding', 'orc/ding.py')
-    logger.debug("Loaded ding.py")
+    path = os.environ.get('INSTRUMENT_PATH', 'orc/ding.py')
+    name = Path(path).stem
+    ASTRID_INSTRUMENT = _load_instrument(name, path)
+    #logger.debug("Loaded %s (%s)" % (name, path))
+    bus.subscribe('astrid', name)
+    for group in ASTRID_INSTRUMENT.groups:
+        bus.subscribe('group%s' % group)
     return 0
 
 cdef public int astrid_reload_instrument() except -1:
     global ASTRID_INSTRUMENT
     ASTRID_INSTRUMENT.reload()
-    logger.debug("Reloaded ding.py")
+    #logger.debug("Reloaded %s" % ASTRID_INSTRUMENT)
     return 0
 
 cdef public int astrid_render_event() except -1:
@@ -284,6 +347,48 @@ cdef public int astrid_render_event() except -1:
     global ASTRID_INSTRUMENT
 
     ASTRID_RENDERS += render_event(ASTRID_INSTRUMENT, None, None)
+    return 0
+
+cdef public int astrid_get_messages() except -1:
+    global ASTRID_RENDERS
+    global ASTRID_INSTRUMENT
+
+    message = bus.get_message()
+    if message is not None:
+        print('MESSAGE', message)
+        if message['type'] == 'message':
+            msg = message['data'].decode('utf-8')
+            channel = message['channel'].decode('utf-8')
+            if channel not in ASTRID_INSTRUMENT.messages:
+                ASTRID_INSTRUMENT.messages[channel] = []
+            ASTRID_INSTRUMENT.messages[channel] += [ msg ]
+    return 0
+
+cdef public int astrid_get_instrument_status(int * status) except -1:
+    global ASTRID_INSTRUMENT
+
+    for channel, messages in ASTRID_INSTRUMENT.messages.items():
+        for msg in messages:
+            if msg == 'stop':
+                ASTRID_INSTRUMENT.playing = <int>0
+            elif msg == 'play':
+                ASTRID_INSTRUMENT.playing = <int>1
+                ASTRID_INSTRUMENT.params['group'] = channel
+            elif msg.startswith('setval'):
+                _, key, coding, val = msg.split(':')
+                if coding == 'int':
+                    c = int
+                elif coding == 'float':
+                    c = float
+                else:
+                    c = str
+
+                ASTRID_INSTRUMENT.params[key] = c(val)
+                print(ASTRID_INSTRUMENT.params)
+
+    ASTRID_INSTRUMENT.flush_messages()
+
+    status[0] = ASTRID_INSTRUMENT.playing
     return 0
 
 cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:
@@ -308,3 +413,17 @@ cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:
     for i in range(buffer.length):
         for c in range(buffer.channels):
             buffer.data[i * buffer.channels + c] = snd.frames[i][c]
+
+cdef public int astrid_copy_adc(lpbuffer_t * adc) except -1:
+    cdef size_t i
+    cdef int c
+    global ASTRID_ADC_BUFFERS
+    inbuf = dsp.buffer(length=adc.length / adc.samplerate, channels=adc.channels, samplerate=adc.samplerate)
+
+    for i in range(adc.length):
+        for c in range(adc.channels):
+            inbuf.frames[i][c] = adc.data[i * adc.channels + c]
+
+    ASTRID_ADC_BUFFERS += [ inbuf ]
+
+
