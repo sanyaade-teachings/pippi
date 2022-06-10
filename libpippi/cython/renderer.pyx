@@ -15,8 +15,8 @@ import redis
 from pippi import dsp
 from pippi.soundbuffer cimport SoundBuffer
 
-ADC_BLOCKSIZE = 256
 ADC_NAME = 'astrid-adc'
+ADC_BLOCKSIZE = 256
 
 logger = logging.getLogger('pippi-renderer')
 if not logger.handlers:
@@ -413,17 +413,5 @@ cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:
     for i in range(buffer.length):
         for c in range(buffer.channels):
             buffer.data[i * buffer.channels + c] = snd.frames[i][c]
-
-cdef public int astrid_copy_adc(lpbuffer_t * adc) except -1:
-    cdef size_t i
-    cdef int c
-    global ASTRID_ADC_BUFFERS
-    inbuf = dsp.buffer(length=adc.length / adc.samplerate, channels=adc.channels, samplerate=adc.samplerate)
-
-    for i in range(adc.length):
-        for c in range(adc.channels):
-            inbuf.frames[i][c] = adc.data[i * adc.channels + c]
-
-    ASTRID_ADC_BUFFERS += [ inbuf ]
 
 

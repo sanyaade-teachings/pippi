@@ -27,7 +27,6 @@ __PYX_EXTERN_C int astrid_get_instrument_status(int *);
 __PYX_EXTERN_C int astrid_get_info(size_t *, int *, int *);
 __PYX_EXTERN_C int astrid_buffer_count(int *);
 __PYX_EXTERN_C int astrid_copy_buffer(lpbuffer_t *);
-__PYX_EXTERN_C int astrid_copy_adc(lpbuffer_t *);
 
 #endif /* !__PYX_HAVE_API__renderer */
 

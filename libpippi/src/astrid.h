@@ -5,7 +5,9 @@ int lprendernode_init();
 
 typedef struct lpastridctx_t {
     lpscheduler_t * s;
-    lpbuffer_t * adc;
+    int channels;
+    float samplerate;
+    int blocksize;
 } lpastridctx_t;
 
 #endif

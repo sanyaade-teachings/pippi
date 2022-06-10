@@ -15,12 +15,13 @@
 
 #define CHANNELS 2
 #define SAMPLERATE 48000
-#define ADC_LENGTH 1440000
 
 #define STATUS_PLAYING 1
 #define STATUS_PAUSED 0
 
 static volatile int astrid_is_running = 1;
+
+int astrid_channels = 2;
 
 void handle_shutdown(int) {
     astrid_is_running = 0;
@@ -29,22 +30,17 @@ void handle_shutdown(int) {
 void miniaudio_callback(ma_device * device, void * pOut, const void * pIn, ma_uint32 count) {
     ma_uint32 i;
     float * out;
-    float * in;
     int c;
     lpastridctx_t * ctx;
 
     ctx = (lpastridctx_t *)device->pUserData;
     out = (float *)pOut;
-    in = (float *)pIn;
 
     for(i=0; i < count; i++) {
         LPScheduler.tick(ctx->s);
-        for(c=0; c < CHANNELS; c++) {
+        for(c=0; c < astrid_channels; c++) {
             *out++ = (float)ctx->s->current_frame[c];
-            ctx->adc->data[ctx->adc->pos * CHANNELS + c] = (lpfloat_t)*in++;
         }
-        ctx->adc->pos += 1;
-        ctx->adc->pos = ctx->adc->pos % ctx->adc->length;
     }
 }
 
@@ -65,6 +61,13 @@ int lprendernode_init() {
     int samplerate;
     int buffer_count;
     int status;
+    char * _astrid_channels;
+
+    _astrid_channels = getenv("ASTRID_CHANNELS");
+    if(_astrid_channels != NULL) {
+        astrid_channels = atoi(_astrid_channels);
+    }
+    printf("astrid_channels %d\n", astrid_channels);
 
     action.sa_handler = handle_shutdown;
     sigaction(SIGINT, &action, NULL);
@@ -72,8 +75,7 @@ int lprendernode_init() {
     voice_id = (long)syscall(SYS_gettid);
 
     ctx = (lpastridctx_t*)LPMemoryPool.alloc(1, sizeof(lpastridctx_t));
-    ctx->s = LPScheduler.create(CHANNELS);
-    ctx->adc = LPBuffer.create(ADC_LENGTH, CHANNELS, SAMPLERATE);
+    ctx->s = LPScheduler.create(astrid_channels);
     length = 0;
 
     /*
@@ -114,7 +116,7 @@ int lprendernode_init() {
     /* Configure miniaudio for playback mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_duplex);
     audioconfig.playback.format = ma_format_f32;
-    audioconfig.playback.channels = CHANNELS;
+    audioconfig.playback.channels = astrid_channels;
     audioconfig.sampleRate = SAMPLERATE;
     audioconfig.dataCallback = miniaudio_callback;
     audioconfig.pUserData = ctx;
@@ -153,14 +155,6 @@ int lprendernode_init() {
         /*printf("status: %d\n", (int)status);*/
 
         if(status == STATUS_PLAYING) {
-            /*
-            if(astrid_copy_adc(ctx->adc) < 0) {
-                PyErr_Print();
-                fprintf(stderr, "Runtime Error while rendering event from astrid instrument\n");
-                goto exit_with_error;
-            }
-            */
-
             if(astrid_render_event() < 0) {
                 PyErr_Print();
                 fprintf(stderr, "Runtime Error while rendering event from astrid instrument\n");
@@ -175,7 +169,7 @@ int lprendernode_init() {
                     goto exit_with_error;
                 }
 
-                out = LPBuffer.create(length, CHANNELS, SAMPLERATE);
+                out = LPBuffer.create(length, astrid_channels, SAMPLERATE);
                 if(astrid_copy_buffer(out) < 0) {
                     PyErr_Print();
                     fprintf(stderr, "Runtime Error while copying render data\n");
