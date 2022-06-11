@@ -18,11 +18,12 @@
 #define SAMPLERATE 48000
 #define ADC_LENGTH 480000
 
+static volatile int adc_is_running = 1;
 static volatile int adc_is_capturing = 1;
 lpadcctx_t * ctx;
 
 void handle_shutdown(int) {
-    adc_is_capturing = 0;
+    adc_is_running = 0;
 }
 
 void lpadcctx_destroy(lpadcctx_t * ctx) {
@@ -40,6 +41,8 @@ void miniaudio_callback(ma_device * device, void * pOut, const void * pIn, ma_ui
 
     ctx = (lpadcctx_t *)device->pUserData;
     in = (float *)pIn;
+
+    if(!adc_is_capturing) return;
 
     for(i=0; i < count; i++) {
         for(c=0; c < CHANNELS; c++) {
@@ -97,10 +100,22 @@ int main() {
         goto exit_with_error;
     }
 
+    /* Reset block counter */
+    status_reply = redisCommand(status_redis, "SET blocksread 0");
+    freeReplyObject(status_reply);
+
+    /* Reset capturing flag */
+    status_reply = redisCommand(status_redis, "SET adc_is_capturing 1");
+    freeReplyObject(status_reply);
+
+    /* Reset frame list */
+    status_reply = redisCommand(status_redis, "DEL adc");
+    freeReplyObject(status_reply);
+
     /* start ma device */
     ma_device_start(&mad);
 
-    while(adc_is_capturing) {
+    while(adc_is_running) {
         usleep((useconds_t)10000);
 
         status_reply = redisCommand(status_redis, "GET blocksread");
@@ -109,6 +124,11 @@ int main() {
 
         status_reply = redisCommand(status_redis, "LLEN adc");
         printf("adc length %d\n", (int)status_reply->integer);
+        freeReplyObject(status_reply);
+
+        status_reply = redisCommand(status_redis, "GET adc_is_capturing");
+        printf("adc_is_capturing %s\n", status_reply->str);
+        adc_is_capturing = atoi(status_reply->str);
         freeReplyObject(status_reply);
     }
 
