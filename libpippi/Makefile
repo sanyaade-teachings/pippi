@@ -24,7 +24,7 @@ clean:
 	rm build/*
 	rm renders/*.wav
 
-astrid:
+astrid-renderer:
 	echo "Building astrid renderer...";
 	cython cython/renderer.pyx
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 examples/renderer.c $(ALLSOURCES) src/astrid.c cython/renderer.c -o build/renderer
@@ -32,6 +32,8 @@ astrid:
 astrid-adc:
 	echo "Building astrid adc...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/adc.c -o build/adc
+	
+astrid: astrid-adc astrid-renderer
 
 osc-examples:
 	mkdir -p build renders
