@@ -2,6 +2,9 @@
 
 from pippi.soundbuffer cimport SoundBuffer
 
+cdef extern from "adc.h":
+    cdef int ADC_LENGTH
+
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 

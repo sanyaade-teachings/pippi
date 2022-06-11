@@ -9,9 +9,7 @@
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
-#include <hiredis/hiredis.h>
 
-#include "pippi.h"
 #include "adc.h"
 
 #define CHANNELS 2

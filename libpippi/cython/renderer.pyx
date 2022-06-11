@@ -1,6 +1,7 @@
 #cython: language_level=3
 
 import array
+from cpython cimport array
 import logging
 from logging.handlers import SysLogHandler
 import warnings
@@ -15,8 +16,7 @@ import redis
 from pippi import dsp
 from pippi.soundbuffer cimport SoundBuffer
 
-ADC_NAME = 'astrid-adc'
-ADC_BLOCKSIZE = 256
+ADC_NAME = 'adc'
 
 logger = logging.getLogger('pippi-renderer')
 if not logger.handlers:
@@ -28,35 +28,18 @@ if not logger.handlers:
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
 
-cdef void write_to_adc(double[:,:] block, int maxblocks):
-    _redis.lpush(ADC_NAME, bytes(block))
-    _redis.ltrim(ADC_NAME, 0, maxblocks-1)
-
 cdef SoundBuffer read_from_adc(double length, tuple channels=None, double offset=0, int samplerate=48000):
     if channels is None:
-        channels = (0,)
+        channels = (0,1)
 
-    cdef SoundBuffer out = dsp.buffer(length, channels=len(channels), samplerate=samplerate)
+    cdef array.array a
     cdef int framelength = <int>(length * samplerate)
-    cdef int numblocks = framelength // ADC_BLOCKSIZE
-    cdef double[:,:] block
-    cdef int i = (numblocks * ADC_BLOCKSIZE) - ADC_BLOCKSIZE
-    cdef int o = <int>(offset * samplerate) // ADC_BLOCKSIZE
-    o = min(o, (framelength - ADC_BLOCKSIZE) // ADC_BLOCKSIZE)
+    cdef int o = <int>(offset * samplerate)
 
-    bytelist = b''.join(_redis.lrange(ADC_NAME, o, o+numblocks-1))
+    bytelist = b''.join(_redis.lrange(ADC_NAME, o, o+framelength-1))
     a = array.array('d', bytelist)
 
-    """
-    for b in redis.lrange(ADC_NAME, o, o+numblocks-1):
-        block = np.ndarray((ADC_BLOCKSIZE, channels), dtype='d', buffer=bytearray(b))
-        for j in range(self.blocksize):
-            for c in range(len(channels)):
-                out[i+j,c] = block[j,channels[c]-1]
-
-        i -= ADC_BLOCKSIZE
-    """
-
+    return SoundBuffer(a, channels=len(channels), samplerate=samplerate)
 
 cdef class SessionParamBucket:
     """ params[key] to params.key
