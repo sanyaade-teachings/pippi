@@ -29,6 +29,10 @@ void handle_shutdown(int) {
     astrid_is_running = 0;
 }
 
+void handle_play_trigger(int) {
+    astrid_is_playing = 1;
+}
+
 void miniaudio_callback(ma_device * device, void * pOut, const void * pIn, ma_uint32 count) {
     ma_uint32 i;
     float * out;
@@ -48,7 +52,8 @@ void miniaudio_callback(ma_device * device, void * pOut, const void * pIn, ma_ui
 
 int lprendernode_init() {
     PyObject * pmodule;
-    struct sigaction action;
+    struct sigaction shutdown_action;
+    struct sigaction play_action;
 
     lpbuffer_t * out;
     lpastridctx_t * ctx;
@@ -70,8 +75,11 @@ int lprendernode_init() {
     }
     printf("astrid_channels %d\n", astrid_channels);
 
-    action.sa_handler = handle_shutdown;
-    sigaction(SIGINT, &action, NULL);
+    shutdown_action.sa_handler = handle_shutdown;
+    sigaction(SIGINT, &shutdown_action, NULL);
+
+    play_action.sa_handler = handle_play_trigger;
+    sigaction(SIGUSR1, &play_action, NULL);
 
     voice_id = (long)syscall(SYS_gettid);
 
