@@ -24,6 +24,11 @@ def play(ctx):
         hf = dsp.rand(9000, 12000) * cc2
         out = noise.bln('sine', l, lf, hf).env('pluckout')
 
-        out = fx.crush(out)
+        #out = fx.crush(out)
+        adc = ctx.adc(out.dur) * 10
+
+        out.dub(adc)
+        out = fx.lpf(out, 500)
+
         #out = out.env('hann')
         yield out * cc3

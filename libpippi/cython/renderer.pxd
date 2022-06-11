@@ -73,7 +73,6 @@ cdef class Instrument:
     cdef public int playing
     cdef public dict messages
     cdef public dict params 
-    cdef lpbuffer_t * adc
 
 cdef tuple collect_players(object instrument)
 cdef list render_event(object instrument, object params, object buf_q)

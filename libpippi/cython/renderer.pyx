@@ -11,7 +11,11 @@ import os
 from pathlib import Path
 import threading
 
+import numpy as np
+#cimport numpy as np
 import redis
+
+#np.import_array()
 
 from pippi import dsp
 from pippi.soundbuffer cimport SoundBuffer
@@ -39,7 +43,7 @@ cdef SoundBuffer read_from_adc(double length, tuple channels=None, double offset
     bytelist = b''.join(_redis.lrange(ADC_NAME, o, o+framelength-1))
     a = array.array('d', bytelist)
 
-    return SoundBuffer(a, channels=len(channels), samplerate=samplerate)
+    return SoundBuffer(np.ndarray(shape=(framelength, len(channels)), buffer=a, dtype='d'), channels=len(channels), samplerate=samplerate)
 
 cdef class SessionParamBucket:
     """ params[key] to params.key
@@ -88,7 +92,6 @@ cdef class EventContext:
         self.client = None
         self.instrument_name = instrument_name
         self.sounds = sounds
-        #self.adc = Circle()
         #self.sampler = Sampler()
 
     def play(self, instrument_name, *params, **kwargs):
@@ -107,6 +110,9 @@ cdef class EventContext:
 
         #if self.client is not None:
         #    self.client.send_cmd([names.PLAY_INSTRUMENT, instrument_name, params])
+
+    def adc(self, length=1):
+        return read_from_adc(length)
 
     def log(self, msg):
         logger.info(msg)
