@@ -184,11 +184,7 @@ int lprendernode_init() {
             usleep((useconds_t)1000);
         }
 
-        if(astrid_is_looping == 0) {
-            astrid_is_playing = 0;
-        } else {
-            astrid_is_playing = 1;
-        }
+        astrid_is_playing = astrid_is_looping;
 
         usleep((useconds_t)1000);
 
