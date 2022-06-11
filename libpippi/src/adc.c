@@ -1,8 +1,3 @@
-#include <unistd.h>
-#include <signal.h>
-#include <sys/time.h>
-#include <string.h>
-
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
 #define MA_ENABLE_JACK
