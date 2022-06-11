@@ -353,7 +353,7 @@ cdef public int astrid_get_messages() except -1:
             ASTRID_INSTRUMENT.messages[channel] += [ msg ]
     return 0
 
-cdef public int astrid_get_instrument_status(int * status) except -1:
+cdef public int astrid_get_instrument_params(int * status) except -1:
     global ASTRID_INSTRUMENT
 
     for channel, messages in ASTRID_INSTRUMENT.messages.items():
@@ -378,6 +378,16 @@ cdef public int astrid_get_instrument_status(int * status) except -1:
     ASTRID_INSTRUMENT.flush_messages()
 
     status[0] = ASTRID_INSTRUMENT.playing
+    return 0
+
+cdef public int astrid_get_instrument_loop_status(int * loop_status) except -1:
+    global ASTRID_INSTRUMENT
+
+    if hasattr(ASTRID_INSTRUMENT.renderer, 'LOOP'):
+        loop_status[0] = 1 if ASTRID_INSTRUMENT.renderer.LOOP else 0
+    else:
+        loop_status[0] = 0
+
     return 0
 
 cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:

@@ -1989,7 +1989,7 @@ struct __pyx_obj_8renderer_EventContext {
 };
 
 
-/* "renderer.pxd":66
+/* "renderer.pxd":65
  *     #cdef public object sampler
  * 
  * cdef class Instrument:             # <<<<<<<<<<<<<<
@@ -3717,7 +3717,8 @@ __PYX_EXTERN_C int astrid_load_instrument(void); /*proto*/
 __PYX_EXTERN_C int astrid_reload_instrument(void); /*proto*/
 __PYX_EXTERN_C int astrid_render_event(void); /*proto*/
 __PYX_EXTERN_C int astrid_get_messages(void); /*proto*/
-__PYX_EXTERN_C int astrid_get_instrument_status(int *); /*proto*/
+__PYX_EXTERN_C int astrid_get_instrument_params(int *); /*proto*/
+__PYX_EXTERN_C int astrid_get_instrument_loop_status(int *); /*proto*/
 __PYX_EXTERN_C int astrid_get_info(size_t *, int *, int *); /*proto*/
 __PYX_EXTERN_C int astrid_buffer_count(int *); /*proto*/
 __PYX_EXTERN_C int astrid_copy_buffer(lpbuffer_t *); /*proto*/
@@ -10132,7 +10133,7 @@ static int __pyx_pf_8renderer_12EventContext_6sounds_4__del__(struct __pyx_obj_8
  *     cdef public object sounds
  *     cdef public int count             # <<<<<<<<<<<<<<
  *     cdef public int tick
- *     #cdef public object adc
+ *     #cdef public object sampler
  */
 
 /* Python wrapper */
@@ -10215,8 +10216,8 @@ static int __pyx_pf_8renderer_12EventContext_5count_2__set__(struct __pyx_obj_8r
  *     cdef public object sounds
  *     cdef public int count
  *     cdef public int tick             # <<<<<<<<<<<<<<
- *     #cdef public object adc
  *     #cdef public object sampler
+ * 
  */
 
 /* Python wrapper */
@@ -12785,7 +12786,7 @@ static PyObject *__pyx_pf_8renderer_10Instrument_10create_ctx(struct __pyx_obj_8
   return __pyx_r;
 }
 
-/* "renderer.pxd":69
+/* "renderer.pxd":68
  *     cdef str name
  *     cdef str path
  *     cdef public list groups             # <<<<<<<<<<<<<<
@@ -12845,7 +12846,7 @@ static int __pyx_pf_8renderer_10Instrument_6groups_2__set__(struct __pyx_obj_8re
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
-  if (!(likely(PyList_CheckExact(__pyx_v_value))||((__pyx_v_value) == Py_None) || __Pyx_RaiseUnexpectedTypeError("list", __pyx_v_value))) __PYX_ERR(2, 69, __pyx_L1_error)
+  if (!(likely(PyList_CheckExact(__pyx_v_value))||((__pyx_v_value) == Py_None) || __Pyx_RaiseUnexpectedTypeError("list", __pyx_v_value))) __PYX_ERR(2, 68, __pyx_L1_error)
   __pyx_t_1 = __pyx_v_value;
   __Pyx_INCREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -12896,7 +12897,7 @@ static int __pyx_pf_8renderer_10Instrument_6groups_4__del__(struct __pyx_obj_8re
   return __pyx_r;
 }
 
-/* "renderer.pxd":70
+/* "renderer.pxd":69
  *     cdef str path
  *     cdef public list groups
  *     cdef public object renderer             # <<<<<<<<<<<<<<
@@ -12994,7 +12995,7 @@ static int __pyx_pf_8renderer_10Instrument_8renderer_4__del__(struct __pyx_obj_8
   return __pyx_r;
 }
 
-/* "renderer.pxd":73
+/* "renderer.pxd":72
  *     cdef object shutdown
  *     cdef object sounds
  *     cdef public int playing             # <<<<<<<<<<<<<<
@@ -13025,7 +13026,7 @@ static PyObject *__pyx_pf_8renderer_10Instrument_7playing___get__(struct __pyx_o
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__get__", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->playing); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 73, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->playing); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 72, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -13064,7 +13065,7 @@ static int __pyx_pf_8renderer_10Instrument_7playing_2__set__(struct __pyx_obj_8r
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 73, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_value); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(2, 72, __pyx_L1_error)
   __pyx_v_self->playing = __pyx_t_1;
 
   /* function exit code */
@@ -13078,7 +13079,7 @@ static int __pyx_pf_8renderer_10Instrument_7playing_2__set__(struct __pyx_obj_8r
   return __pyx_r;
 }
 
-/* "renderer.pxd":74
+/* "renderer.pxd":73
  *     cdef object sounds
  *     cdef public int playing
  *     cdef public dict messages             # <<<<<<<<<<<<<<
@@ -13138,7 +13139,7 @@ static int __pyx_pf_8renderer_10Instrument_8messages_2__set__(struct __pyx_obj_8
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
-  if (!(likely(PyDict_CheckExact(__pyx_v_value))||((__pyx_v_value) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_v_value))) __PYX_ERR(2, 74, __pyx_L1_error)
+  if (!(likely(PyDict_CheckExact(__pyx_v_value))||((__pyx_v_value) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_v_value))) __PYX_ERR(2, 73, __pyx_L1_error)
   __pyx_t_1 = __pyx_v_value;
   __Pyx_INCREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -13189,7 +13190,7 @@ static int __pyx_pf_8renderer_10Instrument_8messages_4__del__(struct __pyx_obj_8
   return __pyx_r;
 }
 
-/* "renderer.pxd":75
+/* "renderer.pxd":74
  *     cdef public int playing
  *     cdef public dict messages
  *     cdef public dict params             # <<<<<<<<<<<<<<
@@ -13249,7 +13250,7 @@ static int __pyx_pf_8renderer_10Instrument_6params_2__set__(struct __pyx_obj_8re
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__set__", 0);
-  if (!(likely(PyDict_CheckExact(__pyx_v_value))||((__pyx_v_value) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_v_value))) __PYX_ERR(2, 75, __pyx_L1_error)
+  if (!(likely(PyDict_CheckExact(__pyx_v_value))||((__pyx_v_value) == Py_None) || __Pyx_RaiseUnexpectedTypeError("dict", __pyx_v_value))) __PYX_ERR(2, 74, __pyx_L1_error)
   __pyx_t_1 = __pyx_v_value;
   __Pyx_INCREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_1);
@@ -16974,7 +16975,7 @@ int astrid_get_messages(void) {
  *             ASTRID_INSTRUMENT.messages[channel] += [ msg ]
  *     return 0             # <<<<<<<<<<<<<<
  * 
- * cdef public int astrid_get_instrument_status(int * status) except -1:
+ * cdef public int astrid_get_instrument_params(int * status) except -1:
  */
   __pyx_r = 0;
   goto __pyx_L0;
@@ -17007,12 +17008,12 @@ int astrid_get_messages(void) {
 /* "renderer.pyx":356
  *     return 0
  * 
- * cdef public int astrid_get_instrument_status(int * status) except -1:             # <<<<<<<<<<<<<<
+ * cdef public int astrid_get_instrument_params(int * status) except -1:             # <<<<<<<<<<<<<<
  *     global ASTRID_INSTRUMENT
  * 
  */
 
-int astrid_get_instrument_status(int *__pyx_v_status) {
+int astrid_get_instrument_params(int *__pyx_v_status) {
   PyObject *__pyx_v_channel = NULL;
   PyObject *__pyx_v_messages = NULL;
   PyObject *__pyx_v_msg = NULL;
@@ -17042,7 +17043,7 @@ int astrid_get_instrument_status(int *__pyx_v_status) {
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
-  __Pyx_RefNannySetupContext("astrid_get_instrument_status", 0);
+  __Pyx_RefNannySetupContext("astrid_get_instrument_params", 0);
 
   /* "renderer.pyx":359
  *     global ASTRID_INSTRUMENT
@@ -17546,7 +17547,7 @@ int astrid_get_instrument_status(int *__pyx_v_status) {
  *     status[0] = ASTRID_INSTRUMENT.playing
  *     return 0             # <<<<<<<<<<<<<<
  * 
- * cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:
+ * cdef public int astrid_get_instrument_loop_status(int * loop_status) except -1:
  */
   __pyx_r = 0;
   goto __pyx_L0;
@@ -17554,7 +17555,7 @@ int astrid_get_instrument_status(int *__pyx_v_status) {
   /* "renderer.pyx":356
  *     return 0
  * 
- * cdef public int astrid_get_instrument_status(int * status) except -1:             # <<<<<<<<<<<<<<
+ * cdef public int astrid_get_instrument_params(int * status) except -1:             # <<<<<<<<<<<<<<
  *     global ASTRID_INSTRUMENT
  * 
  */
@@ -17569,7 +17570,7 @@ int astrid_get_instrument_status(int *__pyx_v_status) {
   __Pyx_XDECREF(__pyx_t_13);
   __Pyx_XDECREF(__pyx_t_14);
   __Pyx_XDECREF(__pyx_t_15);
-  __Pyx_AddTraceback("renderer.astrid_get_instrument_status", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("renderer.astrid_get_instrument_params", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
   __Pyx_XDECREF(__pyx_v_channel);
@@ -17585,6 +17586,119 @@ int astrid_get_instrument_status(int *__pyx_v_status) {
 }
 
 /* "renderer.pyx":383
+ *     return 0
+ * 
+ * cdef public int astrid_get_instrument_loop_status(int * loop_status) except -1:             # <<<<<<<<<<<<<<
+ *     global ASTRID_INSTRUMENT
+ * 
+ */
+
+int astrid_get_instrument_loop_status(int *__pyx_v_loop_status) {
+  int __pyx_r;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_3;
+  int __pyx_t_4;
+  int __pyx_t_5;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("astrid_get_instrument_loop_status", 0);
+
+  /* "renderer.pyx":386
+ *     global ASTRID_INSTRUMENT
+ * 
+ *     if hasattr(ASTRID_INSTRUMENT.renderer, 'LOOP'):             # <<<<<<<<<<<<<<
+ *         loop_status[0] = 1 if ASTRID_INSTRUMENT.renderer.LOOP else 0
+ *     else:
+ */
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ASTRID_INSTRUMENT); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 386, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_renderer); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 386, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = __Pyx_HasAttr(__pyx_t_2, __pyx_n_u_LOOP); if (unlikely(__pyx_t_3 == ((int)-1))) __PYX_ERR(0, 386, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_4 = (__pyx_t_3 != 0);
+  if (__pyx_t_4) {
+
+    /* "renderer.pyx":387
+ * 
+ *     if hasattr(ASTRID_INSTRUMENT.renderer, 'LOOP'):
+ *         loop_status[0] = 1 if ASTRID_INSTRUMENT.renderer.LOOP else 0             # <<<<<<<<<<<<<<
+ *     else:
+ *         loop_status[0] = 0
+ */
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_ASTRID_INSTRUMENT); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 387, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_renderer); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 387, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_LOOP); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 387, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely((__pyx_t_4 < 0))) __PYX_ERR(0, 387, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    if (__pyx_t_4) {
+      __pyx_t_5 = 1;
+    } else {
+      __pyx_t_5 = 0;
+    }
+    (__pyx_v_loop_status[0]) = __pyx_t_5;
+
+    /* "renderer.pyx":386
+ *     global ASTRID_INSTRUMENT
+ * 
+ *     if hasattr(ASTRID_INSTRUMENT.renderer, 'LOOP'):             # <<<<<<<<<<<<<<
+ *         loop_status[0] = 1 if ASTRID_INSTRUMENT.renderer.LOOP else 0
+ *     else:
+ */
+    goto __pyx_L3;
+  }
+
+  /* "renderer.pyx":389
+ *         loop_status[0] = 1 if ASTRID_INSTRUMENT.renderer.LOOP else 0
+ *     else:
+ *         loop_status[0] = 0             # <<<<<<<<<<<<<<
+ * 
+ *     return 0
+ */
+  /*else*/ {
+    (__pyx_v_loop_status[0]) = 0;
+  }
+  __pyx_L3:;
+
+  /* "renderer.pyx":391
+ *         loop_status[0] = 0
+ * 
+ *     return 0             # <<<<<<<<<<<<<<
+ * 
+ * cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:
+ */
+  __pyx_r = 0;
+  goto __pyx_L0;
+
+  /* "renderer.pyx":383
+ *     return 0
+ * 
+ * cdef public int astrid_get_instrument_loop_status(int * loop_status) except -1:             # <<<<<<<<<<<<<<
+ *     global ASTRID_INSTRUMENT
+ * 
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("renderer.astrid_get_instrument_loop_status", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = -1;
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "renderer.pyx":393
  *     return 0
  * 
  * cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:             # <<<<<<<<<<<<<<
@@ -17604,61 +17718,61 @@ int astrid_get_info(size_t *__pyx_v_length, int *__pyx_v_channels, int *__pyx_v_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("astrid_get_info", 0);
 
-  /* "renderer.pyx":386
+  /* "renderer.pyx":396
  *     global ASTRID_RENDERS
  * 
  *     length[0] = <size_t>len(ASTRID_RENDERS[-1])             # <<<<<<<<<<<<<<
  *     channels[0] = <int>(ASTRID_RENDERS[-1].channels)
  *     samplerate[0] = <int>(ASTRID_RENDERS[-1].samplerate)
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 386, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 396, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 386, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 396, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = PyObject_Length(__pyx_t_2); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 386, __pyx_L1_error)
+  __pyx_t_3 = PyObject_Length(__pyx_t_2); if (unlikely(__pyx_t_3 == ((Py_ssize_t)-1))) __PYX_ERR(0, 396, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   (__pyx_v_length[0]) = ((size_t)__pyx_t_3);
 
-  /* "renderer.pyx":387
+  /* "renderer.pyx":397
  * 
  *     length[0] = <size_t>len(ASTRID_RENDERS[-1])
  *     channels[0] = <int>(ASTRID_RENDERS[-1].channels)             # <<<<<<<<<<<<<<
  *     samplerate[0] = <int>(ASTRID_RENDERS[-1].samplerate)
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 387, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 397, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 387, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 397, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_channels); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 387, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_channels); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 397, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 387, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 397, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   (__pyx_v_channels[0]) = ((int)__pyx_t_4);
 
-  /* "renderer.pyx":388
+  /* "renderer.pyx":398
  *     length[0] = <size_t>len(ASTRID_RENDERS[-1])
  *     channels[0] = <int>(ASTRID_RENDERS[-1].channels)
  *     samplerate[0] = <int>(ASTRID_RENDERS[-1].samplerate)             # <<<<<<<<<<<<<<
  * 
  *     return 0
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 388, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 398, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 388, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, -1L, long, 1, __Pyx_PyInt_From_long, 0, 1, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 398, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_samplerate); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 388, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_samplerate); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 398, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 388, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 398, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   (__pyx_v_samplerate[0]) = ((int)__pyx_t_4);
 
-  /* "renderer.pyx":390
+  /* "renderer.pyx":400
  *     samplerate[0] = <int>(ASTRID_RENDERS[-1].samplerate)
  * 
  *     return 0             # <<<<<<<<<<<<<<
@@ -17668,7 +17782,7 @@ int astrid_get_info(size_t *__pyx_v_length, int *__pyx_v_channels, int *__pyx_v_
   __pyx_r = 0;
   goto __pyx_L0;
 
-  /* "renderer.pyx":383
+  /* "renderer.pyx":393
  *     return 0
  * 
  * cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:             # <<<<<<<<<<<<<<
@@ -17687,7 +17801,7 @@ int astrid_get_info(size_t *__pyx_v_length, int *__pyx_v_channels, int *__pyx_v_
   return __pyx_r;
 }
 
-/* "renderer.pyx":392
+/* "renderer.pyx":402
  *     return 0
  * 
  * cdef public int astrid_buffer_count(int * count) except -1:             # <<<<<<<<<<<<<<
@@ -17705,20 +17819,20 @@ int astrid_buffer_count(int *__pyx_v_count) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("astrid_buffer_count", 0);
 
-  /* "renderer.pyx":394
+  /* "renderer.pyx":404
  * cdef public int astrid_buffer_count(int * count) except -1:
  *     global ASTRID_RENDERS
  *     count[0] = <int>len(ASTRID_RENDERS)             # <<<<<<<<<<<<<<
  * 
  * cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 394, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 404, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 394, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 404, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   (__pyx_v_count[0]) = ((int)__pyx_t_2);
 
-  /* "renderer.pyx":392
+  /* "renderer.pyx":402
  *     return 0
  * 
  * cdef public int astrid_buffer_count(int * count) except -1:             # <<<<<<<<<<<<<<
@@ -17738,7 +17852,7 @@ int astrid_buffer_count(int *__pyx_v_count) {
   return __pyx_r;
 }
 
-/* "renderer.pyx":396
+/* "renderer.pyx":406
  *     count[0] = <int>len(ASTRID_RENDERS)
  * 
  * cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:             # <<<<<<<<<<<<<<
@@ -17766,22 +17880,22 @@ int astrid_copy_buffer(lpbuffer_t *__pyx_v_buffer) {
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("astrid_copy_buffer", 0);
 
-  /* "renderer.pyx":401
+  /* "renderer.pyx":411
  *     global ASTRID_RENDERS
  * 
  *     snd = ASTRID_RENDERS.pop()             # <<<<<<<<<<<<<<
  *     for i in range(buffer.length):
  *         for c in range(buffer.channels):
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 401, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_ASTRID_RENDERS); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_Pop(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 401, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Pop(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_snd = __pyx_t_2;
   __pyx_t_2 = 0;
 
-  /* "renderer.pyx":402
+  /* "renderer.pyx":412
  * 
  *     snd = ASTRID_RENDERS.pop()
  *     for i in range(buffer.length):             # <<<<<<<<<<<<<<
@@ -17793,7 +17907,7 @@ int astrid_copy_buffer(lpbuffer_t *__pyx_v_buffer) {
   for (__pyx_t_5 = 0; __pyx_t_5 < __pyx_t_4; __pyx_t_5+=1) {
     __pyx_v_i = __pyx_t_5;
 
-    /* "renderer.pyx":403
+    /* "renderer.pyx":413
  *     snd = ASTRID_RENDERS.pop()
  *     for i in range(buffer.length):
  *         for c in range(buffer.channels):             # <<<<<<<<<<<<<<
@@ -17805,28 +17919,28 @@ int astrid_copy_buffer(lpbuffer_t *__pyx_v_buffer) {
     for (__pyx_t_8 = 0; __pyx_t_8 < __pyx_t_7; __pyx_t_8+=1) {
       __pyx_v_c = __pyx_t_8;
 
-      /* "renderer.pyx":404
+      /* "renderer.pyx":414
  *     for i in range(buffer.length):
  *         for c in range(buffer.channels):
  *             buffer.data[i * buffer.channels + c] = snd.frames[i][c]             # <<<<<<<<<<<<<<
  * 
  * 
  */
-      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_snd, __pyx_n_s_frames); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 404, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_snd, __pyx_n_s_frames); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 414, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 404, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_2, __pyx_v_i, size_t, 0, __Pyx_PyInt_FromSize_t, 0, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 414, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_c, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 404, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_GetItemInt(__pyx_t_1, __pyx_v_c, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 414, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_9 == ((lpfloat_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 404, __pyx_L1_error)
+      __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_9 == ((lpfloat_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 414, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       (__pyx_v_buffer->data[((__pyx_v_i * __pyx_v_buffer->channels) + __pyx_v_c)]) = __pyx_t_9;
     }
   }
 
-  /* "renderer.pyx":396
+  /* "renderer.pyx":406
  *     count[0] = <int>len(ASTRID_RENDERS)
  * 
  * cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:             # <<<<<<<<<<<<<<
@@ -36804,7 +36918,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_IndexError = __Pyx_GetBuiltinName(__pyx_n_s_IndexError); if (!__pyx_builtin_IndexError) __PYX_ERR(0, 181, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 229, __pyx_L1_error)
   __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 347, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 402, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 412, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(4, 120, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 136, __pyx_L1_error)
   __pyx_builtin_Ellipsis = __Pyx_GetBuiltinName(__pyx_n_s_Ellipsis); if (!__pyx_builtin_Ellipsis) __PYX_ERR(1, 418, __pyx_L1_error)

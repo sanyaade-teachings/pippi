@@ -20,6 +20,8 @@
 #define STATUS_PAUSED 0
 
 static volatile int astrid_is_running = 1;
+static volatile int astrid_is_playing = 1;
+static volatile int astrid_is_looping = 1;
 
 int astrid_channels = 2;
 
@@ -60,7 +62,6 @@ int lprendernode_init() {
     int channels;
     int samplerate;
     int buffer_count;
-    int status;
     char * _astrid_channels;
 
     _astrid_channels = getenv("ASTRID_CHANNELS");
@@ -78,9 +79,6 @@ int lprendernode_init() {
     ctx->s = LPScheduler.create(astrid_channels);
     length = 0;
 
-    /*
-    Py_SetPath(L"/home/hecanjog/.pyenv/versions/3.9.9/lib/python39.zip:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/lib-dynload:/home/hecanjog/.local/lib/python3.9/site-packages:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-packages:/home/hecanjog/code/pippi:/home/hecanjog/.pyenv/versions/3.9.9/lib/python3.9/site-packages/PySoundFile-0.9.0.post1-py3.9.egg");
-    */
     astrid_pythonpath = getenv("ASTRID_PYTHONPATH");
     astrid_pythonpath_length = mbstowcs(NULL, astrid_pythonpath, 0);
     astrid_pythonpath_wchar = calloc(astrid_pythonpath_length+1, sizeof(*astrid_pythonpath_wchar));
@@ -104,7 +102,7 @@ int lprendernode_init() {
     Py_SetProgramName(L"astrid");
     Py_Initialize();
 
-    /*printf("Renderer embedded python path: %ls\n", Py_GetPath());*/
+    printf("Renderer embedded python path: %ls\n", Py_GetPath());
 
     pmodule = PyImport_ImportModule("renderer");
     if(!pmodule) {
@@ -138,7 +136,6 @@ int lprendernode_init() {
     }
 
     buffer_count = 0;
-    status = 1;
     while(astrid_is_running) {
         if(astrid_get_messages() < 0) {
             PyErr_Print();
@@ -146,15 +143,13 @@ int lprendernode_init() {
             goto exit_with_error;
         }
 
-        if(astrid_get_instrument_status(&status) < 0) {
+        if(astrid_get_instrument_loop_status(&astrid_is_looping) < 0) {
             PyErr_Print();
             fprintf(stderr, "Runtime Error while checking astrid instrument status\n");
             goto exit_with_error;
         }
 
-        /*printf("status: %d\n", (int)status);*/
-
-        if(status == STATUS_PLAYING) {
+        if(astrid_is_playing) {
             if(astrid_render_event() < 0) {
                 PyErr_Print();
                 fprintf(stderr, "Runtime Error while rendering event from astrid instrument\n");
@@ -187,6 +182,12 @@ int lprendernode_init() {
                 goto exit_with_error;
             }
             usleep((useconds_t)1000);
+        }
+
+        if(astrid_is_looping == 0) {
+            astrid_is_playing = 0;
+        } else {
+            astrid_is_playing = 1;
         }
 
         usleep((useconds_t)1000);

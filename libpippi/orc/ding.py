@@ -1,6 +1,8 @@
 from pippi import dsp, oscs, tune, fx, noise
 import time
 
+#LOOP = True
+
 groups = (5,6,7)
 #dsp.seed(time.time())
 
