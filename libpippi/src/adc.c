@@ -1,6 +1,6 @@
 #define MINIAUDIO_IMPLEMENTATION
-#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
-#define MA_ENABLE_JACK
+#define MA_NO_PULSEAUDIO
+#define MA_NO_ALSA
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
@@ -9,7 +9,7 @@
 
 #define CHANNELS 2
 #define SAMPLERATE 48000
-#define ADC_LENGTH 480000
+#define ADC_LENGTH 4800000
 
 static volatile int adc_is_running = 1;
 static volatile int adc_is_capturing = 1;
@@ -47,7 +47,7 @@ void miniaudio_callback(ma_device * device, void * pOut, const void * pIn, ma_ui
         freeReplyObject(ctx->r);
     }
 
-    ctx->r = redisCommand(ctx->c, "LTRIM adc 0 479999");
+    ctx->r = redisCommand(ctx->c, "LTRIM adc 0 4799999");
     freeReplyObject(ctx->r);
 
     ctx->r = redisCommand(ctx->c, "INCR blocksread");

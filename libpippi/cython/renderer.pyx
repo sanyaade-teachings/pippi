@@ -32,18 +32,15 @@ if not logger.handlers:
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
 
-cdef SoundBuffer read_from_adc(double length, tuple channels=None, double offset=0, int samplerate=48000):
-    if channels is None:
-        channels = (0,1)
-
+cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
     cdef array.array a
     cdef int framelength = <int>(length * samplerate)
     cdef int o = <int>(offset * samplerate)
 
-    bytelist = b''.join(_redis.lrange(ADC_NAME, o, o+framelength-1))
+    bytelist = b''.join(list(reversed(_redis.lrange(ADC_NAME, o, o+framelength-1))))
     a = array.array('d', bytelist)
 
-    return SoundBuffer(np.ndarray(shape=(framelength, len(channels)), buffer=a, dtype='d'), channels=len(channels), samplerate=samplerate)
+    return SoundBuffer(np.ndarray(shape=(framelength, channels), buffer=a, dtype='d'), channels=channels, samplerate=samplerate)
 
 cdef class SessionParamBucket:
     """ params[key] to params.key
@@ -111,8 +108,8 @@ cdef class EventContext:
         #if self.client is not None:
         #    self.client.send_cmd([names.PLAY_INSTRUMENT, instrument_name, params])
 
-    def adc(self, length=1):
-        return read_from_adc(length)
+    def adc(self, length=1, offset=0, channels=2):
+        return read_from_adc(length, offset=offset, channels=channels)
 
     def log(self, msg):
         logger.info(msg)

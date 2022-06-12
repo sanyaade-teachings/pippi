@@ -3,8 +3,8 @@
 #include <sys/syscall.h>
 
 #define MINIAUDIO_IMPLEMENTATION
-#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
-#define MA_ENABLE_JACK
+#define MA_NO_PULSEAUDIO
+#define MA_NO_ALSA
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
