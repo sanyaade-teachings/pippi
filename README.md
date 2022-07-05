@@ -2,7 +2,7 @@
 
 v2.0.0 - Beta 5 (In Development)
 
-Source code: [https://github.com/luvsound/pippi](https://github.com/luvsound/pippi)
+Source code: [https://git.sr.ht/~hecanjog/pippi](https://git.sr.ht/~hecanjog/pippi)
 
 Documentation: [https://pippi.world](https://pippi.world)
 
