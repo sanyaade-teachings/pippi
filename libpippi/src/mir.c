@@ -246,6 +246,7 @@ lppeakfollower_t * peakfollower_create(lpfloat_t interval) {
     peak->last = 0.f;
     peak->phase = 0.f;
     peak->interval = interval;
+    peak->change = 0;
 
     return peak; 
 }
@@ -254,8 +255,11 @@ void peakfollower_process(lppeakfollower_t * peak, lpfloat_t input) {
     peak->phase += 1;
     peak->last = lpfmax(peak->last, input);
     if(peak->phase >= peak->interval) {
+        peak->change = 1;
         peak->phase -= peak->interval;        
         peak->value = peak->last;
+    } else {
+        peak->change = 0;
     }
 }
 

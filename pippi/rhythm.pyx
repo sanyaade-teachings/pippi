@@ -39,6 +39,9 @@ def makesection(str k, dict instrument, double length, list onsets, bint stems, 
     cdef double onset
     cdef double beat
 
+    if stemsdir != '' and not stemsdir.endswith('/'):
+        stemsdir = stemsdir + '/'
+
     """
     cdef dict ctx = {
         'pos': 0, 

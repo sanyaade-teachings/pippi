@@ -5,7 +5,7 @@ import tempfile
 from unittest import TestCase
 
 from pippi.soundbuffer import SoundBuffer
-from pippi import dsp, grains
+from pippi import dsp, grains, grains2
 
 class TestCloud(TestCase):
     def setUp(self):
@@ -13,6 +13,19 @@ class TestCloud(TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.soundfiles)
+
+    def test_libpippi_graincloud(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        cloud = grains2.Cloud2(sound)
+
+        length = 30
+        framelength = int(length * sound.samplerate)
+
+        out = cloud.play(length)
+
+        out.write('tests/renders/graincloud_libpippi.wav')
+
+        self.assertEqual(len(out), framelength)
 
     def test_unmodulated_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')

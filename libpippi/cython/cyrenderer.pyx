@@ -2,6 +2,7 @@
 
 import array
 from cpython cimport array
+from libc.string cimport memcpy
 import logging
 from logging.handlers import SysLogHandler
 import warnings
@@ -9,6 +10,7 @@ import importlib
 import importlib.util
 import os
 from pathlib import Path
+import struct
 import threading
 
 import numpy as np
@@ -31,6 +33,32 @@ if not logger.handlers:
 
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
+
+cdef bytes serialize_buffer(SoundBuffer buf, size_t onset):
+    cdef bytearray strbuf
+    cdef size_t audiosize, length;
+    cdef int channels, samplerate
+
+    strbuf = bytearray()
+
+    channels = <int>buf.channels
+    samplerate = <int>buf.samplerate
+    length = <size_t>len(buf)
+
+    # size of audio data 
+    audiosize = length * channels * sizeof(lpfloat_t)
+
+    strbuf += struct.pack('N', audiosize)
+    strbuf += struct.pack('N', length)
+    strbuf += struct.pack('i', channels)
+    strbuf += struct.pack('i', samplerate)
+    strbuf += struct.pack('N', onset)
+
+    for i in range(length):
+        for c in range(channels):
+            strbuf += struct.pack('d', buf.frames[i,c])
+
+    return bytes(strbuf)
 
 cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
     cdef array.array a
@@ -332,7 +360,10 @@ cdef public int astrid_render_event() except -1:
     global ASTRID_RENDERS
     global ASTRID_INSTRUMENT
 
-    ASTRID_RENDERS += render_event(ASTRID_INSTRUMENT, None, None)
+    #ASTRID_RENDERS += render_event(ASTRID_INSTRUMENT, None, None)
+    for buf in render_event(ASTRID_INSTRUMENT, None, None):
+        bufstr = serialize_buffer(buf, 0)
+        _redis.publish('astridbuffers', bufstr)
     return 0
 
 cdef public int astrid_get_messages() except -1:

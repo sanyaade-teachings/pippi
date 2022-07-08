@@ -2,7 +2,7 @@
 
 lpscheduler_t * scheduler_create(int);
 lpfloat_t scheduler_read_channel(lpscheduler_t * s, int channel);
-void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay);
+void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay, void (*done_callback)(void *), void * done_ctx);
 void scheduler_destroy(lpscheduler_t * s);
 void start_playing(lpscheduler_t * s, lpevent_t * e);
 void scheduler_debug(lpscheduler_t * s);
@@ -91,6 +91,9 @@ void start_playing(lpscheduler_t * s, lpevent_t * e) {
 void stop_playing(lpscheduler_t * s, lpevent_t * e) {
     lpevent_t * current;
     lpevent_t * prev;
+
+    /* Execute done callback if one has been registered */
+    if(e->done != NULL) e->done(e->ctx);
 
     /* Remove from the playing stack */
     if(s->playing_stack_head == NULL) {
@@ -263,7 +266,12 @@ void lpscheduler_tick(lpscheduler_t * s) {
     s->now += 1;
 }
 
-void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay) {
+void scheduler_schedule_event(lpscheduler_t * s, 
+        lpbuffer_t * buf, 
+        size_t delay, 
+        void (*done_callback)(void*), 
+        void * done_ctx
+) {
     lpevent_t * e;
 
     if(s->nursery_head != NULL) {
@@ -279,6 +287,8 @@ void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay)
     e->buf = buf;
     e->pos = 0;
     e->onset = s->now + delay;
+    e->done = done_callback;
+    e->ctx = done_ctx;
 
     start_waiting(s, e);
 }

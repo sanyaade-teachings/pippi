@@ -94,6 +94,7 @@ typedef struct lppeakfollower_t {
     lpfloat_t last;
     lpfloat_t phase;
     lpfloat_t interval;
+    int change;
 } lppeakfollower_t;
 
 typedef struct lpenvelopefollower_t {

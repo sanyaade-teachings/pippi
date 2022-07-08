@@ -4,6 +4,7 @@
 /* std includes */
 #include <assert.h>
 #include <math.h>
+#include <sys/random.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,6 +66,7 @@ typedef struct lpbuffer_t {
     size_t boundry;
     size_t range;
     size_t pos;
+    size_t onset;
 } lpbuffer_t;
 
 typedef struct lpstack_t {
@@ -107,6 +109,7 @@ typedef struct lprand_t {
     lpfloat_t lorenz_b;
     lpfloat_t lorenz_c;
 
+    void (*preseed)(void);
     void (*seed)(int);
 
     lpfloat_t (*stdlib)(lpfloat_t, lpfloat_t);
@@ -157,6 +160,7 @@ typedef struct lpbuffer_factory_t {
     int (*buffers_are_close)(lpbuffer_t *, lpbuffer_t *, int);
     void (*dub)(lpbuffer_t *, lpbuffer_t *, size_t);
     void (*env)(lpbuffer_t *, lpbuffer_t *);
+    lpbuffer_t * (*resize)(lpbuffer_t *, size_t);
     void (*destroy)(lpbuffer_t *);
     void (*destroy_stack)(lpstack_t *);
 } lpbuffer_factory_t;

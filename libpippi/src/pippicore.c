@@ -13,6 +13,7 @@
 
 
 /* Forward declarations */
+void rand_preseed(void);
 void rand_seed(int value);
 lpfloat_t rand_base_logistic(lpfloat_t low, lpfloat_t high);
 lpfloat_t rand_base_stdlib(lpfloat_t low, lpfloat_t high);
@@ -56,6 +57,7 @@ lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length);
 lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length);
 void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos);
+lpbuffer_t * resize_buffer(lpbuffer_t *, size_t);
 void destroy_buffer(lpbuffer_t * buf);
 void destroy_stack(lpstack_t * stack);
 
@@ -102,12 +104,12 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     LORENZ_TIMESTEP_DEFAULT, \
     LORENZ_X_DEFAULT, LORENZ_Y_DEFAULT, LORENZ_Z_DEFAULT, \
     LORENZ_A_DEFAULT, LORENZ_B_DEFAULT, LORENZ_C_DEFAULT, \
-    rand_seed, rand_base_stdlib, rand_base_logistic, \
+    rand_preseed, rand_seed, rand_base_stdlib, rand_base_logistic, \
     rand_base_lorenz, rand_base_lorenzX, rand_base_lorenzY, rand_base_lorenzZ, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_uniform_stack, copy_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_uniform_stack, copy_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, env_buffer, resize_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -115,16 +117,42 @@ const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destro
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
 const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_convolve, fx_norm };
 
-/** Rand
- */
+/* Platform-specific random seed, called 
+ * on program init (and on process pool init) 
+ * from python or optionally elsewhere to 
+ * seed random with nice bytes. */
+void rand_preseed() {
+#ifdef __linux__
+    unsigned int * buffer;
+    ssize_t bytes_read;
+    size_t buffer_size;
+    buffer_size = sizeof(unsigned int);
+    buffer = LPMemoryPool.alloc(1, buffer_size);
+    bytes_read = getrandom(buffer, buffer_size, 0);
+    if(bytes_read > 0) srand(*buffer);
+    free(buffer);
+#endif
+}
+
+/* User rand seed */
 void rand_seed(int value) {
     srand((unsigned int)value);
 }
 
+/* Default rand_base callback. 
+ *
+ * These base rand_base callbacks return 0-1 and 
+ * are the basis of all other rand functions like 
+ * choice and randint.
+ *
+ * They may be swapped out at runtime by setting 
+ * LPRand.rand_base to the desired rand_base pointer;
+ * */
 lpfloat_t rand_base_stdlib(lpfloat_t low, lpfloat_t high) {
     return (rand()/(lpfloat_t)RAND_MAX) * (high-low) + low;
 }
 
+/* Logistic rand base. */
 lpfloat_t rand_base_logistic(lpfloat_t low, lpfloat_t high) {
     LPRand.logistic_x = LPRand.logistic_seed * LPRand.logistic_x * (1.f - LPRand.logistic_x);
     return LPRand.logistic_x * (high-low) + low;
@@ -260,6 +288,7 @@ lpbuffer_t * create_buffer(size_t length, int channels, int samplerate) {
     buf->pos = 0;
     buf->boundry = length-1;
     buf->range = length;
+    buf->onset = 0;
     return buf;
 }
 
@@ -402,9 +431,9 @@ lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length) {
     assert(length > 1);
     out = create_buffer(length, buf->channels, buf->samplerate);
     for(i=0; i < length; i++) {
-        pos = (lpfloat_t)i / length;
+        pos = (lpfloat_t)i/length;
         for(c=0; c < buf->channels; c++) {
-            out->data[i * buf->channels + c] = play_buffer(buf, pos);
+            out->data[i * buf->channels + c] = interpolate_linear_channel(buf, pos * buf->length, c);
         }
     }
 
@@ -587,7 +616,7 @@ void dub_buffer(lpbuffer_t * a, lpbuffer_t * b, size_t start) {
     int c, j;
 
     assert(start + b->length <= a->length);
-    assert(b->length < a->length);
+    assert(b->length <= a->length);
     assert(a->channels == b->channels);
 
     for(i=0; i < b->length; i++) {
@@ -647,6 +676,24 @@ lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b) {
     }
 
     return out;
+}
+
+lpbuffer_t * resize_buffer(lpbuffer_t * buf, size_t length) {
+    size_t i;
+    int c;
+    lpbuffer_t * newbuf;
+
+    newbuf = create_buffer(length, buf->channels, buf->samplerate);
+
+    for(i=0; i < length; i++) {
+        if(i >= buf->length) break;
+        for(c=0; c < buf->channels; c++) {
+            newbuf->data[i * buf->channels + c] = buf->data[i * buf->channels + c];    
+        }
+    }
+
+    destroy_buffer(buf);
+    return newbuf;
 }
 
 void destroy_buffer(lpbuffer_t * buf) {

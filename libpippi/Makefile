@@ -26,15 +26,24 @@ clean:
 
 astrid-renderer:
 	echo "Building astrid renderer...";
-	cython cython/renderer.pyx
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 examples/renderer.c $(ALLSOURCES) src/astrid.c cython/renderer.c -o build/renderer
+	cython cython/cyrenderer.pyx
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 
+astrid-dac:
+	echo "Building astrid dac...";
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/dac.c -o build/dac
 
 astrid-adc:
 	echo "Building astrid adc...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/adc.c -o build/adc
 	
-astrid: astrid-adc astrid-renderer
+astrid: astrid-dac astrid-adc astrid-renderer
+
+silencer:
+	mkdir -p build renders
+
+	echo "Building silencer...";
+	gcc $(FLAGS) tools/silencer.c $(ALLSOURCES) -o build/silencer
 
 osc-examples:
 	mkdir -p build renders
@@ -66,6 +75,12 @@ osc-examples:
 	echo "Building additive_synthesis.c example...";
 	gcc $(FLAGS) examples/additive_synthesis.c $(ALLSOURCES) -o build/additive_synthesis
 
+warble-examples:
+	mkdir -p build renders
+
+	echo "Building warble.c example...";
+	gcc $(FLAGS) examples/warble.c $(ALLSOURCES) -o build/warble
+
 buffer-examples:
 	mkdir -p build renders
 
@@ -77,6 +92,10 @@ buffer-examples:
 
 	echo "Building slicing2.c example...";
 	gcc $(FLAGS) examples/slicing2.c $(ALLSOURCES) -o build/slicing2
+
+	echo "Building resample_buffer.c example...";
+	gcc $(FLAGS) examples/resample_buffer.c $(ALLSOURCES) -o build/resample_buffer
+
 
 mir-examples:
 	mkdir -p build renders
@@ -127,4 +146,4 @@ render:
 	./scripts/render_examples.sh
 
 examples: soundfile-examples convolution-examples microsound-examples embedded-examples mir-examples buffer-examples osc-examples
-all: astrid examples render
+all: astrid examples

@@ -18,6 +18,7 @@ from pippi.wavetables cimport Wavetable, _randline
 from pippi.wavesets cimport Waveset
 from pippi cimport rand as _rand
 from pippi.rand import randparams as _randparams
+from pippi.rand import preseed
 from pippi cimport lists
 from pippi.sounddb cimport SoundDB
 from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
@@ -214,7 +215,7 @@ def pool(callback, reps=None, params=None, processes=None):
     if processes is None:
         processes = mp.cpu_count()
 
-    with mp.Pool(processes=processes) as process_pool:
+    with mp.Pool(processes=processes, initializer=preseed) as process_pool:
         for result in [ process_pool.apply_async(callback, params[i % len(params)]) for i in range(reps) ]:
             out += [ result.get() ]
 

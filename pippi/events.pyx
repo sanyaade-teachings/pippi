@@ -34,6 +34,17 @@ cdef class Event:
 
         self._params = params
 
+    def __repr__(self):
+        p = ''.join([ '  %s=%s,\n' % (k, v) for k, v in self._params.items() ])
+        return """Event(
+  onset=%s, 
+  length=%s, 
+  freq=%s, 
+  amp=%s, 
+  pos=%s, 
+  count=%s, 
+%s)""" % (self.onset, self.length, self.freq, self.amp, self.pos, self.count, p)
+
     def __reduce__(self):
         return (rebuild_event, (self.onset, self.length, self.freq, self.amp, self.pos, self.count, self._before, self._params))
 

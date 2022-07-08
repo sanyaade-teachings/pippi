@@ -15,6 +15,7 @@ cdef extern from "pippicore.h":
         lpfloat_t lorenz_b
         lpfloat_t lorenz_c
 
+        void (*preseed)()
         void (*seed)(int)
 
         lpfloat_t (*stdlib)(lpfloat_t, lpfloat_t)
@@ -34,6 +35,7 @@ cdef extern from "pippicore.h":
     extern lprand_t LPRand
 
 
+cpdef void preseed()
 cpdef void seed(object value=*)
 cpdef double rand(double low=*, double high=*)
 cpdef int randint(int low=*, int high=*)

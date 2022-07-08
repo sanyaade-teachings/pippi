@@ -7,6 +7,10 @@
 #define SR 48000 /* Sampling rate */
 #define CHANNELS 2 /* Number of output channels */
 
+void done_callback(void * ctx) {
+    int * count = (int*)ctx;
+    printf("Done: count %d\n", *(count));
+}
 
 int main() {
     lpbuffer_t * amp;
@@ -24,6 +28,10 @@ int main() {
     size_t i;
     int c;
     size_t output_length;
+    int * done_ctx;
+
+    done_ctx = calloc(1, sizeof(int));
+    *(done_ctx) = 0;
 
     /* Setup the scheduler */
     s = LPScheduler.create(CHANNELS);
@@ -51,10 +59,10 @@ int main() {
     LPBuffer.env(wavelet4, env);
 
     /* Schedule some events */
-    LPScheduler.schedule_event(s, wavelet1, 0);
-    LPScheduler.schedule_event(s, wavelet2, 200);
-    LPScheduler.schedule_event(s, wavelet3, 500);
-    LPScheduler.schedule_event(s, wavelet4, 800);
+    LPScheduler.schedule_event(s, wavelet1, 0, done_callback, done_ctx);
+    LPScheduler.schedule_event(s, wavelet2, 200, NULL, NULL);
+    LPScheduler.schedule_event(s, wavelet3, 500, NULL, NULL);
+    LPScheduler.schedule_event(s, wavelet4, 800, done_callback, done_ctx);
 
     /* Render the events to a buffer. */
     for(i=0; i < output_length; i++) {
@@ -62,6 +70,7 @@ int main() {
         /* The scheduler will fill it with a mix of samples from 
          * every currently playing buffer at the current time index.
          */
+        *(done_ctx) += 1;
         LPScheduler.tick(s);
 
         /* Copy the samples from the current frame into the output buffer. */
@@ -82,6 +91,7 @@ int main() {
     LPBuffer.destroy(out);
     LPBuffer.destroy(env);
     LPScheduler.destroy(s);
+    free(done_ctx);
 
     return 0;
 }

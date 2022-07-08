@@ -36,6 +36,16 @@ ext_modules = cythonize([
             include_dirs=INCLUDES,
             define_macros=MACROS
         ),
+        Extension('pippi.grains2', [
+                'libpippi/src/pippicore.c',
+                'libpippi/src/oscs.tape.c',
+                'libpippi/src/microsound.c',
+                'pippi/grains2.pyx'
+            ],
+            include_dirs=INCLUDES,
+            define_macros=MACROS
+        ),
+
         Extension('pippi.lists', ['pippi/lists.pyx'],
             include_dirs=INCLUDES, 
             define_macros=MACROS
@@ -63,7 +73,11 @@ ext_modules = cythonize([
             include_dirs=INCLUDES,
             define_macros=MACROS
         ),
-        Extension('pippi.noise', ['pippi/noise/noise.pyx'], 
+        Extension('pippi.noise', [
+                'libpippi/src/pippicore.c',
+                'libpippi/src/oscs.bln.c',
+                'pippi/noise/noise.pyx'
+            ], 
             include_dirs=INCLUDES,
             define_macros=MACROS
         ), 

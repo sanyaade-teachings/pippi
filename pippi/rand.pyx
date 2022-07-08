@@ -3,6 +3,11 @@
 from libc.time cimport time
 from libc.math cimport round
 
+LPRand.preseed()
+
+cpdef void preseed():
+    LPRand.preseed()
+
 cpdef void seed(object value=None):
     if value is None:
         LPRand.seed(time(NULL))

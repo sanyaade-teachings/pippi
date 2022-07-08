@@ -9,6 +9,8 @@ typedef struct lpevent_t {
     size_t pos;
     size_t onset;
     void * next;
+    void (*done)(void *);
+    void * ctx;
 } lpevent_t;
 
 typedef struct lpscheduler_t {
@@ -30,7 +32,7 @@ typedef struct lpscheduler_factory_t {
     int (*count_waiting)(lpscheduler_t *);
     int (*count_playing)(lpscheduler_t *);
     int (*count_done)(lpscheduler_t *);
-    void (*schedule_event)(lpscheduler_t *, lpbuffer_t *, size_t);
+    void (*schedule_event)(lpscheduler_t *, lpbuffer_t *, size_t, void (*done_callback)(void*), void *);
     void (*empty)(lpscheduler_t *);
     void (*destroy)(lpscheduler_t *);
 } lpscheduler_factory_t;
