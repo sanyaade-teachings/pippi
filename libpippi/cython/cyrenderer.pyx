@@ -34,7 +34,7 @@ if not logger.handlers:
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
 
-cdef bytes serialize_buffer(SoundBuffer buf, size_t onset):
+cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping):
     cdef bytearray strbuf
     cdef size_t audiosize, length;
     cdef int channels, samplerate
@@ -52,6 +52,7 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset):
     strbuf += struct.pack('N', length)
     strbuf += struct.pack('i', channels)
     strbuf += struct.pack('i', samplerate)
+    strbuf += struct.pack('i', is_looping)
     strbuf += struct.pack('N', onset)
 
     for i in range(length):
@@ -358,15 +359,18 @@ cdef public int astrid_reload_instrument() except -1:
 cdef public int astrid_render_event() except -1:
     global ASTRID_RENDERS
     global ASTRID_INSTRUMENT
+    cdef int is_looping = 0
+
+    if hasattr(ASTRID_INSTRUMENT.renderer, 'LOOP'):
+        is_looping = 1
 
     #ASTRID_RENDERS += render_event(ASTRID_INSTRUMENT, None, None)
     for buf in render_event(ASTRID_INSTRUMENT, None, None):
-        bufstr = serialize_buffer(buf, 0)
+        bufstr = serialize_buffer(buf, 0, is_looping)
         _redis.publish('astridbuffers', bufstr)
     return 0
 
 cdef public int astrid_get_messages() except -1:
-    global ASTRID_RENDERS
     global ASTRID_INSTRUMENT
 
     message = bus.get_message()

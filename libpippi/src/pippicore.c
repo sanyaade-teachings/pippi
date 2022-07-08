@@ -289,6 +289,7 @@ lpbuffer_t * create_buffer(size_t length, int channels, int samplerate) {
     buf->boundry = length-1;
     buf->range = length;
     buf->onset = 0;
+    buf->is_looping = 0;
     return buf;
 }
 

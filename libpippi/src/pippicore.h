@@ -67,6 +67,7 @@ typedef struct lpbuffer_t {
     size_t range;
     size_t pos;
     size_t onset;
+    int is_looping;
 } lpbuffer_t;
 
 typedef struct lpstack_t {

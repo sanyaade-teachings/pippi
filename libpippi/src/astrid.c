@@ -1,3 +1,5 @@
+#include <hiredis/hiredis.h>
+
 #include "pippi.h"
 #include "astrid.h"
 
@@ -12,6 +14,7 @@ char * serialize_buffer(lpbuffer_t * buf) {
     strsize += sizeof(size_t); /* length     */
     strsize += sizeof(int);    /* channels   */
     strsize += sizeof(int);    /* samplerate */
+    strsize += sizeof(int);    /* is_looping */
     strsize += sizeof(size_t); /* onset      */
     strsize += audiosize;      /* audio data */
 
@@ -32,6 +35,9 @@ char * serialize_buffer(lpbuffer_t * buf) {
     memcpy(str + offset, &buf->samplerate, sizeof(int));
     offset += sizeof(int);
 
+    memcpy(str + offset, &buf->is_looping, sizeof(int));
+    offset += sizeof(int);
+
     memcpy(str + offset, &buf->onset, sizeof(size_t));
     offset += sizeof(size_t);
 
@@ -42,7 +48,7 @@ char * serialize_buffer(lpbuffer_t * buf) {
 
 lpbuffer_t * deserialize_buffer(char * str) {
     size_t audiosize, offset, length, onset;
-    int channels, samplerate;
+    int channels, samplerate, is_looping;
     lpbuffer_t * buf;
     lpfloat_t * audio;
 
@@ -60,6 +66,9 @@ lpbuffer_t * deserialize_buffer(char * str) {
     memcpy(&samplerate, str + offset, sizeof(int));
     offset += sizeof(int);
 
+    memcpy(&is_looping, str + offset, sizeof(int));
+    offset += sizeof(int);
+
     memcpy(&onset, str + offset, sizeof(size_t));
     offset += sizeof(size_t);
 
@@ -71,6 +80,7 @@ lpbuffer_t * deserialize_buffer(char * str) {
     buf->length = length;
     buf->channels = channels;
     buf->samplerate = samplerate;
+    buf->is_looping = is_looping;
     buf->data = audio;
     buf->onset = onset;
 
@@ -83,7 +93,27 @@ lpbuffer_t * deserialize_buffer(char * str) {
 }
 
 void send_play_message() {
+    redisContext * redis_ctx;
+    redisReply * redis_reply;
+    struct timeval redis_timeout = {15, 0};
 
+    /* FIXME pass in a connection instead */
+    redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
+    if(redis_ctx == NULL) {
+        fprintf(stderr, "Could not start connection to redis.\n");
+        exit(1);
+    }
+
+    if(redis_ctx->err) {
+        fprintf(stderr, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
+        exit(1);
+    }
+
+    redis_reply = redisCommand(redis_ctx, "LPUSH astridplays p");
+    if(redis_reply->str != NULL) printf("play result: %s\n", redis_reply->str); 
+    freeReplyObject(redis_reply);
+
+    if(redis_ctx != NULL) redisFree(redis_ctx); 
 }
 
 

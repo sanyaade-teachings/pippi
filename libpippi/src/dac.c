@@ -33,6 +33,8 @@ void retrigger_callback(void * arg) {
     send_play_message();
 }
 
+void noop_callback(void * arg) {}
+
 /* This callback runs in a thread started 
  * just before the audio callback is started.
  *
@@ -69,7 +71,11 @@ void * buffer_feed(void * arg) {
         if(redis_reply->type == REDIS_REPLY_ARRAY) {
             /*printf("ab message: %s\n", redis_reply->element[2]->str); */
             buf = deserialize_buffer(redis_reply->element[2]->str);
-            LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, NULL);
+            if(buf->is_looping == 1) {
+                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, NULL);
+            } else {
+                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL);
+            }
         }
         freeReplyObject(redis_reply);
     }
