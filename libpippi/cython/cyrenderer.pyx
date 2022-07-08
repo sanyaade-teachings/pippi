@@ -335,7 +335,6 @@ cdef list render_event(object instrument, object params, object buf_q):
     return out
 
 
-ASTRID_ADC_BUFFERS = []
 ASTRID_RENDERS = []
 ASTRID_INSTRUMENT = None
 
@@ -430,15 +429,4 @@ cdef public int astrid_get_info(size_t * length, int * channels, int * samplerat
 cdef public int astrid_buffer_count(int * count) except -1:
     global ASTRID_RENDERS
     count[0] = <int>len(ASTRID_RENDERS)
-
-cdef public int astrid_copy_buffer(lpbuffer_t * buffer) except -1:
-    cdef size_t i
-    cdef int c
-    global ASTRID_RENDERS
-
-    snd = ASTRID_RENDERS.pop()
-    for i in range(buffer.length):
-        for c in range(buffer.channels):
-            buffer.data[i * buffer.channels + c] = snd.frames[i][c]
-
 

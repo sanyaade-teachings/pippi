@@ -15,22 +15,6 @@ void handle_shutdown(int) {
     astrid_is_running = 0;
 }
 
-void send_buffer_to_mixer(lpbuffer_t * buf) {
-    /*
-    size_t bufsize;
-    mqd_t buffer_queue;
-    char * charbuf;
-
-    buffer_queue = mq_open(BUFFER_QUEUE_NAME, O_RDONLY);
-    bufsize = buf->length * sizeof(lpfloat_t);
-    bufsize += sizeof(lpbuffer_t);
-    charbuf = (char *)calloc(bufsize, sizeof(char));
-    memcpy(charbuf, buf, bufsize);
-    mq_send(buffer_queue, charbuf, bufsize, 0);
-    */
-}
-
-
 int main() {
     struct sigaction shutdown_action;
 
@@ -40,11 +24,7 @@ int main() {
 
     char * _astrid_channels;
     lpastridctx_t * ctx;
-    lpbuffer_t * out;
-    int samplerate;
-    int buffer_count;
     PyObject * pmodule;
-    size_t length = 0;
 
     shutdown_action.sa_handler = handle_shutdown;
     sigaction(SIGINT, &shutdown_action, NULL);
@@ -67,7 +47,6 @@ int main() {
         astrid_channels = atoi(_astrid_channels);
     }
 
-    samplerate = ASTRID_SAMPLERATE;
     ctx = (lpastridctx_t*)LPMemoryPool.alloc(1, sizeof(lpastridctx_t));
     ctx->channels = astrid_channels;
     ctx->samplerate = ASTRID_SAMPLERATE;
@@ -76,7 +55,6 @@ int main() {
     ctx->voice_index = -1;
 
     printf("Starting renderer...\n");
-    /*ctx = (lpastridctx_t *)arg;*/
 
     printf("Setting voice id...\n");
     ctx->voice_id = (long)syscall(SYS_gettid);
@@ -115,7 +93,6 @@ int main() {
         goto lprender_thread_cleanup;
     }
 
-    buffer_count = 0;
     while(astrid_is_running) {
         printf("Thread %d running...\n", (int)ctx->thread_id);
         if(astrid_get_messages() < 0) {
@@ -130,59 +107,17 @@ int main() {
             goto lprender_thread_cleanup;
         }
 
-        /*
-        pqread = mq_receive(play_queue, pqmsg, pqattr.mq_msgsize, &pqprio);
-        if(pqread == -1) {
-            
-        }
-        */
-
-
         if(astrid_render_event() < 0) {
             PyErr_Print();
             fprintf(stderr, "Error while rendering event from astrid instrument\n");
             goto lprender_thread_cleanup;
         }
 
-        astrid_buffer_count(&buffer_count);
-        while(buffer_count > 0) {
-            if(astrid_get_info(&length, &ctx->channels, &samplerate) < 0) {
-                PyErr_Print();
-                fprintf(stderr, "Error while getting info about the last rendered event\n");
-                goto lprender_thread_cleanup;
-            }
-
-            out = LPBuffer.create(length, ctx->channels, ctx->samplerate);
-            if(astrid_copy_buffer(out) < 0) {
-                PyErr_Print();
-                fprintf(stderr, "Error while copying render data\n");
-                goto lprender_thread_cleanup;
-            }
-
-            /* Place buffer on the buffer queue */
-            send_buffer_to_mixer(out);
-            astrid_buffer_count(&buffer_count);
-        }
-
-        /*
-        printf("Checking for play status...\n");
-        while(LPScheduler.is_playing(ctx->s)) {
-            if(astrid_get_messages() < 0) {
-                PyErr_Print();
-                fprintf(stderr, "Error while rendering event from astrid instrument\n");
-                goto lprender_thread_cleanup;
-            }
-            usleep((useconds_t)1000);
-        }
-        */
-
         printf("Done rendering...\n");
         ctx->is_playing = ctx->is_looping;
 
         usleep((useconds_t)1000);
 
-        /* Free memory for old buffers and events */
-        /*LPScheduler.empty(s);*/
         if(astrid_reload_instrument() < 0) {
             PyErr_Print();
             fprintf(stderr, "Error while attempting to reload astrid instrument\n");
