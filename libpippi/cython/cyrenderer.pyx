@@ -295,48 +295,46 @@ cdef tuple collect_players(object instrument):
     #logger.info('COLLECT_PLAYERS players: %s' % players)
     return players, loop, overlap
 
-cdef list render_event(object instrument, object params, object buf_q):
+cdef int render_event(object instrument, object params, object buf_q):
     cdef set players
     cdef object onset_generator
     cdef bint loop
     cdef double overlap
     cdef EventContext ctx = instrument.create_ctx(instrument.params, instrument.messages)
-    cdef list out = []
 
-    #logger.debug('getting players')
     players, loop, overlap = collect_players(instrument)
-    #logger.debug(str(players))
 
     for player, onsets in players:
         try:
             ctx.count = 0
             ctx.tick = 0
 
+            # FIXME use the onset generator with play_sequence, dummy!
             if onsets is None:
                 onset_generator = default_onsets(ctx)
             else:
                 onset_generator = onsets(ctx)
-            
             #play_sequence(buf_q, player, ctx, onset_generator, loop, overlap)
+
             generator = player(ctx)
             try:
                 for snd in generator:
-                    out += [ snd ]
+                    bufstr = serialize_buffer(snd, 0, loop)
+                    _redis.publish('astridbuffers', bufstr)
             except Exception as e:
                 logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))
+                return 1
         except Exception as e:
             logger.exception('Error during %s play sequence: %s' % (ctx.instrument_name, e))
+            return 1
 
     if hasattr(instrument.renderer, 'done'):
         # When the loop has completed or playback has stopped, 
         # execute the done callback
         instrument.renderer.done(ctx)
 
-    #print('Rendered %s buffers for event %s' % (len(out), instrument))
-    return out
+    return 0
 
-
-ASTRID_RENDERS = []
 ASTRID_INSTRUMENT = None
 
 cdef public int astrid_load_instrument() except -1:
@@ -357,18 +355,8 @@ cdef public int astrid_reload_instrument() except -1:
     return 0
 
 cdef public int astrid_render_event() except -1:
-    global ASTRID_RENDERS
     global ASTRID_INSTRUMENT
-    cdef int is_looping = 0
-
-    if hasattr(ASTRID_INSTRUMENT.renderer, 'LOOP'):
-        is_looping = 1
-
-    #ASTRID_RENDERS += render_event(ASTRID_INSTRUMENT, None, None)
-    for buf in render_event(ASTRID_INSTRUMENT, None, None):
-        bufstr = serialize_buffer(buf, 0, is_looping)
-        _redis.publish('astridbuffers', bufstr)
-    return 0
+    return render_event(ASTRID_INSTRUMENT, None, None)
 
 cdef public int astrid_get_messages() except -1:
     global ASTRID_INSTRUMENT
@@ -411,26 +399,4 @@ cdef public int astrid_get_instrument_params(int * status) except -1:
     status[0] = ASTRID_INSTRUMENT.playing
     return 0
 
-cdef public int astrid_get_instrument_loop_status(int * loop_status) except -1:
-    global ASTRID_INSTRUMENT
-
-    if hasattr(ASTRID_INSTRUMENT.renderer, 'LOOP'):
-        loop_status[0] = 1 if ASTRID_INSTRUMENT.renderer.LOOP else 0
-    else:
-        loop_status[0] = 0
-
-    return 0
-
-cdef public int astrid_get_info(size_t * length, int * channels, int * samplerate) except -1:
-    global ASTRID_RENDERS
-
-    length[0] = <size_t>len(ASTRID_RENDERS[-1])
-    channels[0] = <int>(ASTRID_RENDERS[-1].channels)
-    samplerate[0] = <int>(ASTRID_RENDERS[-1].samplerate)
-
-    return 0
-
-cdef public int astrid_buffer_count(int * count) except -1:
-    global ASTRID_RENDERS
-    count[0] = <int>len(ASTRID_RENDERS)
 

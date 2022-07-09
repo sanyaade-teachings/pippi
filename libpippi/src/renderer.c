@@ -141,14 +141,6 @@ int main() {
             goto lprender_thread_cleanup;
         }
 
-        /* Check for an updated LOOP status on the python 
-         * instrument module since last reload */
-        if(astrid_get_instrument_loop_status(&ctx->is_looping) < 0) {
-            PyErr_Print();
-            fprintf(stderr, "Error while checking astrid instrument status\n");
-            goto lprender_thread_cleanup;
-        }
-
         /* Render that shit! The cyrenderer module will dump 
          * serialized buffers into the redis buffer queue */
         if(astrid_render_event() < 0) {
@@ -156,9 +148,6 @@ int main() {
             fprintf(stderr, "Error while rendering event from astrid instrument\n");
             goto lprender_thread_cleanup;
         }
-
-        /* TODO rework these vestigial status indicators */
-        ctx->is_playing = ctx->is_looping;
     }
 
 lprender_thread_cleanup:

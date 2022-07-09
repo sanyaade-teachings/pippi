@@ -74,5 +74,5 @@ cdef class Instrument:
     cdef public dict params 
 
 cdef tuple collect_players(object instrument)
-cdef list render_event(object instrument, object params, object buf_q)
+cdef int render_event(object instrument, object params, object buf_q)
 
