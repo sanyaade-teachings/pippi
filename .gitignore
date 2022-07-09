@@ -29,6 +29,8 @@ venv
 
 libpippi/renders/*.wav
 libpippi/build
+libpippi/cython/cyrenderer.c
+libpippi/cython/cyrenderer.h
 
 garden/libDaisy
 garden/**/**/build/*
