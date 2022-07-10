@@ -45,8 +45,8 @@ class AstridConsole(cmd.Cmd):
     def __init__(self, client=None):
         cmd.Cmd.__init__(self)
 
-    def do_p(self, cmd):
-        r.publish('astrid', 'play')
+    def do_p(self, instrument):
+        r.lpush('astrid-play-%s' % instrument, 'play')
 
     def do_r(self, cmd):
         r.publish('astrid', 'reload')
@@ -58,7 +58,10 @@ class AstridConsole(cmd.Cmd):
         r.publish('astrid', 'status')
 
     def do_s(self, instrument):
-        r.publish('astrid', 'stop')
+        r.lpush('astrid-play-%s' % instrument, 'stop')
+
+    def do_k(self, instrument):
+        r.lpush('astrid-play-%s' % instrument, 'kill')
 
     def do_quit(self, cmd):
         self.quit()
@@ -80,7 +83,7 @@ if __name__ == '__main__':
     mr = threading.Thread(target=midi_relay, args=(None,))
 
     try:
-        mr.start()        
+        #mr.start()        
         c.start()
     except KeyboardInterrupt as e:
         c.quit()

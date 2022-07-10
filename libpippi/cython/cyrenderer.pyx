@@ -2,6 +2,7 @@
 
 import array
 from cpython cimport array
+from libc.stdlib cimport calloc
 from libc.string cimport memcpy
 import logging
 from logging.handlers import SysLogHandler
@@ -34,9 +35,9 @@ if not logger.handlers:
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
 
-cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping):
+cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str name):
     cdef bytearray strbuf
-    cdef size_t audiosize, length;
+    cdef size_t audiosize, length, namesize
     cdef int channels, samplerate
 
     strbuf = bytearray()
@@ -47,8 +48,10 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping):
 
     # size of audio data 
     audiosize = length * channels * sizeof(lpfloat_t)
+    namesize = <size_t>len(name)
 
     strbuf += struct.pack('N', audiosize)
+    strbuf += struct.pack('N', namesize)
     strbuf += struct.pack('N', length)
     strbuf += struct.pack('i', channels)
     strbuf += struct.pack('i', samplerate)
@@ -58,6 +61,7 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping):
     for i in range(length):
         for c in range(channels):
             strbuf += struct.pack('d', buf.frames[i,c])
+    strbuf += bytes(name, 'ascii')
 
     return bytes(strbuf)
 
@@ -319,7 +323,7 @@ cdef int render_event(object instrument, object params, object buf_q):
             generator = player(ctx)
             try:
                 for snd in generator:
-                    bufstr = serialize_buffer(snd, 0, loop)
+                    bufstr = serialize_buffer(snd, 0, loop, ctx.instrument_name)
                     _redis.publish('astridbuffers', bufstr)
             except Exception as e:
                 logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))
@@ -341,11 +345,17 @@ cdef public int astrid_load_instrument() except -1:
     global ASTRID_INSTRUMENT
     path = os.environ.get('INSTRUMENT_PATH', 'orc/ding.py')
     name = Path(path).stem
+    os.environ['INSTRUMENT_PATH'] = path
+    os.environ['INSTRUMENT_NAME'] = name
+
+    # finally, actually load the damn instrument module
     ASTRID_INSTRUMENT = _load_instrument(name, path)
-    #logger.debug("Loaded %s (%s)" % (name, path))
-    bus.subscribe('astrid', name)
+
+    # subscribe to all our favorite redis channels
+    bus.subscribe('astrid-message', 'astrid-message-%s' % name)
     for group in ASTRID_INSTRUMENT.groups:
-        bus.subscribe('group%s' % group)
+        bus.subscribe('astrid-group-message-%s' % group)
+
     return 0
 
 cdef public int astrid_reload_instrument() except -1:

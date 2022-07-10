@@ -6,11 +6,12 @@
 #define ASTRID_SAMPLERATE 48000
 
 #define PLAY_MESSAGE "p"
-#define SHUTDOWN_MESSAGE "s"
+#define STOP_MESSAGE "s"
+#define SHUTDOWN_MESSAGE "k"
 
-char * serialize_buffer(lpbuffer_t * buf); 
-lpbuffer_t * deserialize_buffer(char * str); 
-void send_play_message();
+char * serialize_buffer(lpbuffer_t * buf, char * instrument_name); 
+lpbuffer_t * deserialize_buffer(char * str, char ** name); 
+void send_play_message(char * instrument_name);
 
 typedef struct lpastridctx_t {
     lpscheduler_t * s;

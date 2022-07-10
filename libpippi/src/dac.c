@@ -29,7 +29,9 @@ void handle_shutdown(int) {
  * from an instrument with loop enabled.
  **/
 void retrigger_callback(void * arg) {
-    send_play_message();
+    char * instrument_name;
+    instrument_name = (char *)arg;
+    send_play_message(instrument_name);
 }
 
 void noop_callback(void * arg) {}
@@ -44,6 +46,7 @@ void * buffer_feed(void * arg) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     lpbuffer_t * buf;
+    char * buf_instrument_name;
     struct timeval redis_timeout = {15, 0};
 
     redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
@@ -68,10 +71,10 @@ void * buffer_feed(void * arg) {
     /* Wait on buffers from the queue */
     while(astrid_is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
         if(redis_reply->type == REDIS_REPLY_ARRAY) {
-            /*printf("ab message: %s\n", redis_reply->element[2]->str); */
-            buf = deserialize_buffer(redis_reply->element[2]->str);
+            buf_instrument_name = NULL;
+            buf = deserialize_buffer(redis_reply->element[2]->str, &buf_instrument_name);
             if(buf->is_looping == 1) {
-                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, NULL);
+                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, buf_instrument_name);
             } else {
                 LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL);
             }
