@@ -25,15 +25,21 @@ clean:
 	rm renders/*.wav
 
 astrid-renderer:
+	mkdir -p build renders
+
 	echo "Building astrid renderer...";
 	cython cython/cyrenderer.pyx
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 
 astrid-dac:
+	mkdir -p build renders
+
 	echo "Building astrid dac...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/dac.c -o build/dac
 
 astrid-adc:
+	mkdir -p build renders
+
 	echo "Building astrid adc...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/adc.c -o build/adc
 	
@@ -131,6 +137,8 @@ microsound-examples:
 	gcc $(FLAGS) examples/grainformation2.c $(ALLSOURCES) -o build/grainformation2
 
 convolution-examples:
+	mkdir -p build renders
+
 	echo "Building convolution.c example...";
 	gcc $(FLAGS) examples/convolution.c $(ALLSOURCES) -o build/convolution
 
@@ -138,10 +146,14 @@ convolution-examples:
 	gcc $(FLAGS) examples/convolution2.c $(ALLSOURCES) -o build/convolution2
 
 soundfile-examples:
+	mkdir -p build renders
+
 	echo "Building readsoundfile.c example...";
 	gcc $(FLAGS) examples/readsoundfile.c $(ALLSOURCES) -o build/readsoundfile
 
 render:
+	mkdir -p build renders
+
 	echo "Rendering examples..."
 	./scripts/render_examples.sh
 
