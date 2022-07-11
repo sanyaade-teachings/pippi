@@ -31,7 +31,6 @@ astrid-renderer:
 
 	echo "Building astrid renderer...";
 	cython cython/cyrenderer.pyx
-	#gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor -Icython -I/usr/include/python3.9 -lpython3.9 src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor `python3-config --cflags` -Icython -l$(PYLIB) src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 
 astrid-dac:
