@@ -26,7 +26,12 @@ void lpadcctx_destroy(lpadcctx_t * ctx) {
     free(ctx);
 }
 
-void miniaudio_callback(ma_device * device, void * pOut, const void * pIn, ma_uint32 count) {
+void miniaudio_callback(
+        ma_device * device, 
+    __attribute__((unused)) void * pOut, 
+       const void * pIn, 
+          ma_uint32 count
+) {
     ma_uint32 i;
     float * in;
     int c;

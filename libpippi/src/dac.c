@@ -34,7 +34,7 @@ void retrigger_callback(void * arg) {
     send_play_message(instrument_name);
 }
 
-void noop_callback(void * arg) {}
+void noop_callback(__attribute__((unused)) void * arg) {}
 
 /* This callback runs in a thread started 
  * just before the audio callback is started.
@@ -42,7 +42,7 @@ void noop_callback(void * arg) {}
  * It waits on the buffer queue for new buffers, 
  * and then sends them to the scheduler.
  */
-void * buffer_feed(void * arg) {
+void * buffer_feed(__attribute__((unused)) void * arg) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     lpbuffer_t * buf;
@@ -116,7 +116,7 @@ int main() {
     char * _astrid_channels;
     struct sigaction shutdown_action;
     lpdacctx_t * ctx;
-    int buffer_feed_thread_id;
+    pthread_t buffer_feed_thread;
 
     /* Get channels from ENV */
     _astrid_channels = getenv("ASTRID_CHANNELS");
@@ -136,8 +136,7 @@ int main() {
     ctx->samplerate = ASTRID_SAMPLERATE;
 
     /* Setup and start buffer feed thread */
-    buffer_feed_thread_id = -1;
-    if(pthread_create(&buffer_feed_thread_id, NULL, buffer_feed, ctx) != 0) {
+    if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, ctx) != 0) {
         fprintf(stderr, "Could not initialize renderer thread\n");
         goto exit_with_error;
     }
@@ -165,11 +164,12 @@ int main() {
         usleep((useconds_t)10000);
     }
 
-    if(buffer_feed_thread_id > 0) {
-        printf("Trying to close buffer thread...\n");
-        pthread_join(buffer_feed_thread_id, NULL);
-        printf("Buffer thread closed\n");
+    printf("Joining with buffer thread...\n");
+    if(pthread_join(buffer_feed_thread, NULL) != 0) {
+        fprintf(stderr, "Error while attempting to join with buffer thread\n");
+        goto exit_with_error;
     }
+    printf("Buffer thread closed\n");
 
     printf("Trying to close audio thread...\n");
     ma_device_uninit(&playback);
@@ -187,9 +187,6 @@ int main() {
 
 exit_with_error:
     ma_device_uninit(&playback);
-    if(buffer_feed_thread_id > 0) {
-        pthread_join(buffer_feed_thread_id, NULL);
-    }
     printf("Exited with error\n");
     return 1;
 }
