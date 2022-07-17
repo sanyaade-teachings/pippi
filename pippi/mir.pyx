@@ -82,14 +82,16 @@ cpdef Wavetable pitch(SoundBuffer snd, double tolerance=0.8, str method=None, in
 
     cdef lpfloat_t s
     cdef lpfloat_t last_p = -1
-    cdef lpfloat_t p = 0
+    cdef lpfloat_t p = fallback
 
     for s in src:
         p = LPPitchTracker.yin_process(yin, s);
         if(p > 0 and p != last_p):
             last_p = p
+            pitches += [ p ]
 
-        pitches += [ p ]
+    if len(pitches) == 0:
+        return None
 
     return Wavetable(pitches)
 

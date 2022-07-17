@@ -30,18 +30,23 @@ int wait_for_play_message() {
     play_cmd = calloc(cmd_size, sizeof(char));
     snprintf(play_cmd, cmd_size, "BLPOP astrid-play-%s 0", instrument_basename);
 
+    printf("Waiting for plays...\n");
     redis_reply = redisCommand(redis_ctx, play_cmd);
     if(strncmp(redis_reply->element[1]->str, PLAY_MESSAGE, 1) == 0) {
+        printf("Got PLAY\n");
         status = 1;
     } else if(strncmp(redis_reply->element[1]->str, STOP_MESSAGE, 1) == 0) {
+        printf("Got STOP\n");
         status = 0;
     } else if(strncmp(redis_reply->element[1]->str, SHUTDOWN_MESSAGE, 1) == 0) {
+        printf("Got SHUTDOWN\n");
         status = 0;
         astrid_is_running = 0;
     } else {
         status = 0;
         fprintf(stderr, "Bad play message: %s\n", redis_reply->element[1]->str);
     }
+    printf("play_status %d astrid_is_running %d\n", (int)status, (int)astrid_is_running);
 
     freeReplyObject(redis_reply);
     free(play_cmd);
@@ -168,7 +173,10 @@ int main() {
 
         /* Wait until a play message arrives on the queue */
         play_status = wait_for_play_message();
-        if(play_status == 0) continue;
+        if(play_status == 0) {
+            printf("play_status == 0, continue\n");
+            continue;
+        }
 
         /* Prompt the cyrenderer to check for redis messages and 
          * pass them along to the python instrument module */
@@ -189,7 +197,6 @@ int main() {
 
 lprender_thread_cleanup:
     Py_Finalize();
-    pthread_exit(0);
     return 0;
 }
 

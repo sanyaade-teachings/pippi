@@ -26,8 +26,9 @@ def play(list events, int device_index=0):
     for event in events:
         n = int(round(ftom(event.freq)))
         v = int(round(event.amp * 127))
-        midi_events += [(event.onset, 'note_on', n, v)]
-        midi_events += [(event.onset+event.length, 'note_off', n, 0)]
+        c = event.channel or 0
+        midi_events += [(event.onset, 'note_on', n, v, c)]
+        midi_events += [(event.onset+event.length, 'note_off', n, 0, c)]
 
     midi_events = sorted(midi_events, key=lambda e: e[0])
     start_time = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
@@ -45,7 +46,8 @@ def play(list events, int device_index=0):
             event = queued
 
         if elapsed >= event[0]:
-            device.send(mido.Message(event[1], note=event[2], velocity=event[3]))
+            m = mido.Message(event[1], note=event[2], velocity=event[3], channel=event[4])
+            device.send(m)
             queued = None
         else:
             queued = event
