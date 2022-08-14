@@ -32,7 +32,7 @@ BELL = CLAVE['bell']
 TRESILLO = CLAVE['tresillo']
 
 
-def makesection(str k, dict instrument, double length, list onsets, bint stems, str stemsdir, str sectionname, int sectionindex):
+def makesection(str k, dict instrument, double length, list onsets, bint stems, str stemsdir, str stemsext, str sectionname, int sectionindex):
     cdef SoundBuffer clang
     cdef SoundBuffer bar = SoundBuffer(length=length)
     cdef int count = 0
@@ -81,7 +81,7 @@ def makesection(str k, dict instrument, double length, list onsets, bint stems, 
         bar = instrument['barcallback'](bar)
 
     if stems:
-        bar.write('%sstem-%s-%s-%s.wav' % (stemsdir, ctx.sectionname, ctx.sectionindex, k))
+        bar.write('%sstem-%s-%s-%s.%s' % (stemsdir, ctx.sectionname, ctx.sectionindex, k, stemsext))
 
     if showwarning:
         print('WARNING: using old-style callback')
@@ -230,7 +230,7 @@ cdef class Seq:
         
         return pattern
 
-    def play(self, int numbeats, str patseq=None, bint stems=False, str stemsdir='', bint pool=False):
+    def play(self, int numbeats, str patseq=None, bint stems=False, str stemsdir='', str stemsext='wav', bint pool=False):
         cdef SoundBuffer out = SoundBuffer()
         cdef dict instrument
         cdef str expanded
@@ -255,7 +255,7 @@ cdef class Seq:
                 smear=instrument['smear']
             )
 
-            params += [(k, instrument, length, onsets, stems, stemsdir, None, 0)]
+            params += [(k, instrument, length, onsets, stems, stemsdir, stemsext, None, 0)]
        
         out = SoundBuffer(length=length)
         if pool: 
@@ -268,7 +268,7 @@ cdef class Seq:
 
         return out
 
-    def score(self, dict score, int barlength=4, bint stems=False, str stemsdir='', bint pool=False):
+    def score(self, dict score, int barlength=4, bint stems=False, str stemsdir='', str stemsext='wav', bint pool=False):
         cdef double length, sectionlength
         cdef dict instrument
         cdef list onsets, params
@@ -302,7 +302,7 @@ cdef class Seq:
                     smear=instrument['smear']
                 )
 
-                params += [(k, instrument, length, onsets, stems, stemsdir, sectionname, sectionindex)]
+                params += [(k, instrument, length, onsets, stems, stemsdir, stemsext, sectionname, sectionindex)]
                 sectionlength = max(sectionlength, length)
            
             sectionout = SoundBuffer(length=sectionlength)

@@ -160,6 +160,9 @@ def join(sounds, overlap=None, channels=None, samplerate=None):
 cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, int samplerate=44100):
     return SoundBuffer.__new__(SoundBuffer, frames=frames, length=length, channels=channels, samplerate=samplerate)
 
+cpdef SoundBuffer bufferfrom(SoundBuffer src):
+    return SoundBuffer.__new__(SoundBuffer, length=src.dur, channels=src.channels, samplerate=src.samplerate)
+
 cpdef Wavetable load(object filename):
     frames, samplerate, _ = sndio.read(filename, dtype=np.float64, force_2d=False)
     return Wavetable(frames)
