@@ -33,7 +33,7 @@ Just some refactoring notes...
 
 - [ ] clear -- fill with zeros
 - [ ] cloud -- graincloud
-- [ ] copy
+- [x] copy
 - [ ] clip -- hard clip to minval/maxval
 - [ ] softclip -- fx.softclip
 - [ ] convolve -- fft.conv
