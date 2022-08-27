@@ -335,6 +335,22 @@ cdef class SoundBuffer:
     def __rmul__(SoundBuffer self, object value):
         return self * value
 
+    def __and__(SoundBuffer self, object value):
+        if not isinstance(value, SoundBuffer):
+            return NotImplemented
+
+        cdef lpbuffer_t * out
+
+        out = LPBuffer.mix(self.buffer, (<SoundBuffer>value).buffer)
+        return SoundBuffer.fromlpbuffer(out)
+
+    def __iand__(SoundBuffer self, object value):
+        if not isinstance(value, SoundBuffer):
+            return NotImplemented
+
+        self.buffer = LPBuffer.mix(self.buffer, (<SoundBuffer>value).buffer)
+        return self
+
     def __truediv__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
         cdef lpbuffer_t * data

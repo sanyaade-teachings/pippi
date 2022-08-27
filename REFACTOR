@@ -25,8 +25,8 @@ Just some refactoring notes...
 
 ## mix operator
 
-- [ ] in-place mix
-- [ ] mix into copy
+- [x] in-place mix
+- [x] mix into copy
 - [ ] right-aligned / left-aligned mixes
 
 ## transformations
