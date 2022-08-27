@@ -205,8 +205,6 @@ class TestNewBuffer(TestCase):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         self.assertTrue(sound.mag > 0)
 
-
-"""
     def test_create_mono_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         self.assertTrue(sound.samplerate == 44100)
@@ -218,6 +216,8 @@ class TestNewBuffer(TestCase):
         self.assertTrue(sound.channels == 1)
         self.assertEqual(len(sound), 228554)
 
+
+"""
     def test_create_mono_buffer_from_wavetable(self):
         wt = dsp.wt('sine', wtsize=4096)
         self.assertTrue(len(wt) == 4096)
