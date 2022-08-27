@@ -53,6 +53,8 @@ enum Windows {
     WIN_TRI, 
     WIN_PHASOR, 
     WIN_HANN, 
+    WIN_HANNIN, 
+    WIN_HANNOUT, 
     WIN_RND,
     WIN_SAW,
     WIN_RSAW,

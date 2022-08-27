@@ -1237,7 +1237,6 @@ void window_hanning(lpfloat_t* out, int length) {
     }
 }
 
-
 /* create a window (0 to 1) */
 lpbuffer_t * create_window(int name, size_t length) {
     lpbuffer_t* buf = LPBuffer.create(length, 1, -1);

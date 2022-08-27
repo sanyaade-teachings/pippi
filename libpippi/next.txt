@@ -33,6 +33,7 @@ Core:
         - WIN_GAUSSOUT
         - WIN_PLUCKIN
         - WIN_PLUCKOUT
+        - WIN_SINC
 
 Microsound:
     Waveset segmentation
