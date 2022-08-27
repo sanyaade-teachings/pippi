@@ -216,8 +216,6 @@ class TestNewBuffer(TestCase):
         self.assertTrue(sound.channels == 1)
         self.assertEqual(len(sound), 228554)
 
-
-"""
     def test_create_mono_buffer_from_wavetable(self):
         wt = dsp.wt('sine', wtsize=4096)
         self.assertTrue(len(wt) == 4096)
@@ -230,6 +228,8 @@ class TestNewBuffer(TestCase):
         self.assertTrue(len(snd) == 4096)
         self.assertTrue(snd[100][0] != 0)
 
+
+"""
     def test_stack_soundbuffer(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
