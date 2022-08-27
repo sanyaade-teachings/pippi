@@ -415,4 +415,10 @@ cdef class SoundBuffer:
     def __rtruediv__(SoundBuffer self, object value):
         return self / value 
 
+    def copy(SoundBuffer self):
+        cdef lpbuffer_t * out
+        out = LPBuffer.create(self.buffer.length, self.buffer.channels, self.buffer.samplerate)
+        LPBuffer.copy(self.buffer, out)
+        return SoundBuffer.fromlpbuffer(out)
+
 

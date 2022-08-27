@@ -175,6 +175,10 @@ class TestNewBuffer(TestCase):
         snd1 &= snd2
         self.assertEqual(snd1.channels, channels)
 
+    def test_copy_soundbuffer(self):
+        snd = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+        snd2 = snd.copy()
+        self.assertEqual(len(snd), len(snd2))
 
 """
     def test_create_stereo_buffer_from_soundfile(self):
