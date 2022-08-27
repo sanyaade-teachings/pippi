@@ -59,11 +59,6 @@ class TestNewBuffer(TestCase):
         self.assertEqual(snd + 2, SoundBuffer([3,4,5]))
         self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        r = snd + SoundBuffer([1,3,5])
-        print(len(r))
-        for v in r:
-            print(v)
-
         self.assertEqual(snd + SoundBuffer([1,3,5]), SoundBuffer([1,2,3,1,3,5]))
         self.assertEqual(snd, SoundBuffer([1,2,3]))
 
@@ -99,7 +94,7 @@ class TestNewBuffer(TestCase):
         self.assertEqual(snd / 1.5, SoundBuffer([1/1.5, 2/1.5, 3/1.5]))
         self.assertEqual(snd, SoundBuffer([1,2,3]))
 
-        self.assertEqual(snd / 2, SoundBuffer([1/2, 2/2, 2/3]))
+        self.assertEqual(snd / 2, SoundBuffer([0.5, 1, 1.5]))
         self.assertEqual(snd, SoundBuffer([1,2,3]))
 
         self.assertEqual(snd / 0, SoundBuffer([0,0,0]))

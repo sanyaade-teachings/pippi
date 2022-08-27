@@ -20,8 +20,8 @@ Just some refactoring notes...
 
 ## division
 
-- [ ] in-place division
-- [ ] divide and copy
+- [x] in-place division
+- [x] divide and copy
 
 ## mix operator
 

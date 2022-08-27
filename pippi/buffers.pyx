@@ -339,7 +339,6 @@ cdef class SoundBuffer:
         cdef Py_ssize_t i, c
         cdef lpbuffer_t * data
         cdef SoundBuffer tmp
-        print('truediv')
 
         if self.buffer == NULL:
             if isinstance(value, numbers.Real):
@@ -355,7 +354,6 @@ cdef class SoundBuffer:
         LPBuffer.copy(self.buffer, data)
 
         if isinstance(value, numbers.Real):
-            print('div real', value)
             LPBuffer.divide_scalar(data, <lpfloat_t>value)
 
         elif isinstance(value, SoundBuffer):
@@ -372,7 +370,6 @@ cdef class SoundBuffer:
 
     def __itruediv__(SoundBuffer self, object value):
         cdef Py_ssize_t i, c
-        print('itruediv')
 
         if self.buffer == NULL:
             if isinstance(value, numbers.Real):
@@ -400,7 +397,6 @@ cdef class SoundBuffer:
         return self
 
     def __rtruediv__(SoundBuffer self, object value):
-        print('rtruediv')
         return self / value 
 
 
