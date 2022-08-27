@@ -193,7 +193,7 @@ cdef class Pulsar2d:
                 if self.wt_count == 1:
                     sample = interpolation._linear_point_pw(self.wavetables[0], self.wt_phase, pulsewidth) 
                 else:
-                    wi_phase = self.wt_pos * (self.wt_count-1)
+                    wi_phase = self.wt_pos * (self.wt_count-2)
                     wi = <int>wi_phase
                     wi_frac = wi_phase - wi
                     wt_out_a = interpolation._linear_point_pw(self.wavetables[wi], self.wt_phase, pulsewidth)
@@ -203,7 +203,7 @@ cdef class Pulsar2d:
                 if self.win_count == 1:
                     sample *= interpolation._linear_point_pw(self.windows[0], self.win_phase, pulsewidth)
                 else:
-                    wi_phase = self.win_pos * (self.win_count-1)
+                    wi_phase = self.win_pos * (self.win_count-2)
                     wi = <int>wi_phase
                     wi_frac = wi_phase - wi
                     win_out_a = interpolation._linear_point_pw(self.windows[wi], self.win_phase, pulsewidth)
