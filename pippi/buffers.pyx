@@ -102,6 +102,24 @@ cdef class SoundBuffer:
                 return memoryview(self)
             return None
 
+    property min:
+        def __get__(SoundBuffer self):
+            if self.buffer != NULL:
+                return <double>LPBuffer.min(self.buffer)
+            return 0
+
+    property max:
+        def __get__(SoundBuffer self):
+            if self.buffer != NULL:
+                return <double>LPBuffer.max(self.buffer)
+            return 0
+
+    property mag:
+        def __get__(SoundBuffer self):
+            if self.buffer != NULL:
+                return <double>LPBuffer.mag(self.buffer)
+            return 0
+
     @staticmethod
     cdef SoundBuffer fromlpbuffer(lpbuffer_t * buffer):
         cdef SoundBuffer out = SoundBuffer.__new__(SoundBuffer)

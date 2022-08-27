@@ -193,6 +193,19 @@ class TestNewBuffer(TestCase):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         sound.graph('tests/renders/graph_newsoundbuffer.png', width=1280, height=800)
 
+    def test_max_soundfile(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        self.assertTrue(sound.max > 0)
+
+    def test_min_soundfile(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        self.assertTrue(sound.min < 0)
+
+    def test_mag_soundfile(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        self.assertTrue(sound.mag > 0)
+
+
 """
     def test_create_mono_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
