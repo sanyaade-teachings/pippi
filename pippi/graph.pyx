@@ -15,6 +15,7 @@ from pippi cimport interpolation
 from pippi cimport dsp
 from pippi.defaults cimport MIN_FLOAT
 from pippi.soundbuffer cimport SoundBuffer
+cimport pippi.buffers
 from pippi.wavetables cimport Wavetable
 
 
@@ -55,6 +56,10 @@ def write(object data,
     if isinstance(data, SoundBuffer):
         channels = data.channels
         _data = data.frames
+
+    elif isinstance(data, pippi.buffers.SoundBuffer):
+        channels = data.channels
+        _data = data
 
     elif isinstance(data, Wavetable):
         channels = 1

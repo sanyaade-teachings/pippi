@@ -45,7 +45,7 @@ Just some refactoring notes...
 - [ ] fill -- truncate or loop to desired length
 - [ ] blocks -- iterate over buffer in blocksize blocks
 - [ ] grains -- iterate over buffer in variable-sized grains
-- [ ] graph -- plot the waveform
+- [x] graph -- plot the waveform
 - [ ] max -- absolute value max
 - [ ] mix -- mix in place with sound or list of sounds
 - [ ] pad -- pad with silence at start or end

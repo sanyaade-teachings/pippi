@@ -9,6 +9,8 @@ cimport numpy as np
 import numpy as np
 from pysndfile import sndio
 
+from pippi import graph
+
 DEFAULT_CHANNELS = 2
 DEFAULT_SAMPLERATE = 44100
 
@@ -420,5 +422,8 @@ cdef class SoundBuffer:
         out = LPBuffer.create(self.buffer.length, self.buffer.channels, self.buffer.samplerate)
         LPBuffer.copy(self.buffer, out)
         return SoundBuffer.fromlpbuffer(out)
+
+    def graph(SoundBuffer self, *args, **kwargs):
+        return graph.write(self, *args, **kwargs)
 
 

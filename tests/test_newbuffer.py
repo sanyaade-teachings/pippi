@@ -180,7 +180,6 @@ class TestNewBuffer(TestCase):
         snd2 = snd.copy()
         self.assertEqual(len(snd), len(snd2))
 
-"""
     def test_create_stereo_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         self.assertEqual(len(sound), 44100)
@@ -192,8 +191,9 @@ class TestNewBuffer(TestCase):
 
     def test_graph_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        sound.graph('tests/renders/graph_soundbuffer.png', width=1280, height=800)
+        sound.graph('tests/renders/graph_newsoundbuffer.png', width=1280, height=800)
 
+"""
     def test_create_mono_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
         self.assertTrue(sound.samplerate == 44100)
