@@ -4,6 +4,35 @@ Astrid:
 
 Core:
     port more wavetables & windows
+        + WT_SINE
+        + WT_TRI
+        + WT_SQUARE
+        + WT_RND
+        + WT_COS
+        + WT_SAW
+        + WT_RSAW
+
+        + WIN_SAW
+        + WIN_RSAW
+        + WIN_SINE
+        + WIN_TRI
+        + WIN_PHASOR
+        + WIN_HANN
+        + WIN_RND
+        + WIN_SINEIN
+        + WIN_SINEOUT
+        + WIN_COS
+        - WIN_HANNIN
+        - WIN_HANNOUT
+        - WIN_HAMM
+        - WIN_BLACK
+        - WIN_BART
+        - WIN_KAISER
+        - WIN_GAUSS
+        - WIN_GAUSSIN
+        - WIN_GAUSSOUT
+        - WIN_PLUCKIN
+        - WIN_PLUCKOUT
 
 Microsound:
     Waveset segmentation

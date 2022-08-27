@@ -62,7 +62,7 @@ lpformation_t * formation_create(int numstreams, size_t maxgrainlength, size_t m
     lpfloat_t grainlength;
 
     formation = (lpformation_t *)LPMemoryPool.alloc(1, sizeof(lpformation_t));
-    formation->window = LPWindow.create(WT_HANN, 4096);
+    formation->window = LPWindow.create(WIN_HANN, 4096);
     formation->rb = LPRingBuffer.create(rblength, channels, samplerate);
     formation->maxlength = maxgrainlength;
     formation->minlength = mingrainlength;

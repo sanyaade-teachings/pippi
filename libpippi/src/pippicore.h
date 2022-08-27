@@ -22,6 +22,10 @@ typedef double lpfloat_t;
 #define PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062
 #endif
 
+#ifndef HALFPI
+#define HALFPI (PI/2.0)
+#endif
+
 #ifndef PI2
 #define PI2 (PI*2.0)
 #endif
@@ -32,20 +36,25 @@ typedef double lpfloat_t;
 
 enum Wavetables {
     WT_SINE,
+    WT_COS,
     WT_SQUARE, 
     WT_TRI, 
-    WT_PHASOR, 
-    WT_HANN, 
+    WT_SAW,
+    WT_RSAW,
     WT_RND,
     NUM_WAVETABLES
 };
 
 enum Windows {
     WIN_SINE,
+    WIN_SINEIN,
+    WIN_SINEOUT,
+    WIN_COS,
     WIN_TRI, 
     WIN_PHASOR, 
     WIN_HANN, 
     WIN_RND,
+    WIN_SAW,
     WIN_RSAW,
     NUM_WINDOWS
 };

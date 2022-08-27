@@ -8,6 +8,11 @@ INCLUDES = ['libpippi/src', '/usr/local/include', np.get_include()]
 MACROS = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
 
 ext_modules = cythonize([
+        Extension('pippi.microcontrollers', ['pippi/microcontrollers.pyx'],
+            include_dirs=INCLUDES, 
+            define_macros=MACROS
+        ),
+
         Extension('pippi.breakpoints', ['pippi/breakpoints.pyx'],
             include_dirs=INCLUDES, 
         ),

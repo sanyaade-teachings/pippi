@@ -29,7 +29,7 @@ int main() {
     formation = LPFormation.create(numgrains, SR/4.f, SR/4.f, length, CHANNELS, SR);
     formation->speed = 1.f;
 
-    cutoffs = LPShapeOsc.multi(4, WT_HANN, WT_TRI, WT_SINE, WT_SINE);
+    cutoffs = LPShapeOsc.multi(4, WT_COS, WT_TRI, WT_SINE, WT_SINE);
     cutoffs->min = 20.0f;
     cutoffs->max = 20000.0f;
     cutoffs->maxfreq = 3.f;

@@ -1066,6 +1066,13 @@ void wavetable_sine(lpfloat_t* out, int length) {
     }
 }
 
+void wavetable_cosine(lpfloat_t* out, int length) {
+    int i;
+    for(i=0; i < length; i++) {
+        out[i] = cos((i/(lpfloat_t)length) * (lpfloat_t)PI * 2.0f);
+    }
+}
+
 void wavetable_square(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
@@ -1084,16 +1091,35 @@ void wavetable_tri(lpfloat_t* out, int length) {
     }
 }
 
+void wavetable_saw(lpfloat_t* out, int length) {
+    int i;
+    for(i=0; i < length; i++) {
+        out[i] = (i/(lpfloat_t)length) * 2.f - 1.f;
+    }
+}
+
+void wavetable_rsaw(lpfloat_t* out, int length) {
+    int i;
+    for(i=0; i < length; i++) {
+        out[i] = (1.f - i/(lpfloat_t)length) * 2.f - 1.f;
+    }
+}
 
 /* create a wavetable (-1 to 1) */
 lpbuffer_t* create_wavetable(int name, size_t length) {
     lpbuffer_t* buf = LPBuffer.create(length, 1, -1);
     if(name == WT_SINE) {
         wavetable_sine(buf->data, length);            
+    } else if (name == WT_COS) {
+        wavetable_cosine(buf->data, length);            
     } else if (name == WT_TRI) {
         wavetable_tri(buf->data, length);            
     } else if (name == WT_SQUARE) {
         wavetable_square(buf->data, length);            
+    } else if (name == WT_SAW) {
+        wavetable_saw(buf->data, length);            
+    } else if (name == WT_RSAW) {
+        wavetable_rsaw(buf->data, length);            
     } else if (name == WT_RND) {
         return create_wavetable(rand_choice(NUM_WAVETABLES), length);
     } else {
@@ -1161,13 +1187,12 @@ void window_phasor(lpfloat_t* out, int length) {
     }
 }
 
-void window_reverse_sawtooth(lpfloat_t* out, int length) {
+void window_rsaw(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
         out[i] = 1.f - (i/(lpfloat_t)length);
     }
 }
-
 
 void window_tri(lpfloat_t* out, int length) {
     int i;
@@ -1176,10 +1201,31 @@ void window_tri(lpfloat_t* out, int length) {
     }
 }
 
+void window_cosine(lpfloat_t* out, int length) {
+    int i;
+    for(i=0; i < length; i++) {
+        out[i] = (lpfloat_t)cos((i/(lpfloat_t)length) * (lpfloat_t)PI);         
+    }
+}
+
 void window_sine(lpfloat_t* out, int length) {
     int i;
     for(i=0; i < length; i++) {
         out[i] = (lpfloat_t)sin((i/(lpfloat_t)length) * (lpfloat_t)PI);         
+    }
+}
+
+void window_sinein(lpfloat_t* out, int length) {
+    int i;
+    for(i=0; i < length; i++) {
+        out[i] = (lpfloat_t)sin((i/(lpfloat_t)length) * (lpfloat_t)HALFPI);         
+    }
+}
+
+void window_sineout(lpfloat_t* out, int length) {
+    int i;
+    for(i=0; i < length; i++) {
+        out[i] = (lpfloat_t)sin(((i/(lpfloat_t)length) * (lpfloat_t)HALFPI) + (lpfloat_t)HALFPI);
     }
 }
 
@@ -1197,16 +1243,24 @@ lpbuffer_t * create_window(int name, size_t length) {
     lpbuffer_t* buf = LPBuffer.create(length, 1, -1);
     if(name == WIN_SINE) {
         window_sine(buf->data, length);            
+    } else if (name == WIN_SINEIN) {
+        window_sinein(buf->data, length);            
+    } else if (name == WIN_SINEOUT) {
+        window_sineout(buf->data, length);            
+    } else if (name == WIN_COS) {
+        window_cosine(buf->data, length);            
     } else if (name == WIN_TRI) {
         window_tri(buf->data, length);            
     } else if (name == WIN_PHASOR) {
         window_phasor(buf->data, length);            
     } else if (name == WIN_HANN) {
         window_hanning(buf->data, length);            
+    } else if (name == WIN_SAW) {
+        window_phasor(buf->data, length);            
+    } else if (name == WIN_RSAW) {
+        window_rsaw(buf->data, length);            
     } else if (name == WIN_RND) {
         return create_window(rand_choice(NUM_WINDOWS), length);
-    } else if (name == WIN_RSAW) {
-        window_reverse_sawtooth(buf->data, length);            
     } else {
         window_sine(buf->data, length);            
     }
