@@ -30,10 +30,10 @@ int wait_for_play_message() {
     play_cmd = calloc(cmd_size, sizeof(char));
     snprintf(play_cmd, cmd_size, "BLPOP astrid-play-%s 0", instrument_basename);
 
-    printf("Waiting for plays...\n");
+    /*printf("Waiting for plays...\n");*/
     redis_reply = redisCommand(redis_ctx, play_cmd);
     if(strncmp(redis_reply->element[1]->str, PLAY_MESSAGE, 1) == 0) {
-        printf("Got PLAY\n");
+        /*printf("Got PLAY\n");*/
         status = 1;
     } else if(strncmp(redis_reply->element[1]->str, STOP_MESSAGE, 1) == 0) {
         printf("Got STOP\n");
@@ -46,7 +46,7 @@ int wait_for_play_message() {
         status = 0;
         fprintf(stderr, "Bad play message: %s\n", redis_reply->element[1]->str);
     }
-    printf("play_status %d astrid_is_running %d\n", (int)status, (int)astrid_is_running);
+    /*printf("play_status %d astrid_is_running %d\n", (int)status, (int)astrid_is_running);*/
 
     freeReplyObject(redis_reply);
     free(play_cmd);
@@ -119,7 +119,7 @@ int main() {
     ctx->voice_id = (long)syscall(SYS_gettid);
 
     /* Set python path */
-    printf("Setting renderer embedded python path: %ls\n", python_path);
+    /*printf("Setting renderer embedded python path: %ls\n", python_path);*/
     Py_SetPath(python_path);
 
     /* Prepare cyrenderer module for import */
@@ -135,7 +135,7 @@ int main() {
     Py_InitializeEx(0);
 
     /* Check renderer python path */
-    printf("Renderer embedded python path: %ls\n", Py_GetPath());
+    /*printf("Renderer embedded python path: %ls\n", Py_GetPath());*/
 
     /* Import cyrenderer */
     pmodule = PyImport_ImportModule("cyrenderer");
@@ -159,8 +159,9 @@ int main() {
     strcpy(instrument_fullpath, _instrument_fullpath);
     strcpy(instrument_basename, _instrument_basename);
 
-    printf("instrument_fullpath: %s\n", instrument_fullpath);
+    /*printf("instrument_fullpath: %s\n", instrument_fullpath);
     printf("instrument_basename: %s\n", instrument_basename);
+    */
 
     /* Start rendering! */
     while(astrid_is_running) {

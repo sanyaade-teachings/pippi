@@ -1,5 +1,6 @@
 import cmd
 import threading
+import subprocess
 
 import mido
 import redis
@@ -41,11 +42,16 @@ class AstridConsole(cmd.Cmd):
 
     prompt = '^_- '
     intro = 'Astrid Console'
+    instruments = {}
 
     def __init__(self, client=None):
+        self.dac = subprocess.Popen('./build/dac')
         cmd.Cmd.__init__(self)
 
     def do_p(self, instrument):
+        if instrument not in self.instruments:
+            cmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
+            self.instruments[instrument] = subprocess.Popen(cmd, shell=True)
         r.lpush('astrid-play-%s' % instrument, 'play')
 
     def do_r(self, cmd):
@@ -58,12 +64,20 @@ class AstridConsole(cmd.Cmd):
         r.publish('astrid', 'status')
 
     def do_s(self, instrument):
-        r.lpush('astrid-play-%s' % instrument, 'stop')
+        if instrument in self.instruments:
+            r.lpush('astrid-play-%s' % instrument, 'stop')
 
     def do_k(self, instrument):
-        r.lpush('astrid-play-%s' % instrument, 'kill')
+        if instrument in self.instruments:
+            r.lpush('astrid-play-%s' % instrument, 'kill')
+            self.instruments[instrument].terminate()
 
     def do_quit(self, cmd):
+        for instrument in self.instruments:
+            r.lpush('astrid-play-%s' % instrument, 'kill')
+            self.instruments[instrument].terminate()
+
+        self.dac.kill()
         self.quit()
 
     def do_EOF(self, line):
@@ -80,7 +94,7 @@ class AstridConsole(cmd.Cmd):
 
 if __name__ == '__main__':
     c = AstridConsole()
-    mr = threading.Thread(target=midi_relay, args=(None,))
+    #mr = threading.Thread(target=midi_relay, args=(None,))
 
     try:
         #mr.start()        
@@ -88,4 +102,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt as e:
         c.quit()
 
-    mr.join()
+    #mr.join()

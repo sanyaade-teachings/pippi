@@ -28,7 +28,7 @@ ADC_NAME = 'adc'
 logger = logging.getLogger('pippi-renderer')
 if not logger.handlers:
     logger.addHandler(SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON))
-    logger.addHandler(logging.StreamHandler())
+    #logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
@@ -373,7 +373,7 @@ cdef public int astrid_get_messages() except -1:
 
     message = bus.get_message()
     if message is not None:
-        print('MESSAGE', message)
+        logger.info('MESSAGE', message)
         if message['type'] == 'message':
             msg = message['data'].decode('utf-8')
             channel = message['channel'].decode('utf-8')
@@ -402,7 +402,7 @@ cdef public int astrid_get_instrument_params(int * status) except -1:
                     c = str
 
                 ASTRID_INSTRUMENT.params[key] = c(val)
-                print(ASTRID_INSTRUMENT.params)
+                logger.info(ASTRID_INSTRUMENT.params)
 
     ASTRID_INSTRUMENT.flush_messages()
 

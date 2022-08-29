@@ -1,4 +1,4 @@
-from pippi import dsp, fx, oscs
+from pippi import dsp, fx, oscs, shapes
 
 LOOP = True
 
