@@ -6,7 +6,13 @@ void rewind_tapeosc(lptapeosc_t * osc);
 lpbuffer_t * render_tapeosc(lptapeosc_t * osc, size_t length, lpbuffer_t * amp, int channels);
 void destroy_tapeosc(lptapeosc_t * osc);
 
-const lptapeosc_factory_t LPTapeOsc = { create_tapeosc, process_tapeosc, rewind_tapeosc, render_tapeosc, destroy_tapeosc };
+const lptapeosc_factory_t LPTapeOsc = { 
+    create_tapeosc, 
+    process_tapeosc, 
+    rewind_tapeosc, 
+    render_tapeosc, 
+    destroy_tapeosc 
+};
 
 lptapeosc_t * create_tapeosc(lpbuffer_t * buf, lpfloat_t range) {
     lptapeosc_t* osc = (lptapeosc_t*)LPMemoryPool.alloc(1, sizeof(lptapeosc_t));
@@ -61,8 +67,8 @@ void process_tapeosc(lptapeosc_t * osc) {
     osc->phase += osc->speed;
 
     if(osc->phase >= boundry) {
-        /*printf("Tapeosc phase reset! Phase: %f Length: %f boundry: %f idxb: %f\n", osc->phase, (float)length, (float)boundry, (float)idxb);*/
-        osc->start += osc->start_increment;
+        /*printf("Tapeosc phase reset! Phase: %f Length: %f boundry: %f idxb: %f\n", osc->phase, (float)osc->buf->length, (float)boundry, (float)idxb);*/
+        /*osc->start += osc->start_increment;*/
         osc->phase = osc->start;
         osc->gate = 1;
     } else {

@@ -5,7 +5,7 @@ import tempfile
 from unittest import TestCase
 
 from pippi.soundbuffer import SoundBuffer
-from pippi import dsp, grains, grains2
+from pippi import dsp, grains, grains2, fx
 
 class TestCloud(TestCase):
     def setUp(self):
@@ -22,6 +22,8 @@ class TestCloud(TestCase):
         framelength = int(length * sound.samplerate)
 
         out = cloud.play(length)
+        out = fx.compressor(out*4, -15, 15)
+        out = fx.norm(out, 0.5)
 
         out.write('tests/renders/graincloud_libpippi.wav')
 

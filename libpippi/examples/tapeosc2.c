@@ -20,14 +20,14 @@ int main() {
     LPBuffer.scale(speeds, 0, 1, SR/10.f, (float)SR);
 
     out = LPBuffer.create(length, CHANNELS, SR);
-    osc = LPTapeOsc.create(snd, SR);
+    osc = LPTapeOsc.create(snd, snd->length);
     osc->samplerate = SR;
 
     speedphaseinc = 1.f/speeds->length;
     speedphase = 0.f;
 
     for(i=0; i < length; i++) {
-        osc->range = LPInterpolation.linear(speeds, ((float)i/length) * speeds->length);
+        /*osc->range = LPInterpolation.linear(speeds, ((float)i/length) * speeds->length);*/
 
         LPTapeOsc.process(osc);
         for(c=0; c < CHANNELS; c++) {

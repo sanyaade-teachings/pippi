@@ -5,19 +5,24 @@
 #include "oscs.tape.h"
 
 typedef struct lpgrain_t {
-    lpfloat_t length; /* grainlength == tapeosc range */
-    lpfloat_t window_phase_offset; 
+    size_t length;
     lpfloat_t pulsewidth; 
 
-    lptapeosc_t * osc;
+    size_t range;
+    size_t start;
+    size_t offset;
 
     lpfloat_t phase;
-    lpfloat_t pan; /* pan position across all tapeosc->buf channels */
+    lpfloat_t pan;
     lpfloat_t amp;
-    lpfloat_t speed; /* grain tapeosc playback speed (does not modulate grainlength) */
+    lpfloat_t speed;
     lpfloat_t skew; /* phase distortion on the grain window */
 
+    int gate;
+
+    lpbuffer_t * buf;
     lpbuffer_t * window;
+    lpbuffer_t * current_frame;
 } lpgrain_t;
 
 typedef struct lpformation_t {

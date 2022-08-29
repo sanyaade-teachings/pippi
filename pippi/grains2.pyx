@@ -1,7 +1,5 @@
 from pippi.soundbuffer cimport SoundBuffer
 
-cdef int CHANNELS = 2
-cdef int SR = 48000
 
 cdef class Cloud2:
     def __cinit__(self, 
@@ -18,8 +16,8 @@ cdef class Cloud2:
             unsigned int wtsize=4096,
         ):
 
-        CHANNELS = snd.channels
-        SR = snd.samplerate
+        self.channels = snd.channels
+        self.samplerate = snd.samplerate
 
         """
         if window is None:
@@ -57,29 +55,35 @@ cdef class Cloud2:
         cdef SoundBuffer out
         cdef lpformation_t * formation
 
-
         sndlength = <size_t>len(self.snd)
-        framelength = <size_t>(length * SR)
-        numgrains = 10
-        maxgrainlength = 100
-        mingrainlength = 100
+        framelength = <size_t>(length * self.samplerate)
+        numgrains = 20
+        maxgrainlength = 4800
+        mingrainlength = 48
 
-        snd = LPBuffer.create(sndlength, CHANNELS, SR)
-        out = SoundBuffer(length=length, channels=CHANNELS, samplerate=SR)
+        snd = LPBuffer.create(sndlength, self.channels, self.samplerate)
+        out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
 
         print(framelength, len(out.frames))
 
         for i in range(sndlength):
-            for c in range(CHANNELS):
-                snd.data[i * CHANNELS + c] = self.snd[i, c]
+            for c in range(self.channels):
+                snd.data[i * self.channels + c] = self.snd[i, c]
 
-        formation = LPFormation.create(numgrains, maxgrainlength, mingrainlength, framelength, CHANNELS, SR);
+        formation = LPFormation.create(
+                numgrains, 
+                maxgrainlength, 
+                mingrainlength, 
+                sndlength, 
+                self.channels, 
+                self.samplerate
+        )
 
         LPRingBuffer.write(formation.rb, snd)
 
         for i in range(framelength):
             LPFormation.process(formation)
-            for c in range(CHANNELS):
+            for c in range(self.channels):
                 out.frames[i, c] = formation.current_frame.data[c]
 
         LPBuffer.destroy(snd)
