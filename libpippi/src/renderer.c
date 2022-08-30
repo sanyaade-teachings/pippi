@@ -93,6 +93,7 @@ int main() {
     if(_astrid_channels != NULL) {
         astrid_channels = atoi(_astrid_channels);
     }
+    astrid_channels = 2;
 
     /* Connect to redis */
     redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);

@@ -61,7 +61,8 @@ class AstridConsole(cmd.Cmd):
         r.publish('astrid', 'setval:%s' % cmd)
 
     def do_i(self, cmd):
-        r.publish('astrid', 'status')
+        #r.publish('astrid', 'status')
+        print(self.instruments)
 
     def do_s(self, instrument):
         if instrument in self.instruments:

@@ -5,10 +5,10 @@
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
 
+#include "pippi.h"
+#include "astrid.h"
 #include "adc.h"
 
-#define CHANNELS 2
-#define SAMPLERATE 48000
 #define ADC_LENGTH 4800000
 
 static volatile int adc_is_running = 1;
@@ -43,12 +43,12 @@ void miniaudio_callback(
     if(!adc_is_capturing) return;
 
     for(i=0; i < count; i++) {
-        for(c=0; c < CHANNELS; c++) {
+        for(c=0; c < ASTRID_CHANNELS; c++) {
             ctx->adc->data[c] = (lpfloat_t)*in++;
         }
 
-        memcpy(ctx->framestr, ctx->adc->data, sizeof(lpfloat_t) * CHANNELS);
-        ctx->r = redisCommand(ctx->c, "LPUSH adc %b", ctx->framestr, sizeof(lpfloat_t) * CHANNELS);
+        memcpy(ctx->framestr, ctx->adc->data, sizeof(lpfloat_t) * ASTRID_CHANNELS);
+        ctx->r = redisCommand(ctx->c, "LPUSH adc %b", ctx->framestr, sizeof(lpfloat_t) * ASTRID_CHANNELS);
         freeReplyObject(ctx->r);
     }
 
@@ -68,8 +68,8 @@ int main() {
     struct timeval redis_timeout = {15, 0};
 
     ctx = calloc(1, sizeof(lpadcctx_t));
-    ctx->adc = LPBuffer.create(1, CHANNELS, SAMPLERATE);
-    ctx->framestr = (char *)calloc(1, sizeof(lpfloat_t) * CHANNELS);
+    ctx->adc = LPBuffer.create(1, ASTRID_CHANNELS, ASTRID_SAMPLERATE);
+    ctx->framestr = (char *)calloc(1, sizeof(lpfloat_t) * ASTRID_CHANNELS);
     ctx->c = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
     status_redis = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
     
@@ -83,11 +83,11 @@ int main() {
         goto exit_with_error;
     }
 
-    /* Configure miniaudio for duplex mode */
-    ma_device_config audioconfig = ma_device_config_init(ma_device_type_duplex);
-    audioconfig.playback.format = ma_format_f32;
-    audioconfig.playback.channels = CHANNELS;
-    audioconfig.sampleRate = SAMPLERATE;
+    /* Configure miniaudio for capture mode */
+    ma_device_config audioconfig = ma_device_config_init(ma_device_type_capture);
+    audioconfig.capture.format = ma_format_f32;
+    audioconfig.capture.channels = ASTRID_CHANNELS;
+    audioconfig.sampleRate = ASTRID_SAMPLERATE;
     audioconfig.dataCallback = miniaudio_callback;
     audioconfig.pUserData = ctx;
 

@@ -72,6 +72,7 @@ cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, i
 
     bytelist = b''.join(list(reversed(_redis.lrange(ADC_NAME, o, o+framelength-1))))
     a = array.array('d', bytelist)
+    print('len(a)', len(a), 'framelength', framelength, 'channels', channels)
 
     return SoundBuffer(np.ndarray(shape=(framelength, channels), buffer=a, dtype='d'), channels=channels, samplerate=samplerate)
 
