@@ -1,0 +1,20 @@
+#ifndef LPSOLENOIDS_H
+#define LPSOLENOIDS_H
+
+enum LPSOLE_SELECTION_FLAGS {
+    LPSOLEALL = 0,
+    LPSOLE1   = 1, 
+    LPSOLE2   = 2, 
+    LPSOLE3   = 4, 
+    LPSOLE4   = 8, 
+    LPSOLE5   = 16, 
+    LPSOLE6   = 32, 
+};
+
+enum LPSOLE_STATE_FLAGS {
+    LPSOLE_STATE_TRIGGERED = 1,
+    LPSOLE_STATE_LFO_ENABLED = 2,
+    LPSOLE_STATE_RND_ENABLED = 4
+};
+
+#endif
