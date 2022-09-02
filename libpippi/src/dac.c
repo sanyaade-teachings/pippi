@@ -167,6 +167,7 @@ int main() {
     lpdacctx_t * ctx;
     pthread_t buffer_feed_thread;
 
+    /*
     ma_context context;
     ma_device device;
     ma_device_info* pPlaybackInfos;
@@ -174,9 +175,9 @@ int main() {
     ma_device_info* pCaptureInfos;
     ma_uint32 captureCount;
     ma_uint32 iDevice;
-    ma_device * playback;
+    */
+    ma_device playback;
 
-    playback = NULL;
     ctx = NULL;
 
     /* FIXME Get channels from ENV */
@@ -204,6 +205,7 @@ int main() {
     }
 
     /* Set up the miniaudio device context */
+    /*
     if (ma_context_init(NULL, 0, NULL, &context) != MA_SUCCESS) {
         fprintf(stderr, "Error setting up miniaudio device context\n");
         goto exit_with_error;
@@ -219,7 +221,8 @@ int main() {
     for (iDevice=0; iDevice < playbackCount; iDevice++) {
         printf("Device %d - %s\n", iDevice, pPlaybackInfos[iDevice].name);
     }
-    goto exit_with_error;
+    */
+    /*goto exit_with_error;*/
 
     /* Setup and start miniaudio in playback mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_playback);
@@ -229,13 +232,13 @@ int main() {
     audioconfig.dataCallback = miniaudio_callback;
     audioconfig.pUserData = ctx;
 
-    if(ma_device_init(NULL, &audioconfig, playback) != MA_SUCCESS) {
+    if(ma_device_init(NULL, &audioconfig, &playback) != MA_SUCCESS) {
         fprintf(stderr, "Error while attempting to configure miniaudio for playback\n");
         goto exit_with_error;
     }
 
     printf("Playback started\n");
-    ma_device_start(playback);
+    ma_device_start(&playback);
 
     printf("Running...\n");
     while(astrid_is_running) {
@@ -243,10 +246,10 @@ int main() {
         usleep((useconds_t)10000);
     }
 
-    return cleanup(playback, ctx, buffer_feed_thread);
+    return cleanup(&playback, ctx, buffer_feed_thread);
 
 exit_with_error:
-    cleanup(playback, ctx, buffer_feed_thread);
+    cleanup(&playback, ctx, buffer_feed_thread);
     printf("Exited with error\n");
     return 1;
 }
