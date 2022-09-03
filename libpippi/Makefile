@@ -33,6 +33,13 @@ astrid-renderer:
 	cython cython/cyrenderer.pyx
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor `python3-config --cflags` -Icython -l$(PYLIB) src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 
+astrid-renderer-macos:
+	mkdir -p build renders
+
+	echo "Building astrid renderer...";
+	cython cython/cyrenderer.pyx
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor `python3-config --cflags --ldflags` -Icython -l$(PYLIB) src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
+
 astrid-dac:
 	mkdir -p build renders
 
@@ -46,6 +53,8 @@ astrid-adc:
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/adc.c -o build/adc
 	
 astrid: astrid-dac astrid-adc astrid-renderer
+
+astrid-macos: astrid-dac astrid-adc astrid-renderer-macos
 
 silencer:
 	mkdir -p build renders
