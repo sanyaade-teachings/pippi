@@ -1,0 +1,107 @@
+###########################
+HOW ASTRID TRIGGERING WORKS
+
+- dac.c
+    
+    3) buffer queue thread waits for buffers from redis `astridbuffers` list
+        - incoming buffers are deserialized and sent to the scheduler/mixer
+
+    4) miniaudio callback thread on each frame in the block:
+        - ask for a frame of audio from the scheduler/mixer which:
+            - loops over the internal list of buffers to add the current value to the output and increment each buffer's playback counter
+            - executes a retrigger callback on buffers that were scheduled from a looping instrument script (LOOP=True in python)
+                - which sends a play message to the current instrument
+                    TODO / FIXME - pass a uuid or something with this so the scheduler can line up the buffers
+    
+- renderer.c
+    
+    2) main loop blocks on `astrid-play-<instrument>` redis queue until a play message arrives
+        - reload the instrument module
+        - fill the messages dict with messages from `astrid-message` pubsub channels
+        - render a buffer (or buffers) with the instrument script play() methods
+        - serialize the buffers and send them to the `astridbuffers` redis queue
+
+
+- console.py
+
+    1) p <instrument> g=1 foo=bar
+        - starts renderer program with env variables for instrument script (if not already started)
+        - sends a `astrid-play-<instrument> p` message via redis
+
+
+///// Some old notes...
+
+astrid play sequence:
+
+- load instrument
+  - stores module reference in ASTRID_INSTRUMENT
+
+- render event
+  - TODO decodes params from event message
+  - Passes instrument reference to render handler
+  - creates the event context with params
+  - finds all instrument players
+  - TODO reads all module metadata?
+  - loops over players, for each player:
+    - TODO play in sequence with onsets?
+    - loops over player generator to trigger render
+    - stores each buffer in an out list
+  - on completion of render, calls optional render.done(ctx) callback
+
+TODO:
+  - eliminate copy after render
+    - finish porting pippi to new buffers
+  - copy onset time for scheduling to libpippi buffer before event creation
+  - ^ use onsets associated with player
+
+  - revisit memory management in event handling:
+    - event pool should be (optionally) fixed and reusable
+    - runtime option to tell scheduler how to handle buffers in reused events
+      - default: do nothing, leak memory (and let the parent manage it)
+      - optionally: free internal buffers when events are reused 
+        (the parent must abandon all references to buffers after rendering)
+
+
+////// More old notes....
+
+client
+- command repl
+- translates text commands into msg packets for the astrid daemon
+- subscribes to a status feed from the astrid daemon (ipc: how? zeromq/msgpak et al?)
+
+daemon process
+- listens for commands over the network (msgpak? zeromq? something else?)
+- listens for MIDI on the user selected MIDI software interface
+- listens for OSC on the user selected port and address
+- dispatches commands to internal queue for processing by renderer thread pools
+
+render node
+- wrapped python interpreter
+- uses the cython standalone mode
+- waits for play commands from the dispatcher
+- sessions: calls into the parent C context to read shared session values
+- sessions: asks the parent C context to place a message on a queue to change shared session values
+
+instrument pool
+- takes a play message off the queue and assigns the play to a render node
+- orchestrates render nodes
+
+COMMANDS
+
+PLAY <INSTRUMENT> <PARAMS>
+- routed via the instrument to the appropriate renderer pool
+
+STOP <INSTRUMENT>
+
+STOP <VOICE ID>
+
+STOP ALL
+
+
+Render node waits for messages
+then triggers render
+and returns the sound
+
+sound is put onto scheduler.c for playback
+
+
