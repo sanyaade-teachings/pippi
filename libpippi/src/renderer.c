@@ -20,39 +20,6 @@ void handle_shutdown(int) {
     astrid_is_running = 0;
 }
 
-int wait_for_play_message() {
-    redisReply * redis_reply;
-    ssize_t cmd_size;
-    char * play_cmd;
-    int status;
-
-    cmd_size = snprintf(NULL, 0, "BLPOP astrid-play-%s 0", instrument_basename) + 1;
-    play_cmd = calloc(cmd_size, sizeof(char));
-    snprintf(play_cmd, cmd_size, "BLPOP astrid-play-%s 0", instrument_basename);
-
-    /*printf("Waiting for plays...\n");*/
-    redis_reply = redisCommand(redis_ctx, play_cmd);
-    if(strncmp(redis_reply->element[1]->str, PLAY_MESSAGE, 1) == 0) {
-        /*printf("Got PLAY\n");*/
-        status = 1;
-    } else if(strncmp(redis_reply->element[1]->str, STOP_MESSAGE, 1) == 0) {
-        printf("Got STOP\n");
-        status = 0;
-    } else if(strncmp(redis_reply->element[1]->str, SHUTDOWN_MESSAGE, 1) == 0) {
-        printf("Got SHUTDOWN\n");
-        status = 0;
-        astrid_is_running = 0;
-    } else {
-        status = 0;
-        fprintf(stderr, "Bad play message: %s\n", redis_reply->element[1]->str);
-    }
-    /*printf("play_status %d astrid_is_running %d\n", (int)status, (int)astrid_is_running);*/
-
-    freeReplyObject(redis_reply);
-    free(play_cmd);
-    return status;
-}
-
 int main() {
     struct sigaction shutdown_action;
 
@@ -61,7 +28,6 @@ int main() {
     char * astrid_pythonpath_env;
     size_t astrid_pythonpath_length;
     wchar_t * python_path;
-    int play_status;
 
     char * _astrid_channels;
     lpastridctx_t * ctx;
@@ -143,14 +109,14 @@ int main() {
     if(!pmodule) {
         PyErr_Print();
         fprintf(stderr, "Error: could not import cython renderer module\n");
-        goto lprender_thread_cleanup;
+        goto lprender_cleanup;
     }
 
     /* Import python instrument module */
     if(astrid_load_instrument() < 0) {
         PyErr_Print();
         fprintf(stderr, "Error while attempting to load astrid instrument\n");
-        goto lprender_thread_cleanup;
+        goto lprender_cleanup;
     }
 
     _instrument_fullpath = getenv("INSTRUMENT_PATH");
@@ -166,38 +132,14 @@ int main() {
 
     /* Start rendering! */
     while(astrid_is_running) {
-        /* First reload the instrument module */
-        if(astrid_reload_instrument() < 0) {
+        if(astrid_tick() < 0) {
             PyErr_Print();
-            fprintf(stderr, "Error while attempting to reload astrid instrument\n");
-            goto lprender_thread_cleanup;
-        }
-
-        /* Wait until a play message arrives on the queue */
-        play_status = wait_for_play_message();
-        if(play_status == 0) {
-            printf("play_status == 0, continue\n");
-            continue;
-        }
-
-        /* Prompt the cyrenderer to check for redis messages and 
-         * pass them along to the python instrument module */
-        if(astrid_get_messages() < 0) {
-            PyErr_Print();
-            fprintf(stderr, "Error while rendering event from astrid instrument\n");
-            goto lprender_thread_cleanup;
-        }
-
-        /* Render that shit! The cyrenderer module will dump 
-         * serialized buffers into the redis buffer queue */
-        if(astrid_render_event() < 0) {
-            PyErr_Print();
-            fprintf(stderr, "Error while rendering event from astrid instrument\n");
-            goto lprender_thread_cleanup;
+            fprintf(stderr, "Error during renderer loop\n");
+            goto lprender_cleanup;
         }
     }
 
-lprender_thread_cleanup:
+lprender_cleanup:
     Py_Finalize();
     return 0;
 }

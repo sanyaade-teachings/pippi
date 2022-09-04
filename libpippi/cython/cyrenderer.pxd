@@ -63,14 +63,13 @@ cdef class EventContext:
     #cdef public object sampler
 
 cdef class Instrument:
-    cdef str name
-    cdef str path
+    cdef public str name
+    cdef public str path
     cdef public list groups
     cdef public object renderer
     cdef object shutdown
     cdef object sounds
     cdef public int playing
-    cdef public dict messages
     cdef public dict params 
 
 cdef tuple collect_players(object instrument)

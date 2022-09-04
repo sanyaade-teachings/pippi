@@ -16,17 +16,18 @@ HOW ASTRID TRIGGERING WORKS
 - renderer.c
     
     2) main loop blocks on `astrid-play-<instrument>` redis queue until a play message arrives
+        - parse the play message metadata to feed into the render context
         - reload the instrument module
         - fill the messages dict with messages from `astrid-message` pubsub channels
         - render a buffer (or buffers) with the instrument script play() methods
-        - serialize the buffers and send them to the `astridbuffers` redis queue
+        - serialize the buffers+metadata and send them to the `astridbuffers` redis queue
 
 
 - console.py
 
-    1) p <instrument> g=1 foo=bar
+    1) p <instrument> foo=bar
         - starts renderer program with env variables for instrument script (if not already started)
-        - sends a `astrid-play-<instrument> p` message via redis
+        - sends a `astrid-play-<instrument> p foo=bar` message via redis
 
 
 ///// Some old notes...

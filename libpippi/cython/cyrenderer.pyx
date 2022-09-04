@@ -72,24 +72,24 @@ cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, i
 
     bytelist = b''.join(list(reversed(_redis.lrange(ADC_NAME, o, o+framelength-1))))
     a = array.array('d', bytelist)
-    print('len(a)', len(a), 'framelength', framelength, 'channels', channels)
+    #print('len(a)', len(a), 'framelength', framelength, 'channels', channels)
 
     return SoundBuffer(np.ndarray(shape=(framelength, channels), buffer=a, dtype='d'), channels=channels, samplerate=samplerate)
 
 cdef class SessionParamBucket:
     """ params[key] to params.key
     """
-    def __init__(self):
-        self._bus = {}
-
     def __getattr__(self, key):
         return self.get(key)
 
     def get(self, key, default=None):
-        v = self._bus.get(key) 
+        v = _redis.get(key.encode('ascii')) 
         if v is None:
             return default
         return v.decode('utf-8')
+
+    def __setattr__(self, key, value):
+        _redis.set(key.encode('ascii'), value.encode('ascii'))
 
 cdef class ParamBucket:
     """ params[key] to params.key
@@ -112,12 +112,10 @@ cdef class EventContext:
             sounds=None,
             midi_devices=None, 
             midi_maps=None, 
-            before=None,
-            messages=None,
+            before=None
         ):
 
         self.before = before
-        self.messages = messages or []
         self.p = ParamBucket(params)
         self.s = SessionParamBucket() 
         self.client = None
@@ -157,7 +155,6 @@ cdef class Instrument:
         self.path = path
         self.renderer = renderer
         self.sounds = self.load_sounds()
-        self.messages = {}
         self.playing = <int>1
         self.params = {}
 
@@ -181,10 +178,6 @@ cdef class Instrument:
             self.renderer = renderer
         else:
             logger.error(self.path)
-
-    def flush_messages(self):
-        for k in self.messages.keys():
-            self.messages[k] = []
 
     def load_sounds(self):
         if hasattr(self.renderer, 'SOUNDS') and isinstance(self.renderer.SOUNDS, list):
@@ -218,11 +211,10 @@ cdef class Instrument:
 
         return device_aliases, midi_maps
 
-    def create_ctx(self, params, messages):
+    def create_ctx(self, params):
         device_aliases, midi_maps = self.map_midi_devices()
         return EventContext(
                     params=params, 
-                    messages=messages,
                     instrument_name=self.name, 
                     sounds=self.sounds,
                     midi_devices=device_aliases, 
@@ -305,7 +297,7 @@ cdef int render_event(object instrument, object params, object buf_q):
     cdef object onset_generator
     cdef bint loop
     cdef double overlap
-    cdef EventContext ctx = instrument.create_ctx(instrument.params, instrument.messages)
+    cdef EventContext ctx = instrument.create_ctx(instrument.params)
 
     players, loop, overlap = collect_players(instrument)
 
@@ -359,55 +351,22 @@ cdef public int astrid_load_instrument() except -1:
 
     return 0
 
-cdef public int astrid_reload_instrument() except -1:
+cdef public int astrid_tick() except -1:
     global ASTRID_INSTRUMENT
-    ASTRID_INSTRUMENT.reload()
-    #logger.debug("Reloaded %s" % ASTRID_INSTRUMENT)
-    return 0
 
-cdef public int astrid_render_event() except -1:
-    global ASTRID_INSTRUMENT
+    # Reload instrument
+    ASTRID_INSTRUMENT.reload()
+    msg = ''
+    try:
+        msg = _redis.blpop('astrid-play-%s' % ASTRID_INSTRUMENT.name)[1]
+    except IndexError:
+        logger.error('Could not read message from play queue: %s' % msg)
+        return -1
+
+    if msg[0] == 's' or msg[0] == 'k':
+        return 0
+
     return render_event(ASTRID_INSTRUMENT, None, None)
 
-cdef public int astrid_get_messages() except -1:
-    global ASTRID_INSTRUMENT
-
-    message = bus.get_message()
-    if message is not None:
-        logger.info('MESSAGE', message)
-        if message['type'] == 'message':
-            msg = message['data'].decode('utf-8')
-            channel = message['channel'].decode('utf-8')
-            if channel not in ASTRID_INSTRUMENT.messages:
-                ASTRID_INSTRUMENT.messages[channel] = []
-            ASTRID_INSTRUMENT.messages[channel] += [ msg ]
-    return 0
-
-cdef public int astrid_get_instrument_params(int * status) except -1:
-    global ASTRID_INSTRUMENT
-
-    for channel, messages in ASTRID_INSTRUMENT.messages.items():
-        for msg in messages:
-            if msg == 'stop':
-                ASTRID_INSTRUMENT.playing = <int>0
-            elif msg == 'play':
-                ASTRID_INSTRUMENT.playing = <int>1
-                ASTRID_INSTRUMENT.params['group'] = channel
-            elif msg.startswith('setval'):
-                _, key, coding, val = msg.split(':')
-                if coding == 'int':
-                    c = int
-                elif coding == 'float':
-                    c = float
-                else:
-                    c = str
-
-                ASTRID_INSTRUMENT.params[key] = c(val)
-                logger.info(ASTRID_INSTRUMENT.params)
-
-    ASTRID_INSTRUMENT.flush_messages()
-
-    status[0] = ASTRID_INSTRUMENT.playing
-    return 0
 
 
