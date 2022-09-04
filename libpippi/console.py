@@ -45,8 +45,25 @@ class AstridConsole(cmd.Cmd):
     instruments = {}
 
     def __init__(self, client=None):
-        self.dac = subprocess.Popen('./build/dac')
+        self.dac = None
+        self.adc = None
         cmd.Cmd.__init__(self)
+
+    def do_dac(self, cmd):
+        if cmd == 'on' and self.dac is None:
+            print('Starting dac...')
+            self.dac = subprocess.Popen('./build/dac')
+        elif cmd == 'off' and self.dec is not None:
+            print('Stopping dac...')
+            self.dac.kill()
+
+    def do_adc(self, cmd):
+        if cmd == 'on' and self.adc is None:
+            print('Starting adc...')
+            self.adc = subprocess.Popen('./build/adc')
+        elif cmd == 'off' and self.adc is not None:
+            print('Stopping adc...')
+            self.adc.kill()
 
     def do_p(self, instrument):
         if instrument not in self.instruments:
@@ -54,14 +71,11 @@ class AstridConsole(cmd.Cmd):
             self.instruments[instrument] = subprocess.Popen(cmd, shell=True)
         r.lpush('astrid-play-%s' % instrument, 'play')
 
-    def do_r(self, cmd):
-        r.publish('astrid', 'reload')
-
     def do_v(self, cmd):
-        r.publish('astrid', 'setval:%s' % cmd)
+        k, v = tuple(cmd.split('='))
+        r.set(k.encode('ascii'), v.encode('ascii'))
 
     def do_i(self, cmd):
-        #r.publish('astrid', 'status')
         print(self.instruments)
 
     def do_s(self, instrument):
@@ -74,11 +88,6 @@ class AstridConsole(cmd.Cmd):
             self.instruments[instrument].terminate()
 
     def do_quit(self, cmd):
-        for instrument in self.instruments:
-            r.lpush('astrid-play-%s' % instrument, 'kill')
-            self.instruments[instrument].terminate()
-
-        self.dac.kill()
         self.quit()
 
     def do_EOF(self, line):
@@ -92,6 +101,17 @@ class AstridConsole(cmd.Cmd):
 
     def quit(self):
         print('Quitting')
+        for instrument in self.instruments:
+            r.lpush('astrid-play-%s' % instrument, 'kill')
+            self.instruments[instrument].terminate()
+
+        if self.dac is not None:
+            self.dac.kill()
+
+        if self.adc is not None:
+            self.adc.kill()
+
+        exit(0)
 
 if __name__ == '__main__':
     c = AstridConsole()
