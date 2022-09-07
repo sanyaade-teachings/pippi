@@ -2,8 +2,6 @@
 
 from pippi.soundbuffer cimport SoundBuffer
 
-cdef extern from "adc.h":
-    cdef int ADC_LENGTH
 
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
@@ -40,6 +38,33 @@ cdef extern from "pippicore.h":
         void (*destroy)(lpbuffer_t *)
 
     extern const lpbuffer_factory_t LPBuffer
+
+cdef extern from "scheduler.h":
+    ctypedef struct lpscheduler_t:
+        pass
+
+cdef extern from "astrid.h":
+    ctypedef struct lpadcbuf_t:
+        int fd
+        char * buf
+        size_t headsize
+        size_t fullsize
+        size_t pos
+        size_t frames
+        int channels
+
+    lpadcbuf_t * lpadc_open_for_writing()
+    lpadcbuf_t * lpadc_open_for_reading()
+    lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, int channel)
+    size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, int channel, ssize_t offset)
+    size_t lpadc_increment_pos(lpadcbuf_t * adcbuf)
+    void lpadc_close(lpadcbuf_t * adcbuf)
+    void lpadc_destroy(lpadcbuf_t * adcbuf)
+
+
+cdef extern from "adc.h":
+    cdef int ADC_LENGTH
+
 
 cdef class SessionParamBucket:
     cdef object _bus

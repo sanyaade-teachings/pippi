@@ -189,6 +189,8 @@ int main() {
 
     /* Setup shutdown handler for ctl-c */
     shutdown_action.sa_handler = handle_shutdown;
+    sigemptyset(&shutdown_action.sa_mask);
+    sigemptyset(&shutdown_action.sa_flags);
     sigaction(SIGINT, &shutdown_action, NULL);
 
     /* init scheduler and ctx */

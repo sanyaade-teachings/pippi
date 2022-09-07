@@ -66,15 +66,25 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
     return bytes(strbuf)
 
 cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
-    cdef array.array a
-    cdef int framelength = <int>(length * samplerate)
-    cdef int o = <int>(offset * samplerate)
+    cdef size_t i
+    cdef int c
 
-    bytelist = b''.join(list(reversed(_redis.lrange(ADC_NAME, o, o+framelength-1))))
-    a = array.array('d', bytelist)
+    cdef lpadcbuf_t * adcbuf = lpadc_open_for_reading()
+    cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
+    cdef size_t framelength = len(snd)
+
+    for i in range(framelength):
+        for c in range(channels):
+            snd.frames[i,c] = lpadc_read_sample(adcbuf, c)
+
+    #cdef array.array a
+    #cdef int o = <int>(offset * samplerate)
+    #bytelist = b''.join(list(reversed(_redis.lrange(ADC_NAME, o, o+framelength-1))))
+    #a = array.array('d', bytelist)
     #print('len(a)', len(a), 'framelength', framelength, 'channels', channels)
+    #return SoundBuffer(np.ndarray(shape=(framelength, channels), buffer=a, dtype='d'), channels=channels, samplerate=samplerate)
 
-    return SoundBuffer(np.ndarray(shape=(framelength, channels), buffer=a, dtype='d'), channels=channels, samplerate=samplerate)
+    return snd
 
 cdef class SessionParamBucket:
     """ params[key] to params.key

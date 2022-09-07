@@ -1,9 +1,15 @@
+#include <unistd.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <string.h>
+
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_NO_PULSEAUDIO
 #define MA_NO_ALSA
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
+#include <hiredis/hiredis.h>
 
 #include "pippi.h"
 #include "astrid.h"
@@ -13,17 +19,9 @@
 
 static volatile int adc_is_running = 1;
 static volatile int adc_is_capturing = 1;
-lpadcctx_t * ctx;
 
 void handle_shutdown(int) {
     adc_is_running = 0;
-}
-
-void lpadcctx_destroy(lpadcctx_t * ctx) {
-    if(ctx->c != NULL) redisFree(ctx->c);
-    if(ctx->r != NULL) freeReplyObject(ctx->r);
-    LPBuffer.destroy(ctx->adc);
-    free(ctx);
 }
 
 void miniaudio_callback(
@@ -35,53 +33,56 @@ void miniaudio_callback(
     ma_uint32 i;
     float * in;
     int c;
-    lpadcctx_t * ctx;
+    lpadcbuf_t * adcbuf;
+    lpfloat_t sample;
 
-    ctx = (lpadcctx_t *)device->pUserData;
+    adcbuf = (lpadcbuf_t *)device->pUserData;
     in = (float *)pIn;
 
-    if(!adc_is_capturing) return;
+    if(adc_is_capturing == 0) return;
 
     for(i=0; i < count; i++) {
         for(c=0; c < ASTRID_CHANNELS; c++) {
-            ctx->adc->data[c] = (lpfloat_t)*in++;
+            sample = (lpfloat_t)*in++;
+            lpadc_write_sample(adcbuf, sample, c, 0);
         }
 
-        memcpy(ctx->framestr, ctx->adc->data, sizeof(lpfloat_t) * ASTRID_CHANNELS);
-        ctx->r = redisCommand(ctx->c, "LPUSH adc %b", ctx->framestr, sizeof(lpfloat_t) * ASTRID_CHANNELS);
-        freeReplyObject(ctx->r);
+        lpadc_increment_pos(adcbuf);
     }
-
-    ctx->r = redisCommand(ctx->c, "LTRIM adc 0 4799999");
-    freeReplyObject(ctx->r);
-
-    ctx->r = redisCommand(ctx->c, "INCR blocksread");
-    freeReplyObject(ctx->r);
 }
 
 int main() {
+    lpadcbuf_t * adcbuf;
+
     redisContext * status_redis;
     redisReply * status_reply;
+
+    /* setup SIGNINT handler for shutdown */
     struct sigaction action;
     action.sa_handler = handle_shutdown;
-    sigaction(SIGINT, &action, NULL);
-    struct timeval redis_timeout = {15, 0};
+    sigemptyset(&action.sa_mask);
+    sigemptyset(&action.sa_flags);
+    if(sigaction(SIGINT, &action, NULL) == -1) {
+        fprintf(stderr, "Could not init signal handler.\n");
+        goto exit_with_error;
+    }
 
-    ctx = calloc(1, sizeof(lpadcctx_t));
-    ctx->adc = LPBuffer.create(1, ASTRID_CHANNELS, ASTRID_SAMPLERATE);
-    ctx->framestr = (char *)calloc(1, sizeof(lpfloat_t) * ASTRID_CHANNELS);
-    ctx->c = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
+    /* Connect to redis for status polling */
+    struct timeval redis_timeout = {15, 0};
     status_redis = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
     
-    if(ctx->c == NULL) {
+    if(status_redis == NULL) {
         fprintf(stderr, "Could not start connection to redis.\n");
         goto exit_with_error;
     }
 
-    if(ctx->c->err) {
-        fprintf(stderr, "There was a problem while connecting to redis. %s\n", ctx->c->errstr);
+    if(status_redis->err) {
+        fprintf(stderr, "There was a problem while connecting to redis. %s\n", status_redis->errstr);
         goto exit_with_error;
     }
+
+    /* Open or create shared memory buffer */
+    adcbuf = lpadc_open_for_writing();
 
     /* Configure miniaudio for capture mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_capture);
@@ -89,56 +90,42 @@ int main() {
     audioconfig.capture.channels = ASTRID_CHANNELS;
     audioconfig.sampleRate = ASTRID_SAMPLERATE;
     audioconfig.dataCallback = miniaudio_callback;
-    audioconfig.pUserData = ctx;
+    audioconfig.pUserData = adcbuf;
 
-    /* init ma device */
+    /* init miniaudio device */
     ma_device mad;
     if(ma_device_init(NULL, &audioconfig, &mad) != MA_SUCCESS) {
         fprintf(stderr, "Runtime Error while attempting to configure miniaudio\n");
         goto exit_with_error;
     }
 
-    /* Reset block counter */
-    status_reply = redisCommand(status_redis, "SET blocksread 0");
-    freeReplyObject(status_reply);
-
-    /* Reset capturing flag */
+    /* Set capturing flag to ON */
     status_reply = redisCommand(status_redis, "SET adc_is_capturing 1");
     freeReplyObject(status_reply);
 
-    /* Reset frame list */
-    status_reply = redisCommand(status_redis, "DEL adc");
-    freeReplyObject(status_reply);
-
-    /* start ma device */
+    /* start miniaudio device */
     ma_device_start(&mad);
 
     while(adc_is_running) {
         usleep((useconds_t)10000);
-
-        status_reply = redisCommand(status_redis, "GET blocksread");
-        printf("blocksread %s\n", status_reply->str);
-        freeReplyObject(status_reply);
-
-        status_reply = redisCommand(status_redis, "LLEN adc");
-        printf("adc length %d\n", (int)status_reply->integer);
-        freeReplyObject(status_reply);
-
         status_reply = redisCommand(status_redis, "GET adc_is_capturing");
-        printf("adc_is_capturing %s\n", status_reply->str);
         adc_is_capturing = atoi(status_reply->str);
+        if(adc_is_capturing == 0) printf("adc_is_capturing %s\n", status_reply->str);
         freeReplyObject(status_reply);
+        /*printf("adcbuf writepos %f\n", (float)lpadc_get_pos(adcbuf));*/
     }
 
     redisFree(status_redis);
     ma_device_uninit(&mad);
-    lpadcctx_destroy(ctx);
+    lpadc_close(adcbuf);
+    lpadc_destroy(adcbuf);
     return 0;
 
 exit_with_error:
     if(status_redis != NULL) redisFree(status_redis);
     ma_device_uninit(&mad);
-    lpadcctx_destroy(ctx);
+    lpadc_close(adcbuf);
+    lpadc_destroy(adcbuf);
     return 1;
 }
 
