@@ -38,6 +38,8 @@ int main() {
 
     /* Setup sigint handler for graceful shutdown */
     shutdown_action.sa_handler = handle_shutdown;
+    sigemptyset(&shutdown_action.sa_mask);
+    shutdown_action.sa_flags = 0;
     sigaction(SIGINT, &shutdown_action, NULL);
 
     /* Get python path from env */
@@ -140,6 +142,8 @@ int main() {
     }
 
 lprender_cleanup:
+    fprintf(stderr, "lprenderer cleanup\n");
+
     Py_Finalize();
     return 0;
 }

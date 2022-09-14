@@ -46,6 +46,15 @@ astrid-dac:
 	echo "Building astrid dac...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/dac.c -o build/dac
 
+astrid-tools:
+	mkdir -p build renders
+
+	echo "Building astrid adc reader...";
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c tools/adcreader.c -o build/adcreader
+
+	echo "Building astrid minadc...";
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c tools/minadc.c -o build/minadc
+	
 astrid-adc:
 	mkdir -p build renders
 

@@ -53,11 +53,12 @@ cdef extern from "astrid.h":
         size_t frames
         int channels
 
-    lpadcbuf_t * lpadc_open_for_writing()
-    lpadcbuf_t * lpadc_open_for_reading()
-    lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, int channel)
+    lpadcbuf_t * lpadc_create()
+    lpadcbuf_t * lpadc_open()
+    lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel)
+    void lpadc_get_pos(lpadcbuf_t * adcbuf, size_t * pos)
     size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, int channel, ssize_t offset)
-    size_t lpadc_increment_pos(lpadcbuf_t * adcbuf)
+    void lpadc_increment_pos(lpadcbuf_t * adcbuf, int count)
     void lpadc_close(lpadcbuf_t * adcbuf)
     void lpadc_destroy(lpadcbuf_t * adcbuf)
 

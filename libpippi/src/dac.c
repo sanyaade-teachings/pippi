@@ -190,7 +190,7 @@ int main() {
     /* Setup shutdown handler for ctl-c */
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
-    sigemptyset(&shutdown_action.sa_flags);
+    shutdown_action.sa_flags = 0;
     sigaction(SIGINT, &shutdown_action, NULL);
 
     /* init scheduler and ctx */
@@ -246,6 +246,7 @@ int main() {
     while(astrid_is_running) {
         /* Twiddle thumbs */
         usleep((useconds_t)10000);
+        LPScheduler.empty(ctx->s);
     }
 
     return cleanup(&playback, ctx, buffer_feed_thread);

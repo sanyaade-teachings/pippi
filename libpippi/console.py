@@ -45,8 +45,8 @@ class AstridConsole(cmd.Cmd):
     instruments = {}
 
     def __init__(self, client=None):
-        self.dac = None
-        self.adc = None
+        self.dac = subprocess.Popen('./build/dac')
+        self.adc = subprocess.Popen('./build/adc')
         cmd.Cmd.__init__(self)
 
     def do_dac(self, cmd):

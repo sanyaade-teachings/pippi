@@ -67,22 +67,19 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
 
 cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
     cdef size_t i
+    cdef size_t pos = 0
     cdef int c
+    cdef lpadcbuf_t * adcbuf = lpadc_open()
 
-    cdef lpadcbuf_t * adcbuf = lpadc_open_for_reading()
     cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
     cdef size_t framelength = len(snd)
+    lpadc_get_pos(adcbuf, &pos)
 
     for i in range(framelength):
         for c in range(channels):
-            snd.frames[i,c] = lpadc_read_sample(adcbuf, c)
+            snd.frames[i,c] = lpadc_read_sample(adcbuf, pos-i, c)
 
-    #cdef array.array a
-    #cdef int o = <int>(offset * samplerate)
-    #bytelist = b''.join(list(reversed(_redis.lrange(ADC_NAME, o, o+framelength-1))))
-    #a = array.array('d', bytelist)
-    #print('len(a)', len(a), 'framelength', framelength, 'channels', channels)
-    #return SoundBuffer(np.ndarray(shape=(framelength, channels), buffer=a, dtype='d'), channels=channels, samplerate=samplerate)
+    lpadc_close(adcbuf)
 
     return snd
 
@@ -308,6 +305,8 @@ cdef int render_event(object instrument, object params, object buf_q):
     cdef bint loop
     cdef double overlap
     cdef EventContext ctx = instrument.create_ctx(instrument.params)
+
+    logger.info('rendering event %s' % str(instrument))
 
     players, loop, overlap = collect_players(instrument)
 

@@ -15,7 +15,6 @@
 #include "astrid.h"
 #include "adc.h"
 
-#define ADC_LENGTH 4800000
 
 static volatile int adc_is_running = 1;
 static volatile int adc_is_capturing = 1;
@@ -35,20 +34,22 @@ void miniaudio_callback(
     int c;
     lpadcbuf_t * adcbuf;
     lpfloat_t sample;
+    size_t frame = 0;
 
     adcbuf = (lpadcbuf_t *)device->pUserData;
     in = (float *)pIn;
 
     if(adc_is_capturing == 0) return;
 
+    lpadc_get_pos(adcbuf, &frame);
     for(i=0; i < count; i++) {
         for(c=0; c < ASTRID_CHANNELS; c++) {
             sample = (lpfloat_t)*in++;
-            lpadc_write_sample(adcbuf, sample, c, 0);
+            lpadc_write_sample(adcbuf, sample, frame, c, 0);
         }
 
-        lpadc_increment_pos(adcbuf);
     }
+    lpadc_increment_pos(adcbuf, count);
 }
 
 int main() {
@@ -61,7 +62,7 @@ int main() {
     struct sigaction action;
     action.sa_handler = handle_shutdown;
     sigemptyset(&action.sa_mask);
-    sigemptyset(&action.sa_flags);
+    action.sa_flags = 0;
     if(sigaction(SIGINT, &action, NULL) == -1) {
         fprintf(stderr, "Could not init signal handler.\n");
         goto exit_with_error;
@@ -81,8 +82,12 @@ int main() {
         goto exit_with_error;
     }
 
-    /* Open or create shared memory buffer */
-    adcbuf = lpadc_open_for_writing();
+    /* Create shared memory buffer */
+    adcbuf = lpadc_create();
+    if(adcbuf == NULL) {
+        fprintf(stderr, "Runtime Error while attempting to create shared memory buffer\n");
+        goto exit_with_error;
+    }
 
     /* Configure miniaudio for capture mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_capture);
@@ -107,12 +112,11 @@ int main() {
     ma_device_start(&mad);
 
     while(adc_is_running) {
-        usleep((useconds_t)10000);
+        usleep((useconds_t)1000000);
         status_reply = redisCommand(status_redis, "GET adc_is_capturing");
         adc_is_capturing = atoi(status_reply->str);
         if(adc_is_capturing == 0) printf("adc_is_capturing %s\n", status_reply->str);
         freeReplyObject(status_reply);
-        /*printf("adcbuf writepos %f\n", (float)lpadc_get_pos(adcbuf));*/
     }
 
     redisFree(status_redis);

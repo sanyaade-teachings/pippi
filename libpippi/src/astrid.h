@@ -22,18 +22,18 @@ typedef struct lpadcbuf_t {
     size_t headsize;
     size_t fullsize;
     size_t pos;
-    size_t frames;
+    size_t length;
     int channels;
 } lpadcbuf_t;
 
-lpadcbuf_t * lpadc_open_for_writing();
-lpadcbuf_t * lpadc_open_for_reading();
-lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, int channel);
-size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, int channel, ssize_t offset);
-size_t lpadc_increment_pos(lpadcbuf_t * adcbuf);
-size_t lpadc_get_pos(lpadcbuf_t * adcbuf);
-void lpadc_close(lpadcbuf_t * adcbuf);
-void lpadc_destroy(lpadcbuf_t * adcbuf);
+lpadcbuf_t * lpadc_create();
+lpadcbuf_t * lpadc_open();
+lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel);
+size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, size_t frame, int channel, ssize_t offset);
+int lpadc_increment_pos(lpadcbuf_t * adcbuf, int count);
+int lpadc_get_pos(lpadcbuf_t * adcbuf, size_t * pos);
+int lpadc_close(lpadcbuf_t * adcbuf);
+int lpadc_destroy(lpadcbuf_t * adcbuf);
 
 typedef struct lpastridctx_t {
     lpscheduler_t * s;
