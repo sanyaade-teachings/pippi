@@ -154,7 +154,7 @@ lpadcbuf_t * lpadc_open() {
     struct stat buffdstat;
 
     adcbuf = (lpadcbuf_t *)calloc(sizeof(lpadcbuf_t), 1);
-    adcbuf->fd = shm_open(LPADC_BUFNAME, O_RDWR, 0);
+    adcbuf->fd = shm_open(LPADC_BUFNAME, O_RDONLY, 0);
     if(adcbuf->fd == -1) {
         fprintf(stderr, "lpadc_open: Could not open a handle to adcbuf shared memory.\n");
         return NULL;
@@ -168,7 +168,7 @@ lpadcbuf_t * lpadc_open() {
 
     adcbuf->fullsize = buffdstat.st_size;
 
-    adcbuf->buf = mmap(NULL, adcbuf->fullsize, PROT_READ | PROT_WRITE, MAP_SHARED, adcbuf->fd, 0);
+    adcbuf->buf = mmap(NULL, adcbuf->fullsize, PROT_READ, MAP_SHARED, adcbuf->fd, 0);
     if(adcbuf->buf == MAP_FAILED) {
         fprintf(stderr, "lpadc_open: Could not mmap adcbuf.\n");
         return NULL;

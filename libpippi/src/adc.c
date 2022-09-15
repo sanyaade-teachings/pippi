@@ -45,7 +45,7 @@ void miniaudio_callback(
     for(i=0; i < count; i++) {
         for(c=0; c < ASTRID_CHANNELS; c++) {
             sample = (lpfloat_t)*in++;
-            lpadc_write_sample(adcbuf, sample, frame, c, 0);
+            lpadc_write_sample(adcbuf, sample, frame, c, i);
         }
 
     }
