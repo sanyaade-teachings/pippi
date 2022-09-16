@@ -15,7 +15,6 @@ int lpadc_get_pos(lpadcbuf_t * adcbuf, size_t * pos) {
     fl.l_start = 0;
     fl.l_len = sizeof(size_t);
 
-    /*printf("fd: %d\n", (int)adcbuf->fd);*/
     if(fcntl(adcbuf->fd, F_SETLK, &fl) == -1) {
         fprintf(stderr, "Could not aquire a lock on adcbuf pos lock.\n");
         return -1;
@@ -129,13 +128,13 @@ lpadcbuf_t * lpadc_create() {
 
     if(ftruncate(adcbuf->fd, adcbuf->fullsize) == -1) {
         fprintf(stderr, "Could not resize adcbuf.\n");
-        exit(1);
+        return NULL;
     }
 
     adcbuf->buf = mmap(NULL, adcbuf->fullsize, PROT_READ | PROT_WRITE, MAP_SHARED, adcbuf->fd, 0);
     if(adcbuf->buf == MAP_FAILED) {
         fprintf(stderr, "Could not mmap adcbuf.\n");
-        exit(1);
+        return NULL;
     }
 
     memcpy(adcbuf->buf, &adcbuf->pos, sizeof(size_t));
@@ -191,10 +190,6 @@ lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel) {
     // get buf channels
     lpadc_get_channels(adcbuf, &channels);
     lpadc_get_length(adcbuf, &length);
-    /*
-    printf("Reading from %d channels: channel %d\n", channels, channel);
-    printf("    Length %d\n", (int)length);
-    */
 
     frame = frame % length;
 
@@ -202,18 +197,9 @@ lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel) {
     offset = adcbuf->headsize;
     offset += ((frame * channels + channel) * sizeof(lpfloat_t));
 
-    /*
-    printf("    Reading at offset %d\n", (int)offset);
-    printf("               frame  %d\n", (int)frame);
-    */
-
     // memcpy at offset to lpfloat_t
     sample = 0;
     memcpy(&sample, adcbuf->buf+offset, sizeof(lpfloat_t));
-
-    /*
-    printf("    Sample %f\n\n", (float)sample);
-    */
 
     return sample;
 }
@@ -245,7 +231,6 @@ size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, size_t frame, i
     lpadc_get_channels(adcbuf, channels);
     writepos = adcbuf->headsize + (((frame * (*channels)) + channel) * sizeof(lpfloat_t));
     memcpy(adcbuf->buf + writepos, &sample, sizeof(lpfloat_t));
-    /*printf("writing sample: %f\n", sample);*/
 
     free(length);
     free(channels);

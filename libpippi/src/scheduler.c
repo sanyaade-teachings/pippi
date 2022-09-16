@@ -360,6 +360,7 @@ void scheduler_cleanup_nursery(lpscheduler_t * s) {
         current = s->nursery_head;
         while(current->next != NULL) {
             next = (lpevent_t *)current->next;
+            current->next = NULL;
             LPBuffer.destroy(current->buf);
             current = (lpevent_t *)next;        
         }

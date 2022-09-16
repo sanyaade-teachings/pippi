@@ -128,10 +128,6 @@ int main() {
     strcpy(instrument_fullpath, _instrument_fullpath);
     strcpy(instrument_basename, _instrument_basename);
 
-    /*printf("instrument_fullpath: %s\n", instrument_fullpath);
-    printf("instrument_basename: %s\n", instrument_basename);
-    */
-
     /* Start rendering! */
     while(astrid_is_running) {
         if(astrid_tick() < 0) {
@@ -143,7 +139,6 @@ int main() {
 
 lprender_cleanup:
     fprintf(stderr, "lprenderer cleanup\n");
-
     Py_Finalize();
     return 0;
 }
