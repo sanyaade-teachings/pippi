@@ -6,6 +6,9 @@
 #define ASTRID_SAMPLERATE 48000
 #define ASTRID_ADCSECONDS 30
 
+#define SAMPLER_NAME_SIZE 15
+#define SAMPLER_NAME_TEMPLATE "/lpsampler%04d"
+
 #define PLAY_MESSAGE "p"
 #define STOP_MESSAGE "s"
 #define SHUTDOWN_MESSAGE "k"
@@ -16,14 +19,42 @@ char * serialize_buffer(lpbuffer_t * buf, char * instrument_name);
 lpbuffer_t * deserialize_buffer(char * str, char ** name); 
 void send_play_message(char * instrument_name);
 
+typedef struct lpsampler_t {
+    int fd;
+    char * name;
+    char * buf;
+    size_t total_bytes;
+    size_t length;
+    int samplerate;
+    int channels;
+
+    size_t length_offset;
+    size_t samplerate_offset;
+    size_t channels_offset;
+    size_t buffer_offset;
+} lpsampler_t;
+
+lpsampler_t * lpsampler_create_from(int bankid, lpbuffer_t * buf);
+lpsampler_t * lpsampler_open(int bankid);
+lpsampler_t * lpsampler_dub(int bankid, lpbuffer_t * buf);
+int lpsampler_close(lpsampler_t *);
+int lpsampler_destroy(lpsampler_t *);
+int lpsampler_get_length(lpsampler_t * sampler, size_t * length);
+int lpsampler_get_samplerate(lpsampler_t * sampler, int * samplerate);
+int lpsampler_get_channels(lpsampler_t * sampler, int * channels);
+
 typedef struct lpadcbuf_t {
     int fd;
     char * buf;
-    size_t headsize;
-    size_t fullsize;
+    size_t total_bytes;
     size_t pos;
     size_t length;
     int channels;
+
+    size_t pos_offset;
+    size_t length_offset;
+    size_t channels_offset;
+    size_t buffer_offset;
 } lpadcbuf_t;
 
 lpadcbuf_t * lpadc_create();
