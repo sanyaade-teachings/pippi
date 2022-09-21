@@ -226,6 +226,29 @@ lpsampler_t * lpsampler_dub(int bankid, lpbuffer_t * buf) {
     return sampler;
 }
 
+lpfloat_t lpsampler_read_sample(lpsampler_t * sampler, size_t frame, int channel) {
+    lpfloat_t sample;
+    size_t offset;
+    size_t length = 0;
+    int channels = 0;
+
+    // get buf channels
+    lpsampler_get_channels(sampler, &channels);
+    lpsampler_get_length(sampler, &length);
+
+    frame = frame % length;
+
+    // get offset to buf
+    offset = sampler->buffer_offset;
+    offset += ((frame * channels + channel) * sizeof(lpfloat_t));
+
+    // memcpy at offset to lpfloat_t
+    sample = 0;
+    memcpy(&sample, sampler->buf+offset, sizeof(lpfloat_t));
+
+    return sample;
+}
+
 int lpsampler_close(lpsampler_t * sampler) {
     if(close(sampler->fd) == -1) {
         fprintf(stderr, "Could not close sampler fd.\n");

@@ -83,6 +83,31 @@ cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, i
 
     return snd
 
+cdef SoundBuffer read_from_sampler(int bankid):
+    cdef size_t i
+    cdef size_t pos = 0
+    cdef int c
+    cdef lpsampler_t * sampler = lpsampler_open(bankid)
+
+    cdef size_t framelength = 0
+    cdef int samplerate = 0
+    cdef int channels = 0
+
+    lpsampler_get_length(sampler, &framelength)
+    lpsampler_get_samplerate(sampler, &samplerate)
+    lpsampler_get_channels(sampler, &channels)
+
+    cdef SoundBuffer snd = SoundBuffer(length=framelength/<float>samplerate, channels=channels, samplerate=samplerate)
+
+    for i in range(framelength):
+        for c in range(channels):
+            snd.frames[i,c] = lpsampler_read_sample(sampler, i, c)
+
+    lpsampler_close(sampler)
+
+    return snd
+
+
 cdef class SessionParamBucket:
     """ params[key] to params.key
     """
@@ -149,6 +174,10 @@ cdef class EventContext:
 
     def adc(self, length=1, offset=0, channels=2):
         return read_from_adc(length, offset=offset, channels=channels)
+
+    def sampler(self, bankid=0):
+        bankid %= 10000
+        return read_from_sampler(bankid)
 
     def log(self, msg):
         logger.info(msg)

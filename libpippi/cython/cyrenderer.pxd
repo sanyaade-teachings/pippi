@@ -53,6 +53,30 @@ cdef extern from "astrid.h":
         size_t frames
         int channels
 
+    ctypedef struct lpsampler_t:
+        int fd
+        char * name
+        char * buf
+        size_t total_bytes
+        size_t length
+        int samplerate
+        int channels
+
+        size_t length_offset
+        size_t samplerate_offset
+        size_t channels_offset
+        size_t buffer_offset
+
+    lpsampler_t * lpsampler_create_from(int bankid, lpbuffer_t * buf)
+    lpsampler_t * lpsampler_open(int bankid)
+    lpsampler_t * lpsampler_dub(int bankid, lpbuffer_t * buf)
+    int lpsampler_close(lpsampler_t *)
+    int lpsampler_destroy(lpsampler_t *)
+    int lpsampler_get_length(lpsampler_t * sampler, size_t * length)
+    int lpsampler_get_samplerate(lpsampler_t * sampler, int * samplerate)
+    int lpsampler_get_channels(lpsampler_t * sampler, int * channels)
+    lpfloat_t lpsampler_read_sample(lpsampler_t * sampler, size_t frame, int channel)
+
     lpadcbuf_t * lpadc_create()
     lpadcbuf_t * lpadc_open()
     lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel)

@@ -42,6 +42,7 @@ int lpsampler_destroy(lpsampler_t *);
 int lpsampler_get_length(lpsampler_t * sampler, size_t * length);
 int lpsampler_get_samplerate(lpsampler_t * sampler, int * samplerate);
 int lpsampler_get_channels(lpsampler_t * sampler, int * channels);
+lpfloat_t lpsampler_read_sample(lpsampler_t * sampler, size_t frame, int channel);
 
 typedef struct lpadcbuf_t {
     int fd;
