@@ -191,7 +191,15 @@ int main() {
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
     shutdown_action.sa_flags = 0;
-    sigaction(SIGINT, &shutdown_action, NULL);
+    if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
+        fprintf(stderr, "Could not init SIGINT signal handler.\n");
+        exit(1);
+    }
+
+    if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
+        fprintf(stderr, "Could not init SIGTERM signal handler.\n");
+        exit(1);
+    }
 
     /* init scheduler and ctx */
     astrid_scheduler = LPScheduler.create(astrid_channels);

@@ -83,6 +83,12 @@ cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, i
 
     return snd
 
+cdef void create_from_sampler(SoundBuffer snd, int bankid):
+    pass
+
+cdef SoundBuffer dub_into_sampler(SoundBuffer snd, int bankid):
+    return snd
+
 cdef SoundBuffer read_from_sampler(int bankid):
     cdef size_t i
     cdef size_t pos = 0
@@ -178,6 +184,14 @@ cdef class EventContext:
     def sampler(self, bankid=0):
         bankid %= 10000
         return read_from_sampler(bankid)
+
+    def write_sampler(self, buf, bankid):
+        bankid %= 10000
+        create_from_sampler(buf, bankid)
+
+    def dub_sampler(self, buf, bankid):
+        bankid %= 10000
+        return dub_into_sampler(buf, bankid)
 
     def log(self, msg):
         logger.info(msg)

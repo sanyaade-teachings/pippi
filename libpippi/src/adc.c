@@ -64,9 +64,15 @@ int main() {
     sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
     if(sigaction(SIGINT, &action, NULL) == -1) {
-        fprintf(stderr, "Could not init signal handler.\n");
-        goto exit_with_error;
+        fprintf(stderr, "Could not init SIGINT signal handler.\n");
+        exit(1);
     }
+
+    if(sigaction(SIGTERM, &action, NULL) == -1) {
+        fprintf(stderr, "Could not init SIGTERM signal handler.\n");
+        exit(1);
+    }
+
 
     /* Connect to redis for status polling */
     struct timeval redis_timeout = {15, 0};

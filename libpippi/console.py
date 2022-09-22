@@ -106,10 +106,10 @@ class AstridConsole(cmd.Cmd):
             self.instruments[instrument].terminate()
 
         if self.dac is not None:
-            self.dac.kill()
+            self.dac.terminate()
 
         if self.adc is not None:
-            self.adc.kill()
+            self.adc.terminate()
 
         exit(0)
 
