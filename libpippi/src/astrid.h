@@ -15,9 +15,14 @@
 
 #define LPADC_BUFNAME "/lpadcbuf"
 
-char * serialize_buffer(lpbuffer_t * buf, char * instrument_name); 
-lpbuffer_t * deserialize_buffer(char * str, char ** name); 
-void send_play_message(char * instrument_name);
+typedef struct lpeventctx_t {
+    char * instrument_name;
+    char * play_params;
+} lpeventctx_t;
+
+char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_params); 
+lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t ** ctx); 
+void send_play_message(lpeventctx_t * ctx);
 
 typedef struct lpsampler_t {
     int fd;

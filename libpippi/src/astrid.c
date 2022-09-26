@@ -542,7 +542,6 @@ size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, size_t frame, i
     return frame;
 }
 
-
 int lpadc_close(lpadcbuf_t * adcbuf) {
     if(close(adcbuf->fd) == -1) {
         fprintf(stderr, "Could not close adcbuf fd.\n");
@@ -560,22 +559,25 @@ int lpadc_destroy(lpadcbuf_t * adcbuf) {
     return 0;
 }
 
-
-char * serialize_buffer(lpbuffer_t * buf, char * instrument_name) {
-    size_t strsize, audiosize, offset, namesize;
+char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_params) {
+    size_t strsize, audiosize, offset, namesize, paramsize;
     char * str;
 
     audiosize = buf->length * buf->channels * sizeof(lpfloat_t);
     namesize = strlen(instrument_name);
+    paramsize = strlen(play_params);
 
     strsize =  0;
     strsize += sizeof(size_t); /* length     */
     strsize += sizeof(size_t); /* namelen    */
+    strsize += sizeof(size_t); /* paramlen    */
     strsize += sizeof(int);    /* channels   */
     strsize += sizeof(int);    /* samplerate */
     strsize += sizeof(int);    /* is_looping */
     strsize += sizeof(size_t); /* onset      */
     strsize += audiosize;      /* audio data */
+    strsize += namesize;       /* instrument_name */
+    strsize += paramsize;      /* play_params */
 
     /* initialize string buffer */
     str = calloc(1, strsize);
@@ -586,6 +588,9 @@ char * serialize_buffer(lpbuffer_t * buf, char * instrument_name) {
     offset += sizeof(size_t);
 
     memcpy(str + offset, &namesize, sizeof(size_t));
+    offset += sizeof(size_t);
+
+    memcpy(str + offset, &paramsize, sizeof(size_t));
     offset += sizeof(size_t);
 
     memcpy(str + offset, &buf->length, sizeof(size_t));
@@ -607,16 +612,22 @@ char * serialize_buffer(lpbuffer_t * buf, char * instrument_name) {
     offset += audiosize;
 
     memcpy(str + offset, instrument_name, namesize);
+    offset += namesize;
+
+    memcpy(str + offset, play_params, paramsize);
+    offset += paramsize;
 
     return str;
 }
 
-lpbuffer_t * deserialize_buffer(char * str, char ** name) {
-    size_t audiosize, offset, length, onset, namesize;
+lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t ** ctx) {
+    size_t audiosize, offset, length, onset, namesize, paramsize;
     int channels, samplerate, is_looping;
-    char * _name;
     lpbuffer_t * buf;
+    lpeventctx_t * _ctx;
     lpfloat_t * audio;
+
+    _ctx = (lpeventctx_t *)calloc(sizeof(lpeventctx_t), 1);
 
     offset = 0;
 
@@ -624,6 +635,9 @@ lpbuffer_t * deserialize_buffer(char * str, char ** name) {
     offset += sizeof(size_t);
 
     memcpy(&namesize, str + offset, sizeof(size_t));
+    offset += sizeof(size_t);
+
+    memcpy(&paramsize, str + offset, sizeof(size_t));
     offset += sizeof(size_t);
 
     memcpy(&length, str + offset, sizeof(size_t));
@@ -645,9 +659,15 @@ lpbuffer_t * deserialize_buffer(char * str, char ** name) {
     memcpy(audio, str + offset, audiosize);
     offset += audiosize;
 
-    _name = calloc(namesize+1, sizeof(char));
-    memcpy(_name, str + offset, namesize+1);
-    *name = _name;
+    _ctx->instrument_name = calloc(namesize+1, sizeof(char));
+    memcpy(_ctx->instrument_name, str + offset, namesize+1);
+    offset += namesize+1;
+
+    _ctx->play_params = calloc(paramsize+1, sizeof(char));
+    memcpy(_ctx->play_params, str + offset, paramsize+1);
+    offset += paramsize+1;
+
+    *ctx = _ctx;
 
     buf = calloc(1, sizeof(lpbuffer_t));
 
@@ -666,7 +686,7 @@ lpbuffer_t * deserialize_buffer(char * str, char ** name) {
     return buf;
 }
 
-void send_play_message(char * instrument_name) {
+void send_play_message(lpeventctx_t * ctx) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     ssize_t cmd_size;
@@ -685,16 +705,15 @@ void send_play_message(char * instrument_name) {
         exit(1);
     }
 
-    cmd_size = snprintf(NULL, 0, "LPUSH astrid-play-%s p", instrument_name) + 1;
+    cmd_size = snprintf(NULL, 0, "LPUSH astrid-play-%s p %s", ctx->instrument_name, ctx->play_params) + 1;
     play_cmd = calloc(cmd_size, sizeof(char));
-    snprintf(play_cmd, cmd_size, "LPUSH astrid-play-%s p", instrument_name);
+    snprintf(play_cmd, cmd_size, "LPUSH astrid-play-%s p %s", ctx->instrument_name, ctx->play_params);
+
+    printf("PLAY: %s\n", play_cmd);
 
     redis_reply = redisCommand(redis_ctx, play_cmd);
     if(redis_reply->str != NULL) printf("play result: %s\n", redis_reply->str); 
     freeReplyObject(redis_reply);
-    free(instrument_name);
 
     if(redis_ctx != NULL) redisFree(redis_ctx); 
 }
-
-

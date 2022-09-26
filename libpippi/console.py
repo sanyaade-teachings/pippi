@@ -65,11 +65,19 @@ class AstridConsole(cmd.Cmd):
             print('Stopping adc...')
             self.adc.kill()
 
-    def do_p(self, instrument):
+    def do_p(self, cmd):
+        parts = cmd.split(' ')
+        instrument = parts[0]
+
+        params = ''
+        if len(parts) > 1:
+            params = ' ' + ' '.join(parts)
+
         if instrument not in self.instruments:
-            cmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
-            self.instruments[instrument] = subprocess.Popen(cmd, shell=True)
-        r.lpush('astrid-play-%s' % instrument, 'play')
+            rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
+            self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
+
+        r.lpush('astrid-play-%s' % instrument, 'p' + params)
 
     def do_v(self, cmd):
         k, v = tuple(cmd.split('='))

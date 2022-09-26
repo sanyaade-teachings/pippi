@@ -96,6 +96,8 @@ cdef class SessionParamBucket:
 
 cdef class ParamBucket:
     cdef object _params
+    cdef dict _instrument_params
+    cdef str _play_params
 
 cdef class EventContext:
     cdef public object before
@@ -110,6 +112,7 @@ cdef class EventContext:
     cdef public object sounds
     cdef public int count
     cdef public int tick
+    cdef public str play_params
     #cdef public object sampler
 
 cdef class Instrument:
@@ -123,5 +126,5 @@ cdef class Instrument:
     cdef public dict params 
 
 cdef tuple collect_players(object instrument)
-cdef int render_event(object instrument, object params, object buf_q)
+cdef int render_event(object instrument, str params)
 

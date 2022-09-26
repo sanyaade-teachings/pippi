@@ -30,9 +30,9 @@ void handle_shutdown(int) {
  * from an instrument with loop enabled.
  **/
 void retrigger_callback(void * arg) {
-    char * instrument_name;
-    instrument_name = (char *)arg;
-    send_play_message(instrument_name);
+    lpeventctx_t * ctx;
+    ctx = (lpeventctx_t *)arg;
+    send_play_message(ctx);
 }
 
 void noop_callback(__attribute__((unused)) void * arg) {}
@@ -47,8 +47,9 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     lpbuffer_t * buf;
-    char * buf_instrument_name;
+    lpeventctx_t * ctx;
     struct timeval redis_timeout = {15, 0};
+    size_t callback_delay = 0;
 
     printf("Buffer feed starting up...\n");
     redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
@@ -77,12 +78,12 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 printf("Buffer feed got shutdown message\n");
                 break;
             }
-            buf_instrument_name = NULL;
-            buf = deserialize_buffer(redis_reply->element[2]->str, &buf_instrument_name);
+            buf = deserialize_buffer(redis_reply->element[2]->str, &ctx);
             if(buf->is_looping == 1) {
-                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, buf_instrument_name);
+                callback_delay = (size_t)(buf->length / 2);
+                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, ctx, callback_delay);
             } else {
-                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL);
+                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL, callback_delay);
             }
         }
         freeReplyObject(redis_reply);

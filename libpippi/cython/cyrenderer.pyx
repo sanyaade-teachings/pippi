@@ -35,9 +35,9 @@ if not logger.handlers:
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
 
-cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str name):
+cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str name, str play_params):
     cdef bytearray strbuf
-    cdef size_t audiosize, length, namesize
+    cdef size_t audiosize, length, namesize, paramsize
     cdef int channels, samplerate
 
     strbuf = bytearray()
@@ -50,8 +50,13 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
     audiosize = length * channels * sizeof(lpfloat_t)
     namesize = <size_t>len(name)
 
+    paramsize = 0
+    if play_params is not None:
+        paramsize = <size_t>len(play_params)
+
     strbuf += struct.pack('N', audiosize)
     strbuf += struct.pack('N', namesize)
+    strbuf += struct.pack('N', paramsize)
     strbuf += struct.pack('N', length)
     strbuf += struct.pack('i', channels)
     strbuf += struct.pack('i', samplerate)
@@ -62,6 +67,9 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
         for c in range(channels):
             strbuf += struct.pack('d', buf.frames[i,c])
     strbuf += bytes(name, 'ascii')
+
+    if play_params is not None:
+        strbuf += bytes(play_params, 'ascii')
 
     return bytes(strbuf)
 
@@ -132,21 +140,38 @@ cdef class SessionParamBucket:
 cdef class ParamBucket:
     """ params[key] to params.key
     """
-    def __init__(self, params):
-        self._params = params
+    def __init__(self, dict instrument_params, str play_params=None):
+        self._instrument_params = instrument_params
+        self._play_params = play_params
 
     def __getattr__(self, key):
         return self.get(key)
 
     def get(self, key, default=None):
         if self._params is None:
-            return default
+            self._params = self._parse_play_params()
         return self._params.get(key, default)
+
+    def _parse_play_params(self):
+        cdef dict params = self._instrument_params or {}
+        cdef dict _params
+        cdef str t, k, v
+
+        if self._play_params is not None:
+            _params = {}
+            for t in self._play_params.split(' '):
+                if '=' in t:
+                    t = t.strip()
+                    k, v = tuple(t.split('='))
+                    _params[k] = v
+            params.update(_params)
+        return params
 
 cdef class EventContext:
     def __init__(self, 
-            params=None, 
+            instrument_params=None, 
             instrument_name=None, 
+            play_params=None,
             sounds=None,
             midi_devices=None, 
             midi_maps=None, 
@@ -154,7 +179,7 @@ cdef class EventContext:
         ):
 
         self.before = before
-        self.p = ParamBucket(params)
+        self.p = ParamBucket(instrument_params, play_params)
         self.s = SessionParamBucket() 
         self.client = None
         self.instrument_name = instrument_name
@@ -261,11 +286,12 @@ cdef class Instrument:
 
         return device_aliases, midi_maps
 
-    def create_ctx(self, params):
+    def create_ctx(self, dict instrument_params, str play_params):
         device_aliases, midi_maps = self.map_midi_devices()
         return EventContext(
-                    params=params, 
+                    instrument_params=instrument_params, 
                     instrument_name=self.name, 
+                    play_params=play_params,
                     sounds=self.sounds,
                     midi_devices=device_aliases, 
                     midi_maps=midi_maps, 
@@ -342,12 +368,12 @@ cdef tuple collect_players(object instrument):
     #logger.info('COLLECT_PLAYERS players: %s' % players)
     return players, loop, overlap
 
-cdef int render_event(object instrument, object params, object buf_q):
+cdef int render_event(object instrument, str params):
     cdef set players
     cdef object onset_generator
     cdef bint loop
     cdef double overlap
-    cdef EventContext ctx = instrument.create_ctx(instrument.params)
+    cdef EventContext ctx = instrument.create_ctx(instrument.params, params)
 
     logger.info('rendering event %s' % str(instrument))
 
@@ -368,7 +394,7 @@ cdef int render_event(object instrument, object params, object buf_q):
             generator = player(ctx)
             try:
                 for snd in generator:
-                    bufstr = serialize_buffer(snd, 0, loop, ctx.instrument_name)
+                    bufstr = serialize_buffer(snd, 0, loop, ctx.instrument_name, ctx.play_params)
                     _redis.publish('astridbuffers', bufstr)
             except Exception as e:
                 logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))
@@ -418,7 +444,7 @@ cdef public int astrid_tick() except -1:
     if msg[0] == 's' or msg[0] == 'k':
         return 0
 
-    return render_event(ASTRID_INSTRUMENT, None, None)
+    return render_event(ASTRID_INSTRUMENT, msg.decode('utf-8'))
 
 
 
