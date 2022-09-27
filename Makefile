@@ -104,7 +104,7 @@ cirrus-install:
 	DEBIAN_FRONTEND=noninteractive apt update && apt install libsndfile1-dev --yes
 	pip install -r requirements.txt
 	git submodule update --init
-	cd modules/Soundpipe && make && sudo make install
+	cd modules/Soundpipe && make && make install
 	python setup.py develop
 
 install:
