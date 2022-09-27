@@ -225,7 +225,7 @@ void scheduler_advance_buffers(lpscheduler_t * s) {
                 current->callback != NULL && 
                 s->now >= current->callback_onset
             ) {
-                printf("Firing callback...\n");
+                /*printf("Firing callback...\n");*/
                 current->callback(current->ctx);
                 current->callback_fired = 1;
             }
@@ -300,9 +300,9 @@ void scheduler_schedule_event(lpscheduler_t * s,
     e->callback_onset = s->now + callback_delay;
     e->callback_fired = 0;
 
-    printf("callback delay: %d\n", (int)callback_delay);
-    printf("callback onset: %d\n", (int)e->callback_onset);
-    printf("now: %d\n", (int)s->now);
+    /*printf("callback delay: %d\n", (int)callback_delay);*/
+    /*printf("callback onset: %d\n", (int)e->callback_onset);*/
+    /*printf("now: %d\n", (int)s->now);*/
 
     start_waiting(s, e);
 }

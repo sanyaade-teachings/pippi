@@ -241,7 +241,7 @@ cdef class Instrument:
             self.groups = []
 
     def reload(self):
-        logger.info('Reloading instrument %s from %s' % (self.name, self.path))
+        #logger.info('Reloading instrument %s from %s' % (self.name, self.path))
         spec = importlib.util.spec_from_file_location(self.name, self.path)
         if spec is not None:
             renderer = importlib.util.module_from_spec(spec)
@@ -441,10 +441,15 @@ cdef public int astrid_tick() except -1:
         logger.error('Could not read message from play queue: %s' % msg)
         return -1
 
-    if msg[0] == 's' or msg[0] == 'k':
+    if msg[0] != 'p':
         return 0
 
-    return render_event(ASTRID_INSTRUMENT, msg.decode('utf-8'))
+    try:
+        msg = msg.decode('utf-8')
+    except UnicodeDecodeError:
+        print('ERROR', type(msg), len(msg), msg)
+        return -1
+    return render_event(ASTRID_INSTRUMENT, msg)
 
 
 

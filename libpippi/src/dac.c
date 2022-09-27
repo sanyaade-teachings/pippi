@@ -255,7 +255,7 @@ int main() {
     while(astrid_is_running) {
         /* Twiddle thumbs */
         usleep((useconds_t)10000);
-        LPScheduler.empty(ctx->s);
+        /*LPScheduler.empty(ctx->s);*/
     }
 
     return cleanup(&playback, ctx, buffer_feed_thread);

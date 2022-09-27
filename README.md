@@ -12,6 +12,8 @@ Documentation: [https://pippi.world](https://pippi.world)
 
 Pippi is a library of computer music modules for python. 
 
+It's what I use to make my music, and I hope it'll be useful to others in some way, too. It's a work in progress.
+
 It includes a few handy data structures for music like
 `SoundBuffer` & `Wavetable`, which are operator-overloaded 
 to make working with sounds and control structures simpler.

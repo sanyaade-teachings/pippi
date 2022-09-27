@@ -709,7 +709,7 @@ void send_play_message(lpeventctx_t * ctx) {
     play_cmd = calloc(cmd_size, sizeof(char));
     snprintf(play_cmd, cmd_size, "LPUSH astrid-play-%s p %s", ctx->instrument_name, ctx->play_params);
 
-    printf("PLAY: %s\n", play_cmd);
+    /*printf("PLAY: %s\n", play_cmd);*/
 
     redis_reply = redisCommand(redis_ctx, play_cmd);
     if(redis_reply->str != NULL) printf("play result: %s\n", redis_reply->str); 
