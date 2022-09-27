@@ -5,5 +5,5 @@ build_package_pippi_task:
   pip_cache:
     folder: ~/.cache/pip
     fingerprint_script: echo $PYTHON_VERSION
-    populate_script: python3 -m pip install --upgrade setuptools wheel Cython==3.0.0a10 numpy
+    populate_script: python3 -m pip install --upgrade setuptools wheel Cython==3.0.0a10 numpy && make install
   build_package_pippi_script: python3 setup.py sdist bdist_wheel
