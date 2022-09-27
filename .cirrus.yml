@@ -1,5 +1,5 @@
 container:
-  image: python:slim
+  image: python:3
 
 build_package_pippi_task:
   pip_cache:
