@@ -101,7 +101,7 @@ rpi-install:
 	python setup.py develop
 
 cirrus-install:
-	apt install libsndfile
+	apt install libsndfile --yes
 	pip install -r requirements.txt
 	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install
