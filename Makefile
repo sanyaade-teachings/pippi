@@ -101,7 +101,7 @@ rpi-install:
 	python setup.py develop
 
 cirrus-install:
-	apt install libsndfile1-dev --yes
+	DEBIAN_FRONTEND=noninteractive apt update && apt install libsndfile1-dev --yes
 	pip install -r requirements.txt
 	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install
