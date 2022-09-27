@@ -264,6 +264,7 @@ setup(
     ext_modules=ext_modules, 
     install_requires=[
         'aubio', 
+        'Cython',
         'librosa',
         'numpy', 
         'Pillow', 
