@@ -59,10 +59,10 @@ int main() {
     LPBuffer.env(wavelet4, env);
 
     /* Schedule some events */
-    LPScheduler.schedule_event(s, wavelet1, 0, done_callback, done_ctx);
-    LPScheduler.schedule_event(s, wavelet2, 200, NULL, NULL);
-    LPScheduler.schedule_event(s, wavelet3, 500, NULL, NULL);
-    LPScheduler.schedule_event(s, wavelet4, 800, done_callback, done_ctx);
+    LPScheduler.schedule_event(s, wavelet1, 0, done_callback, done_ctx, 0);
+    LPScheduler.schedule_event(s, wavelet2, 200, NULL, NULL, 0);
+    LPScheduler.schedule_event(s, wavelet3, 500, NULL, NULL, 0);
+    LPScheduler.schedule_event(s, wavelet4, 800, done_callback, done_ctx, 0);
 
     /* Render the events to a buffer. */
     for(i=0; i < output_length; i++) {
