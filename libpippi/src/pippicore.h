@@ -171,6 +171,7 @@ typedef struct lpbuffer_factory_t {
     int (*buffers_are_equal)(lpbuffer_t *, lpbuffer_t *);
     int (*buffers_are_close)(lpbuffer_t *, lpbuffer_t *, int);
     void (*dub)(lpbuffer_t *, lpbuffer_t *, size_t);
+    void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t);
     void (*env)(lpbuffer_t *, lpbuffer_t *);
     lpbuffer_t * (*resize)(lpbuffer_t *, size_t);
     void (*destroy)(lpbuffer_t *);

@@ -1,5 +1,5 @@
 aubio==0.4.9
-Cython==3.0.0a10
+Cython==3.0.0a11
 importlib-resources==5.4.0
 librosa==0.8.1
 mido==1.2.10

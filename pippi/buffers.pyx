@@ -444,4 +444,34 @@ cdef class SoundBuffer:
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
 
+    def dub(self, sounds, double pos=0, size_t framepos=0):
+        """ Dub a sound or iterable of sounds into this soundbuffer
+            starting at the given position in fractional seconds.
 
+                >>> snd.dub(snd2, 3.2)
+
+            To dub starting at a specific frame position use:
+
+                >>> snd.dub(snd3, framepos=111)
+        """
+        cdef int numsounds, i
+
+        if pos > 0:
+            framepos = <size_t>(pos * self.samplerate)
+
+        if isinstance(sounds, SoundBuffer):
+            LPBuffer.dub(self.buffer, (<SoundBuffer>sounds).buffer, framepos)
+
+        elif isinstance(sounds, numbers.Real):
+            LPBuffer.dub_scalar(self.buffer, <lpfloat_t>sounds, framepos)
+
+        else:
+            numsounds = len(sounds)
+            try:
+                for i in range(numsounds):
+                    LPBuffer.dub(self.buffer, (<SoundBuffer>sounds[i]).buffer, framepos)
+
+            except TypeError as e:
+                raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
+
+        return self

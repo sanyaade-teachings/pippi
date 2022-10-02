@@ -229,6 +229,31 @@ class TestNewBuffer(TestCase):
         self.assertTrue(snd[100][0] != 0)
 
 
+    def test_dub_scalar_into_mono_buffer(self):
+        snd = SoundBuffer(length=1, samplerate=20, channels=1)
+        snd.dub(1, framepos=10)
+        self.assertTrue(snd[10] == (1.,))
+
+    def test_dub_scalar_into_stereo_buffer(self):
+        snd = SoundBuffer(length=1, samplerate=20, channels=2)
+        snd.dub(1, framepos=10)
+        self.assertTrue(snd[10] == (1.,1.))
+
+    def test_dub_scalar_into_quad_buffer(self):
+        snd = SoundBuffer(length=1, samplerate=20, channels=4)
+        snd.dub(1, framepos=10)
+        self.assertTrue(snd[10] == (1.,1.,1.,1.))
+
+    def test_dub_into_empty_buffer(self):
+        src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        snd = SoundBuffer(length=src.dur)
+        snd.dub(src, 0)
+
+    def test_dub_into_mono_buffer(self):
+        snd = SoundBuffer([0,0,0])
+        snd.dub(SoundBuffer([1,3,5]))
+        self.assertEqual(snd, SoundBuffer([1,3,5]))
+
 """
     def test_stack_soundbuffer(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')

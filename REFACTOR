@@ -27,7 +27,7 @@ Just some refactoring notes...
 
 - [x] in-place mix
 - [x] mix into copy
-- [ ] right-aligned / left-aligned mixes
+- [x] right-aligned / left-aligned mixes
 
 ## transformations
 
@@ -40,7 +40,7 @@ Just some refactoring notes...
 - [ ] cut
 - [ ] fcut -- frames
 - [ ] rcut
-- [ ] dub
+- [x] dub
 - [ ] env
 - [ ] fill -- truncate or loop to desired length
 - [ ] blocks -- iterate over buffer in blocksize blocks

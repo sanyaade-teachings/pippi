@@ -57,7 +57,8 @@ cdef extern from "pippicore.h":
         lpbuffer_t * (*concat)(lpbuffer_t *, lpbuffer_t *)
         int (*buffers_are_equal)(lpbuffer_t *, lpbuffer_t *)
         int (*buffers_are_close)(lpbuffer_t *, lpbuffer_t *, int)
-        void (*dub)(lpbuffer_t *, lpbuffer_t *)
+        void (*dub)(lpbuffer_t *, lpbuffer_t *, size_t)
+        void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t)
         void (*env)(lpbuffer_t *, lpbuffer_t *)
         void (*destroy)(lpbuffer_t *)
 
