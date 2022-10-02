@@ -9,7 +9,7 @@ cimport numpy as np
 import numpy as np
 from pysndfile import sndio
 
-from pippi import graph
+from pippi import graph, rand
 
 DEFAULT_CHANNELS = 2
 DEFAULT_SAMPLERATE = 44100
@@ -445,7 +445,7 @@ cdef class SoundBuffer:
         LPBuffer.copy(self.buffer, out)
         return SoundBuffer.fromlpbuffer(out)
 
-    def cut(self, double start=0, double length=1):
+    def cut(SoundBuffer self, double start=0, double length=1):
         """ Copy a portion of this soundbuffer, returning 
             a new soundbuffer with the selected slice.
            
@@ -461,6 +461,37 @@ cdef class SoundBuffer:
         cdef lpbuffer_t * out
         out = LPBuffer.cut(self.buffer, readstart, outlength)
         return SoundBuffer.fromlpbuffer(out)
+
+    def fcut(SoundBuffer self, size_t start=0, size_t length=1):
+        """ Copy a portion of this soundbuffer, returning 
+            a new soundbuffer with the selected slice.
+
+            Identical to `cut` except `start` and `length` 
+            should be given in frames instead of seconds.
+        """
+        cdef lpbuffer_t * out
+        out = LPBuffer.cut(self.buffer, start, length)
+        return SoundBuffer.fromlpbuffer(out)
+
+    def rcut(SoundBuffer self, double length=1):
+        """ Copy a portion of this SoundBuffer of the 
+            given length in seconds starting from a random 
+            position within it. 
+            
+            This will always return a complete SoundBuffer 
+            without overflows or added silence, and the entire 
+            sound will be returned without added silence if a length 
+            that exceeds the length of the source SoundBuffer is given -- 
+            unlike SoundBuffer.cut() which will pad results with silence 
+            to preserve the length param if an invalid or overflowing offset 
+            position is given.
+        """
+        cdef double maxlen = self.dur - length
+        if maxlen <= 0:
+            return self
+        cdef double start = rand.rand(0, maxlen)
+        return self.cut(start, length)
+
 
     def dub(SoundBuffer self, object sounds, double pos=0, size_t framepos=0):
         """ Dub a sound or iterable of sounds into this soundbuffer

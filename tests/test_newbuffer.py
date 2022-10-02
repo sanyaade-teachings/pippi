@@ -267,9 +267,19 @@ class TestNewBuffer(TestCase):
     def test_cut_buffer(self):
         snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         bit = snd.cut(0, 0.5)
-
         self.assertTrue(bit.dur == 0.5)
         self.assertTrue(snd[100][0] == bit[100][0])
+
+    def test_fcut_buffer(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        bit = snd.fcut(10, 500)
+        self.assertTrue(len(bit) == 500)
+        self.assertTrue(snd[100][0] == bit[90][0])
+
+    def test_rcut_buffer(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        bit = snd.rcut(0.1)
+        self.assertTrue(bit.dur == 0.1 or bit.dur == snd.dur)
 
 """
     def test_stack_soundbuffer(self):

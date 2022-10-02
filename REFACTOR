@@ -34,8 +34,8 @@ Just some refactoring notes...
 - [x] clear -- fill with zeros
 - [x] copy
 - [x] cut
-- [ ] fcut -- frames
-- [ ] rcut
+- [x] fcut -- frames
+- [x] rcut
 - [x] dub
 - [x] fdub -- frames
 - [x] graph -- plot the waveform
