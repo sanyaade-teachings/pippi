@@ -3,7 +3,6 @@ import random
 import shutil
 import tempfile
 from unittest import TestCase
-import warnings
 
 from pippi.buffers import SoundBuffer
 from pippi import dsp
