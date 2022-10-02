@@ -39,6 +39,7 @@ Just some refactoring notes...
 - [x] dub
 - [x] fdub -- frames
 - [x] graph -- plot the waveform
+- [x] write
 
 ## mixins
 
@@ -67,5 +68,4 @@ Just some refactoring notes...
 - [ ] trim
 - [ ] toenv
 - [ ] towavetable
-- [ ] write
 

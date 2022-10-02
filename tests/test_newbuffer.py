@@ -3,6 +3,7 @@ import random
 import shutil
 import tempfile
 from unittest import TestCase
+import warnings
 
 from pippi.buffers import SoundBuffer
 from pippi import dsp
@@ -248,6 +249,7 @@ class TestNewBuffer(TestCase):
         snd = SoundBuffer(filename='tests/sounds/guitar10s.wav')
         src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd.fdub(src, 1000)
+        snd.write('tests/renders/test_newbuffer_dub.wav')
 
     def test_dub_into_empty_buffer(self):
         src = SoundBuffer(filename='tests/sounds/guitar1s.wav')

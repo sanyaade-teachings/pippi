@@ -3,6 +3,7 @@
 from cpython cimport Py_buffer
 from libc.stdint cimport uintptr_t
 import numbers
+import warnings
 
 cimport cython
 cimport numpy as np
@@ -531,4 +532,11 @@ cdef class SoundBuffer:
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
 
+    def write(self, unicode filename=None):
+        """ Write the contents of this buffer to disk 
+            in the given audio file format. (WAV, AIFF, AU)
+        """
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            sndio.write(filename, np.asarray(self), self.samplerate)
 
