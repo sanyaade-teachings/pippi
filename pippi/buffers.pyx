@@ -460,6 +460,9 @@ cdef class SoundBuffer:
         if pos > 0:
             framepos = <size_t>(pos * self.samplerate)
 
+        return self.fdub(sounds, framepos)
+
+    cpdef SoundBuffer fdub(SoundBuffer self, object sounds, size_t framepos=0):
         if isinstance(sounds, SoundBuffer):
             LPBuffer.dub(self.buffer, (<SoundBuffer>sounds).buffer, framepos)
 

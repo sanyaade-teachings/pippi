@@ -33,7 +33,11 @@ Just some refactoring notes...
 
 - [x] clear -- fill with zeros
 - [x] copy
+- [ ] cut
+- [ ] fcut -- frames
+- [ ] rcut
 - [x] dub
+- [x] fdub -- frames
 - [x] graph -- plot the waveform
 
 ## mixins
@@ -42,9 +46,7 @@ Just some refactoring notes...
 - [ ] clip -- hard clip to minval/maxval
 - [ ] softclip -- fx.softclip
 - [ ] convolve -- fft.conv
-- [ ] cut
-- [ ] fcut -- frames
-- [ ] rcut
+
 - [ ] env
 - [ ] fill -- truncate or loop to desired length
 - [ ] blocks -- iterate over buffer in blocksize blocks

@@ -241,8 +241,13 @@ class TestNewBuffer(TestCase):
 
     def test_dub_scalar_into_quad_buffer(self):
         snd = SoundBuffer(length=1, samplerate=20, channels=4)
-        snd.dub(1, framepos=10)
+        snd.fdub(1, 10)
         self.assertTrue(snd[10] == (1.,1.,1.,1.))
+
+    def test_dub_into_buffer_at_framepos(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar10s.wav')
+        src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        snd.fdub(src, 1000)
 
     def test_dub_into_empty_buffer(self):
         src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
