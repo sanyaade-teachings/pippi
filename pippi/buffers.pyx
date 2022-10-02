@@ -445,6 +445,23 @@ cdef class SoundBuffer:
         LPBuffer.copy(self.buffer, out)
         return SoundBuffer.fromlpbuffer(out)
 
+    def cut(self, double start=0, double length=1):
+        """ Copy a portion of this soundbuffer, returning 
+            a new soundbuffer with the selected slice.
+           
+            The `start` param is a position in seconds to begin 
+            cutting, and the `length` param is the cut length in seconds.
+
+            Overflowing values that exceed the boundries of the source SoundBuffer 
+            will return a SoundBuffer padded with silence so that the `length` param 
+            is always respected.
+        """
+        cdef size_t readstart = <size_t>(start * self.samplerate)
+        cdef size_t outlength = <size_t>(length * self.samplerate)
+        cdef lpbuffer_t * out
+        out = LPBuffer.cut(self.buffer, readstart, outlength)
+        return SoundBuffer.fromlpbuffer(out)
+
     def dub(SoundBuffer self, object sounds, double pos=0, size_t framepos=0):
         """ Dub a sound or iterable of sounds into this soundbuffer
             starting at the given position in fractional seconds.

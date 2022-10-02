@@ -39,14 +39,20 @@ cdef extern from "pippicore.h":
 
     ctypedef struct lpbuffer_factory_t: 
         lpbuffer_t * (*create)(size_t, int, int)
+        #lpstack_t * (*create_stack)(int, size_t, int, int)
         void (*copy)(lpbuffer_t *, lpbuffer_t *)
         void (*clear)(lpbuffer_t *)
+        void (*split2)(lpbuffer_t *, lpbuffer_t *, lpbuffer_t *)
         void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t)
         lpfloat_t (*min)(lpbuffer_t * buf)
         lpfloat_t (*max)(lpbuffer_t * buf)
         lpfloat_t (*mag)(lpbuffer_t * buf)
         lpfloat_t (*play)(lpbuffer_t *, lpfloat_t)
+        void (*pan)(lpbuffer_t * buf, lpbuffer_t * pos)
         lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *)
+        lpbuffer_t * (*cut)(lpbuffer_t * buf, size_t start, size_t length)
+        void (*cut_into)(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length)
+        lpbuffer_t * (*resample)(lpbuffer_t *, size_t)
         void (*multiply)(lpbuffer_t *, lpbuffer_t *)
         void (*multiply_scalar)(lpbuffer_t *, lpfloat_t)
         void (*add)(lpbuffer_t *, lpbuffer_t *)
@@ -61,7 +67,9 @@ cdef extern from "pippicore.h":
         void (*dub)(lpbuffer_t *, lpbuffer_t *, size_t)
         void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t)
         void (*env)(lpbuffer_t *, lpbuffer_t *)
+        lpbuffer_t * (*resize)(lpbuffer_t *, size_t)
         void (*destroy)(lpbuffer_t *)
+        #void (*destroy_stack)(lpstack_t *)
 
     extern const lpbuffer_factory_t LPBuffer
     extern const lpwavetable_factory_t LPWavetable 

@@ -264,6 +264,13 @@ class TestNewBuffer(TestCase):
         snd.clear()
         self.assertTrue(snd[100][0] == 0)
 
+    def test_cut_buffer(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        bit = snd.cut(0, 0.5)
+
+        self.assertTrue(bit.dur == 0.5)
+        self.assertTrue(snd[100][0] == bit[100][0])
+
 """
     def test_stack_soundbuffer(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')

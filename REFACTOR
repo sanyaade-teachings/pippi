@@ -33,7 +33,7 @@ Just some refactoring notes...
 
 - [x] clear -- fill with zeros
 - [x] copy
-- [ ] cut
+- [x] cut
 - [ ] fcut -- frames
 - [ ] rcut
 - [x] dub

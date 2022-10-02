@@ -57,6 +57,7 @@ void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void split2_buffer(lpbuffer_t * src, lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length);
+void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length);
 lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length);
 void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos);
 lpbuffer_t * resize_buffer(lpbuffer_t *, size_t);
@@ -111,7 +112,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, resize_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, resize_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -351,7 +352,6 @@ void clear_buffer(lpbuffer_t * buf) {
         }
     }
 }
-
 
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max) {
     size_t i;
@@ -653,22 +653,33 @@ void dub_scalar(lpbuffer_t * a, lpfloat_t val, size_t start) {
     }
 }
 
-lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length) {
-    size_t i;
+void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length) {
+    size_t i, writelength;
     int c;
-    lpbuffer_t * out;
 
+    /* FIXME support zero-length buffers */
     assert(length > 0);
-    assert(start + length < buf->length);
 
-    out = LPBuffer.create(length, buf->channels, buf->samplerate);
-
-    for(i=0; i < length; i++) {
-        for(c=0; c < buf->channels; c++) {
-            out->data[i * buf->channels + c] = buf->data[(i+start) * buf->channels + c];
+    if(start < buf->length) {
+        writelength = buf->length - start;
+        writelength = (writelength > length) ? length : writelength;
+        for(i=0; i < writelength; i++) {
+            for(c=0; c < buf->channels; c++) {
+                out->data[i * buf->channels + c] = buf->data[(i+start) * buf->channels + c];
+            }
         }
     }
+}
 
+
+lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length) {
+    lpbuffer_t * out;
+
+    /* FIXME support zero-length buffers */
+    assert(length > 0);
+
+    out = LPBuffer.create(length, buf->channels, buf->samplerate);
+    cut_into_buffer(buf, out, start, length);
     return out;
 }
 

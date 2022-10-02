@@ -204,7 +204,7 @@ ext_modules = cythonize([
             ],
             include_dirs=INCLUDES, 
             define_macros=MACROS,
-            extra_compile_args=['-O0'],
+            extra_compile_args=['-O0', '-g3'],
         ),
         Extension('pippi.wavetables', [
                 'libpippi/src/pippicore.c',
