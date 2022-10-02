@@ -254,6 +254,11 @@ class TestNewBuffer(TestCase):
         snd.dub(SoundBuffer([1,3,5]))
         self.assertEqual(snd, SoundBuffer([1,3,5]))
 
+    def test_clear_buffer(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        snd.clear()
+        self.assertTrue(snd[100][0] == 0)
+
 """
     def test_stack_soundbuffer(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')

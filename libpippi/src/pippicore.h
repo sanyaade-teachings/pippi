@@ -149,6 +149,7 @@ typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
     lpstack_t * (*create_stack)(int, size_t, int, int);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
+    void (*clear)(lpbuffer_t *);
     void (*split2)(lpbuffer_t *, lpbuffer_t *, lpbuffer_t *);
     void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t);
     lpfloat_t (*min)(lpbuffer_t * buf);

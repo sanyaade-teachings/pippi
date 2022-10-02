@@ -435,16 +435,17 @@ cdef class SoundBuffer:
     def __rtruediv__(SoundBuffer self, object value):
         return self / value 
 
+    def clear(SoundBuffer self):
+        LPBuffer.clear(self.buffer)
+        return self
+
     def copy(SoundBuffer self):
         cdef lpbuffer_t * out
         out = LPBuffer.create(self.buffer.length, self.buffer.channels, self.buffer.samplerate)
         LPBuffer.copy(self.buffer, out)
         return SoundBuffer.fromlpbuffer(out)
 
-    def graph(SoundBuffer self, *args, **kwargs):
-        return graph.write(self, *args, **kwargs)
-
-    def dub(self, sounds, double pos=0, size_t framepos=0):
+    def dub(SoundBuffer self, object sounds, double pos=0, size_t framepos=0):
         """ Dub a sound or iterable of sounds into this soundbuffer
             starting at the given position in fractional seconds.
 
@@ -475,3 +476,8 @@ cdef class SoundBuffer:
                 raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
 
         return self
+
+    def graph(SoundBuffer self, *args, **kwargs):
+        return graph.write(self, *args, **kwargs)
+
+

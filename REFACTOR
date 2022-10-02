@@ -29,23 +29,26 @@ Just some refactoring notes...
 - [x] mix into copy
 - [x] right-aligned / left-aligned mixes
 
-## transformations
+## built-in methods
 
 - [ ] clear -- fill with zeros
-- [ ] cloud -- graincloud
 - [x] copy
+- [x] dub
+- [x] graph -- plot the waveform
+
+## mixins
+
+- [ ] cloud -- graincloud
 - [ ] clip -- hard clip to minval/maxval
 - [ ] softclip -- fx.softclip
 - [ ] convolve -- fft.conv
 - [ ] cut
 - [ ] fcut -- frames
 - [ ] rcut
-- [x] dub
 - [ ] env
 - [ ] fill -- truncate or loop to desired length
 - [ ] blocks -- iterate over buffer in blocksize blocks
 - [ ] grains -- iterate over buffer in variable-sized grains
-- [x] graph -- plot the waveform
 - [ ] max -- absolute value max
 - [ ] mix -- mix in place with sound or list of sounds
 - [ ] pad -- pad with silence at start or end

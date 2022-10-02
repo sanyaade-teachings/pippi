@@ -40,6 +40,7 @@ cdef extern from "pippicore.h":
     ctypedef struct lpbuffer_factory_t: 
         lpbuffer_t * (*create)(size_t, int, int)
         void (*copy)(lpbuffer_t *, lpbuffer_t *)
+        void (*clear)(lpbuffer_t *)
         void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t)
         lpfloat_t (*min)(lpbuffer_t * buf)
         lpfloat_t (*max)(lpbuffer_t * buf)
