@@ -31,7 +31,7 @@ Just some refactoring notes...
 
 ## built-in methods
 
-- [ ] clear -- fill with zeros
+- [x] clear -- fill with zeros
 - [x] copy
 - [x] dub
 - [x] graph -- plot the waveform
