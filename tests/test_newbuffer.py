@@ -282,6 +282,16 @@ class TestNewBuffer(TestCase):
         bit = snd.rcut(0.1)
         self.assertTrue(bit.dur == 0.1 or bit.dur == snd.dur)
 
+    def test_window(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound = sound.env('pluckout')
+        sound.write('tests/renders/newbuffer-env-pluckout.wav')
+
+    def test_remix_soundbuffer(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        self.assertEqual(snd.remix(1).channels, 1)
+        self.assertEqual(snd.remix(4).channels, 4)
+
 """
     def test_stack_soundbuffer(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -364,12 +374,6 @@ class TestNewBuffer(TestCase):
 
             # Check that all the grains add up
             self.assertEqual(total, len(sound))
-
-    def test_window(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        for window_type in ('sine', 'saw', 'tri', 'hamm', 'hann', 'bart', 'kaiser', 'black'):
-            sound = sound.env(window_type)
-            self.assertEqual(sound[0], (0,0))
 
     def test_speed(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')

@@ -6,17 +6,95 @@ import numbers
 import warnings
 
 cimport cython
+from cpython.array cimport array, clone
 cimport numpy as np
 import numpy as np
 from pysndfile import sndio
 
+from pippi.defaults cimport DEFAULT_WTSIZE, DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 from pippi import graph, rand
+from pippi.wavetables cimport _window, Wavetable
+from pippi cimport interpolation
 
-DEFAULT_CHANNELS = 2
-DEFAULT_SAMPLERATE = 44100
+cdef dict FLAGS = {
+    'sine': WIN_SINE,
+    'sineine': WIN_SINEIN,
+    'sineout': WIN_SINEOUT,
+    'cos': WIN_COS,
+    'tri': WIN_TRI, 
+    'phasor': WIN_PHASOR, 
+    'hann': WIN_HANN, 
+    'hannin': WIN_HANNIN, 
+    'hannout': WIN_HANNOUT, 
+    'rnd': WIN_RND,
+    'saw': WIN_SAW,
+    'rsaw': WIN_RSAW,
+}
+
+cdef int to_flag(str name):
+    try:
+        return FLAGS[name]
+    except KeyError:
+        return WIN_SINE
+
+cdef lpbuffer_t * to_window(object o, size_t length=0):
+    cdef lpbuffer_t * out
+    if length <= 0:
+        length = DEFAULT_WTSIZE
+
+    if isinstance(o, str):
+        out = LPWindow.create(to_flag(o), length)
+
+    elif not isinstance(o, SoundBuffer):
+        out = to_lpbuffer(o, length)
+
+    return out
+
+cdef lpbuffer_t * to_lpbuffer(object o, size_t length):
+    cdef lpbuffer_t * out
+    cdef size_t i
+    cdef int channels = DEFAULT_CHANNELS
+
+    assert(o is not None)
+
+    if isinstance(o, numbers.Real):
+        out = LPBuffer.create_from_float(<lpfloat_t>o, length, DEFAULT_CHANNELS, DEFAULT_SAMPLERATE)
+
+    elif isinstance(o, Wavetable):
+        out = LPBuffer.create(length, 1, DEFAULT_SAMPLERATE)
+        for i in range(length):
+            out.data[i] = o[i]
+
+    elif isinstance(o, SoundBuffer):
+        return (<SoundBuffer>o).buffer
+
+    elif isinstance(o, list):
+        out = LPBuffer.create(length, channels, DEFAULT_SAMPLERATE)
+        if isinstance(o[0], list):
+            channels = len(o[0])
+            for i in range(length):
+                for c in range(channels):
+                    out.data[i * channels + c] = o[i][c]
+        else:
+            for i in range(length):
+                out.data[i] = <lpfloat_t>o[i]
+
+    elif isinstance(o, np.ndarray):
+        channels = o.shape[1]
+        out = LPBuffer.create(length, channels, DEFAULT_SAMPLERATE)
+        for i in range(length):
+            for c in range(channels):
+                out.data[i * channels + c] = o[i * channels + c]
+
+    else:
+        raise NotImplemented
+
+    return out
+
 
 class SoundBufferError(Exception):
     pass
+
 
 @cython.final
 @cython.total_ordering
@@ -493,7 +571,6 @@ cdef class SoundBuffer:
         cdef double start = rand.rand(0, maxlen)
         return self.cut(start, length)
 
-
     def dub(SoundBuffer self, object sounds, double pos=0, size_t framepos=0):
         """ Dub a sound or iterable of sounds into this soundbuffer
             starting at the given position in fractional seconds.
@@ -528,6 +605,34 @@ cdef class SoundBuffer:
                 raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for dubbing') from e
 
         return self
+
+    def remix(self, int channels):
+        cdef lpbuffer_t * out
+        out = LPBuffer.remix(self.buffer, channels)
+        return SoundBuffer.fromlpbuffer(out)
+
+    def env(self, object window=None):
+        """ Apply an amplitude envelope 
+            to the sound of the given type.
+
+            To modulate a sound with an arbitrary 
+            iterable, simply do:
+
+                >>> snd * iterable
+
+            Where iterable is a list, array, or SoundBuffer with 
+            the same # of channels and of any length
+        """
+        cdef lpbuffer_t * w
+        cdef lpbuffer_t * out
+        if window is None:
+            window = 'sine'
+        cdef int length = len(self)
+        out = LPBuffer.create(length, self.channels, self.samplerate)
+        LPBuffer.copy(out, self.buffer)
+        w = to_window(window, length)
+        LPBuffer.multiply(out, w)
+        return SoundBuffer.fromlpbuffer(out)
 
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)

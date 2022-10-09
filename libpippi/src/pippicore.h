@@ -147,6 +147,7 @@ typedef struct lparray_factory_t {
 
 typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
+    lpbuffer_t * (*create_from_float)(lpfloat_t value, size_t length, int channel, int samplerate);
     lpstack_t * (*create_stack)(int, size_t, int, int);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
     void (*clear)(lpbuffer_t *);
@@ -158,6 +159,7 @@ typedef struct lpbuffer_factory_t {
     lpfloat_t (*play)(lpbuffer_t *, lpfloat_t);
     void (*pan)(lpbuffer_t * buf, lpbuffer_t * pos);
     lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *);
+    lpbuffer_t * (*remix)(lpbuffer_t *, int);
     lpbuffer_t * (*cut)(lpbuffer_t * buf, size_t start, size_t length);
     void (*cut_into)(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length);
     lpbuffer_t * (*resample)(lpbuffer_t *, size_t);

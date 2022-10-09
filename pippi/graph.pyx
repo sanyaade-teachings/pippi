@@ -57,10 +57,6 @@ def write(object data,
         channels = data.channels
         _data = data.frames
 
-    elif isinstance(data, pippi.buffers.SoundBuffer):
-        channels = data.channels
-        _data = data
-
     elif isinstance(data, Wavetable):
         channels = 1
         _data = np.transpose(np.array(data.data, dtype='d', ndmin=2))
@@ -68,6 +64,10 @@ def write(object data,
     elif isinstance(data, list):
         channels = 1
         _data = np.transpose(np.array(data, dtype='d', ndmin=2))
+
+    elif isinstance(data, pippi.buffers.SoundBuffer):
+        channels = data.channels
+        _data = data
 
     else:
         channels = data.shape[1]

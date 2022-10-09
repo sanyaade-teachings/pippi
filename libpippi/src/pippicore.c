@@ -31,6 +31,7 @@ lparray_t * create_array(size_t length);
 void destroy_array(lparray_t * array);
 
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
+lpbuffer_t * create_buffer_from_float(lpfloat_t value, size_t length, int channels, int samplerate);
 lpstack_t * create_uniform_stack(int numbuffers, size_t buffer_length, int channels, int samplerate);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void clear_buffer(lpbuffer_t * buf);
@@ -56,6 +57,7 @@ lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void split2_buffer(lpbuffer_t * src, lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
+lpbuffer_t * remix_buffer(lpbuffer_t * buf, int channels);
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length);
 void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length);
 lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length);
@@ -112,7 +114,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, resize_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, resize_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -293,6 +295,19 @@ lpbuffer_t * create_buffer(size_t length, int channels, int samplerate) {
     buf->range = length;
     buf->onset = 0;
     buf->is_looping = 0;
+    return buf;
+}
+
+lpbuffer_t * create_buffer_from_float(lpfloat_t value, size_t length, int channels, int samplerate) {
+    size_t i;
+    int c;
+    lpbuffer_t * buf;
+    buf = create_buffer(length, channels, samplerate);
+    for(i=0; i < length; i++) {
+        for(c=0; c < channels; c++) {
+            buf->data[i * channels + c] = value;
+        }
+    }
     return buf;
 }
 
@@ -713,6 +728,37 @@ lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b) {
     }
 
     return out;
+}
+
+lpbuffer_t * remix_buffer(lpbuffer_t * buf, int channels) {
+    size_t i;
+    int c, ci;
+    lpbuffer_t * newbuf;
+    lpfloat_t sample, phase, frac, a, b;
+
+    newbuf = create_buffer(buf->length, channels, buf->samplerate);
+
+    if(channels <= 1) {
+        for(i=0; i < buf->length; i++) {
+            for(c=0; c < buf->channels; c++) {
+                newbuf->data[i] += buf->data[i * buf->channels + c];
+            }
+        }
+    } else {
+        for(i=0; i < buf->length; i++) {
+            for(c=0; c < channels; c++) {
+                phase = (c / (lpfloat_t)(channels-1)) * buf->channels;
+                ci = (int)phase;
+                frac = phase - ci;
+                a = buf->data[i * buf->channels + ci];
+                b = buf->data[i * buf->channels + ci+1];
+                sample = (1.0f - frac) * a + (frac * b);
+                newbuf->data[i * channels + c] = sample;
+            }
+        }
+    }
+
+    return newbuf;
 }
 
 lpbuffer_t * resize_buffer(lpbuffer_t * buf, size_t length) {

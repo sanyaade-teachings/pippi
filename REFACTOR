@@ -40,6 +40,14 @@ Just some refactoring notes...
 - [x] fdub -- frames
 - [x] graph -- plot the waveform
 - [x] write
+- [ ] env
+
+## computed properties
+
+- [x] max 
+- [x] mag -- absolute value max
+- [x] min
+- [x] dur -- framelength / samplerate
 
 ## mixins
 
@@ -47,12 +55,9 @@ Just some refactoring notes...
 - [ ] clip -- hard clip to minval/maxval
 - [ ] softclip -- fx.softclip
 - [ ] convolve -- fft.conv
-
-- [ ] env
 - [ ] fill -- truncate or loop to desired length
 - [ ] blocks -- iterate over buffer in blocksize blocks
 - [ ] grains -- iterate over buffer in variable-sized grains
-- [ ] max -- absolute value max
 - [ ] mix -- mix in place with sound or list of sounds
 - [ ] pad -- pad with silence at start or end
 - [ ] pan
