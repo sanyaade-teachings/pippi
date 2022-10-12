@@ -28,6 +28,7 @@ venv
 .cache
 
 libpippi/renders/*.wav
+libpippi/renders/*.mp3
 libpippi/build
 libpippi/cython/cyrenderer.c
 libpippi/cython/cyrenderer.h
