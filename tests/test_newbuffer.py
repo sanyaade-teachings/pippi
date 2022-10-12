@@ -284,13 +284,16 @@ class TestNewBuffer(TestCase):
 
     def test_window(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        sound = sound.env('pluckout')
-        sound.write('tests/renders/newbuffer-env-pluckout.wav')
+        sound.env('pluckout').write('tests/renders/newbuffer-env-pluckout.wav')
 
     def test_remix_soundbuffer(self):
         snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         self.assertEqual(snd.remix(1).channels, 1)
         self.assertEqual(snd.remix(4).channels, 4)
+
+    def test_plot_soundbuffer(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        snd.plot()
 
 """
     def test_stack_soundbuffer(self):

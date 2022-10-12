@@ -637,6 +637,9 @@ cdef class SoundBuffer:
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
 
+    def plot(SoundBuffer self):
+        LPBuffer.plot(self.buffer)
+
     def write(self, unicode filename=None):
         """ Write the contents of this buffer to disk 
             in the given audio file format. (WAV, AIFF, AU)

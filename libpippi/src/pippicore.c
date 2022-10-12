@@ -53,6 +53,7 @@ int buffers_are_close(lpbuffer_t * a, lpbuffer_t * b, int d);
 void dub_buffer(lpbuffer_t * a, lpbuffer_t * b, size_t start);
 void dub_scalar(lpbuffer_t * a, lpfloat_t, size_t start);
 void env_buffer(lpbuffer_t * buf, lpbuffer_t * env);
+void plot_buffer(lpbuffer_t * buf);
 lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void split2_buffer(lpbuffer_t * src, lpbuffer_t * a, lpbuffer_t * b);
@@ -114,7 +115,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, resize_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -638,6 +639,67 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
         for(c=0; c < buf->channels; c++) {
             buf->data[i * buf->channels + c] *= value;
         }
+    }
+}
+
+void plot_buffer(lpbuffer_t * buf) {
+    int c, height, width, acount, bcount, ccount, x;
+    size_t i, pos, blocksize, halfblock;
+    int numchars = 256;
+    wchar_t start = 0x2800;
+    float sample, aavg, bavg, cavg, y;
+
+    height = 80;
+    width  = 80;
+
+    blocksize = (size_t)(buf->length / (float)width);
+    halfblock = blocksize / 2;
+
+    printf("buflen: %d\n", (int)buf->length);
+    for(c=0; c < numchars; c++) {
+        printf("%#04x: %lc   ", (int)(start + c), (wchar_t)(start + c));
+        if(c % 5 == 0) printf("\n");
+        if(c % 50 == 0) printf("\n");
+    }
+
+    pos = 0;
+    x = 0;
+    while(pos <= buf->length-blocksize) {
+        aavg = 0;
+        bavg = 0;
+        cavg = 0;
+
+        acount = 0;
+        bcount = 0;
+        ccount = 0;
+
+        for(i=0; i < blocksize; i++) {
+            sample = 0.f;
+            for(c=0; c < buf->channels; c++) {
+                sample += (float)buf->data[(i+pos) * buf->channels + c];
+            }
+            aavg += sample;
+            acount += 1;
+            if(i > halfblock) {
+                cavg += sample;
+                ccount += 1;
+            } else {
+                bavg += sample;
+                bcount += 1;
+            }
+        }
+        printf("pos: %d blocksize: %d\n", (int)pos, (int)blocksize);
+        printf("aavg: %f\n", aavg);
+        printf("aavg / acount: %f\n", aavg/acount);
+        printf("height: %d bavg: %f cavg: %f\n", height, bavg, cavg);
+        printf("acount: %d bcount: %d ccount: %d\n", acount, bcount, ccount);
+
+        y = ((aavg/acount) * 0.5f + 0.5f);
+        printf("x: %d\n", x);
+        printf("y: %f\n", y);
+
+        pos += blocksize;
+        x += 1;
     }
 }
 

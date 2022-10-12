@@ -122,6 +122,9 @@ buffer-examples:
 	echo "Building resample_buffer.c example...";
 	gcc $(FLAGS) examples/resample_buffer.c $(ALLSOURCES) -o build/resample_buffer
 
+	echo "Building plotbuffer.c example...";
+	gcc $(FLAGS) examples/plotbuffer.c $(ALLSOURCES) -o build/plotbuffer
+
 
 mir-examples:
 	mkdir -p build renders
