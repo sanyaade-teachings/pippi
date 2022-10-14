@@ -643,17 +643,21 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
 }
 
 void plot_buffer(lpbuffer_t * buf) {
-    int c, height, width, acount, bcount, ccount, x;
-    size_t i, pos, blocksize, halfblock;
+    int c, height, width, x, y;
+    size_t i, pos, blocksize;
     int numchars = 256;
     wchar_t start = 0x2800;
-    float sample, aavg, bavg, cavg, y;
+    float sample, peak, low;
+    int grid[80];
+    int peaks[80];
+    int lows[80];
+    int current, lastsign;
+    size_t crossing_count;
 
-    height = 80;
+    height = 10;
     width  = 80;
 
     blocksize = (size_t)(buf->length / (float)width);
-    halfblock = blocksize / 2;
 
     printf("buflen: %d\n", (int)buf->length);
     for(c=0; c < numchars; c++) {
@@ -665,41 +669,57 @@ void plot_buffer(lpbuffer_t * buf) {
     pos = 0;
     x = 0;
     while(pos <= buf->length-blocksize) {
-        aavg = 0;
-        bavg = 0;
-        cavg = 0;
+        peak = 0;
+        low = 0;
 
-        acount = 0;
-        bcount = 0;
-        ccount = 0;
-
+        crossing_count = 0;
+        lastsign = 0;
         for(i=0; i < blocksize; i++) {
             sample = 0.f;
             for(c=0; c < buf->channels; c++) {
                 sample += (float)buf->data[(i+pos) * buf->channels + c];
             }
-            aavg += sample;
-            acount += 1;
-            if(i > halfblock) {
-                cavg += sample;
-                ccount += 1;
-            } else {
-                bavg += sample;
-                bcount += 1;
-            }
-        }
-        printf("pos: %d blocksize: %d\n", (int)pos, (int)blocksize);
-        printf("aavg: %f\n", aavg);
-        printf("aavg / acount: %f\n", aavg/acount);
-        printf("height: %d bavg: %f cavg: %f\n", height, bavg, cavg);
-        printf("acount: %d bcount: %d ccount: %d\n", acount, bcount, ccount);
 
-        y = ((aavg/acount) * 0.5f + 0.5f);
-        printf("x: %d\n", x);
-        printf("y: %f\n", y);
+            peak = fmax(peak, sample);
+            low = fmin(low, sample);
+
+            current = signbit(sample); 
+            if((lastsign && !current) || (!lastsign && current)) {
+                crossing_count += 1;
+            }
+            lastsign = current;
+        }
+
+        grid[x] = crossing_count;
+        peaks[x] = (int)(((peak+1.f)/2.f) * height);
+        lows[x] = (int)(((low+1.f)/2.f) * height);
 
         pos += blocksize;
         x += 1;
+    }
+
+    for(y=0; y < height; y++) {
+        for(x=0; x < width; x++) {
+            if(y > peaks[x] || y < lows[x]) {
+                printf(" ");
+                continue;
+            }
+
+            crossing_count = grid[x];
+            if(crossing_count < 5) {
+                printf("-");
+            } else if (crossing_count >= 5 && crossing_count < 10) {
+                printf("+");
+            } else if (crossing_count >= 10 && crossing_count < 15) {
+                printf("%%");
+            } else if (crossing_count >= 15 && crossing_count < 20) {
+                printf("#");
+            } else if (crossing_count >= 20) {
+                printf("@");
+            }
+            /*printf("%lc", (wchar_t)(start + grid[x][y]));*/
+        } 
+        printf("\n");
     }
 }
 
