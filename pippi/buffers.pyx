@@ -629,7 +629,7 @@ cdef class SoundBuffer:
             window = 'sine'
         cdef int length = len(self)
         out = LPBuffer.create(length, self.channels, self.samplerate)
-        LPBuffer.copy(out, self.buffer)
+        LPBuffer.copy(self.buffer, out)
         w = to_window(window, length)
         LPBuffer.multiply(out, w)
         return SoundBuffer.fromlpbuffer(out)

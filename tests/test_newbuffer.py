@@ -191,7 +191,7 @@ class TestNewBuffer(TestCase):
 
     def test_graph_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        sound.graph('tests/renders/graph_newsoundbuffer.png', width=1280, height=800)
+        sound.graph('tests/renders/newsoundbuffer_graph.png', width=1280, height=800)
 
     def test_max_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -249,11 +249,14 @@ class TestNewBuffer(TestCase):
         src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd.fdub(src, 1000)
         snd.write('tests/renders/test_newbuffer_dub.wav')
+        snd.plot()
+        snd.graph('tests/renders/newbuffer-dub-at-offset.png')
 
     def test_dub_into_empty_buffer(self):
         src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd = SoundBuffer(length=src.dur)
         snd.dub(src, 0)
+        snd.plot()
 
     def test_dub_into_mono_buffer(self):
         snd = SoundBuffer([0,0,0])
@@ -283,8 +286,11 @@ class TestNewBuffer(TestCase):
         self.assertTrue(bit.dur == 0.1 or bit.dur == snd.dur)
 
     def test_window(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        sound.env('pluckout').write('tests/renders/newbuffer-env-pluckout.wav')
+        snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        print('tri window')
+        snd.env('tri').write('tests/renders/newbuffer-env-pluckout.wav')
+        snd.plot()
+        snd.graph('tests/renders/newbuffer-env.png')
 
     def test_remix_soundbuffer(self):
         snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')

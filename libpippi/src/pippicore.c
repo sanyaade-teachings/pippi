@@ -11,6 +11,8 @@
 #define LORENZ_Y_DEFAULT 0.0
 #define LORENZ_Z_DEFAULT 0.0
 
+#define PLOT_WIDTH 80
+
 
 /* Forward declarations */
 void rand_preseed(void);
@@ -645,29 +647,35 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
 void plot_buffer(lpbuffer_t * buf) {
     int c, height, width, x, y;
     size_t i, pos, blocksize;
-    int numchars = 256;
-    wchar_t start = 0x2800;
-    float sample, peak, low;
-    int grid[80];
-    int peaks[80];
-    int lows[80];
+    //int numchars = 256;
+    //wchar_t start = 0x2800;
+    float sample, value, peak, low, tpeak, tlow;
+    int grid[PLOT_WIDTH];
+    int peaks[PLOT_WIDTH];
+    int lows[PLOT_WIDTH];
+    float avgs[PLOT_WIDTH] = {0};
     int current, lastsign;
+    int color;
     size_t crossing_count;
 
     height = 10;
-    width  = 80;
+    width  = PLOT_WIDTH;
 
     blocksize = (size_t)(buf->length / (float)width);
 
+    /*
     printf("buflen: %d\n", (int)buf->length);
     for(c=0; c < numchars; c++) {
         printf("%#04x: %lc   ", (int)(start + c), (wchar_t)(start + c));
         if(c % 5 == 0) printf("\n");
         if(c % 50 == 0) printf("\n");
     }
+    */
 
     pos = 0;
     x = 0;
+    tpeak = 0;
+    tlow = 0;
     while(pos <= buf->length-blocksize) {
         peak = 0;
         low = 0;
@@ -678,7 +686,12 @@ void plot_buffer(lpbuffer_t * buf) {
             sample = 0.f;
             for(c=0; c < buf->channels; c++) {
                 sample += (float)buf->data[(i+pos) * buf->channels + c];
+                tpeak = fmax(tpeak, (float)buf->data[(i+pos) * buf->channels + c]);
+                tlow = fmin(tlow, (float)buf->data[(i+pos) * buf->channels + c]);
             }
+            value = (sample + 1) / 2.f;
+            //printf("x: %d value: %f\n", x, sample);
+            if(i < 25) avgs[x] += value;
 
             peak = fmax(peak, sample);
             low = fmin(low, sample);
@@ -691,12 +704,17 @@ void plot_buffer(lpbuffer_t * buf) {
         }
 
         grid[x] = crossing_count;
-        peaks[x] = (int)(((peak+1.f)/2.f) * height);
-        lows[x] = (int)(((low+1.f)/2.f) * height);
+        peaks[x] = (int)(((peak+1)/2.f) * height);
+        lows[x] = (int)(((low+1)/2.f) * height);
+        avgs[x] = avgs[x] / 25;
+        //printf("x: %d avg: %f\n", x, avgs[x]);
 
         pos += blocksize;
         x += 1;
     }
+
+    //printf("tpeak: %f\n", tpeak);
+    //printf("tlow: %f\n", tlow);
 
     for(y=0; y < height; y++) {
         for(x=0; x < width; x++) {
@@ -706,21 +724,25 @@ void plot_buffer(lpbuffer_t * buf) {
             }
 
             crossing_count = grid[x];
+            //color = (int)((crossing_count / 25.f) * 23) + 232;
+            color = (int)(avgs[x] * 23) + 232;
+            printf("\033[38;5;%dm", color);
             if(crossing_count < 5) {
                 printf("-");
             } else if (crossing_count >= 5 && crossing_count < 10) {
                 printf("+");
             } else if (crossing_count >= 10 && crossing_count < 15) {
-                printf("%%");
+                printf("+");
             } else if (crossing_count >= 15 && crossing_count < 20) {
                 printf("#");
             } else if (crossing_count >= 20) {
-                printf("@");
+                printf("#");
             }
             /*printf("%lc", (wchar_t)(start + grid[x][y]));*/
         } 
         printf("\n");
     }
+    printf("\033[0m");
 }
 
 void dub_buffer(lpbuffer_t * a, lpbuffer_t * b, size_t start) {
