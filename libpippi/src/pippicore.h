@@ -36,6 +36,9 @@ typedef double lpfloat_t;
 #define EULER 2.718281828459045235360287471352662497757247093
 #endif
 
+#define GRID_EMPTY 0x2800
+#define GRID_FULL  0x28ff
+
 enum Wavetables {
     WT_SINE,
     WT_COS,

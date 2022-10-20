@@ -644,11 +644,36 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
     }
 }
 
+wchar_t get_grid_char(int pixels[8]) {
+    int i, r;
+    int map[8] = {0,2,4,1,3,5,6,7};
+
+    /* Braille dots are indexed like this:
+     *   1 4
+     *   2 5
+     *   3 6 
+     *   7 8
+     *
+     * Mapped to pixel inputs:
+     *
+     *   pixels:   0  1  2  3  4  5  6  7
+     *   braille:  0  2  4  1  3  5  6  7
+     *   byte idx: 1  2  4  8  16 32 64 128
+     */
+
+    r = 0;
+    for(i=0; i < 8; i++) {
+        if(pixels[map[i]] == 1) {
+            r += (int)exp2(i);
+        }
+    }
+
+    return (wchar_t)(GRID_EMPTY + r);
+}
+
 void plot_buffer(lpbuffer_t * buf) {
     int c, height, width, x, y;
     size_t i, pos, blocksize;
-    //int numchars = 256;
-    //wchar_t start = 0x2800;
     float sample, value, peak, low, tpeak, tlow;
     int grid[PLOT_WIDTH];
     int peaks[PLOT_WIDTH];
@@ -657,20 +682,15 @@ void plot_buffer(lpbuffer_t * buf) {
     int current, lastsign;
     int color;
     size_t crossing_count;
+    int pixels[8] = {0,1,1,1,0,0,0,0};
 
     height = 10;
     width  = PLOT_WIDTH;
 
     blocksize = (size_t)(buf->length / (float)width);
 
-    /*
-    printf("buflen: %d\n", (int)buf->length);
-    for(c=0; c < numchars; c++) {
-        printf("%#04x: %lc   ", (int)(start + c), (wchar_t)(start + c));
-        if(c % 5 == 0) printf("\n");
-        if(c % 50 == 0) printf("\n");
-    }
-    */
+    printf("block: %lc \n\n", get_grid_char(pixels));
+    printf("\n\n");
 
     pos = 0;
     x = 0;
@@ -690,7 +710,6 @@ void plot_buffer(lpbuffer_t * buf) {
                 tlow = fmin(tlow, (float)buf->data[(i+pos) * buf->channels + c]);
             }
             value = (sample + 1) / 2.f;
-            //printf("x: %d value: %f\n", x, sample);
             if(i < 25) avgs[x] += value;
 
             peak = fmax(peak, sample);
@@ -707,14 +726,10 @@ void plot_buffer(lpbuffer_t * buf) {
         peaks[x] = (int)(((peak+1)/2.f) * height);
         lows[x] = (int)(((low+1)/2.f) * height);
         avgs[x] = avgs[x] / 25;
-        //printf("x: %d avg: %f\n", x, avgs[x]);
 
         pos += blocksize;
         x += 1;
     }
-
-    //printf("tpeak: %f\n", tpeak);
-    //printf("tlow: %f\n", tlow);
 
     for(y=0; y < height; y++) {
         for(x=0; x < width; x++) {

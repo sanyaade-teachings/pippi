@@ -3,15 +3,8 @@
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable
 
-import aubio
 import numpy as np
 cimport numpy as np
-
-try:
-    # librosa depends on numba which is not supported at all on some platforms
-    import librosa
-except ImportError as e:
-    print('Warning: could not load librosa. Please install librosa to use the feature extraction procedures in the mir module.')
 
 
 cdef int DEFAULT_WINSIZE = 4096
@@ -22,6 +15,7 @@ cpdef np.ndarray flatten(SoundBuffer snd):
     return np.asarray(snd.remix(1).frames, dtype='f').flatten()
 
 cdef np.ndarray _bandwidth(np.ndarray snd, int samplerate, int winsize):
+    import librosa
     return librosa.feature.spectral_bandwidth(y=snd, sr=samplerate, n_fft=winsize)
 
 cpdef Wavetable bandwidth(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
@@ -29,6 +23,7 @@ cpdef Wavetable bandwidth(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
     return Wavetable(wt.transpose().astype('d').flatten())
 
 cdef np.ndarray _flatness(np.ndarray snd, int winsize):
+    import librosa
     return librosa.feature.spectral_flatness(y=snd, n_fft=winsize)
 
 cpdef Wavetable flatness(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
@@ -36,6 +31,7 @@ cpdef Wavetable flatness(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
     return Wavetable(wt.transpose().astype('d').flatten())
 
 cdef np.ndarray _rolloff(np.ndarray snd, int samplerate, int winsize):
+    import librosa
     return librosa.feature.spectral_rolloff(y=snd, sr=samplerate, n_fft=winsize)
 
 cpdef Wavetable rolloff(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
@@ -43,6 +39,7 @@ cpdef Wavetable rolloff(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
     return Wavetable(wt.transpose().astype('d').flatten())
 
 cdef np.ndarray _centroid(np.ndarray snd, int samplerate, int winsize):
+    import librosa
     return librosa.feature.spectral_centroid(y=snd, sr=samplerate, n_fft=winsize)
 
 cpdef Wavetable centroid(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
@@ -50,6 +47,7 @@ cpdef Wavetable centroid(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
     return Wavetable(wt.transpose().astype('d').flatten())
 
 cdef np.ndarray _contrast(np.ndarray snd, int samplerate, int winsize):
+    import librosa
     return librosa.feature.spectral_contrast(y=snd, sr=samplerate, n_fft=winsize)
 
 cpdef Wavetable contrast(SoundBuffer snd, int winsize=DEFAULT_WINSIZE):
@@ -161,6 +159,7 @@ cpdef list onsets(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE,
         > Simon Dixon, Onset Detection Revisited, in ``Proceedings of the 9th International Conference 
         > on Digital Audio Effects'' (DAFx-06), Montreal, Canada, 2006.
     """
+    import aubio
     if method is None:
         method = 'specflux'
 

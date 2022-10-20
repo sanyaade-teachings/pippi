@@ -269,6 +269,38 @@ cdef class Seq:
         return out
 
     def score(self, dict score, int barlength=4, bint stems=False, str stemsdir='', str stemsext='wav', bint pool=False):
+        """ 
+        # A score looks like this:
+
+        score = {
+            'seq': 'aaba',
+            'a': {
+                'instrument1': '1121', 
+                'instrument2': 'gffg',
+            },
+            'b': {
+                'instrument1': '2211', 
+                'instrument2': 'gggg',
+            }
+        }
+
+        # Which corresponds to instruments like:
+
+        instrument1_patterns = {
+            '1': 'xx.x',
+            '2': '..x.',
+        }
+
+        dm.add('instrument1', instrument1_patterns)
+
+        instrument2_patterns = {
+            'f': 'x...',
+            'g': '.xxx',
+        }
+
+        dm.add('instrument2', instrument2_patterns)
+
+        """
         cdef double length, sectionlength
         cdef dict instrument
         cdef list onsets, params

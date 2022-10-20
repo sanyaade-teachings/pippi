@@ -20,7 +20,7 @@ ALLSOURCES = vendor/fft/fft.c \
 	src/spectral.c \
 	src/pippicore.c
 
-FLAGS = -g -std=gnu11 -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
+FLAGS = -g -std=gnu2x -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
 
 clean:
 	rm build/*
