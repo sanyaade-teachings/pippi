@@ -289,6 +289,7 @@ setup(
         'Programming Language :: Python :: 3.8', 
         'Programming Language :: Python :: 3.9', 
         'Programming Language :: Python :: 3.10', 
+        'Programming Language :: Python :: 3.11', 
         'Topic :: Artistic Software', 
         'Topic :: Multimedia :: Sound/Audio', 
         'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis', 
