@@ -1,10 +1,8 @@
-aubio==0.4.9
 Cython==3.0.0a11
 importlib-resources==5.4.0
-librosa==0.8.1
 mido==1.2.10
-numpy==1.22.2
-Pillow==9.0.1
-pysndfile==1.4.3
+numpy==1.23.4
+Pillow==9.2.0
+pysndfile==1.4.4
 python-rtmidi==1.4.9
-wheel==0.37.1
+wheel==0.38.0

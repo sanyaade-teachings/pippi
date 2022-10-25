@@ -159,7 +159,11 @@ cpdef list onsets(SoundBuffer snd, str method=None, int winsize=DEFAULT_WINSIZE,
         > Simon Dixon, Onset Detection Revisited, in ``Proceedings of the 9th International Conference 
         > on Digital Audio Effects'' (DAFx-06), Montreal, Canada, 2006.
     """
-    import aubio
+    try:
+        import aubio
+    except ImportError:
+        exit('please install aubio to use the onset mir routines')
+
     if method is None:
         method = 'specflux'
 

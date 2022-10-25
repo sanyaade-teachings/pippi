@@ -108,7 +108,7 @@ cirrus-install:
 	python setup.py develop
 
 install:
-	pip install --upgrade pip
+	pip install --upgrade pip wheel cython setuptools numpy
 	pip install -r requirements.txt
 	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install
