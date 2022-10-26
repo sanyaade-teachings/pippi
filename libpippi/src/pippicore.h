@@ -39,6 +39,25 @@ typedef double lpfloat_t;
 #define GRID_EMPTY 0x2800
 #define GRID_FULL  0x28ff
 
+#define LOGISTIC_SEED_DEFAULT 3.999
+#define LOGISTIC_X_DEFAULT 0.555
+
+#define LORENZ_TIMESTEP_DEFAULT 0.01
+#define LORENZ_A_DEFAULT 10.0
+#define LORENZ_B_DEFAULT 28.0
+#define LORENZ_C_DEFAULT (8.0 / 3.0)
+#define LORENZ_X_DEFAULT 0.1
+#define LORENZ_Y_DEFAULT 0.0
+#define LORENZ_Z_DEFAULT 0.0
+
+#define PLOT_WIDTH 80
+#define PLOT_HEIGHT 10
+#define BRAILLE_WIDTH 2
+#define BRAILLE_HEIGHT 4
+#define PIXEL_WIDTH (PLOT_WIDTH * BRAILLE_WIDTH)
+#define PIXEL_HEIGHT (PLOT_HEIGHT * BRAILLE_HEIGHT)
+
+
 enum Wavetables {
     WT_SINE,
     WT_COS,
