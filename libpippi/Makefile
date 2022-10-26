@@ -174,6 +174,9 @@ soundfile-examples:
 	echo "Building readsoundfile.c example...";
 	gcc $(FLAGS) examples/readsoundfile.c $(ALLSOURCES) -o build/readsoundfile
 
+	echo "Building readrawfile.c example...";
+	gcc $(FLAGS) examples/readrawfile.c $(ALLSOURCES) -o build/readrawfile
+
 render:
 	mkdir -p build renders
 
