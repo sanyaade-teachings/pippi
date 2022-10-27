@@ -170,11 +170,7 @@ def degrees(scale_degrees=None, octave=2, root=None, key=None, scale=None, ratio
     if scale_degrees is None:
         scale_degrees = [1,3,5]
 
-    if root is not None:
-        print('WARNING: please use `key` rather than `root` to specify key')
-        key = root
-
-    if key is None:
+    if key is None and root is None:
         key = DEFAULT_KEY
 
     if ratios is None:
@@ -187,7 +183,11 @@ def degrees(scale_degrees=None, octave=2, root=None, key=None, scale=None, ratio
         scale = _scale_mask_to_indexes(scale_mask)
 
     freqs = []
-    root = ntf(key, octave) # TODO: check for float to allow arbitrary roots?
+
+    if root is None:
+        root = ntf(key, octave)
+    else:
+        root = float(root)
 
     for index, degree in enumerate(scale_degrees):
         # strings are okay

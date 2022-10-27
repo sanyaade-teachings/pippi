@@ -8,6 +8,7 @@
 #include <sys/random.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
@@ -172,7 +173,7 @@ typedef struct lparray_factory_t {
 typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
     lpbuffer_t * (*create_from_float)(lpfloat_t value, size_t length, int channels, int samplerate);
-    lpbuffer_t * (*create_from_bytes)(char * bytes, size_t length, size_t width, int channels, int samplerate);
+    lpbuffer_t * (*create_from_bytes)(char * bytes, size_t length, int channels, int samplerate);
     lpstack_t * (*create_stack)(int, size_t, int, int);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
     void (*clear)(lpbuffer_t *);

@@ -21,7 +21,7 @@ void destroy_array(lparray_t * array);
 
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
 lpbuffer_t * create_buffer_from_float(lpfloat_t value, size_t length, int channels, int samplerate);
-lpbuffer_t * create_buffer_from_bytes(char * bytes, size_t length, size_t width, int channels, int samplerate);
+lpbuffer_t * create_buffer_from_bytes(char * bytes, size_t length, int channels, int samplerate);
 lpstack_t * create_uniform_stack(int numbuffers, size_t buffer_length, int channels, int samplerate);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void clear_buffer(lpbuffer_t * buf);
@@ -302,16 +302,17 @@ lpbuffer_t * create_buffer_from_float(lpfloat_t value, size_t length, int channe
     return buf;
 }
 
-lpbuffer_t * create_buffer_from_bytes(char * bytes, size_t length, size_t width, int channels, int samplerate) {
+lpbuffer_t * create_buffer_from_bytes(char * bytes, size_t length, int channels, int samplerate) {
     size_t i, buffersize;
     int c;
+    int val = 0;
     lpbuffer_t * buf;
-    buffersize = length / width;
+    buffersize = length * channels;
     buf = create_buffer(buffersize, channels, samplerate);
     for(i=0; i < buffersize; i++) {
         for(c=0; c < channels; c++) {
-            buf->data[i * channels + c] = bytes[i];
-            memcpy(&buf->data[i * channels + c], bytes+(i*width), width);
+            val = (int)bytes[i * channels + c];
+            buf->data[i * channels + c] = (float)val / INT8_MAX;
         }
     }
     return buf;
@@ -902,7 +903,7 @@ void plot_buffer(lpbuffer_t * buf) {
         }
 
         printf("crossings: %d\n", (int)crossing_count);
-        printf("speak: %.04f slow: %.04f\n", peak, low);
+        printf("speak: %.04f slow: %.04f\n", (double)peak, (double)low);
         peak = fmin(1.f, (peak+1.f)/2.f);
         low = fmax(0.f, (low+1.f)/2.f);
 
@@ -914,7 +915,7 @@ void plot_buffer(lpbuffer_t * buf) {
         pos += blocksize;
         px += 1;
         printf("px: %d py1: %d py2: %d\n", px, py1, py2);
-        printf("high: %.04f low: %.04f\n", peak, low);
+        printf("high: %.04f low: %.04f\n", (double)peak, (double)low);
 
         assert(px <= PIXEL_WIDTH);
     }
