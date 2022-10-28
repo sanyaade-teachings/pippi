@@ -4,6 +4,7 @@
 lpbuffer_t * convolve_spectral(lpbuffer_t * src, lpbuffer_t * impulse) {
     size_t length, i;
     int c;
+    lpfloat_t mag;
     lpbuffer_t * out;
     lpbuffer_t * outa;
     lpbuffer_t * outb;
@@ -18,7 +19,8 @@ lpbuffer_t * convolve_spectral(lpbuffer_t * src, lpbuffer_t * impulse) {
 
     length = src->length + impulse->length + 1;
     out = LPBuffer.create(length, src->channels, src->samplerate);
-    printf("convolve spectral\n");
+
+    mag = LPBuffer.mag(src);
 
     if(src->channels == 2) {
         outa = LPBuffer.create(length, src->channels, src->samplerate);
@@ -26,12 +28,10 @@ lpbuffer_t * convolve_spectral(lpbuffer_t * src, lpbuffer_t * impulse) {
 
         srca = LPBuffer.create(src->length, 1, src->samplerate);
         srcb = LPBuffer.create(src->length, 1, src->samplerate);
-        printf("split src\n");
         LPBuffer.split2(src, srca, srcb);
 
         impulsea = LPBuffer.create(impulse->length, 1, src->samplerate);
         impulseb = LPBuffer.create(impulse->length, 1, src->samplerate);
-        printf("split impulse\n");
         LPBuffer.split2(impulse, impulsea, impulseb);
 
         Fft_convolveReal(srca->data, impulsea->data, outa->data, length);
@@ -53,6 +53,8 @@ lpbuffer_t * convolve_spectral(lpbuffer_t * src, lpbuffer_t * impulse) {
     } else {
         Fft_convolveReal(src->data, impulse->data, out->data, length);
     }
+
+    LPFX.norm(out, mag);
 
     return out;
 }

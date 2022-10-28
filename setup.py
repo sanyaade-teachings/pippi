@@ -1,11 +1,12 @@
-#!/usr/bin/env python
+#!/uss/bin/env python
 from setuptools import setup
 from setuptools.extension import Extension
 from Cython.Build import cythonize
 import numpy as np
 
-INCLUDES = ['libpippi/src', '/usr/local/include', np.get_include()]
+INCLUDES = ['libpippi/vendor', 'libpippi/src', '/usr/local/include', np.get_include()]
 MACROS = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+
 
 ext_modules = cythonize([
         Extension('pippi.microcontrollers', ['pippi/microcontrollers.pyx'],
@@ -199,10 +200,12 @@ ext_modules = cythonize([
             define_macros=MACROS
         ), 
         Extension('pippi.buffers', [
+                'libpippi/vendor/fft/fft.c',
                 'libpippi/src/pippicore.c',
+                'libpippi/src/spectral.c',
                 'pippi/buffers.pyx',
             ],
-            include_dirs=INCLUDES, 
+            include_dirs=INCLUDES + ['libpippi/vendor/fft'],
             define_macros=MACROS,
             extra_compile_args=['-O0', '-g3'],
         ),

@@ -8,6 +8,12 @@ from pippi.buffers import SoundBuffer
 from pippi import dsp
 
 class TestNewBuffer(TestCase):
+    def setUp(self):
+        self.soundfiles = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.soundfiles)
+
     def test_create_empty_buffer(self):
         sound = SoundBuffer()
 
@@ -249,14 +255,12 @@ class TestNewBuffer(TestCase):
         src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd.fdub(src, 1000)
         snd.write('tests/renders/test_newbuffer_dub.wav')
-        snd.plot()
         snd.graph('tests/renders/newbuffer-dub-at-offset.png')
 
     def test_dub_into_empty_buffer(self):
         src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd = SoundBuffer(length=src.dur)
         snd.dub(src, 0)
-        snd.plot()
 
     def test_dub_into_mono_buffer(self):
         snd = SoundBuffer([0,0,0])
@@ -287,10 +291,8 @@ class TestNewBuffer(TestCase):
 
     def test_window(self):
         snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        print('tri window')
-        snd.env('tri').write('tests/renders/newbuffer-env-pluckout.wav')
-        snd.plot()
-        snd.graph('tests/renders/newbuffer-env.png')
+        snd.env('sine').write('tests/renders/newbuffer-env-sine.wav')
+        snd.graph('tests/renders/newbuffer-env-sine.png')
 
     def test_remix_soundbuffer(self):
         snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -300,6 +302,27 @@ class TestNewBuffer(TestCase):
     def test_plot_soundbuffer(self):
         snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd.plot()
+
+    def test_save_buffer_to_soundfile(self):
+        filename = path.join(self.soundfiles, 'test_save_newbuffer_to_soundfile.{}')
+        sound = SoundBuffer(length=1)
+
+        sound.write(filename.format('wav'))
+        self.assertTrue(path.isfile(filename.format('wav')))
+
+        sound.write(filename.format('flac'))
+        self.assertTrue(path.isfile(filename.format('flac')))
+
+        sound.write(filename.format('ogg'))
+        self.assertTrue(path.isfile(filename.format('ogg')))
+
+    def test_convolve_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
+
+        impulse = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+        out = sound.convolve(impulse)
+        out.write('tests/renders/newbuffer_convolve_guitar_littletikes.wav')
+
 
 """
     def test_stack_soundbuffer(self):
@@ -313,17 +336,6 @@ class TestNewBuffer(TestCase):
         self.assertTrue(snd1.samplerate == out.samplerate)
         out.write('tests/renders/soundbuffer_stack.wav')
 
-    def test_convolve_soundbuffer(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-
-        impulse = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
-        out = sound.convolve(impulse)
-        out.write('tests/renders/soundbuffer_convolve_guitar_littletikes.wav')
-
-        impulse = dsp.win('sinc')
-        out = sound.convolve(impulse)
-        out.write('tests/renders/soundbuffer_convolve_guitar_sinc.wav')
-
     def test_clip_soundbuffer(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
@@ -332,19 +344,6 @@ class TestNewBuffer(TestCase):
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
         self.assertTrue(sound.max() <= 0.1)
-
-    def test_save_buffer_to_soundfile(self):
-        filename = path.join(self.soundfiles, 'test_save_buffer_to_soundfile.{}')
-        sound = SoundBuffer(length=1)
-
-        sound.write(filename.format('wav'))
-        self.assertTrue(path.isfile(filename.format('wav')))
-
-        sound.write(filename.format('flac'))
-        self.assertTrue(path.isfile(filename.format('flac')))
-
-        sound.write(filename.format('ogg'))
-        self.assertTrue(path.isfile(filename.format('ogg')))
 
     def test_split_into_blocks(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 0.11)

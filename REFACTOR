@@ -32,6 +32,7 @@ Just some refactoring notes...
 ## built-in methods
 
 - [x] clear -- fill with zeros
+- [x] convolve -- fft.conv
 - [x] copy
 - [x] cut
 - [x] fcut -- frames
@@ -40,7 +41,7 @@ Just some refactoring notes...
 - [x] fdub -- frames
 - [x] graph -- plot the waveform
 - [x] write
-- [ ] env
+- [x] env
 
 ## computed properties
 
@@ -54,7 +55,6 @@ Just some refactoring notes...
 - [ ] cloud -- graincloud
 - [ ] clip -- hard clip to minval/maxval
 - [ ] softclip -- fx.softclip
-- [ ] convolve -- fft.conv
 - [ ] fill -- truncate or loop to desired length
 - [ ] blocks -- iterate over buffer in blocksize blocks
 - [ ] grains -- iterate over buffer in variable-sized grains

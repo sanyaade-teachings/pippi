@@ -12,6 +12,7 @@ import numpy as np
 from pysndfile import sndio
 
 from pippi.defaults cimport DEFAULT_WTSIZE, DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
+from pippi cimport fft
 from pippi import graph, rand
 from pippi.wavetables cimport _window, Wavetable
 from pippi cimport interpolation
@@ -517,6 +518,19 @@ cdef class SoundBuffer:
     def clear(SoundBuffer self):
         LPBuffer.clear(self.buffer)
         return self
+
+    cpdef SoundBuffer convolve(SoundBuffer self, SoundBuffer impulse, bint norm=True):
+        cdef lpbuffer_t * out
+
+        if not isinstance(impulse, SoundBuffer):
+            raise TypeError('Could not convolve impulse of type %s' % type(impulse))
+
+        if impulse.channels != self.channels:
+            impulse = impulse.remix(self.channels)
+
+        out = LPSpectral.convolve(self.buffer, impulse.buffer)
+
+        return SoundBuffer.fromlpbuffer(out)
 
     def copy(SoundBuffer self):
         cdef lpbuffer_t * out

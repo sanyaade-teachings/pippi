@@ -104,4 +104,9 @@ cdef extern from "pippicore.h":
     extern lpmemorypool_factory_t LPMemoryPool
 
 
+cdef extern from "spectral.h":
+    ctypedef struct lpspectral_factory_t:
+        lpbuffer_t * (*convolve)(lpbuffer_t *, lpbuffer_t *)
+    extern const lpspectral_factory_t LPSpectral
+
 

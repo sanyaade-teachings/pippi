@@ -338,8 +338,6 @@ void stack2_buffer(lpbuffer_t * src, lpbuffer_t * a, lpbuffer_t * b) {
 void split2_buffer(lpbuffer_t * src, lpbuffer_t * a, lpbuffer_t * b) {
     size_t i;
 
-    printf("src length: %d\n  a length: %d\n  b length: %d\n", (int)src->length, (int)a->length, (int)b->length);
-
     assert(src->channels == 2);
     assert(src->length == a->length);
     assert(src->length == b->length);
