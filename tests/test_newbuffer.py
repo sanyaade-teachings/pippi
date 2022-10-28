@@ -317,11 +317,16 @@ class TestNewBuffer(TestCase):
         self.assertTrue(path.isfile(filename.format('ogg')))
 
     def test_convolve_soundbuffer(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar10s.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
         impulse = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
         out = sound.convolve(impulse)
         out.write('tests/renders/newbuffer_convolve_guitar_littletikes.wav')
+
+    def test_repeat_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        out = sound.repeat(5)
+        out.write('tests/renders/newbuffer_repeat.wav')
 
 
 """

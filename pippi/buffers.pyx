@@ -625,6 +625,11 @@ cdef class SoundBuffer:
         cdef lpbuffer_t * out = LPBuffer.remix(self.buffer, channels)
         return SoundBuffer.fromlpbuffer(out)
 
+    cpdef SoundBuffer repeat(SoundBuffer self, size_t repeats):
+        repeats = max(repeats, 1)
+        cdef lpbuffer_t * out = LPBuffer.repeat(self.buffer, repeats)
+        return SoundBuffer.fromlpbuffer(out)
+
     def env(self, object window=None):
         """ Apply an amplitude envelope 
             to the sound of the given type.

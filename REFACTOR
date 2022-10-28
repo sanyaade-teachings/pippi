@@ -41,6 +41,7 @@ Just some refactoring notes...
 - [x] fdub -- frames
 - [x] graph -- plot the waveform
 - [x] write
+- [x] repeat
 - [x] remix
 - [x] env
 
@@ -62,7 +63,6 @@ Just some refactoring notes...
 - [ ] mix -- mix in place with sound or list of sounds
 - [ ] pad -- pad with silence at start or end
 - [ ] pan
-- [ ] repeat
 - [ ] reverse
 - [ ] reversed
 - [ ] speed
