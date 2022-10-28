@@ -7,3 +7,6 @@ build_package_pippi_task:
     fingerprint_script: echo $PYTHON_VERSION
     populate_script: python3 -m pip install --upgrade setuptools wheel Cython==3.0.0a10 numpy
   build_package_pippi_script: make cirrus-install && python3 setup.py sdist bdist_wheel
+
+test_pippi_task:
+  test_pippi_script: make test
