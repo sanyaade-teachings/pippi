@@ -620,9 +620,9 @@ cdef class SoundBuffer:
 
         return self
 
-    def remix(self, int channels):
-        cdef lpbuffer_t * out
-        out = LPBuffer.remix(self.buffer, channels)
+    cpdef SoundBuffer remix(SoundBuffer self, int channels):
+        channels = max(channels, 1)
+        cdef lpbuffer_t * out = LPBuffer.remix(self.buffer, channels)
         return SoundBuffer.fromlpbuffer(out)
 
     def env(self, object window=None):
