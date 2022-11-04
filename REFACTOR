@@ -39,7 +39,7 @@ Just some refactoring notes...
 - [x] rcut
 - [x] dub
 - [x] fdub -- frames
-- [ ] fill -- truncate or loop to desired length
+- [x] fill -- truncate or loop to desired length
 - [x] graph -- plot the waveform
 - [x] write
 - [x] repeat

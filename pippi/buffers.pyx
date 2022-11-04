@@ -660,6 +660,10 @@ cdef class SoundBuffer:
         LPBuffer.multiply(out, w)
         return SoundBuffer.fromlpbuffer(out)
 
+    cpdef SoundBuffer fill(SoundBuffer self, double length):
+        cdef lpbuffer_t * out = LPBuffer.fill(self.buffer, <size_t>(length * self.samplerate))
+        return SoundBuffer.fromlpbuffer(out)
+
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
 

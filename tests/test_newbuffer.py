@@ -338,6 +338,20 @@ class TestNewBuffer(TestCase):
         out = sound.reversed()
         out.write('tests/renders/newbuffer_reversed.wav')
 
+    def test_overfill_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        length = 2.45
+        out = sound.fill(length)
+        self.assertEqual(out.dur, length)
+        out.write('tests/renders/newbuffer_overfill.wav')
+
+    def test_underfill_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        length = sound.dur / 3
+        out = sound.fill(length)
+        self.assertEqual(out.dur, length)
+        out.write('tests/renders/newbuffer_underfill.wav')
+
 
 
 """

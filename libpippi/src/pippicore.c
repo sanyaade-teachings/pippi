@@ -53,6 +53,7 @@ lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length);
 void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length);
 lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length);
 void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos);
+lpbuffer_t * fill_buffer(lpbuffer_t * buf, size_t length);
 lpbuffer_t * repeat_buffer(lpbuffer_t * buf, size_t repeats);
 lpbuffer_t * reverse_buffer(lpbuffer_t * buf);
 lpbuffer_t * resize_buffer(lpbuffer_t *, size_t);
@@ -107,7 +108,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -909,6 +910,22 @@ lpbuffer_t * remix_buffer(lpbuffer_t * buf, int channels) {
     }
 
     return newbuf;
+}
+
+lpbuffer_t * fill_buffer(lpbuffer_t * buf, size_t length) {
+    size_t i, j;
+    int c;
+    lpbuffer_t * out;
+    out = create_buffer(length, buf->channels, buf->samplerate);
+
+    for(i=0; i < length; i++) {
+        j = i % buf->length;
+        for(c=0; c < out->channels; c++) {
+            out->data[i * out->channels + c] = buf->data[j * out->channels + c];
+        }
+    }
+
+    return out;
 }
 
 lpbuffer_t * repeat_buffer(lpbuffer_t * buf, size_t repeats) {
