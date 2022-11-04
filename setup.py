@@ -203,6 +203,7 @@ ext_modules = cythonize([
                 'libpippi/vendor/fft/fft.c',
                 'libpippi/src/pippicore.c',
                 'libpippi/src/spectral.c',
+                'libpippi/src/soundfile.c',
                 'pippi/buffers.pyx',
             ],
             include_dirs=INCLUDES + ['libpippi/vendor/fft'],

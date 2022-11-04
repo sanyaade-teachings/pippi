@@ -328,6 +328,17 @@ class TestNewBuffer(TestCase):
         out = sound.repeat(5)
         out.write('tests/renders/newbuffer_repeat.wav')
 
+    def test_reverse_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound.reverse()
+        sound.write('tests/renders/newbuffer_reverse.wav')
+
+    def test_reversed_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        out = sound.reversed()
+        out.write('tests/renders/newbuffer_reversed.wav')
+
+
 
 """
     def test_stack_soundbuffer(self):

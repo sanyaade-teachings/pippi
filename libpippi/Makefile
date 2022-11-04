@@ -122,6 +122,9 @@ buffer-examples:
 	echo "Building resample_buffer.c example...";
 	gcc $(FLAGS) examples/resample_buffer.c $(ALLSOURCES) -o build/resample_buffer
 
+	echo "Building reverse_buffer.c example...";
+	gcc $(FLAGS) examples/reverse_buffer.c $(ALLSOURCES) -o build/reverse_buffer
+
 	echo "Building plotbuffer.c example...";
 	gcc $(FLAGS) examples/plotbuffer.c $(ALLSOURCES) -o build/plotbuffer
 
@@ -176,6 +179,10 @@ soundfile-examples:
 
 	echo "Building readrawfile.c example...";
 	gcc $(FLAGS) examples/readrawfile.c $(ALLSOURCES) -o build/readrawfile
+
+noise:
+	echo "Making noise...";
+	gcc $(FLAGS) examples/noisevember.c $(ALLSOURCES) -o build/noisevember
 
 render:
 	mkdir -p build renders

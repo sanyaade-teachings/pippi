@@ -94,6 +94,7 @@ cdef extern from "pippicore.h":
         void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t)
         void (*env)(lpbuffer_t *, lpbuffer_t *)
         lpbuffer_t * (*repeat)(lpbuffer_t * src, size_t repeats)
+        lpbuffer_t * (*reverse)(lpbuffer_t * buf)
         lpbuffer_t * (*resize)(lpbuffer_t *, size_t)
         void (*plot)(lpbuffer_t * buf)
         void (*destroy)(lpbuffer_t *)
@@ -109,5 +110,12 @@ cdef extern from "spectral.h":
     ctypedef struct lpspectral_factory_t:
         lpbuffer_t * (*convolve)(lpbuffer_t *, lpbuffer_t *)
     extern const lpspectral_factory_t LPSpectral
+
+cdef extern from "soundfile.h":
+    ctypedef struct lpsoundfile_factory_t:
+        lpbuffer_t * (*read)(const char *)
+        void (*write)(const char *, lpbuffer_t *)
+
+    extern const lpsoundfile_factory_t LPSoundFile
 
 

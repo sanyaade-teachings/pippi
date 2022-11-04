@@ -4,14 +4,19 @@
 /* std includes */
 #include <assert.h>
 #include <locale.h>
+#include <limits.h>
 #include <math.h>
-#include <sys/random.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+
+/* linux platform includes */
+#ifdef __linux__
+#include <sys/random.h>
+#endif
 
 /* TYPES */
 #ifdef LP_FLOAT
@@ -204,6 +209,7 @@ typedef struct lpbuffer_factory_t {
     void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t);
     void (*env)(lpbuffer_t *, lpbuffer_t *);
     lpbuffer_t * (*repeat)(lpbuffer_t * src, size_t repeats);
+    lpbuffer_t * (*reverse)(lpbuffer_t * buf);
     lpbuffer_t * (*resize)(lpbuffer_t *, size_t);
     void (*plot)(lpbuffer_t * buf);
     void (*destroy)(lpbuffer_t *);

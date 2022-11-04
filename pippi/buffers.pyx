@@ -202,7 +202,7 @@ cdef class SoundBuffer:
 
     @staticmethod
     cdef SoundBuffer fromlpbuffer(lpbuffer_t * buffer):
-        cdef SoundBuffer out = SoundBuffer.__new__(SoundBuffer)
+        cdef SoundBuffer out = SoundBuffer.__new__(SoundBuffer, channels=buffer.channels, samplerate=buffer.samplerate)
         out.buffer = buffer
         return out
 
@@ -630,7 +630,14 @@ cdef class SoundBuffer:
         cdef lpbuffer_t * out = LPBuffer.repeat(self.buffer, repeats)
         return SoundBuffer.fromlpbuffer(out)
 
-    def env(self, object window=None):
+    cpdef reverse(SoundBuffer self):
+        self.buffer = <lpbuffer_t *>LPBuffer.reverse(self.buffer)
+
+    cpdef SoundBuffer reversed(SoundBuffer self):
+        cdef lpbuffer_t * out = LPBuffer.reverse(self.buffer)
+        return SoundBuffer.fromlpbuffer(out)
+
+    cpdef SoundBuffer env(SoundBuffer self, object window=None):
         """ Apply an amplitude envelope 
             to the sound of the given type.
 
@@ -663,7 +670,10 @@ cdef class SoundBuffer:
         """ Write the contents of this buffer to disk 
             in the given audio file format. (WAV, AIFF, AU)
         """
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        if filename.endswith('.wav'):
+            LPSoundFile.write(filename.encode('ascii'), self.buffer)
+        else:
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
             sndio.write(filename, np.asarray(self), self.samplerate)
 
