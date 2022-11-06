@@ -110,7 +110,7 @@ cdef class Pulsar2d:
 
         self.win_length = DEFAULT_WTSIZE
         for window in windows:
-            if isinstance(wavetable, str):
+            if isinstance(window, str):
                 # Same dumb workaround for built-in wavetable string literals
                 self.wt_length = max(DEFAULT_WTSIZE, self.wt_length)
                 continue

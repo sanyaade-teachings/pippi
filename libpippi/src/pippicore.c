@@ -179,34 +179,42 @@ lpfloat_t lorenzZ(lpfloat_t low, lpfloat_t high) {
 
 lpfloat_t rand_base_lorenzX(lpfloat_t low, lpfloat_t high) {
     lpfloat_t x;
-    x = lorenzX(0.f, 1.f);
-    lorenzY(0.f, 1.f);
-    lorenzZ(0.f, 1.f);
-    return x * (high-low) + low;
+    x = lorenzX(low, high);
+    lorenzY(low, high);
+    lorenzZ(low, high);
+    return x;
 }
 
 lpfloat_t rand_base_lorenzY(lpfloat_t low, lpfloat_t high) {
     lpfloat_t y;
-    lorenzX(0.f, 1.f);
-    y = lorenzY(0.f, 1.f);
-    lorenzZ(0.f, 1.f);
-    return y * (high-low) + low;
+    lorenzX(low, high);
+    y = lorenzY(low, high);
+    lorenzZ(low, high);
+    return y;
 }
 
 lpfloat_t rand_base_lorenzZ(lpfloat_t low, lpfloat_t high) {
     lpfloat_t z;
-    lorenzX(0.f, 1.f);
-    lorenzY(0.f, 1.f);
-    z = lorenzZ(0.f, 1.f);
-    return z * (high-low) + low;
+    lorenzX(low, high);
+    lorenzY(low, high);
+    z = lorenzZ(low, high);
+    return z;
 }
 
 lpfloat_t rand_base_lorenz(lpfloat_t low, lpfloat_t high) {
-    lpfloat_t x, y, z;
-    x = lorenzX(0.f, 1.f);
-    y = lorenzY(0.f, 1.f);
-    z = lorenzZ(0.f, 1.f);
-    return x * y * z * (high-low) + low;
+    lpfloat_t x, y, z, val;
+    x = lorenzX(0, 1);
+    y = lorenzY(0, 1);
+    z = lorenzZ(0, 1);
+    val = x * y * z;
+    while(val > high) {
+        val -= (high-low);
+    }
+    while(val < low) {
+        val += (high-low);
+    }
+
+    return val;
 }
 
 lpfloat_t rand_rand(lpfloat_t low, lpfloat_t high) {

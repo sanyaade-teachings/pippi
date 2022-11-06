@@ -3,8 +3,6 @@
 #include <signal.h>
 #include <sys/syscall.h>
 
-#include <hiredis/hiredis.h>
-
 #include "pippi.h"
 #include "cyrenderer.h"
 #include "astrid.h"
@@ -12,7 +10,6 @@
 
 static volatile int astrid_is_running = 1;
 int astrid_channels = 2;
-redisContext * redis_ctx;
 char * instrument_fullpath; /* eg ../orc/ding.py */
 char * instrument_basename; /* eg ding           */
 
@@ -32,7 +29,6 @@ int main() {
     char * _astrid_channels;
     lpastridctx_t * ctx;
     PyObject * pmodule;
-    struct timeval redis_timeout = {15, 0};
 
     printf("Starting renderer...\n");
 
@@ -49,7 +45,6 @@ int main() {
         fprintf(stderr, "Could not init SIGTERM signal handler.\n");
         exit(1);
     }
-
 
     /* Get python path from env */
     astrid_pythonpath_env = getenv("ASTRID_PYTHONPATH");
@@ -71,19 +66,6 @@ int main() {
         astrid_channels = atoi(_astrid_channels);
     }
     astrid_channels = 2;
-
-    /* Connect to redis */
-    redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
-    if(redis_ctx == NULL) {
-        fprintf(stderr, "Could not start connection to redis.\n");
-        exit(1);
-    }
-
-    /* Check redis connection */
-    if(redis_ctx->err) {
-        fprintf(stderr, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
-        exit(1);
-    }
 
     /* Setup context */
     ctx = (lpastridctx_t*)LPMemoryPool.alloc(1, sizeof(lpastridctx_t));

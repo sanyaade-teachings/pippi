@@ -33,6 +33,12 @@ astrid-renderer:
 	cython cython/cyrenderer.pyx
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor `python3-config --cflags` -Icython -l$(PYLIB) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 
+astrid-q:
+	echo "Building astrid queue reader...";
+	cythonize -i cyreader.pyx
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qreader.c -o build/qreader
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qserver.c -o build/qserver
+
 astrid-renderer-macos:
 	mkdir -p build renders
 
