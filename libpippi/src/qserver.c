@@ -7,6 +7,8 @@
 #include <sys/syscall.h>
 #include <sys/stat.h> /* umask */
 
+#define MAXMSG 4096
+#define TESTMSG "p ding o:3 v:2 foo:bar biz=baz blah blah blah blah\n"
 
 static volatile int is_running = 1;
 
@@ -16,12 +18,16 @@ void handle_shutdown(int) {
 
 struct response {
     int start;
+    char msg[MAXMSG];
 };
 
 int main() {
     int qfd, count;
     struct sigaction shutdown_action;
-    struct response resp;
+    struct response resp = {
+        .start=0,
+        .msg=TESTMSG
+    };
 
     printf("Starting qserver...\n");
 
@@ -31,6 +37,11 @@ int main() {
     shutdown_action.sa_flags = 0;
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
         fprintf(stderr, "Could not init SIGINT signal handler.\n");
+        exit(1);
+    }
+
+    if(sigaction(SIGPIPE, &shutdown_action, NULL) == -1) {
+        fprintf(stderr, "Could not init SIGPIPE signal handler.\n");
         exit(1);
     }
 
@@ -53,6 +64,7 @@ int main() {
             continue;
         }
         count += 1;
+        sleep(2);
     }
     printf("Quitting...\n");
 

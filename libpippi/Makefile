@@ -38,6 +38,7 @@ astrid-q:
 	cythonize -i cyreader.pyx
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qreader.c -o build/qreader
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qserver.c -o build/qserver
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qmessage.c -o build/qmessage
 
 astrid-renderer-macos:
 	mkdir -p build renders

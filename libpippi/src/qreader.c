@@ -6,11 +6,13 @@
 #include <sys/syscall.h>
 #include <sys/stat.h> /* umask */
 
+#define MAXMSG 4096
 
 static volatile int is_running = 1;
 
 struct response {
     int start;
+    char msg[MAXMSG];
 };
 
 void handle_shutdown(int) {
@@ -41,11 +43,14 @@ int main() {
 
     while(is_running) {
         if(read(qfd, &resp, sizeof(struct response)) != sizeof(struct response)) {
-            fprintf(stderr, "Error writing, but I guess that is OK...\n");
+            //fprintf(stderr, "Error writing, but I guess that is OK...\n");
+            //continue;
+            is_running = 0;
             continue;
         }
 
         printf("The count is: %d\n", resp.start);
+        printf("The message is: %s\n", resp.msg);
     }
 
     printf("Quitting...\n");
