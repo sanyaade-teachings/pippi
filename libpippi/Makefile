@@ -35,7 +35,6 @@ astrid-renderer:
 
 astrid-q:
 	echo "Building astrid queue reader...";
-	cythonize -i cyreader.pyx
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qreader.c -o build/qreader
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qserver.c -o build/qserver
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qmessage.c -o build/qmessage
@@ -186,10 +185,6 @@ soundfile-examples:
 
 	echo "Building readrawfile.c example...";
 	gcc $(FLAGS) examples/readrawfile.c $(ALLSOURCES) -o build/readrawfile
-
-noise:
-	echo "Making noise...";
-	gcc $(FLAGS) examples/noisevember.c $(ALLSOURCES) -o build/noisevember
 
 render:
 	mkdir -p build renders
