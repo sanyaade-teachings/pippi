@@ -713,6 +713,8 @@ int send_play_message(lpeventctx_t * ctx) {
     qname = calloc(qname_length, sizeof(char));
     snprintf(qname, qname_length, "%s-%s", LPPLAYQ, ctx->instrument_name);
 
+    strncpy(msg.msg, ctx->play_params, LPMAXMSG);
+
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
         fprintf(stderr, "Error creating named pipe\n");
@@ -722,6 +724,7 @@ int send_play_message(lpeventctx_t * ctx) {
     qfd = open(qname, O_WRONLY);
 
     msg.timestamp = 0;
+    printf("Sending play msg: %s\n", msg.msg);
     if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
         fprintf(stderr, "Could not write to q...\n");
         return 1;

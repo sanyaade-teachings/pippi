@@ -132,6 +132,7 @@ int main() {
         }
 
         msg.timestamp = 0;
+        printf("Got play msg: %s\n", msg.msg);
 
         if(astrid_tick(msg.msg, &msglength, &msg.timestamp) < 0) {
             PyErr_Print();
