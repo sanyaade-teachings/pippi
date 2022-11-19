@@ -649,11 +649,11 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
     memcpy(audio, str + offset, audiosize);
     offset += audiosize;
 
-    memcpy(ctx->instrument_name, str + offset, namesize+1);
-    offset += namesize+1;
+    memcpy(ctx->instrument_name, str + offset, namesize);
+    offset += namesize;
 
-    memcpy(ctx->play_params, str + offset, paramsize+1);
-    offset += paramsize+1;
+    memcpy(ctx->play_params, str + offset, paramsize);
+    offset += paramsize;
 
     buf = calloc(1, sizeof(lpbuffer_t));
 
@@ -724,7 +724,6 @@ int send_play_message(lpeventctx_t * ctx) {
     qfd = open(qname, O_WRONLY);
 
     msg.timestamp = 0;
-    printf("Sending play msg: %s\n", msg.msg);
     if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
         fprintf(stderr, "Could not write to q...\n");
         return 1;
@@ -760,8 +759,6 @@ void send_redis_play_message(lpeventctx_t * ctx) {
     cmd_size = snprintf(NULL, 0, "LPUSH astrid-play-%s p %s", ctx->instrument_name, ctx->play_params) + 1;
     play_cmd = calloc(cmd_size, sizeof(char));
     snprintf(play_cmd, cmd_size, "LPUSH astrid-play-%s p %s", ctx->instrument_name, ctx->play_params);
-
-    /*printf("PLAY: %s\n", play_cmd);*/
 
     redis_reply = redisCommand(redis_ctx, play_cmd);
     if(redis_reply->str != NULL) printf("play result: %s\n", redis_reply->str); 

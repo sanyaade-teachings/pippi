@@ -40,8 +40,6 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
     cdef size_t audiosize, length, namesize, paramsize
     cdef int channels, samplerate
 
-    strbuf = bytearray()
-
     channels = <int>buf.channels
     samplerate = <int>buf.samplerate
     length = <size_t>len(buf)
@@ -53,6 +51,8 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
     paramsize = 0
     if play_params is not None:
         paramsize = <size_t>len(play_params)
+
+    strbuf = bytearray()
 
     strbuf += struct.pack('N', audiosize)
     strbuf += struct.pack('N', namesize)
@@ -184,6 +184,7 @@ cdef class EventContext:
         self.client = None
         self.instrument_name = instrument_name
         self.sounds = sounds
+        self.play_params = play_params
         #self.sampler = Sampler()
 
     def play(self, instrument_name, *params, **kwargs):
@@ -375,7 +376,7 @@ cdef int render_event(object instrument, str params):
     cdef double overlap
     cdef EventContext ctx = instrument.create_ctx(instrument.params, params)
 
-    logger.info('rendering event %s' % str(instrument))
+    logger.info('rendering event %s w/params %s' % (str(instrument), params))
 
     players, loop, overlap = collect_players(instrument)
 
