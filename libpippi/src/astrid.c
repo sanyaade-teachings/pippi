@@ -1,12 +1,5 @@
-#include <hiredis/hiredis.h>
-
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <unistd.h>
-
-#include "pippi.h"
 #include "astrid.h"
+
 
 int lpsampler_get_length(lpsampler_t * sampler, size_t * length) {
     struct flock fl;
@@ -620,14 +613,11 @@ char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_pa
     return str;
 }
 
-lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t ** ctx) {
+lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
     size_t audiosize, offset, length, onset, namesize, paramsize;
     int channels, samplerate, is_looping;
     lpbuffer_t * buf;
-    lpeventctx_t * _ctx;
     lpfloat_t * audio;
-
-    _ctx = (lpeventctx_t *)calloc(sizeof(lpeventctx_t), 1);
 
     offset = 0;
 
@@ -659,15 +649,11 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t ** ctx) {
     memcpy(audio, str + offset, audiosize);
     offset += audiosize;
 
-    _ctx->instrument_name = calloc(namesize+1, sizeof(char));
-    memcpy(_ctx->instrument_name, str + offset, namesize+1);
+    memcpy(ctx->instrument_name, str + offset, namesize+1);
     offset += namesize+1;
 
-    _ctx->play_params = calloc(paramsize+1, sizeof(char));
-    memcpy(_ctx->play_params, str + offset, paramsize+1);
+    memcpy(ctx->play_params, str + offset, paramsize+1);
     offset += paramsize+1;
-
-    *ctx = _ctx;
 
     buf = calloc(1, sizeof(lpbuffer_t));
 
@@ -686,7 +672,70 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t ** ctx) {
     return buf;
 }
 
-void send_play_message(lpeventctx_t * ctx) {
+int get_play_message(char * instrument_name, lpmsg_t * msg) {
+    int qfd;
+    char * qname;
+    ssize_t qname_length;
+    ssize_t read_result;
+
+    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
+    qname = calloc(qname_length, sizeof(char));
+    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
+
+    umask(0);
+    if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
+        fprintf(stderr, "Error creating named pipe\n");
+        return -1;
+    }
+
+    qfd = open(qname, O_RDONLY);
+    if((read_result = read(qfd, msg, sizeof(lpmsg_t))) != sizeof(lpmsg_t)) {
+        fprintf(stderr, "Read result: %d\n", (int)read_result);
+        fprintf(stderr, "Errno: %d\n", errno);
+        return -1;
+    }
+
+    if(close(qfd) == -1) {
+        fprintf(stderr, "Error closing q...\n");
+        return -1; 
+    }
+
+    return 0;
+}
+
+int send_play_message(lpeventctx_t * ctx) {
+    int qfd;
+    char * qname;
+    ssize_t qname_length;
+    lpmsg_t msg = {0};
+
+    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, ctx->instrument_name) + 1;
+    qname = calloc(qname_length, sizeof(char));
+    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, ctx->instrument_name);
+
+    umask(0);
+    if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
+        fprintf(stderr, "Error creating named pipe\n");
+        return -1;
+    }
+
+    qfd = open(qname, O_WRONLY);
+
+    msg.timestamp = 0;
+    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
+        fprintf(stderr, "Could not write to q...\n");
+        return 1;
+    }
+
+    if(close(qfd) == -1) {
+        fprintf(stderr, "Error closing q...\n");
+        return -1; 
+    }
+
+    return 0;
+}
+
+void send_redis_play_message(lpeventctx_t * ctx) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     ssize_t cmd_size;

@@ -429,27 +429,15 @@ cdef public int astrid_load_instrument() except -1:
 
     return 0
 
-cdef public int astrid_tick() except -1:
+cdef public int astrid_tick(char msg[LPMAXMSG], size_t * length, size_t * timestamp) except -1:
     global ASTRID_INSTRUMENT
+
+    cdef Py_ssize_t _length = length[0]
+    cdef size_t _timestamp = timestamp[0]
 
     # Reload instrument
     ASTRID_INSTRUMENT.reload()
-    msg = ''
-    try:
-        msg = _redis.blpop('astrid-play-%s' % ASTRID_INSTRUMENT.name)[1]
-    except IndexError:
-        logger.error('Could not read message from play queue: %s' % msg)
-        return -1
-
-    if msg[0] != 'p':
-        return 0
-
-    try:
-        msg = msg.decode('utf-8')
-    except UnicodeDecodeError:
-        print('ERROR', type(msg), len(msg), msg)
-        return -1
-    return render_event(ASTRID_INSTRUMENT, msg)
+    return render_event(ASTRID_INSTRUMENT, msg[:_length].decode('UTF-8'))
 
 
 

@@ -1,6 +1,16 @@
 #ifndef LPASTRID_H
 #define LPASTRID_H
 
+#include <hiredis/hiredis.h>
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include "pippi.h"
+
 #define NUM_RENDERERS 10
 #define ASTRID_CHANNELS 2
 #define ASTRID_SAMPLERATE 48000
@@ -13,16 +23,27 @@
 #define STOP_MESSAGE "s"
 #define SHUTDOWN_MESSAGE "k"
 
+#define SPACE ' '
+#define LPMAXNAME 20
+#define LPMAXMSG (PIPE_BUF - sizeof(size_t))
 #define LPADC_BUFNAME "/lpadcbuf"
+#define LPPLAYQ "/tmp/astridq"
+
 
 typedef struct lpeventctx_t {
-    char * instrument_name;
-    char * play_params;
+    char instrument_name[LPMAXNAME];
+    char play_params[LPMAXMSG];
 } lpeventctx_t;
 
+typedef struct lpmsg_t {
+    size_t timestamp;
+    char msg[LPMAXMSG];
+} lpmsg_t;
+
 char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_params); 
-lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t ** ctx); 
-void send_play_message(lpeventctx_t * ctx);
+lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx); 
+int send_play_message(lpeventctx_t * ctx);
+int get_play_message(char * instrument_name, lpmsg_t * msg);
 
 typedef struct lpsampler_t {
     int fd;

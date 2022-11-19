@@ -212,25 +212,29 @@ void scheduler_mix_buffers(lpscheduler_t * s) {
     }
 }
 
+void scheduler_try_callback(lpscheduler_t * s, lpevent_t * e) {
+    /* Execute callback if one has been registered */
+    if(
+        e->callback_fired == 0 && 
+        e->callback != NULL && 
+        s->now >= e->callback_onset
+    ) {
+        e->callback(e->ctx);
+        e->callback_fired = 1;
+    }
+}
+
 void scheduler_advance_buffers(lpscheduler_t * s) {
     lpevent_t * current;
  
     /* loop over buffers and advance their positions */
     if(s->playing_stack_head != NULL) {
         current = s->playing_stack_head;
+        scheduler_try_callback(s, current);
         while(current->next != NULL) {
-            /* Execute callback if one has been registered */
-            if(
-                current->callback_fired == 0 && 
-                current->callback != NULL && 
-                s->now >= current->callback_onset
-            ) {
-                /*printf("Firing callback...\n");*/
-                current->callback(current->ctx);
-                current->callback_fired = 1;
-            }
             current->pos += 1;
             current = (lpevent_t *)current->next;
+            scheduler_try_callback(s, current);
         }
         current->pos += 1;
     }
@@ -299,10 +303,6 @@ void scheduler_schedule_event(lpscheduler_t * s,
     e->ctx = ctx;
     e->callback_onset = s->now + callback_delay;
     e->callback_fired = 0;
-
-    /*printf("callback delay: %d\n", (int)callback_delay);*/
-    /*printf("callback onset: %d\n", (int)e->callback_onset);*/
-    /*printf("now: %d\n", (int)s->now);*/
 
     start_waiting(s, e);
 }

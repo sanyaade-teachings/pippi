@@ -67,9 +67,9 @@ astrid-adc:
 	echo "Building astrid adc...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/adc.c -o build/adc
 	
-astrid: astrid-dac astrid-adc astrid-renderer
+astrid: astrid-dac astrid-adc astrid-renderer astrid-q
 
-astrid-macos: astrid-dac astrid-adc astrid-renderer-macos
+astrid-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q
 
 silencer:
 	mkdir -p build renders

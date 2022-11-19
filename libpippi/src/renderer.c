@@ -25,10 +25,13 @@ int main() {
     char * astrid_pythonpath_env;
     size_t astrid_pythonpath_length;
     wchar_t * python_path;
+    size_t msglength = LPMAXMSG;
 
     char * _astrid_channels;
     lpastridctx_t * ctx;
     PyObject * pmodule;
+
+    lpmsg_t msg = {0};
 
     printf("Starting renderer...\n");
 
@@ -119,11 +122,20 @@ int main() {
     strcpy(instrument_fullpath, _instrument_fullpath);
     strcpy(instrument_basename, _instrument_basename);
 
+    printf("Renderer... is now rendering!\n");
     /* Start rendering! */
     while(astrid_is_running) {
-        if(astrid_tick() < 0) {
+        memset(msg.msg, 0, LPMAXMSG);
+        if(get_play_message(instrument_basename, &msg) < 0) {
+            fprintf(stderr, "Error fetching message during renderer loop\n");
+            goto lprender_cleanup;
+        }
+
+        msg.timestamp = 0;
+
+        if(astrid_tick(msg.msg, &msglength, &msg.timestamp) < 0) {
             PyErr_Print();
-            fprintf(stderr, "Error during renderer loop\n");
+            fprintf(stderr, "CPython error during renderer loop\n");
             goto lprender_cleanup;
         }
     }

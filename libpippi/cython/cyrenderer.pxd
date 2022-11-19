@@ -44,6 +44,7 @@ cdef extern from "scheduler.h":
         pass
 
 cdef extern from "astrid.h":
+    cdef const int LPMAXMSG
     ctypedef struct lpadcbuf_t:
         int fd
         char * buf

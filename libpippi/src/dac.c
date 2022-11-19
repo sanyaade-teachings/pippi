@@ -47,7 +47,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     lpbuffer_t * buf;
-    lpeventctx_t * ctx;
+    lpeventctx_t ctx = {0};
     struct timeval redis_timeout = {15, 0};
     size_t callback_delay = 0;
 
@@ -81,7 +81,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             buf = deserialize_buffer(redis_reply->element[2]->str, &ctx);
             if(buf->is_looping == 1) {
                 callback_delay = (size_t)(buf->length / 2);
-                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, ctx, callback_delay);
+                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, &ctx, callback_delay);
             } else {
                 LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL, callback_delay);
             }

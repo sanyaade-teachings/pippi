@@ -1,6 +1,10 @@
 ###########################
 HOW ASTRID TRIGGERING WORKS
 
+CONTEXTS:
+    - event context (cython)
+    - play context (libpippi)
+
 - dac.c
     
     3) buffer queue thread waits for buffers from redis `astridbuffers` list
