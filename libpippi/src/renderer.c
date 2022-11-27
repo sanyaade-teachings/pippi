@@ -1,5 +1,3 @@
-#include <fcntl.h>
-#include <unistd.h>
 #include <signal.h>
 #include <sys/syscall.h>
 
@@ -22,6 +20,7 @@ int main() {
 
     char * _instrument_fullpath; 
     char * _instrument_basename; 
+    size_t instrument_name_length;
     char * astrid_pythonpath_env;
     size_t astrid_pythonpath_length;
     wchar_t * python_path;
@@ -117,8 +116,9 @@ int main() {
 
     _instrument_fullpath = getenv("INSTRUMENT_PATH");
     _instrument_basename = getenv("INSTRUMENT_NAME");
+    instrument_name_length = strlen(_instrument_basename);
     instrument_fullpath = calloc(strlen(_instrument_fullpath)+1, sizeof(char));
-    instrument_basename = calloc(strlen(_instrument_basename)+1, sizeof(char));
+    instrument_basename = calloc(instrument_name_length+1, sizeof(char));
     strcpy(instrument_fullpath, _instrument_fullpath);
     strcpy(instrument_basename, _instrument_basename);
 

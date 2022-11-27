@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include <signal.h>
 #include <sys/time.h>
 #include <string.h>
@@ -9,7 +8,6 @@
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
-#include <hiredis/hiredis.h>
 
 #include "pippi.h"
 #include "astrid.h"
@@ -20,6 +18,7 @@ static volatile int adc_is_running = 1;
 static volatile int adc_is_capturing = 1;
 
 void handle_shutdown(int) {
+    adc_is_capturing = 0;
     adc_is_running = 0;
 }
 
@@ -55,9 +54,6 @@ void miniaudio_callback(
 int main() {
     lpadcbuf_t * adcbuf;
 
-    redisContext * status_redis;
-    redisReply * status_reply;
-
     /* setup SIGNINT handler for shutdown */
     struct sigaction action;
     action.sa_handler = handle_shutdown;
@@ -72,22 +68,7 @@ int main() {
         fprintf(stderr, "Could not init SIGTERM signal handler.\n");
         exit(1);
     }
-
-
-    /* Connect to redis for status polling */
-    struct timeval redis_timeout = {15, 0};
-    status_redis = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
     
-    if(status_redis == NULL) {
-        fprintf(stderr, "Could not start connection to redis.\n");
-        goto exit_with_error;
-    }
-
-    if(status_redis->err) {
-        fprintf(stderr, "There was a problem while connecting to redis. %s\n", status_redis->errstr);
-        goto exit_with_error;
-    }
-
     /* Create shared memory buffer */
     adcbuf = lpadc_create();
     if(adcbuf == NULL) {
@@ -110,29 +91,19 @@ int main() {
         goto exit_with_error;
     }
 
-    /* Set capturing flag to ON */
-    status_reply = redisCommand(status_redis, "SET adc_is_capturing 1");
-    freeReplyObject(status_reply);
-
     /* start miniaudio device */
     ma_device_start(&mad);
 
     while(adc_is_running) {
         usleep((useconds_t)1000000);
-        status_reply = redisCommand(status_redis, "GET adc_is_capturing");
-        adc_is_capturing = atoi(status_reply->str);
-        if(adc_is_capturing == 0) printf("adc_is_capturing %s\n", status_reply->str);
-        freeReplyObject(status_reply);
     }
 
-    redisFree(status_redis);
     ma_device_uninit(&mad);
     lpadc_close(adcbuf);
     lpadc_destroy(adcbuf);
     return 0;
 
 exit_with_error:
-    if(status_redis != NULL) redisFree(status_redis);
     ma_device_uninit(&mad);
     lpadc_close(adcbuf);
     lpadc_destroy(adcbuf);

@@ -4,7 +4,7 @@ lpscheduler_t * scheduler_create(int);
 lpfloat_t scheduler_read_channel(lpscheduler_t * s, int channel);
 void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay, void (*callback)(void *), void * ctx, size_t callback_delay);
 void scheduler_destroy(lpscheduler_t * s);
-void start_playing(lpscheduler_t * s, lpevent_t * e);
+static inline void start_playing(lpscheduler_t * s, lpevent_t * e);
 void scheduler_debug(lpscheduler_t * s);
 void scheduler_cleanup_nursery(lpscheduler_t * s);
 
@@ -39,7 +39,7 @@ int ll_count(lpevent_t * head) {
 }
 
 /* Add event to the tail of the waiting queue */
-void start_waiting(lpscheduler_t * s, lpevent_t * e) {
+static inline void start_waiting(lpscheduler_t * s, lpevent_t * e) {
     lpevent_t * current;
 
     if(s->waiting_queue_head == NULL) {
@@ -53,7 +53,7 @@ void start_waiting(lpscheduler_t * s, lpevent_t * e) {
     }
 } 
 
-void start_playing(lpscheduler_t * s, lpevent_t * e) {
+static inline void start_playing(lpscheduler_t * s, lpevent_t * e) {
     lpevent_t * current;
     lpevent_t * prev;
 
@@ -88,7 +88,7 @@ void start_playing(lpscheduler_t * s, lpevent_t * e) {
     }
 }
 
-void stop_playing(lpscheduler_t * s, lpevent_t * e) {
+static inline void stop_playing(lpscheduler_t * s, lpevent_t * e) {
     lpevent_t * current;
     lpevent_t * prev;
 
@@ -143,7 +143,7 @@ lpscheduler_t * scheduler_create(int channels) {
 }
 
 /* look for events waiting to be scheduled */
-void scheduler_update(lpscheduler_t * s) {
+static inline void scheduler_update(lpscheduler_t * s) {
     lpevent_t * current;
     void * next;
     if(s->waiting_queue_head != NULL) {
@@ -179,7 +179,7 @@ void scheduler_update(lpscheduler_t * s) {
 }
 
 
-void scheduler_mix_buffers(lpscheduler_t * s) {
+static inline void scheduler_mix_buffers(lpscheduler_t * s) {
     lpevent_t * current;
     lpfloat_t sample;
     int bufc, c;
@@ -212,7 +212,7 @@ void scheduler_mix_buffers(lpscheduler_t * s) {
     }
 }
 
-void scheduler_try_callback(lpscheduler_t * s, lpevent_t * e) {
+static inline void scheduler_try_callback(lpscheduler_t * s, lpevent_t * e) {
     /* Execute callback if one has been registered */
     if(
         e->callback_fired == 0 && 
@@ -224,17 +224,15 @@ void scheduler_try_callback(lpscheduler_t * s, lpevent_t * e) {
     }
 }
 
-void scheduler_advance_buffers(lpscheduler_t * s) {
+static inline void scheduler_advance_buffers(lpscheduler_t * s) {
     lpevent_t * current;
  
     /* loop over buffers and advance their positions */
     if(s->playing_stack_head != NULL) {
         current = s->playing_stack_head;
-        scheduler_try_callback(s, current);
         while(current->next != NULL) {
             current->pos += 1;
             current = (lpevent_t *)current->next;
-            scheduler_try_callback(s, current);
         }
         current->pos += 1;
     }
@@ -260,6 +258,18 @@ void scheduler_debug(lpscheduler_t * s) {
         ll_display(s->nursery_head);
     } else {
         printf("none done\n");
+    }
+}
+
+void lpscheduler_handle_callbacks(lpscheduler_t * s) {
+    lpevent_t * current;
+    if(s->playing_stack_head != NULL) {
+        current = s->playing_stack_head;
+        scheduler_try_callback(s, current);
+        while(current->next != NULL) {
+            current = (lpevent_t *)current->next;
+            scheduler_try_callback(s, current);
+        }
     }
 }
 
@@ -381,4 +391,4 @@ void scheduler_cleanup_nursery(lpscheduler_t * s) {
     }
 }
 
-const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, scheduler_is_playing, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_cleanup_nursery, scheduler_destroy };
+const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, lpscheduler_handle_callbacks, scheduler_is_playing, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_cleanup_nursery, scheduler_destroy };

@@ -366,7 +366,6 @@ cdef tuple collect_players(object instrument):
         and isinstance(instrument.renderer.PLAYERS, set):
         players |= instrument.renderer.PLAYERS
     
-    #logger.info('COLLECT_PLAYERS players: %s' % players)
     return players, loop, overlap
 
 cdef int render_event(object instrument, str params):
@@ -376,7 +375,7 @@ cdef int render_event(object instrument, str params):
     cdef double overlap
     cdef EventContext ctx = instrument.create_ctx(instrument.params, params)
 
-    logger.info('rendering event %s w/params %s' % (str(instrument), params))
+    logger.debug('rendering event %s w/params %s' % (str(instrument), params))
 
     players, loop, overlap = collect_players(instrument)
 

@@ -23,7 +23,7 @@ ALLSOURCES = vendor/fft/fft.c \
 FLAGS = -g -std=gnu2x -Werror -Wall -Wextra -pedantic -lm -Isrc -Ivendor
 
 clean:
-	rm build/*
+	rm -rf build/*
 	rm renders/*.wav
 
 astrid-renderer:
@@ -31,20 +31,20 @@ astrid-renderer:
 
 	echo "Building astrid renderer...";
 	cython cython/cyrenderer.pyx
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor `python3-config --cflags` -Icython -l$(PYLIB) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor `python3-config --cflags` -Icython -l$(PYLIB) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 
 astrid-q:
 	echo "Building astrid queue reader...";
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qreader.c -o build/qreader
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qserver.c -o build/qserver
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qmessage.c -o build/qmessage
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qreader.c -o build/qreader
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qserver.c -o build/qserver
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qmessage.c -o build/qmessage
 
 astrid-renderer-macos:
 	mkdir -p build renders
 
 	echo "Building astrid renderer...";
 	cython cython/cyrenderer.pyx
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor `python3-config --cflags --ldflags` -Icython -l$(PYLIB) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor `python3-config --cflags --ldflags` -Icython -l$(PYLIB) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
 
 astrid-dac:
 	mkdir -p build renders
@@ -52,20 +52,11 @@ astrid-dac:
 	echo "Building astrid dac...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/dac.c -o build/dac
 
-astrid-tools:
-	mkdir -p build renders
-
-	echo "Building astrid adc reader...";
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c tools/adcreader.c -o build/adcreader
-
-	echo "Building astrid minadc...";
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c tools/minadc.c -o build/minadc
-	
 astrid-adc:
 	mkdir -p build renders
 
 	echo "Building astrid adc...";
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -lhiredis -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/adc.c -o build/adc
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/adc.c -o build/adc
 	
 astrid: astrid-dac astrid-adc astrid-renderer astrid-q
 

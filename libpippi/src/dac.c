@@ -1,11 +1,7 @@
-#include <fcntl.h>
-#include <unistd.h>
 #include <signal.h>
 #include <sys/syscall.h>
 
-#include "pippi.h"
 #include "astrid.h"
-#include "dac.h"
 
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_NO_PULSEAUDIO
@@ -72,8 +68,10 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     freeReplyObject(redis_reply);
 
     /* Wait on buffers from the queue */
+    printf("Waiting for buffers...\n");
     while(astrid_is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
         if(redis_reply->type == REDIS_REPLY_ARRAY) {
+            printf("Got message on redis buffer channel...\n");
             if(redis_reply->element[2]->str[0] == 's') {
                 printf("Buffer feed got shutdown message\n");
                 break;
@@ -202,6 +200,7 @@ int main() {
         exit(1);
     }
 
+
     /* init scheduler and ctx */
     astrid_scheduler = LPScheduler.create(astrid_channels);
     ctx = (lpdacctx_t*)LPMemoryPool.alloc(1, sizeof(lpdacctx_t));
@@ -254,8 +253,9 @@ int main() {
     printf("Running...\n");
     while(astrid_is_running) {
         /* Twiddle thumbs */
-        usleep((useconds_t)10000);
+        usleep((useconds_t)1000);
         /*LPScheduler.empty(ctx->s);*/
+        LPScheduler.handle_callbacks(ctx->s);
     }
 
     return cleanup(&playback, ctx, buffer_feed_thread);

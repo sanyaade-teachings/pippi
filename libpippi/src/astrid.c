@@ -672,14 +672,17 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
     return buf;
 }
 
+// TODO
+// - break into: open/create, read, close
+// - call open only once in the lifetime of the cb...
 int get_play_message(char * instrument_name, lpmsg_t * msg) {
     int qfd;
-    char * qname;
     ssize_t qname_length;
+    char qname[LPMAXQNAME] = {0};
     ssize_t read_result;
 
     qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
-    qname = calloc(qname_length, sizeof(char));
+    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
     snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
 
     umask(0);
@@ -704,16 +707,14 @@ int get_play_message(char * instrument_name, lpmsg_t * msg) {
 }
 
 int send_play_message(lpeventctx_t * ctx) {
-    int qfd;
-    char * qname;
+    char qname[LPMAXQNAME] = {0};
     ssize_t qname_length;
     lpmsg_t msg = {0};
+    int qfd;
 
     qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, ctx->instrument_name) + 1;
-    qname = calloc(qname_length, sizeof(char));
+    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
     snprintf(qname, qname_length, "%s-%s", LPPLAYQ, ctx->instrument_name);
-
-    strncpy(msg.msg, ctx->play_params, LPMAXMSG);
 
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
@@ -723,46 +724,19 @@ int send_play_message(lpeventctx_t * ctx) {
 
     qfd = open(qname, O_WRONLY);
 
+    strncpy(msg.msg, ctx->play_params, LPMAXMSG);
     msg.timestamp = 0;
+
     if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
         fprintf(stderr, "Could not write to q...\n");
-        return 1;
+        return -1;
     }
 
     if(close(qfd) == -1) {
-        fprintf(stderr, "Error closing q...\n");
+        fprintf(stderr, "Error closing play q...\n");
         return -1; 
     }
 
     return 0;
 }
 
-void send_redis_play_message(lpeventctx_t * ctx) {
-    redisContext * redis_ctx;
-    redisReply * redis_reply;
-    ssize_t cmd_size;
-    char * play_cmd;
-    struct timeval redis_timeout = {15, 0};
-
-    /* FIXME pass in a connection instead */
-    redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
-    if(redis_ctx == NULL) {
-        fprintf(stderr, "Could not start connection to redis.\n");
-        exit(1);
-    }
-
-    if(redis_ctx->err) {
-        fprintf(stderr, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
-        exit(1);
-    }
-
-    cmd_size = snprintf(NULL, 0, "LPUSH astrid-play-%s p %s", ctx->instrument_name, ctx->play_params) + 1;
-    play_cmd = calloc(cmd_size, sizeof(char));
-    snprintf(play_cmd, cmd_size, "LPUSH astrid-play-%s p %s", ctx->instrument_name, ctx->play_params);
-
-    redis_reply = redisCommand(redis_ctx, play_cmd);
-    if(redis_reply->str != NULL) printf("play result: %s\n", redis_reply->str); 
-    freeReplyObject(redis_reply);
-
-    if(redis_ctx != NULL) redisFree(redis_ctx); 
-}

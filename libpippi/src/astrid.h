@@ -1,8 +1,6 @@
 #ifndef LPASTRID_H
 #define LPASTRID_H
 
-#include <hiredis/hiredis.h>
-
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -28,7 +26,13 @@
 #define LPMAXMSG (PIPE_BUF - sizeof(size_t))
 #define LPADC_BUFNAME "/lpadcbuf"
 #define LPPLAYQ "/tmp/astridq"
+#define LPMAXQNAME (12 + 1 + LPMAXNAME)
 
+typedef struct lpdacctx_t {
+    lpscheduler_t * s;
+    int channels;
+    float samplerate;
+} lpdacctx_t;
 
 typedef struct lpeventctx_t {
     char instrument_name[LPMAXNAME];

@@ -78,6 +78,7 @@ class AstridConsole(cmd.Cmd):
             self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
 
         r.lpush('astrid-play-%s' % instrument, 'p' + params)
+        subprocess.run('./build/qmessage', instrument, params)
 
     def do_v(self, cmd):
         k, v = tuple(cmd.split('='))
@@ -87,13 +88,15 @@ class AstridConsole(cmd.Cmd):
         print(self.instruments)
 
     def do_s(self, instrument):
-        if instrument in self.instruments:
-            r.lpush('astrid-play-%s' % instrument, 'stop')
+        #if instrument in self.instruments:
+        #    r.lpush('astrid-play-%s' % instrument, 'stop')
+        pass
 
     def do_k(self, instrument):
-        if instrument in self.instruments:
-            r.lpush('astrid-play-%s' % instrument, 'kill')
-            self.instruments[instrument].terminate()
+        #if instrument in self.instruments:
+        #    r.lpush('astrid-play-%s' % instrument, 'kill')
+        #    self.instruments[instrument].terminate()
+        pass
 
     def do_quit(self, cmd):
         self.quit()
@@ -110,7 +113,7 @@ class AstridConsole(cmd.Cmd):
     def quit(self):
         print('Quitting')
         for instrument in self.instruments:
-            r.lpush('astrid-play-%s' % instrument, 'kill')
+            #r.lpush('astrid-play-%s' % instrument, 'kill')
             self.instruments[instrument].terminate()
 
         if self.dac is not None:
