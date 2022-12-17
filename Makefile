@@ -93,12 +93,11 @@ clean:
 rpi-install:
 	sudo apt update -y
 	sudo apt upgrade -y
-	sudo apt install python3-pillow python3-numpy python3-aubio python3-mido python3-rtmidi
-	pip install --upgrade pip
+	sudo apt install libsndfile1-dev python3-pip python3-pillow python3-numpy python3-aubio python3-mido python3-rtmidi
 	pip install -r rpi-requirements.txt
 	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install
-	python setup.py develop
+	python setup.py develop --user
 
 cirrus-install:
 	DEBIAN_FRONTEND=noninteractive apt update && apt install libsndfile1-dev --yes
