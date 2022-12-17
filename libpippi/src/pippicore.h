@@ -56,10 +56,17 @@ typedef double lpfloat_t;
 #define LORENZ_Y_DEFAULT 0.0
 #define LORENZ_Z_DEFAULT 0.0
 
-#define PLOT_WIDTH 80
+/* plot width/height is measured in display chars */
+#define PLOT_WIDTH 60
 #define PLOT_HEIGHT 10
+
+/* braille width/height correspond to the number of dots in 
+ * each unicode braille char: 2 columns of 4 dots */
 #define BRAILLE_WIDTH 2
 #define BRAILLE_HEIGHT 4
+
+/* This is the virtual pixel grid, drawn in braille dot 
+ * configurations across the field of braille chars */
 #define PIXEL_WIDTH (PLOT_WIDTH * BRAILLE_WIDTH)
 #define PIXEL_HEIGHT (PLOT_HEIGHT * BRAILLE_HEIGHT)
 

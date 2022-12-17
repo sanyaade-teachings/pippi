@@ -654,6 +654,16 @@ void env_buffer(lpbuffer_t * buf, lpbuffer_t * env) {
     }
 }
 
+void print_pixels(int * pixels, int width, int height) {
+    int x, y;
+    for(y=0; y < height; y++) {
+        for(x=0; x < width; x++) {
+            fprintf(stderr, "%d", pixels[x * PIXEL_HEIGHT + y]);
+        }
+        fprintf(stderr, "\n");
+    }
+}
+
 wchar_t get_grid_char(int pixels[BRAILLE_WIDTH * BRAILLE_HEIGHT]) {
     int i, r;
     int map[BRAILLE_WIDTH * BRAILLE_HEIGHT] = {0,2,4,1,3,5,6,7};
@@ -670,44 +680,36 @@ wchar_t get_grid_char(int pixels[BRAILLE_WIDTH * BRAILLE_HEIGHT]) {
      *   braille:  0  2  4  1  3  5  6  7
      *   byte idx: 1  2  4  8  16 32 64 128
      */
+    //print_pixels(pixels, BRAILLE_WIDTH, BRAILLE_HEIGHT);
     r = 0;
+    fprintf(stderr, "BEG\n");
     for(i=0; i < BRAILLE_WIDTH * BRAILLE_HEIGHT; i++) {
+        fprintf(stderr, "pixels[map[%d]]=%d pixels[%d]=%d\n", i, pixels[map[i]], i, pixels[i]);
         if(pixels[map[i]] == 1) {
+            fprintf(stderr, "  map[%d]: %d exp2(%d): %d\n", i, map[i], i, (int)exp2(i));
             r += (int)exp2(i);
         }
     }
+    fprintf(stderr, "END\n");
 
     return (wchar_t)(GRID_EMPTY + r);
 }
 
-void print_pixels(int * pixels, int width, int height) {
-    int x, y;
-    for(y=0; y < height; y++) {
-        for(x=0; x < width; x++) {
-            printf("%d", pixels[x * PIXEL_HEIGHT + y]);
-        }
-        printf("\n");
-    }
-}
-
 void copy_pixels_to_block(int * pixels, int offset_x, int offset_y, int * block, int width, int height) {
     int x, y, px, py;
-    //printf("offset x: %d offset y: %d\n", offset_x, offset_y);
     for(x=0; x < width; x++) {
         for(y=0; y < height; y++) {
             px = x + offset_x;
             py = y + offset_y;
-            //printf("px: %d py: %d\n", px, py);
-            //block[j * height + i] = pixels[(offset_x+j) * PIXEL_HEIGHT + (offset_y+i)];
-            //block[j * height + i] = pixels[(offset_x+j) * PIXEL_HEIGHT + (offset_y+i)];
             block[x * height + y] = pixels[px * height + py];
         }
     }
 }
 
 void plot_buffer(lpbuffer_t * buf) {
-    size_t i, pos, blocksize, crossing_count;
-    int c, current, lastsign, color;
+    size_t i, pos, blocksize;
+    int c;
+    int color;
     int px, py1, py2, py;
     int cx, cy;
     float sample, peak, low;
@@ -726,8 +728,6 @@ void plot_buffer(lpbuffer_t * buf) {
         peak = 0;
         low = 0;
 
-        crossing_count = 0;
-        lastsign = 0;
         for(i=0; i < blocksize; i++) {
             sample = 0.f;
             for(c=0; c < buf->channels; c++) {
@@ -736,17 +736,8 @@ void plot_buffer(lpbuffer_t * buf) {
 
             peak = fmax(peak, sample);
             low = fmin(low, sample);
-            //printf("speak: %.04f slow: %.04f\n", peak, low);
-
-            current = signbit(sample); 
-            if((lastsign && !current) || (!lastsign && current)) {
-                crossing_count += 1;
-            }
-            lastsign = current;
         }
 
-        //printf("crossings: %d\n", (int)crossing_count);
-        //printf("speak: %.04f slow: %.04f\n", (double)peak, (double)low);
         peak = fmin(1.f, (peak+1.f)/2.f);
         low = fmax(0.f, (low+1.f)/2.f);
 
@@ -757,41 +748,27 @@ void plot_buffer(lpbuffer_t * buf) {
 
         pos += blocksize;
         px += 1;
-        //printf("px: %d py1: %d py2: %d\n", px, py1, py2);
-        //printf("high: %.04f low: %.04f\n", (double)peak, (double)low);
 
         assert(px <= PIXEL_WIDTH);
     }
 
 
-    print_pixels(pixels, 0, 0);
-    //print_pixels(pixel_block, 2, 4);
-    for(cy=0; cy < 4; cy++) {
-        for(cx=0; cx < 4; cx++) {
+    print_pixels(pixels, PIXEL_WIDTH, PIXEL_HEIGHT);
+    /* for each braille char row */
+    for(cy=0; cy < PLOT_HEIGHT; cy++) {
+        /* for each braille char column in this row */
+        py = cy * BRAILLE_HEIGHT;
+        for(cx=0; cx < PLOT_WIDTH; cx++) {
             px = cx * BRAILLE_WIDTH;
-            py = cy * BRAILLE_HEIGHT;
-
-            crossing_count = 255;
-            //crossing_count += crossings[x];
-            //printf("\n");
-            //printf("-- pixel block: \n");
-            //printf("cx: %d cy %d\n", cx, cy);
-            //printf("px: %d py %d\n", px, py);
 
             copy_pixels_to_block(pixels, px, py, pixel_block, BRAILLE_WIDTH, BRAILLE_HEIGHT);
-            //print_pixels(pixel_block, BRAILLE_WIDTH, BRAILLE_HEIGHT);
-
-            // Get the average crossing count
-            //crossing_count = (int)((float)crossing_count / (BRAILLE_HEIGHT * BRAILLE_WIDTH));
-
-            // then convert to braille char and print
-            //color = (int)((crossing_count / 15.f) * 23) + 232;
-            color = crossing_count;
+            fprintf(stderr, "\n\npixel_block\n");
+            print_pixels(pixel_block, BRAILLE_WIDTH, BRAILLE_HEIGHT);
+            color = 255; // FIXME do something fun (or useful?)
             printf("\033[38;5;%dm", color);
             w = get_grid_char(pixel_block);
-            //printf("   grid char: %lc", w);
             printf("%lc", w);
-            //printf("\n");
+            fprintf(stderr, "GOT %lc\n\n", w);
         } 
         printf("\n");
     }
