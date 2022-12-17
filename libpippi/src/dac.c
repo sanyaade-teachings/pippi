@@ -17,7 +17,7 @@ int astrid_channels = 2;
 lpscheduler_t * astrid_scheduler;
 
 /* Callback for SIGINT */
-void handle_shutdown(int) {
+void handle_shutdown(int sig __attribute__((unused))) {
     astrid_is_running = 0;
 }
 

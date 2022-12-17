@@ -17,7 +17,7 @@
 static volatile int adc_is_running = 1;
 static volatile int adc_is_capturing = 1;
 
-void handle_shutdown(int) {
+void handle_shutdown(int sig __attribute__((unused))) {
     adc_is_capturing = 0;
     adc_is_running = 0;
 }
