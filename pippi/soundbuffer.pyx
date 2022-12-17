@@ -5,11 +5,12 @@ import random
 import reprlib
 import warnings
 
-from pysndfile import sndio
-import numpy as np
 cimport numpy as np
 cimport cython
 from libc cimport math
+
+import numpy as np
+import soundfile as sf
 
 from pippi.wavetables cimport Wavetable, CONSTANT, LINEAR, SINE, GOGINS, _window, _adsr, to_window, to_flag
 from pippi.dsp cimport _mag
@@ -223,7 +224,7 @@ cdef class SoundBuffer:
         of the soundfile being read. (Or don't!)
         Overflows (reading beyond the boundries of the file) are filled with silence so the length 
         param is always respected and will return a SoundBuffer of the requested length. This is 
-        just a wrapper around pysndfile's sndio.PySndfile().read method.
+        just a wrapper around the `soundfile` libsndfile wrapper's read method.
 
         Data loaded via the `buf` keyword must be interpretable by cython as a memoryview on a 2D array 
         of doubles. (A numpy ndarray for example.)
@@ -243,6 +244,34 @@ cdef class SoundBuffer:
         the SoundBuffer will be initialized with silence to the given length in seconds.
         
         Otherwise an empty SoundBuffer is created with a length of zero.
+
+        Supported formats for soundfile reading & writing via libsndfile:
+            AIFF - AIFF (Apple/SGI)
+            AU - AU (Sun/NeXT)
+            AVR - AVR (Audio Visual Research)
+            CAF - CAF (Apple Core Audio File)
+            FLAC - FLAC (Free Lossless Audio Codec)
+            HTK - HTK (HMM Tool Kit)
+            SVX - IFF (Amiga IFF/SVX8/SV16)
+            MAT4 - MAT4 (GNU Octave 2.0 / Matlab 4.2)
+            MAT5 - MAT5 (GNU Octave 2.1 / Matlab 5.0)
+            MPC2K - MPC (Akai MPC 2k)
+            OGG - OGG (OGG Container format)
+            PAF - PAF (Ensoniq PARIS)
+            PVF - PVF (Portable Voice Format)
+            RAW - RAW (header-less)
+            RF64 - RF64 (RIFF 64)
+            SD2 - SD2 (Sound Designer II)
+            SDS - SDS (Midi Sample Dump Standard)
+            IRCAM - SF (Berkeley/IRCAM/CARL)
+            VOC - VOC (Creative Labs)
+            W64 - W64 (SoundFoundry WAVE 64)
+            WAV - WAV (Microsoft)
+            NIST - WAV (NIST Sphere)
+            WAVEX - WAVEX (Microsoft)
+            WVE - WVE (Psion Series 3)
+            XI - XI (FastTracker 2)
+
     """
 
     def __cinit__(SoundBuffer self, 
@@ -251,17 +280,15 @@ cdef class SoundBuffer:
                int channels=DEFAULT_CHANNELS, 
                int samplerate=DEFAULT_SAMPLERATE, 
            unicode filename=None, 
-            double start=0, 
+               int offset=0, 
        double[:,:] buf=None):
         self.samplerate = samplerate
         self.channels = max(channels, 1)
-        cdef int framestart = 0
         cdef int framelength = <int>(length * self.samplerate)
         cdef double[:] tmplist
 
         if filename is not None:
-            framestart = <int>(start * self.samplerate)
-            self.frames, self.samplerate, _ = sndio.read(filename, framelength, framestart, dtype=np.float64, force_2d=True)
+            self.frames, self.samplerate = sf.read(filename, framelength-offset, offset, dtype='float64', fill_value=0, always_2d=True)
             self.channels = self.frames.shape[1]
 
         elif buf is not None:
@@ -1084,7 +1111,7 @@ cdef class SoundBuffer:
         cdef int hits = 0
 
         if end:
-            current = abs(sum(self.frames[trimend]))
+            current = abs(sum(self.frames[trimend])/<float>self.channels)
 
             while True:
                 if current > threshold:
@@ -1095,11 +1122,11 @@ cdef class SoundBuffer:
                 if trimend <= 0 or hits >= window:
                     break
 
-                current = abs(sum(self.frames[trimend]))
+                current = abs(sum(self.frames[trimend])/<float>self.channels)
 
         if start:
             hits = 0
-            current = abs(sum(self.frames[trimstart]))
+            current = abs(sum(self.frames[trimstart])/<float>self.channels)
 
             while True:
                 if current > threshold:
@@ -1110,7 +1137,7 @@ cdef class SoundBuffer:
                 if trimstart >= boundry or hits >= window:
                     break
 
-                current = abs(sum(self.frames[trimstart]))
+                current = abs(sum(self.frames[trimstart])/<float>self.channels)
 
         return self[trimstart:trimend].copy()
 
@@ -1122,11 +1149,39 @@ cdef class SoundBuffer:
 
     def write(self, unicode filename=None):
         """ Write the contents of this buffer to disk 
-            in the given audio file format. (WAV, AIFF, AU)
+            in the given audio file format. 
+
+            Supported formats via libsndfile:
+                AIFF - AIFF (Apple/SGI)
+                AU - AU (Sun/NeXT)
+                AVR - AVR (Audio Visual Research)
+                CAF - CAF (Apple Core Audio File)
+                FLAC - FLAC (Free Lossless Audio Codec)
+                HTK - HTK (HMM Tool Kit)
+                SVX - IFF (Amiga IFF/SVX8/SV16)
+                MAT4 - MAT4 (GNU Octave 2.0 / Matlab 4.2)
+                MAT5 - MAT5 (GNU Octave 2.1 / Matlab 5.0)
+                MPC2K - MPC (Akai MPC 2k)
+                OGG - OGG (OGG Container format)
+                PAF - PAF (Ensoniq PARIS)
+                PVF - PVF (Portable Voice Format)
+                RAW - RAW (header-less)
+                RF64 - RF64 (RIFF 64)
+                SD2 - SD2 (Sound Designer II)
+                SDS - SDS (Midi Sample Dump Standard)
+                IRCAM - SF (Berkeley/IRCAM/CARL)
+                VOC - VOC (Creative Labs)
+                W64 - W64 (SoundFoundry WAVE 64)
+                WAV - WAV (Microsoft)
+                NIST - WAV (NIST Sphere)
+                WAVEX - WAVEX (Microsoft)
+                WVE - WVE (Psion Series 3)
+                XI - XI (FastTracker 2)
+
         """
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            sndio.write(filename, np.asarray(self.frames), self.samplerate)
+            sf.write(filename, np.asarray(self.frames), self.samplerate)
 
 
 cpdef object rebuild_buffer(double[:,:] frames, int channels, int samplerate):

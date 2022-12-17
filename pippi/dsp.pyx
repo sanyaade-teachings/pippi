@@ -167,17 +167,17 @@ cpdef Wavetable load(object filename):
     frames, samplerate, _ = sndio.read(filename, dtype=np.float64, force_2d=False)
     return Wavetable(frames)
 
-cpdef SoundBuffer read(object filename, double length=-1, double start=0):
+cpdef SoundBuffer read(object filename, double length=-1, int offset=0):
     """ Read a pysndfile from disk and return a `SoundBuffer` with its contents.
         May include a start position and length in seconds to read a segment from a large file.
 
         The `filename` param is always converted to a string, so it is safe to pass a 
         `Path` instance from the standard library `pathlib` module.
     """
-    return SoundBuffer(filename=str(filename), length=length, start=start)
+    return SoundBuffer(filename=str(filename), length=length, offset=offset)
 
-cpdef list readall(str path, double length=-1, double start=0):
-    return [ read(filename, length, start) for filename in Path('.').glob(path) ]
+cpdef list readall(str path, double length=-1, int offset=0):
+    return [ read(filename, length, offset) for filename in Path('.').glob(path) ]
 
 cpdef double rand(double low=0, double high=1):
     return _rand.rand(low, high)
