@@ -519,6 +519,10 @@ cdef class SoundBuffer:
         LPBuffer.clear(self.buffer)
         return self
 
+    def clip(SoundBuffer self, double minval=-1, double maxval=1):
+        LPBuffer.clip(self.buffer, minval, maxval)
+        return self
+
     cpdef SoundBuffer convolve(SoundBuffer self, SoundBuffer impulse, bint norm=True):
         cdef lpbuffer_t * out
 

@@ -49,6 +49,7 @@ void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void split2_buffer(lpbuffer_t * src, lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * remix_buffer(lpbuffer_t * buf, int channels);
+void clip_buffer(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval);
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length);
 void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length);
 lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length);
@@ -108,7 +109,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -658,9 +659,9 @@ void print_pixels(int * pixels, int width, int height) {
     int x, y;
     for(y=0; y < height; y++) {
         for(x=0; x < width; x++) {
-            fprintf(stderr, "%d", pixels[x * PIXEL_HEIGHT + y]);
+            fprintf(stdout, "%d", pixels[x * PIXEL_HEIGHT + y]);
         }
-        fprintf(stderr, "\n");
+        fprintf(stdout, "\n");
     }
 }
 
@@ -701,7 +702,7 @@ void copy_pixels_to_block(int * pixels, int offset_x, int offset_y, int * block,
         for(y=0; y < height; y++) {
             px = x + offset_x;
             py = y + offset_y;
-            block[x * height + y] = pixels[px * height + py];
+            block[x * height + y] = pixels[px * PIXEL_HEIGHT + py];
         }
     }
 }
@@ -724,6 +725,19 @@ void plot_buffer(lpbuffer_t * buf) {
     px = 0;
     py1 = 0;
     py2 = 0;
+
+    /* Trace a temporary pixel buffer:
+     *     1s at peaks and lows, 0s elsewhere.
+     *
+     * Width is PIXEL_WIDTH 
+     *     where each pixel is a 1 at the averaged peaks and 
+     *     lows of the block size computed from the buffer length.
+     *
+     * Height is PIXEL_HEIGHT
+     *     with buffer values scaled from 
+     *     a -1.f to 1.f domain to 
+     *     a range of 0 to PIXEL_HEIGHT pixels.
+     */
     while(pos <= buf->length-blocksize) {
         peak = 0;
         low = 0;
@@ -734,12 +748,12 @@ void plot_buffer(lpbuffer_t * buf) {
                 sample += (float)buf->data[(i+pos) * buf->channels + c];
             }
 
-            peak = fmax(peak, sample);
-            low = fmin(low, sample);
+            peak = lpfmax(peak, sample);
+            low = lpfmin(low, sample);
         }
 
-        peak = fmin(1.f, (peak+1.f)/2.f);
-        low = fmax(0.f, (low+1.f)/2.f);
+        peak = lpfmin(1.f, (peak+1.f)/2.f);
+        low = lpfmax(0.f, (low+1.f)/2.f);
 
         py1 = (int)(peak * PIXEL_HEIGHT);
         py2 = (int)(low * PIXEL_HEIGHT);
@@ -763,7 +777,7 @@ void plot_buffer(lpbuffer_t * buf) {
 
             copy_pixels_to_block(pixels, px, py, pixel_block, BRAILLE_WIDTH, BRAILLE_HEIGHT);
             fprintf(stderr, "\n\npixel_block\n");
-            print_pixels(pixel_block, BRAILLE_WIDTH, BRAILLE_HEIGHT);
+            //print_pixels(pixel_block, BRAILLE_WIDTH, BRAILLE_HEIGHT);
             color = 255; // FIXME do something fun (or useful?)
             printf("\033[38;5;%dm", color);
             w = get_grid_char(pixel_block);
@@ -822,6 +836,20 @@ void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t le
     }
 }
 
+void clip_buffer(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval) {
+    size_t i;
+    int c;
+    lpfloat_t sample;
+
+    for(i=0; i < buf->length; i++) {
+        for(c=0; c < buf->channels; c++) {
+            sample = buf->data[i * buf->channels + c];
+            sample = lpfmax(sample, minval);
+            sample = lpfmin(sample, maxval);
+            buf->data[i * buf->channels + c] = sample;
+        }
+    }
+}
 
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length) {
     lpbuffer_t * out;

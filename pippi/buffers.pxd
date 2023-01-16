@@ -76,6 +76,7 @@ cdef extern from "pippicore.h":
         void (*pan)(lpbuffer_t * buf, lpbuffer_t * pos)
         lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *)
         lpbuffer_t * (*remix)(lpbuffer_t *, int)
+        void (*clip)(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval)
         lpbuffer_t * (*cut)(lpbuffer_t * buf, size_t start, size_t length)
         void (*cut_into)(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length)
         lpbuffer_t * (*resample)(lpbuffer_t *, size_t)

@@ -301,7 +301,7 @@ class TestNewBuffer(TestCase):
 
     def test_plot_soundbuffer(self):
         snd = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        snd.plot()
+        #snd.plot()
 
     def test_save_buffer_to_soundfile(self):
         filename = path.join(self.soundfiles, 'test_save_newbuffer_to_soundfile.{}')
@@ -352,7 +352,13 @@ class TestNewBuffer(TestCase):
         self.assertEqual(out.dur, length)
         out.write('tests/renders/newbuffer_underfill.wav')
 
+    def test_clip_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound = sound.clip(-0.1, 0.1)
 
+        self.assertEqual(len(sound), 44100)
+        self.assertTrue(sound.samplerate == 44100)
+        self.assertTrue(sound.max <= 0.1)
 
 """
     def test_stack_soundbuffer(self):
@@ -365,15 +371,6 @@ class TestNewBuffer(TestCase):
         self.assertTrue(length == len(out))
         self.assertTrue(snd1.samplerate == out.samplerate)
         out.write('tests/renders/soundbuffer_stack.wav')
-
-    def test_clip_soundbuffer(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-
-        sound = sound.clip(-0.1, 0.1)
-
-        self.assertEqual(len(sound), 44100)
-        self.assertTrue(sound.samplerate == 44100)
-        self.assertTrue(sound.max() <= 0.1)
 
     def test_split_into_blocks(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 0.11)

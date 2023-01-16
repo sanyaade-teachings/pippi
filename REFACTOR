@@ -32,6 +32,7 @@ Just some refactoring notes...
 ## built-in methods
 
 - [x] clear -- fill with zeros
+- [x] clip -- hard clip to minval/maxval
 - [x] convolve -- fft.conv
 - [x] copy
 - [x] cut
@@ -55,10 +56,9 @@ Just some refactoring notes...
 - [x] min
 - [x] dur -- framelength / samplerate
 
-## mixins
+## misc
 
 - [ ] cloud -- graincloud
-- [ ] clip -- hard clip to minval/maxval
 - [ ] softclip -- fx.softclip
 - [ ] blocks -- iterate over buffer in blocksize blocks
 - [ ] grains -- iterate over buffer in variable-sized grains
