@@ -1,5 +1,6 @@
 import cmd
 import threading
+import traceback
 import subprocess
 
 import mido
@@ -43,19 +44,20 @@ class AstridConsole(cmd.Cmd):
     prompt = '^_- '
     intro = 'Astrid Console'
     instruments = {}
+    dac = None
+    adc = None
 
     def __init__(self, client=None):
-        self.dac = subprocess.Popen('./build/dac')
-        self.adc = subprocess.Popen('./build/adc')
         cmd.Cmd.__init__(self)
 
     def do_dac(self, cmd):
         if cmd == 'on' and self.dac is None:
             print('Starting dac...')
             self.dac = subprocess.Popen('./build/dac')
-        elif cmd == 'off' and self.dec is not None:
+        elif cmd == 'off' and self.dac is not None:
             print('Stopping dac...')
-            self.dac.kill()
+            #self.dac.kill()
+            self.dac.terminate()
 
     def do_adc(self, cmd):
         if cmd == 'on' and self.adc is None:
@@ -63,7 +65,8 @@ class AstridConsole(cmd.Cmd):
             self.adc = subprocess.Popen('./build/adc')
         elif cmd == 'off' and self.adc is not None:
             print('Stopping adc...')
-            self.adc.kill()
+            #self.adc.kill()
+            self.adc.terminate()
 
     def do_p(self, cmd):
         parts = cmd.split(' ')
@@ -74,11 +77,19 @@ class AstridConsole(cmd.Cmd):
             params = ' ' + ' '.join(parts)
 
         if instrument not in self.instruments:
-            rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
-            self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
+            try:
+                rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
+                self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
+            except Exception as e:
+                print('Could not start renderer: %s' % e)
+                print(traceback.format_exc())
+                return
 
-        r.lpush('astrid-play-%s' % instrument, 'p' + params)
-        subprocess.run('./build/qmessage', instrument, params)
+        try:
+            subprocess.run(['./build/qmessage', instrument, params])
+        except Exception as e:
+            print('Could not invoke qmessage: %s' % e)
+            print(traceback.format_exc())
 
     def do_v(self, cmd):
         k, v = tuple(cmd.split('='))

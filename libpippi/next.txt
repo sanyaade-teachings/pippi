@@ -1,6 +1,5 @@
 Astrid:
-    - redis sub for buffers in dac thread
-    - redis pub for buffers in renderer processes
+    TODO
 
 Core:
     port more wavetables & windows
