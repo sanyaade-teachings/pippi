@@ -7,6 +7,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+#ifdef __APPLE__
+#include <pthread.h>
+#endif
+
 #include "pippi.h"
 
 #define NUM_RENDERERS 10

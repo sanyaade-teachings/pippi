@@ -3,6 +3,10 @@
 
 #include "astrid.h"
 
+#ifdef __APPLE__
+#include <pthread.h>
+#endif
+
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_NO_PULSEAUDIO
 #define MA_NO_ALSA
