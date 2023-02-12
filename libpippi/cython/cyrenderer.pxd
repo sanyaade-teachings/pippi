@@ -101,7 +101,7 @@ cdef class ParamBucket:
     cdef str _play_params
 
 cdef class EventContext:
-    cdef public object before
+    cdef public dict cache
     cdef public object messages
     cdef public ParamBucket p
     cdef public SessionParamBucket s
@@ -125,6 +125,7 @@ cdef class Instrument:
     cdef object sounds
     cdef public int playing
     cdef public dict params 
+    cdef public dict cache
 
 cdef tuple collect_players(object instrument)
 cdef int render_event(object instrument, str params)

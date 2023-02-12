@@ -25,7 +25,7 @@ from pippi.soundbuffer cimport SoundBuffer
 
 ADC_NAME = 'adc'
 
-logger = logging.getLogger('pippi-renderer')
+logger = logging.getLogger('astrid-renderer')
 if not logger.handlers:
     logger.addHandler(SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON))
     #logger.addHandler(logging.StreamHandler())
@@ -175,10 +175,10 @@ cdef class EventContext:
             sounds=None,
             midi_devices=None, 
             midi_maps=None, 
-            before=None
+            dict cache=None
         ):
 
-        self.before = before
+        self.cache = cache
         self.p = ParamBucket(instrument_params, play_params)
         self.s = SessionParamBucket() 
         self.client = None
@@ -233,6 +233,7 @@ cdef class Instrument:
         self.sounds = self.load_sounds()
         self.playing = <int>1
         self.params = {}
+        self.cache = {}
 
         if hasattr(renderer, 'groups') and (\
                 isinstance(renderer.groups, list) or \
@@ -296,6 +297,7 @@ cdef class Instrument:
                     sounds=self.sounds,
                     midi_devices=device_aliases, 
                     midi_maps=midi_maps, 
+                    cache=self.cache,
                 )
 
 
@@ -376,6 +378,9 @@ cdef int render_event(object instrument, str params):
     cdef EventContext ctx = instrument.create_ctx(instrument.params, params)
 
     logger.debug('rendering event %s w/params %s' % (str(instrument), params))
+
+    if hasattr(instrument.renderer, 'before'):
+        instrument.renderer.before(ctx)
 
     players, loop, overlap = collect_players(instrument)
 

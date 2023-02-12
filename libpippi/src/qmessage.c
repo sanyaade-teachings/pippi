@@ -27,7 +27,6 @@ int main(int argc, char * argv[]) {
     strncpy(ctx.instrument_name, instrument_name, instrument_name_length);
     strncpy(ctx.play_params, message_params, bytesread);
 
-    printf("Sending play msg to %s renderer w/params:\n  %s\n", instrument_name, ctx.play_params);
     if(send_play_message(&ctx) < 0) {
         fprintf(stderr, "Could not send play message...\n");
         return 1;

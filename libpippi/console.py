@@ -1,10 +1,21 @@
 import cmd
+import logging
+from logging.handlers import SysLogHandler
+import subprocess
 import threading
 import traceback
-import subprocess
+import warnings
 
 import mido
 import redis
+
+
+logger = logging.getLogger('astrid-console')
+if not logger.handlers:
+    logger.addHandler(SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON))
+    logger.setLevel(logging.DEBUG)
+    warnings.simplefilter('always')
+
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = r.pubsub()
@@ -21,21 +32,38 @@ PADMAP = {
     43: 'group8',
 }
 
-def midi_relay(self, *args, **kwargs):
-    with mido.open_input('LPD8:LPD8 MIDI 1 20:0') as lpd:
-        for msg in lpd:
+def midi_relay(device_name, stop_event):
+    with mido.open_input(device_name) as device:
+        for msg in device:
+            if stop_event.is_set():
+                print('Stopping MIDI relay...')
+                break
+
             if msg.type == 'note_on':
                 #r.publish('astrid', 'play')
-                r.publish(PADMAP[msg.note], 'play')
-                print(PADMAP[msg.note], 'play')
+                #r.publish(PADMAP[msg.note], 'play')
+                #print(PADMAP[msg.note], 'play')
+
+                instrument = 'osc'
+                params = 'note=%s' % msg.note
+
+                try:
+                    subprocess.run(['./build/qmessage', instrument, params])
+                except Exception as e:
+                    logger.error('Could not invoke qmessage: %s' % e)
+                    logger.error(traceback.format_exc())
+
+
             elif msg.type == 'note_off':
                 #r.publish('astrid', 'stop')
-                r.publish(PADMAP[msg.note], 'stop')
-                print(PADMAP[msg.note], 'stop')
+                #r.publish(PADMAP[msg.note], 'stop')
+                #print(PADMAP[msg.note], 'stop')
+                pass
+
             elif msg.type == 'control_change':
                 r.publish('astrid', 'setval:cc%s:float:%s' % (msg.control, msg.value/128.))
 
-            print(msg)
+            logger.info('MIDI message: %s' % msg)
 
 class AstridConsole(cmd.Cmd):
     """ Astrid Console 
@@ -46,9 +74,12 @@ class AstridConsole(cmd.Cmd):
     instruments = {}
     dac = None
     adc = None
+    midi_relay = None
+    midi_stop_event = None
 
     def __init__(self, client=None):
         cmd.Cmd.__init__(self)
+        self.midi_stop_event = threading.Event()
 
     def do_dac(self, cmd):
         if cmd == 'on' and self.dac is None:
@@ -56,7 +87,6 @@ class AstridConsole(cmd.Cmd):
             self.dac = subprocess.Popen('./build/dac')
         elif cmd == 'off' and self.dac is not None:
             print('Stopping dac...')
-            #self.dac.kill()
             self.dac.terminate()
 
     def do_adc(self, cmd):
@@ -65,7 +95,6 @@ class AstridConsole(cmd.Cmd):
             self.adc = subprocess.Popen('./build/adc')
         elif cmd == 'off' and self.adc is not None:
             print('Stopping adc...')
-            #self.adc.kill()
             self.adc.terminate()
 
     def do_p(self, cmd):
@@ -86,6 +115,7 @@ class AstridConsole(cmd.Cmd):
                 return
 
         try:
+            logger.info('Sending play msg to %s renderer w/params:\n  %s' % (instrument, params))
             subprocess.run(['./build/qmessage', instrument, params])
         except Exception as e:
             print('Could not invoke qmessage: %s' % e)
@@ -104,10 +134,34 @@ class AstridConsole(cmd.Cmd):
         pass
 
     def do_k(self, instrument):
-        #if instrument in self.instruments:
-        #    r.lpush('astrid-play-%s' % instrument, 'kill')
-        #    self.instruments[instrument].terminate()
-        pass
+        if instrument in self.instruments:
+            #r.lpush('astrid-play-%s' % instrument, 'kill')
+            self.instruments[instrument].terminate()
+
+    def do_midi(self, cmd):
+        if cmd == 'list':
+            print('MIDI Inputs:')
+            for i, d in enumerate(mido.get_input_names()):
+                print('%02d: %s' % (i, d))
+
+        elif cmd.startswith('device'):
+            try:
+                _, device = cmd.split(' ')
+                device = int(device)
+            except Exception:
+                device = 0
+            self.midi_device = mido.get_input_names()[device]
+
+        elif cmd == 'start':
+            self.midi_relay = threading.Thread(target=midi_relay, args=(self.midi_device, self.midi_stop_event))
+            self.midi_relay.start()        
+
+        elif cmd == 'stop':
+            if self.midi_relay is not None:
+                self.midi_stop_event.set()
+                self.midi_relay.join()
+                self.midi_relay = None
+                self.midi_stop_event.clear()
 
     def do_quit(self, cmd):
         self.quit()
@@ -133,16 +187,16 @@ class AstridConsole(cmd.Cmd):
         if self.adc is not None:
             self.adc.terminate()
 
+        self.midi_stop_event.set()
+        self.midi_relay.join()
+
         exit(0)
 
 if __name__ == '__main__':
     c = AstridConsole()
-    #mr = threading.Thread(target=midi_relay, args=(None,))
 
     try:
-        #mr.start()        
         c.start()
     except KeyboardInterrupt as e:
         c.quit()
 
-    #mr.join()

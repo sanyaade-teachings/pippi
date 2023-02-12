@@ -75,7 +75,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     printf("Waiting for buffers...\n");
     while(astrid_is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
         if(redis_reply->type == REDIS_REPLY_ARRAY) {
-            printf("Got message on redis buffer channel...\n");
+            /*printf("Got message on redis buffer channel...\n");*/
             if(redis_reply->element[2]->str[0] == 's') {
                 printf("Buffer feed got shutdown message\n");
                 break;

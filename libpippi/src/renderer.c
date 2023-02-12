@@ -122,7 +122,7 @@ int main() {
     strcpy(instrument_fullpath, _instrument_fullpath);
     strcpy(instrument_basename, _instrument_basename);
 
-    printf("Renderer... is now rendering!\n");
+    fprintf(stderr, "Renderer... is now rendering!\n");
     /* Start rendering! */
     while(astrid_is_running) {
         memset(msg.msg, 0, LPMAXMSG);
@@ -132,7 +132,7 @@ int main() {
         }
 
         msg.timestamp = 0;
-        printf("Got play msg: %s\n", msg.msg);
+        /*fprintf(stderr, "Got play msg: %s\n", msg.msg);*/
 
         if(astrid_tick(msg.msg, &msglength, &msg.timestamp) < 0) {
             PyErr_Print();
