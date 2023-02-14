@@ -14,11 +14,7 @@ from pathlib import Path
 import struct
 import threading
 
-import numpy as np
-#cimport numpy as np
 import redis
-
-#np.import_array()
 
 from pippi import dsp
 from pippi.soundbuffer cimport SoundBuffer
@@ -28,7 +24,6 @@ ADC_NAME = 'adc'
 logger = logging.getLogger('astrid-renderer')
 if not logger.handlers:
     logger.addHandler(SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON))
-    #logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
@@ -121,7 +116,6 @@ cdef SoundBuffer read_from_sampler(int bankid):
 
     return snd
 
-
 cdef class SessionParamBucket:
     """ params[key] to params.key
     """
@@ -201,8 +195,11 @@ cdef class EventContext:
         if kwargs is not None:
             params.update(kwargs)
 
-        #if self.client is not None:
-        #    self.client.send_cmd([names.PLAY_INSTRUMENT, instrument_name, params])
+        try:
+            rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument_name, instrument_name)
+            subprocess.Popen(rcmd, shell=True)
+        except Exception as e:
+            logger.exception('Could not start renderer from within renderer: %s' % e)
 
     def adc(self, length=1, offset=0, channels=2):
         return read_from_adc(length, offset=offset, channels=channels)
@@ -243,7 +240,7 @@ cdef class Instrument:
             self.groups = []
 
     def reload(self):
-        #logger.info('Reloading instrument %s from %s' % (self.name, self.path))
+        logger.debug('Reloading instrument %s from %s' % (self.name, self.path))
         spec = importlib.util.spec_from_file_location(self.name, self.path)
         if spec is not None:
             renderer = importlib.util.module_from_spec(spec)
