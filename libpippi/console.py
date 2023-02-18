@@ -20,50 +20,70 @@ if not logger.handlers:
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = r.pubsub()
 
-PADMAP = {
-    36: 'group1',
-    37: 'group2',
-    38: 'group3',
-    39: 'group4',
-
-    40: 'group5',
-    41: 'group6',
-    42: 'group7',
-    43: 'group8',
-}
 
 def midi_relay(device_name, stop_event):
+    waiter = threading.Event()
+    logger.info('Starting MIDI relay for device %s...' % device_name)
     with mido.open_input(device_name) as device:
-        for msg in device:
+        registered_instruments = r.hkeys('%s-triggers' % device_name)
+        while True:
             if stop_event.is_set():
-                print('Stopping MIDI relay...')
+                logger.info('Got stop event for %s MIDI listener' % device_name)
                 break
 
-            if msg.type == 'note_on':
-                #r.publish('astrid', 'play')
-                #r.publish(PADMAP[msg.note], 'play')
-                #print(PADMAP[msg.note], 'play')
+            if device.closed:
+                logger.info('Stopping %s MIDI listener: port has been closed' % device_name)
+                break
 
-                instrument = 'osc'
-                params = 'note=%s' % msg.note
+            for msg in device.iter_pending():
+                if msg.type == 'note_on':
+                    r.set('%s-note%03d' % (device_name, msg.note), msg.velocity)
 
-                try:
-                    subprocess.run(['./build/qmessage', instrument, params])
-                except Exception as e:
-                    logger.error('Could not invoke qmessage: %s' % e)
-                    logger.error(traceback.format_exc())
+                    logger.debug('Registered instruments for device %s:\n    %s' % (device_name, registered_instruments))
 
+                    for instrument_name in registered_instruments:
+                        lowval = r.get('%s-%s-triglow' % (device_name, instrument_name))
+                        logger.debug('Low trigger val: %s' % lowval)
+                        lowval = int(lowval)
+                        if lowval is None or msg.note < lowval:
+                            break
 
-            elif msg.type == 'note_off':
-                #r.publish('astrid', 'stop')
-                #r.publish(PADMAP[msg.note], 'stop')
-                #print(PADMAP[msg.note], 'stop')
-                pass
+                        highval = r.get('%s-%s-trighigh' % (device_name, instrument_name))
+                        logger.debug('High trigger val: %s' % highval)
+                        highval = int(highval)
+                        if highval is None or msg.note > highval:
+                            break
 
-            elif msg.type == 'control_change':
-                r.publish('astrid', 'setval:cc%s:float:%s' % (msg.control, msg.value/128.))
+                        params = 'note=%s velocity=%s' % (msg.note, msg.velocity)
 
-            logger.info('MIDI message: %s' % msg)
+                        try:
+                            subprocess.run(['./build/qmessage', instrument_name, params])
+                        except Exception as e:
+                            logger.exception('Could not invoke qmessage: %s' % e)
+
+                elif msg.type == 'note_off':
+                    r.set('%s-note%03d' % (device_name, msg.note), 0)
+
+                elif msg.type == 'control_change':
+                    r.set('%s-cc%03d' % (device_name, msg.control), msg.value)
+
+                logger.debug('MIDI message: %s' % msg)
+
+            # update triggers for this device
+            # triggers are a dict where 
+            #   keys are device names
+            #   values are a dict where:
+            #     keys are instrument names
+            #     values are a note range tuple: low val, high val
+            # on each loop: 
+            #   look up the trigger dict for this device
+            #   copy the instrument name to note range mappings to local dict
+            #   use the dict to look up triggers
+            registered_instruments = r.hkeys('%s-triggers' % device_name)
+            waiter.wait(timeout=1)
+
+    logger.info('Stopping MIDI relay for device %s...' % device_name)
+
 
 class AstridConsole(cmd.Cmd):
     """ Astrid Console 
@@ -74,8 +94,7 @@ class AstridConsole(cmd.Cmd):
     instruments = {}
     dac = None
     adc = None
-    midi_relay = None
-    midi_stop_event = None
+    midi_relays = {}
 
     def __init__(self, client=None):
         cmd.Cmd.__init__(self)
@@ -96,6 +115,16 @@ class AstridConsole(cmd.Cmd):
         elif cmd == 'off' and self.adc is not None:
             print('Stopping adc...')
             self.adc.terminate()
+
+    def do_l(self, instrument):
+        if instrument not in self.instruments:
+            try:
+                rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
+                self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
+            except Exception as e:
+                print('Could not start renderer: %s' % e)
+                print(traceback.format_exc())
+                return
 
     def do_p(self, cmd):
         parts = cmd.split(' ')
@@ -140,9 +169,11 @@ class AstridConsole(cmd.Cmd):
 
     def do_midi(self, cmd):
         if cmd == 'list':
-            print('MIDI Inputs:')
-            for i, d in enumerate(mido.get_input_names()):
-                print('%02d: %s' % (i, d))
+            inputs = mido.get_input_names()
+            print('Found %d MIDI inputs:' % len(inputs))
+            for i, d in enumerate(inputs):
+                l = '[LISTENING]' if d in self.midi_relays else ''
+                print('%02d: %s %s' % (i, d, l))
 
         elif cmd.startswith('device'):
             try:
@@ -150,18 +181,41 @@ class AstridConsole(cmd.Cmd):
                 device = int(device)
             except Exception:
                 device = 0
-            self.midi_device = mido.get_input_names()[device]
+            self.default_midi_device = mido.get_input_names()[device]
 
-        elif cmd == 'start':
-            self.midi_relay = threading.Thread(target=midi_relay, args=(self.midi_device, self.midi_stop_event))
-            self.midi_relay.start()        
+        elif cmd.startswith('start'):
+            try:
+                _, device_id = cmd.split(' ')
+                device = mido.get_input_names()[int(device_id)]
+            except Exception:
+                device = self.default_midi_device or mido.get_input_names()[0]
 
-        elif cmd == 'stop':
-            if self.midi_relay is not None:
-                self.midi_stop_event.set()
-                self.midi_relay.join()
-                self.midi_relay = None
-                self.midi_stop_event.clear()
+            if device in self.midi_relays:
+                print('MIDI relay for %s is already started' % device)
+                return
+
+            stop_event = threading.Event()
+            self.midi_relays[device] = (
+                stop_event,
+                threading.Thread(target=midi_relay, args=(device, stop_event))
+            )
+            self.midi_relays[device][1].start()        
+            print('Started MIDI relay for %s' % device)
+
+        elif cmd.startswith('stop'):
+            try:
+                _, device_id = cmd.split(' ')
+                device = mido.get_input_names()[int(device_id)]
+            except Exception:
+                device = self.default_midi_device or mido.get_input_names()[0]
+
+            if not device in self.midi_relays:
+                print('No MIDI relay started for device %s' % device)
+                return
+            
+            self.midi_relays[device][0].set()
+            self.midi_relays[device][1].join()
+            del self.midi_relays[device]
 
     def do_quit(self, cmd):
         self.quit()
@@ -187,8 +241,9 @@ class AstridConsole(cmd.Cmd):
         if self.adc is not None:
             self.adc.terminate()
 
-        self.midi_stop_event.set()
-        self.midi_relay.join()
+        for stop_event, relay in self.midi_relays.items():
+            stop_event.set()
+            relay.join()
 
         exit(0)
 

@@ -12,6 +12,7 @@ import importlib.util
 import os
 from pathlib import Path
 import struct
+import subprocess
 import threading
 
 import redis
@@ -167,8 +168,6 @@ cdef class EventContext:
             instrument_name=None, 
             play_params=None,
             sounds=None,
-            midi_devices=None, 
-            midi_maps=None, 
             dict cache=None
         ):
 
@@ -231,6 +230,7 @@ cdef class Instrument:
         self.playing = <int>1
         self.params = {}
         self.cache = {}
+        self.last_reload = 0
 
         if hasattr(renderer, 'groups') and (\
                 isinstance(renderer.groups, list) or \
@@ -250,8 +250,9 @@ cdef class Instrument:
                 logger.exception('Error loading instrument module: %s' % str(e))
 
             self.renderer = renderer
+            self.register_midi_triggers()
         else:
-            logger.error(self.path)
+            logger.error('Error reloading instrument. Null spec at path:\n  %s' % self.path)
 
     def load_sounds(self):
         if hasattr(self.renderer, 'SOUNDS') and isinstance(self.renderer.SOUNDS, list):
@@ -260,43 +261,30 @@ cdef class Instrument:
             return { k: dsp.read(snd) for k, snd in self.renderer.SOUNDS.items() }
         return None
 
-    def map_midi_devices(self):
-        device_aliases = []
-        midi_maps = {}
-
+    def register_midi_triggers(self):
         if hasattr(self.renderer, 'MIDI'): 
+            devices = []
             if isinstance(self.renderer.MIDI, list):
-                device_aliases = self.renderer.MIDI
+                devices += self.renderer.MIDI
             else:
-                device_aliases = [ self.renderer.MIDI ]
+                devices = [ self.renderer.MIDI ]
 
-        for i, device in enumerate(device_aliases):
-            mapping = None
-            if hasattr(self.renderer, 'MAP'):
-                if isinstance(self.renderer.MAP, list):
-                    try:
-                        mapping = self.renderer.MAP[i]
-                    except IndexError:
-                        pass
-                else:
-                    mapping = self.renderer.MAP
-
-                midi_maps[device] = mapping 
-
-        return device_aliases, midi_maps
+            try:
+                for device, low, high in devices:
+                    _redis.hset('%s-triggers' % device, self.name, 1)
+                    _redis.set('%s-%s-triglow' % (device, self.name), str(low))
+                    _redis.set('%s-%s-trighigh' % (device, self.name), str(high))
+            except (TypeError, ValueError):
+                logger.error('Could not unpack MIDI params from %s: %s' % (self.name, devices))
 
     def create_ctx(self, dict instrument_params, str play_params):
-        device_aliases, midi_maps = self.map_midi_devices()
         return EventContext(
-                    instrument_params=instrument_params, 
-                    instrument_name=self.name, 
-                    play_params=play_params,
-                    sounds=self.sounds,
-                    midi_devices=device_aliases, 
-                    midi_maps=midi_maps, 
-                    cache=self.cache,
-                )
-
+            instrument_params=instrument_params, 
+            instrument_name=self.name, 
+            play_params=play_params,
+            sounds=self.sounds,
+            cache=self.cache,
+        )
 
 
 class InstrumentNotFoundError(Exception):
@@ -311,7 +299,7 @@ def _load_instrument(name, path):
         InstrumentNotFoundError
     """
     try:
-        #logger.info('Loading instrument %s from %s' % (name, path))
+        logger.debug('Loading instrument %s from %s' % (name, path))
         spec = importlib.util.spec_from_file_location(name, path)
         if spec is not None:
             renderer = importlib.util.module_from_spec(spec)
@@ -329,7 +317,8 @@ def _load_instrument(name, path):
         logger.exception('TypeError loading instrument module: %s' % str(e))
         raise InstrumentNotFoundError(name) from e
 
-    #midi.start_listener(instrument)
+    instrument.last_reload = os.path.getmtime(path)
+    instrument.register_midi_triggers()
     return instrument
 
 def default_onsets(ctx):
@@ -436,9 +425,12 @@ cdef public int astrid_tick(char msg[LPMAXMSG], size_t * length, size_t * timest
 
     cdef Py_ssize_t _length = length[0]
     cdef size_t _timestamp = timestamp[0]
+    cdef size_t last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)
 
     # Reload instrument
-    ASTRID_INSTRUMENT.reload()
+    if last_edit > ASTRID_INSTRUMENT.last_reload:
+        ASTRID_INSTRUMENT.reload()
+        ASTRID_INSTRUMENT.last_reload = last_edit
     return render_event(ASTRID_INSTRUMENT, msg[:_length].decode('UTF-8'))
 
 

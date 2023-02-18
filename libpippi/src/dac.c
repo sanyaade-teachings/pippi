@@ -78,6 +78,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             /*printf("Got message on redis buffer channel...\n");*/
             if(redis_reply->element[2]->str[0] == 's') {
                 printf("Buffer feed got shutdown message\n");
+                printf("    message: %s\n", redis_reply->element[2]->str);
                 break;
             }
             buf = deserialize_buffer(redis_reply->element[2]->str, &ctx);

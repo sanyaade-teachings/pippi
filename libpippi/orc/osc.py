@@ -2,6 +2,7 @@ from pippi import dsp, oscs, tune, fx, shapes
 
 #LOOP = True
 
+MIDI = ('MidiSport 2x2:MidiSport 2x2 MIDI 1 20:0', 60, 70)
 
 def before(ctx):
     # The before callback is fired before 

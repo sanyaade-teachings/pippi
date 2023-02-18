@@ -126,6 +126,7 @@ cdef class Instrument:
     cdef public int playing
     cdef public dict params 
     cdef public dict cache
+    cdef public size_t last_reload
 
 cdef tuple collect_players(object instrument)
 cdef int render_event(object instrument, str params)
