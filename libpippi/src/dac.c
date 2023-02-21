@@ -134,37 +134,37 @@ int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread
 
     redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
     if(redis_ctx == NULL) {
-        fprintf(stderr, "Could not start connection to redis.\n");
+        syslog(LOG_ERR, "Could not start connection to redis.\n");
         exit(1);
     }
 
     if(redis_ctx->err) {
-        fprintf(stderr, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
+        syslog(LOG_ERR, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
         exit(1);
     }
 
-    printf("Sending shutdown to buffer thread...\n");
+    syslog(LOG_INFO, "Sending shutdown to buffer thread...\n");
     astrid_is_running = 0;
     redis_reply = redisCommand(redis_ctx, "PUBLISH astridbuffers shutdown");
-    if(redis_reply->str != NULL) printf("astridbuffers shutdown result: %s\n", redis_reply->str); 
+    if(redis_reply->str != NULL) syslog(LOG_INFO, "astridbuffers shutdown result: %s\n", redis_reply->str); 
     freeReplyObject(redis_reply);
     if(redis_ctx != NULL) redisFree(redis_ctx); 
 
-    printf("Joining with buffer thread...\n");
+    syslog(LOG_DEBUG, "Joining with buffer thread...\n");
     if(pthread_join(buffer_feed_thread, NULL) != 0) {
-        fprintf(stderr, "Error while attempting to join with buffer thread\n");
+        syslog(LOG_ERR, "Error while attempting to join with buffer thread\n");
     }
 
-    printf("Closing audio thread...\n");
+    syslog(LOG_INFO, "Closing audio thread...\n");
     if(playback != NULL) ma_device_uninit(playback);
 
-    printf("Freeing scheduler...\n");
+    syslog(LOG_INFO, "Cleaning up scheduler...\n");
     if(ctx != NULL) LPScheduler.destroy(ctx->s);
 
-    printf("Freeing astrid context...\n");
+    syslog(LOG_INFO, "Freeing astrid context...\n");
     if(ctx != NULL) free(ctx);
 
-    printf("Done with cleanup!\n");
+    syslog(LOG_INFO, "Done with cleanup!\n");
 
     closelog();
 
