@@ -1,3 +1,5 @@
+#include <syslog.h>
+
 #include "astrid.h"
 
 
@@ -693,8 +695,7 @@ int get_play_message(char * instrument_name, lpmsg_t * msg) {
 
     qfd = open(qname, O_RDONLY);
     if((read_result = read(qfd, msg, sizeof(lpmsg_t))) != sizeof(lpmsg_t)) {
-        fprintf(stderr, "Read result: %d\n", (int)read_result);
-        fprintf(stderr, "Errno: %d\n", errno);
+        syslog(LOG_INFO, "Play queue for %s has closed\n", instrument_name);
         return -1;
     }
 

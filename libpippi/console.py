@@ -44,15 +44,13 @@ def midi_relay(device_name, stop_event):
 
                     for instrument_name in registered_instruments:
                         lowval = r.get('%s-%s-triglow' % (device_name, instrument_name))
-                        lowval = 0
                         logger.debug('Low trigger val: %s' % lowval)
-                        #lowval = int(lowval)
+                        lowval = int(lowval or 0)
                         if lowval is None or msg.note < lowval:
                             break
 
                         highval = r.get('%s-%s-trighigh' % (device_name, instrument_name))
-                        #highval = int(highval)
-                        highval = 128
+                        highval = int(highval or 127)
                         logger.debug('High trigger val: %s' % highval)
                         if highval is None or msg.note > highval:
                             break
@@ -235,18 +233,24 @@ class AstridConsole(cmd.Cmd):
     def quit(self):
         print('Quitting')
         for instrument in self.instruments:
-            #r.lpush('astrid-play-%s' % instrument, 'kill')
+            print('Stopping renderer for %s...' % instrument)
             self.instruments[instrument].terminate()
+            self.instruments[instrument].wait()
 
         if self.dac is not None:
+            print('Stopping DAC...')
             self.dac.terminate()
+            self.dac.wait()
 
         if self.adc is not None:
+            print('Stopping ADC...')
             self.adc.terminate()
+            self.dac.wait()
 
-        for stop_event, relay in self.midi_relays.items():
-            stop_event.set()
-            relay.join()
+        for device_name, mr in self.midi_relays.items():
+            print('Stopping MIDI relay for %s...' % device_name)
+            mr[0].set()
+            mr[1].join()
 
         exit(0)
 
