@@ -231,19 +231,19 @@ class AstridConsole(cmd.Cmd):
         self.cmdloop()
 
     def quit(self):
-        print('Quitting')
+        print('Shutting down...')
         for instrument in self.instruments:
             print('Stopping renderer for %s...' % instrument)
             self.instruments[instrument].terminate()
             self.instruments[instrument].wait()
 
         if self.dac is not None:
-            print('Stopping DAC...')
+            print('Stopping DAC mixer...')
             self.dac.terminate()
             self.dac.wait()
 
         if self.adc is not None:
-            print('Stopping ADC...')
+            print('Stopping ADC ringbuf recorder...')
             self.adc.terminate()
             self.dac.wait()
 
@@ -252,6 +252,7 @@ class AstridConsole(cmd.Cmd):
             mr[0].set()
             mr[1].join()
 
+        print('All done. Bye-bye!')
         exit(0)
 
 if __name__ == '__main__':

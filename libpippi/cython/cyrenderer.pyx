@@ -219,7 +219,7 @@ cdef class EventContext:
         return dub_into_sampler(buf, bankid)
 
     def log(self, msg):
-        logger.info(msg)
+        logger.info('ctx.log[%s] %s' % (self.instrument_name, msg))
 
     def get_params(self):
         return self.p._params
