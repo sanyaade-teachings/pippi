@@ -40,17 +40,20 @@ def midi_relay(device_name, stop_event):
                     r.set('%s-note%03d' % (device_name, msg.note), msg.velocity)
 
                     logger.debug('Registered instruments for device %s:\n    %s' % (device_name, registered_instruments))
+                    registered_instruments = ['osc']
 
                     for instrument_name in registered_instruments:
                         lowval = r.get('%s-%s-triglow' % (device_name, instrument_name))
+                        lowval = 0
                         logger.debug('Low trigger val: %s' % lowval)
-                        lowval = int(lowval)
+                        #lowval = int(lowval)
                         if lowval is None or msg.note < lowval:
                             break
 
                         highval = r.get('%s-%s-trighigh' % (device_name, instrument_name))
+                        #highval = int(highval)
+                        highval = 128
                         logger.debug('High trigger val: %s' % highval)
-                        highval = int(highval)
                         if highval is None or msg.note > highval:
                             break
 

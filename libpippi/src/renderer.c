@@ -1,5 +1,6 @@
 #include <signal.h>
 #include <sys/syscall.h>
+#include <syslog.h>
 
 #include "pippi.h"
 #include "cyrenderer.h"
@@ -30,21 +31,23 @@ int main() {
     lpastridctx_t * ctx;
     PyObject * pmodule;
 
+    openlog("astrid-renderer", LOG_PID, LOG_USER);
+
     lpmsg_t msg = {0};
 
-    printf("Starting renderer...\n");
+    syslog(LOG_INFO, "Starting renderer...\n");
 
     /* Setup sigint handler for graceful shutdown */
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
     shutdown_action.sa_flags = 0;
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
-        fprintf(stderr, "Could not init SIGINT signal handler.\n");
+        syslog(LOG_ERR, "Could not init SIGINT signal handler.\n");
         exit(1);
     }
 
     if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
-        fprintf(stderr, "Could not init SIGTERM signal handler.\n");
+        syslog(LOG_ERR, "Could not init SIGTERM signal handler.\n");
         exit(1);
     }
 
@@ -53,12 +56,12 @@ int main() {
     astrid_pythonpath_length = mbstowcs(NULL, astrid_pythonpath_env, 0);
     python_path = calloc(astrid_pythonpath_length+1, sizeof(*python_path));
     if(python_path == NULL) {
-        fprintf(stderr, "Error: could not allocate memory for wide char path\n");
+        syslog(LOG_ERR, "Error: could not allocate memory for wide char path\n");
         exit(1);
     }
 
     if(mbstowcs(python_path, astrid_pythonpath_env, astrid_pythonpath_length) == (size_t) -1) {
-        fprintf(stderr, "Error: Could not convert path to wchar_t\n");
+        syslog(LOG_ERR, "Error: Could not convert path to wchar_t\n");
         exit(1);
     }
 
@@ -86,7 +89,7 @@ int main() {
 
     /* Prepare cyrenderer module for import */
     if(PyImport_AppendInittab("cyrenderer", PyInit_cyrenderer) == -1) {
-        fprintf(stderr, "Error: could not extend in-built modules table for renderer\n");
+        syslog(LOG_ERR, "Error: could not extend in-built modules table for renderer\n");
         exit(1);
     }
 
@@ -103,14 +106,14 @@ int main() {
     pmodule = PyImport_ImportModule("cyrenderer");
     if(!pmodule) {
         PyErr_Print();
-        fprintf(stderr, "Error: could not import cython renderer module\n");
+        syslog(LOG_ERR, "Error: could not import cython renderer module\n");
         goto lprender_cleanup;
     }
 
     /* Import python instrument module */
     if(astrid_load_instrument() < 0) {
         PyErr_Print();
-        fprintf(stderr, "Error while attempting to load astrid instrument\n");
+        syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
         goto lprender_cleanup;
     }
 
@@ -122,12 +125,13 @@ int main() {
     strcpy(instrument_fullpath, _instrument_fullpath);
     strcpy(instrument_basename, _instrument_basename);
 
-    fprintf(stderr, "Renderer... is now rendering!\n");
+    syslog(LOG_INFO, "Astrid renderer... is now rendering!\n");
+
     /* Start rendering! */
     while(astrid_is_running) {
         memset(msg.msg, 0, LPMAXMSG);
         if(get_play_message(instrument_basename, &msg) < 0) {
-            fprintf(stderr, "Error fetching message during renderer loop\n");
+            syslog(LOG_ERR, "Error fetching message during renderer loop\n");
             goto lprender_cleanup;
         }
 
@@ -136,14 +140,15 @@ int main() {
 
         if(astrid_tick(msg.msg, &msglength, &msg.timestamp) < 0) {
             PyErr_Print();
-            fprintf(stderr, "CPython error during renderer loop\n");
+            syslog(LOG_ERR, "CPython error during renderer loop\n");
             goto lprender_cleanup;
         }
     }
 
 lprender_cleanup:
-    fprintf(stderr, "lprenderer cleanup\n");
+    syslog(LOG_INFO, "Astrid renderer shutting down...\n");
     Py_Finalize();
+    closelog();
     return 0;
 }
 

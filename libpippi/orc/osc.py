@@ -2,7 +2,7 @@ from pippi import dsp, oscs, tune, fx, shapes
 
 #LOOP = True
 
-MIDI = ('MidiSport 2x2:MidiSport 2x2 MIDI 1 20:0', 60, 70)
+MIDI = ('MidiSport 2x2:MidiSport 2x2 MIDI 1 20:0', 0, 128)
 
 def before(ctx):
     # The before callback is fired before 
@@ -12,17 +12,21 @@ def before(ctx):
     ctx.log('before render')
 
 def play(ctx):
-    length = ctx.cache.get('length', 1)
+    length = dsp.rand(0.3, 4)
 
     # ctx.p contains parameters passed with 
     # the triggering play command.
     # Play commands initiated by the MIDI relay 
     # will include the MIDI note as a parameter.
     # Parameters are provided as strings.
-    note = float(ctx.p.note or 60)
+    note = float(ctx.p.note or dsp.randint(60, 70))
+    #amp = 0.5 * (float(ctx.p.velocity or 0)/127)
+    amp = 0.2
 
     # ctx.log will write a string to the system log
     ctx.log('note %s' % note)
+
+    ctx.log('cache.foo %s' % ctx.cache.get('foo', None))
 
     # Convert the MIDI note to a frequency
     freq = tune.mtf(note)
@@ -31,9 +35,9 @@ def play(ctx):
     # by looping over a yield. Each buffer in 
     # the generator is rendered and then mixed 
     # together at the output.
-    for _ in range(dsp.randint(2,3)):
+    for _ in range(dsp.randint(1, 2)):
         # Set up the osc with a randomly detuned freq
-        osc = oscs.SineOsc(freq=freq * dsp.rand(0.99, 1.01), amp=0.15)
+        osc = oscs.SineOsc(freq=freq * dsp.rand(0.99, 1.01), amp=amp)
 
         # Render a buffer
         out = osc.play(length)
@@ -65,4 +69,4 @@ def done(ctx):
     # clear the cache. It is stored as a 
     # property on the renderer instance, 
     # not in the redis session.
-    ctx.cache['length'] = dsp.rand(0.3, 3)
+    ctx.cache['foo'] = 'bar'

@@ -1,5 +1,6 @@
 #include <signal.h>
 #include <sys/syscall.h>
+#include <syslog.h>
 
 #include "astrid.h"
 
@@ -51,15 +52,15 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     struct timeval redis_timeout = {15, 0};
     size_t callback_delay = 0;
 
-    printf("Buffer feed starting up...\n");
+    syslog(LOG_INFO, "Buffer feed starting up...\n");
     redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
     if(redis_ctx == NULL) {
-        fprintf(stderr, "Could not start connection to redis.\n");
+        syslog(LOG_CRIT, "Could not start connection to redis.\n");
         exit(1);
     }
 
     if(redis_ctx->err) {
-        fprintf(stderr, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
+        syslog(LOG_CRIT, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
         exit(1);
     }
 
@@ -72,27 +73,29 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     freeReplyObject(redis_reply);
 
     /* Wait on buffers from the queue */
-    printf("Waiting for buffers...\n");
+    syslog(LOG_INFO, "Waiting for buffers...\n");
     while(astrid_is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
         if(redis_reply->type == REDIS_REPLY_ARRAY) {
             /*printf("Got message on redis buffer channel...\n");*/
             if(redis_reply->element[2]->str[0] == 's') {
-                printf("Buffer feed got shutdown message\n");
-                printf("    message: %s\n", redis_reply->element[2]->str);
+                syslog(LOG_INFO, "Buffer feed got shutdown message\n");
+                syslog(LOG_INFO, "    message: %s\n", redis_reply->element[2]->str);
                 break;
             }
             buf = deserialize_buffer(redis_reply->element[2]->str, &ctx);
             if(buf->is_looping == 1) {
+                syslog(LOG_DEBUG, "Scheduling buffer for retriggering at onset %d\n", (int)buf->onset);
                 callback_delay = (size_t)(buf->length / 2);
                 LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, &ctx, callback_delay);
             } else {
+                syslog(LOG_DEBUG, "Scheduling buffer for single play at onset %d\n", (int)buf->onset);
                 LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL, callback_delay);
             }
         }
         freeReplyObject(redis_reply);
     }
 
-    printf("Buffer feed shutting down...\n");
+    syslog(LOG_INFO, "Buffer feed shutting down...\n");
 
     if(redis_ctx != NULL) redisFree(redis_ctx); 
     return 0;
@@ -162,6 +165,9 @@ int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread
     if(ctx != NULL) free(ctx);
 
     printf("Done with cleanup!\n");
+
+    closelog();
+
     return 0;
 }
 
@@ -170,6 +176,8 @@ int main() {
     struct sigaction shutdown_action;
     lpdacctx_t * ctx;
     pthread_t buffer_feed_thread;
+
+    openlog("astrid-dac", LOG_PID, LOG_USER);
 
     /*
     ma_context context;
@@ -248,14 +256,14 @@ int main() {
     audioconfig.pUserData = ctx;
 
     if(ma_device_init(NULL, &audioconfig, &playback) != MA_SUCCESS) {
-        fprintf(stderr, "Error while attempting to configure miniaudio for playback\n");
+        syslog(LOG_ERR, "Error while attempting to configure miniaudio for playback\n");
         goto exit_with_error;
     }
 
-    printf("Playback started\n");
+    syslog(LOG_INFO, "Miniaudio callback starting...\n");
     ma_device_start(&playback);
 
-    printf("Running...\n");
+    syslog(LOG_INFO, "Astrid DAC is starting...\n");
     while(astrid_is_running) {
         /* Twiddle thumbs */
         usleep((useconds_t)1000);
@@ -267,7 +275,7 @@ int main() {
 
 exit_with_error:
     cleanup(&playback, ctx, buffer_feed_thread);
-    printf("Exited with error\n");
+    syslog(LOG_ERR, "Exited with error\n");
     return 1;
 }
 

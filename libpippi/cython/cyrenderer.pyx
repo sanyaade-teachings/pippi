@@ -67,6 +67,9 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
     if play_params is not None:
         strbuf += bytes(play_params, 'ascii')
 
+    logger.debug('strbuf loop: %s' % is_looping)
+    logger.debug('strbuf bytes: %d' % len(strbuf))
+
     return bytes(strbuf)
 
 cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
