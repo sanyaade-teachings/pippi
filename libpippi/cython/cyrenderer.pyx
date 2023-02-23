@@ -171,7 +171,8 @@ cdef class EventContext:
             instrument_name=None, 
             play_params=None,
             sounds=None,
-            dict cache=None
+            dict cache=None,
+            int voice_id=-1
         ):
 
         self.cache = cache
@@ -181,6 +182,7 @@ cdef class EventContext:
         self.instrument_name = instrument_name
         self.sounds = sounds
         self.play_params = play_params
+        self.id = voice_id
         #self.sampler = Sampler()
 
     def play(self, instrument_name, *params, **kwargs):

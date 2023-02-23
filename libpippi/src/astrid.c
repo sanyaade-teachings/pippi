@@ -1,5 +1,3 @@
-#include <syslog.h>
-
 #include "astrid.h"
 
 
@@ -674,6 +672,10 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
     return buf;
 }
 
+int get_now(struct timespec * tp) {
+    return clock_gettime(CLOCK_MONOTONIC_RAW, tp);
+}
+
 // TODO
 // - break into: open/create, read, close
 // - call open only once in the lifetime of the cb...
@@ -706,6 +708,55 @@ int get_play_message(char * instrument_name, lpmsg_t * msg) {
 
     return 0;
 }
+
+int astrid_playq_open(char * instrument_name) {
+    int qfd;
+    ssize_t qname_length;
+    char qname[LPMAXQNAME] = {0};
+
+    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
+    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
+    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
+
+    umask(0);
+    if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
+        fprintf(stderr, "Error creating play queue FIFO\n");
+        return -1;
+    }
+
+    if((qfd = open(qname, O_RDWR)) < 0) {
+        fprintf(stderr, "Error opening play queue FIFO\n");
+    };
+
+    return qfd;
+}
+
+int astrid_playq_close(int qfd) {
+    if(close(qfd) == -1) {
+        fprintf(stderr, "Error closing q...\n");
+        return -1; 
+    }
+
+    return 0;
+}
+
+int astrid_playq_read(int qfd, lpmsg_t * msg) {
+    ssize_t read_result;
+    read_result = read(qfd, msg, sizeof(lpmsg_t));
+    if(read_result == 0) {
+        syslog(LOG_DEBUG, "The play queue (%d) has been closed. (EOF)\n", qfd);
+        return -1;
+    }
+
+    // do we need larger play messages?
+    if(read_result != sizeof(lpmsg_t)) {
+        syslog(LOG_INFO, "The play queue (%d) returned %d bytes. Expecting sizeof(lpmsg_t)==%d\n", qfd, (int)read_result, (int)sizeof(lpmsg_t));
+        return -1;
+    }
+
+    return 0;
+}
+
 
 int send_play_message(lpeventctx_t * ctx) {
     char qname[LPMAXQNAME] = {0};

@@ -1,5 +1,4 @@
 #include <signal.h>
-#include <sys/time.h>
 #include <string.h>
 
 #define MINIAUDIO_IMPLEMENTATION
@@ -9,9 +8,7 @@
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
 
-#include "pippi.h"
 #include "astrid.h"
-#include "adc.h"
 
 
 static volatile int adc_is_running = 1;
@@ -95,7 +92,7 @@ int main() {
     ma_device_start(&mad);
 
     while(adc_is_running) {
-        usleep((useconds_t)1000000);
+        usleep((useconds_t)1000);
     }
 
     ma_device_uninit(&mad);

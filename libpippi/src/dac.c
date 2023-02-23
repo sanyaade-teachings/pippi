@@ -1,12 +1,5 @@
 #include <signal.h>
 #include <sys/syscall.h>
-#include <syslog.h>
-
-#include "astrid.h"
-
-#ifdef __APPLE__
-#include <pthread.h>
-#endif
 
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_NO_PULSEAUDIO
@@ -15,6 +8,8 @@
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
 #include <hiredis/hiredis.h>
+
+#include "astrid.h"
 
 
 static volatile int astrid_is_running = 1;
@@ -176,30 +171,22 @@ int main() {
     struct sigaction shutdown_action;
     lpdacctx_t * ctx;
     pthread_t buffer_feed_thread;
-
-    openlog("astrid-dac", LOG_PID, LOG_USER);
-
-    /*
-    ma_context context;
-    ma_device device;
-    ma_device_info* pPlaybackInfos;
-    ma_uint32 playbackCount;
-    ma_device_info* pCaptureInfos;
-    ma_uint32 captureCount;
-    ma_uint32 iDevice;
-    */
     ma_device playback;
 
     ctx = NULL;
+    openlog("astrid-dac", LOG_PID, LOG_USER);
 
-    /* FIXME Get channels from ENV */
+
+    /* Set maximum output channels */
+    /* FIXME get channels from available sound card ports */
     _astrid_channels = getenv("ASTRID_CHANNELS");
     if(_astrid_channels != NULL) {
         astrid_channels = atoi(_astrid_channels);
     }
     astrid_channels = ASTRID_CHANNELS;
 
-    /* Setup shutdown handler for ctl-c */
+
+    /* Set shutdown signal handlers */
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
     shutdown_action.sa_flags = 0;
@@ -214,12 +201,25 @@ int main() {
     }
 
 
-    /* init scheduler and ctx */
+    /* init scheduler and ctx 
+     * 
+     * The scheduler is shared between the miniaudio callback 
+     * and astrid buffer feed threads. The buffer feed thread 
+     * may schedule buffers by adding them to the internal linked 
+     * list in the scheduler. The miniaudio callback may read from 
+     * the linked list, increment counts in playing buffers and 
+     * flag buffers as having playback completed. The main thread 
+     * periodically triggers callbacks in the scheduler to be executed.
+     *
+     * The DAC context struct is a thin wrapper around the scheduler
+     * given as a payload to the miniaudio callback and buffer feed.
+     **/
     astrid_scheduler = LPScheduler.create(astrid_channels);
     ctx = (lpdacctx_t*)LPMemoryPool.alloc(1, sizeof(lpdacctx_t));
     ctx->s = astrid_scheduler;
     ctx->channels = ASTRID_CHANNELS;
     ctx->samplerate = ASTRID_SAMPLERATE;
+
 
     /* Setup and start buffer feed thread */
     if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, ctx) != 0) {
@@ -227,25 +227,6 @@ int main() {
         goto exit_with_error;
     }
 
-    /* Set up the miniaudio device context */
-    /*
-    if (ma_context_init(NULL, 0, NULL, &context) != MA_SUCCESS) {
-        fprintf(stderr, "Error setting up miniaudio device context\n");
-        goto exit_with_error;
-    }
-
-    if (ma_context_get_devices(&context, &pPlaybackInfos, &playbackCount, &pCaptureInfos, &captureCount) != MA_SUCCESS) {
-        fprintf(stderr, "Error getting miniaudio device info\n");
-        goto exit_with_error;
-    }
-
-    // Loop over each device info and do something with it. Here we just print the name with their index. You may want
-    // to give the user the opportunity to choose which device they'd prefer.
-    for (iDevice=0; iDevice < playbackCount; iDevice++) {
-        printf("Device %d - %s\n", iDevice, pPlaybackInfos[iDevice].name);
-    }
-    */
-    /*goto exit_with_error;*/
 
     /* Setup and start miniaudio in playback mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_playback);
@@ -267,8 +248,8 @@ int main() {
     while(astrid_is_running) {
         /* Twiddle thumbs */
         usleep((useconds_t)1000);
-        /*LPScheduler.empty(ctx->s);*/
         LPScheduler.handle_callbacks(ctx->s);
+        /*LPScheduler.empty(ctx->s);*/
     }
 
     return cleanup(&playback, ctx, buffer_feed_thread);

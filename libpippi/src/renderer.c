@@ -1,8 +1,6 @@
 #include <signal.h>
 #include <sys/syscall.h>
-#include <syslog.h>
 
-#include "pippi.h"
 #include "cyrenderer.h"
 #include "astrid.h"
 
@@ -33,6 +31,7 @@ int main() {
 
     openlog("astrid-renderer", LOG_PID, LOG_USER);
 
+    int playqfd = -1;
     lpmsg_t msg = {0};
 
     syslog(LOG_INFO, "Starting renderer...\n");
@@ -127,11 +126,15 @@ int main() {
 
     syslog(LOG_INFO, "Astrid renderer... is now rendering!\n");
 
+    playqfd = astrid_playq_open(instrument_basename);
+    syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument_basename, playqfd);
+
     /* Start rendering! */
     while(astrid_is_running) {
         memset(msg.msg, 0, LPMAXMSG);
-        if(get_play_message(instrument_basename, &msg) < 0) {
-            syslog(LOG_ERR, "Error fetching message during renderer loop\n");
+
+        if(astrid_playq_read(playqfd, &msg) < 0) {
+            syslog(LOG_ERR, "Got errno (%d) while fetching message during renderer loop: %s\n", errno, strerror(errno));
             goto lprender_cleanup;
         }
 
@@ -148,6 +151,7 @@ int main() {
 lprender_cleanup:
     syslog(LOG_INFO, "Astrid renderer shutting down...\n");
     Py_Finalize();
+    if(playqfd != -1) astrid_playq_close(playqfd);
     closelog();
     return 0;
 }

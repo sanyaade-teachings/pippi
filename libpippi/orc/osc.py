@@ -1,6 +1,6 @@
 from pippi import dsp, oscs, tune, fx, shapes
 
-#LOOP = True
+LOOP = True
 
 #MIDI = ('MidiSport 2x2:MidiSport 2x2 MIDI 1 20:0', 0, 128)
 
@@ -12,16 +12,15 @@ def before(ctx):
     ctx.log('before render')
 
 def play(ctx):
-    length = dsp.rand(0.3, 4)
+    length = dsp.rand(0.1, 4)
 
     # ctx.p contains parameters passed with 
     # the triggering play command.
     # Play commands initiated by the MIDI relay 
     # will include the MIDI note as a parameter.
     # Parameters are provided as strings.
-    note = float(ctx.p.note or dsp.randint(60, 70))
-    #amp = 0.5 * (float(ctx.p.velocity or 0)/127)
-    amp = 0.2
+    note = float(ctx.p.note or dsp.randint(33, 100))
+    amp = float(ctx.p.velocity or 33) / 127
 
     # ctx.log will write a string to the system log
     ctx.log('note %s' % note)

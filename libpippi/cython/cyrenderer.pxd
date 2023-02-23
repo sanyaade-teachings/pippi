@@ -88,10 +88,6 @@ cdef extern from "astrid.h":
     void lpadc_destroy(lpadcbuf_t * adcbuf)
 
 
-cdef extern from "adc.h":
-    cdef int ADC_LENGTH
-
-
 cdef class SessionParamBucket:
     cdef object _bus
 
@@ -114,6 +110,7 @@ cdef class EventContext:
     cdef public int count
     cdef public int tick
     cdef public str play_params
+    cdef public int id
     #cdef public object sampler
 
 cdef class Instrument:

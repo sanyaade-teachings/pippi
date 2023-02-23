@@ -1,11 +1,14 @@
 #ifndef LPASTRID_H
 #define LPASTRID_H
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <syslog.h>
+#include <time.h>
+#include <unistd.h>
 
 #ifdef __APPLE__
 #include <pthread.h>
@@ -27,7 +30,7 @@
 
 #define SPACE ' '
 #define LPMAXNAME 20
-#define LPMAXMSG (PIPE_BUF - sizeof(size_t))
+#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t))
 #define LPADC_BUFNAME "/lpadcbuf"
 #define LPPLAYQ "/tmp/astridq"
 #define LPMAXQNAME (12 + 1 + LPMAXNAME)
@@ -45,6 +48,7 @@ typedef struct lpeventctx_t {
 
 typedef struct lpmsg_t {
     size_t timestamp;
+    size_t voice_id;
     char msg[LPMAXMSG];
 } lpmsg_t;
 
@@ -52,6 +56,10 @@ char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_pa
 lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx); 
 int send_play_message(lpeventctx_t * ctx);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
+
+int astrid_playq_open(char * instrument_name);
+int astrid_playq_read(int qfd, lpmsg_t * msg);
+int astrid_playq_close(int qfd);
 
 typedef struct lpsampler_t {
     int fd;

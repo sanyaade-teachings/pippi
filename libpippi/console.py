@@ -101,21 +101,69 @@ class AstridConsole(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.midi_stop_event = threading.Event()
 
+    def do_sound(self, cmd):
+        if cmd == 'on' and self.dac is None:
+            print('Starting dac & adc...')
+            if self.dac is None:
+                self.dac = subprocess.Popen('./build/dac')
+            else:
+                print('dac is already running')
+
+            if self.adc is None:
+                self.adc = subprocess.Popen('./build/adc')
+            else:
+                print('adc is already running')
+
+        elif cmd == 'off':
+            if self.dac is not None:
+                print('Stopping dac...')
+                self.dac.terminate()
+                self.dac.wait()
+                self.dac = None
+            else:
+                print('dac is already stopped')
+
+            if self.adc is not None:
+                print('Stopping adc...')
+                self.adc.terminate()
+                self.adc.wait()
+                self.adc = None
+            else:
+                print('adc is already stopped')
+
     def do_dac(self, cmd):
         if cmd == 'on' and self.dac is None:
             print('Starting dac...')
-            self.dac = subprocess.Popen('./build/dac')
+            if self.dac is None:
+                self.dac = subprocess.Popen('./build/dac')
+            else:
+                print('dac is already running')
+
         elif cmd == 'off' and self.dac is not None:
             print('Stopping dac...')
-            self.dac.terminate()
+            if self.dac is not None:
+                self.dac.terminate()
+                self.dac.wait()
+                self.dac = None
+            else:
+                print('dac is already stopped')
 
     def do_adc(self, cmd):
         if cmd == 'on' and self.adc is None:
             print('Starting adc...')
-            self.adc = subprocess.Popen('./build/adc')
+            if self.adc is None:
+                self.adc = subprocess.Popen('./build/adc')
+            else:
+                print('adc is already running')
+
         elif cmd == 'off' and self.adc is not None:
             print('Stopping adc...')
-            self.adc.terminate()
+            if self.adc is not None:
+                self.adc.terminate()
+                self.adc.wait()
+                self.adc = None
+            else:
+                print('adc is already stopped')
 
     def do_l(self, instrument):
         if instrument not in self.instruments:
