@@ -271,7 +271,6 @@ setup(
         'Cython',
         'numpy', 
         'Pillow', 
-        'pysndfile', 
     ], 
     keywords='algorithmic computer music', 
     python_requires='>=3',

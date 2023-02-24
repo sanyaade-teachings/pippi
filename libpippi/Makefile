@@ -57,10 +57,16 @@ astrid-adc:
 
 	echo "Building astrid adc...";
 	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/adc.c -o build/adc
-	
-astrid: astrid-dac astrid-adc astrid-renderer astrid-q
 
-astrid-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q
+astrid-seriallistener:
+	mkdir -p build renders
+
+	echo "Building astrid serial listener...";
+	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/seriallistener.c -o build/seriallistener
+	
+astrid: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener
+
+astrid-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener
 
 silencer:
 	mkdir -p build renders

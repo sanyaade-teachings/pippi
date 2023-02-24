@@ -1,6 +1,6 @@
 from pippi import dsp, oscs, tune, fx, shapes
 
-LOOP = True
+#LOOP = True
 
 #MIDI = ('MidiSport 2x2:MidiSport 2x2 MIDI 1 20:0', 0, 128)
 
@@ -19,8 +19,8 @@ def play(ctx):
     # Play commands initiated by the MIDI relay 
     # will include the MIDI note as a parameter.
     # Parameters are provided as strings.
-    note = float(ctx.p.note or dsp.randint(33, 100))
-    amp = float(ctx.p.velocity or 33) / 127
+    note = float(ctx.p.note or dsp.randint(63, 90))
+    amp = float(ctx.p.velocity or dsp.rand(10, 55)) / 127
 
     # ctx.log will write a string to the system log
     ctx.log('note %s' % note)
@@ -49,7 +49,7 @@ def play(ctx):
 
         # Sometimes add foldback distortion
         if dsp.rand() > 0.5:
-            out = fx.fold(out, dsp.rand(1,2))
+            out = fx.fold(out, dsp.rand(1,3))
 
         # Sometimes warble the pitch
         if dsp.rand() > 0.75:
