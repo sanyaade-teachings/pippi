@@ -9,7 +9,7 @@ cimport cython
 from cpython.array cimport array, clone
 cimport numpy as np
 import numpy as np
-from pysndfile import sndio
+import soundfile as sf
 
 from pippi.defaults cimport DEFAULT_WTSIZE, DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 from pippi cimport fft
@@ -114,11 +114,19 @@ cdef class SoundBuffer:
             double[:,:] buf=None
         ):
 
-        cdef size_t framelength = 0
+        cdef size_t framelength = <size_t>(length * samplerate)
+        cdef size_t offset = <size_t>(start * samplerate)
 
         if filename is not None:
             # Filename will always override frames input
-            frames, samplerate, _ = sndio.read(filename, None if framelength==0 else framelength, start * samplerate, dtype=np.float64, force_2d=True)
+            if length > 0 and start > 0:
+                frames, samplerate = sf.read(filename, frames=framelength-offset, start=offset, dtype='float64', fill_value=0, always_2d=True)
+            elif length > 0 and start == 0:
+                frames, samplerate = sf.read(filename, frames=framelength, dtype='float64', fill_value=0, always_2d=True)
+            else:
+                frames, samplerate = sf.read(filename, dtype='float64', fill_value=0, always_2d=True)
+                framelength = len(frames)
+
             channels = frames.shape[1]
 
         if frames is None and length > 0:
@@ -678,10 +686,9 @@ cdef class SoundBuffer:
         """ Write the contents of this buffer to disk 
             in the given audio file format. (WAV, AIFF, AU)
         """
-        if filename.endswith('.wav'):
-            LPSoundFile.write(filename.encode('ascii'), self.buffer)
-        else:
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore')
-            sndio.write(filename, np.asarray(self), self.samplerate)
+        sf.write(filename, np.asarray(self), self.samplerate)
+        #if filename.endswith('.wav'):
+        #    LPSoundFile.write(filename.encode('ascii'), self.buffer)
+        #else:
+        #    sf.write(filename, np.asarray(self), self.samplerate)
 

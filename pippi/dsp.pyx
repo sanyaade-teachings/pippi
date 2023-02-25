@@ -164,11 +164,11 @@ cpdef SoundBuffer bufferfrom(SoundBuffer src):
     return SoundBuffer.__new__(SoundBuffer, length=src.dur, channels=src.channels, samplerate=src.samplerate)
 
 cpdef Wavetable load(object filename):
-    frames, samplerate = sf.read(filename, dtype=np.float64)
+    frames, samplerate = sf.read(filename, dtype=np.float64, always_2d=False)
     return Wavetable(frames)
 
 cpdef SoundBuffer read(object filename, double length=-1, int offset=0):
-    """ Read a pysndfile from disk and return a `SoundBuffer` with its contents.
+    """ Read a soundfile from disk and return a `SoundBuffer` with its contents.
         May include a start position and length in seconds to read a segment from a large file.
 
         The `filename` param is always converted to a string, so it is safe to pass a 

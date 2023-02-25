@@ -1148,7 +1148,7 @@ cpdef double[:] wavetable(int wavetable_type, int length, double[:] data):
     return _wavetable(wavetable_type, length)
 
 cpdef double[:] fromfile(unicode filename, int length):
-    wt, _ = sf.read(filename, dtype=np.float64)
+    wt, _ = sf.read(filename, dtype=np.float64, always_2d=False)
     if len(wt) == length:
         return wt
 
