@@ -323,5 +323,6 @@ lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, l
 lpfloat_t lpfmax(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfabs(lpfloat_t value);
+lpfloat_t lpfpow(lpfloat_t value, int exp);
 
 #endif

@@ -1602,7 +1602,7 @@ void destroy_window(lpbuffer_t* buf) {
  */
 lpfloat_t lpzapgremlins(lpfloat_t x) {
     lpfloat_t absx;
-    absx = fabs(x);
+    absx = lpfabs(x);
     return (absx > (lpfloat_t)1e-15 && absx < (lpfloat_t)1e15) ? x : (lpfloat_t)0.f;
 }
 
@@ -1640,3 +1640,15 @@ lpfloat_t lpfabs(lpfloat_t value) {
     return value;
 }
 
+lpfloat_t lpfpow(lpfloat_t value, int exp) {
+    int i;
+    lpfloat_t result;
+
+    assert(exp >= 0);
+
+    result = 1.f;
+    for(i=0; i < exp; i++) {
+        result *= value;
+    }
+    return result;
+}

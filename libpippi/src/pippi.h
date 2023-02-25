@@ -1,5 +1,7 @@
 #include "pippicore.h"
 
+#include "fx.softclip.h"
+
 #include "oscs.bln.h"
 #include "oscs.phasor.h"
 #include "oscs.pulsar.h"

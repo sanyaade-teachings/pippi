@@ -5,6 +5,7 @@ default: astrid examples
 PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBRARY')[3:-2])")
 
 ALLSOURCES = vendor/fft/fft.c \
+    src/fx.softclip.c \
 	src/oscs.bln.c \
 	src/oscs.phasor.c \
 	src/oscs.sine.c \
@@ -74,6 +75,12 @@ silencer:
 
 	echo "Building silencer...";
 	gcc $(FLAGS) tools/silencer.c $(ALLSOURCES) $(LDFLAGS) -o build/silencer
+	
+fx-examples:
+	mkdir -p build renders
+
+	echo "Building fx.softclip.c example...";
+	gcc $(FLAGS) examples/fx.softclip.c $(ALLSOURCES) $(LDFLAGS) -o build/fxsoftclip
 
 osc-examples:
 	mkdir -p build renders
@@ -190,4 +197,4 @@ render:
 	echo "Rendering examples..."
 	./scripts/render_examples.sh
 
-examples: soundfile-examples convolution-examples microsound-examples embedded-examples mir-examples buffer-examples osc-examples
+examples: soundfile-examples convolution-examples microsound-examples embedded-examples mir-examples buffer-examples osc-examples fx-examples
