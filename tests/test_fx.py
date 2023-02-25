@@ -207,6 +207,10 @@ class TestFx(TestCase):
         out = oscs.SineOsc(freq=[30, 10000], amp=10).play(1).softclip()
         out.write('tests/renders/fx_softclip.wav')
 
+    def test_softclip2(self):
+        out = oscs.SineOsc(freq=[30, 10000], amp=10).play(1).softclip2()
+        out.write('tests/renders/fx_softclip2.wav')
+
     def test_svf_lp(self):
         snd = dsp.read('tests/sounds/whitenoise10s.wav')
         freq = [20, 10000]

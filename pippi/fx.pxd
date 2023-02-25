@@ -18,20 +18,21 @@ cpdef SoundBuffer widen(SoundBuffer snd, object width=*)
 
 cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil
 cpdef SoundBuffer softclip(SoundBuffer snd)
+cpdef SoundBuffer softclip2(SoundBuffer snd)
 
 ctypedef void (*svf_filter_t)(SVFData* data)
 
 ctypedef struct SVFData:
-	double[4] Az 
-	double[2] Bz
-	double[3] Cz
-	double[2] X
+    double[4] Az 
+    double[2] Bz
+    double[3] Cz
+    double[2] X
 
-	double[3] M
-	double freq
-	double res
-	double gain
-	double shelf
+    double[3] M
+    double freq
+    double res
+    double gain
+    double shelf
 
 cpdef SoundBuffer hpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
 cpdef SoundBuffer lpf(SoundBuffer snd, object freq=*, object res=*, bint norm=*)
@@ -51,10 +52,24 @@ cpdef SoundBuffer brf(SoundBuffer snd, object freq)
 ctypedef double (*HBAPProcess)(HBAP* data, double sample)
 
 ctypedef struct HBAP:
-	double d1
-	double d2
-	double d3
-	double a0
-	double a1	
-	HBAPProcess process
+    double d1
+    double d2
+    double d3
+    double a0
+    double a1	
+    HBAPProcess process
+
+cdef extern from "pippicore.h":
+    ctypedef double lpfloat_t
+
+cdef extern from "fx.softclip.h":
+    ctypedef struct lpfxsoftclip_t:
+        lpfloat_t lastval
+
+    ctypedef struct lpfxsoftclip_factory_t:
+        lpfxsoftclip_t * (*create)()
+        lpfloat_t (*process)(lpfxsoftclip_t * sc, lpfloat_t val)
+        void (*destroy)(lpfxsoftclip_t * sc)
+
+    extern const lpfxsoftclip_factory_t LPSoftClip
 

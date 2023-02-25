@@ -135,6 +135,20 @@ cpdef SoundBuffer softclip(SoundBuffer snd):
     cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
     return SoundBuffer(_softclip(out, snd.frames), channels=snd.channels, samplerate=snd.samplerate)
 
+cpdef SoundBuffer softclip2(SoundBuffer snd):
+    cdef double[:,:] out = np.zeros((len(snd), snd.channels), dtype='d')
+    cdef lpfxsoftclip_t * clipper
+
+    for c in range(snd.channels):
+        clipper = LPSoftClip.create()
+
+        for i in range(len(snd)):
+            out[i,c] = LPSoftClip.process(clipper, snd.frames[i,c])
+
+        LPSoftClip.destroy(clipper)
+   
+    return SoundBuffer(out, channels=snd.channels, samplerate=snd.samplerate)
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)

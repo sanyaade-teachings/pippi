@@ -30,7 +30,11 @@ ext_modules = cythonize([
             include_dirs=INCLUDES,
             define_macros=MACROS
         ), 
-        Extension('pippi.fx', ['pippi/fx.pyx'],
+        Extension('pippi.fx', [
+                'libpippi/src/pippicore.c',
+                'libpippi/src/fx.softclip.c',
+                'pippi/fx.pyx'
+            ],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
             include_dirs=INCLUDES + ['modules/fft'],

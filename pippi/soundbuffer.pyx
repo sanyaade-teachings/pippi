@@ -718,6 +718,9 @@ cdef class SoundBuffer:
 
     def softclip(SoundBuffer self):
         return fx.softclip(self)
+
+    def softclip2(SoundBuffer self):
+        return fx.softclip2(self)
         
     cpdef SoundBuffer convolve(SoundBuffer self, object impulse, bint norm=True):
         cdef double[:,:] _impulse
