@@ -7,6 +7,7 @@ PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get
 ALLSOURCES = vendor/fft/fft.c \
     src/fx.softclip.c \
 	src/oscs.bln.c \
+	src/oscs.node.c \
 	src/oscs.phasor.c \
 	src/oscs.sine.c \
 	src/oscs.pulsar.c \
@@ -90,6 +91,9 @@ osc-examples:
 
 	echo "Building phasorosc.c example...";
 	gcc $(FLAGS) examples/phasorosc.c $(ALLSOURCES) $(LDFLAGS) -o build/phasorosc
+
+	echo "Building nodeosc.c example...";
+	gcc $(FLAGS) examples/nodeosc.c $(ALLSOURCES) $(LDFLAGS) -o build/nodeosc
 
 	echo "Building sineosc.c example...";
 	gcc $(FLAGS) examples/sineosc.c $(ALLSOURCES) $(LDFLAGS) -o build/sineosc

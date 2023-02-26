@@ -3,6 +3,7 @@
 #include "fx.softclip.h"
 
 #include "oscs.bln.h"
+#include "oscs.node.h"
 #include "oscs.phasor.h"
 #include "oscs.pulsar.h"
 #include "oscs.shape.h"
