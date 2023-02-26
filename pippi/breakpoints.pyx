@@ -30,7 +30,7 @@ cdef class Breakpoint:
         self.numpoints = numpoints
         self.wtsize = wtsize
 
-        cdef compare_t ct = compare
+        #cdef compare_t ct = compare
 
         self.points = <Point*>PyMem_Malloc(numpoints * sizeof(Point))
 
@@ -45,7 +45,7 @@ cdef class Breakpoint:
             self.points[i+1].x = rand.rand(0, 1)
             self.points[i+1].y = rand.rand(-1, 1)
 
-        qsort(<void*>self.points, self.numpoints, sizeof(Point), ct)
+        #qsort(<void*>self.points, self.numpoints, sizeof(Point), ct)
 
         self.out = np.zeros(self.wtsize, dtype='d')
 

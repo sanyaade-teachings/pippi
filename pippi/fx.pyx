@@ -1086,7 +1086,7 @@ cdef SoundBuffer _decimate(SoundBuffer snd, int factor):
         _initHBAP(filters[i * 2 + 1])
 
 
-    cdef int oversample = 2**factor 
+    cdef int oversample = <int>(2**factor)
 
     cdef int length_error = int(len(snd)) % oversample
     cdef int pad_size = (oversample-length_error)
@@ -1171,7 +1171,7 @@ cdef SoundBuffer _upsample(SoundBuffer snd, int factor):
         _initHBAP(filters[i * 2])
         _initHBAP(filters[i * 2 + 1])
     
-    cdef int oversample = 2**factor 
+    cdef int oversample = <int>(2**factor)
     # no need to pad
     cdef int old_length = len(snd)
     cdef int new_length = old_length * oversample

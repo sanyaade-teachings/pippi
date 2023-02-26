@@ -14,6 +14,11 @@ class TestRand(TestCase):
         dsp.randmethod('normal')
         dsp.pool(makeseedgraph, params=[(i,) for i in range(10)])
 
+    def test_rand_strseed(self):
+        dsp.seed('foo')
+        print(dsp.rand())
+        dsp.randmethod('normal')
+
     def test_rand_1000(self):
         dsp.seed(1000)
         for m in methods:

@@ -12,7 +12,7 @@ cpdef void seed(object value=None):
     if value is None:
         LPRand.seed(time(NULL))
     else:
-        LPRand.seed(<unsigned int>value)
+        LPRand.seed(int(sum([ ord(c) for c in str(value) ])))
 
 cpdef void randmethod(str method='normal'):
     if method == 'logistic':
