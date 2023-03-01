@@ -5,6 +5,7 @@ int main() {
     lpnode_t * osc;
     lpnode_t * mod1;
     lpnode_t * mod2;
+    lpnode_t * mod3;
     lpbuffer_t * out;
     lpfloat_t sample;
     lpfloat_t sr = 48000.f;
@@ -28,22 +29,27 @@ int main() {
     mod2 = LPNode.create(NODE_SINEOSC);
     mod2->params.sineosc->samplerate = sr;
 
+    // Create the third mod node
+    mod3 = LPNode.create(NODE_SINEOSC);
+    mod3->params.sineosc->samplerate = sr;
+
     // Connect the output of the modular node to 
     // the freq param input of the carrier node.
     // Configure the modulator output to scale from 
     // 100hz to 300hz.
-    LPNode.connect(osc, PARAM_FREQ, mod1, 100, 300);
+    LPNode.connect(osc, PARAM_FREQ, mod1, 60, 300);
 
     // Connect the output of the second modulator node 
     // to the freq param of the first modulator node, 
-    // and configure it to output values between 100 and 3000
-    LPNode.connect(mod1, PARAM_FREQ, mod2, 100, 3000);
+    // ...and the second to the third...
+    LPNode.connect(mod1, PARAM_FREQ, mod2, 10, 400);
+    LPNode.connect(mod2, PARAM_FREQ, mod3, 1500, 4050);
 
     // Set the freq param on the modulator to a fixed value of
     // 200hz. Internally this creates a fixed signal node and 
     // connects it to the given param with a fixed node->last 
     // value. (NODE_SIGNAL)
-    LPNode.connect_signal(mod2, PARAM_FREQ, 200.f);
+    LPNode.connect_signal(mod3, PARAM_FREQ, 0.15f);
 
     // Render some samples to the output buffer
     for(i=0; i < length; i++) {
@@ -61,6 +67,7 @@ int main() {
         // current output value.
         LPNode.process(mod1);
         LPNode.process(mod2);
+        LPNode.process(mod3);
 
         out->data[i * 2] = sample;
         out->data[i * 2 + 1] = sample;
@@ -72,6 +79,7 @@ int main() {
     // Clean up the mess
     LPNode.destroy(mod1);
     LPNode.destroy(mod2);
+    LPNode.destroy(mod3);
     LPNode.destroy(osc);
     LPBuffer.destroy(out);
 }
