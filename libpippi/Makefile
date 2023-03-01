@@ -1,8 +1,6 @@
-.PHONY: cython examples
+.PHONY: examples
 
-default: astrid examples
-
-PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBRARY')[3:-2])")
+default: examples render
 
 ALLSOURCES = vendor/fft/fft.c \
     src/fx.softclip.c \
@@ -28,48 +26,6 @@ LDFLAGS = -lm
 clean:
 	rm -rf build/*
 	rm renders/*.wav
-
-astrid-renderer:
-	mkdir -p build renders
-
-	echo "Building astrid renderer...";
-	cython cython/cyrenderer.pyx
-	gcc -g -Wall -Wextra -ldl -lpthread -lm -Isrc -Ivendor `python3-config --cflags` -Icython -l$(PYLIB) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
-
-astrid-q:
-	echo "Building astrid queue reader...";
-	gcc -g -Wall -Wextra -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qreader.c -ldl -lpthread -lm -o build/qreader
-	gcc -g -Wall -Wextra -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qserver.c -ldl -lpthread -lm -o build/qserver
-	gcc -g -Wall -Wextra -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/qmessage.c -ldl -lpthread -lm -o build/qmessage
-
-astrid-renderer-macos:
-	mkdir -p build renders
-
-	echo "Building astrid renderer...";
-	cython cython/cyrenderer.pyx
-	gcc -g -Wall -Wextra -Isrc -Ivendor `python3-config --cflags --ldflags` -Icython -l$(PYLIB) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -ldl -lpthread -lm -o build/renderer
-
-astrid-dac:
-	mkdir -p build renders
-
-	echo "Building astrid dac...";
-	gcc -g -Wall -Wextra -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/dac.c -ldl -lpthread -lm -lhiredis -o build/dac
-
-astrid-adc:
-	mkdir -p build renders
-
-	echo "Building astrid adc...";
-	gcc -g -Wall -Wextra -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/adc.c -ldl -lpthread -lm -o build/adc
-
-astrid-seriallistener:
-	mkdir -p build renders
-
-	echo "Building astrid serial listener...";
-	gcc -g -Wall -Wextra -Isrc -Ivendor $(ALLSOURCES) src/astrid.c src/seriallistener.c -ldl -lpthread -lm -o build/seriallistener
-	
-astrid: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener
-
-astrid-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener
 
 silencer:
 	mkdir -p build renders

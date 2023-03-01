@@ -30,8 +30,10 @@ venv
 libpippi/renders/*.wav
 libpippi/renders/*.mp3
 libpippi/build
-libpippi/cython/cyrenderer.c
-libpippi/cython/cyrenderer.h
+
+astrid/build
+astrid/cython/cyrenderer.c
+astrid/cython/cyrenderer.h
 
 garden/libDaisy
 garden/**/**/build/*
