@@ -65,6 +65,7 @@ lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, 
 lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
 void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
 void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling);
+lpfloat_t fx_crush(lpfloat_t val, int bits);
 
 lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate);
 void ringbuffer_fill(lpbuffer_t * ringbuf, lpbuffer_t * buf, int offset);
@@ -115,7 +116,7 @@ const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_i
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
-const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_convolve, fx_norm };
+const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_convolve, fx_norm, fx_crush };
 
 /* Platform-specific random seed, called 
  * on program init (and on process pool init) 
@@ -1045,6 +1046,25 @@ void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling) {
             buf->data[i * buf->channels + c] *= normval;
         }
     }
+}
+
+lpfloat_t fx_crush(lpfloat_t val, int bits) {
+    size_t intmax = 0;
+    lpfloat_t out = val;
+
+    if(bits <= 0) return 0.f;
+    
+    // multiply float val by int max to get int val
+    intmax = lpfpow(2, bits);
+    out *= intmax;
+
+    // truncate mantassa
+    out = (lpfloat_t)((int)out); 
+
+    // divide by int max and get crushed float back
+    out /= (lpfloat_t)intmax;
+
+    return out;
 }
 
 void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out) {

@@ -83,6 +83,9 @@ fx-examples:
 	echo "Building fx.softclip.c example...";
 	gcc $(FLAGS) examples/fx.softclip.c $(ALLSOURCES) $(LDFLAGS) -o build/fxsoftclip
 
+	echo "Building fx.crush.c example...";
+	gcc $(FLAGS) examples/fx.crush.c $(ALLSOURCES) $(LDFLAGS) -o build/crush
+
 osc-examples:
 	mkdir -p build renders
 

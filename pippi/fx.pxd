@@ -61,6 +61,7 @@ ctypedef struct HBAP:
 
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
+    cdef lpfloat_t lpzapgremlins(lpfloat_t x)
 
 cdef extern from "fx.softclip.h":
     ctypedef struct lpfxsoftclip_t:
