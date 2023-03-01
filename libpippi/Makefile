@@ -1,8 +1,8 @@
-.PHONY: examples
+.PHONY: examples render
 
 default: examples render
 
-ALLSOURCES = vendor/fft/fft.c \
+LPSOURCES = vendor/fft/fft.c \
     src/fx.softclip.c \
 	src/oscs.bln.c \
 	src/oscs.node.c \
@@ -20,8 +20,8 @@ ALLSOURCES = vendor/fft/fft.c \
 	src/spectral.c \
 	src/pippicore.c
 
-FLAGS = -g -std=gnu2x -Werror -Wall -Wextra -pedantic -Isrc -Ivendor
-LDFLAGS = -lm
+LPFLAGS = -g -std=gnu2x -Werror -Wall -Wextra -pedantic -Isrc -Ivendor
+LPLIBS = -lm
 
 clean:
 	rm -rf build/*
@@ -31,128 +31,128 @@ silencer:
 	mkdir -p build renders
 
 	echo "Building silencer...";
-	gcc $(FLAGS) tools/silencer.c $(ALLSOURCES) $(LDFLAGS) -o build/silencer
+	gcc $(LPFLAGS) tools/silencer.c $(LPSOURCES) $(LPLIBS) -o build/silencer
 	
 fx-examples:
 	mkdir -p build renders
 
 	echo "Building fx.softclip.c example...";
-	gcc $(FLAGS) examples/fx.softclip.c $(ALLSOURCES) $(LDFLAGS) -o build/fxsoftclip
+	gcc $(LPFLAGS) examples/fx.softclip.c $(LPSOURCES) $(LPLIBS) -o build/fxsoftclip
 
 	echo "Building fx.crush.c example...";
-	gcc $(FLAGS) examples/fx.crush.c $(ALLSOURCES) $(LDFLAGS) -o build/crush
+	gcc $(LPFLAGS) examples/fx.crush.c $(LPSOURCES) $(LPLIBS) -o build/crush
 
 osc-examples:
 	mkdir -p build renders
 
 	echo "Building pulsarosc.c example...";
-	gcc $(FLAGS) examples/pulsarosc.c $(ALLSOURCES) $(LDFLAGS) -o build/pulsarosc
+	gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
 
 	echo "Building phasorosc.c example...";
-	gcc $(FLAGS) examples/phasorosc.c $(ALLSOURCES) $(LDFLAGS) -o build/phasorosc
+	gcc $(LPFLAGS) examples/phasorosc.c $(LPSOURCES) $(LPLIBS) -o build/phasorosc
 
 	echo "Building nodeosc.c example...";
-	gcc $(FLAGS) examples/nodeosc.c $(ALLSOURCES) $(LDFLAGS) -o build/nodeosc
+	gcc $(LPFLAGS) examples/nodeosc.c $(LPSOURCES) $(LPLIBS) -o build/nodeosc
 
 	echo "Building sineosc.c example...";
-	gcc $(FLAGS) examples/sineosc.c $(ALLSOURCES) $(LDFLAGS) -o build/sineosc
+	gcc $(LPFLAGS) examples/sineosc.c $(LPSOURCES) $(LPLIBS) -o build/sineosc
 
 	echo "Building tukeyosc.c example...";
-	gcc $(FLAGS) examples/tukeyosc.c $(ALLSOURCES) $(LDFLAGS) -o build/tukeyosc
+	gcc $(LPFLAGS) examples/tukeyosc.c $(LPSOURCES) $(LPLIBS) -o build/tukeyosc
 
 	echo "Building tableosc.c example...";
-	gcc $(FLAGS) examples/tableosc.c $(ALLSOURCES) $(LDFLAGS) -o build/tableosc
+	gcc $(LPFLAGS) examples/tableosc.c $(LPSOURCES) $(LPLIBS) -o build/tableosc
 
 	echo "Building blnosc.c example...";
-	gcc $(FLAGS) examples/blnosc.c $(ALLSOURCES) $(LDFLAGS) -o build/blnosc
+	gcc $(LPFLAGS) examples/blnosc.c $(LPSOURCES) $(LPLIBS) -o build/blnosc
 
 	echo "Building tapeosc.c example...";
-	gcc $(FLAGS) examples/tapeosc.c $(ALLSOURCES) $(LDFLAGS) -o build/tapeosc
+	gcc $(LPFLAGS) examples/tapeosc.c $(LPSOURCES) $(LPLIBS) -o build/tapeosc
 
 	echo "Building tapeosc2.c example...";
-	gcc $(FLAGS) examples/tapeosc2.c $(ALLSOURCES) $(LDFLAGS) -o build/tapeosc2
+	gcc $(LPFLAGS) examples/tapeosc2.c $(LPSOURCES) $(LPLIBS) -o build/tapeosc2
 
 	echo "Building additive_synthesis.c example...";
-	gcc $(FLAGS) examples/additive_synthesis.c $(ALLSOURCES) $(LDFLAGS) -o build/additive_synthesis
+	gcc $(LPFLAGS) examples/additive_synthesis.c $(LPSOURCES) $(LPLIBS) -o build/additive_synthesis
 
 warble-examples:
 	mkdir -p build renders
 
 	echo "Building warble.c example...";
-	gcc $(FLAGS) examples/warble.c $(ALLSOURCES) $(LDFLAGS) -o build/warble
+	gcc $(LPFLAGS) examples/warble.c $(LPSOURCES) $(LPLIBS) -o build/warble
 
 buffer-examples:
 	mkdir -p build renders
 
 	echo "Building ring_buffer.c example...";
-	gcc $(FLAGS) examples/ring_buffer.c $(ALLSOURCES) $(LDFLAGS) -o build/ring_buffer
+	gcc $(LPFLAGS) examples/ring_buffer.c $(LPSOURCES) $(LPLIBS) -o build/ring_buffer
 
 	echo "Building slicing.c example...";
-	gcc $(FLAGS) examples/slicing.c $(ALLSOURCES) $(LDFLAGS) -o build/slicing
+	gcc $(LPFLAGS) examples/slicing.c $(LPSOURCES) $(LPLIBS) -o build/slicing
 
 	echo "Building slicing2.c example...";
-	gcc $(FLAGS) examples/slicing2.c $(ALLSOURCES) $(LDFLAGS) -o build/slicing2
+	gcc $(LPFLAGS) examples/slicing2.c $(LPSOURCES) $(LPLIBS) -o build/slicing2
 
 	echo "Building resample_buffer.c example...";
-	gcc $(FLAGS) examples/resample_buffer.c $(ALLSOURCES) $(LDFLAGS) -o build/resample_buffer
+	gcc $(LPFLAGS) examples/resample_buffer.c $(LPSOURCES) $(LPLIBS) -o build/resample_buffer
 
 	echo "Building reverse_buffer.c example...";
-	gcc $(FLAGS) examples/reverse_buffer.c $(ALLSOURCES) $(LDFLAGS) -o build/reverse_buffer
+	gcc $(LPFLAGS) examples/reverse_buffer.c $(LPSOURCES) $(LPLIBS) -o build/reverse_buffer
 
 	echo "Building plotbuffer.c example...";
-	gcc $(FLAGS) examples/plotbuffer.c $(ALLSOURCES) $(LDFLAGS) -o build/plotbuffer
+	gcc $(LPFLAGS) examples/plotbuffer.c $(LPSOURCES) $(LPLIBS) -o build/plotbuffer
 
 
 mir-examples:
 	mkdir -p build renders
 
 	echo "Building onset_detector.c example...";
-	gcc $(FLAGS) examples/onset_detector.c $(ALLSOURCES) $(LDFLAGS) -o build/onset_detector
+	gcc $(LPFLAGS) examples/onset_detector.c $(LPSOURCES) $(LPLIBS) -o build/onset_detector
 
 	echo "Building pitch_tracker.c example...";
-	gcc $(FLAGS) examples/pitch_tracker.c $(ALLSOURCES) $(LDFLAGS) -o build/pitch_tracker
+	gcc $(LPFLAGS) examples/pitch_tracker.c $(LPSOURCES) $(LPLIBS) -o build/pitch_tracker
 
 embedded-examples:
 	mkdir -p build renders
 
 	echo "Building memory_pool.c example...";
-	gcc $(FLAGS) -Wdouble-promotion -DLP_FLOAT -DLP_STATIC examples/memory_pool.c src/oscs.sine.c src/soundfile.c src/pippicore.c $(LDFLAGS) -o build/memorypool
+	gcc $(LPFLAGS) -Wdouble-promotion -DLP_FLOAT -DLP_STATIC examples/memory_pool.c src/oscs.sine.c src/soundfile.c src/pippicore.c $(LPLIBS) -o build/memorypool
 
 microsound-examples:
 	mkdir -p build renders
 
 	echo "Building crossings.c example...";
-	gcc $(FLAGS) examples/crossings.c $(ALLSOURCES) $(LDFLAGS) -o build/crossings
+	gcc $(LPFLAGS) examples/crossings.c $(LPSOURCES) $(LPLIBS) -o build/crossings
 
 	echo "Building crossings2.c example...";
-	gcc $(FLAGS) examples/crossings2.c $(ALLSOURCES) $(LDFLAGS) -o build/crossings2
+	gcc $(LPFLAGS) examples/crossings2.c $(LPSOURCES) $(LPLIBS) -o build/crossings2
 
 	echo "Building scheduler.c example...";
-	gcc $(FLAGS) examples/scheduler.c $(ALLSOURCES) $(LDFLAGS) -o build/scheduler
+	gcc $(LPFLAGS) examples/scheduler.c $(LPSOURCES) $(LPLIBS) -o build/scheduler
 
 	echo "Building grainformation.c example...";
-	gcc $(FLAGS) examples/grainformation.c $(ALLSOURCES) $(LDFLAGS) -o build/grainformation
+	gcc $(LPFLAGS) examples/grainformation.c $(LPSOURCES) $(LPLIBS) -o build/grainformation
 
 	echo "Building grainformation2.c example...";
-	gcc $(FLAGS) examples/grainformation2.c $(ALLSOURCES) $(LDFLAGS) -o build/grainformation2
+	gcc $(LPFLAGS) examples/grainformation2.c $(LPSOURCES) $(LPLIBS) -o build/grainformation2
 
 convolution-examples:
 	mkdir -p build renders
 
 	echo "Building convolution.c example...";
-	gcc $(FLAGS) examples/convolution.c $(ALLSOURCES) $(LDFLAGS) -o build/convolution
+	gcc $(LPFLAGS) examples/convolution.c $(LPSOURCES) $(LPLIBS) -o build/convolution
 
 	echo "Building convolution2.c example...";
-	gcc $(FLAGS) examples/convolution2.c $(ALLSOURCES) $(LDFLAGS) -o build/convolution2
+	gcc $(LPFLAGS) examples/convolution2.c $(LPSOURCES) $(LPLIBS) -o build/convolution2
 
 soundfile-examples:
 	mkdir -p build renders
 
 	echo "Building readsoundfile.c example...";
-	gcc $(FLAGS) examples/readsoundfile.c $(ALLSOURCES) $(LDFLAGS) -o build/readsoundfile
+	gcc $(LPFLAGS) examples/readsoundfile.c $(LPSOURCES) $(LPLIBS) -o build/readsoundfile
 
 	echo "Building readrawfile.c example...";
-	gcc $(FLAGS) examples/readrawfile.c $(ALLSOURCES) $(LDFLAGS) -o build/readrawfile
+	gcc $(LPFLAGS) examples/readrawfile.c $(LPSOURCES) $(LPLIBS) -o build/readrawfile
 
 render:
 	mkdir -p build renders

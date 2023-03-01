@@ -6,7 +6,7 @@ PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get
 
 LPDIR = ../libpippi
 
-ALLSOURCES = $(LPDIR)/vendor/fft/fft.c \
+LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
     $(LPDIR)/src/fx.softclip.c \
 	$(LPDIR)/src/oscs.bln.c \
 	$(LPDIR)/src/oscs.node.c \
@@ -36,38 +36,38 @@ astrid-renderer:
 
 	echo "Building astrid renderer...";
 	cython cython/cyrenderer.pyx
-	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -o build/renderer
+	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/renderer
 
 astrid-q:
 	echo "Building astrid queue reader...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(ALLSOURCES) src/astrid.c src/qreader.c $(LPLIBS) -o build/qreader
-	gcc $(LPFLAGS) $(LPINCLUDES) $(ALLSOURCES) src/astrid.c src/qserver.c $(LPLIBS) -o build/qserver
-	gcc $(LPFLAGS) $(LPINCLUDES) $(ALLSOURCES) src/astrid.c src/qmessage.c $(LPLIBS) -o build/qmessage
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qreader.c $(LPLIBS) -o build/qreader
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qserver.c $(LPLIBS) -o build/qserver
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qmessage.c $(LPLIBS) -o build/qmessage
 
 astrid-renderer-macos:
 	mkdir -p build
 
 	echo "Building astrid renderer...";
 	cython cython/cyrenderer.pyx
-	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags --ldflags` -Icython src/astrid.c src/renderer.c $(ALLSOURCES) cython/cyrenderer.c -l$(PYLIB) $(LPLIBS) -o build/renderer
+	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags --ldflags` -Icython src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -l$(PYLIB) $(LPLIBS) -o build/renderer
 
 astrid-dac:
 	mkdir -p build
 
 	echo "Building astrid dac...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(ALLSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/dac
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/dac
 
 astrid-adc:
 	mkdir -p build
 
 	echo "Building astrid adc...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(ALLSOURCES) src/astrid.c src/adc.c $(LPLIBS) -o build/adc
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc.c $(LPLIBS) -o build/adc
 
 astrid-seriallistener:
 	mkdir -p build
 
 	echo "Building astrid serial listener...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(ALLSOURCES) src/astrid.c src/seriallistener.c $(LPLIBS) -o build/seriallistener
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seriallistener.c $(LPLIBS) -o build/seriallistener
 	
 astrid: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener
 
