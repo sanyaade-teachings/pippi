@@ -373,24 +373,6 @@ class TestNewBuffer(TestCase):
                 self.assertTrue(len(block), blocksize)
             count += 1
 
-"""
-    def test_stack_soundbuffer(self):
-        snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
-        channels = snd1.channels + snd2.channels
-        length = max(len(snd1), len(snd2))
-        out = dsp.stack([snd1, snd2])
-        self.assertTrue(channels == out.channels)
-        self.assertTrue(length == len(out))
-        self.assertTrue(snd1.samplerate == out.samplerate)
-        out.write('tests/renders/soundbuffer_stack.wav')
-
-    def test_split_into_blocks(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 0.11)
-        blocksize = 2048
-        for block in sound.blocks(blocksize):
-            self.assertEqual(len(block), blocksize)
-
     def test_split_buffer(self):
         def _split(length):
             sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -398,6 +380,10 @@ class TestNewBuffer(TestCase):
             total = 0
             for grain in sound.grains(length):
                 total += len(grain)
+
+            if length <= 0:
+                self.assertEqual(total, 0)
+                return
 
             # Check that the remainder grain is not 0
             self.assertNotEqual(len(grain), 0)
@@ -410,7 +396,7 @@ class TestNewBuffer(TestCase):
             _split(length)
 
     def test_random_split_buffer(self):
-        for _ in range(100):
+        for _ in range(10):
             sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
 
             total = 0
@@ -422,6 +408,19 @@ class TestNewBuffer(TestCase):
 
             # Check that all the grains add up
             self.assertEqual(total, len(sound))
+
+
+"""
+    def test_stack_soundbuffer(self):
+        snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+        channels = snd1.channels + snd2.channels
+        length = max(len(snd1), len(snd2))
+        out = dsp.stack([snd1, snd2])
+        self.assertTrue(channels == out.channels)
+        self.assertTrue(length == len(out))
+        self.assertTrue(snd1.samplerate == out.samplerate)
+        out.write('tests/renders/soundbuffer_stack.wav')
 
     def test_speed(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')

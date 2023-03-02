@@ -61,7 +61,7 @@ Just some refactoring notes...
 - [ ] cloud -- graincloud
 - [ ] softclip -- fx.softclip
 - [x] blocks -- iterate over buffer in blocksize blocks
-- [ ] grains -- iterate over buffer in variable-sized grains
+- [x] grains -- iterate over buffer in variable-sized grains
 - [ ] mix -- mix in place with sound or list of sounds
 - [ ] pad -- pad with silence at start or end
 - [ ] pan

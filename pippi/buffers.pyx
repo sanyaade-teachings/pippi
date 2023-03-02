@@ -688,6 +688,36 @@ cdef class SoundBuffer:
         cdef lpbuffer_t * out = LPBuffer.fill(self.buffer, <size_t>(length * self.samplerate))
         return SoundBuffer.fromlpbuffer(out)
 
+    def grains(SoundBuffer self, double minlength, double maxlength=-1):
+        """ Iterate over the buffer in fixed-size grains.
+            If a second length is given, iterate in randomly-sized 
+            grains, given the minimum and maximum sizes.
+        """
+        if minlength == maxlength or (minlength <= 0 and maxlength <= 0):
+            return SoundBuffer([], channels=self.channels, samplerate=self.samplerate)
+
+        if minlength > self.dur:
+            minlength = self.dur
+
+        if maxlength > 0 and maxlength > self.dur:
+            maxlength = self.dur
+
+        cdef size_t framesread = 0
+        cdef size_t minframes = <size_t>(minlength * self.samplerate)
+        cdef size_t grainlength = minframes
+        cdef size_t maxframes
+
+        if maxlength > 0:
+            maxframes = <size_t>(maxlength * self.samplerate) 
+            while framesread < len(self):
+                grainlength = LPRand.randint(minframes, maxframes)
+                yield self[framesread:framesread+grainlength]
+                framesread += grainlength
+        else:
+            while framesread < len(self):
+                yield self[framesread:framesread+grainlength]
+                framesread += grainlength
+
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
 
