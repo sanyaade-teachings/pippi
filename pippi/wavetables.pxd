@@ -133,8 +133,8 @@ cdef int* ALL_WINDOWS
 cdef int LEN_WAVETABLES
 cdef int* ALL_WAVETABLES
 
-cpdef double[:] to_window(object w, int wtsize=?)
-cpdef double[:] to_wavetable(object w, int wtsize=?)
+cpdef double[:] to_window(object w=?, int wtsize=?)
+cpdef double[:] to_wavetable(object w=?, int wtsize=?)
 cpdef list to_stack(list wavetables, int wtsize=?)
 cdef int to_flag(str value)
 cpdef Wavetable _randline(int numpoints, double lowvalue=?, double highvalue=?, int wtsize=?)

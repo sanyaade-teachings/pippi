@@ -345,13 +345,18 @@ cpdef object rebuild_wavetable(double[:] data):
     return Wavetable(data)
 
 cdef class Wavetable:
-    def __cinit__(self, object values, 
+    def __cinit__(self, object values=None, 
             object lowvalue=None, 
             object highvalue=None,
             int wtsize=0, 
             bint window=False):
         cdef bint scaled = False
         cdef bint resized = False
+
+        if values is None:
+            self.data = np.array([], dtype='d')
+            self.length = 0
+            return
 
         if window:
             self.data = to_window(values, wtsize)
@@ -641,13 +646,20 @@ cdef class Wavetable:
 
     cpdef Wavetable cut(Wavetable self, int start, int length):
         start = min(max(0, start), len(self.data))
-        length = min(max(1, length), len(self.data)-start)
+
+        if length <= 0:
+            return Wavetable()
+
+        length = min(length, len(self.data)-start)
+
         cdef double[:] out = np.zeros(length, dtype='d')
         for i in range(length):
             out[i] = self.data[i+start]
         return Wavetable(out)
 
     cpdef Wavetable rcut(Wavetable self, int length):
+        if length <= 0:
+            return Wavetable()
         cdef int start = rand.randint(0, len(self.data)-length)
         return self.cut(start, length)
 
@@ -1154,11 +1166,12 @@ cpdef double[:] fromfile(unicode filename, int length):
 
     return interpolation._linear(wt, length)
 
-cpdef double[:] to_window(object w, int wtsize=0):
+cpdef double[:] to_window(object w=None, int wtsize=0):
     cdef double[:] wt
 
     if w is None:
-        return None
+        wt = np.array([], dtype='d')
+        wtsize = 0
 
     if isinstance(w, str):
         if wtsize <= 0:
@@ -1180,7 +1193,7 @@ cpdef double[:] to_window(object w, int wtsize=0):
     elif isinstance(w, np.ndarray):
         wt = w
 
-    else:
+    elif w is not None:
         wt = array('d', w)
 
     if wtsize > 0 and len(wt) != wtsize:
@@ -1188,11 +1201,12 @@ cpdef double[:] to_window(object w, int wtsize=0):
 
     return wt
 
-cpdef double[:] to_wavetable(object w, int wtsize=0):
+cpdef double[:] to_wavetable(object w=None, int wtsize=0):
     cdef double[:] wt
 
     if w is None:
-        return None
+        wt = np.array([], dtype='d')
+        wtsize = 0
 
     if isinstance(w, str):
         if wtsize <= 0:
@@ -1214,7 +1228,7 @@ cpdef double[:] to_wavetable(object w, int wtsize=0):
     elif isinstance(w, np.ndarray):
         wt = w
 
-    else:
+    elif w is not None:
         wt = array('d', w)
 
     if wtsize > 0 and len(wt) != wtsize:

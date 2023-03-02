@@ -65,7 +65,7 @@ cdef class Osc2d:
         self.mod_range = mod_range
         self.mod_phase = mod_phase
         self.mod_freq = mod_freq
-        self.mod = wavetables.to_wavetable(mod, self.wtsize)
+        self.mod = wavetables.to_wavetable(mod or 1, self.wtsize)
 
         self.lfo_freq = lfo_freq
 
@@ -124,7 +124,7 @@ cdef class Osc2d:
         cdef double wt_mod_next = 0
 
         cdef int i, wt_lfo_x, stack_x, channel, wt_mod_i
-        cdef int wt_mod_length = 1 if self.mod is None else len(self.mod)
+        cdef int wt_mod_length = 1 if (self.mod is None or len(self.mod) == 0) else len(self.mod)
         cdef int wt_mod_boundry = wt_mod_length - 1
         cdef double wt_phase = 0
         cdef double wt_mod_phase_inc = self.mod_freq * (1.0 / length) * wt_mod_length

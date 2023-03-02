@@ -58,12 +58,12 @@ class TestWavetables(TestCase):
     def test_rcut_bad(self):
         wt = dsp.wt('sine', wtsize=4092)
         wt = wt.rcut(-100)
-        self.assertEqual(1, len(wt))
+        self.assertEqual(0, len(wt))
 
     def test_cut_bad(self):
         wt = dsp.wt('sine', wtsize=4092)
         wt = wt.cut(-100, -100)
-        self.assertEqual(1, len(wt))
+        self.assertEqual(0, len(wt))
 
     def test_randline(self):
         numpoints = 3
