@@ -257,9 +257,12 @@ cdef class SoundBuffer:
 
     def __getitem__(self, position):
         cdef double[:,:] mv = memoryview(self)
-        if position >= self.buffer.length:
-            raise IndexError('Cannot read index %s from buffer of length %s' % (position, self.buffer.length))
-        return tuple([ mv[position][v] for v in range(self.channels) ])
+        if isinstance(position, slice):
+            return SoundBuffer(mv[position.start:position.stop], channels=self.channels, samplerate=self.samplerate)
+        else:
+            if position >= self.buffer.length:
+                return tuple([ 0 for _ in range(self.channels) ])
+            return tuple([ mv[position][v] for v in range(self.channels) ])
 
     def __len__(self):
         return 0 if self.buffer == NULL else <int>self.buffer.length
@@ -522,6 +525,15 @@ cdef class SoundBuffer:
 
     def __rtruediv__(SoundBuffer self, object value):
         return self / value 
+
+    def blocks(SoundBuffer self, int blocksize):
+        if blocksize <= 1:
+            blocksize = 1
+
+        cdef size_t frames_read = 0
+        while frames_read < len(self):
+            yield self[frames_read:frames_read+blocksize]
+            frames_read += blocksize
 
     def clear(SoundBuffer self):
         LPBuffer.clear(self.buffer)

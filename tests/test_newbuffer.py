@@ -360,6 +360,19 @@ class TestNewBuffer(TestCase):
         self.assertTrue(sound.samplerate == 44100)
         self.assertTrue(sound.max <= 0.1)
 
+    def test_split_into_blocks(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 0.11)
+        blocksize = 2048
+        numblocks = len(sound) // blocksize
+        slop = len(sound) % blocksize
+        count = 1
+        for block in sound.blocks(blocksize):
+            if count == numblocks:
+                self.assertTrue(len(block), slop)
+            else:
+                self.assertTrue(len(block), blocksize)
+            count += 1
+
 """
     def test_stack_soundbuffer(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
