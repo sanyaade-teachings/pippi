@@ -95,6 +95,7 @@ cdef extern from "pippicore.h":
         void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t)
         void (*env)(lpbuffer_t *, lpbuffer_t *)
         lpbuffer_t * (*pad)(lpbuffer_t * buf, size_t before, size_t after)
+        lpbuffer_t * (*trim)(lpbuffer_t * buf, size_t start, size_t end, lpfloat_t threshold, int window)
         lpbuffer_t * (*fill)(lpbuffer_t * src, size_t length)
         lpbuffer_t * (*repeat)(lpbuffer_t * src, size_t repeats)
         lpbuffer_t * (*reverse)(lpbuffer_t * buf)

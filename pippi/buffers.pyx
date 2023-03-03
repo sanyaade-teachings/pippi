@@ -732,18 +732,25 @@ cdef class SoundBuffer:
         cdef lpbuffer_t * out
         cdef size_t framebefore, frameafter
 
-        if not samples:
-            framebefore = <size_t>(before * self.samplerate)
-            frameafter = <size_t>(after * self.samplerate)
-        else:
+        if samples:
             framebefore = <size_t>before
             frameafter = <size_t>after
+        else:
+            framebefore = <size_t>(before * self.samplerate)
+            frameafter = <size_t>(after * self.samplerate)
 
         out = LPBuffer.pad(self.buffer, framebefore, frameafter)
         return SoundBuffer.fromlpbuffer(out)
 
     def plot(SoundBuffer self):
         LPBuffer.plot(self.buffer)
+
+    def trim(SoundBuffer self, bint start=False, bint end=True, double threshold=0, int window=4):
+        """ Trim silence below a given threshold from the end (and/or start) of the buffer
+        """
+        cdef lpbuffer_t * out
+        out = LPBuffer.trim(self.buffer, start, end, threshold, window);
+        return SoundBuffer.fromlpbuffer(out)
 
     def write(self, unicode filename=None):
         """ Write the contents of this buffer to disk 

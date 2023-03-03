@@ -99,6 +99,9 @@ buffer-examples:
 	echo "Building reverse_buffer.c example...";
 	gcc $(LPFLAGS) examples/reverse_buffer.c $(LPSOURCES) $(LPLIBS) -o build/reverse_buffer
 
+	echo "Building pad_buffer.c example...";
+	gcc $(LPFLAGS) examples/pad_buffer.c $(LPSOURCES) $(LPLIBS) -o build/pad_buffer
+
 	echo "Building plotbuffer.c example...";
 	gcc $(LPFLAGS) examples/plotbuffer.c $(LPSOURCES) $(LPLIBS) -o build/plotbuffer
 

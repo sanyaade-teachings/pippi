@@ -410,9 +410,8 @@ class TestNewBuffer(TestCase):
             self.assertEqual(total, len(sound))
 
     def test_pad_sound_with_silence(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-
         # Pad before
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         original_length = len(sound)
         silence_length = random.triangular(0.001, 1)
         sound = sound.pad(silence_length)
@@ -422,6 +421,7 @@ class TestNewBuffer(TestCase):
         self.assertEqual(sound[0], (0,0))
 
         # Pad after
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         original_length = len(sound)
         silence_length = random.triangular(0.001, 1)
         sound = sound.pad(after=silence_length)
@@ -429,6 +429,35 @@ class TestNewBuffer(TestCase):
 
         self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
         self.assertEqual(sound[-1], (0,0))
+
+        # Pad before and after
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        original_length = len(sound)
+        silence_length = random.triangular(0.001, 1)
+        sound = sound.pad(before=silence_length, after=silence_length)
+        sound.write('tests/renders/newbuffer_pad_before_and_after.wav')
+
+        self.assertEqual(len(sound), int((sound.samplerate * silence_length * 2) + original_length))
+        self.assertEqual(sound[0], (0,0))
+        self.assertEqual(sound[-1], (0,0))
+
+
+    def test_trim_silence(self):
+        src = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        src.write('tests/renders/newbuffer_trim_original.wav')
+        sound = src.pad(before=1, after=1)
+        sound.write('tests/renders/newbuffer_trim_padded.wav')
+
+        self.assertEqual(sound.dur, 3)
+
+        sound.write('tests/renders/trim_silence_before.wav')
+
+        for threshold in (0, 0.01, 0.5):
+            trimstart = sound.trim(start=True, end=False, threshold=threshold)
+            trimstart.write('tests/renders/newbuffer_trim_silence_start%s.wav' % threshold)
+
+            trimend = sound.trim(start=False, end=True, threshold=threshold)
+            trimend.write('tests/renders/newbuffer_trim_silence_end%s.wav' % threshold)
 
 
 """

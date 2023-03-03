@@ -44,6 +44,7 @@ void dub_buffer(lpbuffer_t * a, lpbuffer_t * b, size_t start);
 void dub_scalar(lpbuffer_t * a, lpfloat_t, size_t start);
 void env_buffer(lpbuffer_t * buf, lpbuffer_t * env);
 lpbuffer_t * pad_buffer(lpbuffer_t * buf, size_t before, size_t after); 
+lpbuffer_t * trim_buffer(lpbuffer_t * buf, size_t start, size_t end, lpfloat_t threshold, int window);
 void plot_buffer(lpbuffer_t * buf);
 lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
@@ -111,7 +112,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -662,16 +663,69 @@ lpbuffer_t * pad_buffer(lpbuffer_t * buf, size_t before, size_t after) {
     int c;
     lpbuffer_t * out;
 
-    assert(before >= 0);
-    assert(after >= 0);
-
     length = buf->length + before + after;
-
     out = LPBuffer.create(length, buf->channels, buf->samplerate);
 
-    for(i=before; i < buf->length; i++) {
+    for(i=0; i < buf->length; i++) {
         for(c=0; c < out->channels; c++) {
-            out->data[i * out->channels + c] = buf->data[(i-before) * out->channels + c];
+            out->data[(i+before) * out->channels + c] = buf->data[i * out->channels + c];
+        }
+    }
+
+    return out;
+}
+
+lpfloat_t _sum_abs_frame(lpbuffer_t * buf, size_t pos) {
+    int c;
+    lpfloat_t current;
+    current = 0;
+    for(c=0; c < buf->channels; c++) {
+        current += buf->data[pos * buf->channels + c];
+    }
+
+    current /= (lpfloat_t)buf->channels;
+    current = lpfabs(current);
+
+    return current; 
+}
+
+lpbuffer_t * trim_buffer(lpbuffer_t * buf, size_t start, size_t end, lpfloat_t threshold, int window) {
+    size_t boundry, trimend, trimstart, length, i;
+    lpbuffer_t * out;
+    lpfloat_t current;
+    int c, hits;
+
+    boundry = buf->length - 1;
+    trimend = boundry;
+    trimstart = 0;
+    current = 0.f;
+    hits = 0;
+
+    if(end==1) {
+        while(1) {
+            current = _sum_abs_frame(buf, trimend);
+            if(current > threshold) hits += 1;
+            trimend -= 1;
+            if(trimend <= 0 || hits >= window) break;
+        }
+    }
+
+    if(start==1) {
+        hits = 0;
+        while(1) {
+            current = _sum_abs_frame(buf, trimstart);
+            if(current > threshold) hits += 1;
+            trimstart += 1;
+            if(trimstart >= boundry || hits >= window) break;
+        }
+    }
+
+    length = trimend - trimstart;
+    out = LPBuffer.create(length, buf->channels, buf->samplerate);
+
+    for(i=0; i < length; i++) {
+        for(c=0; c < buf->channels; c++) {
+            out->data[i * buf->channels + c] = buf->data[(trimstart + i) * buf->channels + c];
         }
     }
 
