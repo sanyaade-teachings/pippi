@@ -262,6 +262,8 @@ cdef class SoundBuffer:
         else:
             if position >= self.buffer.length:
                 return tuple([ 0 for _ in range(self.channels) ])
+            elif position < 0:
+                position = len(self) + position
             return tuple([ mv[position][v] for v in range(self.channels) ])
 
     def __len__(self):
@@ -720,6 +722,25 @@ cdef class SoundBuffer:
 
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
+
+    def pad(self, double before=0, double after=0, bint samples=False):
+        """ Pad this sound with silence at before or after
+        """
+        if before <= 0 and after <= 0: 
+            return self
+
+        cdef lpbuffer_t * out
+        cdef size_t framebefore, frameafter
+
+        if not samples:
+            framebefore = <size_t>(before * self.samplerate)
+            frameafter = <size_t>(after * self.samplerate)
+        else:
+            framebefore = <size_t>before
+            frameafter = <size_t>after
+
+        out = LPBuffer.pad(self.buffer, framebefore, frameafter)
+        return SoundBuffer.fromlpbuffer(out)
 
     def plot(SoundBuffer self):
         LPBuffer.plot(self.buffer)

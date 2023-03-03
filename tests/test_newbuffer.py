@@ -409,6 +409,27 @@ class TestNewBuffer(TestCase):
             # Check that all the grains add up
             self.assertEqual(total, len(sound))
 
+    def test_pad_sound_with_silence(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+
+        # Pad before
+        original_length = len(sound)
+        silence_length = random.triangular(0.001, 1)
+        sound = sound.pad(silence_length)
+        sound.write('tests/renders/newbuffer_pad_before.wav')
+
+        self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
+        self.assertEqual(sound[0], (0,0))
+
+        # Pad after
+        original_length = len(sound)
+        silence_length = random.triangular(0.001, 1)
+        sound = sound.pad(after=silence_length)
+        sound.write('tests/renders/newbuffer_pad_after.wav')
+
+        self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
+        self.assertEqual(sound[-1], (0,0))
+
 
 """
     def test_stack_soundbuffer(self):
@@ -469,25 +490,6 @@ class TestNewBuffer(TestCase):
 
             pan_right = sound.pan(1, method=pan_method)
             self.assertEqual(pan_right[random.randint(0, len(pan_right))][1], 0)
-
-    def test_pad_sound_with_silence(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-
-        # Pad start
-        original_length = len(sound)
-        silence_length = random.triangular(0.001, 1)
-        sound = sound.pad(silence_length)
-
-        self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
-        self.assertEqual(sound[0], (0,0))
-
-        # Pad end
-        original_length = len(sound)
-        silence_length = random.triangular(0.001, 1)
-        sound = sound.pad(end=silence_length)
-
-        self.assertEqual(len(sound), int((sound.samplerate * silence_length) + original_length))
-        self.assertEqual(sound[-1], (0,0))
 
     def test_trim_silence(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').env('hannout')

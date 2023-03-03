@@ -216,6 +216,7 @@ typedef struct lpbuffer_factory_t {
     void (*dub)(lpbuffer_t *, lpbuffer_t *, size_t);
     void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t);
     void (*env)(lpbuffer_t *, lpbuffer_t *);
+    lpbuffer_t * (*pad)(lpbuffer_t * buf, size_t before, size_t after);
     lpbuffer_t * (*fill)(lpbuffer_t * src, size_t length);
     lpbuffer_t * (*repeat)(lpbuffer_t * src, size_t repeats);
     lpbuffer_t * (*reverse)(lpbuffer_t * buf);
