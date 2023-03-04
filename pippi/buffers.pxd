@@ -140,6 +140,17 @@ cdef extern from "pippicore.h":
     extern lpmemorypool_factory_t LPMemoryPool
 
 
+cdef extern from "fx.softclip.h":
+    ctypedef struct lpfxsoftclip_t:
+        lpfloat_t lastval
+
+    ctypedef struct lpfxsoftclip_factory_t:
+        lpfxsoftclip_t * (*create)()
+        lpfloat_t (*process)(lpfxsoftclip_t * sc, lpfloat_t val)
+        void (*destroy)(lpfxsoftclip_t * sc)
+
+    extern const lpfxsoftclip_factory_t LPSoftClip
+
 cdef extern from "spectral.h":
     ctypedef struct lpspectral_factory_t:
         lpbuffer_t * (*convolve)(lpbuffer_t *, lpbuffer_t *)

@@ -208,6 +208,7 @@ ext_modules = cythonize([
                 'libpippi/src/pippicore.c',
                 'libpippi/src/spectral.c',
                 'libpippi/src/soundfile.c',
+                'libpippi/src/fx.softclip.c',
                 'pippi/buffers.pyx',
             ],
             include_dirs=INCLUDES + ['libpippi/vendor/fft'],

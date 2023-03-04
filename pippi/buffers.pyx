@@ -745,6 +745,20 @@ cdef class SoundBuffer:
     def plot(SoundBuffer self):
         LPBuffer.plot(self.buffer)
 
+    def softclip(SoundBuffer self):
+        cdef lpfxsoftclip_t * sc = LPSoftClip.create()
+        cdef size_t i
+        cdef int c
+        cdef lpfloat_t sample
+
+        for i in range(self.buffer.length):
+            for c in range(self.buffer.channels):
+                sample = self.buffer.data[i * self.buffer.channels + c]
+                sample = LPSoftClip.process(sc, sample)
+                self.buffer.data[i * self.buffer.channels + c] = sample
+
+        return self
+
     def trim(SoundBuffer self, bint start=False, bint end=True, double threshold=0, int window=4):
         """ Trim silence below a given threshold from the end (and/or start) of the buffer
         """
@@ -757,8 +771,4 @@ cdef class SoundBuffer:
             in the given audio file format. (WAV, AIFF, AU)
         """
         sf.write(filename, np.asarray(self), self.samplerate)
-        #if filename.endswith('.wav'):
-        #    LPSoundFile.write(filename.encode('ascii'), self.buffer)
-        #else:
-        #    sf.write(filename, np.asarray(self), self.samplerate)
 

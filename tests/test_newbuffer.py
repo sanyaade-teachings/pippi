@@ -360,6 +360,12 @@ class TestNewBuffer(TestCase):
         self.assertTrue(sound.samplerate == 44100)
         self.assertTrue(sound.max <= 0.1)
 
+    def test_softclip_soundbuffer(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav') * 10
+        sound = sound.softclip()
+        sound.write('tests/renders/newbuffer_softclip.wav')
+        self.assertTrue(sound.samplerate == 44100)
+
     def test_split_into_blocks(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').cut(0, 0.11)
         blocksize = 2048
@@ -437,7 +443,11 @@ class TestNewBuffer(TestCase):
         sound = sound.pad(before=silence_length, after=silence_length)
         sound.write('tests/renders/newbuffer_pad_before_and_after.wav')
 
-        self.assertEqual(len(sound), int((sound.samplerate * silence_length * 2) + original_length))
+        silence_length *= sound.samplerate
+        silence_length = int(silence_length)
+        silence_length *= 2
+
+        self.assertEqual(len(sound), silence_length + original_length)
         self.assertEqual(sound[0], (0,0))
         self.assertEqual(sound[-1], (0,0))
 
