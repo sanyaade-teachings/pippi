@@ -914,17 +914,10 @@ void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t le
 }
 
 void clip_buffer(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval) {
-    size_t i;
-    int c;
-    lpfloat_t sample;
-
-    for(i=0; i < buf->length; i++) {
-        for(c=0; c < buf->channels; c++) {
-            sample = buf->data[i * buf->channels + c];
-            sample = lpfmax(sample, minval);
-            sample = lpfmin(sample, maxval);
-            buf->data[i * buf->channels + c] = sample;
-        }
+    size_t i, elements;
+    elements = buf->length * buf->channels;
+    for(i=0; i < elements; i++) {
+        buf->data[i] = fmin(fmax(buf->data[i], minval), maxval);
     }
 }
 

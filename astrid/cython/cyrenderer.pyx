@@ -252,7 +252,10 @@ cdef class Instrument:
             try:
                 spec.loader.exec_module(renderer)
             except Exception as e:
-                logger.exception('Error loading instrument module: %s' % str(e))
+                logger.exception('Error reloading instrument module: %s' % str(e))
+
+            if not hasattr(renderer, '_'):
+                renderer._ = None
 
             self.renderer = renderer
             self.register_midi_triggers()
@@ -312,6 +315,9 @@ def _load_instrument(name, path):
                 spec.loader.exec_module(renderer)
             except Exception as e:
                 logger.exception('Error loading instrument module: %s' % str(e))
+
+            if not hasattr(renderer, '_'):
+                renderer._ = None
 
             instrument = Instrument(name, path, renderer)
 

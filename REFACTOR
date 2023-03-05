@@ -50,6 +50,8 @@ Just some refactoring notes...
 - [x] reverse
 - [x] reversed
 - [x] remix
+- [x] softclip -- fx.softclip
+- [ ] taper
 - [x] trim
 - [x] write
 
@@ -63,13 +65,11 @@ Just some refactoring notes...
 ## misc
 
 - [ ] cloud -- graincloud
-- [ ] softclip -- fx.softclip
 - [ ] mix -- mix in place with sound or list of sounds
 - [ ] pan
 - [ ] speed
 - [ ] vspeed
 - [ ] stretch
-- [ ] taper
 - [ ] transpose
 - [ ] toenv
 - [ ] towavetable
