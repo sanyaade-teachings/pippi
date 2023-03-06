@@ -8,6 +8,7 @@ import sqlite3
 import numpy as np
 cimport numpy as np
 
+from pippi import midi
 from pippi.soundbuffer cimport SoundBuffer
 from pippi cimport mir
 
@@ -75,6 +76,41 @@ cdef class SoundDB:
         """
         self.c.execute(sql)
         self.db.commit()
+
+        sql = """CREATE TABLE events (
+            id INTEGER PRIMARY KEY, 
+            voice_id INTEGER,
+            group_id INTEGER,
+            take_id INTEGER,
+            start REAL,
+            now REAL,
+            onset REAL, 
+            freq REAL,
+            amp REAL,
+            note INTEGER,
+            velocity INTEGER
+        )
+        """
+        self.c.execute(sql)
+        self.db.commit()
+
+    def add_event(SoundDB self, double start, double now, int note, int velocity, int voice_id=-1, int group_id=-1, int take_id=0):
+        self.c.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?,?,?)", (
+            None, voice_id, group_id, take_id,
+            start, now, now-start, 
+            midi.mtof(note), velocity/128, 
+            note, velocity
+        ))
+        self.db.commit()
+
+    def get_midi_events(SoundDB self, double start, double end, int voice_id=-1, int group_id=-1, int take_id=-1):
+        sql = "SELECT onset, note, velocity from events where voice_id=? and group_id=? and onset < ? and onset > ? %sorder by onset"
+        if take_id > 0:
+            r = self.c.execute(sql % "and take_id=? ", (voice_id, group_id, end, start, take_id))
+        else:
+            r = self.c.execute(sql % "", (voice_id, group_id, end, start))
+
+        return r.fetchall()
 
     def ingest(SoundDB self, SoundBuffer snd, str filename=None, int offset=0):
         cdef np.ndarray vector = mir.flatten(snd)
