@@ -119,7 +119,11 @@ typedef struct lpbuffer_t {
     int is_looping;
 } lpbuffer_t;
 
+#ifdef LP_FLOAT
+#define HANN_WINDOW_SIZE 256
+#else
 #define HANN_WINDOW_SIZE 4096
+#endif
 extern const lpfloat_t LPHANN_WINDOW[];
 
 typedef struct lpstack_t {
