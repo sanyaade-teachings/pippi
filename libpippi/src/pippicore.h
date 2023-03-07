@@ -102,6 +102,7 @@ enum Windows {
 #define DEFAULT_SAMPLERATE 48000
 #define DEFAULT_TABLESIZE 4096
 
+
 /* Core datatypes */
 typedef struct lpbuffer_t {
     lpfloat_t * data;
@@ -117,6 +118,9 @@ typedef struct lpbuffer_t {
     size_t onset;
     int is_looping;
 } lpbuffer_t;
+
+#define HANN_WINDOW_SIZE 4096
+extern const lpfloat_t LPHANN_WINDOW[];
 
 typedef struct lpstack_t {
     lpbuffer_t ** stack;
@@ -217,6 +221,7 @@ typedef struct lpbuffer_factory_t {
     void (*dub_scalar)(lpbuffer_t *, lpfloat_t, size_t);
     void (*env)(lpbuffer_t *, lpbuffer_t *);
     lpbuffer_t * (*pad)(lpbuffer_t * buf, size_t before, size_t after);
+    void (*taper)(lpbuffer_t * buf, size_t start, size_t end);
     lpbuffer_t * (*trim)(lpbuffer_t * buf, size_t start, size_t end, lpfloat_t threshold, int window);
     lpbuffer_t * (*fill)(lpbuffer_t * src, size_t length);
     lpbuffer_t * (*repeat)(lpbuffer_t * src, size_t repeats);
