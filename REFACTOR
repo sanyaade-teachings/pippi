@@ -46,6 +46,7 @@ Just some refactoring notes...
 - [x] grains -- iterate over buffer in variable-sized grains
 - [x] graph -- plot the waveform
 - [x] pad -- pad with silence at start or end
+- [x] pan
 - [x] repeat
 - [x] reverse
 - [x] reversed
@@ -66,7 +67,6 @@ Just some refactoring notes...
 
 - [ ] cloud -- graincloud
 - [ ] mix -- mix in place with sound or list of sounds
-- [ ] pan
 - [ ] speed
 - [ ] vspeed
 - [ ] stretch

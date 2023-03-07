@@ -56,7 +56,7 @@ void clip_buffer(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval);
 lpbuffer_t * cut_buffer(lpbuffer_t * buf, size_t start, size_t length);
 void cut_into_buffer(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length);
 lpbuffer_t * resample_buffer(lpbuffer_t * buf, size_t length);
-void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos);
+void pan_stereo_buffer(lpbuffer_t * buf, lpbuffer_t * pos, int method);
 lpbuffer_t * fill_buffer(lpbuffer_t * buf, size_t length);
 lpbuffer_t * repeat_buffer(lpbuffer_t * buf, size_t repeats);
 lpbuffer_t * reverse_buffer(lpbuffer_t * buf);
@@ -119,7 +119,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, taper_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_stereo_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, taper_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -425,7 +425,7 @@ lpfloat_t min_buffer(lpbuffer_t * buf) {
 
     for(i=0; i < buf->length; i++) {
         for(c=0; c < buf->channels; c++) {
-            out = lpfmin(buf->data[i * buf->channels + c], out);
+            out = fmin(buf->data[i * buf->channels + c], out);
         }
     }
     return out;
@@ -438,7 +438,7 @@ lpfloat_t max_buffer(lpbuffer_t * buf) {
 
     for(i=0; i < buf->length; i++) {
         for(c=0; c < buf->channels; c++) {
-            out = lpfmax(buf->data[i * buf->channels + c], out);
+            out = fmax(buf->data[i * buf->channels + c], out);
         }
     }
     return out;
@@ -451,20 +451,54 @@ lpfloat_t mag_buffer(lpbuffer_t * buf) {
 
     for(i=0; i < buf->length; i++) {
         for(c=0; c < buf->channels; c++) {
-            out = lpfmax(fabs(buf->data[i * buf->channels + c]), out);
+            out = fmax(fabs(buf->data[i * buf->channels + c]), out);
         }
     }
     return out;
 }
 
-void pan_buffer(lpbuffer_t * buf, lpbuffer_t * pos) {
+void pan_stereo_constant(lpfloat_t pos, lpfloat_t left_in, lpfloat_t right_in, lpfloat_t * left_out, lpfloat_t * right_out) {
+    *left_out = left_in * (lpfloat_t)sqrt(1.f - pos);
+    *right_out = right_in * (lpfloat_t)sqrt(pos);
+}
+
+void pan_stereo_linear(lpfloat_t pos, lpfloat_t left_in, lpfloat_t right_in, lpfloat_t * left_out, lpfloat_t * right_out) {
+    *left_out = left_in * (1.f - pos);
+    *right_out = right_in * pos;
+}
+
+void pan_stereo_sine(lpfloat_t pos, lpfloat_t left_in, lpfloat_t right_in, lpfloat_t * left_out, lpfloat_t * right_out) {
+    *left_out = left_in * (lpfloat_t)sin(pos * (lpfloat_t)HALFPI);
+    *right_out = right_in * (lpfloat_t)cos(pos * (lpfloat_t)HALFPI);
+}
+
+void pan_stereo_gogins(lpfloat_t pos, lpfloat_t left_in, lpfloat_t right_in, lpfloat_t * left_out, lpfloat_t * right_out) {
+    *left_out = left_in * (lpfloat_t)sin((pos + 0.5f) * (lpfloat_t)HALFPI);
+    *right_out = right_in * (lpfloat_t)cos((pos + 0.5f) * (lpfloat_t)HALFPI);
+}
+
+void pan_stereo_buffer(lpbuffer_t * buf, lpbuffer_t * pos, int method) {
+    void (*handler)(lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t *, lpfloat_t *);
+    lpfloat_t _pos;
     size_t i;
-    int c;
+
+    assert(buf->channels == 2);
+
+    if(method == PANMETHOD_CONSTANT) {
+        handler = &pan_stereo_constant;
+    } else if(method == PANMETHOD_LINEAR) {
+        handler = &pan_stereo_linear;
+    } else if(method == PANMETHOD_SINE) {
+        handler = &pan_stereo_sine;
+    } else if(method == PANMETHOD_GOGINS) {
+        handler = &pan_stereo_gogins;
+    } else {
+        handler = &pan_stereo_constant;
+    }
+
     for(i=0; i < buf->length; i++) {
-        for(c=0; c < buf->channels-1; c += 2) {
-            buf->data[i * buf->channels + c] *= (lpfloat_t)sqrt(interpolate_linear_pos(pos, pos->phase));
-            buf->data[i * buf->channels + c+1] *= (lpfloat_t)sqrt(1.f-interpolate_linear_pos(pos, pos->phase));
-        }
+        _pos = interpolate_linear_pos(pos, (lpfloat_t)i/buf->length);
+        handler(_pos, buf->data[i*2], buf->data[i*2+1], &buf->data[i*2], &buf->data[i*2+1]);
     }
 }
 
@@ -691,7 +725,7 @@ lpfloat_t _sum_abs_frame(lpbuffer_t * buf, size_t pos) {
     }
 
     current /= (lpfloat_t)buf->channels;
-    current = lpfabs(current);
+    current = fabs(current);
 
     return current; 
 }
@@ -879,12 +913,12 @@ void plot_buffer(lpbuffer_t * buf) {
                 sample += (float)buf->data[(i+pos) * buf->channels + c];
             }
 
-            peak = lpfmax(peak, sample);
-            low = lpfmin(low, sample);
+            peak = fmax(peak, sample);
+            low = fmin(low, sample);
         }
 
-        peak = lpfmin(1.f, (peak+1.f)/2.f);
-        low = lpfmax(0.f, (low+1.f)/2.f);
+        peak = fmin(1.f, (peak+1.f)/2.f);
+        low = fmax(0.f, (low+1.f)/2.f);
 
         py1 = (int)(peak * PIXEL_HEIGHT);
         py2 = (int)(low * PIXEL_HEIGHT);
@@ -1178,7 +1212,7 @@ lpfloat_t fx_crush(lpfloat_t val, int bits) {
     if(bits <= 0) return 0.f;
     
     // multiply float val by int max to get int val
-    intmax = lpfpow(2, bits);
+    intmax = pow(2, bits);
     out *= intmax;
 
     // truncate mantassa
@@ -1745,7 +1779,7 @@ void destroy_window(lpbuffer_t* buf) {
  */
 lpfloat_t lpzapgremlins(lpfloat_t x) {
     lpfloat_t absx;
-    absx = lpfabs(x);
+    absx = fabs(x);
     return (absx > (lpfloat_t)1e-15 && absx < (lpfloat_t)1e15) ? x : (lpfloat_t)0.f;
 }
 
@@ -1769,13 +1803,15 @@ lpfloat_t lpsvf(lpfloat_t value, lpfloat_t min, lpfloat_t max, lpfloat_t from, l
 }
 
 lpfloat_t lpfmax(lpfloat_t a, lpfloat_t b) {
-    if(a > b) return a;
-    return b;
+    if(isnan(a)) return b;
+    if(isnan(b)) return a;
+    return a < b ? b : a;
 }
 
 lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b) {
-    if(a < b) return a;
-    return b;
+    if (isnan(a)) return b;
+    if (isnan(b)) return a;
+    return a < b ? a : b;
 }
 
 lpfloat_t lpfabs(lpfloat_t value) {

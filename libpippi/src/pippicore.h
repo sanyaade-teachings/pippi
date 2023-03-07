@@ -98,6 +98,14 @@ enum Windows {
     NUM_WINDOWS
 };
 
+enum PanMethods {
+    PANMETHOD_CONSTANT,
+    PANMETHOD_LINEAR,
+    PANMETHOD_SINE,
+    PANMETHOD_GOGINS,
+    NUM_PANMETHODS
+};
+
 #define DEFAULT_CHANNELS 2
 #define DEFAULT_SAMPLERATE 48000
 #define DEFAULT_TABLESIZE 4096
@@ -203,7 +211,7 @@ typedef struct lpbuffer_factory_t {
     lpfloat_t (*max)(lpbuffer_t * buf);
     lpfloat_t (*mag)(lpbuffer_t * buf);
     lpfloat_t (*play)(lpbuffer_t *, lpfloat_t);
-    void (*pan)(lpbuffer_t * buf, lpbuffer_t * pos);
+    void (*pan)(lpbuffer_t * buf, lpbuffer_t * pos, int method);
     lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *);
     lpbuffer_t * (*remix)(lpbuffer_t *, int);
     void (*clip)(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval);
@@ -270,7 +278,7 @@ typedef struct lpmemorypool_factory_t {
 typedef struct lpinterpolation_factory_t {
     lpfloat_t (*linear_pos)(lpbuffer_t *, lpfloat_t);
     lpfloat_t (*linear)(lpbuffer_t *, lpfloat_t);
-    lpfloat_t (*interpolate_linear_channel)(lpbuffer_t *, lpfloat_t, int);
+    lpfloat_t (*linear_channel)(lpbuffer_t *, lpfloat_t, int);
     lpfloat_t (*hermite_pos)(lpbuffer_t *, lpfloat_t);
     lpfloat_t (*hermite)(lpbuffer_t *, lpfloat_t);
 } lpinterpolation_factory_t;

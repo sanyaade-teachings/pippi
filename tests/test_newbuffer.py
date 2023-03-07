@@ -485,6 +485,20 @@ class TestNewBuffer(TestCase):
         self.assertEqual(len(sound), 44100)
         self.assertTrue(sound.samplerate == 44100)
 
+    def test_pan(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        for pan_method in ('linear', 'constant', 'sine', 'gogins'):
+            for pan_value in (0, 0.25, 0.75, 1):
+                p = sound.pan(pan_value, method=pan_method)
+                p.write('tests/renders/newbuffer_pan_%s_%.3f.wav' % (pan_method, pan_value))
+
+        pan_sine = sound.pan('sine')
+        pan_sine.write('tests/renders/newbuffer_pan_sine.wav')
+
+        pan_self = sound.pan([0, 0.1, 0.7, 0.2, 0, 1, 1, 1], method='constant')
+        pan_self.write('tests/renders/newbuffer_pan_self.wav')
+
+
 """
     def test_stack_soundbuffer(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
@@ -534,15 +548,5 @@ class TestNewBuffer(TestCase):
         out = sound.transpose(speed)
         self.assertEqual(len(out), len(sound))
 
-
-    def test_pan(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        for pan_method in ('linear', 'constant', 'gogins'):
-            # Hard pan smoke test
-            pan_left = sound.pan(0, method=pan_method)
-            self.assertEqual(pan_left[random.randint(0, len(pan_left))][0], 0)
-
-            pan_right = sound.pan(1, method=pan_method)
-            self.assertEqual(pan_right[random.randint(0, len(pan_right))][1], 0)
 
 """

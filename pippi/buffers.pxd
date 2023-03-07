@@ -27,6 +27,13 @@ cdef extern from "pippicore.h":
         WIN_RSAW,
         NUM_WINDOWS
 
+    cdef enum PanMethods:
+        PANMETHOD_CONSTANT,
+        PANMETHOD_LINEAR,
+        PANMETHOD_SINE,
+        PANMETHOD_GOGINS,
+        NUM_PANMETHODS
+
     ctypedef struct lpbuffer_t:
         lpfloat_t * data
         size_t length
@@ -61,6 +68,13 @@ cdef extern from "pippicore.h":
         void * (*custom_alloc)(lpmemorypool_t *, size_t, size_t)
         void (*free)(void *)
 
+    ctypedef struct lpinterpolation_factory_t:
+        lpfloat_t (*linear_pos)(lpbuffer_t *, lpfloat_t)
+        lpfloat_t (*linear)(lpbuffer_t *, lpfloat_t)
+        lpfloat_t (*linear_channel)(lpbuffer_t *, lpfloat_t, int)
+        lpfloat_t (*hermite_pos)(lpbuffer_t *, lpfloat_t)
+        lpfloat_t (*hermite)(lpbuffer_t *, lpfloat_t)
+
     ctypedef struct lpbuffer_factory_t: 
         lpbuffer_t * (*create)(size_t, int, int)
         lpbuffer_t * (*create_from_float)(lpfloat_t, size_t, int, int)
@@ -73,7 +87,7 @@ cdef extern from "pippicore.h":
         lpfloat_t (*max)(lpbuffer_t * buf)
         lpfloat_t (*mag)(lpbuffer_t * buf)
         lpfloat_t (*play)(lpbuffer_t *, lpfloat_t)
-        void (*pan)(lpbuffer_t * buf, lpbuffer_t * pos)
+        void (*pan)(lpbuffer_t * buf, lpbuffer_t * pos, int method)
         lpbuffer_t * (*mix)(lpbuffer_t *, lpbuffer_t *)
         lpbuffer_t * (*remix)(lpbuffer_t *, int)
         void (*clip)(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval)
@@ -139,6 +153,7 @@ cdef extern from "pippicore.h":
     extern const lpwavetable_factory_t LPWavetable 
     extern const lpwindow_factory_t LPWindow
     extern lpmemorypool_factory_t LPMemoryPool
+    extern const lpinterpolation_factory_t LPInterpolation
 
 
 cdef extern from "fx.softclip.h":

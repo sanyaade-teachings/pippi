@@ -32,6 +32,19 @@ cdef dict FLAGS = {
     'rsaw': WIN_RSAW,
 }
 
+cdef dict PAN_METHODS = {
+    'constant': PANMETHOD_CONSTANT,
+    'linear': PANMETHOD_LINEAR,
+    'sine': PANMETHOD_SINE,
+    'gogins': PANMETHOD_GOGINS
+}
+
+cdef int to_pan_method(str name):
+    try:
+        return PAN_METHODS[name]
+    except KeyError:
+        return PANMETHOD_CONSTANT
+
 cdef int to_flag(str name):
     try:
         return FLAGS[name]
@@ -45,24 +58,22 @@ cdef lpbuffer_t * to_window(object o, size_t length=0):
 
     if isinstance(o, str):
         out = LPWindow.create(to_flag(o), length)
-
-    elif not isinstance(o, SoundBuffer):
-        out = to_lpbuffer(o, length)
+    else:
+        out = to_lpbuffer(o, length, 1)
 
     return out
 
-cdef lpbuffer_t * to_lpbuffer(object o, size_t length):
+cdef lpbuffer_t * to_lpbuffer(object o, size_t length, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE):
     cdef lpbuffer_t * out
     cdef size_t i
-    cdef int channels = DEFAULT_CHANNELS
 
     assert(o is not None)
 
     if isinstance(o, numbers.Real):
-        out = LPBuffer.create_from_float(<lpfloat_t>o, length, DEFAULT_CHANNELS, DEFAULT_SAMPLERATE)
+        out = LPBuffer.create_from_float(<lpfloat_t>o, length, channels, samplerate)
 
     elif isinstance(o, Wavetable):
-        out = LPBuffer.create(length, 1, DEFAULT_SAMPLERATE)
+        out = LPBuffer.create(length, 1, samplerate)
         for i in range(length):
             out.data[i] = o[i]
 
@@ -70,8 +81,9 @@ cdef lpbuffer_t * to_lpbuffer(object o, size_t length):
         return (<SoundBuffer>o).buffer
 
     elif isinstance(o, list):
-        out = LPBuffer.create(length, channels, DEFAULT_SAMPLERATE)
-        if isinstance(o[0], list):
+        length = len(o)
+        out = LPBuffer.create(length, channels, samplerate)
+        if isinstance(o[0], list) or isinstance(o[0], tuple):
             channels = len(o[0])
             for i in range(length):
                 for c in range(channels):
@@ -82,7 +94,7 @@ cdef lpbuffer_t * to_lpbuffer(object o, size_t length):
 
     elif isinstance(o, np.ndarray):
         channels = o.shape[1]
-        out = LPBuffer.create(length, channels, DEFAULT_SAMPLERATE)
+        out = LPBuffer.create(length, channels, samplerate)
         for i in range(length):
             for c in range(channels):
                 out.data[i * channels + c] = o[i * channels + c]
@@ -723,7 +735,7 @@ cdef class SoundBuffer:
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
 
-    def pad(self, double before=0, double after=0, bint samples=False):
+    def pad(SoundBuffer self, double before=0, double after=0, bint samples=False):
         """ Pad this sound with silence at before or after
         """
         if before <= 0 and after <= 0: 
@@ -741,6 +753,30 @@ cdef class SoundBuffer:
 
         out = LPBuffer.pad(self.buffer, framebefore, frameafter)
         return SoundBuffer.fromlpbuffer(out)
+
+    def pan(SoundBuffer self, object pos=0.5, str method=None):
+        """ Pan a stereo sound from `pos=0` (hard left) to `pos=1` (hard right)
+
+            Different panning strategies can be chosen by passing a value to the `method` param.
+
+            - `method='constant'` Constant (square) power panning. This is the default.
+            - `method='linear'` Simple linear panning.
+            - `method='sine'` Variation on constant power panning using sin() and cos() to shape the pan. _Taken from the floss manuals csound manual._
+            - `method='gogins'` Michael Gogins' variation on the above which uses a different part of the sinewave. _Also taken from the floss csound manual!_
+        """
+        if method is None:
+            method = 'constant'
+
+        cdef int _method = to_pan_method(method)
+        cdef lpbuffer_t * out
+        cdef lpbuffer_t * _pos = to_window(pos)
+
+        out = LPBuffer.create(len(self), self.channels, self.samplerate)
+        LPBuffer.copy(self.buffer, out)
+        LPBuffer.pan(out, _pos, _method)
+
+        return SoundBuffer.fromlpbuffer(out)
+
 
     def plot(SoundBuffer self):
         LPBuffer.plot(self.buffer)
@@ -761,6 +797,9 @@ cdef class SoundBuffer:
 
     def taper(self, double start, double end=-1):
         cdef lpbuffer_t * out
+
+        if start <= 0 and end <= 0:
+            return self
 
         if end < 0:
             end = start
