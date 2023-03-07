@@ -697,7 +697,7 @@ lpfloat_t _sum_abs_frame(lpbuffer_t * buf, size_t pos) {
 }
 
 void taper_buffer(lpbuffer_t * buf, size_t start, size_t end) {
-    lpfloat_t frac, a, b, phase, sample;
+    lpfloat_t frac, a, b, phase, sample, mul;
     size_t i, offset, winlength;
     int c, hi;
 
@@ -706,6 +706,9 @@ void taper_buffer(lpbuffer_t * buf, size_t start, size_t end) {
 
     winlength = HANN_WINDOW_SIZE / 2;
 
+    start = (start > buf->length) ? buf->length : start;
+    end = (end > buf->length) ? buf->length : end;
+
     if(start > 0) {
         for(i=0; i < start; i++) {
             phase = ((lpfloat_t)i / start) * (winlength-1);
@@ -713,10 +716,10 @@ void taper_buffer(lpbuffer_t * buf, size_t start, size_t end) {
             hi = (int)phase;
             a = LPHANN_WINDOW[hi];
             b = LPHANN_WINDOW[hi+1];
-            sample = (1.0f - frac) * a + (frac * b);
+            mul = (1.0f - frac) * a + (frac * b);
 
             for(c=0; c < buf->channels; c++) {
-                sample *= buf->data[i * buf->channels + c];
+                sample = mul * buf->data[i * buf->channels + c];
                 buf->data[i * buf->channels + c] = sample;
             }
         }
@@ -730,10 +733,10 @@ void taper_buffer(lpbuffer_t * buf, size_t start, size_t end) {
             hi = (int)phase + winlength;
             a = LPHANN_WINDOW[hi];
             b = LPHANN_WINDOW[hi+1];
-            sample = (1.0f - frac) * a + (frac * b);
+            mul = (1.0f - frac) * a + (frac * b);
 
             for(c=0; c < buf->channels; c++) {
-                sample *= buf->data[(offset + i) * buf->channels + c];
+                sample = mul * buf->data[(offset + i) * buf->channels + c];
                 buf->data[(offset + i) * buf->channels + c] = sample;
             }
         }

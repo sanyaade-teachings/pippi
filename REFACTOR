@@ -51,7 +51,7 @@ Just some refactoring notes...
 - [x] reversed
 - [x] remix
 - [x] softclip -- fx.softclip
-- [ ] taper
+- [x] taper
 - [x] trim
 - [x] write
 

@@ -469,6 +469,21 @@ class TestNewBuffer(TestCase):
             trimend = sound.trim(start=False, end=True, threshold=threshold)
             trimend.write('tests/renders/newbuffer_trim_silence_end%s.wav' % threshold)
 
+    def test_taper(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+
+        lengths = (0, 0.001, 0.5, 1, 10)
+        for l in lengths:
+            sound.taper(l).write('tests/renders/newbuffer_taper_both_%.3f.wav' % l)
+
+        for l in lengths:
+            sound.taper(l, end=0).write('tests/renders/newbuffer_taper_start_%.3f.wav' % l)
+
+        for l in lengths:
+            sound.taper(start=0, end=l).write('tests/renders/newbuffer_taper_end_%.3f.wav' % l)
+
+        self.assertEqual(len(sound), 44100)
+        self.assertTrue(sound.samplerate == 44100)
 
 """
     def test_stack_soundbuffer(self):
@@ -530,32 +545,4 @@ class TestNewBuffer(TestCase):
             pan_right = sound.pan(1, method=pan_method)
             self.assertEqual(pan_right[random.randint(0, len(pan_right))][1], 0)
 
-    def test_trim_silence(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav').env('hannout')
-        firstval = abs(sum(sound[0]))
-        lastval = abs(sum(sound[-1]))
-        sound = sound.pad(start=1, end=1)
-
-        self.assertEqual(sound.dur, 3)
-
-        sound.write('tests/renders/trim_silence_before.wav')
-
-        for threshold in (0, 0.01, 0.5):
-            trimstart = sound.trim(start=True, end=False, threshold=threshold)
-            trimstart.write('tests/renders/trim_silence_start%s.wav' % threshold)
-
-            trimend = sound.trim(start=False, end=True, threshold=threshold)
-            trimend.write('tests/renders/trim_silence_end%s.wav' % threshold)
-
-    def test_taper(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        sound = sound.taper(0)
-        sound = sound.taper(0.001)
-        sound = sound.taper(0.01)
-        sound = sound.taper(0.1)
-        sound = sound.taper(1)
-        sound = sound.taper(10)
-
-        self.assertEqual(len(sound), 44100)
-        self.assertTrue(sound.samplerate == 44100)
 """

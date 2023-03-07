@@ -759,6 +759,17 @@ cdef class SoundBuffer:
 
         return self
 
+    def taper(self, double start, double end=-1):
+        cdef lpbuffer_t * out
+
+        if end < 0:
+            end = start
+
+        out = LPBuffer.create(len(self), self.channels, self.samplerate)
+        LPBuffer.copy(self.buffer, out)
+        LPBuffer.taper(out, <size_t>(start * self.samplerate), <size_t>(end * self.samplerate))
+        return SoundBuffer.fromlpbuffer(out)
+
     def trim(SoundBuffer self, bint start=False, bint end=True, double threshold=0, int window=4):
         """ Trim silence below a given threshold from the end (and/or start) of the buffer
         """
