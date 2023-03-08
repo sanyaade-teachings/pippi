@@ -84,7 +84,7 @@ cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, i
 
     for i in range(framelength):
         for c in range(channels):
-            snd.frames[i,c] = lpadc_read_sample(adcbuf, pos-i, c)
+            snd.frames[framelength-1-i,c] = lpadc_read_sample(adcbuf, pos-i, c)
 
     lpadc_close(adcbuf)
 
