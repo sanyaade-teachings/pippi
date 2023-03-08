@@ -306,7 +306,8 @@ int lpadc_set_pos(lpadcbuf_t * adcbuf, size_t pos) {
     return 0;
 }
 
-int lpadc_get_length(lpadcbuf_t * adcbuf, size_t * length) {
+size_t lpadc_get_length(lpadcbuf_t * adcbuf) {
+    size_t length;
     struct flock fl;
     fl.l_type = F_RDLCK;
     fl.l_whence = SEEK_SET;
@@ -317,7 +318,7 @@ int lpadc_get_length(lpadcbuf_t * adcbuf, size_t * length) {
         fprintf(stderr, "Could not aquire a read lock on adcbuf length.\n");
         return -1;
     } else {
-        memcpy(length, adcbuf->buf+adcbuf->length_offset, sizeof(size_t));
+        memcpy(&length, adcbuf->buf+adcbuf->length_offset, sizeof(size_t));
 
         fl.l_type = F_UNLCK;
         if(fcntl(adcbuf->fd, F_SETLK, &fl) == -1) {
@@ -326,7 +327,7 @@ int lpadc_get_length(lpadcbuf_t * adcbuf, size_t * length) {
         }
     }
 
-    return 0;
+    return length;
 }
 
 int lpadc_set_length(lpadcbuf_t * adcbuf, size_t length) {
@@ -352,7 +353,8 @@ int lpadc_set_length(lpadcbuf_t * adcbuf, size_t length) {
     return 0;
 }
 
-int lpadc_get_channels(lpadcbuf_t * adcbuf, int * channels) {
+int lpadc_get_channels(lpadcbuf_t * adcbuf) {
+    int channels;
     struct flock fl;
     fl.l_type = F_RDLCK;
     fl.l_whence = SEEK_SET;
@@ -363,7 +365,7 @@ int lpadc_get_channels(lpadcbuf_t * adcbuf, int * channels) {
         fprintf(stderr, "Could not aquire a read lock on adcbuf channels.\n");
         return -1;
     } else {
-        memcpy(channels, adcbuf->buf+adcbuf->channels_offset, sizeof(int));
+        memcpy(&channels, adcbuf->buf+adcbuf->channels_offset, sizeof(int));
 
         fl.l_type = F_UNLCK;
         if(fcntl(adcbuf->fd, F_SETLK, &fl) == -1) {
@@ -372,7 +374,7 @@ int lpadc_get_channels(lpadcbuf_t * adcbuf, int * channels) {
         }
     }
 
-    return 0;
+    return channels;
 }
 
 int lpadc_set_channels(lpadcbuf_t * adcbuf, int channels) {
@@ -401,7 +403,11 @@ int lpadc_set_channels(lpadcbuf_t * adcbuf, int channels) {
 lpadcbuf_t * lpadc_create() {
     lpadcbuf_t * adcbuf;
 
+    // this struct holds a reference to the shared memory buffer
+    // and metadata deserialized from the shared memory buffer
     adcbuf = (lpadcbuf_t *)calloc(sizeof(lpadcbuf_t), 1);
+
+    // open the shared memory buffer and store the file descriptor
     adcbuf->fd = shm_open(LPADC_BUFNAME, O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
     if(adcbuf->fd == -1) {
         fprintf(stderr, "Could not get a handle to adcbuf shared memory.\n");
@@ -409,33 +415,40 @@ lpadcbuf_t * lpadc_create() {
     }
 
     /* FIXME get samplerate & channels from context */
+    // set general metadata
     adcbuf->length = (size_t)(ASTRID_ADCSECONDS * ASTRID_SAMPLERATE);
     adcbuf->channels = ASTRID_CHANNELS;
     adcbuf->buffer_offset = sizeof(size_t) + sizeof(size_t) + sizeof(int);
     adcbuf->pos = 0;
 
     /* Store byte offsets for easy lookup */
+    // FIXME most of these offsets could probably be constants...
     adcbuf->pos_offset = 0;
     adcbuf->length_offset = adcbuf->pos_offset + sizeof(size_t);
     adcbuf->channels_offset = adcbuf->length_offset + sizeof(size_t);
     adcbuf->buffer_offset = adcbuf->channels_offset + sizeof(int);
     adcbuf->total_bytes = adcbuf->buffer_offset + (sizeof(lpfloat_t) * adcbuf->length * adcbuf->channels);
 
+    // Initialize the shared memory buffer to the appropriate size
     if(ftruncate(adcbuf->fd, adcbuf->total_bytes) == -1) {
         fprintf(stderr, "Could not resize adcbuf.\n");
         return NULL;
     }
 
+    // mmap the shared memory to the char * pointer
+    // opening it for reading and writing
     adcbuf->buf = mmap(NULL, adcbuf->total_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, adcbuf->fd, 0);
     if(adcbuf->buf == MAP_FAILED) {
         fprintf(stderr, "Could not mmap adcbuf.\n");
         return NULL;
     }
 
+    // initialize pos, length and channels values in the shared memory buffer
     memcpy(adcbuf->buf+adcbuf->pos_offset, &adcbuf->pos, sizeof(size_t));
     memcpy(adcbuf->buf+adcbuf->length_offset, &adcbuf->length, sizeof(size_t));
     memcpy(adcbuf->buf+adcbuf->channels_offset, &adcbuf->channels, sizeof(int));
 
+    // return a pointer to the struct
     return adcbuf;
 }
 
@@ -472,8 +485,8 @@ lpadcbuf_t * lpadc_open() {
     adcbuf->buffer_offset = adcbuf->channels_offset + sizeof(int);
 
     lpadc_get_pos(adcbuf, &adcbuf->pos);
-    lpadc_get_channels(adcbuf, &adcbuf->channels);
-    lpadc_get_length(adcbuf, &adcbuf->length);
+    adcbuf->channels = lpadc_get_channels(adcbuf);
+    adcbuf->length = lpadc_get_length(adcbuf);
 
     return adcbuf;
 }
@@ -485,8 +498,8 @@ lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel) {
     int channels = 0;
 
     // get buf channels
-    lpadc_get_channels(adcbuf, &channels);
-    lpadc_get_length(adcbuf, &length);
+    channels = lpadc_get_channels(adcbuf);
+    length = lpadc_get_length(adcbuf);
 
     frame = frame % length;
 
@@ -506,31 +519,31 @@ int lpadc_increment_pos(lpadcbuf_t * adcbuf, int count) {
     size_t length = 0;
 
     if(lpadc_get_pos(adcbuf, &pos) == -1) return -1;
-    if(lpadc_get_length(adcbuf, &length) == -1) return -1;
+    length = lpadc_get_length(adcbuf);
     pos = (pos + count) % length;
 
     return lpadc_set_pos(adcbuf, pos);
 }
 
-size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, size_t frame, int channel, ssize_t offset) {
+size_t lpadc_write_sample(
+        lpadcbuf_t * adcbuf, 
+        lpfloat_t sample, 
+        size_t frame, 
+        int channel, 
+        ssize_t offset
+) {
     size_t writepos;
-    size_t * length;
-    int * channels;
+    size_t length;
+    int channels;
 
-    length = (size_t *)calloc(1, sizeof(size_t));
-    channels = (int *)calloc(1, sizeof(int));
+    channels = lpadc_get_channels(adcbuf);
+    length = lpadc_get_length(adcbuf);
 
-    lpadc_get_length(adcbuf, length);
+    assert(length != 0);
 
-    assert(*length != 0);
-
-    frame = (frame + offset) % (*length);
-    lpadc_get_channels(adcbuf, channels);
-    writepos = adcbuf->buffer_offset + (((frame * (*channels)) + channel) * sizeof(lpfloat_t));
+    frame = (frame + offset) % length;
+    writepos = adcbuf->buffer_offset + (((frame * channels) + channel) * sizeof(lpfloat_t));
     memcpy(adcbuf->buf + writepos, &sample, sizeof(lpfloat_t));
-
-    free(length);
-    free(channels);
 
     return frame;
 }
