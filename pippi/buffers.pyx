@@ -734,6 +734,23 @@ cdef class SoundBuffer:
 
     def graph(SoundBuffer self, *args, **kwargs):
         return graph.write(self, *args, **kwargs)
+    
+    def mix(SoundBuffer self, object sounds):
+        """ Mix this sound in place with an iterable of sounds
+        """
+        cdef SoundBuffer sound
+        cdef int numsounds
+        cdef int sound_index
+        if isinstance(sounds, SoundBuffer):
+            self &= sounds
+        else:
+            numsounds = len(sounds)
+            try:
+                for sound_index in range(numsounds):
+                    self &= sounds[sound_index] 
+            except TypeError as e:
+                raise TypeError('Please provide a SoundBuffer or list of SoundBuffers for mixing') from e
+        return self
 
     def pad(SoundBuffer self, double before=0, double after=0, bint samples=False):
         """ Pad this sound with silence at before or after

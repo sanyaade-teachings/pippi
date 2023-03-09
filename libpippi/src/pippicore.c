@@ -1039,13 +1039,13 @@ lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b) {
 
     for(i=0; i < longest->length; i++) {
         for(c=0; c < max_channels; c++) {
-            out->data[i * max_channels + c] = longest->data[i * max_channels + c];
+            out->data[i * max_channels + c] += longest->data[i * max_channels + c];
         }
     }
 
     for(i=0; i < shortest->length; i++) {
         for(c=0; c < max_channels; c++) {
-            out->data[i * max_channels + c] = shortest->data[i * max_channels + c];
+            out->data[i * max_channels + c] += shortest->data[i * max_channels + c];
         }
     }
 

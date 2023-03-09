@@ -45,6 +45,7 @@ Just some refactoring notes...
 - [x] fill -- truncate or loop to desired length
 - [x] grains -- iterate over buffer in variable-sized grains
 - [x] graph -- plot the waveform
+- [x] mix -- mix in place with sound or list of sounds
 - [x] pad -- pad with silence at start or end
 - [x] pan
 - [x] repeat
@@ -66,7 +67,6 @@ Just some refactoring notes...
 ## misc
 
 - [ ] cloud -- graincloud
-- [ ] mix -- mix in place with sound or list of sounds
 - [ ] speed
 - [ ] vspeed
 - [ ] stretch

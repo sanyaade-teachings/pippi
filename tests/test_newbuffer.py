@@ -155,6 +155,16 @@ class TestNewBuffer(TestCase):
                 sample = sound[frame_index][channel_index]
                 self.assertTrue(isinstance(sample, float))
 
+    def test_mix_list_of_sounds(self):
+        snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+        snd3 = SoundBuffer(filename='tests/sounds/LittleTikes-E1.wav')
+        snd4 = SoundBuffer(filename='tests/sounds/LittleTikes-C3.wav')
+
+        out = snd1.mix([snd2, snd3, snd4])
+        out.write('tests/renders/newbuffer_mix_list-postmix.wav')
+
+
     def test_mix_operator(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
