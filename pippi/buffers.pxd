@@ -45,7 +45,7 @@ cdef extern from "pippicore.h":
         size_t pos
 
     ctypedef struct lpwavetable_factory_t:
-        lpbuffer_t * (*create)(const char * name, size_t length)
+        lpbuffer_t * (*create)(int name, size_t length)
         void (*destroy)(lpbuffer_t *)
 
     ctypedef struct lpwindow_factory_t:

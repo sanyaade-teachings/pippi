@@ -512,6 +512,13 @@ class TestNewBuffer(TestCase):
         w = SoundBuffer.win('hann', 0.5, 2)
         w.write('tests/renders/newbuffer_window_hann.wav')
 
+    def test_newbuffer_as_wavetable(self):
+        w = SoundBuffer.wt('sine')
+        w.write('tests/renders/newbuffer_wavetable_sine.wav')
+
+        w = SoundBuffer.wt('sine', -0.2, 0.6)
+        w.write('tests/renders/newbuffer_wavetable_sine_scaled.wav')
+
     def test_fixed_speed(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         speed = random.random()

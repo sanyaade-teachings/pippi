@@ -17,7 +17,17 @@ from pippi import graph, rand
 from pippi.wavetables cimport _window, Wavetable
 from pippi cimport interpolation
 
-cdef dict FLAGS = {
+cdef dict WT_FLAGS = {
+    'sine': WT_SINE,
+    'cos': WT_COS,
+    'square': WT_SQUARE,
+    'tri': WT_TRI,
+    'saw': WT_RSAW,
+    'rsaw': WT_RSAW,
+    'rnd': WT_RND,
+}
+
+cdef dict WIN_FLAGS = {
     'sine': WIN_SINE,
     'sineine': WIN_SINEIN,
     'sineout': WIN_SINEOUT,
@@ -45,11 +55,17 @@ cdef int to_pan_method(str name):
     except KeyError:
         return PANMETHOD_CONSTANT
 
-cdef int to_flag(str name):
+cdef int to_win_flag(str name):
     try:
-        return FLAGS[name]
+        return WIN_FLAGS[name]
     except KeyError:
         return WIN_SINE
+
+cdef int to_wt_flag(str name):
+    try:
+        return WT_FLAGS[name]
+    except KeyError:
+        return WT_SINE
 
 cdef lpbuffer_t * to_window(object o, size_t length=0):
     cdef lpbuffer_t * out
@@ -57,7 +73,19 @@ cdef lpbuffer_t * to_window(object o, size_t length=0):
         length = DEFAULT_WTSIZE
 
     if isinstance(o, str):
-        out = LPWindow.create(to_flag(o), length)
+        out = LPWindow.create(to_win_flag(o), length)
+    else:
+        out = to_lpbuffer(o, length, 1)
+
+    return out
+
+cdef lpbuffer_t * to_wavetable(object o, size_t length=0):
+    cdef lpbuffer_t * out
+    if length <= 0:
+        length = DEFAULT_WTSIZE
+
+    if isinstance(o, str):
+        out = LPWavetable.create(to_wt_flag(o), length)
     else:
         out = to_lpbuffer(o, length, 1)
 
@@ -239,12 +267,18 @@ cdef class SoundBuffer:
 
         return SoundBuffer.fromlpbuffer(out)
 
-    """"
     @staticmethod
-    cdef SoundBuffer wt(object w, double minvalue=-1, double maxvalue=-1, double length=-1):
-        cdef lpbuffer_t * _win = to_wavetable(w, length)
-        return SoundBuffer.fromlpbuffer(_win)
-    """
+    def wt(object w, double minvalue=-1, double maxvalue=1, double length=0, double samplerate=DEFAULT_SAMPLERATE):
+        cdef lpbuffer_t * out
+        if length > 0:
+            length *= samplerate
+
+        out = to_wavetable(w, <size_t>int(length))
+
+        if minvalue != -1 and maxvalue != 1:
+            LPBuffer.scale(out, -1, 1, minvalue, maxvalue)
+
+        return SoundBuffer.fromlpbuffer(out)
 
     def __bool__(self):
         return bool(len(self))

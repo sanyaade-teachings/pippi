@@ -56,6 +56,8 @@ Just some refactoring notes...
 - [x] speed
 - [x] vspeed
 - [x] taper
+- [ ] toenv
+- [ ] towavetable
 - [x] trim
 - [x] write
 
@@ -71,6 +73,4 @@ Just some refactoring notes...
 - [ ] cloud -- graincloud
 - [ ] stretch
 - [ ] transpose
-- [ ] toenv
-- [ ] towavetable
 

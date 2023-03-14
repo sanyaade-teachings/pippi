@@ -1620,7 +1620,7 @@ void wavetable_rsaw(lpfloat_t* out, int length) {
 
 /* create a wavetable (-1 to 1) */
 lpbuffer_t* create_wavetable(int name, size_t length) {
-    lpbuffer_t* buf = LPBuffer.create(length, 1, -1);
+    lpbuffer_t* buf = LPBuffer.create(length, 1, DEFAULT_SAMPLERATE);
     if(name == WT_SINE) {
         wavetable_sine(buf->data, length);            
     } else if (name == WT_COS) {
