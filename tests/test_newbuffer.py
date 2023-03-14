@@ -520,19 +520,19 @@ class TestNewBuffer(TestCase):
         self.assertEqual(len(out), int(len(sound) * (1/speed)))
 
     def test_variable_speed_1(self):
-        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         speed = SoundBuffer.win('hann', 0.5, 2)
         out = sound.speed(speed)
         out.write('tests/renders/newbuffer_vspeed_0.5_2.wav')
 
     def test_variable_speed_2(self):
-        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         speed = SoundBuffer.win('hann', 0.15, 0.5)
         out = sound.speed(speed)
         out.write('tests/renders/newbuffer_vspeed_0.15_0.5.wav')
 
     def test_variable_speed_3(self):
-        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         speed = SoundBuffer.win('hann', 5, 50)
         out = sound.speed(speed)
         out.write('tests/renders/newbuffer_vspeed_5_50.wav')

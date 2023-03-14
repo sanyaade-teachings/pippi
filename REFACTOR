@@ -53,8 +53,8 @@ Just some refactoring notes...
 - [x] reversed
 - [x] remix
 - [x] softclip -- fx.softclip
-- [ ] speed
-- [ ] vspeed
+- [x] speed
+- [x] vspeed
 - [x] taper
 - [x] trim
 - [x] write

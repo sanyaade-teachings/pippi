@@ -860,6 +860,8 @@ cdef class SoundBuffer:
         cdef lpbuffer_t * out
         #cdef int interpolation_scheme
 
+        # TODO would be cool to be able to select the interpolator 
+        # like some pippi oscs allow.
         #if interpolation is None:
         #    interpolation = 'linear'
         #interpolation_scheme = to_interpolation_scheme(interpolation)
@@ -868,6 +870,10 @@ cdef class SoundBuffer:
 
         out = LPBuffer.varispeed(self.buffer, _speed);
         return SoundBuffer.fromlpbuffer(out)
+
+    def vspeed(SoundBuffer self, object speed, str interpolation=None):
+        logger.warning('DEPRECATED: SoundBuffer.vspeed() is deprecated. Please just use SoundBuffer.speed()')
+        return self.speed(speed, interpolation)
 
     def taper(self, double start, double end=-1):
         cdef lpbuffer_t * out

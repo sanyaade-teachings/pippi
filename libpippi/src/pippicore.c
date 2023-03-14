@@ -536,7 +536,6 @@ lpbuffer_t * varispeed_buffer(lpbuffer_t * buf, lpbuffer_t * speed) {
 
     out = create_buffer(length, buf->channels, buf->samplerate);
     for(i=0; i < length; i++) {
-        //pos = phase/buf->length;
         pos = (lpfloat_t)i / length;
 
         for(c=0; c < buf->channels; c++) {
@@ -545,11 +544,10 @@ lpbuffer_t * varispeed_buffer(lpbuffer_t * buf, lpbuffer_t * speed) {
 
         _speed = interpolate_linear_pos(speed, pos);
         phase += phase_inc * _speed;
+        if(phase >= buf->length) break;
     }
 
-    printf("length: %d last i: %d\n", (int)length, (int)i);
     trimmed = cut_buffer(out, 0, i);
-    //trimmed = trim_buffer(out, 0, 1, 0, 4);
     free(out);
     return trimmed;
 }
