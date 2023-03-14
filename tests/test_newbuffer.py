@@ -508,6 +508,35 @@ class TestNewBuffer(TestCase):
         pan_self = sound.pan([0, 0.1, 0.7, 0.2, 0, 1, 1, 1], method='constant')
         pan_self.write('tests/renders/newbuffer_pan_self.wav')
 
+    def test_newbuffer_as_window(self):
+        w = SoundBuffer.win('hann', 0.5, 2)
+        w.write('tests/renders/newbuffer_window_hann.wav')
+
+    def test_fixed_speed(self):
+        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        speed = random.random()
+        out = sound.speed(speed)
+        out.write('tests/renders/newbuffer_speed.wav')
+        self.assertEqual(len(out), int(len(sound) * (1/speed)))
+
+    def test_variable_speed_1(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        speed = SoundBuffer.win('hann', 0.5, 2)
+        out = sound.speed(speed)
+        out.write('tests/renders/newbuffer_vspeed_0.5_2.wav')
+
+    def test_variable_speed_2(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        speed = SoundBuffer.win('hann', 0.15, 0.5)
+        out = sound.speed(speed)
+        out.write('tests/renders/newbuffer_vspeed_0.15_0.5.wav')
+
+    def test_variable_speed_3(self):
+        sound = SoundBuffer(filename='tests/sounds/linux.wav')
+        speed = SoundBuffer.win('hann', 5, 50)
+        out = sound.speed(speed)
+        out.write('tests/renders/newbuffer_vspeed_5_50.wav')
+
 
 """
     def test_stack_soundbuffer(self):
@@ -520,27 +549,6 @@ class TestNewBuffer(TestCase):
         self.assertTrue(length == len(out))
         self.assertTrue(snd1.samplerate == out.samplerate)
         out.write('tests/renders/soundbuffer_stack.wav')
-
-    def test_speed(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        speed = random.random()
-        out = sound.speed(speed)
-        out.write('tests/renders/soundbuffer_speed.wav')
-        self.assertEqual(len(out), int(len(sound) * (1/speed)))
-
-    def test_vpeed(self):
-        sound = SoundBuffer(filename='tests/sounds/linux.wav')
-        speed = dsp.win('hann', 0.5, 2)
-        out = sound.vspeed(speed)
-        out.write('tests/renders/soundbuffer_vspeed_0.5_2.wav')
-
-        speed = dsp.win('hann', 0.15, 0.5)
-        out = sound.vspeed(speed)
-        out.write('tests/renders/soundbuffer_vspeed_0.15_0.5.wav')
-
-        speed = dsp.win('hann', 5, 50)
-        out = sound.vspeed(speed)
-        out.write('tests/renders/soundbuffer_vspeed_5_50.wav')
 
 
     def test_transpose(self):

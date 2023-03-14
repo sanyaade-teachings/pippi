@@ -89,6 +89,8 @@ clean:
 	rm -rf pippi/**/*.c
 	rm -rf pippi/*.so
 	rm -rf pippi/**/*.so
+	rm -f tests/renders/*.wav
+	rm -f tests/renders/*.png
 
 rpi-install:
 	sudo apt update -y

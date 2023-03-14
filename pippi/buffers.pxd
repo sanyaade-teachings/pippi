@@ -93,6 +93,7 @@ cdef extern from "pippicore.h":
         void (*clip)(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval)
         lpbuffer_t * (*cut)(lpbuffer_t * buf, size_t start, size_t length)
         void (*cut_into)(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length)
+        lpbuffer_t * (*varispeed)(lpbuffer_t * buf, lpbuffer_t * speed)
         lpbuffer_t * (*resample)(lpbuffer_t *, size_t)
         void (*multiply)(lpbuffer_t *, lpbuffer_t *)
         void (*multiply_scalar)(lpbuffer_t *, lpfloat_t)

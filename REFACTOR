@@ -53,6 +53,8 @@ Just some refactoring notes...
 - [x] reversed
 - [x] remix
 - [x] softclip -- fx.softclip
+- [ ] speed
+- [ ] vspeed
 - [x] taper
 - [x] trim
 - [x] write
@@ -67,8 +69,6 @@ Just some refactoring notes...
 ## misc
 
 - [ ] cloud -- graincloud
-- [ ] speed
-- [ ] vspeed
 - [ ] stretch
 - [ ] transpose
 - [ ] toenv

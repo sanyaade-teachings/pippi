@@ -42,6 +42,8 @@ typedef double lpfloat_t;
 #define EULER 2.718281828459045235360287471352662497757247093
 #endif
 
+#define LPVSPEED_MIN 0.001
+
 #define GRID_EMPTY 0x2800
 #define GRID_FULL  0x28ff
 
@@ -217,6 +219,7 @@ typedef struct lpbuffer_factory_t {
     void (*clip)(lpbuffer_t * buf, lpfloat_t minval, lpfloat_t maxval);
     lpbuffer_t * (*cut)(lpbuffer_t * buf, size_t start, size_t length);
     void (*cut_into)(lpbuffer_t * buf, lpbuffer_t * out, size_t start, size_t length);
+    lpbuffer_t * (*varispeed)(lpbuffer_t * buf, lpbuffer_t * speed);
     lpbuffer_t * (*resample)(lpbuffer_t *, size_t);
     void (*multiply)(lpbuffer_t *, lpbuffer_t *);
     void (*multiply_scalar)(lpbuffer_t *, lpfloat_t);

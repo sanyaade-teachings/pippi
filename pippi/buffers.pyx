@@ -108,9 +108,9 @@ cdef lpbuffer_t * to_lpbuffer(object o, size_t length, int channels=DEFAULT_CHAN
 class SoundBufferError(Exception):
     pass
 
+#@cython.total_ordering
 
 @cython.final
-@cython.total_ordering
 cdef class SoundBuffer:
     cdef lpbuffer_t * buffer
     cdef Py_ssize_t shape[2]
@@ -226,6 +226,26 @@ cdef class SoundBuffer:
         out.buffer = buffer
         return out
 
+    @staticmethod
+    def win(object w, double minvalue=0, double maxvalue=1, double length=0, double samplerate=DEFAULT_SAMPLERATE):
+        cdef lpbuffer_t * out
+        if length > 0:
+            length *= samplerate
+
+        out = to_window(w, <size_t>int(length))
+
+        if minvalue != 0 and maxvalue != 1:
+            LPBuffer.scale(out, 0, 1, minvalue, maxvalue)
+
+        return SoundBuffer.fromlpbuffer(out)
+
+    """"
+    @staticmethod
+    cdef SoundBuffer wt(object w, double minvalue=-1, double maxvalue=-1, double length=-1):
+        cdef lpbuffer_t * _win = to_wavetable(w, length)
+        return SoundBuffer.fromlpbuffer(_win)
+    """
+
     def __bool__(self):
         return bool(len(self))
 
@@ -234,16 +254,38 @@ cdef class SoundBuffer:
 
     def __repr__(self):
         return 'SoundBuffer(samplerate=%s, channels=%s, frames=%s, dur=%.2f)' % (self.samplerate, self.channels, len(self.frames), self.dur)
+    
+    def __lt__(self, other):
+        if not isinstance(other, SoundBuffer):
+            return NotImplemented
+        return self.min < (<SoundBuffer>other).min
+
+    def __le__(self, other):
+        if not isinstance(other, SoundBuffer):
+            return NotImplemented
+        return self.min <= (<SoundBuffer>other).min
+
+    def __eq__(self, other):
+        if isinstance(other, SoundBuffer):
+            #return LPBuffer.buffers_are_close(self.buffer, (<SoundBuffer>other).buffer, 1000) > 0
+            return self.length == (<SoundBuffer>other).length
+        return self.avg == other
+        
+    def __ne__(self, other):
+        if isinstance(other, SoundBuffer):
+            #return LPBuffer.buffers_are_close(self.buffer, (<SoundBuffer>other).buffer, 1000) == 0
+            return self.length != (<SoundBuffer>other).length
+        return self.avg != other
+
+    def __gt__(self, other):
+        if not isinstance(other, SoundBuffer):
+            return NotImplemented
+        return self.max > (<SoundBuffer>other).max
 
     def __ge__(self, other):
         if not isinstance(other, SoundBuffer):
             return NotImplemented
-        return self.buffer.length >= (<SoundBuffer>other).buffer.length
-
-    def __eq__(self, other):
-        if not isinstance(other, SoundBuffer):
-            return False
-        return LPBuffer.buffers_are_close(self.buffer, (<SoundBuffer>other).buffer, 1000) != 0
+        return self.max >= (<SoundBuffer>other).max
 
     def __getbuffer__(SoundBuffer self, Py_buffer * buffer, int flags):
         cdef Py_ssize_t itemsize = sizeof(self.buffer.data[0])
@@ -273,7 +315,7 @@ cdef class SoundBuffer:
             return SoundBuffer(mv[position.start:position.stop], channels=self.channels, samplerate=self.samplerate)
         else:
             if position >= self.buffer.length:
-                return tuple([ 0 for _ in range(self.channels) ])
+                raise IndexError('Requested frame at position %d is beyond the end of the %d frame buffer.' % (position, self.buffer.length))
             elif position < 0:
                 position = len(self) + position
             return tuple([ mv[position][v] for v in range(self.channels) ])
@@ -811,6 +853,21 @@ cdef class SoundBuffer:
                 self.buffer.data[i * self.buffer.channels + c] = sample
 
         return self
+
+    def speed(SoundBuffer self, object speed, str interpolation=None):
+        """ Change the speed of the sound
+        """
+        cdef lpbuffer_t * out
+        #cdef int interpolation_scheme
+
+        #if interpolation is None:
+        #    interpolation = 'linear'
+        #interpolation_scheme = to_interpolation_scheme(interpolation)
+
+        cdef lpbuffer_t * _speed = to_window(speed)
+
+        out = LPBuffer.varispeed(self.buffer, _speed);
+        return SoundBuffer.fromlpbuffer(out)
 
     def taper(self, double start, double end=-1):
         cdef lpbuffer_t * out
