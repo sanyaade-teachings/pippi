@@ -872,7 +872,7 @@ cdef class SoundBuffer:
         return SoundBuffer.fromlpbuffer(out)
 
     def vspeed(SoundBuffer self, object speed, str interpolation=None):
-        logger.warning('DEPRECATED: SoundBuffer.vspeed() is deprecated. Please just use SoundBuffer.speed()')
+        warnings.warn('DEPRECATED: SoundBuffer.vspeed() is deprecated. Please just use SoundBuffer.speed()', DeprecationWarning)
         return self.speed(speed, interpolation)
 
     def taper(self, double start, double end=-1):
