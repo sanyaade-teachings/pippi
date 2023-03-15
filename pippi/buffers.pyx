@@ -906,7 +906,7 @@ cdef class SoundBuffer:
         return SoundBuffer.fromlpbuffer(out)
 
     def vspeed(SoundBuffer self, object speed, str interpolation=None):
-        warnings.warn('DEPRECATED: SoundBuffer.vspeed() is deprecated. Please just use SoundBuffer.speed()', DeprecationWarning)
+        warnings.warn('SoundBuffer.vspeed() is deprecated. Please use SoundBuffer.speed()', DeprecationWarning)
         return self.speed(speed, interpolation)
 
     def taper(self, double start, double end=-1):
@@ -921,6 +921,39 @@ cdef class SoundBuffer:
         out = LPBuffer.create(len(self), self.channels, self.samplerate)
         LPBuffer.copy(self.buffer, out)
         LPBuffer.taper(out, <size_t>(start * self.samplerate), <size_t>(end * self.samplerate))
+        return SoundBuffer.fromlpbuffer(out)
+
+    def toenv(SoundBuffer self, double window=0.01):
+        cdef lpbuffer_t * out
+        cdef size_t blocksize = <size_t>int(window * self.samplerate)
+        cdef size_t length = <size_t>int(len(self) / float(blocksize))
+        cdef size_t i, b
+        cdef lpfloat_t sample
+        cdef int processing = 1
+
+        out = LPBuffer.create(length, 1, self.samplerate)
+
+        i = 0
+        while True:
+            # find the peak in the block
+            sample = 0
+            for b in range(blocksize):
+                sample = max(sample, abs(sum(self[i*blocksize+b])))
+            sample /= self.channels
+
+            if i*blocksize+blocksize >= len(self)-blocksize:
+                break
+
+            out.data[i] = sample
+            i += 1
+
+        return SoundBuffer.fromlpbuffer(out)
+
+    def towavetable(SoundBuffer self, *args, **kwargs):
+        warnings.warn('SoundBuffer.towavetable() is deprecated. Use SoundBuffers as wavetables directly. Please use SoundBuffer.remix(1) to mix down to a single channel.', DeprecationWarning)
+        if self.channels == 1:
+            return self
+        cdef lpbuffer_t * out = LPBuffer.remix(self.buffer, 1)
         return SoundBuffer.fromlpbuffer(out)
 
     def trim(SoundBuffer self, bint start=False, bint end=True, double threshold=0, int window=4):

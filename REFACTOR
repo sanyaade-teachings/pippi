@@ -56,8 +56,8 @@ Just some refactoring notes...
 - [x] speed
 - [x] vspeed
 - [x] taper
-- [ ] toenv
-- [ ] towavetable
+- [x] toenv
+- [x] towavetable
 - [x] trim
 - [x] write
 

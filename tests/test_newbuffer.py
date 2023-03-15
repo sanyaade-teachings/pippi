@@ -544,6 +544,10 @@ class TestNewBuffer(TestCase):
         out = sound.speed(speed)
         out.write('tests/renders/newbuffer_vspeed_5_50.wav')
 
+    def test_toenv(self):
+        snd = SoundBuffer(filename='tests/sounds/linux.wav')
+        env = snd.toenv()
+        env.write('tests/renders/newbuffer_toenv.wav')
 
 """
     def test_stack_soundbuffer(self):
