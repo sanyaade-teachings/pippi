@@ -685,10 +685,6 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
     return buf;
 }
 
-int get_now(struct timespec * tp) {
-    return clock_gettime(CLOCK_MONOTONIC_RAW, tp);
-}
-
 // TODO
 // - break into: open/create, read, close
 // - call open only once in the lifetime of the cb...

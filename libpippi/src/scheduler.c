@@ -1,12 +1,82 @@
 #include "scheduler.h"
 
-lpscheduler_t * scheduler_create(int);
+lpscheduler_t * scheduler_create(int, int, lpfloat_t);
 lpfloat_t scheduler_read_channel(lpscheduler_t * s, int channel);
 void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay, void (*callback)(void *), void * ctx, size_t callback_delay);
 void scheduler_destroy(lpscheduler_t * s);
 static inline void start_playing(lpscheduler_t * s, lpevent_t * e);
 void scheduler_debug(lpscheduler_t * s);
 void scheduler_cleanup_nursery(lpscheduler_t * s);
+void scheduler_frames_to_timespec(size_t frames, lpfloat_t samplerate, struct timespec * ts);
+
+void scheduler_get_now(struct timespec * now) {
+    clock_gettime(CLOCK_MONOTONIC_RAW, now);
+}
+
+void scheduler_frames_to_timespec(
+    size_t frames, 
+    lpfloat_t samplerate, 
+    struct timespec * ts
+) {
+    size_t ns;
+
+    ts->tv_sec = (time_t)(frames / samplerate);
+
+    ns = frames - (size_t)(ts->tv_sec * samplerate);
+    ts->tv_nsec = (size_t)(ns / samplerate);
+}
+
+void scheduler_increment_timespec_by_ns(
+    struct timespec * ts, 
+    size_t ns
+) {
+    size_t seconds = 0;
+    while(ns >= 1000000000) {
+        ns -= 1000000000;
+        seconds += 1;
+    }
+
+    ts->tv_sec += seconds;
+    ts->tv_nsec += ns;
+}
+
+size_t scheduler_timespec_to_ticks(
+    lpscheduler_t * s, 
+    struct timespec * ts
+) {
+    size_t secs, nsecs, total_ns;     
+
+    /* Seconds and nanoseconds since init */
+    secs = ts->tv_sec - s->init->tv_sec;
+    nsecs = ts->tv_nsec - s->init->tv_nsec;
+
+    /* Convert nanoseconds since init to number of 
+     * ticks since init.
+     *
+     * ticks advance on frame boundries as the scheduler 
+     * processes each frame of output.
+     *
+     * `tick_ns` is the number of nanoseconds 
+     * per frame at the current samplerate.
+     **/
+    total_ns = nsecs + (secs * 1000000000);
+    return total_ns / s->tick_ns;
+}
+
+int scheduler_onset_has_elapsed(lpscheduler_t * s, struct timespec * ts) {
+    printf(" s->now->tv_sec: %d\n", (int)s->now->tv_sec);
+    printf("     ts->tv_sec: %d\n", (int)ts->tv_sec);
+    printf("s->now->tv_nsec: %d\n", (int)s->now->tv_nsec);
+    printf("    ts->tv_nsec: %d\n", (int)ts->tv_nsec);
+
+    return ((
+            s->now->tv_sec >= ts->tv_sec
+        ) || (
+            s->now->tv_sec == ts->tv_sec &&
+            s->now->tv_nsec >= ts->tv_nsec
+        )
+    ) ? 1 : 0;
+}
 
 void ll_display(lpevent_t * head) {
     lpevent_t * current;
@@ -124,17 +194,25 @@ static inline void stop_playing(lpscheduler_t * s, lpevent_t * e) {
     }
 }
 
-lpscheduler_t * scheduler_create(int channels) {
+lpscheduler_t * scheduler_create(int realtime, int channels, lpfloat_t samplerate) {
     lpscheduler_t * s;
 
     s = (lpscheduler_t *)LPMemoryPool.alloc(1, sizeof(lpscheduler_t));
+    s->now = (struct timespec *)LPMemoryPool.alloc(1, sizeof(struct timespec));
+
+    s->realtime = realtime;
 
     s->waiting_queue_head = NULL;
     s->playing_stack_head = NULL;
     s->nursery_head = NULL;
 
+    s->samplerate = samplerate;
     s->channels = channels;
-    s->now = 0;
+
+    s->tick_ns = (size_t)(samplerate / 1000000000.f);
+
+    if(realtime == 1) scheduler_get_now(s->now);
+    s->ticks = 0;
     s->current_frame = (lpfloat_t *)LPMemoryPool.alloc(channels, sizeof(lpfloat_t));
 
     s->event_count = 0;
@@ -150,12 +228,12 @@ static inline void scheduler_update(lpscheduler_t * s) {
         current = s->waiting_queue_head;
         while(current->next != NULL) {
             next = current->next;
-            if(current->onset <= s->now) {
+            if(s->ticks >= current->onset) {
                 start_playing(s, current);
             }
             current = (lpevent_t *)next;
         }
-        if(current->onset <= s->now) {
+        if(s->ticks >= current->onset) {
             start_playing(s, current);
         }
     }
@@ -217,7 +295,7 @@ static inline void scheduler_try_callback(lpscheduler_t * s, lpevent_t * e) {
     if(
         e->callback_fired == 0 && 
         e->callback != NULL && 
-        s->now >= e->callback_onset
+        s->ticks >= e->callback_onset
     ) {
         e->callback(e->ctx);
         e->callback_fired = 1;
@@ -274,6 +352,8 @@ void lpscheduler_handle_callbacks(lpscheduler_t * s) {
 }
 
 void lpscheduler_tick(lpscheduler_t * s) {
+    //scheduler_debug(s);
+
     /* Move buffers to proper lists */
     scheduler_update(s);
 
@@ -283,8 +363,13 @@ void lpscheduler_tick(lpscheduler_t * s) {
     /* Advance the position for all playing buffers */
     scheduler_advance_buffers(s);
 
-    /* Advance now */
-    s->now += 1;
+    /* Increment process ticks and update now timestamp */
+    s->ticks += 1;
+    if(s->realtime == 1) {
+        scheduler_get_now(s->now);
+    } else {
+        scheduler_increment_timespec_by_ns(s->now, s->tick_ns);
+    }
 }
 
 void scheduler_schedule_event(lpscheduler_t * s, 
@@ -304,14 +389,17 @@ void scheduler_schedule_event(lpscheduler_t * s,
         e = (lpevent_t *)LPMemoryPool.alloc(1, sizeof(lpevent_t));
         s->event_count += 1;
         e->id = s->event_count;
+        e->onset = 0;
+        e->callback_onset = 0;
     }
 
     e->buf = buf;
     e->pos = 0;
-    e->onset = s->now + delay;
+    e->onset = s->ticks + delay;
     e->callback = callback;
     e->ctx = ctx;
-    e->callback_onset = s->now + callback_delay;
+
+    e->callback_onset = e->onset + callback_delay;
     e->callback_fired = 0;
 
     start_waiting(s, e);
@@ -391,4 +479,4 @@ void scheduler_cleanup_nursery(lpscheduler_t * s) {
     }
 }
 
-const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, lpscheduler_handle_callbacks, scheduler_is_playing, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_cleanup_nursery, scheduler_destroy };
+const lpscheduler_factory_t LPScheduler = { scheduler_create, lpscheduler_tick, lpscheduler_handle_callbacks, scheduler_is_playing, scheduler_count_waiting, scheduler_count_playing, scheduler_count_done, scheduler_schedule_event, scheduler_frames_to_timespec, scheduler_cleanup_nursery, scheduler_destroy };

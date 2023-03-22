@@ -81,6 +81,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             if(buf->is_looping == 1) {
                 syslog(LOG_DEBUG, "Scheduling buffer for retriggering at onset %d\n", (int)buf->onset);
                 callback_delay = (size_t)(buf->length / 2);
+                //LPScheduler.to_timespec((size_t)(buf->length / 2.f), buf->samplerate, callback_delay);
                 LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, &ctx, callback_delay);
             } else {
                 syslog(LOG_DEBUG, "Scheduling buffer for single play at onset %d\n", (int)buf->onset);
@@ -214,7 +215,7 @@ int main() {
      * The DAC context struct is a thin wrapper around the scheduler
      * given as a payload to the miniaudio callback and buffer feed.
      **/
-    astrid_scheduler = LPScheduler.create(astrid_channels);
+    astrid_scheduler = LPScheduler.create(1, astrid_channels, ASTRID_SAMPLERATE);
     ctx = (lpdacctx_t*)LPMemoryPool.alloc(1, sizeof(lpdacctx_t));
     ctx->s = astrid_scheduler;
     ctx->channels = ASTRID_CHANNELS;
