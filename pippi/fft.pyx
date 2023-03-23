@@ -6,6 +6,7 @@ from libc cimport math
 import numpy as np
 cimport numpy as np
 
+from pippi import dsp
 from pippi.interpolation cimport _linear_pos
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport to_window, Wavetable
@@ -172,6 +173,19 @@ cpdef SoundBuffer itransform(SoundBuffer real, SoundBuffer imag):
 def passthru(pos, real, imag):
     return real, imag
 
+def process_block(pos, elapsed, snd, callback, taper):
+    rblock, iblock = transform(snd)
+    rblock.frames = np.nan_to_num(rblock.frames)
+    iblock.frames = np.nan_to_num(iblock.frames)
+
+    rblock, iblock = callback(pos, rblock, iblock)
+    rblock.frames = np.nan_to_num(rblock.frames)
+    iblock.frames = np.nan_to_num(iblock.frames)
+
+    block = itransform(rblock, iblock).taper(taper)
+    block.frames = np.nan_to_num(block.frames)
+    return elapsed, block
+
 cpdef SoundBuffer process(SoundBuffer snd, object blocksize=0.01, object length=None, object callback=None, object window=None):
     cdef double olength = snd.dur
     cdef double _length = <double>(length or olength)
@@ -183,6 +197,8 @@ cpdef SoundBuffer process(SoundBuffer snd, object blocksize=0.01, object length=
     cdef SoundBuffer rblock
     cdef SoundBuffer iblock
     cdef SoundBuffer block
+    cdef list blocks
+    cdef list params = []
 
     cdef double pos = 0
     cdef double elapsed = 0
@@ -197,10 +213,13 @@ cpdef SoundBuffer process(SoundBuffer snd, object blocksize=0.01, object length=
     while elapsed <= _length:
         pos = elapsed / _length
         bs = _linear_pos(_blocksize, pos)
-        rblock, iblock = transform(snd.cut(pos*olength, bs).env(win))
-        rblock, iblock = callback(pos, rblock, iblock)
-        block = itransform(rblock, iblock).taper(taper)
-        out.dub(block, elapsed)
+        block = snd.cut(pos*olength, bs).env(win)
+        params += [(pos, elapsed, block, callback, taper)]
         elapsed += bs/2
+
+    blocks = dsp.pool(process_block, params=params)
+
+    for elapsed, block in blocks:
+        out.dub(block, elapsed)
 
     return out

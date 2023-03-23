@@ -1,11 +1,14 @@
 #cython: language_level=3
 
 import glob
+import io
 import math
 import multiprocessing as mp
 import numpy as np
 from pathlib import Path
 import random
+from urllib.request import Request
+import urllib
 
 cimport cython
 import soundfile as sf
@@ -162,6 +165,31 @@ cpdef SoundBuffer buffer(object frames=None, double length=-1, int channels=2, i
 
 cpdef SoundBuffer bufferfrom(SoundBuffer src):
     return SoundBuffer.__new__(SoundBuffer, length=src.dur, channels=src.channels, samplerate=src.samplerate)
+
+cpdef SoundBuffer fetch(str url):
+    r = Request(url, method='GET')
+    with urllib.request.urlopen(r) as resp:
+        blob = resp.read()
+    return SoundBuffer(filename=io.BytesIO(blob))
+
+cpdef SoundBuffer fromrawfile(str filename):
+    with open(filename, 'rb') as f:
+        b = f.read()
+        print('by', type(b), len(b))
+
+        #b = io.BytesIO(b)
+        #print('io', type(b), len(b))
+
+        b = np.frombuffer(b, dtype=np.byte)
+        print('bu', type(b), len(b))
+
+        b = np.asarray(b).copy()
+        print('np', type(b), len(b))
+
+        return SoundBuffer(b, channels=1, samplerate=DEFAULT_SAMPLERATE)
+
+cpdef SoundBuffer frombytes(bytes blob):
+    return SoundBuffer(filename=io.BytesIO(blob))
 
 cpdef Wavetable load(object filename):
     frames, samplerate = sf.read(filename, dtype=np.float64, always_2d=False)

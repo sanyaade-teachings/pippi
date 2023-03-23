@@ -279,7 +279,7 @@ cdef class SoundBuffer:
             double length=-1, 
                int channels=DEFAULT_CHANNELS, 
                int samplerate=DEFAULT_SAMPLERATE, 
-           unicode filename=None, 
+            object filename=None, 
                int offset=0, 
        double[:,:] buf=None):
         self.samplerate = samplerate
