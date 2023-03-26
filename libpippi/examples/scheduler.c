@@ -22,16 +22,6 @@ int main() {
     lpbuffer_t * wavelet4;
     lpbuffer_t * out;
 
-    struct timespec onset1 = {0};
-    struct timespec onset2 = {0};
-    struct timespec onset3 = {0};
-    struct timespec onset4 = {0};
-
-    LPScheduler.to_timespec(0, SR, &onset1);
-    LPScheduler.to_timespec(200, SR, &onset2);
-    LPScheduler.to_timespec(300, SR, &onset3);
-    LPScheduler.to_timespec(800, SR, &onset4);
-
     lpsineosc_t * osc;
     lpscheduler_t * s;
 
@@ -69,10 +59,10 @@ int main() {
     LPBuffer.env(wavelet4, env);
 
     /* Schedule some events */
-    LPScheduler.schedule_event(s, wavelet1, &onset1, done_callback, done_ctx, NULL);
-    LPScheduler.schedule_event(s, wavelet2, &onset2, NULL, NULL, NULL);
-    LPScheduler.schedule_event(s, wavelet3, &onset3, NULL, NULL, NULL);
-    LPScheduler.schedule_event(s, wavelet4, &onset4, done_callback, done_ctx, NULL);
+    LPScheduler.schedule_event(s, wavelet1, 0, done_callback, done_ctx, 0);
+    LPScheduler.schedule_event(s, wavelet2, 200, NULL, NULL, 0);
+    LPScheduler.schedule_event(s, wavelet3, 300, NULL, NULL, 0);
+    LPScheduler.schedule_event(s, wavelet4, 800, done_callback, done_ctx, 0);
 
     /* Render the events to a buffer. */
     for(i=0; i < output_length; i++) {

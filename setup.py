@@ -254,7 +254,7 @@ ext_modules = cythonize([
         ), 
     ], 
     annotate=True, 
-    compiler_directives={'profile': False},
+    compiler_directives={'profile': True},
     gdb_debug=True,
 ) 
 
