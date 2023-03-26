@@ -5,6 +5,6 @@ for b in build/*; do
     echo "========="
     echo "Rendering $b..."
     echo "========="
-    (time ./$b) |& sed 's/^/  /'
+    time "./$b"
 done
 echo
