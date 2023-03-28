@@ -5,7 +5,7 @@ from cpython cimport array
 from libc.stdlib cimport calloc
 from libc.string cimport memcpy
 import logging
-from logging.handlers import SysLogHandler
+from logging import FileHandler
 import warnings
 import importlib
 import importlib.util
@@ -24,7 +24,7 @@ ADC_NAME = 'adc'
 
 logger = logging.getLogger('astrid-renderer')
 if not logger.handlers:
-    logger.addHandler(SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON))
+    logger.addHandler(FileHandler('/tmp/astrid.log', encoding='utf-8'))
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
