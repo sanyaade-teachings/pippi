@@ -186,7 +186,7 @@ def process_block(pos, elapsed, snd, callback, taper):
     block.frames = np.nan_to_num(block.frames)
     return elapsed, block
 
-cpdef SoundBuffer process(SoundBuffer snd, object blocksize=0.01, object length=None, object callback=None, object window=None):
+cpdef SoundBuffer process(SoundBuffer snd, object blocksize=0.01, object length=None, object callback=None, object window=None, bool pool=False):
     cdef double olength = snd.dur
     cdef double _length = <double>(length or olength)
     cdef double samplerate = <double>snd.samplerate
@@ -210,16 +210,26 @@ cpdef SoundBuffer process(SoundBuffer snd, object blocksize=0.01, object length=
 
     cdef double[:] win = to_window(window or 'sine')
 
-    while elapsed <= _length:
-        pos = elapsed / _length
-        bs = _linear_pos(_blocksize, pos)
-        block = snd.cut(pos*olength, bs).env(win)
-        params += [(pos, elapsed, block, callback, taper)]
-        elapsed += bs/2
+    if pool:
+        while elapsed <= _length:
+            pos = elapsed / _length
+            bs = _linear_pos(_blocksize, pos)
+            block = snd.cut(pos*olength, bs).env(win)
+            params += [(pos, elapsed, block, callback, taper)]
+            elapsed += bs/2
 
-    blocks = dsp.pool(process_block, params=params)
+            blocks = dsp.pool(process_block, params=params)
 
-    for elapsed, block in blocks:
-        out.dub(block, elapsed)
+        for elapsed, block in blocks:
+            out.dub(block, elapsed)
+    else:
+        while elapsed <= _length:
+            pos = elapsed / _length
+            bs = _linear_pos(_blocksize, pos)
+            block = snd.cut(pos*olength, bs).env(win)
+            _, block = process_block(pos, elapsed, block, callback, taper)
+            out.dub(block, elapsed)
+
+            elapsed += bs/2
 
     return out
