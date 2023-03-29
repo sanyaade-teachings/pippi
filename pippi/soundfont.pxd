@@ -27,7 +27,13 @@ cdef extern from "tsf.h":
     int tsf_channel_set_presetindex(tsf* f, int channel, int preset_number)
     int tsf_channel_set_presetnumber(tsf* f, int channel, int preset_number, int flag_mididrums)
     int tsf_active_voice_count(tsf* f)
-   
+
+cdef class ToneFactory:
+    cdef tsf* TSF
+    cdef float* block
+    cdef int channels
+    cdef int samplerate
+  
 cdef double[:,:] render(str font, list events, int voice, int channels, int samplerate)
 cpdef SoundBuffer play(str font, double length=*, double freq=*, double amp=*, int voice=*, int channels=*, int samplerate=*)
 cpdef SoundBuffer playall(str font, object events, int voice=*, int channels=*, int samplerate=*)

@@ -9,8 +9,17 @@ class TestSoundfont(TestCase):
         freq = 440.0
         amp = 0.99
         voice = 0
-        out = soundfont.play("tests/sounds/florestan-gm.sf2", length, freq, amp, voice)
+        out = soundfont.play('tests/sounds/florestan-gm.sf2', length, freq, amp, voice)
         out.write('tests/renders/soundfont_play.wav')
+
+    def test_tonefactory(self):
+        tf = soundfont.ToneFactory('tests/sounds/florestan-gm.sf2')
+        length = 1
+        freq = 440.0
+        amp = 0.99
+        voice = 0
+        out = tf.play(length, freq, amp, voice)
+        out.write('tests/renders/soundfont_tonefactory.wav')
 
     def test_playall(self):
         events = []

@@ -10,11 +10,10 @@ cimport numpy as np
 from pippi.events cimport Event
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.tune import ftom
+from pippi.defaults cimport DEFAULT_CHANNELS, DEFAULT_SAMPLERATE
 
 np.import_array()
 
-cdef int SAMPLERATE = 44100
-cdef int CHANNELS = 2
 cdef int BLOCKSIZE = 64
 cdef int NOTE_ON = 0
 cdef int NOTE_OFF = 1
@@ -42,6 +41,57 @@ cdef list parsemessages(list events, int samplerate):
         messages += [dict(id=_id, type=NOTE_OFF, note=note, pos=end, instrument=e.voice)]
 
     return sorted(messages, key=lambda x: x['pos'])
+
+cdef class ToneFactory:
+    def __cinit__(self, str soundfont_path, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE):
+        self.channels = channels
+        self.samplerate = samplerate
+
+        self.block = <float*>malloc(sizeof(float) * BLOCKSIZE * 2)
+        self.TSF = tsf_load_filename(soundfont_path.encode('UTF-8'))
+
+        # TSF only supports stereo or mono
+        if channels == 1:
+            tsf_set_output(self.TSF, TSF_MONO, samplerate, 0)
+        else:
+            channels = 2
+            tsf_set_output(self.TSF, TSF_STEREO_UNWEAVED, samplerate, 0)
+
+    def __dealloc__(ToneFactory self):
+        free(self.block)
+        tsf_close(self.TSF)
+
+    def play(ToneFactory self, double length, double freq, double amp, int midi_instrument=0, int midi_channel=0):
+        cdef int note
+        cdef double fnote, frac
+
+        cdef long framelength=<long>(length*self.samplerate), elapsed=0, i=0
+        cdef int c, offset=0
+
+        cdef double[:,:] out = np.zeros((framelength, self.channels), dtype='d')
+
+        tsf_channel_set_presetnumber(self.TSF, midi_channel, midi_instrument, 0)
+
+        fnote = ftom(freq)
+        note = <int>fnote
+        frac = fnote - note
+
+        tsf_channel_mts_note_on(self.TSF, midi_channel, <double>(note+frac), amp)
+
+        while elapsed < framelength:
+            tsf_render_float(self.TSF, self.block, BLOCKSIZE, 0)
+
+            for c in range(self.channels):
+                offset = c * BLOCKSIZE
+                for i in range(BLOCKSIZE):
+                    if i+elapsed < framelength:
+                        out[i+elapsed,c] = self.block[i+offset]
+
+            elapsed += BLOCKSIZE
+
+        tsf_channel_note_off(self.TSF, midi_channel, note)
+
+        return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
 
 cdef double[:,:] render(str font, list events, int voice, int channels, int samplerate):
@@ -126,11 +176,11 @@ cdef double[:,:] render(str font, list events, int voice, int channels, int samp
 
     return out
 
-cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):
+cpdef SoundBuffer play(str font, double length=1, double freq=440, double amp=1, int voice=1, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE):
     cdef list events = [Event(onset=0, length=length, freq=freq, amp=amp, voice=voice)]
     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
 
-cpdef SoundBuffer playall(str font, object events, int voice=1, int channels=CHANNELS, int samplerate=SAMPLERATE):
+cpdef SoundBuffer playall(str font, object events, int voice=1, int channels=DEFAULT_CHANNELS, int samplerate=DEFAULT_SAMPLERATE):
     return SoundBuffer(render(font, events, voice, channels, samplerate), channels=channels, samplerate=samplerate)
 
 
