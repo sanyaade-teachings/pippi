@@ -4,9 +4,10 @@
 int main(int argc, char * argv[]) {
     int soletty;
     ssize_t bytesread;
-    char msg = LPSOLEALL;
+    char trigger = LPSOLEALL;
 
-    lpeventctx_t ctx = {
+    lpmsg_t msg = {
+        0, 0,
         "osc",
         "",
     };
@@ -19,11 +20,11 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
     while(1) {
-        bytesread = read(soletty, &msg, 1);
-        if(msg == 10) continue;
-        printf("trrrrrigger! %c (bytes read: %d)\n", (char)msg, (int)bytesread);
+        bytesread = read(soletty, &trigger, 1);
+        if(trigger == 10) continue;
+        printf("trrrrrigger! %c (bytes read: %d)\n", (char)trigger, (int)bytesread);
         printf("Sending play message\n");
-        if(send_play_message(&ctx) < 0) {
+        if(send_play_message(&msg) < 0) {
             fprintf(stderr, "Could not send play message...\n");
             return 1;
         }

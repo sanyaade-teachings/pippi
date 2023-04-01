@@ -3,7 +3,7 @@
 int main(int argc, char * argv[]) {
     int bytesread, a, i, length;
     size_t instrument_name_length;
-    lpeventctx_t ctx = {0};
+    lpmsg_t msg = {0};
     char message_params[LPMAXMSG] = {0};
     char instrument_name[LPMAXNAME] = {0};
 
@@ -24,10 +24,10 @@ int main(int argc, char * argv[]) {
         bytesread++;
     }
 
-    strncpy(ctx.instrument_name, instrument_name, instrument_name_length);
-    strncpy(ctx.play_params, message_params, bytesread);
+    strncpy(msg.instrument_name, instrument_name, instrument_name_length);
+    strncpy(msg.msg, message_params, bytesread);
 
-    if(send_play_message(&ctx) < 0) {
+    if(send_play_message(&msg) < 0) {
         fprintf(stderr, "Could not send play message...\n");
         return 1;
     }

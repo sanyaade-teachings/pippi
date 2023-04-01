@@ -1010,8 +1010,23 @@ cdef class SoundBuffer:
         out = _pan(out, length, self.channels, _pos, to_flag(method))
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)
 
-    def remix(self, int channels):
-        return SoundBuffer(_remix(self.frames, len(self.frames), channels), samplerate=self.samplerate, channels=channels)
+    def remix(self, object channels):
+        cdef int c, numc
+        cdef double samp
+        cdef double length = self.dur
+        cdef size_t framelength = len(self)
+        cdef size_t i, si
+        cdef double[:,:] out
+        if isinstance(channels, list):
+            numc = len(channels)
+            print(length, numc, self.samplerate)
+            out = np.zeros((framelength, numc), dtype='d')
+            for c in range(numc):
+                print('channels[c]', channels[c], 'self.frames.shape', self.frames.shape, 'c', c, 'out.shape', out.shape)
+                out[:,c] = self.frames[:,channels[c]-1]
+            return SoundBuffer(out, channels=numc, samplerate=self.samplerate)
+        else:
+            return SoundBuffer(_remix(self.frames, len(self.frames), channels), samplerate=self.samplerate, channels=channels)
 
     def repeat(self, int reps=2):
         if reps <= 1:

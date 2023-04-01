@@ -45,6 +45,8 @@ cdef extern from "scheduler.h":
 
 cdef extern from "astrid.h":
     cdef const int LPMAXMSG
+    cdef const int LPMAXNAME
+
     ctypedef struct lpadcbuf_t:
         int fd
         char * buf
@@ -67,6 +69,13 @@ cdef extern from "astrid.h":
         size_t samplerate_offset
         size_t channels_offset
         size_t buffer_offset
+
+    ctypedef struct lpmsg_t:
+        size_t timestamp
+        size_t voice_id
+        char instrument_name[LPMAXNAME]
+        char msg[LPMAXMSG]
+
 
     lpsampler_t * lpsampler_create_from(int bankid, lpbuffer_t * buf)
     lpsampler_t * lpsampler_open(int bankid)
@@ -110,8 +119,8 @@ cdef class EventContext:
     cdef public int count
     cdef public int tick
     cdef public str play_params
+    cdef lpmsg_t * msg
     cdef public int id
-    #cdef public object sampler
 
 cdef class Instrument:
     cdef public str name
@@ -119,12 +128,12 @@ cdef class Instrument:
     cdef public list groups
     cdef public object renderer
     cdef object shutdown
-    cdef object sounds
+    cdef public object sounds
     cdef public int playing
     cdef public dict params 
     cdef public dict cache
     cdef public size_t last_reload
 
 cdef tuple collect_players(object instrument)
-cdef int render_event(object instrument, str params)
+cdef int render_event(object instrument, lpmsg_t * msg)
 

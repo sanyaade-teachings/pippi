@@ -1125,6 +1125,25 @@ lpbuffer_t * remix_buffer(lpbuffer_t * buf, int channels) {
     return newbuf;
 }
 
+lpbuffer_t * remix_buffer_to_channels(lpbuffer_t * buf, int * channels, int num_channels) {
+    size_t i;
+    int c;
+    lpbuffer_t * newbuf;
+
+    assert(num_channels > 0);
+
+    newbuf = create_buffer(buf->length, num_channels, buf->samplerate);
+
+    for(i=0; i < buf->length; i++) {
+        for(c=0; c < num_channels; c++) {
+            if((channels[c]-1) >= buf->channels) continue;
+            newbuf->data[i * num_channels + c] = buf->data[i * buf->channels + (channels[c]-1)];
+        }
+    }
+
+    return newbuf;
+}
+
 lpbuffer_t * fill_buffer(lpbuffer_t * buf, size_t length) {
     size_t i, j;
     int c;

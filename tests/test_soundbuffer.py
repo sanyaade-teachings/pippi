@@ -7,6 +7,9 @@ from unittest import TestCase
 from pippi.soundbuffer import SoundBuffer
 from pippi import dsp
 
+DEFAULT_SAMPLERATE = 48000
+TEST_SAMPLERATE = 44100
+
 class TestSoundBuffer(TestCase):
     def setUp(self):
         self.soundfiles = tempfile.mkdtemp()
@@ -20,7 +23,7 @@ class TestSoundBuffer(TestCase):
         self.assertTrue(not sound)
 
         sound = SoundBuffer(length=1)
-        self.assertEqual(len(sound), 44100)
+        self.assertEqual(len(sound), DEFAULT_SAMPLERATE)
         self.assertTrue(sound)
 
     def test_mix_operator(self):
@@ -30,6 +33,11 @@ class TestSoundBuffer(TestCase):
         snd1 &= snd2
 
         self.assertEqual(snd1.dur, snd2.dur)
+
+    def test_swap_channels(self):
+        snd = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')
+        snd = snd.remix([2,1])
+        snd.write('tests/renders/soundbuffer_swap_channels.wav')
 
     def test_mix_mismatched_channels(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav').remix(1)
@@ -51,11 +59,11 @@ class TestSoundBuffer(TestCase):
 
     def test_create_stereo_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        self.assertEqual(len(sound), 44100)
+        self.assertEqual(len(sound), sound.samplerate)
         self.assertTrue(sound.samplerate == 44100)
 
         sound = dsp.read('tests/sounds/guitar1s.wav')
-        self.assertEqual(len(sound), 44100)
+        self.assertEqual(len(sound), sound.samplerate)
         self.assertTrue(sound.samplerate == 44100)
 
     def test_graph_soundfile(self):
@@ -64,12 +72,12 @@ class TestSoundBuffer(TestCase):
 
     def test_create_mono_buffer_from_soundfile(self):
         sound = SoundBuffer(filename='tests/sounds/linux.wav')
-        self.assertTrue(sound.samplerate == 44100)
+        self.assertTrue(sound.samplerate == TEST_SAMPLERATE)
         self.assertTrue(sound.channels == 1)
         self.assertEqual(len(sound), 228554)
 
         sound = dsp.read('tests/sounds/linux.wav')
-        self.assertTrue(sound.samplerate == 44100)
+        self.assertTrue(sound.samplerate == TEST_SAMPLERATE)
         self.assertTrue(sound.channels == 1)
         self.assertEqual(len(sound), 228554)
 
@@ -112,8 +120,8 @@ class TestSoundBuffer(TestCase):
 
         sound = sound.clip(-0.1, 0.1)
 
-        self.assertEqual(len(sound), 44100)
-        self.assertTrue(sound.samplerate == 44100)
+        self.assertEqual(len(sound), TEST_SAMPLERATE)
+        self.assertTrue(sound.samplerate == TEST_SAMPLERATE)
         self.assertTrue(sound.max() <= 0.1)
 
     def test_save_buffer_to_soundfile(self):
@@ -307,8 +315,8 @@ class TestSoundBuffer(TestCase):
         sound = sound.taper(1)
         sound = sound.taper(10)
 
-        self.assertEqual(len(sound), 44100)
-        self.assertTrue(sound.samplerate == 44100)
+        self.assertEqual(len(sound), TEST_SAMPLERATE)
+        self.assertTrue(sound.samplerate == TEST_SAMPLERATE)
 
     def test_mul_soundbuffers(self):
         snd = dsp.buffer([1,2,3])

@@ -29,8 +29,8 @@
 #define SHUTDOWN_MESSAGE "k"
 
 #define SPACE ' '
-#define LPMAXNAME 20
-#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t))
+#define LPMAXNAME 24
+#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t) - LPMAXNAME)
 #define LPADC_BUFNAME "/lpadcbuf"
 #define LPPLAYQ "/tmp/astridq"
 #define LPMAXQNAME (12 + 1 + LPMAXNAME)
@@ -41,20 +41,16 @@ typedef struct lpdacctx_t {
     float samplerate;
 } lpdacctx_t;
 
-typedef struct lpeventctx_t {
-    char instrument_name[LPMAXNAME];
-    char play_params[LPMAXMSG];
-} lpeventctx_t;
-
 typedef struct lpmsg_t {
     size_t timestamp;
     size_t voice_id;
+    char instrument_name[LPMAXNAME];
     char msg[LPMAXMSG];
 } lpmsg_t;
 
-char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_params); 
-lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx); 
-int send_play_message(lpeventctx_t * ctx);
+char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg); 
+lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg); 
+int send_play_message(lpmsg_t * msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
 
 int astrid_playq_open(char * instrument_name);

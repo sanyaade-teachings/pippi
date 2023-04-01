@@ -3,7 +3,7 @@ from pippi import oscs
 from pippi import tune
 
 # Uncomment this to retrigger after each play
-#LOOP = True
+LOOP = True
 
 stack = ['sine', 'hann', 'tri', 'cos', 'square']
 

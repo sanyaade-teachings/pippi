@@ -565,25 +565,20 @@ int lpadc_destroy(lpadcbuf_t * adcbuf) {
     return 0;
 }
 
-char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_params) {
-    size_t strsize, audiosize, offset, namesize, paramsize;
+char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg) {
+    size_t strsize, audiosize, offset;
     char * str;
 
     audiosize = buf->length * buf->channels * sizeof(lpfloat_t);
-    namesize = strlen(instrument_name);
-    paramsize = strlen(play_params);
 
     strsize =  0;
-    strsize += sizeof(size_t); /* length     */
-    strsize += sizeof(size_t); /* namelen    */
-    strsize += sizeof(size_t); /* paramlen    */
-    strsize += sizeof(int);    /* channels   */
-    strsize += sizeof(int);    /* samplerate */
-    strsize += sizeof(int);    /* is_looping */
-    strsize += sizeof(size_t); /* onset      */
-    strsize += audiosize;      /* audio data */
-    strsize += namesize;       /* instrument_name */
-    strsize += paramsize;      /* play_params */
+    strsize += sizeof(size_t);  /* audio len     */
+    strsize += sizeof(int);     /* channels   */
+    strsize += sizeof(int);     /* samplerate */
+    strsize += sizeof(int);     /* is_looping */
+    strsize += sizeof(size_t);  /* onset      */
+    strsize += audiosize;       /* audio data */
+    strsize += sizeof(lpmsg_t); /* message */
 
     /* initialize string buffer */
     str = calloc(1, strsize);
@@ -591,12 +586,6 @@ char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_pa
     offset = 0;
 
     memcpy(str + offset, &audiosize, sizeof(size_t));
-    offset += sizeof(size_t);
-
-    memcpy(str + offset, &namesize, sizeof(size_t));
-    offset += sizeof(size_t);
-
-    memcpy(str + offset, &paramsize, sizeof(size_t));
     offset += sizeof(size_t);
 
     memcpy(str + offset, &buf->length, sizeof(size_t));
@@ -617,17 +606,14 @@ char * serialize_buffer(lpbuffer_t * buf, char * instrument_name, char * play_pa
     memcpy(str + offset, buf->data, audiosize);
     offset += audiosize;
 
-    memcpy(str + offset, instrument_name, namesize);
-    offset += namesize;
-
-    memcpy(str + offset, play_params, paramsize);
-    offset += paramsize;
+    memcpy(str + offset, msg, sizeof(lpmsg_t));
+    offset += sizeof(lpmsg_t);
 
     return str;
 }
 
-lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
-    size_t audiosize, offset, length, onset, namesize, paramsize;
+lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg) {
+    size_t audiosize, offset, length, onset;
     int channels, samplerate, is_looping;
     lpbuffer_t * buf;
     lpfloat_t * audio;
@@ -635,12 +621,6 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
     offset = 0;
 
     memcpy(&audiosize, str + offset, sizeof(size_t));
-    offset += sizeof(size_t);
-
-    memcpy(&namesize, str + offset, sizeof(size_t));
-    offset += sizeof(size_t);
-
-    memcpy(&paramsize, str + offset, sizeof(size_t));
     offset += sizeof(size_t);
 
     memcpy(&length, str + offset, sizeof(size_t));
@@ -662,11 +642,8 @@ lpbuffer_t * deserialize_buffer(char * str, lpeventctx_t * ctx) {
     memcpy(audio, str + offset, audiosize);
     offset += audiosize;
 
-    memcpy(ctx->instrument_name, str + offset, namesize);
-    offset += namesize;
-
-    memcpy(ctx->play_params, str + offset, paramsize);
-    offset += paramsize;
+    memcpy(msg, str + offset, sizeof(lpmsg_t));
+    offset += sizeof(lpmsg_t);
 
     buf = calloc(1, sizeof(lpbuffer_t));
 
@@ -766,16 +743,14 @@ int astrid_playq_read(int qfd, lpmsg_t * msg) {
     return 0;
 }
 
-
-int send_play_message(lpeventctx_t * ctx) {
+int send_play_message(lpmsg_t * msg) {
     char qname[LPMAXQNAME] = {0};
     ssize_t qname_length;
-    lpmsg_t msg = {0};
     int qfd;
 
-    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, ctx->instrument_name) + 1;
+    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, msg->instrument_name) + 1;
     qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
-    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, ctx->instrument_name);
+    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, msg->instrument_name);
 
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
@@ -785,10 +760,9 @@ int send_play_message(lpeventctx_t * ctx) {
 
     qfd = open(qname, O_WRONLY);
 
-    strncpy(msg.msg, ctx->play_params, LPMAXMSG);
-    msg.timestamp = 0;
+    msg->timestamp = 0;
 
-    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
+    if(write(qfd, msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
         perror("Could not write to q...\n");
         return -1;
     }

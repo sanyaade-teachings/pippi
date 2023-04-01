@@ -83,7 +83,6 @@ int main() {
     ctx->voice_id = (long)syscall(SYS_gettid);
 
     /* Set python path */
-    /*printf("Setting renderer embedded python path: %ls\n", python_path);*/
     Py_SetPath(python_path);
 
     /* Prepare cyrenderer module for import */
@@ -129,19 +128,26 @@ int main() {
     playqfd = astrid_playq_open(instrument_basename);
     syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument_basename, playqfd);
 
+    memcpy(msg.instrument_name, instrument_basename, instrument_name_length);
+
     /* Start rendering! */
     while(astrid_is_running) {
+        syslog(LOG_DEBUG, "clearing msg.timestamp\n");
+        msg.timestamp = 0;
+
+        syslog(LOG_DEBUG, "clearing msg.voice_id\n");
+        msg.voice_id = 0;
+
+        syslog(LOG_DEBUG, "clearing msg.msg\n");
         memset(msg.msg, 0, LPMAXMSG);
 
+        syslog(LOG_DEBUG, "Waiting for %s playqueue messages...\n", instrument_basename);
         if(astrid_playq_read(playqfd, &msg) < 0) {
             syslog(LOG_ERR, "Got errno (%d) while fetching message during renderer loop: %s\n", errno, strerror(errno));
             goto lprender_cleanup;
         }
 
-        msg.timestamp = 0;
-        /*fprintf(stderr, "Got play msg: %s\n", msg.msg);*/
-
-        if(astrid_tick(msg.msg, &msglength, &msg.timestamp) < 0) {
+        if(astrid_tick(&msg) < 0) {
             PyErr_Print();
             syslog(LOG_ERR, "CPython error during renderer loop\n");
             goto lprender_cleanup;

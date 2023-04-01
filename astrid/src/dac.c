@@ -26,9 +26,9 @@ void handle_shutdown(int sig __attribute__((unused))) {
  * from an instrument with loop enabled.
  **/
 void retrigger_callback(void * arg) {
-    lpeventctx_t * ctx;
-    ctx = (lpeventctx_t *)arg;
-    send_play_message(ctx);
+    lpmsg_t * msg;
+    msg = (lpmsg_t *)arg;
+    send_play_message(msg);
 }
 
 void noop_callback(__attribute__((unused)) void * arg) {}
@@ -43,7 +43,8 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     lpbuffer_t * buf;
-    lpeventctx_t ctx = {0};
+    lpmsg_t msg = {0};
+
     struct timeval redis_timeout = {15, 0};
     size_t callback_delay = 0;
 
@@ -71,18 +72,17 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     syslog(LOG_INFO, "Waiting for buffers...\n");
     while(astrid_is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
         if(redis_reply->type == REDIS_REPLY_ARRAY) {
-            /*printf("Got message on redis buffer channel...\n");*/
+            syslog(LOG_DEBUG, "Got message on redis buffer channel...\n");
             if(redis_reply->element[2]->str[0] == 's') {
                 syslog(LOG_INFO, "Buffer feed got shutdown message\n");
                 syslog(LOG_INFO, "    message: %s\n", redis_reply->element[2]->str);
                 break;
             }
-            buf = deserialize_buffer(redis_reply->element[2]->str, &ctx);
+            buf = deserialize_buffer(redis_reply->element[2]->str, &msg);
             if(buf->is_looping == 1) {
                 syslog(LOG_DEBUG, "Scheduling buffer for retriggering at onset %d\n", (int)buf->onset);
                 callback_delay = (size_t)(buf->length / 2);
-                //LPScheduler.to_timespec((size_t)(buf->length / 2.f), buf->samplerate, callback_delay);
-                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, &ctx, callback_delay);
+                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, &msg, callback_delay);
             } else {
                 syslog(LOG_DEBUG, "Scheduling buffer for single play at onset %d\n", (int)buf->onset);
                 LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL, callback_delay);

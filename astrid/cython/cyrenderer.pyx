@@ -31,10 +31,13 @@ if not logger.handlers:
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
 
-cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str name, str play_params):
+cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, lpmsg_t * msg):
     cdef bytearray strbuf
-    cdef size_t audiosize, length, namesize, paramsize
+    cdef size_t audiosize, length, msgsize
     cdef int channels, samplerate
+    cdef unsigned char[:] msgview
+
+    msgsize = sizeof(lpmsg_t)
 
     channels = <int>buf.channels
     samplerate = <int>buf.samplerate
@@ -42,17 +45,10 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
 
     # size of audio data 
     audiosize = length * channels * sizeof(lpfloat_t)
-    namesize = <size_t>len(name)
-
-    paramsize = 0
-    if play_params is not None:
-        paramsize = <size_t>len(play_params)
 
     strbuf = bytearray()
 
     strbuf += struct.pack('N', audiosize)
-    strbuf += struct.pack('N', namesize)
-    strbuf += struct.pack('N', paramsize)
     strbuf += struct.pack('N', length)
     strbuf += struct.pack('i', channels)
     strbuf += struct.pack('i', samplerate)
@@ -62,10 +58,10 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, str n
     for i in range(length):
         for c in range(channels):
             strbuf += struct.pack('d', buf.frames[i,c])
-    strbuf += bytes(name, 'ascii')
 
-    if play_params is not None:
-        strbuf += bytes(play_params, 'ascii')
+    msgview = <unsigned char[:msgsize]>(<unsigned char *>msg)
+    for i in range(msgsize):
+        strbuf.append(msgview[i])
 
     logger.debug('strbuf loop: %s' % is_looping)
     logger.debug('strbuf bytes: %d' % len(strbuf))
@@ -166,22 +162,20 @@ cdef class ParamBucket:
         return params
 
 cdef class EventContext:
-    def __init__(self, 
+    def __cinit__(self, 
             instrument_params=None, 
             instrument_name=None, 
-            play_params=None,
             sounds=None,
             dict cache=None,
             int voice_id=-1
         ):
 
         self.cache = cache
-        self.p = ParamBucket(instrument_params, play_params)
+        self.p = ParamBucket(instrument_params, self.msg.msg)
         self.s = SessionParamBucket() 
         self.client = None
         self.instrument_name = instrument_name
         self.sounds = sounds
-        self.play_params = play_params
         self.id = voice_id
         #self.sampler = Sampler()
 
@@ -285,15 +279,6 @@ cdef class Instrument:
             except (TypeError, ValueError):
                 logger.error('Could not unpack MIDI params from %s: %s' % (self.name, devices))
 
-    def create_ctx(self, dict instrument_params, str play_params):
-        return EventContext(
-            instrument_params=instrument_params, 
-            instrument_name=self.name, 
-            play_params=play_params,
-            sounds=self.sounds,
-            cache=self.cache,
-        )
-
 
 class InstrumentNotFoundError(Exception):
     def __init__(self, instrument_name, *args, **kwargs):
@@ -332,30 +317,20 @@ def _load_instrument(name, path):
     instrument.register_midi_triggers()
     return instrument
 
-def default_onsets(ctx):
-    yield 0
-
 cdef tuple collect_players(object instrument):
     loop = False
     if hasattr(instrument.renderer, 'LOOP'):
         loop = instrument.renderer.LOOP
 
-    overlap = 1
-    if hasattr(instrument.renderer, 'OVERLAP'):
-        overlap = instrument.renderer.OVERLAP
-
     # find all play methods
     players = set()
 
     # The simplest case is a single play method 
-    # with an optional onset list or callback
     if hasattr(instrument.renderer, 'play'):
-        onsets = getattr(instrument.renderer, 'onsets', default_onsets)
-        players.add((instrument.renderer.play, onsets))
+        players.add(instrument.renderer.play)
 
     # Play methods can also be registered via 
-    # an @player.init decorator, which also registers 
-    # an optional onset list or callback
+    # an @player.init decorator
     if hasattr(instrument.renderer, 'player') \
         and hasattr(instrument.renderer.player, 'players') \
         and isinstance(instrument.renderer.player.players, set):
@@ -365,49 +340,58 @@ cdef tuple collect_players(object instrument):
         and isinstance(instrument.renderer.PLAYERS, set):
         players |= instrument.renderer.PLAYERS
     
-    return players, loop, overlap
+    return players, loop
 
-cdef int render_event(object instrument, str params):
+cdef int render_event(object instrument, lpmsg_t * msg):
     cdef set players
     cdef object onset_generator
     cdef bint loop
     cdef double overlap
-    cdef EventContext ctx = instrument.create_ctx(instrument.params, params)
+    cdef EventContext ctx = EventContext(
+        instrument_params=instrument.params, 
+        instrument_name=instrument.name, 
+        sounds=instrument.sounds,
+        cache=instrument.cache,
+    )
+    ctx.msg = msg
 
-    logger.debug('rendering event %s w/params %s' % (str(instrument), params))
+    logger.debug('rendering event %s w/params %s' % (str(instrument), msg.msg))
 
     if hasattr(instrument.renderer, 'before'):
         instrument.renderer.before(ctx)
 
-    players, loop, overlap = collect_players(instrument)
+    players, loop = collect_players(instrument)
 
-    for player, onsets in players:
+    # schedule future events
+    # FIXME use the onset generator with play_sequence, dummy!
+    #if onsets is None:
+    #    onset_generator = default_onsets(ctx)
+    #else:
+    #    onset_generator = onsets(ctx)
+    #play_sequence(buf_q, player, ctx, onset_generator, loop, overlap)
+
+
+    # render all buffers for this event
+
+    for player in players:
         try:
             ctx.count = 0
             ctx.tick = 0
-
-            # FIXME use the onset generator with play_sequence, dummy!
-            if onsets is None:
-                onset_generator = default_onsets(ctx)
-            else:
-                onset_generator = onsets(ctx)
-            #play_sequence(buf_q, player, ctx, onset_generator, loop, overlap)
-
             generator = player(ctx)
+
             try:
                 for snd in generator:
-                    bufstr = serialize_buffer(snd, 0, loop, ctx.instrument_name, ctx.play_params)
+                    bufstr = serialize_buffer(snd, 0, loop, msg)
                     _redis.publish('astridbuffers', bufstr)
+
             except Exception as e:
                 logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))
                 return 1
         except Exception as e:
-            logger.exception('Error during %s play sequence: %s' % (ctx.instrument_name, e))
+            logger.exception('Error allocating generator for %s render: %s' % (ctx.instrument_name, e))
             return 1
 
     if hasattr(instrument.renderer, 'done'):
-        # When the loop has completed or playback has stopped, 
-        # execute the done callback
         instrument.renderer.done(ctx)
 
     return 0
@@ -431,18 +415,16 @@ cdef public int astrid_load_instrument() except -1:
 
     return 0
 
-cdef public int astrid_tick(char msg[LPMAXMSG], size_t * length, size_t * timestamp) except -1:
+cdef public int astrid_tick(void * msgp) except -1:
     global ASTRID_INSTRUMENT
-
-    cdef Py_ssize_t _length = length[0]
-    cdef size_t _timestamp = timestamp[0]
+    cdef lpmsg_t * msg = <lpmsg_t *>msgp
     cdef size_t last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)
 
     # Reload instrument
     if last_edit > ASTRID_INSTRUMENT.last_reload:
         ASTRID_INSTRUMENT.reload()
         ASTRID_INSTRUMENT.last_reload = last_edit
-    return render_event(ASTRID_INSTRUMENT, msg[:_length].decode('UTF-8'))
+    return render_event(ASTRID_INSTRUMENT, msg)
 
 
 
