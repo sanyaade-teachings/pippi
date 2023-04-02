@@ -1,6 +1,6 @@
 import cmd
 import logging
-from logging.handlers import SysLogHandler
+from logging import FileHandler
 import subprocess
 import threading
 import traceback
@@ -15,7 +15,6 @@ if not logger.handlers:
     logger.addHandler(FileHandler('/tmp/astrid.log', encoding='utf-8'))
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
-
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = r.pubsub()
