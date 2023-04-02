@@ -1,6 +1,6 @@
 import cmd
 import logging
-from logging.handlers import SysLogHandler
+from logging import FileHandler
 import subprocess
 import threading
 import traceback
