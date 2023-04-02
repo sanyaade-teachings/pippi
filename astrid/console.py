@@ -12,7 +12,7 @@ import redis
 
 logger = logging.getLogger('astrid-console')
 if not logger.handlers:
-    logger.addHandler(SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON))
+    logger.addHandler(FileHandler('/tmp/astrid.log', encoding='utf-8'))
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
