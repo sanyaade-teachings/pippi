@@ -21,7 +21,7 @@ class TestNewBuffer(TestCase):
         self.assertTrue(not sound)
 
         sound = SoundBuffer(length=1)
-        self.assertEqual(len(sound), 44100)
+        self.assertEqual(len(sound), 48000)
         self.assertTrue(sound)
 
     def test_mul_scalar(self):

@@ -1,6 +1,6 @@
 .PHONY: cython astrid
 
-default: astrid
+default: build
 
 PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBRARY')[3:-2])")
 
@@ -69,7 +69,7 @@ astrid-seriallistener:
 	echo "Building astrid serial listener...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seriallistener.c $(LPLIBS) -o build/seriallistener
 	
-astrid: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener
+build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener
 
-astrid-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener
+macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener
 
