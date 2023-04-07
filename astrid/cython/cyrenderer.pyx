@@ -86,38 +86,10 @@ cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, i
 
     return snd
 
-cdef void create_from_sampler(SoundBuffer snd, int bankid):
-    pass
-
-cdef SoundBuffer dub_into_sampler(SoundBuffer snd, int bankid):
-    return snd
-
-cdef SoundBuffer read_from_sampler(int bankid):
-    cdef size_t i
-    cdef size_t pos = 0
-    cdef int c
-    cdef lpsampler_t * sampler = lpsampler_open(bankid)
-
-    cdef size_t framelength = 0
-    cdef int samplerate = 0
-    cdef int channels = 0
-
-    lpsampler_get_length(sampler, &framelength)
-    lpsampler_get_samplerate(sampler, &samplerate)
-    lpsampler_get_channels(sampler, &channels)
-
-    cdef SoundBuffer snd = SoundBuffer(length=framelength/<float>samplerate, channels=channels, samplerate=samplerate)
-
-    for i in range(framelength):
-        for c in range(channels):
-            snd.frames[i,c] = lpsampler_read_sample(sampler, i, c)
-
-    lpsampler_close(sampler)
-
-    return snd
-
 cdef class SessionParamBucket:
     """ params[key] to params.key
+
+        An interface to redis to get and set shared session params.
     """
     def __getattr__(self, key):
         return self.get(key)
@@ -133,9 +105,11 @@ cdef class SessionParamBucket:
 
 cdef class ParamBucket:
     """ params[key] to params.key
+
+        These params are passed in to the render context 
+        through the play message to the renderer.
     """
-    def __init__(self, dict instrument_params, str play_params=None):
-        self._instrument_params = instrument_params
+    def __init__(self, str play_params=None):
         self._play_params = play_params
 
     def __getattr__(self, key):
@@ -147,7 +121,7 @@ cdef class ParamBucket:
         return self._params.get(key, default)
 
     def _parse_play_params(self):
-        cdef dict params = self._instrument_params or {}
+        cdef dict params = {}
         cdef dict _params
         cdef str t, k, v
 
@@ -163,21 +137,20 @@ cdef class ParamBucket:
 
 cdef class EventContext:
     def __cinit__(self, 
-            instrument_params=None, 
-            instrument_name=None, 
-            sounds=None,
+            str instrument_name=None, 
+            str msg=None,
+            object sounds=None,
             dict cache=None,
             int voice_id=-1
         ):
 
         self.cache = cache
-        self.p = ParamBucket(instrument_params, self.msg.msg)
+        self.p = ParamBucket(str(msg))
         self.s = SessionParamBucket() 
         self.client = None
         self.instrument_name = instrument_name
         self.sounds = sounds
         self.id = voice_id
-        #self.sampler = Sampler()
 
     def play(self, instrument_name, *params, **kwargs):
         """ FIXME -- this should probably be a general 
@@ -202,18 +175,6 @@ cdef class EventContext:
     def adc(self, length=1, offset=0, channels=2):
         return read_from_adc(length, offset=offset, channels=channels)
 
-    def sampler(self, bankid=0):
-        bankid %= 10000
-        return read_from_sampler(bankid)
-
-    def write_sampler(self, buf, bankid):
-        bankid %= 10000
-        create_from_sampler(buf, bankid)
-
-    def dub_sampler(self, buf, bankid):
-        bankid %= 10000
-        return dub_into_sampler(buf, bankid)
-
     def log(self, msg):
         logger.info('ctx.log[%s] %s' % (self.instrument_name, msg))
 
@@ -226,17 +187,8 @@ cdef class Instrument:
         self.path = path
         self.renderer = renderer
         self.sounds = self.load_sounds()
-        self.playing = <int>1
-        self.params = {}
         self.cache = {}
         self.last_reload = 0
-
-        if hasattr(renderer, 'groups') and (\
-                isinstance(renderer.groups, list) or \
-                isinstance(renderer.groups, tuple)):
-            self.groups = list(renderer.groups)
-        else:
-            self.groups = []
 
     def reload(self):
         logger.debug('Reloading instrument %s from %s' % (self.name, self.path))
@@ -347,15 +299,20 @@ cdef int render_event(object instrument, lpmsg_t * msg):
     cdef object onset_generator
     cdef bint loop
     cdef double overlap
-    cdef EventContext ctx = EventContext(
-        instrument_params=instrument.params, 
+    cdef EventContext ctx 
+    cdef str msgstr
+    cdef bytes render_params = msg.msg
+
+    msgstr = render_params.decode('ascii')
+    ctx = EventContext.__new__(EventContext,
         instrument_name=instrument.name, 
+        msg=msgstr,
         sounds=instrument.sounds,
         cache=instrument.cache,
+        voice_id=0,
     )
-    ctx.msg = msg
 
-    logger.debug('rendering event %s w/params %s' % (str(instrument), msg.msg))
+    logger.debug('rendering event %s w/params %s' % (str(instrument), render_params))
 
     if hasattr(instrument.renderer, 'before'):
         instrument.renderer.before(ctx)
@@ -373,6 +330,8 @@ cdef int render_event(object instrument, lpmsg_t * msg):
 
     # render all buffers for this event
 
+    cdef size_t onset = msg.delay
+
     for player in players:
         try:
             ctx.count = 0
@@ -381,7 +340,7 @@ cdef int render_event(object instrument, lpmsg_t * msg):
 
             try:
                 for snd in generator:
-                    bufstr = serialize_buffer(snd, 0, loop, msg)
+                    bufstr = serialize_buffer(snd, onset, loop, msg)
                     _redis.publish('astridbuffers', bufstr)
 
             except Exception as e:
@@ -405,17 +364,11 @@ cdef public int astrid_load_instrument() except -1:
     os.environ['INSTRUMENT_PATH'] = path
     os.environ['INSTRUMENT_NAME'] = name
 
-    # finally, actually load the damn instrument module
     ASTRID_INSTRUMENT = _load_instrument(name, path)
-
-    # subscribe to all our favorite redis channels
-    bus.subscribe('astrid-message', 'astrid-message-%s' % name)
-    for group in ASTRID_INSTRUMENT.groups:
-        bus.subscribe('astrid-group-message-%s' % group)
 
     return 0
 
-cdef public int astrid_tick(void * msgp) except -1:
+cdef public int astrid_schedule_python_render(void * msgp) except -1:
     global ASTRID_INSTRUMENT
     cdef lpmsg_t * msg = <lpmsg_t *>msgp
     cdef size_t last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)

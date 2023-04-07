@@ -28,6 +28,10 @@ void handle_shutdown(int sig __attribute__((unused))) {
 void retrigger_callback(void * arg) {
     lpmsg_t * msg;
     msg = (lpmsg_t *)arg;
+    /* set delay to
+     *   prev buffer length
+     *   - callback delay = onset
+     */
     send_play_message(msg);
 }
 
@@ -81,7 +85,8 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             buf = deserialize_buffer(redis_reply->element[2]->str, &msg);
             if(buf->is_looping == 1) {
                 syslog(LOG_DEBUG, "Scheduling buffer for retriggering at onset %d\n", (int)buf->onset);
-                callback_delay = (size_t)(buf->length / 2);
+                callback_delay = (size_t)(buf->length * 0.7f);
+                msg.delay = buf->length - callback_delay;
                 LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, &msg, callback_delay);
             } else {
                 syslog(LOG_DEBUG, "Scheduling buffer for single play at onset %d\n", (int)buf->onset);

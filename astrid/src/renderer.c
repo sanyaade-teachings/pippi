@@ -23,7 +23,6 @@ int main() {
     char * astrid_pythonpath_env;
     size_t astrid_pythonpath_length;
     wchar_t * python_path;
-    size_t msglength = LPMAXMSG;
 
     char * _astrid_channels;
     lpastridctx_t * ctx;
@@ -132,8 +131,8 @@ int main() {
 
     /* Start rendering! */
     while(astrid_is_running) {
-        syslog(LOG_DEBUG, "clearing msg.timestamp\n");
-        msg.timestamp = 0;
+        syslog(LOG_DEBUG, "clearing msg.delay\n");
+        msg.delay = 0;
 
         syslog(LOG_DEBUG, "clearing msg.voice_id\n");
         msg.voice_id = 0;
@@ -147,11 +146,12 @@ int main() {
             goto lprender_cleanup;
         }
 
-        if(astrid_tick(&msg) < 0) {
+        if(astrid_schedule_python_render(&msg) < 0) {
             PyErr_Print();
             syslog(LOG_ERR, "CPython error during renderer loop\n");
             goto lprender_cleanup;
         }
+        /* astrid_begin_python_stream(&msg) */
     }
 
 lprender_cleanup:

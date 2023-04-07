@@ -42,7 +42,7 @@ typedef struct lpdacctx_t {
 } lpdacctx_t;
 
 typedef struct lpmsg_t {
-    size_t timestamp;
+    size_t delay;
     size_t voice_id;
     char instrument_name[LPMAXNAME];
     char msg[LPMAXMSG];
@@ -99,7 +99,7 @@ typedef struct lpadcbuf_t {
 lpadcbuf_t * lpadc_create();
 lpadcbuf_t * lpadc_open();
 lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel);
-size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, size_t frame, int channel, ssize_t offset);
+ssize_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, size_t frame, int channel, ssize_t offset);
 int lpadc_increment_pos(lpadcbuf_t * adcbuf, int count);
 int lpadc_get_pos(lpadcbuf_t * adcbuf, size_t * pos);
 int lpadc_close(lpadcbuf_t * adcbuf);

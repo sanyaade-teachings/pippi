@@ -71,7 +71,7 @@ cdef extern from "astrid.h":
         size_t buffer_offset
 
     ctypedef struct lpmsg_t:
-        size_t timestamp
+        size_t delay
         size_t voice_id
         char instrument_name[LPMAXNAME]
         char msg[LPMAXMSG]
@@ -102,7 +102,6 @@ cdef class SessionParamBucket:
 
 cdef class ParamBucket:
     cdef object _params
-    cdef dict _instrument_params
     cdef str _play_params
 
 cdef class EventContext:
@@ -119,18 +118,13 @@ cdef class EventContext:
     cdef public int count
     cdef public int tick
     cdef public str play_params
-    cdef lpmsg_t * msg
     cdef public int id
 
 cdef class Instrument:
     cdef public str name
     cdef public str path
-    cdef public list groups
     cdef public object renderer
-    cdef object shutdown
     cdef public object sounds
-    cdef public int playing
-    cdef public dict params 
     cdef public dict cache
     cdef public size_t last_reload
 
