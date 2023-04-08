@@ -48,27 +48,8 @@ cdef extern from "astrid.h":
     cdef const int LPMAXNAME
 
     ctypedef struct lpadcbuf_t:
-        int fd
-        char * buf
-        size_t headsize
-        size_t fullsize
         size_t pos
-        size_t frames
-        int channels
-
-    ctypedef struct lpsampler_t:
-        int fd
-        char * name
         char * buf
-        size_t total_bytes
-        size_t length
-        int samplerate
-        int channels
-
-        size_t length_offset
-        size_t samplerate_offset
-        size_t channels_offset
-        size_t buffer_offset
 
     ctypedef struct lpmsg_t:
         size_t delay
@@ -76,25 +57,12 @@ cdef extern from "astrid.h":
         char instrument_name[LPMAXNAME]
         char msg[LPMAXMSG]
 
-
-    lpsampler_t * lpsampler_create_from(int bankid, lpbuffer_t * buf)
-    lpsampler_t * lpsampler_open(int bankid)
-    lpsampler_t * lpsampler_dub(int bankid, lpbuffer_t * buf)
-    int lpsampler_close(lpsampler_t *)
-    int lpsampler_destroy(lpsampler_t *)
-    int lpsampler_get_length(lpsampler_t * sampler, size_t * length)
-    int lpsampler_get_samplerate(lpsampler_t * sampler, int * samplerate)
-    int lpsampler_get_channels(lpsampler_t * sampler, int * channels)
-    lpfloat_t lpsampler_read_sample(lpsampler_t * sampler, size_t frame, int channel)
-
-    lpadcbuf_t * lpadc_create()
+    int lpadc_create()
+    int lpadc_destroy()
     lpadcbuf_t * lpadc_open()
-    lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t frame, int channel)
-    void lpadc_get_pos(lpadcbuf_t * adcbuf, size_t * pos)
-    size_t lpadc_write_sample(lpadcbuf_t * adcbuf, lpfloat_t sample, int channel, ssize_t offset)
-    void lpadc_increment_pos(lpadcbuf_t * adcbuf, int count)
-    void lpadc_close(lpadcbuf_t * adcbuf)
-    void lpadc_destroy(lpadcbuf_t * adcbuf)
+    void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize_in_bytes)
+    lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t pos)
+
 
 
 cdef class SessionParamBucket:

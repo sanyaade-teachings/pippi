@@ -69,20 +69,18 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, lpmsg
     return bytes(strbuf)
 
 cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
-    cdef size_t i
+    cdef size_t i, byte_offset
     cdef size_t pos = 0
     cdef int c
     cdef lpadcbuf_t * adcbuf = lpadc_open()
 
     cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
     cdef size_t framelength = len(snd)
-    lpadc_get_pos(adcbuf, &pos)
 
     for i in range(framelength):
         for c in range(channels):
-            snd.frames[framelength-1-i,c] = lpadc_read_sample(adcbuf, pos-i, c)
-
-    lpadc_close(adcbuf)
+            byte_offset = (i*channels+c+1) * sizeof(float)
+            snd.frames[framelength-1-i,c] = lpadc_read_sample(adcbuf, byte_offset)
 
     return snd
 
@@ -318,17 +316,6 @@ cdef int render_event(object instrument, lpmsg_t * msg):
         instrument.renderer.before(ctx)
 
     players, loop = collect_players(instrument)
-
-    # schedule future events
-    # FIXME use the onset generator with play_sequence, dummy!
-    #if onsets is None:
-    #    onset_generator = default_onsets(ctx)
-    #else:
-    #    onset_generator = onsets(ctx)
-    #play_sequence(buf_q, player, ctx, onset_generator, loop, overlap)
-
-
-    # render all buffers for this event
 
     cdef size_t onset = msg.delay
 
