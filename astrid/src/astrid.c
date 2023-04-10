@@ -321,14 +321,14 @@ int astrid_playq_read(int qfd, lpmsg_t * msg) {
     return 0;
 }
 
-int send_play_message(lpmsg_t * msg) {
+int send_play_message(lpmsg_t msg) {
     char qname[LPMAXQNAME] = {0};
     ssize_t qname_length;
     int qfd;
 
-    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, msg->instrument_name) + 1;
+    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, msg.instrument_name) + 1;
     qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
-    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, msg->instrument_name);
+    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, msg.instrument_name);
 
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
@@ -338,9 +338,7 @@ int send_play_message(lpmsg_t * msg) {
 
     qfd = open(qname, O_WRONLY);
 
-    //msg->delay = 0;
-
-    if(write(qfd, msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
+    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
         perror("Could not write to q");
         return -1;
     }

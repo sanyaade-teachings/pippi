@@ -27,7 +27,7 @@ int main(int argc, char * argv[]) {
     strncpy(msg.instrument_name, instrument_name, instrument_name_length);
     strncpy(msg.msg, message_params, bytesread);
 
-    if(send_play_message(&msg) < 0) {
+    if(send_play_message(msg) < 0) {
         fprintf(stderr, "Could not send play message...\n");
         return 1;
     }

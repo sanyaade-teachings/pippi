@@ -24,7 +24,7 @@ int main(int argc, char * argv[]) {
         if(trigger == 10) continue;
         printf("trrrrrigger! %c (bytes read: %d)\n", (char)trigger, (int)bytesread);
         printf("Sending play message\n");
-        if(send_play_message(&msg) < 0) {
+        if(send_play_message(msg) < 0) {
             fprintf(stderr, "Could not send play message...\n");
             return 1;
         }

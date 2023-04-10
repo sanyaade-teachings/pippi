@@ -364,6 +364,7 @@ cdef public int astrid_schedule_python_render(void * msgp) except -1:
     if last_edit > ASTRID_INSTRUMENT.last_reload:
         ASTRID_INSTRUMENT.reload()
         ASTRID_INSTRUMENT.last_reload = last_edit
+
     return render_event(ASTRID_INSTRUMENT, msg)
 
 

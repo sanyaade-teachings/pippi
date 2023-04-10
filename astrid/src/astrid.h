@@ -72,7 +72,7 @@ typedef struct lpastridctx_t {
 
 char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg); 
 lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg); 
-int send_play_message(lpmsg_t * msg);
+int send_play_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
 
 int astrid_playq_open(char * instrument_name);
