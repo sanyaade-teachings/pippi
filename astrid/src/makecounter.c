@@ -1,11 +1,9 @@
 #include "astrid.h"
 
 int main() {
-    int semid, shmid, i;
+    int semid, shmid;
     size_t * counter;
-    union semun arg, dummy;
-    struct sembuf sop;
-    struct timespec timer;
+    union semun arg;
 
     openlog("astrid-makecounter", LOG_PID, LOG_USER);
 
@@ -43,69 +41,6 @@ int main() {
     /* Print the IDs for testing */
     printf("shmid = %d\n", shmid);
     printf("semid = %d\n", semid);
-
-    for(i=0; i < 10; i++) {
-        /* Print the current Voice ID */
-        printf("Voice ID: %d\n", (int)(*counter));
-
-        /* Wait for zero */
-        sop.sem_num = 0;
-        sop.sem_op = 0;
-        sop.sem_flg = 0;
-        printf("Waiting for zero...\n");
-        if(semop(semid, &sop, 1) < 0) {
-            perror("semop");
-            goto exit_with_error;
-        }
-
-        printf("Zero!\n");
-        clock_gettime(CLOCK_REALTIME, &timer);
-        lptimeit_since(&timer);
-
-        /* Aquire the lock */
-        sop.sem_num = 0;
-        sop.sem_op = -1;
-        sop.sem_flg = 0;
-        printf("Aquiring lock...");
-        lptimeit_since(&timer);
-        if(semop(semid, &sop, 1) < 0) {
-            perror("semop");
-            goto exit_with_error;
-        }
-
-        printf("Incrementing the counter...\n");
-        lptimeit_since(&timer);
-        *counter += 1;
-
-        /* Release the lock */
-        sop.sem_num = 0;
-        sop.sem_op = 1;
-        sop.sem_flg = 0;
-        printf("Releasing the lock...\n");
-        lptimeit_since(&timer);
-        if(semop(semid, &sop, 1) < 0) {
-            perror("semop");
-            goto exit_with_error;
-        }
-
-        printf("Done incrementing to zero\n");
-        lptimeit_since(&timer);
-
-    }
-
-    lptimeit_since(&timer);
-    printf("Cleanup!");
-
-    /* Remove the semaphore and shared memory counter */
-    if(shmctl(shmid, IPC_RMID, NULL) < 0) {
-        perror("shmctl");
-        goto exit_with_error;
-    }
-
-    if(semctl(semid, 0, IPC_RMID, dummy) < 0) {
-        perror("semctl");
-        goto exit_with_error;
-    }
 
     return 0;
 

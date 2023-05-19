@@ -40,6 +40,7 @@ astrid-renderer:
 astrid-counter:
 	echo "Building astrid queue reader...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/makecounter.c $(LPLIBS) -o build/astrid-makecounter
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/rmcounter.c $(LPLIBS) -o build/astrid-rmcounter
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getvoiceid.c $(LPLIBS) -o build/astrid-getvoiceid
 
 astrid-q:
