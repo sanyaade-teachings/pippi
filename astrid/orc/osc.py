@@ -56,7 +56,7 @@ def play(ctx):
             out = out.vspeed(shapes.win('sine', 0.5, 1.5))
 
         # Off to the mixer for playback
-        yield out
+        yield out * 0.125
 
 def done(ctx):
     # The done callback is fired after each 

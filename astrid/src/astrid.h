@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/ipc.h>
+#include <sys/sem.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -38,12 +39,16 @@
 #define LPPLAYQ "/tmp/astridq"
 #define LPMAXQNAME (12 + 1 + LPMAXNAME)
 
-
-typedef struct lpdacctx_t {
-    lpscheduler_t * s;
-    int channels;
-    float samplerate;
-} lpdacctx_t;
+/* This struct is required for historical reasons by POSIX to be defined 
+ * for system V semaphores. Astrid uses them for voice ID assignment. */
+union semun {
+    int val;
+    struct semid_ds * buf;
+    unsigned short * array;
+#if defined(__linux__)
+    struct seminfo * __buf;
+#endif
+};
 
 typedef struct lpmsg_t {
     size_t delay;
@@ -51,6 +56,48 @@ typedef struct lpmsg_t {
     char instrument_name[LPMAXNAME];
     char msg[LPMAXMSG];
 } lpmsg_t;
+
+typedef struct lpevent_t {
+    size_t id;
+    lpbuffer_t * buf;
+    size_t pos;
+    size_t onset;
+    void * next;
+    void (*callback)(lpmsg_t msg);
+    lpmsg_t msg;
+    size_t callback_onset;
+    int callback_fired;
+} lpevent_t;
+
+typedef struct lpscheduler_t {
+    lpfloat_t * current_frame;
+    int channels;
+    int realtime;
+    lpfloat_t samplerate;
+    struct timespec * init;
+    struct timespec * now;
+    size_t ticks;
+    size_t tick_ns;
+    size_t event_count;
+    size_t numzeros;
+    lpfloat_t last_sum;
+    lpevent_t * waiting_queue_head;
+    lpevent_t * playing_stack_head;
+    lpevent_t * nursery_head;
+} lpscheduler_t;
+
+void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay, void (*callback)(lpmsg_t), lpmsg_t msg, size_t callback_delay);
+void lpscheduler_tick(lpscheduler_t * s);
+lpscheduler_t * scheduler_create(int, int, lpfloat_t);
+void scheduler_destroy(lpscheduler_t * s);
+void lpscheduler_handle_callbacks(lpscheduler_t * s);
+
+
+typedef struct lpdacctx_t {
+    lpscheduler_t * s;
+    int channels;
+    float samplerate;
+} lpdacctx_t;
 
 typedef struct lpadcbuf_t {
     atomic_size_t pos;
@@ -84,5 +131,7 @@ int lpadc_destroy();
 lpadcbuf_t * lpadc_open();
 void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize);
 lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t offset);
+
+void lptimeit_since(struct timespec * start);
 
 #endif

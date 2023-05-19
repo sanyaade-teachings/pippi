@@ -5,12 +5,13 @@ from cpython cimport array
 from libc.stdlib cimport calloc
 from libc.string cimport memcpy
 import logging
-from logging import FileHandler
+from logging.handlers import SysLogHandler
 import warnings
 import importlib
 import importlib.util
 import os
 from pathlib import Path
+import platform
 import struct
 import subprocess
 import threading
@@ -22,9 +23,14 @@ from pippi.soundbuffer cimport SoundBuffer
 
 ADC_NAME = 'adc'
 
-logger = logging.getLogger('astrid-renderer')
+logger = logging.getLogger('astrid-cyrenderer')
 if not logger.handlers:
-    logger.addHandler(FileHandler('/tmp/astrid.log', encoding='utf-8'))
+    if platform.system() == 'Darwin':
+        log_path = '/var/run/syslog'
+    else:
+        log_path = '/dev/log'
+
+    logger.addHandler(SysLogHandler(address=log_path))
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
@@ -344,15 +350,12 @@ cdef int render_event(object instrument, lpmsg_t * msg):
 
 ASTRID_INSTRUMENT = None
 
-cdef public int astrid_load_instrument() except -1:
+cdef public int astrid_load_instrument(char * path) except -1:
     global ASTRID_INSTRUMENT
-    path = os.environ.get('INSTRUMENT_PATH', 'orc/ding.py')
-    name = Path(path).stem
-    os.environ['INSTRUMENT_PATH'] = path
-    os.environ['INSTRUMENT_NAME'] = name
+    _path = path.decode('utf-8')
+    name = Path(_path).stem
 
-    ASTRID_INSTRUMENT = _load_instrument(name, path)
-
+    ASTRID_INSTRUMENT = _load_instrument(name, _path)
     return 0
 
 cdef public int astrid_schedule_python_render(void * msgp) except -1:

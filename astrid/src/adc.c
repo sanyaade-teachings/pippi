@@ -11,7 +11,10 @@
 #include "astrid.h"
 
 
+/* When false, the inner loop exits and begins cleanup */
 static volatile int adc_is_running = 1;
+
+/* When false, no frames are written into the shared buffer */
 static volatile int adc_is_capturing = 1;
 
 void handle_shutdown(int sig __attribute__((unused))) {
@@ -19,6 +22,9 @@ void handle_shutdown(int sig __attribute__((unused))) {
     adc_is_running = 0;
 }
 
+/* Audio callback: writes a block of frames into 
+ * the shared circular buffer and increments the 
+ * write position in the buffer. */
 void miniaudio_callback(
     __attribute__((unused)) ma_device * device, 
     __attribute__((unused)) void * pOut, 
@@ -26,40 +32,44 @@ void miniaudio_callback(
           ma_uint32 count
 ) {
     lpadcbuf_t * adcbuf = (lpadcbuf_t *)device->pUserData;
-
     if(adc_is_capturing == 0) return;
-
     lpadc_write_block(adcbuf, (float *)pIn, (size_t)(count * sizeof(float) * ASTRID_CHANNELS));
 }
 
 int main() {
     lpadcbuf_t * adcbuf;
 
+    /* Open a handle to the system log */
     openlog("astrid-adc", LOG_PID, LOG_USER);
-    syslog(LOG_DEBUG, "Setting up signals\n");
 
-    /* setup SIGNINT handler for shutdown */
-    struct sigaction action;
-    action.sa_handler = handle_shutdown;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-    if(sigaction(SIGINT, &action, NULL) == -1) {
+    /* setup signal handlers */
+    struct sigaction shutdown_action;
+    shutdown_action.sa_handler = handle_shutdown;
+    sigemptyset(&shutdown_action.sa_mask);
+    shutdown_action.sa_flags = 0;
+
+    /* Keyboard interrupt triggers cleanup and shutdown */
+    if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
         perror("Could not init SIGINT signal handler");
         exit(1);
     }
 
-    if(sigaction(SIGTERM, &action, NULL) == -1) {
+    /* Terminate signals also trigger cleanup and shutdown */
+    if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
         perror("Could not init SIGTERM signal handler");
         exit(1);
     }
     
-    syslog(LOG_DEBUG, "Creating shared memory\n");
-    /* Create shared memory buffer */
+    /* Create a shared memory region to be used as a circular 
+     * buffer for renderer processes to read from */
+    syslog(LOG_DEBUG, "Creating shared memory buffer for ADC\n");
     if(lpadc_create() < 0) {
         perror("Could not create adcbuf shared memory");
         return 1;
     }
 
+    /* Open the shared memory buffer for writing */
+    syslog(LOG_DEBUG, "Opening shared memory buffer for writing\n");
     adcbuf = lpadc_open();
     if(adcbuf == NULL) {
         perror("Runtime error while attempting to open shared memory buffer in audio callback");
@@ -74,27 +84,32 @@ int main() {
     audioconfig.dataCallback = miniaudio_callback;
     audioconfig.pUserData = (void *)adcbuf;
 
-    syslog(LOG_DEBUG, "Starting miniaudio callback\n");
     /* init miniaudio device */
     ma_device mad;
+    syslog(LOG_DEBUG, "Initializing miniaudio\n");
     if(ma_device_init(NULL, &audioconfig, &mad) != MA_SUCCESS) {
         perror("Runtime Error while attempting to configure miniaudio");
         goto exit_with_error;
     }
 
     /* start miniaudio device */
+    syslog(LOG_DEBUG, "Starting audio callback\n");
     ma_device_start(&mad);
 
-    syslog(LOG_DEBUG, "Running\n");
+    syslog(LOG_DEBUG, "ADC is now running!\n");
     while(adc_is_running) {
         usleep((useconds_t)1000);
     }
 
+    syslog(LOG_DEBUG, "Exiting normally: shutting down audio\n");
     ma_device_uninit(&mad);
+
+    syslog(LOG_DEBUG, "Exiting normally: cleaning up shared buffer\n");
     lpadc_destroy();
     return 0;
 
 exit_with_error:
+    syslog(LOG_DEBUG, "Attempting to clean up after exiting with error\n");
     ma_device_uninit(&mad);
     lpadc_destroy();
     return 1;

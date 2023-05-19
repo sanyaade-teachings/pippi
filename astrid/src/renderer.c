@@ -14,7 +14,7 @@ void handle_shutdown(int) {
     astrid_is_running = 0;
 }
 
-int main() {
+int main(int argc, char * argv[]) {
     struct sigaction shutdown_action;
 
     char * _instrument_fullpath; 
@@ -27,6 +27,11 @@ int main() {
     char * _astrid_channels;
     lpastridctx_t * ctx;
     PyObject * pmodule;
+
+    if(argc != 3) {
+        syslog(LOG_ERR, "Error: invalid number of arguments to astrid renderer\n");
+        exit(1);
+    }
 
     openlog("astrid-renderer", LOG_PID, LOG_USER);
 
@@ -107,40 +112,38 @@ int main() {
         goto lprender_cleanup;
     }
 
-    /* Import python instrument module */
-    if(astrid_load_instrument() < 0) {
-        PyErr_Print();
-        syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
-        goto lprender_cleanup;
-    }
-
-    _instrument_fullpath = getenv("INSTRUMENT_PATH");
-    _instrument_basename = getenv("INSTRUMENT_NAME");
+    _instrument_fullpath = argv[1];
+    _instrument_basename = argv[2];
     instrument_name_length = strlen(_instrument_basename);
     instrument_fullpath = calloc(strlen(_instrument_fullpath)+1, sizeof(char));
     instrument_basename = calloc(instrument_name_length+1, sizeof(char));
     strcpy(instrument_fullpath, _instrument_fullpath);
     strcpy(instrument_basename, _instrument_basename);
 
+    /* Import python instrument module */
+    if(astrid_load_instrument(instrument_fullpath) < 0) {
+        PyErr_Print();
+        syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
+        goto lprender_cleanup;
+    }
+
     syslog(LOG_INFO, "Astrid renderer... is now rendering!\n");
 
     playqfd = astrid_playq_open(instrument_basename);
     syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument_basename, playqfd);
 
+    msg.voice_id = (size_t)ctx->voice_id;
     memcpy(msg.instrument_name, instrument_basename, instrument_name_length);
 
     /* Start rendering! */
     while(astrid_is_running) {
-        syslog(LOG_DEBUG, "clearing msg.delay\n");
         msg.delay = 0;
-
-        syslog(LOG_DEBUG, "clearing msg.voice_id\n");
-        msg.voice_id = 0;
-
-        syslog(LOG_DEBUG, "clearing msg.msg\n");
         memset(msg.msg, 0, LPMAXMSG);
 
         syslog(LOG_DEBUG, "Waiting for %s playqueue messages...\n", instrument_basename);
+        syslog(LOG_DEBUG, "            %s (msg.instrument_name)\n", msg.instrument_name);
+        syslog(LOG_DEBUG, "            %d (msg.voice_id)\n", (int)msg.voice_id);
+        syslog(LOG_DEBUG, "            %d (ctx.voice_id)\n", (int)ctx->voice_id);
         if(astrid_playq_read(playqfd, &msg) < 0) {
             syslog(LOG_ERR, "Got errno (%d) while fetching message during renderer loop: %s\n", errno, strerror(errno));
             goto lprender_cleanup;

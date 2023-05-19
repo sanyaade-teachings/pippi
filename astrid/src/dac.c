@@ -25,13 +25,18 @@ void handle_shutdown(int sig __attribute__((unused))) {
  * mixer has finished playback, and it originated 
  * from an instrument with loop enabled.
  **/
-void retrigger_callback(void * arg) {
-    lpmsg_t * msg;
-    msg = (lpmsg_t *)arg;
-    send_play_message(*msg);
+void retrigger_callback(lpmsg_t msg) {
+    syslog(LOG_DEBUG, " R           %s MSG RETRIG %s\n", msg.instrument_name, msg.msg);
+    syslog(LOG_DEBUG, " R           %s (msg.instrument_name)\n", msg.instrument_name);
+    syslog(LOG_DEBUG, " R           %d (msg.voice_id)\n", (int)msg.voice_id);
+    syslog(LOG_DEBUG, " R           %d (msg.delay)\n", (int)msg.delay);
+
+    if(send_play_message(msg) < 0) {
+        syslog(LOG_ERR, "Error sending play message from callback\n");
+    }
 }
 
-void noop_callback(__attribute__((unused)) void * arg) {}
+void noop_callback(__attribute__((unused)) lpmsg_t msg) {}
 
 /* This callback runs in a thread started 
  * just before the audio callback is started.
@@ -83,10 +88,10 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for retriggering at onset %d\n", msg.instrument_name, (int)buf->onset);
                 callback_delay = (size_t)(buf->length * 0.7f);
                 msg.delay = buf->length - callback_delay;
-                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, &msg, callback_delay);
+                scheduler_schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, msg, callback_delay);
             } else {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for single play at onset %d\n", msg.instrument_name, (int)buf->onset);
-                LPScheduler.schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, NULL, callback_delay);
+                scheduler_schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, msg, callback_delay);
             }
         }
         freeReplyObject(redis_reply);
@@ -117,7 +122,7 @@ void miniaudio_callback(
     out = (float *)pOut;
 
     for(i=0; i < count; i++) {
-        LPScheduler.tick(ctx->s);
+        lpscheduler_tick(ctx->s);
         for(c=0; c < astrid_channels; c++) {
             *out++ = (float)ctx->s->current_frame[c];
         }
@@ -156,7 +161,7 @@ int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread
     if(playback != NULL) ma_device_uninit(playback);
 
     syslog(LOG_INFO, "Cleaning up scheduler...\n");
-    if(ctx != NULL) LPScheduler.destroy(ctx->s);
+    if(ctx != NULL) scheduler_destroy(ctx->s);
 
     syslog(LOG_INFO, "Freeing astrid context...\n");
     if(ctx != NULL) free(ctx);
@@ -216,7 +221,7 @@ int main() {
      * The DAC context struct is a thin wrapper around the scheduler
      * given as a payload to the miniaudio callback and buffer feed.
      **/
-    astrid_scheduler = LPScheduler.create(1, astrid_channels, ASTRID_SAMPLERATE);
+    astrid_scheduler = scheduler_create(1, astrid_channels, ASTRID_SAMPLERATE);
     ctx = (lpdacctx_t*)LPMemoryPool.alloc(1, sizeof(lpdacctx_t));
     ctx->s = astrid_scheduler;
     ctx->channels = ASTRID_CHANNELS;
@@ -250,7 +255,7 @@ int main() {
     while(astrid_is_running) {
         /* Twiddle thumbs */
         usleep((useconds_t)1000);
-        LPScheduler.handle_callbacks(ctx->s);
+        lpscheduler_handle_callbacks(ctx->s);
         /*LPScheduler.empty(ctx->s);*/
     }
 

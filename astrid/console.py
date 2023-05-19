@@ -1,6 +1,7 @@
 import cmd
 import logging
-from logging import FileHandler
+from logging.handlers import SysLogHandler
+import platform
 import subprocess
 import threading
 import traceback
@@ -12,7 +13,12 @@ import redis
 
 logger = logging.getLogger('astrid-console')
 if not logger.handlers:
-    logger.addHandler(FileHandler('/tmp/astrid.log', encoding='utf-8'))
+    if platform.system() == 'Darwin':
+        log_path = '/var/run/syslog'
+    else:
+        log_path = '/dev/log'
+
+    logger.addHandler(SysLogHandler(address=log_path))
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
@@ -167,7 +173,8 @@ class AstridConsole(cmd.Cmd):
     def do_l(self, instrument):
         if instrument not in self.instruments:
             try:
-                rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
+                rcmd = './build/renderer "orc/%s.py" "%s"' % (instrument, instrument)
+                print(rcmd)
                 self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
             except Exception as e:
                 print('Could not start renderer: %s' % e)
@@ -184,7 +191,8 @@ class AstridConsole(cmd.Cmd):
 
         if instrument not in self.instruments:
             try:
-                rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument, instrument)
+                rcmd = './build/renderer "orc/%s.py" "%s"' % (instrument, instrument)
+                print(rcmd)
                 self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
             except Exception as e:
                 print('Could not start renderer: %s' % e)

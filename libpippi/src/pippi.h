@@ -14,7 +14,6 @@
 
 #include "microsound.h"
 #include "mir.h"
-#include "scheduler.h"
 #include "soundfile.h"
 #include "spectral.h"
 
