@@ -12,6 +12,95 @@ void lptimeit_since(struct timespec * start) {
     start->tv_nsec = now.tv_nsec;
 }
 
+int lpcounter_read_and_increment(lpcounter_t * c) {
+    struct sembuf sop;
+    size_t * counter;
+    int counter_value;
+
+    /* Aquire lock */
+    sop.sem_num = 0;
+    sop.sem_op = -1;
+    sop.sem_flg = 0;
+    if(semop(c->semid, &sop, 1) < 0) {
+        perror("semop");
+        return -1;
+    }
+
+    /* Read the current value */
+    counter = shmat(c->shmid, NULL, 0);
+    counter_value = *counter;
+
+    /* Increment the counter */
+    *counter += 1;
+
+    /* Release lock */
+    sop.sem_num = 0;
+    sop.sem_op = 1;
+    sop.sem_flg = 0;
+    if(semop(c->semid, &sop, 1) < 0) {
+        perror("semop");
+        return -1;
+    }
+
+    return counter_value;
+}
+
+int lpcounter_destroy(lpcounter_t * c) {
+    union semun dummy;
+
+    /* Remove the semaphore and shared memory counter */
+    if(shmctl(c->shmid, IPC_RMID, NULL) < 0) {
+        perror("shmctl");
+        return -1;
+    }
+
+    if(semctl(c->semid, 0, IPC_RMID, dummy) < 0) {
+        perror("semctl");
+        return -1;
+    }
+
+    /* Don't need to free the struct since it's just two 
+     * ints on the stack... */
+    return 0;
+}
+
+int lpcounter_create(lpcounter_t * c) {
+    size_t * counter;
+    union semun arg;
+
+    /* Create the shared memory space for the counter value */
+    c->shmid = shmget(IPC_PRIVATE, sizeof(size_t), IPC_CREAT | 0600);
+    if (c->shmid < 0) {
+        perror("shmget");
+        return -1;
+    }
+
+    /* Create the semaphore used as a read/write lock on the counter */
+    c->semid = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
+    if (c->semid < 0) {
+        perror("semget");
+        return -1;
+    }
+
+    /* Attach the shared memory for reading and writing */
+    counter = shmat(c->shmid, NULL, 0);
+    if (counter == (void*)-1) {
+        perror("shmat");
+        return -1;
+    }
+
+    /* Start the voice IDs at 1 */
+    *counter = 1;
+
+    /* Prime the lock by initalizing the sempahore to 1 */
+    arg.val = 1;
+    if(semctl(c->semid, 0, SETVAL, arg) < 0) {
+        perror("semctl");
+        return -1;
+    }
+
+    return 0;
+}
 
 int lpadc_create() {
     int shmid, count;

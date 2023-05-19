@@ -50,6 +50,11 @@ union semun {
 #endif
 };
 
+typedef struct lpcounter_t {
+    int shmid;
+    int semid;
+} lpcounter_t;
+
 typedef struct lpmsg_t {
     size_t delay;
     size_t voice_id;
@@ -92,6 +97,9 @@ lpscheduler_t * scheduler_create(int, int, lpfloat_t);
 void scheduler_destroy(lpscheduler_t * s);
 void lpscheduler_handle_callbacks(lpscheduler_t * s);
 
+int lpcounter_create(lpcounter_t * c);
+int lpcounter_read_and_increment(lpcounter_t * c);
+int lpcounter_destroy(lpcounter_t * c);
 
 typedef struct lpdacctx_t {
     lpscheduler_t * s;
