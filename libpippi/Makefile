@@ -16,7 +16,6 @@ LPSOURCES = vendor/fft/fft.c \
 	src/microsound.c \
 	src/mir.c \
 	src/soundfile.c \
-	src/scheduler.c \
 	src/spectral.c \
 	src/pippicore.c
 
@@ -132,9 +131,6 @@ microsound-examples:
 
 	echo "Building crossings2.c example...";
 	gcc $(LPFLAGS) examples/crossings2.c $(LPSOURCES) $(LPLIBS) -o build/crossings2
-
-	echo "Building scheduler.c example...";
-	gcc $(LPFLAGS) examples/scheduler.c $(LPSOURCES) $(LPLIBS) -o build/scheduler
 
 	echo "Building grainformation.c example...";
 	gcc $(LPFLAGS) examples/grainformation.c $(LPSOURCES) $(LPLIBS) -o build/grainformation
