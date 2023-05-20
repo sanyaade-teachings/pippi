@@ -156,41 +156,64 @@ int lpadc_create() {
     return 0;
 }
 
-int lpadc_getid() {
-    int handle, shmid = 0;
-    char * shmidp;
+int lpipc_setid(char * path, int id) {
+    FILE * handle;
+    int count;
+
+    handle = fopen(path, "w");
+    if(handle == NULL) {
+        perror("fopen");
+        return -1;
+    }
+
+    count = fprintf(handle, "%d", id);
+    if(count < 0) {
+        perror("fprintf");
+        fclose(handle);
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpipc_getid(char * path) {
+    int handle, id = 0;
+    char * idp;
     struct stat st;
 
-    /* Read the identifier for the adcbuf shared memory 
-     * from the well known file. Reading with mmap to speed 
-     * up access as this might be called in a tight render loop */
-    handle = open(LPADC_HANDLE, O_RDONLY);
+    /* Read the identifier from the well known file. mmap speeds 
+     * up access when ids need to be fetched when timing matters */
+    handle = open(path, O_RDONLY);
     if(handle < 0) {
-        perror("Could not open tmpfile to read adcbuf shmid");
+        perror("lpipc_getid open");
         return -1;
     }
 
     /* Get the file size */
     if(fstat(handle, &st) == -1) {
-        perror("Could not stat tmpfile");
+        perror("lpipc_getid fstat");
         close(handle);
         return -1;
     }
 
     /* Map the file into memory */
-    shmidp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, handle, 0);
-    if(shmidp == MAP_FAILED) {
-        perror("Could not mmap tmpfile");
+    idp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, handle, 0);
+    if(idp == MAP_FAILED) {
+        perror("lpipc_getid mmap");
         close(handle);
         return -1;
     }
 
     /* Copy the identifier from the mmaped file & cleanup */
-    sscanf(shmidp, "%d", &shmid);
-    munmap(shmidp, st.st_size);
+    sscanf(idp, "%d", &id);
+    munmap(idp, st.st_size);
     close(handle);
 
-    return shmid;
+    return id;
+}
+
+int lpadc_getid() {
+    return lpipc_getid(LPADC_HANDLE);
 }
 
 lpadcbuf_t * lpadc_open() {

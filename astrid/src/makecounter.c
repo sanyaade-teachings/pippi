@@ -12,5 +12,8 @@ int main() {
     printf("shmid = %d\n", c.shmid);
     printf("semid = %d\n", c.semid);
 
+    lpipc_setid(LPVOICE_ID_SHMID, c.shmid);
+    lpipc_setid(LPVOICE_ID_SEMID, c.semid);
+
     return 0;
 }

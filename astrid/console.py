@@ -63,7 +63,7 @@ def midi_relay(device_name, stop_event):
                         params = 'note=%s velocity=%s' % (msg.note, msg.velocity)
 
                         try:
-                            subprocess.run(['./build/qmessage', instrument_name, params])
+                            subprocess.run(['./build/astrid-qmessage', instrument_name, params])
                         except Exception as e:
                             logger.exception('Could not invoke qmessage: %s' % e)
 
@@ -110,12 +110,12 @@ class AstridConsole(cmd.Cmd):
         if cmd == 'on' and self.dac is None:
             print('Starting dac & adc...')
             if self.dac is None:
-                self.dac = subprocess.Popen('./build/dac')
+                self.dac = subprocess.Popen('./build/astrid-dac')
             else:
                 print('dac is already running')
 
             if self.adc is None:
-                self.adc = subprocess.Popen('./build/adc')
+                self.adc = subprocess.Popen('./build/astrid-adc')
             else:
                 print('adc is already running')
 
@@ -140,7 +140,7 @@ class AstridConsole(cmd.Cmd):
         if cmd == 'on' and self.dac is None:
             print('Starting dac...')
             if self.dac is None:
-                self.dac = subprocess.Popen('./build/dac')
+                self.dac = subprocess.Popen('./build/astrid-dac')
             else:
                 print('dac is already running')
 
@@ -157,7 +157,7 @@ class AstridConsole(cmd.Cmd):
         if cmd == 'on' and self.adc is None:
             print('Starting adc...')
             if self.adc is None:
-                self.adc = subprocess.Popen('./build/adc')
+                self.adc = subprocess.Popen('./build/astrid-adc')
             else:
                 print('adc is already running')
 
@@ -173,7 +173,7 @@ class AstridConsole(cmd.Cmd):
     def do_l(self, instrument):
         if instrument not in self.instruments:
             try:
-                rcmd = './build/renderer "orc/%s.py" "%s"' % (instrument, instrument)
+                rcmd = './build/astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
                 print(rcmd)
                 self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
             except Exception as e:
@@ -191,7 +191,7 @@ class AstridConsole(cmd.Cmd):
 
         if instrument not in self.instruments:
             try:
-                rcmd = './build/renderer "orc/%s.py" "%s"' % (instrument, instrument)
+                rcmd = './build/astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
                 print(rcmd)
                 self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
             except Exception as e:
@@ -201,7 +201,7 @@ class AstridConsole(cmd.Cmd):
 
         try:
             logger.info('Sending play msg to %s renderer w/params:\n  %s' % (instrument, params))
-            subprocess.run(['./build/qmessage', instrument, params])
+            subprocess.run(['./build/astrid-qmessage', instrument, params])
         except Exception as e:
             print('Could not invoke qmessage: %s' % e)
             print(traceback.format_exc())

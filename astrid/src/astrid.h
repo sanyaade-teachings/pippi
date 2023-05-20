@@ -39,6 +39,9 @@
 #define LPPLAYQ "/tmp/astridq"
 #define LPMAXQNAME (12 + 1 + LPMAXNAME)
 
+#define LPVOICE_ID_SHMID "/tmp/astrid_voice_id_shmid"
+#define LPVOICE_ID_SEMID "/tmp/astrid_voice_id_semid"
+
 /* This struct is required for historical reasons by POSIX to be defined 
  * for system V semaphores. Astrid uses them for voice ID assignment. */
 union semun {
@@ -139,6 +142,9 @@ int lpadc_destroy();
 lpadcbuf_t * lpadc_open();
 void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize);
 lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t offset);
+
+int lpipc_setid(char * path, int id); 
+int lpipc_getid(char * path); 
 
 void lptimeit_since(struct timespec * start);
 
