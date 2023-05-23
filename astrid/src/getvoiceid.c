@@ -8,7 +8,7 @@ int main(int argc, char * argv[]) {
     c.shmid = lpipc_getid(LPVOICE_ID_SHMID);
 
     if((voice_id = lpcounter_read_and_increment(&c)) < 0) {
-        perror("lpcounter_create");
+        perror("lpcounter_read_and_increment");
         return 1;
     }
 

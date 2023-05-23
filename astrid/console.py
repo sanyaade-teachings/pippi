@@ -136,6 +136,14 @@ class AstridConsole(cmd.Cmd):
             else:
                 print('adc is already stopped')
 
+    def do_device(self, cmd):
+        if cmd == '':
+            print('Available audio devices:')
+            subprocess.run(['./build/astrid-getdeviceids'])
+
+        else:
+            subprocess.run(['./build/astrid-setdeviceid', cmd])
+
     def do_dac(self, cmd):
         if cmd == 'on' and self.dac is None:
             print('Starting dac...')

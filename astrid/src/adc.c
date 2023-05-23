@@ -2,8 +2,6 @@
 #include <string.h>
 
 #define MINIAUDIO_IMPLEMENTATION
-#define MA_NO_PULSEAUDIO
-#define MA_NO_ALSA
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
@@ -38,9 +36,14 @@ void miniaudio_callback(
 
 int main() {
     lpadcbuf_t * adcbuf;
+    int device_id;
+    ma_uint32 playback_device_count, capture_device_count;
+    ma_device_info * playback_devices;
+    ma_device_info * capture_devices;
 
     /* Open a handle to the system log */
     openlog("astrid-adc", LOG_PID, LOG_USER);
+
 
     /* setup signal handlers */
     struct sigaction shutdown_action;
@@ -76,19 +79,36 @@ int main() {
         return 1;
     }
 
+    /* Set up the miniaudio device context */
+    ma_context audio_device_context;
+    if (ma_context_init(NULL, 0, NULL, &audio_device_context) != MA_SUCCESS) {
+        syslog(LOG_ERR, "Error while attempting to initialize miniaudio device context\n");
+        goto exit_with_error;
+    }
+
+    /* Populate it with some devices */
+    if(ma_context_get_devices(&audio_device_context, &playback_devices, &playback_device_count, &capture_devices, &capture_device_count) != MA_SUCCESS) {
+        syslog(LOG_ERR, "Error while attempting to get devices\n");
+        return -1;
+    }
+
+    /* Get the selected device ID */
+    device_id = lpipc_getid(ASTRID_DEVICEID_PATH);
+
     /* Configure miniaudio for capture mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_capture);
     audioconfig.capture.format = ma_format_f32;
     audioconfig.capture.channels = ASTRID_CHANNELS;
+    audioconfig.capture.pDeviceID = &capture_devices[device_id].id;
     audioconfig.sampleRate = ASTRID_SAMPLERATE;
     audioconfig.dataCallback = miniaudio_callback;
     audioconfig.pUserData = (void *)adcbuf;
 
     /* init miniaudio device */
     ma_device mad;
-    syslog(LOG_DEBUG, "Initializing miniaudio\n");
+    syslog(LOG_INFO, "Opening device ID %d\n", device_id);
     if(ma_device_init(NULL, &audioconfig, &mad) != MA_SUCCESS) {
-        perror("Runtime Error while attempting to configure miniaudio");
+        syslog(LOG_ERR, "Error while attempting to configure device %d for capture\n", device_id);
         goto exit_with_error;
     }
 

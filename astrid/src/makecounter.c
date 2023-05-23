@@ -3,7 +3,7 @@
 int main() {
     lpcounter_t c;
 
-    if(lpcounter_create(&c) > 0) {
+    if(lpcounter_create(&c) < 0) {
         perror("lpcounter_create");
         return 1;
     }

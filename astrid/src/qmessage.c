@@ -6,6 +6,7 @@ int main(int argc, char * argv[]) {
     lpmsg_t msg = {0};
     char message_params[LPMAXMSG] = {0};
     char instrument_name[LPMAXNAME] = {0};
+    lpcounter_t c;
 
     bytesread = 0;
     for(a=1; a < argc; a++) {
@@ -26,6 +27,13 @@ int main(int argc, char * argv[]) {
 
     strncpy(msg.instrument_name, instrument_name, instrument_name_length);
     strncpy(msg.msg, message_params, bytesread);
+
+    c.semid = lpipc_getid(LPVOICE_ID_SEMID);
+    c.shmid = lpipc_getid(LPVOICE_ID_SHMID);
+    if((msg.voice_id = lpcounter_read_and_increment(&c)) < 0) {
+        fprintf(stderr, "Problem trying to get voice ID when constructing play message from command input\n");
+        return 1;
+    }
 
     if(send_play_message(msg) < 0) {
         fprintf(stderr, "Could not send play message...\n");

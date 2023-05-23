@@ -22,7 +22,7 @@ int lpcounter_read_and_increment(lpcounter_t * c) {
     sop.sem_op = -1;
     sop.sem_flg = 0;
     if(semop(c->semid, &sop, 1) < 0) {
-        perror("semop");
+        syslog(LOG_ERR, "lpcounter_read_and_increment semop. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -38,7 +38,7 @@ int lpcounter_read_and_increment(lpcounter_t * c) {
     sop.sem_op = 1;
     sop.sem_flg = 0;
     if(semop(c->semid, &sop, 1) < 0) {
-        perror("semop");
+        syslog(LOG_ERR, "lpcounter_read_and_increment semop. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -50,12 +50,12 @@ int lpcounter_destroy(lpcounter_t * c) {
 
     /* Remove the semaphore and shared memory counter */
     if(shmctl(c->shmid, IPC_RMID, NULL) < 0) {
-        perror("shmctl");
+        syslog(LOG_ERR, "lpcounter_destroy shmctl. Error: %s\n", strerror(errno));
         return -1;
     }
 
     if(semctl(c->semid, 0, IPC_RMID, dummy) < 0) {
-        perror("semctl");
+        syslog(LOG_ERR, "lpcounter_destroy semctl. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -71,21 +71,21 @@ int lpcounter_create(lpcounter_t * c) {
     /* Create the shared memory space for the counter value */
     c->shmid = shmget(IPC_PRIVATE, sizeof(size_t), IPC_CREAT | 0600);
     if (c->shmid < 0) {
-        perror("shmget");
+        syslog(LOG_ERR, "lpcounter_create shmget. Error: %s\n", strerror(errno));
         return -1;
     }
 
     /* Create the semaphore used as a read/write lock on the counter */
     c->semid = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
     if (c->semid < 0) {
-        perror("semget");
+        syslog(LOG_ERR, "lpcounter_create semget. Error: %s\n", strerror(errno));
         return -1;
     }
 
     /* Attach the shared memory for reading and writing */
     counter = shmat(c->shmid, NULL, 0);
     if (counter == (void*)-1) {
-        perror("shmat");
+        syslog(LOG_ERR, "lpcounter_create shmat. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -95,7 +95,7 @@ int lpcounter_create(lpcounter_t * c) {
     /* Prime the lock by initalizing the sempahore to 1 */
     arg.val = 1;
     if(semctl(c->semid, 0, SETVAL, arg) < 0) {
-        perror("semctl");
+        syslog(LOG_ERR, "lpcounter_create semctl. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -117,12 +117,12 @@ int lpadc_create() {
      * are done through the identifier produced here. */
     shmid = shmget(IPC_PRIVATE, sizeof(lpadcbuf_t), IPC_CREAT | S_IRUSR | S_IWUSR);
     if(shmid < 0) {
-        perror("shmget failed");
+        syslog(LOG_ERR, "lpadc_create shmget. Error: %s\n", strerror(errno));
         return -1;
     }
 
     if(shmctl(shmid, IPC_STAT, &shm_info) == -1) {
-        perror("shmctl failed");
+        syslog(LOG_ERR, "lpadc_create shmctl. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -130,20 +130,20 @@ int lpadc_create() {
      * well known file other processes can use to attach and read */
     handle = fopen(LPADC_HANDLE, "w");
     if(handle == NULL) {
-        perror("Could not open tmpfile to write adcbuf shmid");
+        syslog(LOG_ERR, "lpadc_create fopen. Error: %s\n", strerror(errno));
         return -1;
     }
 
     count = fprintf(handle, "%d", shmid);
     if(count < 0) {
-        perror("Could not write shmid to tmpfile");
+        syslog(LOG_ERR, "lpadc_create fprintf. Error: %s\n", strerror(errno));
         fclose(handle);
         return -1;
     }
 
     adcbuf = (lpadcbuf_t *)shmat(shmid, NULL, 0);
     if(adcbuf == (void *)-1) {
-        perror("Could not attach to shared memory");
+        syslog(LOG_ERR, "lpadc_create shmat. Error: %s\n", strerror(errno));
         fclose(handle);
         return -1;
     }
@@ -162,13 +162,13 @@ int lpipc_setid(char * path, int id) {
 
     handle = fopen(path, "w");
     if(handle == NULL) {
-        perror("fopen");
+        syslog(LOG_ERR, "lpipc_setid fopen: %s. Error: %s\n", path, strerror(errno));
         return -1;
     }
 
     count = fprintf(handle, "%d", id);
     if(count < 0) {
-        perror("fprintf");
+        syslog(LOG_ERR, "lpipc_setid fprintf: %s. Error: %s\n", path, strerror(errno));
         fclose(handle);
         return -1;
     }
@@ -185,13 +185,13 @@ int lpipc_getid(char * path) {
      * up access when ids need to be fetched when timing matters */
     handle = open(path, O_RDONLY);
     if(handle < 0) {
-        perror("lpipc_getid open");
+        syslog(LOG_ERR, "lpipc_getid could not open path: %s. Error: %s\n", path, strerror(errno));
         return -1;
     }
 
     /* Get the file size */
     if(fstat(handle, &st) == -1) {
-        perror("lpipc_getid fstat");
+        syslog(LOG_ERR, "lpipc_getid fstat: %s. Error: %s\n", path, strerror(errno));
         close(handle);
         return -1;
     }
@@ -199,7 +199,7 @@ int lpipc_getid(char * path) {
     /* Map the file into memory */
     idp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, handle, 0);
     if(idp == MAP_FAILED) {
-        perror("lpipc_getid mmap");
+        syslog(LOG_ERR, "lpipc_getid mmap: %s. Error: %s\n", path, strerror(errno));
         close(handle);
         return -1;
     }
@@ -264,7 +264,7 @@ int lpadc_destroy() {
     int shmid;
     shmid = lpadc_getid();
     if(shmctl(shmid, IPC_RMID, 0) < 0) {
-        perror("Could not destroy adcbuf shared memory");
+        syslog(LOG_ERR, "lpadc_destroy shmctl: Could not destroy adcbuf shared memory. Error: %s\n", strerror(errno));
         return -1;
     }
     return 0;
@@ -379,7 +379,7 @@ int get_play_message(char * instrument_name, lpmsg_t * msg) {
 
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        perror("Error creating named pipe");
+        syslog(LOG_ERR, "get_play_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -390,7 +390,7 @@ int get_play_message(char * instrument_name, lpmsg_t * msg) {
     }
 
     if(close(qfd) == -1) {
-        perror("Error closing q");
+        syslog(LOG_ERR, "get_play_message mkfifo: Error closing q. Error: %s\n", strerror(errno));
         return -1; 
     }
 
@@ -412,12 +412,13 @@ int astrid_playq_open(char * instrument_name) {
 
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        perror("Error creating play queue FIFO");
+        syslog(LOG_ERR, "astrid_playq_open mkfifo: Error creating play queue FIFO. Error: %s\n", strerror(errno));
         return -1;
     }
 
     if((qfd = open(qname, O_RDWR)) < 0) {
-        perror("Error opening play queue FIFO");
+        syslog(LOG_ERR, "astrid_playq_open open: Error opening play queue FIFO. Error: %s\n", strerror(errno));
+        return -1;
     };
 
     return qfd;
@@ -425,7 +426,7 @@ int astrid_playq_open(char * instrument_name) {
 
 int astrid_playq_close(int qfd) {
     if(close(qfd) == -1) {
-        perror("Error closing q");
+        syslog(LOG_ERR, "astrid_playq_close close: Error closing play queue FIFO. Error: %s\n", strerror(errno));
         return -1; 
     }
 
@@ -465,19 +466,19 @@ int send_play_message(lpmsg_t msg) {
 
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        perror("Error creating named pipe");
+        syslog(LOG_ERR, "send_play_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
         return -1;
     }
 
     qfd = open(qname, O_WRONLY);
 
     if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
-        perror("Could not write to q");
+        syslog(LOG_ERR, "send_play_message write: Could not write to q. Error: %s\n", strerror(errno));
         return -1;
     }
 
     if(close(qfd) == -1) {
-        perror("Error closing play q");
+        syslog(LOG_ERR, "send_play_message close: Error closing play q. Error: %s\n", strerror(errno));
         return -1; 
     }
 

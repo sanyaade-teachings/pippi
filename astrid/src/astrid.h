@@ -24,6 +24,7 @@
 #define ASTRID_CHANNELS 2
 #define ASTRID_SAMPLERATE 48000
 #define ASTRID_ADCSECONDS 10
+#define ASTRID_SESSIONDB_PATH "/tmp/astrid_session.db"
 #define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
 #define LPADCBUFSIZE (LPADCBUFFRAMES * sizeof(float) * ASTRID_CHANNELS)
 
@@ -41,6 +42,8 @@
 
 #define LPVOICE_ID_SHMID "/tmp/astrid_voice_id_shmid"
 #define LPVOICE_ID_SEMID "/tmp/astrid_voice_id_semid"
+
+#define ASTRID_DEVICEID_PATH "/tmp/astrid_device_id"
 
 /* This struct is required for historical reasons by POSIX to be defined 
  * for system V semaphores. Astrid uses them for voice ID assignment. */

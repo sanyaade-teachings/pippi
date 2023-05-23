@@ -83,7 +83,7 @@ int main(int argc, char * argv[]) {
     ctx->is_looping = 1;
     ctx->voice_index = -1;
 
-    /* TODO some human readable ID is useful too? */
+    /* TODO this is the renderer ID, rename it.. */
     ctx->voice_id = (long)syscall(SYS_gettid);
 
     /* Set python path */
@@ -132,7 +132,6 @@ int main(int argc, char * argv[]) {
     playqfd = astrid_playq_open(instrument_basename);
     syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument_basename, playqfd);
 
-    msg.voice_id = (size_t)ctx->voice_id;
     memcpy(msg.instrument_name, instrument_basename, instrument_name_length);
 
     /* Start rendering! */

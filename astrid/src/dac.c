@@ -2,8 +2,6 @@
 #include <sys/syscall.h>
 
 #define MINIAUDIO_IMPLEMENTATION
-#define MA_NO_PULSEAUDIO
-#define MA_NO_ALSA
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
@@ -177,8 +175,13 @@ int main() {
     char * _astrid_channels;
     struct sigaction shutdown_action;
     lpdacctx_t * ctx;
+    lpcounter_t voice_id_counter;
     pthread_t buffer_feed_thread;
+    int device_id;
+    ma_uint32 playback_device_count, capture_device_count;
     ma_device playback;
+    ma_device_info * playback_devices;
+    ma_device_info * capture_devices;
 
     ctx = NULL;
     openlog("astrid-dac", LOG_PID, LOG_USER);
@@ -228,27 +231,51 @@ int main() {
     ctx->samplerate = ASTRID_SAMPLERATE;
 
 
+    /* Set up shared memory IPC for voice IDs */
+    if(lpcounter_create(&voice_id_counter) < 0) {
+        fprintf(stderr, "Could not initialize voice ID shared memory\n");
+        goto exit_with_error;
+    }
+
+
     /* Setup and start buffer feed thread */
     if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, ctx) != 0) {
         fprintf(stderr, "Could not initialize renderer thread\n");
         goto exit_with_error;
     }
 
+    /* Set up the miniaudio device context */
+    ma_context audio_device_context;
+    if (ma_context_init(NULL, 0, NULL, &audio_device_context) != MA_SUCCESS) {
+        syslog(LOG_ERR, "Error while attempting to initialize miniaudio device context\n");
+        goto exit_with_error;
+    }
+
+    /* Populate it with some devices */
+    if(ma_context_get_devices(&audio_device_context, &playback_devices, &playback_device_count, &capture_devices, &capture_device_count) != MA_SUCCESS) {
+        syslog(LOG_ERR, "Error while attempting to get devices\n");
+        return -1;
+    }
+
+    /* Get the selected device ID */
+    device_id = lpipc_getid(ASTRID_DEVICEID_PATH);
 
     /* Setup and start miniaudio in playback mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_playback);
     audioconfig.playback.format = ma_format_f32;
     audioconfig.playback.channels = ASTRID_CHANNELS;
+    audioconfig.playback.pDeviceID = &playback_devices[device_id].id;
     audioconfig.sampleRate = ASTRID_SAMPLERATE;
     audioconfig.dataCallback = miniaudio_callback;
     audioconfig.pUserData = ctx;
 
-    if(ma_device_init(NULL, &audioconfig, &playback) != MA_SUCCESS) {
-        syslog(LOG_ERR, "Error while attempting to configure miniaudio for playback\n");
+    syslog(LOG_INFO, "Opening device ID %d\n", device_id);
+    if(ma_device_init(&audio_device_context, &audioconfig, &playback) != MA_SUCCESS) {
+        syslog(LOG_ERR, "Error while attempting to configure device %d for playback\n", device_id);
         goto exit_with_error;
     }
 
-    syslog(LOG_INFO, "Miniaudio callback starting...\n");
+    syslog(LOG_INFO, "Audio callback starting...\n");
     ma_device_start(&playback);
 
     syslog(LOG_INFO, "Astrid DAC is starting...\n");

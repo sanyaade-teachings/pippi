@@ -23,7 +23,7 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 	$(LPDIR)/src/spectral.c \
 	$(LPDIR)/src/pippicore.c
 
-LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src
+LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I${LPDIR}/vendor/sqlite3 -I$(LPDIR)/src
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic
 LPLIBS = -lm -ldl -lpthread
 
@@ -38,10 +38,14 @@ astrid-renderer:
 	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-renderer
 
 astrid-counter:
-	echo "Building astrid queue reader...";
+	echo "Building astrid counter tools...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/makecounter.c $(LPLIBS) -o build/astrid-makecounter
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/rmcounter.c $(LPLIBS) -o build/astrid-rmcounter
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getvoiceid.c $(LPLIBS) -o build/astrid-getvoiceid
+
+astrid-sessiondb:
+	echo "Building astrid session db tools...";
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) $(LPDIR)/vendor/sqlite3/sqlite3.c src/astrid.c src/createsessiondb.c $(LPLIBS) -o build/astrid-createsessiondb
 
 astrid-q:
 	echo "Building astrid queue reader...";
@@ -62,6 +66,19 @@ astrid-dac:
 	echo "Building astrid dac...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
 
+astrid-devices:
+	mkdir -p build
+
+	echo "Building astrid device tools...";
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getdeviceids.c $(LPLIBS) -o build/astrid-getdeviceids
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/setdeviceid.c $(LPLIBS) -o build/astrid-setdeviceid
+
+astrid-voice-status:
+	mkdir -p build
+
+	echo "Building astrid voice status...";
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/voicestatus.c $(LPLIBS) -lncurses -o build/astrid-voice-status
+
 astrid-adc:
 	mkdir -p build
 
@@ -81,7 +98,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-counter
+build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-counter astrid-devices
 
-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-counter
+macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-counter astrid-devices
 
