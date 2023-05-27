@@ -63,7 +63,7 @@ def midi_relay(device_name, stop_event):
                         params = 'note=%s velocity=%s' % (msg.note, msg.velocity)
 
                         try:
-                            subprocess.run(['./build/astrid-qmessage', instrument_name, params])
+                            subprocess.run(['./build/astrid-qmessage', 'p', instrument_name, params])
                         except Exception as e:
                             logger.exception('Could not invoke qmessage: %s' % e)
 
@@ -209,7 +209,7 @@ class AstridConsole(cmd.Cmd):
 
         try:
             logger.info('Sending play msg to %s renderer w/params:\n  %s' % (instrument, params))
-            subprocess.run(['./build/astrid-qmessage', instrument, params])
+            subprocess.run(['./build/astrid-qmessage', 'p', instrument, params])
         except Exception as e:
             print('Could not invoke qmessage: %s' % e)
             print(traceback.format_exc())

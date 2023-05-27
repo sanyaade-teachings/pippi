@@ -12,6 +12,129 @@ void lptimeit_since(struct timespec * start) {
     start->tv_nsec = now.tv_nsec;
 }
 
+/* sqlite3 is pretty slow to build, so sessiondb are 
+ * disabled for most astrid modules */
+#ifdef LPSESSIONDB
+/* SESSION
+ * DATABASE
+ * ********/
+static int lpsessiondb_callback_debug(void * unused, int argc, char ** argv, char ** colname) {
+    int i;
+    for(i=0; i < argc; i++) {
+        syslog(LOG_DEBUG, "lpsessiondb_callback %s=%s\n", colname[i], argv[i] ? argv[i] : "None");
+    }
+    return 0;
+}
+
+static int lpsessiondb_callback_noop(void * unused, int argc, char ** argv, char ** colname) {
+    return 0;
+}
+
+int lpsessiondb_open(sqlite3 * db) {
+    if(sqlite3_open(ASTRID_SESSIONDB_PATH, &db) > 0) {
+        syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+int lpsessiondb_close(sqlite3 * db) {
+    if(sqlite3_close(db) < 0) {
+        syslog(LOG_ERR, "Could not close sql db. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+
+int lpsessiondb_create(sqlite3 * db) {
+    char * err = 0;
+    char * sql = "create table voices \
+                  (started integer, ended integer, \
+                   active integer, delay integer, id integer, instrument_name text, \
+                   params text, render_count integer);";
+
+    /* Remove any existing sessiondb */
+    unlink(ASTRID_SESSIONDB_PATH);
+
+
+    /* Init the new sessiondb */
+    if(sqlite3_open(ASTRID_SESSIONDB_PATH, &db) > 0) {
+        syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
+        return -1;
+    }
+
+    /* Set up session schema */
+    if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
+        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpsessiondb_insert_voice(lpmsg_t msg) {
+    sqlite3 * db;
+    char * err = 0;
+    char * sql;
+    size_t sqlsize;
+    char * _sql = "insert into voices (started, ended, active, delay, \
+                   id, instrument_name, params, render_count) \
+                   values (NULL, NULL, 0, %d, %d, \"%s\", \"%s\", 0);";
+
+    /* Prepare the sql unsafely */
+    sqlsize = snprintf(NULL, 0, _sql, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg);
+    sql = calloc(1, sqlsize+1);
+    if(snprintf(sql, sqlsize, _sql, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
+        syslog(LOG_ERR, "Could not concat sql for insert. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Open the sessiondb */
+    if(sqlite3_open(ASTRID_SESSIONDB_PATH, &db) > 0) {
+        syslog(LOG_ERR, "Could not open db for insert at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
+        return -1;
+    }
+
+    /* Insert the voice */
+    if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
+        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        return -1;
+    }
+
+    return lpsessiondb_close(db);
+}
+
+int lpsessiondb_mark_voice_active(sqlite3 * db, int voice_id) {
+    char * err = 0;
+    char * sql;
+    size_t sqlsize;
+    time_t now;
+
+    now = time(NULL);
+
+    /* Prepare the sql unsafely */
+    sqlsize = snprintf(NULL, 0, "update voices set active=1 started=%ld where id=%d;", now, voice_id);
+    sql = calloc(1, sqlsize+1);
+    if(snprintf(sql, sqlsize, "update voices set active=1 where id=%d;", voice_id) < 0) {
+        syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Mark the voice as active */
+    if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
+        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+#endif
+
+/* THREAD SAFE
+ * COUNTER TOOLS
+ * *************/
 int lpcounter_read_and_increment(lpcounter_t * c) {
     struct sembuf sop;
     size_t * counter;
@@ -102,60 +225,9 @@ int lpcounter_create(lpcounter_t * c) {
     return 0;
 }
 
-int lpadc_create() {
-    int shmid, count;
-    FILE * handle;
-    lpadcbuf_t adc;
-    lpadcbuf_t * adcbuf;
-    struct shmid_ds shm_info;
-
-    /* Create or open the system V shared memory segment with 
-     * permissions allowing world read/write access. (Easy interop?)
-     *
-     * The special IPC_PRIVATE key produces a unique identifier on each 
-     * call to shmget, so all other operations on the shared memory segment 
-     * are done through the identifier produced here. */
-    shmid = shmget(IPC_PRIVATE, sizeof(lpadcbuf_t), IPC_CREAT | S_IRUSR | S_IWUSR);
-    if(shmid < 0) {
-        syslog(LOG_ERR, "lpadc_create shmget. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if(shmctl(shmid, IPC_STAT, &shm_info) == -1) {
-        syslog(LOG_ERR, "lpadc_create shmctl. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Write the identifier for the adcbuf shared memory into a 
-     * well known file other processes can use to attach and read */
-    handle = fopen(LPADC_HANDLE, "w");
-    if(handle == NULL) {
-        syslog(LOG_ERR, "lpadc_create fopen. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    count = fprintf(handle, "%d", shmid);
-    if(count < 0) {
-        syslog(LOG_ERR, "lpadc_create fprintf. Error: %s\n", strerror(errno));
-        fclose(handle);
-        return -1;
-    }
-
-    adcbuf = (lpadcbuf_t *)shmat(shmid, NULL, 0);
-    if(adcbuf == (void *)-1) {
-        syslog(LOG_ERR, "lpadc_create shmat. Error: %s\n", strerror(errno));
-        fclose(handle);
-        return -1;
-    }
-
-    adc.pos = 0;
-    memset(adc.buf, 0, sizeof(adc.buf));
-    memcpy(adcbuf, &adc, sizeof(lpadcbuf_t));
-
-    fclose(handle);
-    return 0;
-}
-
+/* SHARED MEMORY
+ * COMMUNICATION TOOLS
+ * *******************/
 int lpipc_setid(char * path, int id) {
     FILE * handle;
     int count;
@@ -173,6 +245,7 @@ int lpipc_setid(char * path, int id) {
         return -1;
     }
 
+    fclose(handle);
     return 0;
 }
 
@@ -214,6 +287,262 @@ int lpipc_getid(char * path) {
 
 int lpadc_getid() {
     return lpipc_getid(LPADC_HANDLE);
+}
+
+/* SHARED MEMORY
+ * BUFFER TOOLS
+ * ************/
+int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate) {
+    int shmid, semid;
+    lpipc_buffer_t * buf;
+    size_t bufsize;
+    union semun arg;
+    char * sempath;
+    size_t sempath_size;
+
+
+    /* Determine the size of the shared memory segment */
+    bufsize = sizeof(lpipc_buffer_t) + (sizeof(lpfloat_t) * length * channels);
+
+    /* Create the system V shared memory segment */
+    shmid = shmget(IPC_PRIVATE, bufsize, IPC_CREAT | S_IRUSR | S_IWUSR);
+    if(shmid < 0) {
+        syslog(LOG_ERR, "lpadc_create shmget. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Write the identifier for the shared memory buffer into a 
+     * well known file other processes can use to attach and read */
+    if(lpipc_setid(id_path, shmid) < 0) {
+        syslog(LOG_ERR, "lpadc_create failed to store shared memory ID to path %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+
+    /* Attach the shared memory */
+    buf = (lpipc_buffer_t *)shmat(shmid, NULL, 0);
+    if(buf == (void *)-1) {
+        syslog(LOG_ERR, "lpipc_buffer_create shmat. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Initialize the buffer struct  */
+    memset(buf, 0, bufsize);
+    buf->length = length;
+    buf->boundry = length-1;
+    buf->range = length;
+    buf->channels = channels;
+    buf->samplerate = samplerate;
+
+    /* Create the semaphore used as a read/write lock on the buffer */
+    semid = semget(IPC_PRIVATE, 1, IPC_CREAT | S_IRUSR | S_IWUSR);
+    if (semid < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_create semget. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Prime the lock by initalizing the sempahore to 1 */
+    arg.val = 1;
+    if(semctl(semid, 0, SETVAL, arg) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_create semctl. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Write the identifier for the sempahore into a 
+     * well known file other processes can use to attach and read */
+    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
+    sempath = (char *)calloc(1, sempath_size+1);
+    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
+        syslog(LOG_ERR, "lpadc_create failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    if(lpipc_setid(sempath, semid) < 0) {
+        syslog(LOG_ERR, "lpadc_create failed to store shared memory ID to path %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    free(sempath);
+
+    return 0;
+}
+
+int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf) {
+    int shmid, semid;
+    struct sembuf sop;
+    char * sempath;
+    size_t sempath_size;
+
+
+    /* Construct the sempahore ID path */
+    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
+    sempath = (char *)calloc(1, sempath_size+1);
+    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    /* Look up the sempahore ID */
+    if((semid = lpipc_getid(sempath)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not get semid %s. Error: %s\n", sempath, strerror(errno));
+        return -1;
+    }
+
+    free(sempath);
+
+    /* Look up the shared memory ID */
+    if((shmid = lpipc_getid(id_path)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not get shmid %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    /* Aquire a lock on the semaphore */
+    sop.sem_num = 0;
+    sop.sem_op = -1;
+    sop.sem_flg = 0;
+    if(semop(semid, &sop, 1) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire semop. Could not aquire sem lock. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Attach the shared memory to the pointer */
+    *buf = (lpipc_buffer_t *)shmat(shmid, NULL, 0);
+    if(*buf == (void *)-1) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire shmat. Could not attach to shm. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpipc_buffer_release(char * id_path) {
+    int semid;
+    struct sembuf sop;
+    char * sempath;
+    size_t sempath_size;
+
+
+    /* Construct the sempahore ID path */
+    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
+    sempath = (char *)calloc(1, sempath_size+1);
+    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    /* Look up the sempahore ID */
+    if((semid = lpipc_getid(sempath)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release Could not get semid %s. Error: %s\n", sempath, strerror(errno));
+        return -1;
+    }
+
+    /* Release lock */
+    sop.sem_num = 0;
+    sop.sem_op = 1;
+    sop.sem_flg = 0;
+    if(semop(semid, &sop, 1) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release semop. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    free(sempath);
+    return 0;
+}
+
+int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf) {
+    size_t bufsize;
+    *buf = LPBuffer.create(ipcbuf->length, ipcbuf->channels, ipcbuf->samplerate);
+    bufsize = sizeof(lpfloat_t) * (*buf)->length * (*buf)->channels;
+    memcpy((*buf)->data, (lpfloat_t *)ipcbuf->data, bufsize);
+    return 0;
+}
+
+int lpipc_buffer_destroy(char * id_path) {
+    int shmid, semid;
+    union semun dummy;
+    char * sempath;
+    size_t sempath_size;
+
+
+    /* Construct the sempahore ID path */
+    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
+    sempath = (char *)calloc(1, sempath_size+1);
+    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    /* Look up the sempahore ID */
+    if((semid = lpipc_getid(sempath)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release Could not get semid %s. Error: %s\n", sempath, strerror(errno));
+        return -1;
+    }
+    free(sempath);
+
+    /* Look up the shared memory ID */
+    if((shmid = lpipc_getid(id_path)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release Could not get shmid %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    /* Remove the semaphore and shared memory buffer */
+    if(shmctl(shmid, IPC_RMID, NULL) < 0) {
+        syslog(LOG_ERR, "lpcounter_destroy shmctl. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(semctl(semid, 0, IPC_RMID, dummy) < 0) {
+        syslog(LOG_ERR, "lpcounter_destroy semctl. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpadc_create() {
+    int shmid;
+    lpadcbuf_t adc;
+    lpadcbuf_t * adcbuf;
+    struct shmid_ds shm_info;
+
+    /* Create or open the system V shared memory segment with 
+     * permissions allowing world read/write access. (Easy interop?)
+     *
+     * The special IPC_PRIVATE key produces a unique identifier on each 
+     * call to shmget, so all other operations on the shared memory segment 
+     * are done through the identifier produced here. */
+    shmid = shmget(IPC_PRIVATE, sizeof(lpadcbuf_t), IPC_CREAT | S_IRUSR | S_IWUSR);
+    if(shmid < 0) {
+        syslog(LOG_ERR, "lpadc_create shmget. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Get info about the shared memory... but why? */
+    if(shmctl(shmid, IPC_STAT, &shm_info) == -1) {
+        syslog(LOG_ERR, "lpadc_create shmctl. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Write the identifier for the adcbuf shared memory into a 
+     * well known file other processes can use to attach and read */
+    if(lpipc_setid(LPADC_HANDLE, shmid) < 0) {
+        syslog(LOG_ERR, "lpadc_create failed to store shared memory ID to path %s. Error: %s\n", LPADC_HANDLE, strerror(errno));
+        return -1;
+    }
+
+    /* Attach the shared memory to adcbuf */
+    adcbuf = (lpadcbuf_t *)shmat(shmid, NULL, 0);
+    if(adcbuf == (void *)-1) {
+        syslog(LOG_ERR, "lpadc_create shmat. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Initialize the shared memory as a buffer */
+    adc.pos = 0;
+    memset(adc.buf, 0, sizeof(adc.buf));
+    memcpy(adcbuf, &adc, sizeof(lpadcbuf_t));
+
+    return 0;
 }
 
 lpadcbuf_t * lpadc_open() {
@@ -270,6 +599,10 @@ int lpadc_destroy() {
     return 0;
 }
 
+
+/* BUFFER
+ * SERIALIZATION
+ * *************/
 char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg) {
     size_t strsize, audiosize, offset;
     char * str;
@@ -367,6 +700,9 @@ lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg) {
     return buf;
 }
 
+/* MESSAGE
+ * QUEUES
+ * ******/
 int get_play_message(char * instrument_name, lpmsg_t * msg) {
     int qfd;
     ssize_t qname_length;
@@ -407,8 +743,6 @@ int astrid_playq_open(char * instrument_name) {
     qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
     qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
     snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
-
-    syslog(LOG_ERR, "astrid_playq_open: %s\n", qname);
 
     umask(0);
     if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
@@ -491,6 +825,9 @@ int send_play_message(lpmsg_t msg) {
     return 0;
 }
 
+/* SCHEDULING
+ * and MIXING
+ * **********/
 void scheduler_get_now(struct timespec * now) {
     clock_gettime(CLOCK_MONOTONIC_RAW, now);
 }

@@ -23,7 +23,9 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 	$(LPDIR)/src/spectral.c \
 	$(LPDIR)/src/pippicore.c
 
-LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I${LPDIR}/vendor/sqlite3 -I$(LPDIR)/src
+LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
+LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src
+LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic
 LPLIBS = -lm -ldl -lpthread
 
@@ -37,21 +39,23 @@ astrid-renderer:
 	cython cython/cyrenderer.pyx
 	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-renderer
 
-astrid-counter:
-	echo "Building astrid counter tools...";
+astrid-ipc:
+	echo "Building astrid ipc tools...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/makecounter.c $(LPLIBS) -o build/astrid-makecounter
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/rmcounter.c $(LPLIBS) -o build/astrid-rmcounter
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getvoiceid.c $(LPLIBS) -o build/astrid-getvoiceid
 
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/createsharedbuffer.c $(LPLIBS) -o build/astrid-createsharedbuffer
+
 astrid-sessiondb:
 	echo "Building astrid session db tools...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) $(LPDIR)/vendor/sqlite3/sqlite3.c src/astrid.c src/createsessiondb.c $(LPLIBS) -o build/astrid-createsessiondb
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/createsessiondb.c $(LPLIBS) -o build/astrid-createsessiondb
 
 astrid-q:
 	echo "Building astrid queue reader...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qreader.c $(LPLIBS) -o build/astrid-qreader
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qserver.c $(LPLIBS) -o build/astrid-qserver
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qmessage.c $(LPLIBS) -o build/astrid-qmessage
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/qmessage.c $(LPLIBS) -o build/astrid-qmessage
 
 astrid-renderer-macos:
 	mkdir -p build
@@ -64,7 +68,7 @@ astrid-dac:
 	mkdir -p build
 
 	echo "Building astrid dac...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
 
 astrid-devices:
 	mkdir -p build

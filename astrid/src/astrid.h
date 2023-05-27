@@ -23,18 +23,20 @@
 #define NUM_RENDERERS 10
 #define ASTRID_CHANNELS 2
 #define ASTRID_SAMPLERATE 48000
+
 #define ASTRID_ADCSECONDS 10
 #define ASTRID_SESSIONDB_PATH "/tmp/astrid_session.db"
 #define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
 #define LPADCBUFSIZE (LPADCBUFFRAMES * sizeof(float) * ASTRID_CHANNELS)
 
-#define PLAY_MESSAGE "p"
-#define STOP_MESSAGE "s"
-#define SHUTDOWN_MESSAGE "k"
+#define PLAY_MESSAGE 'p'
+#define STOP_MESSAGE 's'
+#define LOAD_MESSAGE 'l'
+#define SHUTDOWN_MESSAGE 'k'
 
 #define SPACE ' '
 #define LPMAXNAME 24
-#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t) - LPMAXNAME)
+#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t) - sizeof(uint16_t) - LPMAXNAME)
 #define LPADC_HANDLE "/tmp/astrid_adcbuf_shmid"
 #define LPADC_BUFNAME "/lpadcbuf"
 #define LPPLAYQ "/tmp/astridq"
@@ -56,16 +58,28 @@ union semun {
 #endif
 };
 
+enum LPMessageTypes {
+    LPMSG_PLAY,
+    LPMSG_STOP,
+    LPMSG_LOAD,
+    LPMSG_SHUTDOWN,
+    NUM_LPMESSAGETYPES
+};
+
 typedef struct lpcounter_t {
     int shmid;
     int semid;
 } lpcounter_t;
 
+/* The order of the members of this struct matters, 
+ * since it must fit into exactly PIPE_BUF bytes. 
+ * The members are arranged to eliminate padding. */
 typedef struct lpmsg_t {
     size_t delay;
     size_t voice_id;
-    char instrument_name[LPMAXNAME];
+    uint16_t type;
     char msg[LPMAXMSG];
+    char instrument_name[LPMAXNAME];
 } lpmsg_t;
 
 typedef struct lpevent_t {
@@ -118,6 +132,22 @@ typedef struct lpadcbuf_t {
     char buf[LPADCBUFSIZE];
 } lpadcbuf_t;
 
+/* compatible with lpbuffer_t */
+typedef struct lpipc_buffer_t {
+    size_t length;
+    int samplerate;
+    int channels;
+
+    lpfloat_t phase;
+    size_t boundry;
+    size_t range;
+    size_t pos;
+    size_t onset;
+    int is_looping;
+
+    char data[];
+} lpipc_buffer_t;
+
 typedef struct lpastridctx_t {
     lpscheduler_t * s;
     int channels;
@@ -146,9 +176,24 @@ lpadcbuf_t * lpadc_open();
 void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize);
 lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t offset);
 
+int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate);
+int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf);
+int lpipc_buffer_release(char * id_path);
+int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf);
+int lpipc_buffer_destroy(char * id_path);
 int lpipc_setid(char * path, int id); 
 int lpipc_getid(char * path); 
 
 void lptimeit_since(struct timespec * start);
+
+#ifdef LPSESSIONDB
+#include <sqlite3.h>
+int lpsessiondb_create(sqlite3 * db);
+int lpsessiondb_open(sqlite3 * db);
+int lpsessiondb_close(sqlite3 * db);
+int lpsessiondb_insert_voice(lpmsg_t msg);
+int lpsessiondb_mark_voice_active(sqlite3 * db, int voice_id);
+#endif
+
 
 #endif

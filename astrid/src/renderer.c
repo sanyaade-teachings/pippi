@@ -148,11 +148,31 @@ int main(int argc, char * argv[]) {
             goto lprender_cleanup;
         }
 
-        if(astrid_schedule_python_render(&msg) < 0) {
-            PyErr_Print();
-            syslog(LOG_ERR, "CPython error during renderer loop\n");
-            goto lprender_cleanup;
+        switch(msg.type) {
+            case LPMSG_PLAY:
+                if(astrid_schedule_python_render(&msg) < 0) {
+                    PyErr_Print();
+                    syslog(LOG_ERR, "CPython error during renderer loop\n");
+                    goto lprender_cleanup;
+                }
+                break;
+
+            case LPMSG_LOAD:
+                if(astrid_reload_instrument(instrument_fullpath) < 0) {
+                    PyErr_Print();
+                    syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
+                    goto lprender_cleanup;
+                }
+                break;
+
+            case LPMSG_SHUTDOWN:
+                astrid_is_running = 0;
+                break;
+
+            default:
+                break;
         }
+
         /* astrid_begin_python_stream(&msg) */
     }
 

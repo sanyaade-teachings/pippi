@@ -350,6 +350,24 @@ cdef int render_event(object instrument, lpmsg_t * msg):
 
 ASTRID_INSTRUMENT = None
 
+cdef public int astrid_reload_instrument(char * path) except -1:
+    cdef size_t last_edit 
+    global ASTRID_INSTRUMENT
+
+    if ASTRID_INSTRUMENT is None:
+        _path = path.decode('utf-8')
+        name = Path(_path).stem
+        ASTRID_INSTRUMENT = _load_instrument(name, _path)
+        return 0
+
+    last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)
+    if last_edit > ASTRID_INSTRUMENT.last_reload:
+        ASTRID_INSTRUMENT.reload()
+        ASTRID_INSTRUMENT.last_reload = last_edit
+
+    return 0
+
+
 cdef public int astrid_load_instrument(char * path) except -1:
     global ASTRID_INSTRUMENT
     _path = path.decode('utf-8')

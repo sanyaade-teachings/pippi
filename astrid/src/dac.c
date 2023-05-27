@@ -127,7 +127,7 @@ void miniaudio_callback(
     }
 }
 
-int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread) {
+int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread, sqlite3 * sessiondb) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     struct timeval redis_timeout = {15, 0};
@@ -161,6 +161,9 @@ int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread
     syslog(LOG_INFO, "Cleaning up scheduler...\n");
     if(ctx != NULL) scheduler_destroy(ctx->s);
 
+    syslog(LOG_INFO, "Closing sessiondb...\n");
+    if(sessiondb != NULL) lpsessiondb_close(sessiondb);
+
     syslog(LOG_INFO, "Freeing astrid context...\n");
     if(ctx != NULL) free(ctx);
 
@@ -182,10 +185,16 @@ int main() {
     ma_device playback;
     ma_device_info * playback_devices;
     ma_device_info * capture_devices;
+    sqlite3 * sessiondb;
 
+    sessiondb = NULL;
     ctx = NULL;
     openlog("astrid-dac", LOG_PID, LOG_USER);
 
+    /* lpmsg_t must be exactly PIPE_BUF bytes so messages are
+     * passed atomically over the message queues (and leave 
+     * maximum space for instrument commands) */
+    assert(sizeof(lpmsg_t) == PIPE_BUF);
 
     /* Set maximum output channels */
     /* FIXME get channels from available sound card ports */
@@ -201,12 +210,12 @@ int main() {
     sigemptyset(&shutdown_action.sa_mask);
     shutdown_action.sa_flags = 0;
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
-        fprintf(stderr, "Could not init SIGINT signal handler.\n");
+        syslog(LOG_ERR, "Could not init SIGINT signal handler. Error: %s\n", strerror(errno));
         exit(1);
     }
 
     if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
-        fprintf(stderr, "Could not init SIGTERM signal handler.\n");
+        syslog(LOG_ERR, "Could not init SIGTERM signal handler. Error: %s\n", strerror(errno));
         exit(1);
     }
 
@@ -231,16 +240,37 @@ int main() {
     ctx->samplerate = ASTRID_SAMPLERATE;
 
 
+
     /* Set up shared memory IPC for voice IDs */
     if(lpcounter_create(&voice_id_counter) < 0) {
-        fprintf(stderr, "Could not initialize voice ID shared memory\n");
+        syslog(LOG_ERR, "Could not initialize voice ID shared memory. Error: %s\n", strerror(errno));
+        goto exit_with_error;
+    }
+
+    syslog(LOG_ERR, "voice counter init, shmid: %d\n", (int)voice_id_counter.shmid);
+    syslog(LOG_ERR, "voice counter init, semid: %d\n", (int)voice_id_counter.semid);
+
+    /* Store a reference to the shared memory in well known files */
+    if(lpipc_setid(LPVOICE_ID_SHMID, voice_id_counter.shmid) < 0) {
+        syslog(LOG_ERR, "Could not store voice ID shmid. Error: %s\n", strerror(errno));
+        goto exit_with_error;
+    }
+
+    if(lpipc_setid(LPVOICE_ID_SEMID, voice_id_counter.semid) < 0) {
+        syslog(LOG_ERR, "Could not store voice ID shmid. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }
 
 
+    /* Initialize the sessiondb */
+    if(lpsessiondb_create(sessiondb) < 0) {
+        syslog(LOG_ERR, "Could not initialize the sessiondb. Error: %s\n", strerror(errno));
+        goto exit_with_error;
+    }
+
     /* Setup and start buffer feed thread */
     if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, ctx) != 0) {
-        fprintf(stderr, "Could not initialize renderer thread\n");
+        syslog(LOG_ERR, "Could not initialize renderer thread. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }
 
@@ -259,6 +289,11 @@ int main() {
 
     /* Get the selected device ID */
     device_id = lpipc_getid(ASTRID_DEVICEID_PATH);
+    if(device_id < 0) {
+        /* If no device has been selected, set it to the default device */
+        device_id = 0;
+        lpipc_setid(ASTRID_DEVICEID_PATH, device_id);
+    }
 
     /* Setup and start miniaudio in playback mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_playback);
@@ -283,13 +318,14 @@ int main() {
         /* Twiddle thumbs */
         usleep((useconds_t)1000);
         lpscheduler_handle_callbacks(ctx->s);
+        //lpscheduler_update_session_state(ctx->s);
         /*LPScheduler.empty(ctx->s);*/
     }
 
-    return cleanup(&playback, ctx, buffer_feed_thread);
+    return cleanup(&playback, ctx, buffer_feed_thread, sessiondb);
 
 exit_with_error:
-    cleanup(&playback, ctx, buffer_feed_thread);
+    cleanup(&playback, ctx, buffer_feed_thread, sessiondb);
     syslog(LOG_ERR, "Exited with error\n");
     return 1;
 }
