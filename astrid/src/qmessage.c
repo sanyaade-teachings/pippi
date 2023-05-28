@@ -75,6 +75,9 @@ int main(int argc, char * argv[]) {
 
     msg.voice_id = voice_id;
 
+    /* Initialize the count */
+    msg.count = 0;
+
     /* Send the play message over the message queue */
     if(send_play_message(msg) < 0) {
         fprintf(stderr, "Could not send play message...\n");

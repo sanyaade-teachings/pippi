@@ -30,8 +30,8 @@ static int lpsessiondb_callback_noop(void * unused, int argc, char ** argv, char
     return 0;
 }
 
-int lpsessiondb_open(sqlite3 * db) {
-    if(sqlite3_open(ASTRID_SESSIONDB_PATH, &db) > 0) {
+int lpsessiondb_open(sqlite3 ** db) {
+    if(sqlite3_open(ASTRID_SESSIONDB_PATH, db) > 0) {
         syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
         return -1;
     }
@@ -48,10 +48,10 @@ int lpsessiondb_close(sqlite3 * db) {
 }
 
 
-int lpsessiondb_create(sqlite3 * db) {
+int lpsessiondb_create(sqlite3 ** db) {
     char * err = 0;
     char * sql = "create table voices \
-                  (started integer, ended integer, \
+                  (created integer, started integer, last_render integer, ended integer, \
                    active integer, delay integer, id integer, instrument_name text, \
                    params text, render_count integer);";
 
@@ -60,13 +60,13 @@ int lpsessiondb_create(sqlite3 * db) {
 
 
     /* Init the new sessiondb */
-    if(sqlite3_open(ASTRID_SESSIONDB_PATH, &db) > 0) {
+    if(sqlite3_open(ASTRID_SESSIONDB_PATH, db) > 0) {
         syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
         return -1;
     }
 
     /* Set up session schema */
-    if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
+    if(sqlite3_exec(*db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
         syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
         return -1;
     }
@@ -79,14 +79,20 @@ int lpsessiondb_insert_voice(lpmsg_t msg) {
     char * err = 0;
     char * sql;
     size_t sqlsize;
-    char * _sql = "insert into voices (started, ended, active, delay, \
+    struct timespec ts;
+    long long now;
+
+    char * _sql = "insert into voices (created, started, last_render, ended, active, delay, \
                    id, instrument_name, params, render_count) \
-                   values (NULL, NULL, 0, %d, %d, \"%s\", \"%s\", 0);";
+                   values (%lld, NULL, NULL, NULL, 0, %d, %d, \"%s\", \"%s\", 0);";
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, _sql, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg);
+    sqlsize = snprintf(NULL, 0, _sql, now, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg);
     sql = calloc(1, sqlsize+1);
-    if(snprintf(sql, sqlsize, _sql, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
+    if(snprintf(sql, sqlsize, _sql, now, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
         syslog(LOG_ERR, "Could not concat sql for insert. Error: %s\n", strerror(errno));
         return -1;
     }
@@ -110,14 +116,16 @@ int lpsessiondb_mark_voice_active(sqlite3 * db, int voice_id) {
     char * err = 0;
     char * sql;
     size_t sqlsize;
-    time_t now;
+    struct timespec ts;
+    long long now;
 
-    now = time(NULL);
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, "update voices set active=1 started=%ld where id=%d;", now, voice_id);
+    sqlsize = snprintf(NULL, 0, "update voices set active=1, started=%lld, last_render=%lld, render_count=1 where id=%d;", now, now, voice_id);
     sql = calloc(1, sqlsize+1);
-    if(snprintf(sql, sqlsize, "update voices set active=1 where id=%d;", voice_id) < 0) {
+    if(snprintf(sql, sqlsize, "update voices set active=1, started=%lld, last_render=%lld, render_count=1 where id=%d;", now, now, voice_id) < 0) {
         syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
         return -1;
     }
@@ -130,6 +138,34 @@ int lpsessiondb_mark_voice_active(sqlite3 * db, int voice_id) {
 
     return 0;
 }
+
+int lpsessiondb_increment_voice_render_count(sqlite3 * db, int voice_id, size_t count) {
+    char * err = 0;
+    char * sql;
+    size_t sqlsize;
+    struct timespec ts;
+    long long now;
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
+
+    /* Prepare the sql unsafely */
+    sqlsize = snprintf(NULL, 0, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id);
+    sql = calloc(1, sqlsize+1);
+    if(snprintf(sql, sqlsize, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id) < 0) {
+        syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Mark the voice as active */
+    if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
+        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
 #endif
 
 /* THREAD SAFE
@@ -1169,6 +1205,20 @@ void lpscheduler_handle_callbacks(lpscheduler_t * s) {
         }
     }
 }
+
+#ifdef LPSESSIONDB
+void lpscheduler_update_session_state(lpscheduler_t * s, sqlite3 * db) {
+    lpevent_t * current;
+    if(s->playing_stack_head != NULL) {
+        current = s->playing_stack_head;
+        scheduler_try_callback(s, current);
+        while(current->next != NULL) {
+            current = (lpevent_t *)current->next;
+            scheduler_try_callback(s, current);
+        }
+    }
+}
+#endif
 
 void lpscheduler_tick(lpscheduler_t * s) {
     //scheduler_debug(s);

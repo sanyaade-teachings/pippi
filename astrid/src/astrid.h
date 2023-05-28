@@ -36,7 +36,7 @@
 
 #define SPACE ' '
 #define LPMAXNAME 24
-#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t) - sizeof(uint16_t) - LPMAXNAME)
+#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t) - sizeof(size_t) - sizeof(uint16_t) - LPMAXNAME)
 #define LPADC_HANDLE "/tmp/astrid_adcbuf_shmid"
 #define LPADC_BUFNAME "/lpadcbuf"
 #define LPPLAYQ "/tmp/astridq"
@@ -77,6 +77,7 @@ typedef struct lpcounter_t {
 typedef struct lpmsg_t {
     size_t delay;
     size_t voice_id;
+    size_t count;
     uint16_t type;
     char msg[LPMAXMSG];
     char instrument_name[LPMAXNAME];
@@ -188,11 +189,13 @@ void lptimeit_since(struct timespec * start);
 
 #ifdef LPSESSIONDB
 #include <sqlite3.h>
-int lpsessiondb_create(sqlite3 * db);
-int lpsessiondb_open(sqlite3 * db);
+int lpsessiondb_create(sqlite3 ** db);
+int lpsessiondb_open(sqlite3 ** db);
 int lpsessiondb_close(sqlite3 * db);
 int lpsessiondb_insert_voice(lpmsg_t msg);
 int lpsessiondb_mark_voice_active(sqlite3 * db, int voice_id);
+int lpsessiondb_increment_voice_render_count(sqlite3 * db, int voice_id, size_t count);
+void lpscheduler_update_session_state(lpscheduler_t * s, sqlite3 * db);
 #endif
 
 

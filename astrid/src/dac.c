@@ -13,6 +13,7 @@
 static volatile int astrid_is_running = 1;
 int astrid_channels = 2;
 lpscheduler_t * astrid_scheduler;
+sqlite3 * sessiondb;
 
 /* Callback for SIGINT */
 void handle_shutdown(int sig __attribute__((unused))) {
@@ -82,6 +83,10 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 break;
             }
             buf = deserialize_buffer(redis_reply->element[2]->str, &msg);
+
+            /* Increment the message count */
+            msg.count += 1;
+
             if(buf->is_looping == 1) {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for retriggering at onset %d\n", msg.instrument_name, (int)buf->onset);
                 callback_delay = (size_t)(buf->length * 0.7f);
@@ -90,6 +95,12 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             } else {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for single play at onset %d\n", msg.instrument_name, (int)buf->onset);
                 scheduler_schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, msg, callback_delay);
+            }
+
+            if(msg.count == 1) {
+                lpsessiondb_mark_voice_active(sessiondb, msg.voice_id);
+            } else {
+                lpsessiondb_increment_voice_render_count(sessiondb, msg.voice_id, msg.count);
             }
         }
         freeReplyObject(redis_reply);
@@ -185,7 +196,6 @@ int main() {
     ma_device playback;
     ma_device_info * playback_devices;
     ma_device_info * capture_devices;
-    sqlite3 * sessiondb;
 
     sessiondb = NULL;
     ctx = NULL;
@@ -261,9 +271,8 @@ int main() {
         goto exit_with_error;
     }
 
-
     /* Initialize the sessiondb */
-    if(lpsessiondb_create(sessiondb) < 0) {
+    if(lpsessiondb_create(&sessiondb) < 0) {
         syslog(LOG_ERR, "Could not initialize the sessiondb. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }

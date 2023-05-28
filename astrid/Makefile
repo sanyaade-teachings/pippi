@@ -102,7 +102,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-counter astrid-devices
+build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices
 
-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-counter astrid-devices
+macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices
 
