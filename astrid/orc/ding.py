@@ -5,7 +5,7 @@ from pippi import fx
 from pippi import shapes
 
 # Uncomment this to retrigger after each play
-LOOP = True
+#LOOP = True
 
 stack = ['sine', 'hann', 'tri', 'cos', 'square', 'rnd', 'rnd']
 

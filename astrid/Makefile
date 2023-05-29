@@ -77,11 +77,11 @@ astrid-devices:
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getdeviceids.c $(LPLIBS) -o build/astrid-getdeviceids
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/setdeviceid.c $(LPLIBS) -o build/astrid-setdeviceid
 
-astrid-voice-status:
+astrid-voicestatus:
 	mkdir -p build
 
 	echo "Building astrid voice status...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/voicestatus.c $(LPLIBS) -lncurses -o build/astrid-voice-status
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/voicestatus.c $(LPLIBS) -lncurses -o build/astrid-voicestatus
 
 astrid-adc:
 	mkdir -p build
@@ -102,7 +102,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices
+build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus
 
-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices
+macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus
 

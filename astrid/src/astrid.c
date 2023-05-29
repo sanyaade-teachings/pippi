@@ -30,13 +30,22 @@ static int lpsessiondb_callback_noop(void * unused, int argc, char ** argv, char
     return 0;
 }
 
-int lpsessiondb_open(sqlite3 ** db) {
-    if(sqlite3_open(ASTRID_SESSIONDB_PATH, db) > 0) {
+int lpsessiondb_open_for_writing(sqlite3 ** db) {
+    if(sqlite3_open_v2(ASTRID_SESSIONDB_PATH, db, SQLITE_OPEN_READWRITE, NULL) > 0) {
         syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
         return -1;
     }
     return 0;
 }
+
+int lpsessiondb_open_for_reading(sqlite3 ** db) {
+    if(sqlite3_open_v2(ASTRID_SESSIONDB_PATH, db, SQLITE_OPEN_READONLY, NULL) > 0) {
+        syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
 
 int lpsessiondb_close(sqlite3 * db) {
     if(sqlite3_close(db) < 0) {
@@ -58,16 +67,21 @@ int lpsessiondb_create(sqlite3 ** db) {
     /* Remove any existing sessiondb */
     unlink(ASTRID_SESSIONDB_PATH);
 
-
-    /* Init the new sessiondb */
-    if(sqlite3_open(ASTRID_SESSIONDB_PATH, db) > 0) {
+    /* Create and open the database */
+    if(sqlite3_open_v2(ASTRID_SESSIONDB_PATH, db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL) > 0) {
         syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
         return -1;
     }
 
     /* Set up session schema */
     if(sqlite3_exec(*db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
-        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, sqlite3_errmsg(*db));
+        return -1;
+    }
+
+    /* Set WAL mode */
+    if(sqlite3_exec(*db, "pragma journal_mode=WAL;", lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
+        syslog(LOG_ERR, "Could not set sessiondb WAL mode. Error: %s\n", sqlite3_errmsg(*db));
         return -1;
     }
 
@@ -97,11 +111,8 @@ int lpsessiondb_insert_voice(lpmsg_t msg) {
         return -1;
     }
 
-    /* Open the sessiondb */
-    if(sqlite3_open(ASTRID_SESSIONDB_PATH, &db) > 0) {
-        syslog(LOG_ERR, "Could not open db for insert at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
-        return -1;
-    }
+    /* Open the sessiondb for writing */
+    lpsessiondb_open_for_writing(&db);
 
     /* Insert the voice */
     if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
@@ -165,6 +176,34 @@ int lpsessiondb_increment_voice_render_count(sqlite3 * db, int voice_id, size_t 
 
     return 0;
 }
+
+int lpsessiondb_mark_voice_stopped(sqlite3 * db, int voice_id, size_t count) {
+    char * err = 0;
+    char * sql;
+    size_t sqlsize;
+    struct timespec ts;
+    long long now;
+
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
+
+    /* Prepare the sql unsafely */
+    sqlsize = snprintf(NULL, 0, "update voices set active=0, ended=%lld, last_render=%lld, render_count=%ld where id=%d;", now, now, count, voice_id);
+    sql = calloc(1, sqlsize+1);
+    if(snprintf(sql, sqlsize, "update voices set active=0, ended=%lld, last_render=%lld, render_count=%ld where id=%d;", now, now, count, voice_id) < 0) {
+        syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Mark the voice as stopped */
+    if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
+        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
 
 #endif
 
@@ -1205,20 +1244,6 @@ void lpscheduler_handle_callbacks(lpscheduler_t * s) {
         }
     }
 }
-
-#ifdef LPSESSIONDB
-void lpscheduler_update_session_state(lpscheduler_t * s, sqlite3 * db) {
-    lpevent_t * current;
-    if(s->playing_stack_head != NULL) {
-        current = s->playing_stack_head;
-        scheduler_try_callback(s, current);
-        while(current->next != NULL) {
-            current = (lpevent_t *)current->next;
-            scheduler_try_callback(s, current);
-        }
-    }
-}
-#endif
 
 void lpscheduler_tick(lpscheduler_t * s) {
     //scheduler_debug(s);

@@ -190,12 +190,13 @@ void lptimeit_since(struct timespec * start);
 #ifdef LPSESSIONDB
 #include <sqlite3.h>
 int lpsessiondb_create(sqlite3 ** db);
-int lpsessiondb_open(sqlite3 ** db);
+int lpsessiondb_open_for_writing(sqlite3 ** db);
+int lpsessiondb_open_for_reading(sqlite3 ** db);
 int lpsessiondb_close(sqlite3 * db);
 int lpsessiondb_insert_voice(lpmsg_t msg);
 int lpsessiondb_mark_voice_active(sqlite3 * db, int voice_id);
 int lpsessiondb_increment_voice_render_count(sqlite3 * db, int voice_id, size_t count);
-void lpscheduler_update_session_state(lpscheduler_t * s, sqlite3 * db);
+int lpsessiondb_mark_voice_stopped(sqlite3 * db, int voice_id, size_t count);
 #endif
 
 

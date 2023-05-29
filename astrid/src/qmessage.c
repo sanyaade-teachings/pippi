@@ -60,7 +60,6 @@ int main(int argc, char * argv[]) {
     if((c.semid = lpipc_getid(LPVOICE_ID_SEMID)) < 0) {
         fprintf(stderr, "Problem trying to get voice ID sempahore handle when constructing play message from command input\n");
         return 1;
-
     }
 
     if((c.shmid = lpipc_getid(LPVOICE_ID_SHMID)) < 0) {

@@ -35,6 +35,12 @@ void retrigger_callback(lpmsg_t msg) {
     }
 }
 
+void finalplay_callback(lpmsg_t msg) {
+    syslog(LOG_DEBUG, "FINALPLAY CALLBACK %d (msg.voice_id)\n", (int)msg.voice_id);
+    lpsessiondb_mark_voice_stopped(sessiondb, msg.voice_id, msg.count);
+    syslog(LOG_DEBUG, "FINALPLAY CALLBACK marked stopped\n");
+}
+
 void noop_callback(__attribute__((unused)) lpmsg_t msg) {}
 
 /* This callback runs in a thread started 
@@ -48,6 +54,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     redisReply * redis_reply;
     lpbuffer_t * buf;
     lpmsg_t msg = {0};
+    int finalplay = 0;
 
     struct timeval redis_timeout = {15, 0};
     size_t callback_delay = 0;
@@ -89,17 +96,24 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
 
             if(buf->is_looping == 1) {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for retriggering at onset %d\n", msg.instrument_name, (int)buf->onset);
-                callback_delay = (size_t)(buf->length * 0.7f);
-                msg.delay = buf->length - callback_delay;
+                callback_delay = (size_t)(buf->length * 0.7f); // Trigger the next render 70% into playback of the current buffer
+                msg.delay = buf->length - callback_delay; // Schedule playback for the next render
                 scheduler_schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, msg, callback_delay);
             } else {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for single play at onset %d\n", msg.instrument_name, (int)buf->onset);
-                scheduler_schedule_event(astrid_scheduler, buf, buf->onset, noop_callback, msg, callback_delay);
+                // Mark the voice as stopped just before playback is finished
+                // FIXME this is unstable because the callback only fires 
+                // while the voice is playing, and callbacks are only invoked 
+                // periodically in the main thread, not on every frame.
+                callback_delay = buf->length - 1000; 
+                scheduler_schedule_event(astrid_scheduler, buf, buf->onset, finalplay_callback, msg, callback_delay);
             }
 
+            /* Mark the voice active on the first render, looping or not */
             if(msg.count == 1) {
                 lpsessiondb_mark_voice_active(sessiondb, msg.voice_id);
-            } else {
+            } else if(msg.count > 1 && buf->is_looping) {
+                /* If the voice is looping and is already active, just increment the render count */
                 lpsessiondb_increment_voice_render_count(sessiondb, msg.voice_id, msg.count);
             }
         }
@@ -327,7 +341,6 @@ int main() {
         /* Twiddle thumbs */
         usleep((useconds_t)1000);
         lpscheduler_handle_callbacks(ctx->s);
-        //lpscheduler_update_session_state(ctx->s);
         /*LPScheduler.empty(ctx->s);*/
     }
 
