@@ -6,6 +6,7 @@
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"
 #include <hiredis/hiredis.h>
+#include "pqueue.h"
 
 #include "astrid.h"
 
@@ -14,24 +15,18 @@ static volatile int astrid_is_running = 1;
 int astrid_channels = 2;
 lpscheduler_t * astrid_scheduler;
 sqlite3 * sessiondb;
+pqueue_t * msgpq;
 
 /* Callback for SIGINT */
 void handle_shutdown(int sig __attribute__((unused))) {
+    lpmsg_t msg;
     astrid_is_running = 0;
-}
 
-/* This callback fires when a buffer in the 
- * mixer has finished playback, and it originated 
- * from an instrument with loop enabled.
- **/
-void retrigger_callback(lpmsg_t msg) {
-    syslog(LOG_DEBUG, " R           %s MSG RETRIG %s\n", msg.instrument_name, msg.msg);
-    syslog(LOG_DEBUG, " R           %s (msg.instrument_name)\n", msg.instrument_name);
-    syslog(LOG_DEBUG, " R           %d (msg.voice_id)\n", (int)msg.voice_id);
-    syslog(LOG_DEBUG, " R           %d (msg.delay)\n", (int)msg.delay);
-
-    if(send_play_message(msg) < 0) {
-        syslog(LOG_ERR, "Error sending play message from callback\n");
+    syslog(LOG_INFO, "Sending shutdown to message q...\n");
+    msg.type = LPMSG_SHUTDOWN;
+    if(send_message(msg) < 0) {
+        syslog(LOG_ERR, "dac handle_shutdown write: Could not write shutdown message to q. Error: %s\n", strerror(errno));
+        exit(1);
     }
 }
 
@@ -42,6 +37,150 @@ void finalplay_callback(lpmsg_t msg) {
 }
 
 void noop_callback(__attribute__((unused)) lpmsg_t msg) {}
+
+static int msgpq_cmp_pri(double next, double curr) {
+    return (next < curr);
+}
+
+static double msgpq_get_pri(void * a) {
+    return ((lpmsgpq_node_t *)a)->timestamp;
+}
+
+static void msgpq_set_pri(void * a, double timestamp) {
+    ((lpmsgpq_node_t *)a)->timestamp = timestamp;
+}
+
+static size_t msgpq_get_pos(void * a) {
+    return ((lpmsgpq_node_t *)a)->pos;
+}
+
+static void msgpq_set_pos(void * a, size_t pos) {
+    ((lpmsgpq_node_t *)a)->pos = pos;
+}
+
+
+void * message_scheduler_pq(__attribute__((unused)) void * arg) {
+    lpmsg_t * msg;
+    lpmsgpq_node_t * node;
+    void * d;
+    double now;
+
+    now = 0;
+    syslog(LOG_DEBUG, " MPQ           STARTING\n");
+
+    while(astrid_is_running) {
+        /* peek into the queue */
+        d = pqueue_peek(msgpq);
+
+        /* No messages have arrived */
+        if(d == NULL) {
+            usleep((useconds_t)500);
+            continue;
+        }
+
+        /* There is a message! */
+        node = (lpmsgpq_node_t *)d;
+        msg = node->msg;
+
+        if(msg->type == LPMSG_SHUTDOWN) {
+            free(msg);
+            free(node);
+            break;
+        }
+
+        /* Get now */
+        if(lpscheduler_get_now_seconds(&now) < 0) {
+            syslog(LOG_CRIT, "Error getting now in message scheduler\n");
+            exit(1);
+        }
+
+
+        /* If msg timestamp is in the future, 
+         * sleep for a bit and then try again */
+        if(msg->timestamp > now) {
+            usleep((useconds_t)500);
+            continue;
+        }
+
+        syslog(LOG_DEBUG, " MPQ           %s MSG PRIORITY QUEUE SENDING MESSAGE %s\n", msg->instrument_name, msg->msg);
+        syslog(LOG_DEBUG, " MPQ           %s (msg.instrument_name)\n", msg->instrument_name);
+        syslog(LOG_DEBUG, " MPQ           %d (msg.voice_id)\n", (int)msg->voice_id);
+        syslog(LOG_DEBUG, " MPQ           %f (msg.timestamp)\n", msg->timestamp);
+        syslog(LOG_DEBUG, " MPQ           %d (msg.onset_delay)\n", (int)msg->onset_delay);
+        syslog(LOG_DEBUG, " MPQ           %f (now)\n", now);
+
+        /* Send it along */
+        if(send_play_message(*msg) < 0) {
+            syslog(LOG_ERR, "Error sending play message from callback\n");
+            usleep((useconds_t)500);
+            continue;
+        }
+
+        /* And remove it from the pq */
+        if(pqueue_remove(msgpq, d) < 0) {
+            syslog(LOG_ERR, "pqueue_remove: problem removing message from the pq\n");
+            usleep((useconds_t)500);
+        }
+
+        /* TODO do this somewhere else maybe? */
+        free(msg);
+        free(node);
+
+        syslog(LOG_DEBUG, " MPQ           DONE\n");
+    }
+
+    syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
+    /* Clean up the pq: TODO, check for orphan messages? */
+    pqueue_free(msgpq);
+    return 0;
+}
+
+void * message_feed(__attribute__((unused)) void * arg) {
+    int qfd;
+    lpmsg_t msg = {0};
+    lpmsg_t * msgout;
+    lpmsgpq_node_t * d;
+
+    qfd = astrid_msgq_open();
+
+    syslog(LOG_INFO, "Message feed: Waiting for messages...\n");
+
+    /* Wait for messages on the msgq fifo */
+    while(astrid_is_running) {
+        if(astrid_msgq_read(qfd, &msg) < 0) {
+            syslog(LOG_ERR, "Error while fetching message during msgq loop: %s\n", strerror(errno));
+            continue;
+        }
+
+        syslog(LOG_DEBUG, " MFT           %s MSG FEED THREAD GOT MESSAGE %s\n", msg.instrument_name, msg.msg);
+        syslog(LOG_DEBUG, " MFT           %s (msg.instrument_name)\n", msg.instrument_name);
+        syslog(LOG_DEBUG, " MFT           %d (msg.voice_id)\n", (int)msg.voice_id);
+        syslog(LOG_DEBUG, " MFT           %d (msg.type)\n", msg.type);
+        syslog(LOG_DEBUG, " MFT           %f (msg.timestamp)\n", msg.timestamp);
+        syslog(LOG_DEBUG, " MFT           %d (msg.onset_delay)\n", (int)msg.onset_delay);
+
+        d = (lpmsgpq_node_t *)calloc(1, sizeof(lpmsgpq_node_t));
+        msgout = (lpmsg_t *)calloc(1, sizeof(lpmsg_t));
+        memcpy(msgout, &msg, sizeof(lpmsg_t));
+        d->msg = msgout;
+        d->timestamp = msg.timestamp;
+
+        if(pqueue_insert(msgpq, (void *)d) < 0) {
+            syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", errno, strerror(errno));
+            continue;
+        }
+
+        /* Exit the loop on shutdown message after sending 
+         * it along to the priority queue as well */
+        if(msg.type == LPMSG_SHUTDOWN) break;
+    }
+
+    syslog(LOG_INFO, "Message feed shutting down...\n");
+    if(qfd != -1) astrid_msgq_close(qfd);
+
+    return 0;
+}
+
 
 /* This callback runs in a thread started 
  * just before the audio callback is started.
@@ -54,7 +193,8 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     redisReply * redis_reply;
     lpbuffer_t * buf;
     lpmsg_t msg = {0};
-    int finalplay = 0;
+    double now, delay;
+    size_t delay_frames;
 
     struct timeval redis_timeout = {15, 0};
     size_t callback_delay = 0;
@@ -94,11 +234,47 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             /* Increment the message count */
             msg.count += 1;
 
+            /* Schedule the buffer for playback */
+            scheduler_schedule_event(astrid_scheduler, buf, buf->onset);
+
+            /* Mark the voice active on the first render and 
+             * increment the render count if looping */
+            if(msg.count == 1) {
+                lpsessiondb_mark_voice_active(sessiondb, msg.voice_id);
+            } else if(msg.count > 1 && buf->is_looping) {
+                lpsessiondb_increment_voice_render_count(sessiondb, msg.voice_id, msg.count);
+            }
+
+            /* If the buffer is flagged to loop, schedule the next render 
+             * by placing the message onto the message scheduling priority 
+             * queue with a timestamp for sending the render message 70% 
+             * into the buffer playback, with an onset delay for the buffer 
+             * making up the last 30%. TODO: measure jitter when scheduling 
+             * in regular intervals. */
+            if(buf->is_looping == 1) {
+                /* Get now to schedule the next render */
+                if(lpscheduler_get_now_seconds(&now) < 0) {
+                    syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
+                    continue;
+                }
+
+                delay_frames = (size_t)(buf->length * 0.7f);
+                delay = (delay_frames / (double)buf->samplerate);
+                msg.timestamp = now + delay;
+                msg.onset_delay = buf->length - delay_frames;
+
+                if(send_message(msg) < 0) {
+                    syslog(LOG_ERR, "Could not schedule message for loop retriggering\n");
+                    continue;
+                }
+            }
+
+            /*
             if(buf->is_looping == 1) {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for retriggering at onset %d\n", msg.instrument_name, (int)buf->onset);
-                callback_delay = (size_t)(buf->length * 0.7f); // Trigger the next render 70% into playback of the current buffer
-                msg.delay = buf->length - callback_delay; // Schedule playback for the next render
-                scheduler_schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, msg, callback_delay);
+                //callback_delay = (size_t)(buf->length * 0.7f); // Trigger the next render 70% into playback of the current buffer
+                //msg.delay = buf->length - callback_delay; // Schedule playback for the next render
+                //scheduler_schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, msg, callback_delay);
             } else {
                 syslog(LOG_DEBUG, "Scheduling %s buffer for single play at onset %d\n", msg.instrument_name, (int)buf->onset);
                 // Mark the voice as stopped just before playback is finished
@@ -108,14 +284,8 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 callback_delay = buf->length - 1000; 
                 scheduler_schedule_event(astrid_scheduler, buf, buf->onset, finalplay_callback, msg, callback_delay);
             }
+            */
 
-            /* Mark the voice active on the first render, looping or not */
-            if(msg.count == 1) {
-                lpsessiondb_mark_voice_active(sessiondb, msg.voice_id);
-            } else if(msg.count > 1 && buf->is_looping) {
-                /* If the voice is looping and is already active, just increment the render count */
-                lpsessiondb_increment_voice_render_count(sessiondb, msg.voice_id, msg.count);
-            }
         }
         freeReplyObject(redis_reply);
     }
@@ -152,7 +322,14 @@ void miniaudio_callback(
     }
 }
 
-int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread, sqlite3 * sessiondb) {
+int cleanup(
+    ma_device * playback, 
+    lpdacctx_t * ctx, 
+    pthread_t buffer_feed_thread, 
+    pthread_t message_feed_thread, 
+    pthread_t message_scheduler_pq_thread, 
+    sqlite3 * sessiondb
+) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     struct timeval redis_timeout = {15, 0};
@@ -192,6 +369,16 @@ int cleanup(ma_device * playback, lpdacctx_t * ctx, pthread_t buffer_feed_thread
     syslog(LOG_INFO, "Freeing astrid context...\n");
     if(ctx != NULL) free(ctx);
 
+    syslog(LOG_DEBUG, "Joining with message thread...\n");
+    if(pthread_join(message_feed_thread, NULL) != 0) {
+        syslog(LOG_ERR, "Error while attempting to join with message thread\n");
+    }
+
+    syslog(LOG_DEBUG, "Joining with message scheduler pq thread...\n");
+    if(pthread_join(message_scheduler_pq_thread, NULL) != 0) {
+        syslog(LOG_ERR, "Error while attempting to join with message scheduler pq thread\n");
+    }
+
     syslog(LOG_INFO, "Done with cleanup!\n");
 
     closelog();
@@ -205,6 +392,8 @@ int main() {
     lpdacctx_t * ctx;
     lpcounter_t voice_id_counter;
     pthread_t buffer_feed_thread;
+    pthread_t message_feed_thread;
+    pthread_t message_scheduler_pq_thread;
     int device_id;
     ma_uint32 playback_device_count, capture_device_count;
     ma_device playback;
@@ -291,9 +480,24 @@ int main() {
         goto exit_with_error;
     }
 
-    /* Setup and start buffer feed thread */
+    /* Create the message priority queue */
+    msgpq = pqueue_init(LPMSG_MAX_PQ, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos);
+
+    /* Start message feed thread */
+    if(pthread_create(&message_feed_thread, NULL, message_feed, ctx) != 0) {
+        syslog(LOG_ERR, "Could not initialize message feed thread. Error: %s\n", strerror(errno));
+        goto exit_with_error;
+    }
+
+    /* Start message pq thread */
+    if(pthread_create(&message_scheduler_pq_thread, NULL, message_scheduler_pq, NULL) != 0) {
+        syslog(LOG_ERR, "Could not initialize message scheduler pq thread. Error: %s\n", strerror(errno));
+        goto exit_with_error;
+    }
+
+    /* Start buffer feed thread */
     if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, ctx) != 0) {
-        syslog(LOG_ERR, "Could not initialize renderer thread. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "Could not initialize buffer feed thread. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }
 
@@ -340,14 +544,13 @@ int main() {
     while(astrid_is_running) {
         /* Twiddle thumbs */
         usleep((useconds_t)1000);
-        lpscheduler_handle_callbacks(ctx->s);
         /*LPScheduler.empty(ctx->s);*/
     }
 
-    return cleanup(&playback, ctx, buffer_feed_thread, sessiondb);
+    return cleanup(&playback, ctx, buffer_feed_thread, message_feed_thread, message_scheduler_pq_thread, sessiondb);
 
 exit_with_error:
-    cleanup(&playback, ctx, buffer_feed_thread, sessiondb);
+    cleanup(&playback, ctx, buffer_feed_thread, message_feed_thread, message_scheduler_pq_thread, sessiondb);
     syslog(LOG_ERR, "Exited with error\n");
     return 1;
 }

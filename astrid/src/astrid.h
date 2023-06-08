@@ -26,21 +26,39 @@
 
 #define ASTRID_ADCSECONDS 10
 #define ASTRID_SESSIONDB_PATH "/tmp/astrid_session.db"
+#define ASTRID_MSGQ_PATH "/tmp/astrid-msgq"
+#define ASTRID_MIDI_TRIGGERQ_PATH "/tmp/astrid-miditriggerq"
+#define ASTRID_MIDI_CCBASE_PATH "/tmp/astrid-mididevice%d-cc%d"
+#define ASTRID_MIDI_NOTEBASE_PATH "/tmp/astrid-mididevice%d-note%d"
 #define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
 #define LPADCBUFSIZE (LPADCBUFFRAMES * sizeof(float) * ASTRID_CHANNELS)
 
 #define PLAY_MESSAGE 'p'
+#define TRIGGER_MESSAGE 't'
 #define STOP_MESSAGE 's'
 #define LOAD_MESSAGE 'l'
 #define SHUTDOWN_MESSAGE 'k'
 
+#ifndef NOTE_ON
+#define NOTE_ON 144
+#endif
+
+#ifndef NOTE_OFF
+#define NOTE_OFF 128
+#endif
+
+#ifndef CONTROL_CHANGE
+#define CONTROL_CHANGE 176
+#endif
+
 #define SPACE ' '
 #define LPMAXNAME 24
-#define LPMAXMSG (PIPE_BUF - sizeof(size_t) - sizeof(size_t) - sizeof(size_t) - sizeof(uint16_t) - LPMAXNAME)
+#define LPMAXMSG (PIPE_BUF - sizeof(double) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
 #define LPADC_HANDLE "/tmp/astrid_adcbuf_shmid"
 #define LPADC_BUFNAME "/lpadcbuf"
-#define LPPLAYQ "/tmp/astridq"
+#define LPPLAYQ "/tmp/astridq" /* the path *prefix* used for instrument play queues */
 #define LPMAXQNAME (12 + 1 + LPMAXNAME)
+#define LPMSG_MAX_PQ 4096 /* preallocated message priority queue size */
 
 #define LPVOICE_ID_SHMID "/tmp/astrid_voice_id_shmid"
 #define LPVOICE_ID_SEMID "/tmp/astrid_voice_id_semid"
@@ -60,6 +78,7 @@ union semun {
 
 enum LPMessageTypes {
     LPMSG_PLAY,
+    LPMSG_TRIGGER,
     LPMSG_STOP,
     LPMSG_LOAD,
     LPMSG_SHUTDOWN,
@@ -75,7 +94,8 @@ typedef struct lpcounter_t {
  * since it must fit into exactly PIPE_BUF bytes. 
  * The members are arranged to eliminate padding. */
 typedef struct lpmsg_t {
-    size_t delay;
+    double timestamp; /* Used to schedule the message itself */
+    size_t onset_delay;     /* Used to supply an onset delay interval for playback or triggering */
     size_t voice_id;
     size_t count;
     uint16_t type;
@@ -83,6 +103,31 @@ typedef struct lpmsg_t {
     char instrument_name[LPMAXNAME];
 } lpmsg_t;
 
+typedef struct lpmsgpq_node_t {
+    double timestamp;
+    lpmsg_t * msg;
+    size_t pos;
+} lpmsgpq_node_t;
+
+
+/* When instrument scripts produce MIDI triggers, 
+ * they schedule them (with the onset value, which 
+ * is relative to *now*) by sending this struct over 
+ * the MIDI trigger fifo. */
+typedef struct lpmidievent_t {
+    double onset;
+    double length;
+    char type;
+    char note;
+    char velocity;
+    char channel;
+} lpmidievent_t;
+
+/* These events are what is stored in the 
+ * scheduler's linked lists where it tracks 
+ * which buffers are queued, playing, and 
+ * completed, and which have pending callbacks.
+ * */
 typedef struct lpevent_t {
     size_t id;
     lpbuffer_t * buf;
@@ -112,11 +157,11 @@ typedef struct lpscheduler_t {
     lpevent_t * nursery_head;
 } lpscheduler_t;
 
-void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay, void (*callback)(lpmsg_t), lpmsg_t msg, size_t callback_delay);
+void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay);
 void lpscheduler_tick(lpscheduler_t * s);
 lpscheduler_t * scheduler_create(int, int, lpfloat_t);
 void scheduler_destroy(lpscheduler_t * s);
-void lpscheduler_handle_callbacks(lpscheduler_t * s);
+int lpscheduler_get_now_seconds(double * now);
 
 int lpcounter_create(lpcounter_t * c);
 int lpcounter_read_and_increment(lpcounter_t * c);
@@ -170,6 +215,20 @@ int get_play_message(char * instrument_name, lpmsg_t * msg);
 int astrid_playq_open(char * instrument_name);
 int astrid_playq_read(int qfd, lpmsg_t * msg);
 int astrid_playq_close(int qfd);
+
+int send_message(lpmsg_t msg);
+int astrid_msgq_open();
+int astrid_msgq_close(int qfd);
+int astrid_msgq_read(int qfd, lpmsg_t * msg);
+
+int midi_triggerq_open();
+int midi_triggerq_schedule(int qfd, lpmidievent_t t);
+int midi_triggerq_close(int qfd);
+
+int lpmidi_setcc(int device_id, int cc, int value);
+int lpmidi_getcc(int device_id, int cc);
+int lpmidi_setnote(int device_id, int note, int velocity);
+int lpmidi_getnote(int device_id, int note);
 
 int lpadc_create();
 int lpadc_destroy();

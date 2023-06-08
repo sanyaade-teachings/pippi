@@ -87,6 +87,8 @@ cdef class SoundDB:
             onset REAL, 
             freq REAL,
             amp REAL,
+            midi_msg_type INTEGER,
+            channel INTEGER,
             note INTEGER,
             velocity INTEGER
         )
@@ -94,23 +96,23 @@ cdef class SoundDB:
         self.c.execute(sql)
         self.db.commit()
 
-    def add_event(SoundDB self, double start, double now, int note, int velocity, int voice_id=-1, int group_id=-1, int take_id=0):
-        self.c.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?,?,?)", (
-            None, voice_id, group_id, take_id,
-            start, now, now-start, 
-            midi.mtof(note), velocity/128, 
-            note, velocity
-        ))
-        self.db.commit()
-
-    def get_midi_events(SoundDB self, double start, double end, int voice_id=-1, int group_id=-1, int take_id=-1):
-        sql = "SELECT onset, note, velocity from events where voice_id=? and group_id=? and onset < ? and onset > ? %sorder by onset"
+    def get_midi_events(SoundDB self, double start, double end, int voice_id=-1, int group_id=-1, int take_id=-1, int channel=0):
+        sql = "SELECT onset, note, velocity, channel from events where voice_id=? and group_id=? and channel=? and onset < ? and onset > ? %sorder by onset"
         if take_id > 0:
-            r = self.c.execute(sql % "and take_id=? ", (voice_id, group_id, end, start, take_id))
+            r = self.c.execute(sql % "and take_id=? ", (voice_id, group_id, channel, end, start, take_id))
         else:
             r = self.c.execute(sql % "", (voice_id, group_id, end, start))
 
         return r.fetchall()
+
+    def add_midi_event(SoundDB self, int midi_msg_type, double start, double now, int note, int velocity, int voice_id=-1, int group_id=-1, int take_id=0, int channel=0):
+        self.c.execute("INSERT INTO events VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+            None, voice_id, group_id, take_id,
+            start, now, now-start, 
+            midi.mtof(note), velocity/127, 
+            midi_message_type, channel, note, velocity
+        ))
+        self.db.commit()
 
     def ingest(SoundDB self, SoundBuffer snd, str filename=None, int offset=0):
         cdef np.ndarray vector = mir.flatten(snd)

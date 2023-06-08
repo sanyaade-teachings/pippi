@@ -1,5 +1,6 @@
 #cython: language_level=3
 
+from libc.stdint cimport uint16_t
 from pippi.soundbuffer cimport SoundBuffer
 
 
@@ -46,16 +47,30 @@ cdef extern from "scheduler.h":
 cdef extern from "astrid.h":
     cdef const int LPMAXMSG
     cdef const int LPMAXNAME
+    cdef const int NOTE_ON
+    cdef const int NOTE_OFF
+    cdef const int CONTROL_CHANGE
 
     ctypedef struct lpadcbuf_t:
         size_t pos
         char * buf
 
     ctypedef struct lpmsg_t:
-        size_t delay
+        double timestamp
+        size_t onset_delay
         size_t voice_id
-        char instrument_name[LPMAXNAME]
+        size_t count
+        uint16_t type
         char msg[LPMAXMSG]
+        char instrument_name[LPMAXNAME]
+
+    ctypedef struct lpmidievent_t:
+        double onset
+        double length
+        char type
+        char note
+        char velocity
+        char channel
 
     int lpadc_create()
     int lpadc_destroy()
@@ -63,7 +78,23 @@ cdef extern from "astrid.h":
     void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize_in_bytes)
     lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t pos)
 
+    int send_message(lpmsg_t msg)
 
+    int midi_triggerq_open()
+    int midi_triggerq_schedule(int qfd, lpmidievent_t t)
+    int midi_triggerq_close(int qfd)
+
+    int lpmidi_setcc(int device_id, int cc, int value)
+    int lpmidi_getcc(int device_id, int cc)
+    int lpmidi_setnote(int device_id, int note, int velocity)
+    int lpmidi_getnote(int device_id, int note)
+
+    int lpscheduler_get_now_seconds(double * now)
+
+
+cdef class MidiEvent:
+    cdef lpmidievent_t * event
+    cpdef double schedule_event(MidiEvent self, int qfd)
 
 cdef class SessionParamBucket:
     cdef object _bus
@@ -72,21 +103,26 @@ cdef class ParamBucket:
     cdef object _params
     cdef str _play_params
 
+cdef class EventTriggerFactory:
+    cpdef midi(self, double onset, double length, double freq, double amp, int channel=*, int device=*)
+
+cdef class MidiEventListenerProxy:
+    cpdef float cc(self, int cc, int device_id=*)
+    cpdef int cci(self, int cc, int device_id=*)
+    cpdef float note(self, int note, int device_id=*)
+    cpdef int notei(self, int note, int device_id=*)
+
 cdef class EventContext:
     cdef public dict cache
-    cdef public object messages
     cdef public ParamBucket p
     cdef public SessionParamBucket s
-    cdef public object client
+    cdef public EventTriggerFactory t
+    cdef public MidiEventListenerProxy m
     cdef public str instrument_name
-    cdef public object running
-    cdef public object shutdown
-    cdef public object stop_me
     cdef public object sounds
     cdef public int count
     cdef public int tick
-    cdef public str play_params
-    cdef public int id
+    cdef public int vid
 
 cdef class Instrument:
     cdef public str name
@@ -98,4 +134,6 @@ cdef class Instrument:
 
 cdef tuple collect_players(object instrument)
 cdef int render_event(object instrument, lpmsg_t * msg)
+cdef set collect_trigger_planners(object instrument)
+cdef int trigger_events(object instrument, lpmsg_t * msg)
 

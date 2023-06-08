@@ -136,7 +136,7 @@ int main(int argc, char * argv[]) {
 
     /* Start rendering! */
     while(astrid_is_running) {
-        msg.delay = 0;
+        msg.onset_delay = 0;
         memset(msg.msg, 0, LPMAXMSG);
 
         syslog(LOG_DEBUG, "Waiting for %s playqueue messages...\n", instrument_basename);
@@ -161,6 +161,14 @@ int main(int argc, char * argv[]) {
                 if(astrid_reload_instrument(instrument_fullpath) < 0) {
                     PyErr_Print();
                     syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
+                    goto lprender_cleanup;
+                }
+                break;
+
+            case LPMSG_TRIGGER:
+                if(astrid_schedule_python_triggers(&msg) < 0) {
+                    PyErr_Print();
+                    syslog(LOG_ERR, "CPython error during trigger planning loop\n");
                     goto lprender_cleanup;
                 }
                 break;

@@ -12,7 +12,7 @@ def before(ctx):
     ctx.log('before render')
 
 def play(ctx):
-    length = dsp.rand(0.1, 4)
+    length = dsp.rand(0.01, ctx.m.cc(26) * 1 + 0.02)
 
     # ctx.p contains parameters passed with 
     # the triggering play command.
@@ -21,6 +21,8 @@ def play(ctx):
     # Parameters are provided as strings.
     note = float(ctx.p.note or dsp.randint(63, 90))
     amp = float(ctx.p.velocity or dsp.rand(10, 55)) / 127
+
+    amp = ctx.m.cc(25)
 
     # ctx.log will write a string to the system log
     ctx.log('note %s' % note)

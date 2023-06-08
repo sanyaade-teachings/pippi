@@ -2,7 +2,7 @@
 
 import array
 from cpython cimport array
-from libc.stdlib cimport calloc
+from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy
 import logging
 from logging.handlers import SysLogHandler
@@ -18,7 +18,7 @@ import threading
 
 import redis
 
-from pippi import dsp
+from pippi import dsp, midi
 from pippi.soundbuffer cimport SoundBuffer
 
 ADC_NAME = 'adc'
@@ -90,6 +90,61 @@ cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, i
 
     return snd
 
+cdef class MidiEvent:
+    def __cinit__(self,
+            double onset,
+            double length,
+            char type,
+            char note,
+            char velocity,
+            char channel
+        ):
+
+        self.event = <lpmidievent_t *>calloc(1, sizeof(lpmidievent_t))
+        self.event.onset = onset
+        self.event.length = length
+        self.event.type = type
+        self.event.note = note
+        self.event.velocity = velocity
+        self.event.channel = channel
+
+    cpdef double schedule_event(MidiEvent self, int qfd):
+        midi_triggerq_schedule(qfd, self.event[0])
+        return self.event.onset + self.event.length
+
+    def __dealloc__(self):
+        if self.event is not NULL:
+            free(self.event)
+
+cdef class MidiEventListenerProxy:
+    cpdef float cc(self, int cc, int device_id=0):
+        cdef int value = lpmidi_getcc(device_id, cc)
+        return float(value) / 127
+
+    cpdef int cci(self, int cc, int device_id=0):
+        return lpmidi_getcc(device_id, cc)
+
+    cpdef float note(self, int note, int device_id=0):
+        cdef int velocity = lpmidi_getnote(device_id, note)
+        return float(velocity) / 127
+
+    cpdef int notei(self, int note, int device_id=0):
+        return lpmidi_getnote(device_id, note)
+
+cdef class EventTriggerFactory:
+    cpdef midi(self, double onset, double length, double freq, double amp, int channel=1, int device=-1):
+        cdef char note, velocity
+        cdef MidiEvent noteon
+        cdef MidiEvent noteoff
+        
+        note = <char>midi.ftomi(freq)
+        velocity = <char>max(0, min(127, (amp * 127)))
+
+        noteon = MidiEvent(onset, length, <char>NOTE_ON, note, velocity, <char>channel)
+        noteoff = MidiEvent(onset + length, 0, <char>NOTE_OFF, note, velocity, <char>channel)
+
+        return [noteon, noteoff]
+ 
 cdef class SessionParamBucket:
     """ params[key] to params.key
 
@@ -151,30 +206,11 @@ cdef class EventContext:
         self.cache = cache
         self.p = ParamBucket(str(msg))
         self.s = SessionParamBucket() 
-        self.client = None
+        self.t = EventTriggerFactory()
+        self.m = MidiEventListenerProxy()
         self.instrument_name = instrument_name
         self.sounds = sounds
-        self.id = voice_id
-
-    def play(self, instrument_name, *params, **kwargs):
-        """ FIXME -- this should probably be a general 
-            message-passing interface, so instrument scripts
-            can invoke any astrid orchestration commands.
-        """
-        if params is not None:
-            params = params[0]
-
-        if params is None:
-            params = {}
-
-        if kwargs is not None:
-            params.update(kwargs)
-
-        try:
-            rcmd = 'INSTRUMENT_PATH="orc/%s.py" INSTRUMENT_NAME="%s" ./build/renderer' % (instrument_name, instrument_name)
-            subprocess.Popen(rcmd, shell=True)
-        except Exception as e:
-            logger.exception('Could not start renderer from within renderer: %s' % e)
+        self.vid = voice_id
 
     def adc(self, length=1, offset=0, channels=2):
         return read_from_adc(length, offset=offset, channels=channels)
@@ -278,20 +314,21 @@ cdef tuple collect_players(object instrument):
     if hasattr(instrument.renderer, 'LOOP'):
         loop = instrument.renderer.LOOP
 
-    # find all play methods
+    # find all play functions
     players = set()
 
-    # The simplest case is a single play method 
+    # The simplest case is a single play function
     if hasattr(instrument.renderer, 'play'):
         players.add(instrument.renderer.play)
 
-    # Play methods can also be registered via 
+    # Play functions can also be registered via 
     # an @player.init decorator
     if hasattr(instrument.renderer, 'player') \
         and hasattr(instrument.renderer.player, 'players') \
         and isinstance(instrument.renderer.player.players, set):
         players |= instrument.renderer.player.players
 
+    # Finally, any compatible function can be added to a set
     if hasattr(instrument.renderer, 'PLAYERS') \
         and isinstance(instrument.renderer.PLAYERS, set):
         players |= instrument.renderer.PLAYERS
@@ -302,10 +339,10 @@ cdef int render_event(object instrument, lpmsg_t * msg):
     cdef set players
     cdef object onset_generator
     cdef bint loop
-    cdef double overlap
     cdef EventContext ctx 
     cdef str msgstr
     cdef bytes render_params = msg.msg
+    cdef size_t onset = msg.onset_delay
 
     msgstr = render_params.decode('ascii')
     ctx = EventContext.__new__(EventContext,
@@ -322,8 +359,6 @@ cdef int render_event(object instrument, lpmsg_t * msg):
         instrument.renderer.before(ctx)
 
     players, loop = collect_players(instrument)
-
-    cdef size_t onset = msg.delay
 
     for player in players:
         try:
@@ -347,6 +382,100 @@ cdef int render_event(object instrument, lpmsg_t * msg):
         instrument.renderer.done(ctx)
 
     return 0
+
+cdef set collect_trigger_planners(object instrument):
+    # find all trigger planner functions
+    planners = set()
+
+    # The simplest case is a single trigger function
+    if hasattr(instrument.renderer, 'trigger'):
+        planners.add(instrument.renderer.trigger)
+
+    # Trigger functions can also be registered via 
+    # a @triggerer.init decorator
+    if hasattr(instrument.renderer, 'triggerer') \
+        and hasattr(instrument.renderer.triggerer, 'planners') \
+        and isinstance(instrument.renderer.triggerer.planners, set):
+        planners |= instrument.renderer.triggerer.planners
+
+    # Finally, any compatible function can be added to a set
+    if hasattr(instrument.renderer, 'TRIGGERERS') \
+        and isinstance(instrument.renderer.TRIGGERERS, set):
+        planners |= instrument.renderer.TRIGGERERS
+    
+    return planners
+
+cdef int trigger_events(object instrument, lpmsg_t * msg):
+    """ Collect the trigger functions in the instrument module
+        and compute the triggers to be scheduled.
+    """
+    cdef set planners
+    cdef bint loop
+    cdef EventContext ctx 
+    cdef str msgstr
+    cdef int qfd
+    cdef double now = 0
+    cdef double loop_interval = 0
+    cdef bytes trigger_params = msg.msg
+    cdef list triggers = []
+
+    msgstr = trigger_params.decode('ascii')
+    ctx = EventContext.__new__(EventContext,
+        instrument_name=instrument.name, 
+        msg=msgstr,
+        sounds=instrument.sounds,
+        cache=instrument.cache,
+        voice_id=0,
+    )
+
+    logger.debug('trigger generation event %s w/params %s' % (str(instrument), trigger_params))
+
+    if hasattr(instrument.renderer, 'trigger_before'):
+        instrument.renderer.trigger_before(ctx)
+
+    planners = collect_trigger_planners(instrument)
+
+    for p in planners:
+        ctx.count = 0
+        ctx.tick = 0
+        try:
+            # TODO allow single triggers OR lists of triggers here
+            triggers += p(ctx)
+        except Exception as e:
+            logger.exception('Error during %s trigger generation: %s' % (ctx.instrument_name, e))
+            return 1
+
+    qfd = midi_triggerq_open()
+    if qfd < 0:
+        logger.exception('Error after %s trigger generation: Could not open fifo q' % ctx.instrument_name)
+        return 1
+
+    lpscheduler_get_now_seconds(&now)
+    logger.info('NOW %f' % now)
+
+    # Schedule the triggers
+    for t in triggers:
+        loop_interval = max(loop_interval, t.schedule_event(qfd))
+
+    if midi_triggerq_close(qfd) < 0:
+        logger.exception('Error after %s trigger generation: Could not close fifo q' % ctx.instrument_name)
+        return 1
+
+    if hasattr(instrument.renderer, 'trigger_done'):
+        instrument.renderer.trigger_done(ctx)
+
+    # If looping, schedule the retrigger callback
+    # Send a new play message, cloned from the original 
+    # with an onset delay of largest onset + largest onset length
+    # Always loop for now.
+    msg.timestamp = now + loop_interval
+    logger.info('scheduling retrigger msg: loop_interval %f timestamp %f now %f' % (loop_interval, msg.timestamp, now))
+    if send_message(msg[0]) < 0:
+        logger.exception('Error after %s trigger generation: Could not send retrigger loop message' % ctx.instrument_name)
+        return 1
+
+    return 0
+
 
 ASTRID_INSTRUMENT = None
 
@@ -388,5 +517,17 @@ cdef public int astrid_schedule_python_render(void * msgp) except -1:
 
     return render_event(ASTRID_INSTRUMENT, msg)
 
+
+cdef public int astrid_schedule_python_triggers(void * msgp) except -1:
+    global ASTRID_INSTRUMENT
+    cdef lpmsg_t * msg = <lpmsg_t *>msgp
+    cdef size_t last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)
+
+    # Reload instrument
+    if last_edit > ASTRID_INSTRUMENT.last_reload:
+        ASTRID_INSTRUMENT.reload()
+        ASTRID_INSTRUMENT.last_reload = last_edit
+
+    return trigger_events(ASTRID_INSTRUMENT, msg)
 
 

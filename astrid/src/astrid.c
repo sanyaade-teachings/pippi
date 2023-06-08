@@ -61,7 +61,7 @@ int lpsessiondb_create(sqlite3 ** db) {
     char * err = 0;
     char * sql = "create table voices \
                   (created integer, started integer, last_render integer, ended integer, \
-                   active integer, delay integer, id integer, instrument_name text, \
+                   active integer, timestamp real, id integer, instrument_name text, \
                    params text, render_count integer);";
 
     /* Remove any existing sessiondb */
@@ -96,17 +96,17 @@ int lpsessiondb_insert_voice(lpmsg_t msg) {
     struct timespec ts;
     long long now;
 
-    char * _sql = "insert into voices (created, started, last_render, ended, active, delay, \
+    char * _sql = "insert into voices (created, started, last_render, ended, active, timestamp, \
                    id, instrument_name, params, render_count) \
-                   values (%lld, NULL, NULL, NULL, 0, %d, %d, \"%s\", \"%s\", 0);";
+                   values (%lld, NULL, NULL, NULL, 0, %f, %d, \"%s\", \"%s\", 0);";
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, _sql, now, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg);
+    sqlsize = snprintf(NULL, 0, _sql, now, msg.timestamp, (int)msg.voice_id, msg.instrument_name, msg.msg);
     sql = calloc(1, sqlsize+1);
-    if(snprintf(sql, sqlsize, _sql, now, (int)msg.delay, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
+    if(snprintf(sql, sqlsize, _sql, now, msg.timestamp, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
         syslog(LOG_ERR, "Could not concat sql for insert. Error: %s\n", strerror(errno));
         return -1;
     }
@@ -674,6 +674,82 @@ int lpadc_destroy() {
     return 0;
 }
 
+/* MIDI STATUS IPC
+ * GETTERS & SETTERS
+ * ****************/
+int lpmidi_setcc(int device_id, int cc, int value) {
+    char * cc_path;
+    size_t path_length;
+
+    path_length = snprintf(NULL, 0, ASTRID_MIDI_CCBASE_PATH, device_id, cc) + 1;
+    cc_path = (char *)calloc(1, path_length);
+    snprintf(cc_path, path_length,  ASTRID_MIDI_CCBASE_PATH, device_id, cc);
+
+    if(lpipc_setid(cc_path, value) < 0) {
+        syslog(LOG_ERR, "Could not store %d for MIDI CC %d from device %d\n", value, cc, device_id);
+        return -1;
+    }
+
+    free(cc_path);
+
+    return 0;
+}
+
+int lpmidi_getcc(int device_id, int cc) {
+    char * cc_path;
+    size_t path_length;
+    int value;
+
+    path_length = snprintf(NULL, 0, ASTRID_MIDI_CCBASE_PATH, device_id, cc) + 1;
+    cc_path = (char *)calloc(1, path_length);
+    snprintf(cc_path, path_length,  ASTRID_MIDI_CCBASE_PATH, device_id, cc);
+
+    value = lpipc_getid(cc_path);
+    if(value < 0) {
+        value = 0;
+        lpipc_setid(cc_path, value); 
+    }
+
+    return value;
+}
+
+int lpmidi_setnote(int device_id, int note, int velocity) {
+    char * note_path;
+    size_t path_length;
+
+    path_length = snprintf(NULL, 0, ASTRID_MIDI_NOTEBASE_PATH, device_id, note) + 1;
+    note_path = (char *)calloc(1, path_length);
+    snprintf(note_path, path_length,  ASTRID_MIDI_NOTEBASE_PATH, device_id, note);
+
+    if(lpipc_setid(note_path, velocity) < 0) {
+        syslog(LOG_ERR, "Could not store velocity %d for MIDI note %d from device %d\n", velocity, note, device_id);
+        return -1;
+    }
+
+    free(note_path);
+
+    return 0;
+}
+
+int lpmidi_getnote(int device_id, int note) {
+    char * note_path;
+    size_t path_length;
+    int value;
+
+    path_length = snprintf(NULL, 0, ASTRID_MIDI_NOTEBASE_PATH, device_id, note) + 1;
+    note_path = (char *)calloc(1, path_length);
+    snprintf(note_path, path_length,  ASTRID_MIDI_NOTEBASE_PATH, device_id, note);
+
+    value = lpipc_getid(note_path);
+    if(value < 0) {
+        value = 0;
+        lpipc_setid(note_path, value); 
+    }
+
+    return value;
+}
+
+
 
 /* BUFFER
  * SERIALIZATION
@@ -859,7 +935,7 @@ int astrid_playq_read(int qfd, lpmsg_t * msg) {
     syslog(LOG_DEBUG, " Q           %s MSG READ FROM Q %d\n", msg->instrument_name, qfd);
     syslog(LOG_DEBUG, " Q           %s (msg.instrument_name)\n", msg->instrument_name);
     syslog(LOG_DEBUG, " Q           %d (msg.voice_id)\n", (int)msg->voice_id);
-    syslog(LOG_DEBUG, " Q           %d (msg.delay)\n", (int)msg->delay);
+    syslog(LOG_DEBUG, " Q           %f (msg.timestamp)\n", msg->timestamp);
 
     return 0;
 }
@@ -894,15 +970,157 @@ int send_play_message(lpmsg_t msg) {
     syslog(LOG_DEBUG, " P           %s MSG OUT %s\n", msg.instrument_name, msg.msg);
     syslog(LOG_DEBUG, " P           %s (msg.instrument_name)\n", msg.instrument_name);
     syslog(LOG_DEBUG, " P           %d (msg.voice_id)\n", (int)msg.voice_id);
-    syslog(LOG_DEBUG, " P           %d (msg.delay)\n", (int)msg.delay);
+    syslog(LOG_DEBUG, " P           %f (msg.timestamp)\n", msg.timestamp);
 
 
     return 0;
 }
 
+int astrid_msgq_open() {
+    int qfd;
+
+    umask(0);
+    if(mkfifo(ASTRID_MSGQ_PATH, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
+        syslog(LOG_ERR, "astrid_msgq_open mkfifo: Error creating msg queue FIFO. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if((qfd = open(ASTRID_MSGQ_PATH, O_RDWR)) < 0) {
+        syslog(LOG_ERR, "astrid_msgq_open open: Error opening msg queue FIFO. Error: %s\n", strerror(errno));
+        return -1;
+    };
+
+    return qfd;
+}
+
+int astrid_msgq_close(int qfd) {
+    if(close(qfd) == -1) {
+        syslog(LOG_ERR, "astrid_msgq_close close: Error closing msg queue FIFO. Error: %s\n", strerror(errno));
+        return -1; 
+    }
+
+    return 0;
+}
+
+int astrid_msgq_read(int qfd, lpmsg_t * msg) {
+    ssize_t read_result;
+    read_result = read(qfd, msg, sizeof(lpmsg_t));
+    if(read_result == 0) {
+        syslog(LOG_DEBUG, "The msg queue (%d) has been closed. (EOF)\n", qfd);
+        return -1;
+    }
+
+    if(read_result != sizeof(lpmsg_t)) {
+        syslog(LOG_INFO, "The msg queue (%d) returned %d bytes. Expecting sizeof(lpmsg_t)==%d\n", qfd, (int)read_result, (int)sizeof(lpmsg_t));
+        return -1;
+    }
+
+    syslog(LOG_DEBUG, " MQ           %s MSG READ FROM Q %d\n", msg->instrument_name, qfd);
+    syslog(LOG_DEBUG, " MQ           %s (msg.instrument_name)\n", msg->instrument_name);
+    syslog(LOG_DEBUG, " MQ           %d (msg.voice_id)\n", (int)msg->voice_id);
+    syslog(LOG_DEBUG, " MQ           %f (msg.timestamp)\n", msg->timestamp);
+
+    return 0;
+}
+
+int send_message(lpmsg_t msg) {
+    int qfd;
+
+    syslog(LOG_ERR, "send_message SENDING MSG ts         %f\n", msg.timestamp);
+    syslog(LOG_ERR, "send_message SENDING MSG instrument %s\n", msg.instrument_name);
+
+    syslog(LOG_DEBUG, "SM mkfifo\n");
+
+    umask(0);
+    if(mkfifo(ASTRID_MSGQ_PATH, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
+        syslog(LOG_ERR, "send_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    syslog(LOG_DEBUG, "SM open\n");
+    if((qfd = open(ASTRID_MSGQ_PATH, O_WRONLY)) < 0) {
+        syslog(LOG_ERR, "send_message open: Could not open q. Error: %s\n", strerror(errno));
+    }
+
+    syslog(LOG_DEBUG, "SM write\n");
+    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
+        syslog(LOG_ERR, "send_message write: Could not write to q. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    syslog(LOG_DEBUG, "SM close\n");
+    if(close(qfd) == -1) {
+        syslog(LOG_ERR, "send_message close: Error closing play q. Error: %s\n", strerror(errno));
+        return -1; 
+    }
+
+    syslog(LOG_DEBUG, " SM           %s MSG OUT %s\n", msg.instrument_name, msg.msg);
+    syslog(LOG_DEBUG, " SM           %s (msg.instrument_name)\n", msg.instrument_name);
+    syslog(LOG_DEBUG, " SM           %d (msg.voice_id)\n", (int)msg.voice_id);
+    syslog(LOG_DEBUG, " SM           %f (msg.timestamp)\n", msg.timestamp);
+
+    return 0;
+}
+
+int midi_triggerq_open() {
+    int qfd;
+
+    umask(0);
+    if(mkfifo(ASTRID_MIDI_TRIGGERQ_PATH, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
+        syslog(LOG_ERR, "midi_triggerq_open mkfifo: Error creating msg queue FIFO. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if((qfd = open(ASTRID_MIDI_TRIGGERQ_PATH, O_RDWR)) < 0) {
+        syslog(LOG_ERR, "midi_triggerq_open open: Error opening msg queue FIFO. Error: %s\n", strerror(errno));
+        return -1;
+    };
+
+    return qfd;
+}
+
+int midi_triggerq_schedule(int qfd, lpmidievent_t t) {
+    if(write(qfd, &t, sizeof(lpmidievent_t)) != sizeof(lpmidievent_t)) {
+        syslog(LOG_ERR, "midi_triggerq_schedule write: Could not write to q. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int midi_triggerq_close(int qfd) {
+    if(close(qfd) == -1) {
+        syslog(LOG_ERR, "midi_triggerq_close close: Error closing msg queue FIFO. Error: %s\n", strerror(errno));
+        return -1; 
+    }
+
+    return 0;
+}
+
+
 /* SCHEDULING
  * and MIXING
  * **********/
+int lpscheduler_get_now_seconds(double * now) {
+    clockid_t cid;
+    struct timespec ts;
+
+#if defined(__linux__)
+    cid = CLOCK_MONOTONIC_RAW;
+#else
+    cid = CLOCK_MONOTONIC;
+#endif
+
+    if(clock_gettime(cid, &ts) < 0) {
+        syslog(LOG_ERR, "scheduler_get_now_seconds: clock_gettime error: %s\n", strerror(errno));
+        return -1; 
+    }
+
+    *now = ts.tv_sec + ts.tv_nsec * 1e-9;
+
+    return 0;
+}
+
 void scheduler_get_now(struct timespec * now) {
     clock_gettime(CLOCK_MONOTONIC_RAW, now);
 }
@@ -1058,7 +1276,8 @@ static inline void stop_playing(lpscheduler_t * s, lpevent_t * e) {
 
     /* Remove from the playing stack */
     if(s->playing_stack_head == NULL) {
-        printf("Cannot move this event. There is nothing in the waiting queue!\n");
+        syslog(LOG_CRIT, "Cannot move this event. There is nothing in the waiting queue!\n");
+        return;
     }
 
     prev = NULL;
@@ -1150,7 +1369,6 @@ static inline void scheduler_update(lpscheduler_t * s) {
     }
 }
 
-
 static inline void scheduler_mix_buffers(lpscheduler_t * s) {
     lpevent_t * current;
     lpfloat_t sample;
@@ -1181,18 +1399,6 @@ static inline void scheduler_mix_buffers(lpscheduler_t * s) {
         }
  
         s->current_frame[c] = sample;
-    }
-}
-
-static inline void scheduler_try_callback(lpscheduler_t * s, lpevent_t * e) {
-    /* Execute callback if one has been registered */
-    if(
-        e->callback_fired == 0 && 
-        e->callback != NULL && 
-        s->ticks >= e->callback_onset
-    ) {
-        e->callback(e->msg);
-        e->callback_fired = 1;
     }
 }
 
@@ -1233,18 +1439,6 @@ void scheduler_debug(lpscheduler_t * s) {
     }
 }
 
-void lpscheduler_handle_callbacks(lpscheduler_t * s) {
-    lpevent_t * current;
-    if(s->playing_stack_head != NULL) {
-        current = s->playing_stack_head;
-        scheduler_try_callback(s, current);
-        while(current->next != NULL) {
-            current = (lpevent_t *)current->next;
-            scheduler_try_callback(s, current);
-        }
-    }
-}
-
 void lpscheduler_tick(lpscheduler_t * s) {
     //scheduler_debug(s);
 
@@ -1266,13 +1460,7 @@ void lpscheduler_tick(lpscheduler_t * s) {
     }
 }
 
-void scheduler_schedule_event(lpscheduler_t * s, 
-        lpbuffer_t * buf, 
-        size_t delay, 
-        void (*callback)(lpmsg_t), 
-        lpmsg_t msg,
-        size_t callback_delay
-) {
+void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay) {
     lpevent_t * e;
 
     if(s->nursery_head != NULL) {
@@ -1290,11 +1478,6 @@ void scheduler_schedule_event(lpscheduler_t * s,
     e->buf = buf;
     e->pos = 0;
     e->onset = s->ticks + delay;
-    e->callback = callback;
-    e->msg = msg;
-
-    e->callback_onset = e->onset + callback_delay;
-    e->callback_fired = 0;
 
     start_waiting(s, e);
 }

@@ -39,6 +39,12 @@ astrid-renderer:
 	cython cython/cyrenderer.pyx
 	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-renderer
 
+astrid-midilog:
+	mkdir -p build
+
+	echo "Building astrid midilog...";
+	python cython/setup.py build_ext --inplace --build-lib=python
+
 astrid-ipc:
 	echo "Building astrid ipc tools...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/makecounter.c $(LPLIBS) -o build/astrid-makecounter
@@ -68,7 +74,7 @@ astrid-dac:
 	mkdir -p build
 
 	echo "Building astrid dac...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) -I${LPDIR}/vendor/libpqueue/src $(LPSOURCES) $(LPDBSOURCES) ${LPDIR}/vendor/libpqueue/src/pqueue.c src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
 
 astrid-devices:
 	mkdir -p build
@@ -102,7 +108,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus
+build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog
 
-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus
+macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog
 

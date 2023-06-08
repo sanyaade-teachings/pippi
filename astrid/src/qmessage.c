@@ -39,6 +39,10 @@ int main(int argc, char * argv[]) {
             msg.type = LPMSG_PLAY;
             break;
 
+        case TRIGGER_MESSAGE:
+            msg.type = LPMSG_TRIGGER;
+            break;
+
         case LOAD_MESSAGE:
             msg.type = LPMSG_LOAD;
             break;
@@ -77,16 +81,24 @@ int main(int argc, char * argv[]) {
     /* Initialize the count */
     msg.count = 0;
 
-    /* Send the play message over the message queue */
-    if(send_play_message(msg) < 0) {
-        fprintf(stderr, "Could not send play message...\n");
-        return 1;
-    }
+    if(msg.type == LPMSG_PLAY || msg.type == LPMSG_LOAD || msg.type == LPMSG_TRIGGER) {
+        /* Send the play message over the message queue */
+        if(send_play_message(msg) < 0) {
+            fprintf(stderr, "Could not send play message...\n");
+            return 1;
+        }
 
-    /* Record the voice in the sessiondb */
-    if(lpsessiondb_insert_voice(msg) < 0) {
-        fprintf(stderr, "Could not insert voice record in sessiondb...\n");
-        return 1;
+        /* Record the voice in the sessiondb */
+        if(lpsessiondb_insert_voice(msg) < 0) {
+            fprintf(stderr, "Could not insert voice record in sessiondb...\n");
+            return 1;
+        }
+    } else {
+        /* Send the message to the dac message q */
+        if(send_message(msg) < 0) {
+            fprintf(stderr, "Could not send message...\n");
+            return 1;
+        }
     }
 
     return 0;
