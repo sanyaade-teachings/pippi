@@ -110,7 +110,7 @@ cdef class SoundDB:
             None, voice_id, group_id, take_id,
             start, now, now-start, 
             midi.mtof(note), velocity/127, 
-            midi_message_type, channel, note, velocity
+            midi_msg_type, channel, note, velocity
         ))
         self.db.commit()
 
