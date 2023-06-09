@@ -251,6 +251,8 @@ int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf);
 int lpipc_buffer_destroy(char * id_path);
 int lpipc_setid(char * path, int id); 
 int lpipc_getid(char * path); 
+int lpipc_setvalue(char * path, void * value, size_t size);
+int lpipc_getvalue(char * path, void ** value, size_t size);
 
 void lptimeit_since(struct timespec * start);
 

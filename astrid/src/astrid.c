@@ -360,9 +360,48 @@ int lpipc_getid(char * path) {
     return id;
 }
 
-int lpadc_getid() {
-    return lpipc_getid(LPADC_HANDLE);
+int lpipc_setvalue(char * path, void * value, size_t size) {
+    int fd, bytes_written;
+
+    if((fd = open(path, O_RDWR | O_CREAT, 0777)) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue open: %s. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    if((bytes_written = write(fd, value, size)) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue write: %s. Error: %s\n", path, strerror(errno));
+        close(fd);
+        return -1;
+    }
+
+    close(fd);
+    return 0;
 }
+
+int lpipc_getvalue(char * path, void ** value, size_t size) {
+    int fd;
+    void * valuep;
+
+    /* Get the file descriptor for the path */
+    if((fd = open(path, O_RDONLY)) < 0) {
+        syslog(LOG_ERR, "lpipc_getvalue could not open path: %s. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    /* Map the contents of the file into memory */
+    if((valuep = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "lpipc_getvalue mmap: %s. Error: %s\n", path, strerror(errno));
+        close(fd);
+        return -1;
+    }
+
+    /* Copy the address of the mmaped file & cleanup */
+    *value = valuep;
+    close(fd);
+
+    return 0;
+}
+
 
 /* SHARED MEMORY
  * BUFFER TOOLS
@@ -572,6 +611,10 @@ int lpipc_buffer_destroy(char * id_path) {
     }
 
     return 0;
+}
+
+int lpadc_getid() {
+    return lpipc_getid(LPADC_HANDLE);
 }
 
 int lpadc_create() {
