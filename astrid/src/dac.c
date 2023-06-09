@@ -12,7 +12,6 @@
 
 
 static volatile int astrid_is_running = 1;
-int astrid_channels = 2;
 lpscheduler_t * astrid_scheduler;
 sqlite3 * sessiondb;
 pqueue_t * msgpq;
@@ -94,7 +93,6 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             exit(1);
         }
 
-
         /* If msg timestamp is in the future, 
          * sleep for a bit and then try again */
         if(msg->timestamp > now) {
@@ -102,16 +100,16 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             continue;
         }
 
-        syslog(LOG_DEBUG, " MPQ           %s MSG PRIORITY QUEUE SENDING MESSAGE %s\n", msg->instrument_name, msg->msg);
-        syslog(LOG_DEBUG, " MPQ           %s (msg.instrument_name)\n", msg->instrument_name);
-        syslog(LOG_DEBUG, " MPQ           %d (msg.voice_id)\n", (int)msg->voice_id);
-        syslog(LOG_DEBUG, " MPQ           %f (msg.timestamp)\n", msg->timestamp);
-        syslog(LOG_DEBUG, " MPQ           %d (msg.onset_delay)\n", (int)msg->onset_delay);
-        syslog(LOG_DEBUG, " MPQ           %f (now)\n", now);
+        syslog(LOG_DEBUG, " MESSAGE PQ    %s MSG PRIORITY QUEUE SENDING MESSAGE %s\n", msg->instrument_name, msg->msg);
+        syslog(LOG_DEBUG, " MESSAGE PQ    %s (msg.instrument_name)\n", msg->instrument_name);
+        syslog(LOG_DEBUG, " MESSAGE PQ    %d (msg.voice_id)\n", (int)msg->voice_id);
+        syslog(LOG_DEBUG, " MESSAGE PQ    %f (msg.timestamp)\n", msg->timestamp);
+        syslog(LOG_DEBUG, " MESSAGE PQ    %d (msg.onset_delay)\n", (int)msg->onset_delay);
+        syslog(LOG_DEBUG, " MESSAGE PQ    %f (now)\n", now);
 
-        /* Send it along */
+        /* Send it along to the instrument message fifo */
         if(send_play_message(*msg) < 0) {
-            syslog(LOG_ERR, "Error sending play message from callback\n");
+            syslog(LOG_ERR, "Error sending play message from message priority queue\n");
             usleep((useconds_t)500);
             continue;
         }
@@ -126,12 +124,13 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
         free(msg);
         free(node);
 
-        syslog(LOG_DEBUG, " MPQ           DONE\n");
+        syslog(LOG_DEBUG, " MESSAGE PQ     DONE W/SENDING MESSAGE & CLEANUP\n");
     }
 
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
     /* Clean up the pq: TODO, check for orphan messages? */
     pqueue_free(msgpq);
+    syslog(LOG_DEBUG, "Message scheduler pq thread exiting...\n");
     return 0;
 }
 
@@ -141,7 +140,10 @@ void * message_feed(__attribute__((unused)) void * arg) {
     lpmsg_t * msgout;
     lpmsgpq_node_t * d;
 
-    qfd = astrid_msgq_open();
+    if((qfd = astrid_msgq_open()) < 0) {
+        syslog(LOG_CRIT, "Could not open msgq: %s\n", strerror(errno));
+        exit(1);        
+    }
 
     syslog(LOG_INFO, "Message feed: Waiting for messages...\n");
 
@@ -164,6 +166,8 @@ void * message_feed(__attribute__((unused)) void * arg) {
         memcpy(msgout, &msg, sizeof(lpmsg_t));
         d->msg = msgout;
         d->timestamp = msg.timestamp;
+
+        syslog(LOG_DEBUG, " MFT Inserting message into pq for scheduling\n");
 
         if(pqueue_insert(msgpq, (void *)d) < 0) {
             syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", errno, strerror(errno));
@@ -269,23 +273,6 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 }
             }
 
-            /*
-            if(buf->is_looping == 1) {
-                syslog(LOG_DEBUG, "Scheduling %s buffer for retriggering at onset %d\n", msg.instrument_name, (int)buf->onset);
-                //callback_delay = (size_t)(buf->length * 0.7f); // Trigger the next render 70% into playback of the current buffer
-                //msg.delay = buf->length - callback_delay; // Schedule playback for the next render
-                //scheduler_schedule_event(astrid_scheduler, buf, buf->onset, retrigger_callback, msg, callback_delay);
-            } else {
-                syslog(LOG_DEBUG, "Scheduling %s buffer for single play at onset %d\n", msg.instrument_name, (int)buf->onset);
-                // Mark the voice as stopped just before playback is finished
-                // FIXME this is unstable because the callback only fires 
-                // while the voice is playing, and callbacks are only invoked 
-                // periodically in the main thread, not on every frame.
-                callback_delay = buf->length - 1000; 
-                scheduler_schedule_event(astrid_scheduler, buf, buf->onset, finalplay_callback, msg, callback_delay);
-            }
-            */
-
         }
         freeReplyObject(redis_reply);
     }
@@ -316,7 +303,7 @@ void miniaudio_callback(
 
     for(i=0; i < count; i++) {
         lpscheduler_tick(ctx->s);
-        for(c=0; c < astrid_channels; c++) {
+        for(c=0; c < ASTRID_CHANNELS; c++) {
             *out++ = (float)ctx->s->current_frame[c];
         }
     }
@@ -387,7 +374,6 @@ int cleanup(
 }
 
 int main() {
-    char * _astrid_channels;
     struct sigaction shutdown_action;
     lpdacctx_t * ctx;
     lpcounter_t voice_id_counter;
@@ -404,20 +390,6 @@ int main() {
     ctx = NULL;
     openlog("astrid-dac", LOG_PID, LOG_USER);
 
-    /* lpmsg_t must be exactly PIPE_BUF bytes so messages are
-     * passed atomically over the message queues (and leave 
-     * maximum space for instrument commands) */
-    assert(sizeof(lpmsg_t) == PIPE_BUF);
-
-    /* Set maximum output channels */
-    /* FIXME get channels from available sound card ports */
-    _astrid_channels = getenv("ASTRID_CHANNELS");
-    if(_astrid_channels != NULL) {
-        astrid_channels = atoi(_astrid_channels);
-    }
-    astrid_channels = ASTRID_CHANNELS;
-
-
     /* Set shutdown signal handlers */
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
@@ -432,7 +404,6 @@ int main() {
         exit(1);
     }
 
-
     /* init scheduler and ctx 
      * 
      * The scheduler is shared between the miniaudio callback 
@@ -440,19 +411,13 @@ int main() {
      * may schedule buffers by adding them to the internal linked 
      * list in the scheduler. The miniaudio callback may read from 
      * the linked list, increment counts in playing buffers and 
-     * flag buffers as having playback completed. The main thread 
-     * periodically triggers callbacks in the scheduler to be executed.
-     *
-     * The DAC context struct is a thin wrapper around the scheduler
-     * given as a payload to the miniaudio callback and buffer feed.
+     * flag buffers as having playback completed. 
      **/
-    astrid_scheduler = scheduler_create(1, astrid_channels, ASTRID_SAMPLERATE);
+    astrid_scheduler = scheduler_create(1, ASTRID_CHANNELS, ASTRID_SAMPLERATE);
     ctx = (lpdacctx_t*)LPMemoryPool.alloc(1, sizeof(lpdacctx_t));
     ctx->s = astrid_scheduler;
     ctx->channels = ASTRID_CHANNELS;
     ctx->samplerate = ASTRID_SAMPLERATE;
-
-
 
     /* Set up shared memory IPC for voice IDs */
     if(lpcounter_create(&voice_id_counter) < 0) {
@@ -460,8 +425,8 @@ int main() {
         goto exit_with_error;
     }
 
-    syslog(LOG_ERR, "voice counter init, shmid: %d\n", (int)voice_id_counter.shmid);
-    syslog(LOG_ERR, "voice counter init, semid: %d\n", (int)voice_id_counter.semid);
+    syslog(LOG_DEBUG, "voice counter init, shmid: %d\n", (int)voice_id_counter.shmid);
+    syslog(LOG_DEBUG, "voice counter init, semid: %d\n", (int)voice_id_counter.semid);
 
     /* Store a reference to the shared memory in well known files */
     if(lpipc_setid(LPVOICE_ID_SHMID, voice_id_counter.shmid) < 0) {
@@ -481,7 +446,10 @@ int main() {
     }
 
     /* Create the message priority queue */
-    msgpq = pqueue_init(LPMSG_MAX_PQ, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos);
+    if((msgpq = pqueue_init(LPMSG_MAX_PQ, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) < 0) {
+        syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
+        goto exit_with_error;
+    }
 
     /* Start message feed thread */
     if(pthread_create(&message_feed_thread, NULL, message_feed, ctx) != 0) {

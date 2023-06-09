@@ -469,7 +469,7 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
     # with an onset delay of largest onset + largest onset length
     # Always loop for now.
     msg.timestamp = now + loop_interval
-    logger.info('scheduling retrigger msg: loop_interval %f timestamp %f now %f' % (loop_interval, msg.timestamp, now))
+    logger.info('scheduling retrigger msg: loop_interval %f timestamp %f now %f (%s)' % (loop_interval, msg.timestamp, now, msg.type))
     if send_message(msg[0]) < 0:
         logger.exception('Error after %s trigger generation: Could not send retrigger loop message' % ctx.instrument_name)
         return 1

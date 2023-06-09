@@ -76,6 +76,15 @@ astrid-dac:
 	echo "Building astrid dac...";
 	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) -I${LPDIR}/vendor/libpqueue/src $(LPSOURCES) $(LPDBSOURCES) ${LPDIR}/vendor/libpqueue/src/pqueue.c src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
 
+astrid-midimap:
+	mkdir -p build
+
+	echo "Building astrid midimap tools...";
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/addnotemap.c $(LPLIBS) -o build/astrid-addnotemap
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/rmnotemap.c $(LPLIBS) -o build/astrid-rmnotemap
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/printnotemap.c $(LPLIBS) -o build/astrid-printnotemap
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/triggernotemap.c $(LPLIBS) -o build/astrid-triggernotemap
+
 astrid-devices:
 	mkdir -p build
 

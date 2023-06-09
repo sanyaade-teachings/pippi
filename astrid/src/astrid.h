@@ -30,6 +30,7 @@
 #define ASTRID_MIDI_TRIGGERQ_PATH "/tmp/astrid-miditriggerq"
 #define ASTRID_MIDI_CCBASE_PATH "/tmp/astrid-mididevice%d-cc%d"
 #define ASTRID_MIDI_NOTEBASE_PATH "/tmp/astrid-mididevice%d-note%d"
+#define ASTRID_MIDIMAP_NOTEBASE_PATH "/tmp/astrid-midimap-device%d-note%d"
 #define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
 #define LPADCBUFSIZE (LPADCBUFFRAMES * sizeof(float) * ASTRID_CHANNELS)
 
@@ -77,6 +78,7 @@ union semun {
 };
 
 enum LPMessageTypes {
+    LPMSG_EMPTY,
     LPMSG_PLAY,
     LPMSG_TRIGGER,
     LPMSG_STOP,
@@ -216,6 +218,7 @@ int astrid_playq_open(char * instrument_name);
 int astrid_playq_read(int qfd, lpmsg_t * msg);
 int astrid_playq_close(int qfd);
 
+int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
 int send_message(lpmsg_t msg);
 int astrid_msgq_open();
 int astrid_msgq_close(int qfd);
@@ -229,6 +232,11 @@ int lpmidi_setcc(int device_id, int cc, int value);
 int lpmidi_getcc(int device_id, int cc);
 int lpmidi_setnote(int device_id, int note, int velocity);
 int lpmidi_getnote(int device_id, int note);
+
+int lpmidi_add_msg_to_notemap(int device_id, int note, lpmsg_t msg);
+int lpmidi_remove_msg_from_notemap(int device_id, int note, int index);
+int lpmidi_print_notemap(int device_id, int note);
+int lpmidi_trigger_notemap(int device_id, int note);
 
 int lpadc_create();
 int lpadc_destroy();

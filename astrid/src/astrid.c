@@ -749,6 +749,196 @@ int lpmidi_getnote(int device_id, int note) {
     return value;
 }
 
+/* MIDI trigger maps for noteon 
+ * (and eventually cc triggers)
+ * ***************************/
+
+int lpmidi_add_msg_to_notemap(int device_id, int note, lpmsg_t msg) {
+    int fd, bytes_written;
+    size_t notemap_path_length;
+    char * notemap_path;
+
+    notemap_path_length = snprintf(NULL, 0, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note) + 1;
+    notemap_path = (char *)calloc(1, notemap_path_length);
+    snprintf(notemap_path, notemap_path_length, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note);
+
+    if((fd = open(notemap_path, O_RDWR | O_CREAT | O_APPEND, 0777)) < 0) {
+        syslog(LOG_ERR, "Could not open file for appending. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if((bytes_written = write(fd, &msg, sizeof(lpmsg_t))) < 0) {
+        syslog(LOG_ERR, "Could not append msg to file. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(bytes_written != sizeof(lpmsg_t)) {
+        syslog(LOG_ERR, "Wrote incorrect number of bytes to notemap. Expected %d, wrote %d\n", (int)sizeof(lpmsg_t), bytes_written);
+        return -1;
+    }
+
+    if(close(fd) < 0) {
+        syslog(LOG_ERR, "Could not close notemap file after writing. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    free(notemap_path);
+
+    return 0;
+}
+
+int lpmidi_remove_msg_from_notemap(int device_id, int note, int index_to_remove) {
+    int fd, bytes_read, bytes_written, map_index;
+    struct stat statbuf;
+    size_t notemap_path_length, notemap_size, read_pos;
+    char * notemap_path;
+    lpmsg_t msg = {0};
+
+    notemap_path_length = snprintf(NULL, 0, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note) + 1;
+    notemap_path = (char *)calloc(1, notemap_path_length);
+    snprintf(notemap_path, notemap_path_length, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note);
+
+    if((fd = open(notemap_path, O_RDWR)) < 0) {
+        syslog(LOG_ERR, "Could not open file for printing. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(fstat(fd, &statbuf) < 0) {
+        syslog(LOG_ERR, "Could not stat notemap file. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    notemap_size = statbuf.st_size;
+    map_index = 0;
+    for(read_pos=0; read_pos < notemap_size; read_pos += sizeof(lpmsg_t)) {
+        if((bytes_read = read(fd, &msg, sizeof(lpmsg_t))) < 0) {
+            syslog(LOG_ERR, "Could not read msg from file during removal walk. Error: %s\n", strerror(errno));
+            return -1;
+        }
+
+        if(map_index == index_to_remove) {
+            msg.type = LPMSG_EMPTY;
+
+            if(lseek(fd, read_pos, SEEK_SET) < 0) {
+                syslog(LOG_ERR, "Could not rewind midimap to remove msg from file. Error: %s\n", strerror(errno));
+                return -1;
+            }
+
+            if((bytes_written = write(fd, &msg, sizeof(lpmsg_t))) < 0) {
+                syslog(LOG_ERR, "Could not remove msg from file. Error: %s\n", strerror(errno));
+                return -1;
+            }
+        }
+
+        map_index += 1;
+    }
+
+    if(close(fd) < 0) {
+        syslog(LOG_ERR, "Could not close notemap file after msg removal. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    free(notemap_path);
+
+    return 0;
+}
+
+int lpmidi_print_notemap(int device_id, int note) {
+    int fd, bytes_read, map_index;
+    struct stat statbuf;
+    size_t notemap_path_length, notemap_size, read_pos;
+    char * notemap_path;
+    lpmsg_t msg = {0};
+
+    notemap_path_length = snprintf(NULL, 0, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note) + 1;
+    notemap_path = (char *)calloc(1, notemap_path_length);
+    snprintf(notemap_path, notemap_path_length, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note);
+
+    if((fd = open(notemap_path, O_RDONLY)) < 0) {
+        syslog(LOG_ERR, "Could not open file for printing. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(fstat(fd, &statbuf) < 0) {
+        syslog(LOG_ERR, "Could not stat notemap file. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    notemap_size = statbuf.st_size;
+    map_index = 0;
+    for(read_pos=0; read_pos < notemap_size; read_pos += sizeof(lpmsg_t)) {
+        if((bytes_read = read(fd, &msg, sizeof(lpmsg_t))) < 0) {
+            syslog(LOG_ERR, "Could not read msg from file. Error: %s\n", strerror(errno));
+            return -1;
+        }
+
+        printf("\nmap_index: %d\n", map_index);
+        printf("bytes_read: %d, read_pos: %ld, notemap_size: %ld\n", bytes_read, read_pos, notemap_size);
+        printf("msg.type: %d msg.timestamp: %f msg.instrument_name: %s\n", msg.type, msg.timestamp, msg.instrument_name);
+        if(msg.type == LPMSG_EMPTY) {
+            printf("this message is empty!\n");
+        }
+
+        map_index += 1;
+    }
+
+    if(close(fd) < 0) {
+        syslog(LOG_ERR, "Could not close notemap file after reading. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    free(notemap_path);
+
+    return 0;
+}
+
+int lpmidi_trigger_notemap(int device_id, int note) {
+    int fd, bytes_read;
+    struct stat statbuf;
+    size_t notemap_path_length, notemap_size, read_pos;
+    char * notemap_path;
+    lpmsg_t msg = {0};
+
+    notemap_path_length = snprintf(NULL, 0, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note) + 1;
+    notemap_path = (char *)calloc(1, notemap_path_length);
+    snprintf(notemap_path, notemap_path_length, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note);
+
+    if((fd = open(notemap_path, O_RDWR)) < 0) {
+        syslog(LOG_ERR, "Could not open file for printing. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(fstat(fd, &statbuf) < 0) {
+        syslog(LOG_ERR, "Could not stat notemap file. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    notemap_size = statbuf.st_size;
+    for(read_pos=0; read_pos < notemap_size; read_pos += sizeof(lpmsg_t)) {
+        if((bytes_read = read(fd, &msg, sizeof(lpmsg_t))) < 0) {
+            syslog(LOG_ERR, "Could not read msg from file during notemap trigger walk. Error: %s\n", strerror(errno));
+            return -1;
+        }
+
+        if(msg.type == LPMSG_EMPTY) continue;
+
+        syslog(LOG_INFO, "Sending message from lpmidi trigger notemap\n");
+        if(send_message(msg) < 0) {
+            syslog(LOG_ERR, "Could not schedule msg for sending during notemap trigger. Error: %s\n", strerror(errno));
+            return -1;
+        }
+        syslog(LOG_INFO, "Sent! lpmidi trigger notemap message\n");
+    }
+
+    if(close(fd) < 0) {
+        syslog(LOG_ERR, "Could not close notemap file after triggering. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    free(notemap_path);
+
+    return 0;
+}
 
 
 /* BUFFER
@@ -1019,6 +1209,89 @@ int astrid_msgq_read(int qfd, lpmsg_t * msg) {
     syslog(LOG_DEBUG, " MQ           %s (msg.instrument_name)\n", msg->instrument_name);
     syslog(LOG_DEBUG, " MQ           %d (msg.voice_id)\n", (int)msg->voice_id);
     syslog(LOG_DEBUG, " MQ           %f (msg.timestamp)\n", msg->timestamp);
+
+    return 0;
+}
+
+int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg) {
+    int bytesread, a, i, length, voice_id;
+    char msgtype;
+    char message_params[LPMAXMSG] = {0};
+    char instrument_name[LPMAXNAME] = {0};
+    size_t instrument_name_length;
+    lpcounter_t c;
+
+    msgtype = argv[arg_offset + 1][0];
+
+    /* Prepare the message param string */
+    bytesread = 0;
+    for(a=arg_offset+2; a < argc; a++) {
+        length = strlen(argv[a]);
+        if(a==arg_offset+2) {
+            instrument_name_length = (size_t)length;
+            memcpy(instrument_name, argv[a], instrument_name_length);
+            continue;
+        }
+
+        for(i=0; i < length; i++) {
+            message_params[bytesread] = argv[a][i];
+            bytesread++;
+        }
+        message_params[bytesread] = SPACE;
+        bytesread++;
+    }
+
+    /* Set up the message struct */
+    strncpy(msg->instrument_name, instrument_name, instrument_name_length);
+    strncpy(msg->msg, message_params, bytesread);
+
+    /* Set the message type from the first arg */
+    switch(msgtype) {
+        case PLAY_MESSAGE:
+            msg->type = LPMSG_PLAY;
+            break;
+
+        case TRIGGER_MESSAGE:
+            msg->type = LPMSG_TRIGGER;
+            break;
+
+        case LOAD_MESSAGE:
+            msg->type = LPMSG_LOAD;
+            break;
+
+        case STOP_MESSAGE:
+            msg->type = LPMSG_STOP;
+            break;
+
+        case SHUTDOWN_MESSAGE:
+            msg->type = LPMSG_SHUTDOWN;
+            break;
+
+        default:
+            msg->type = LPMSG_SHUTDOWN;
+            break;
+    }
+
+    /* Get the voice ID from the voice ID counter */
+    if((c.semid = lpipc_getid(LPVOICE_ID_SEMID)) < 0) {
+        syslog(LOG_ERR, "Problem trying to get voice ID sempahore handle when constructing play message from command input\n");
+        return -1;
+    }
+
+    if((c.shmid = lpipc_getid(LPVOICE_ID_SHMID)) < 0) {
+        syslog(LOG_ERR, "Problem trying to get voice ID shared memory handle when constructing play message from command input\n");
+        return -1;
+    }
+
+    if((voice_id = lpcounter_read_and_increment(&c)) < 0) {
+        syslog(LOG_ERR, "Problem trying to get voice ID when constructing play message from command input\n");
+        return -1;
+    }
+
+    msg->voice_id = voice_id;
+
+    /* Initialize the count */
+    msg->count = 0;
 
     return 0;
 }
