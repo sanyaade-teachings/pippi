@@ -4,7 +4,7 @@ int main() {
     size_t value;
     void * valuep;
 
-    if(lpipc_getvalue("/tmp/ipcvalue-test", &valuep, sizeof(size_t)) < 0) {
+    if(lpipc_getvalue("/tmp/ipcvalue-test", &valuep) < 0) {
         fprintf(stderr, "Could not set value\n");
         return 1;
     }

@@ -75,18 +75,31 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, lpmsg
     return bytes(strbuf)
 
 cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
-    cdef size_t i, byte_offset
-    cdef size_t pos = 0
+    cdef size_t i
     cdef int c
-    cdef lpadcbuf_t * adcbuf = lpadc_open()
+    cdef double sample
+    cdef double * block
 
     cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
     cdef size_t framelength = len(snd)
+    cdef size_t frameoffset = <size_t>(offset * samplerate)
+
+    logger.debug('ADC: framelength %s (before)' % framelength)
+    logger.debug('ADC: frameoffset %s (before)' % frameoffset)
+
+    if lpadc_read_block_of_samples(frameoffset, framelength, &block) < 0:
+        logger.error('cyrenderer ADC read: failed to read %d frames at offset %d from ADC' % (framelength, frameoffset))
+        return snd
+
+    logger.debug('ADC: framelength %s' % framelength)
+    logger.debug('ADC: frameoffset %s' % frameoffset)
 
     for i in range(framelength):
-        for c in range(channels):
-            byte_offset = (i*channels+c+1) * sizeof(float)
-            snd.frames[framelength-1-i,c] = lpadc_read_sample(adcbuf, byte_offset)
+        for c in range(snd.channels):
+            sample = block[i * snd.channels + c]
+            snd.frames[i,c] = sample
+
+    free(block)
 
     return snd
 

@@ -29,13 +29,15 @@ void miniaudio_callback(
        const void * pIn, 
           ma_uint32 count
 ) {
-    lpadcbuf_t * adcbuf = (lpadcbuf_t *)device->pUserData;
     if(adc_is_capturing == 0) return;
-    lpadc_write_block(adcbuf, (float *)pIn, (size_t)(count * sizeof(float) * ASTRID_CHANNELS));
+    if(lpadc_write_block((float *)pIn, (size_t)(count * ASTRID_CHANNELS)) < 0) {
+        syslog(LOG_ERR, "Could not write input block to ADC");
+        return;
+    }
+    syslog(LOG_ERR, "Wrote %d frames to ADC...\n", (int)count);
 }
 
 int main() {
-    lpadcbuf_t * adcbuf;
     int device_id;
     ma_uint32 playback_device_count, capture_device_count;
     ma_device_info * playback_devices;
@@ -43,7 +45,6 @@ int main() {
 
     /* Open a handle to the system log */
     openlog("astrid-adc", LOG_PID, LOG_USER);
-
 
     /* setup signal handlers */
     struct sigaction shutdown_action;
@@ -71,14 +72,6 @@ int main() {
         return 1;
     }
 
-    /* Open the shared memory buffer for writing */
-    syslog(LOG_DEBUG, "Opening shared memory buffer for writing\n");
-    adcbuf = lpadc_open();
-    if(adcbuf == NULL) {
-        perror("Runtime error while attempting to open shared memory buffer in audio callback");
-        return 1;
-    }
-
     /* Set up the miniaudio device context */
     ma_context audio_device_context;
     if (ma_context_init(NULL, 0, NULL, &audio_device_context) != MA_SUCCESS) {
@@ -102,7 +95,6 @@ int main() {
     audioconfig.capture.pDeviceID = &capture_devices[device_id].id;
     audioconfig.sampleRate = ASTRID_SAMPLERATE;
     audioconfig.dataCallback = miniaudio_callback;
-    audioconfig.pUserData = (void *)adcbuf;
 
     /* init miniaudio device */
     ma_device mad;

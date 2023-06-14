@@ -31,6 +31,15 @@ LPLIBS = -lm -ldl -lpthread
 
 clean:
 	rm -rf build/*
+	rm -f cython/*.c
+	rm -f cython/*.h
+	rm -rf cython/build/*
+
+	rm -f python/cython/*.c
+	rm -f python/cython/*.h
+	rm -rf python/src
+	rm -f python/*.so
+
 
 astrid-renderer:
 	mkdir -p build
@@ -52,8 +61,10 @@ astrid-ipc:
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getvoiceid.c $(LPLIBS) -o build/astrid-getvoiceid
 
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/createsharedbuffer.c $(LPLIBS) -o build/astrid-createsharedbuffer
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/ipccreatevalue.c $(LPLIBS) -o build/astrid-ipccreatevalue
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/ipcgetvalue.c $(LPLIBS) -o build/astrid-ipcgetvalue
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/ipcsetvalue.c $(LPLIBS) -o build/astrid-ipcsetvalue
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/ipcdestroyvalue.c $(LPLIBS) -o build/astrid-ipcdestroyvalue
 
 astrid-sessiondb:
 	echo "Building astrid session db tools...";
@@ -103,8 +114,14 @@ astrid-voicestatus:
 astrid-adc:
 	mkdir -p build
 
-	echo "Building astrid adc...";
+	echo "Building astrid adc and tools...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc.c $(LPLIBS) -o build/astrid-adc
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadccreate.c $(LPLIBS) -o build/astrid-adccreate
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwriteval.c $(LPLIBS) -o build/astrid-adcwriteval
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwritewav.c $(LPLIBS) -o build/astrid-adcwritewav
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcsave.c $(LPLIBS) -o build/astrid-adcsave
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcread1s.c $(LPLIBS) -o build/astrid-adcread1s
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcdestroy.c $(LPLIBS) -o build/astrid-adcdestroy
 
 astrid-seriallistener:
 	mkdir -p build

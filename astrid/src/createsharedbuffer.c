@@ -28,7 +28,7 @@ int main(int argc, char * argv[]) {
         case 'c':
             if(lpipc_buffer_create(id_path, 48000 * 10, 2, 48000) < 0) {
                 fprintf(stderr, "Could not create buffer\n");
-                return -1;
+                return 1;
             }
 
             printf("Created shared memory buffer with handle %s\n", id_path);
@@ -44,7 +44,7 @@ int main(int argc, char * argv[]) {
 
             if(lpipc_buffer_aquire(id_path, &buf) < 0) {
                 fprintf(stderr, "Could not aquire buffer\n");
-                return -1;
+                return 1;
             }
 
             assert(buf != NULL);
@@ -59,7 +59,7 @@ int main(int argc, char * argv[]) {
 
             if(lpipc_buffer_release(id_path) < 0) {
                 fprintf(stderr, "Could not release buffer\n");
-                return -1;
+                return 1;
             }
 
             printf("Wrote shared memory buffer at handle %s to %s\n", id_path, out_path);
@@ -68,7 +68,7 @@ int main(int argc, char * argv[]) {
         case 'x':
             if(lpipc_buffer_release(id_path) < 0) {
                 fprintf(stderr, "Could not release buffer\n");
-                return -1;
+                return 1;
             }
 
             printf("Released shared memory buffer at handle %s\n", id_path);
@@ -78,7 +78,7 @@ int main(int argc, char * argv[]) {
         case 'd':
             if(lpipc_buffer_destroy(id_path) < 0) {
                 fprintf(stderr, "Could not destroy buffer\n");
-                return -1;
+                return 1;
             }
 
             printf("Destroyed shared memory buffer at handle %s\n", id_path);

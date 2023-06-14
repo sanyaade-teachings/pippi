@@ -18,7 +18,7 @@ pqueue_t * msgpq;
 
 /* Callback for SIGINT */
 void handle_shutdown(int sig __attribute__((unused))) {
-    lpmsg_t msg;
+    lpmsg_t msg = {0};
     astrid_is_running = 0;
 
     syslog(LOG_INFO, "Sending shutdown to message q...\n");
@@ -170,7 +170,7 @@ void * message_feed(__attribute__((unused)) void * arg) {
         syslog(LOG_DEBUG, " MFT Inserting message into pq for scheduling\n");
 
         if(pqueue_insert(msgpq, (void *)d) < 0) {
-            syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", errno, strerror(errno));
+            syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
             continue;
         }
 
@@ -446,7 +446,7 @@ int main() {
     }
 
     /* Create the message priority queue */
-    if((msgpq = pqueue_init(LPMSG_MAX_PQ, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) < 0) {
+    if((msgpq = pqueue_init(LPMSG_MAX_PQ, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }

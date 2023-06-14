@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/file.h>
+#include <semaphore.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
@@ -24,15 +26,15 @@
 #define ASTRID_CHANNELS 2
 #define ASTRID_SAMPLERATE 48000
 
-#define ASTRID_ADCSECONDS 10
+#define TOKEN_PROJECT_ID 'x'
+#define LPIPC_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
+
 #define ASTRID_SESSIONDB_PATH "/tmp/astrid_session.db"
 #define ASTRID_MSGQ_PATH "/tmp/astrid-msgq"
 #define ASTRID_MIDI_TRIGGERQ_PATH "/tmp/astrid-miditriggerq"
 #define ASTRID_MIDI_CCBASE_PATH "/tmp/astrid-mididevice%d-cc%d"
 #define ASTRID_MIDI_NOTEBASE_PATH "/tmp/astrid-mididevice%d-note%d"
 #define ASTRID_MIDIMAP_NOTEBASE_PATH "/tmp/astrid-midimap-device%d-note%d"
-#define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
-#define LPADCBUFSIZE (LPADCBUFFRAMES * sizeof(float) * ASTRID_CHANNELS)
 
 #define PLAY_MESSAGE 'p'
 #define TRIGGER_MESSAGE 't'
@@ -55,8 +57,17 @@
 #define SPACE ' '
 #define LPMAXNAME 24
 #define LPMAXMSG (PIPE_BUF - sizeof(double) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
+
+#define ASTRID_ADCSECONDS 10
+#define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
+#define LPADCBUFSAMPLES (LPADCBUFFRAMES * ASTRID_CHANNELS)
+#define LPADC_WRITEPOS_PATH "/tmp/astrid-adc-writepos"
+#define LPADC_BUFFER_PATH "/tmp/astrid-adc-buffer"
+
+/* deprecated */
 #define LPADC_HANDLE "/tmp/astrid_adcbuf_shmid"
 #define LPADC_BUFNAME "/lpadcbuf"
+
 #define LPPLAYQ "/tmp/astridq" /* the path *prefix* used for instrument play queues */
 #define LPMAXQNAME (12 + 1 + LPMAXNAME)
 #define LPMSG_MAX_PQ 4096 /* preallocated message priority queue size */
@@ -175,11 +186,6 @@ typedef struct lpdacctx_t {
     float samplerate;
 } lpdacctx_t;
 
-typedef struct lpadcbuf_t {
-    atomic_size_t pos;
-    char buf[LPADCBUFSIZE];
-} lpadcbuf_t;
-
 /* compatible with lpbuffer_t */
 typedef struct lpipc_buffer_t {
     size_t length;
@@ -240,9 +246,9 @@ int lpmidi_trigger_notemap(int device_id, int note);
 
 int lpadc_create();
 int lpadc_destroy();
-lpadcbuf_t * lpadc_open();
-void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize);
-lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t offset);
+int lpadc_write_block(float * block, size_t blocksize);
+int lpadc_read_sample(size_t offset, lpfloat_t * sample);
+int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out);
 
 int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate);
 int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf);
@@ -251,8 +257,11 @@ int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf);
 int lpipc_buffer_destroy(char * id_path);
 int lpipc_setid(char * path, int id); 
 int lpipc_getid(char * path); 
+int lpipc_createvalue(char * path, size_t size);
 int lpipc_setvalue(char * path, void * value, size_t size);
-int lpipc_getvalue(char * path, void ** value, size_t size);
+int lpipc_getvalue(char * path, void ** value);
+int lpipc_releasevalue(char * id_path);
+int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 

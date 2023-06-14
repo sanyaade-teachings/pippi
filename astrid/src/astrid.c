@@ -104,8 +104,8 @@ int lpsessiondb_insert_voice(lpmsg_t msg) {
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, _sql, now, msg.timestamp, (int)msg.voice_id, msg.instrument_name, msg.msg);
-    sql = calloc(1, sqlsize+1);
+    sqlsize = snprintf(NULL, 0, _sql, now, msg.timestamp, (int)msg.voice_id, msg.instrument_name, msg.msg)+1;
+    sql = calloc(1, sqlsize);
     if(snprintf(sql, sqlsize, _sql, now, msg.timestamp, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
         syslog(LOG_ERR, "Could not concat sql for insert. Error: %s\n", strerror(errno));
         return -1;
@@ -134,8 +134,8 @@ int lpsessiondb_mark_voice_active(sqlite3 * db, int voice_id) {
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, "update voices set active=1, started=%lld, last_render=%lld, render_count=1 where id=%d;", now, now, voice_id);
-    sql = calloc(1, sqlsize+1);
+    sqlsize = snprintf(NULL, 0, "update voices set active=1, started=%lld, last_render=%lld, render_count=1 where id=%d;", now, now, voice_id)+1;
+    sql = calloc(1, sqlsize);
     if(snprintf(sql, sqlsize, "update voices set active=1, started=%lld, last_render=%lld, render_count=1 where id=%d;", now, now, voice_id) < 0) {
         syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
         return -1;
@@ -161,8 +161,8 @@ int lpsessiondb_increment_voice_render_count(sqlite3 * db, int voice_id, size_t 
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id);
-    sql = calloc(1, sqlsize+1);
+    sqlsize = snprintf(NULL, 0, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id)+1;
+    sql = calloc(1, sqlsize);
     if(snprintf(sql, sqlsize, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id) < 0) {
         syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
         return -1;
@@ -188,8 +188,8 @@ int lpsessiondb_mark_voice_stopped(sqlite3 * db, int voice_id, size_t count) {
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, "update voices set active=0, ended=%lld, last_render=%lld, render_count=%ld where id=%d;", now, now, count, voice_id);
-    sql = calloc(1, sqlsize+1);
+    sqlsize = snprintf(NULL, 0, "update voices set active=0, ended=%lld, last_render=%lld, render_count=%ld where id=%d;", now, now, count, voice_id)+1;
+    sql = calloc(1, sqlsize);
     if(snprintf(sql, sqlsize, "update voices set active=0, ended=%lld, last_render=%lld, render_count=%ld where id=%d;", now, now, count, voice_id) < 0) {
         syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
         return -1;
@@ -267,14 +267,14 @@ int lpcounter_create(lpcounter_t * c) {
     union semun arg;
 
     /* Create the shared memory space for the counter value */
-    c->shmid = shmget(IPC_PRIVATE, sizeof(size_t), IPC_CREAT | 0600);
+    c->shmid = shmget(IPC_PRIVATE, sizeof(size_t), IPC_CREAT | LPIPC_PERMS);
     if (c->shmid < 0) {
         syslog(LOG_ERR, "lpcounter_create shmget. Error: %s\n", strerror(errno));
         return -1;
     }
 
     /* Create the semaphore used as a read/write lock on the counter */
-    c->semid = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
+    c->semid = semget(IPC_PRIVATE, 1, IPC_CREAT | LPIPC_PERMS);
     if (c->semid < 0) {
         syslog(LOG_ERR, "lpcounter_create semget. Error: %s\n", strerror(errno));
         return -1;
@@ -324,6 +324,36 @@ int lpipc_setid(char * path, int id) {
     return 0;
 }
 
+int lpipc_lockid(char * path) {
+    int fd;
+    if((fd = open(path, O_RDWR))) {
+        syslog(LOG_ERR, "lpipc_lockid open: %s. Could not open id file for locking. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    if(flock(fd, LOCK_EX) < 0) {
+        syslog(LOG_ERR, "lpipc_lockid flock: %s. Could not lock id file. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpipc_unlockid(char * path) {
+    int fd;
+    if((fd = open(path, O_RDWR))) {
+        syslog(LOG_ERR, "lpipc_lockid open: %s. Could not open id file for locking. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    if(flock(fd, LOCK_UN) < 0) {
+        syslog(LOG_ERR, "lpipc_lockid flock: %s. Could not lock id file. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
 int lpipc_getid(char * path) {
     int handle, id = 0;
     char * idp;
@@ -347,7 +377,7 @@ int lpipc_getid(char * path) {
     /* Map the file into memory */
     idp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, handle, 0);
     if(idp == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_getid mmap: %s. Error: %s\n", path, strerror(errno));
+        syslog(LOG_ERR, "lpipc_getid mmap: %s. (size: %d) Error: %s\n", path, (int)st.st_size, strerror(errno));
         close(handle);
         return -1;
     }
@@ -360,44 +390,175 @@ int lpipc_getid(char * path) {
     return id;
 }
 
-int lpipc_setvalue(char * path, void * value, size_t size) {
-    int fd, bytes_written;
-
-    if((fd = open(path, O_RDWR | O_CREAT, 0777)) < 0) {
-        syslog(LOG_ERR, "lpipc_setvalue open: %s. Error: %s\n", path, strerror(errno));
+int lpipc_destroyid(char * path) {
+    if(unlink(path) < 0) {
+        syslog(LOG_ERR, "lpipc_destroyid unlink: %s. Error: %s\n", path, strerror(errno));
         return -1;
     }
 
-    if((bytes_written = write(fd, value, size)) < 0) {
-        syslog(LOG_ERR, "lpipc_setvalue write: %s. Error: %s\n", path, strerror(errno));
-        close(fd);
-        return -1;
-    }
-
-    close(fd);
     return 0;
 }
 
-int lpipc_getvalue(char * path, void ** value, size_t size) {
-    int fd;
-    void * valuep;
+int lpipc_createvalue(char * path, size_t size) {
+    int shmid;
+    char * semname;
 
-    /* Get the file descriptor for the path */
-    if((fd = open(path, O_RDONLY)) < 0) {
-        syslog(LOG_ERR, "lpipc_getvalue could not open path: %s. Error: %s\n", path, strerror(errno));
+    /* Construct the sempahore name by stripping the /tmp prefix */
+    semname = path + 4;
+
+    /* Create the POSIX semaphore and initialize it to 1 */
+    if(sem_open(semname, O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
+        syslog(LOG_ERR, "lpipc_createvalue failed to create semaphore %s. Error: %s\n", semname, strerror(errno));
         return -1;
     }
 
-    /* Map the contents of the file into memory */
-    if((valuep = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0)) == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_getvalue mmap: %s. Error: %s\n", path, strerror(errno));
-        close(fd);
+    /* Create the shared memory segment */
+    if((shmid = shmget(IPC_PRIVATE, size, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_createvalue shmget. Error: %s\n", strerror(errno));
         return -1;
     }
 
-    /* Copy the address of the mmaped file & cleanup */
-    *value = valuep;
-    close(fd);
+    /* Store the shm IPC ID */
+    if(lpipc_setid(path, shmid) < 0) {
+        syslog(LOG_ERR, "lpipc_createvalue could not store shm IPC ID. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpipc_setvalue(char * path, void * value, size_t size) {
+    int shmid;
+    sem_t * sem;
+    void * shmaddr;
+    char * semname;
+
+    /* Construct the sempahore name by stripping the /tmp prefix */
+    semname = path + 4;
+
+    /* Open the semaphore */
+    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
+        syslog(LOG_ERR, "lpipc_setvalue failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Aquire a lock on the semaphore */
+    if(sem_wait(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue failed to decrementsem %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Get the shared memory segment ID */
+    if((shmid = lpipc_getid(path)) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue could not read shm IPC ID. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Attach the shared memory */
+    shmaddr = (void *)shmat(shmid, NULL, 0);
+    if(shmaddr == (void *)-1) {
+        syslog(LOG_ERR, "lpipc_setvalue shmat. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Write the value into the shared memory segment */
+    memcpy(shmaddr, value, size);
+
+    /* Release the lock on the semaphore */
+    if(sem_post(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue failed to unlock %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+    
+    /* Clean up sempahore resources */
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue sem_close Could not close semaphore\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpipc_getvalue(char * path, void ** value) {
+    int shmid;
+    sem_t * sem;
+    char * semname;
+
+    /* Construct the sempahore name by stripping the /tmp prefix */
+    semname = path + 4;
+
+    /* Open the semaphore */
+    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
+        syslog(LOG_ERR, "lpipc_setvalue failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Aquire a lock on the semaphore */
+    if(sem_wait(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue failed to decrementsem %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Get the shared memory segment ID */
+    if((shmid = lpipc_getid(path)) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue could not read shm IPC ID. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Attach the shared memory to the pointer */
+    *value = (void *)shmat(shmid, NULL, 0);
+    if(*value == (void *)-1) {
+        syslog(LOG_ERR, "lpipc_getvalue shmat. Could not attach to shm. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Clean up sempahore resources */
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_getvalue sem_close Could not close semaphore\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpipc_releasevalue(char * id_path) {
+    sem_t * sem;
+    char * semname;
+
+    /* Construct the sempahore name by stripping the /tmp prefix */
+    semname = id_path + 4;
+
+    /* Open the semaphore */
+    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
+        syslog(LOG_ERR, "lpipc_releasevalue failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Release the lock on the semaphore */
+    if(sem_post(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_releasevalue failed to unlock %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Clean up sempahore resources */
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_releasevalue sem_close Could not close semaphore\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+
+int lpipc_destroyvalue(char * path) {
+    char * semname;
+
+    semname = path + 4;
+
+    if(sem_unlink(semname) < 0) {
+        syslog(LOG_ERR, "lpipc_destroyvalue sem_unlink Could not destroy semaphore\n");
+        return -1;
+    }
 
     return 0;
 }
@@ -407,32 +568,41 @@ int lpipc_getvalue(char * path, void ** value, size_t size) {
  * BUFFER TOOLS
  * ************/
 int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate) {
-    int shmid, semid;
+    int shmid;
     lpipc_buffer_t * buf;
     size_t bufsize;
-    union semun arg;
-    char * sempath;
-    size_t sempath_size;
-
+    char * semname;
 
     /* Determine the size of the shared memory segment */
     bufsize = sizeof(lpipc_buffer_t) + (sizeof(lpfloat_t) * length * channels);
 
-    /* Create the system V shared memory segment */
-    shmid = shmget(IPC_PRIVATE, bufsize, IPC_CREAT | S_IRUSR | S_IWUSR);
-    if(shmid < 0) {
-        syslog(LOG_ERR, "lpadc_create shmget. Error: %s\n", strerror(errno));
+    /* Construct the sempahore name by stripping the /tmp prefix */
+    semname = id_path + 4;
+
+    syslog(LOG_DEBUG, "lpipc_buffer_create sem_open: Creating semaphore at %s\n", semname);
+    /* Create the POSIX semaphore and initialize it to 1 */
+    if(sem_open(semname, O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
+        syslog(LOG_ERR, "lpipc_buffer_create failed to create semaphore %s. Error: %s\n", semname, strerror(errno));
         return -1;
     }
 
+    syslog(LOG_DEBUG, "lpipc_buffer_create shmget: Creating shared memory segment\n");
+    /* Create the system V shared memory segment */
+    shmid = shmget(IPC_PRIVATE, bufsize, IPC_CREAT | LPIPC_PERMS);
+    if(shmid < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_create shmget. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    syslog(LOG_DEBUG, "lpipc_buffer_create Writing shmid to id path\n");
     /* Write the identifier for the shared memory buffer into a 
      * well known file other processes can use to attach and read */
     if(lpipc_setid(id_path, shmid) < 0) {
-        syslog(LOG_ERR, "lpadc_create failed to store shared memory ID to path %s. Error: %s\n", id_path, strerror(errno));
+        syslog(LOG_ERR, "lpipc_buffer_create failed to store token to path %s. Error: %s\n", id_path, strerror(errno));
         return -1;
     }
 
-
+    syslog(LOG_DEBUG, "lpipc_buffer_create shmat attaching to shared memory\n");
     /* Attach the shared memory */
     buf = (lpipc_buffer_t *)shmat(shmid, NULL, 0);
     if(buf == (void *)-1) {
@@ -448,74 +618,33 @@ int lpipc_buffer_create(char * id_path, size_t length, int channels, int sampler
     buf->channels = channels;
     buf->samplerate = samplerate;
 
-    /* Create the semaphore used as a read/write lock on the buffer */
-    semid = semget(IPC_PRIVATE, 1, IPC_CREAT | S_IRUSR | S_IWUSR);
-    if (semid < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_create semget. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Prime the lock by initalizing the sempahore to 1 */
-    arg.val = 1;
-    if(semctl(semid, 0, SETVAL, arg) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_create semctl. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Write the identifier for the sempahore into a 
-     * well known file other processes can use to attach and read */
-    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
-    sempath = (char *)calloc(1, sempath_size+1);
-    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
-        syslog(LOG_ERR, "lpadc_create failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
-        return -1;
-    }
-
-    if(lpipc_setid(sempath, semid) < 0) {
-        syslog(LOG_ERR, "lpadc_create failed to store shared memory ID to path %s. Error: %s\n", id_path, strerror(errno));
-        return -1;
-    }
-
-    free(sempath);
-
+    syslog(LOG_DEBUG, "lpipc_buffer_create init buffer of length %ld\n", buf->length);
     return 0;
 }
 
 int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf) {
-    int shmid, semid;
-    struct sembuf sop;
-    char * sempath;
-    size_t sempath_size;
+    sem_t * sem;
+    int shmid;
+    char * semname;
 
+    /* Construct the sempahore name by stripping the /tmp prefix */
+    semname = id_path + 4;
 
-    /* Construct the sempahore ID path */
-    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
-    sempath = (char *)calloc(1, sempath_size+1);
-    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
-        return -1;
-    }
-
-    /* Look up the sempahore ID */
-    if((semid = lpipc_getid(sempath)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not get semid %s. Error: %s\n", sempath, strerror(errno));
-        return -1;
-    }
-
-    free(sempath);
-
-    /* Look up the shared memory ID */
-    if((shmid = lpipc_getid(id_path)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not get shmid %s. Error: %s\n", id_path, strerror(errno));
+    /* Open the semaphore */
+    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
         return -1;
     }
 
     /* Aquire a lock on the semaphore */
-    sop.sem_num = 0;
-    sop.sem_op = -1;
-    sop.sem_flg = 0;
-    if(semop(semid, &sop, 1) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire semop. Could not aquire sem lock. Error: %s\n", strerror(errno));
+    if(sem_wait(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire failed to decrementsem %s. Error: %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Get the shared memory segment ID */
+    if((shmid = lpipc_getid(id_path)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire could not read shm IPC ID. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -526,40 +655,40 @@ int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf) {
         return -1;
     }
 
+    /* Clean up sempahore resources */
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire sem_close Could not close semaphore\n");
+        return -1;
+    }
+
     return 0;
 }
 
 int lpipc_buffer_release(char * id_path) {
-    int semid;
-    struct sembuf sop;
-    char * sempath;
-    size_t sempath_size;
+    sem_t * sem;
+    char * semname;
 
+    /* Construct the sempahore name by stripping the /tmp prefix */
+    semname = id_path + 4;
 
-    /* Construct the sempahore ID path */
-    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
-    sempath = (char *)calloc(1, sempath_size+1);
-    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
+    /* Open the semaphore */
+    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_release failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
         return -1;
     }
 
-    /* Look up the sempahore ID */
-    if((semid = lpipc_getid(sempath)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release Could not get semid %s. Error: %s\n", sempath, strerror(errno));
+    /* Release the lock on the semaphore */
+    if(sem_post(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release failed to unlock %s. Error: %s\n", semname, strerror(errno));
         return -1;
     }
 
-    /* Release lock */
-    sop.sem_num = 0;
-    sop.sem_op = 1;
-    sop.sem_flg = 0;
-    if(semop(semid, &sop, 1) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release semop. Error: %s\n", strerror(errno));
+    /* Clean up sempahore resources */
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release sem_close Could not close semaphore\n");
         return -1;
     }
 
-    free(sempath);
     return 0;
 }
 
@@ -572,26 +701,8 @@ int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf) {
 }
 
 int lpipc_buffer_destroy(char * id_path) {
-    int shmid, semid;
-    union semun dummy;
-    char * sempath;
-    size_t sempath_size;
-
-
-    /* Construct the sempahore ID path */
-    sempath_size = snprintf(NULL, 0, "%s_semid", id_path);
-    sempath = (char *)calloc(1, sempath_size+1);
-    if(snprintf(sempath, sempath_size, "%s_semid", id_path) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release failed to concat sempath %s. Error: %s\n", id_path, strerror(errno));
-        return -1;
-    }
-
-    /* Look up the sempahore ID */
-    if((semid = lpipc_getid(sempath)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release Could not get semid %s. Error: %s\n", sempath, strerror(errno));
-        return -1;
-    }
-    free(sempath);
+   char * semname;
+   int shmid;
 
     /* Look up the shared memory ID */
     if((shmid = lpipc_getid(id_path)) < 0) {
@@ -599,14 +710,23 @@ int lpipc_buffer_destroy(char * id_path) {
         return -1;
     }
 
-    /* Remove the semaphore and shared memory buffer */
+    /* Remove the shared memory buffer */
     if(shmctl(shmid, IPC_RMID, NULL) < 0) {
         syslog(LOG_ERR, "lpcounter_destroy shmctl. Error: %s\n", strerror(errno));
         return -1;
     }
 
-    if(semctl(semid, 0, IPC_RMID, dummy) < 0) {
-        syslog(LOG_ERR, "lpcounter_destroy semctl. Error: %s\n", strerror(errno));
+    /* Clean up the id file */
+    if(lpipc_destroyid(id_path) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_destroy failed to destroy %s. Error: %s\n", id_path, strerror(errno));
+        return -1;
+    }
+
+    semname = id_path + 4;
+
+    /* Destroy the sempahore */
+    if(sem_unlink(semname) < 0) {
+        syslog(LOG_ERR, "lpipc_destroyvalue sem_unlink Could not destroy semaphore\n");
         return -1;
     }
 
@@ -618,102 +738,160 @@ int lpadc_getid() {
 }
 
 int lpadc_create() {
-    int shmid;
-    lpadcbuf_t adc;
-    lpadcbuf_t * adcbuf;
-    struct shmid_ds shm_info;
-
-    /* Create or open the system V shared memory segment with 
-     * permissions allowing world read/write access. (Easy interop?)
-     *
-     * The special IPC_PRIVATE key produces a unique identifier on each 
-     * call to shmget, so all other operations on the shared memory segment 
-     * are done through the identifier produced here. */
-    shmid = shmget(IPC_PRIVATE, sizeof(lpadcbuf_t), IPC_CREAT | S_IRUSR | S_IWUSR);
-    if(shmid < 0) {
-        syslog(LOG_ERR, "lpadc_create shmget. Error: %s\n", strerror(errno));
+    /* Initialize the file storing the write position */
+    if(lpipc_setid(LPADC_WRITEPOS_PATH, 0) < 0) {
+        syslog(LOG_ERR, "Could not set ADC write_pos\n");
         return -1;
     }
 
-    /* Get info about the shared memory... but why? */
-    if(shmctl(shmid, IPC_STAT, &shm_info) == -1) {
-        syslog(LOG_ERR, "lpadc_create shmctl. Error: %s\n", strerror(errno));
+    /* Initialize the shared memory buffer and semaphore for the ADC */
+    if(lpipc_buffer_create(LPADC_BUFFER_PATH, LPADCBUFFRAMES, ASTRID_CHANNELS, ASTRID_SAMPLERATE) < 0) {
+        syslog(LOG_ERR, "Could create ADC buffer shared mem\n");
         return -1;
     }
-
-    /* Write the identifier for the adcbuf shared memory into a 
-     * well known file other processes can use to attach and read */
-    if(lpipc_setid(LPADC_HANDLE, shmid) < 0) {
-        syslog(LOG_ERR, "lpadc_create failed to store shared memory ID to path %s. Error: %s\n", LPADC_HANDLE, strerror(errno));
-        return -1;
-    }
-
-    /* Attach the shared memory to adcbuf */
-    adcbuf = (lpadcbuf_t *)shmat(shmid, NULL, 0);
-    if(adcbuf == (void *)-1) {
-        syslog(LOG_ERR, "lpadc_create shmat. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Initialize the shared memory as a buffer */
-    adc.pos = 0;
-    memset(adc.buf, 0, sizeof(adc.buf));
-    memcpy(adcbuf, &adc, sizeof(lpadcbuf_t));
 
     return 0;
 }
 
-lpadcbuf_t * lpadc_open() {
-    int shmid;
+int lpadc_write_block(float * block, size_t blocksize_in_samples) {
+    ssize_t write_pos, insert_pos;
+    size_t i;
+    lpipc_buffer_t * adcbuf;
+    lpfloat_t sample = 0;
 
-    /* Get the shared memory id */
-    shmid = lpadc_getid();
-
-    /* Attach to the shared memory segment and 
-     * populate the adcbuf pointer. */
-    return (lpadcbuf_t *)shmat(shmid, NULL, 0);
-}
-
-void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize_in_bytes) {
-    size_t byte_pos, i;
-
-    byte_pos = atomic_load_explicit(&adcbuf->pos, memory_order_acquire);
-
-    /* Copy the block */
-    if(byte_pos + blocksize_in_bytes >= LPADCBUFSIZE) {
-        for(i=0; i < blocksize_in_bytes; i++) {
-            memcpy(adcbuf->buf + ((byte_pos+i) % LPADCBUFSIZE), block+i, 1);
-        }
-    } else {
-        memcpy(adcbuf->buf + byte_pos, block, blocksize_in_bytes);
+    /* Aquire a lock on the buffer */
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
+        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
+        return -1;
     }
 
-    /* Increment the position */
-    byte_pos += blocksize_in_bytes;
-    byte_pos = byte_pos % LPADCBUFSIZE;
+    /* Get the writepos value */
+    if((write_pos = lpipc_getid(LPADC_WRITEPOS_PATH)) < 0) {
+        syslog(LOG_ERR, "Could not get writepos value\n");
+        return -1;
+    }
 
-    atomic_store_explicit(&adcbuf->pos, byte_pos, memory_order_release);
+    /* Copy the block of samples */
+    for(i=0; i < blocksize_in_samples; i++) {
+        insert_pos = (write_pos+i) % LPADCBUFSAMPLES;
+        sample = (lpfloat_t)block[i];
+        memcpy(adcbuf->data + (sizeof(lpfloat_t) * insert_pos), (char*)(&sample), sizeof(lpfloat_t));
+    }
+
+    /* Increment the write position */
+    write_pos += blocksize_in_samples;
+    write_pos = write_pos % LPADCBUFSAMPLES;
+
+    /* Store the new write position */
+    if(lpipc_setid(LPADC_WRITEPOS_PATH, write_pos) < 0) {
+        syslog(LOG_ERR, "Could not set ADC write pos after update\n");
+        return -1;
+    }
+
+    /* Release the lock on the ADC buffer shm */
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
+        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
+        return -1;
+    }
+
+    return 0;
 }
 
-lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t offset) {
-    size_t byte_offset;
-    float sample=0;
+int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out) {
+    ssize_t write_pos, read_pos, copy_pos;
+    size_t i;
+    lpfloat_t sample;
+    lpipc_buffer_t * adcbuf;
+    double * _out;
 
-    byte_offset = atomic_load_explicit(&adcbuf->pos, memory_order_acquire);
-    byte_offset = byte_offset - offset;
-    byte_offset = byte_offset % (LPADCBUFSIZE-sizeof(float));
 
-    memcpy(&sample, (char*)(&adcbuf->buf) + byte_offset, sizeof(float));
-    return (lpfloat_t)sample;
+    syslog(LOG_DEBUG, "Creating output block buffer...\n");
+    _out = (double *)calloc(size, sizeof(double));
+
+    syslog(LOG_DEBUG, "Get a lock on the buffer...\n");
+    /* Aquire a lock on the buffer */
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
+        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
+        return -1;
+    }
+
+    syslog(LOG_DEBUG, "Get the writepos...\n");
+    /* Get the writepos value */
+    if((write_pos = lpipc_getid(LPADC_WRITEPOS_PATH)) < 0) {
+        syslog(LOG_ERR, "Could not get write_pos value\n");
+        return -1;
+    }
+
+    syslog(LOG_DEBUG, "         writepos: %ld\n", write_pos);
+
+    /* Determine the read position */
+    read_pos = write_pos - offset;
+    read_pos = read_pos % (LPADCBUFSAMPLES-1);
+    sample = 0;
+    syslog(LOG_DEBUG, "         offset:   %ld\n", offset);
+    syslog(LOG_DEBUG, "         readpos:  %ld\n", read_pos);
+
+    syslog(LOG_DEBUG, "Copy the block...\n");
+    /* Copy the block */
+    for(i=0; i < size; i++) {
+        copy_pos = (read_pos+i) % LPADCBUFSAMPLES;
+        memcpy(&sample, adcbuf->data + (copy_pos * sizeof(lpfloat_t)), sizeof(lpfloat_t));
+        _out[i] = sample;
+    }
+
+    syslog(LOG_DEBUG, "Copy the block address pointer...\n");
+    /* Copy the address of the buffer */
+    *out = _out;
+
+    syslog(LOG_DEBUG, "Release the lock on the buffer...\n");
+    /* Release the lock on the ADC buffer shm */
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
+        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
+        return -1;
+    }
+
+    syslog(LOG_DEBUG, "Done!\n");
+
+    return 0;
+}
+
+
+int lpadc_read_sample(size_t offset, lpfloat_t * sample) {
+    ssize_t write_pos;
+    lpipc_buffer_t * adcbuf;
+
+    /* Aquire a lock on the buffer */
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
+        syslog(LOG_ERR, "Could not aquire ADC buffer shm for reading\n");
+        return -1;
+    }
+
+    /* Get the writepos value */
+    if((write_pos = lpipc_getid(LPADC_WRITEPOS_PATH)) < 0) {
+        syslog(LOG_ERR, "Could not get write_pos value\n");
+        return -1;
+    }
+
+    /* Copy the sample */
+    write_pos = write_pos - offset;
+    write_pos = write_pos % (LPADCBUFSAMPLES-1);
+    memcpy(sample, adcbuf->data + (write_pos * sizeof(lpfloat_t)), sizeof(lpfloat_t));
+
+    /* Release the lock on the ADC buffer shm */
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
+        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
+        return -1;
+    }
+
+    return 0;
 }
 
 int lpadc_destroy() {
-    int shmid;
-    shmid = lpadc_getid();
-    if(shmctl(shmid, IPC_RMID, 0) < 0) {
-        syslog(LOG_ERR, "lpadc_destroy shmctl: Could not destroy adcbuf shared memory. Error: %s\n", strerror(errno));
+    if(lpipc_buffer_destroy(LPADC_BUFFER_PATH) < 0) {
+        syslog(LOG_ERR, "Could not destroy ADC buffer\n");
         return -1;
     }
+
     return 0;
 }
 
@@ -805,7 +983,7 @@ int lpmidi_add_msg_to_notemap(int device_id, int note, lpmsg_t msg) {
     notemap_path = (char *)calloc(1, notemap_path_length);
     snprintf(notemap_path, notemap_path_length, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note);
 
-    if((fd = open(notemap_path, O_RDWR | O_CREAT | O_APPEND, 0777)) < 0) {
+    if((fd = open(notemap_path, O_RDWR | O_CREAT | O_APPEND, LPIPC_PERMS)) < 0) {
         syslog(LOG_ERR, "Could not open file for appending. Error: %s\n", strerror(errno));
         return -1;
     }
@@ -1311,8 +1489,8 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
             break;
 
         default:
-            msg->type = LPMSG_SHUTDOWN;
-            break;
+            syslog(LOG_CRIT, "Bad msgtype! %c\n", msgtype);
+            return -1;
     }
 
     /* Get the voice ID from the voice ID counter */

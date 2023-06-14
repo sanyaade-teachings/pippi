@@ -33,7 +33,7 @@ int main(int argc, char * argv[]) {
 
     for(i = 0; i < playback_device_count; i += 1) {
         if((int)i == device_id) {
-            printf("\e[1m%d - %s\e[22m\n", i, playback_devices[i].name);
+            printf("\033[1m%d - %s\033[22m\n", i, playback_devices[i].name);
         } else {
             printf("%d - %s\n", i, playback_devices[i].name);
         }

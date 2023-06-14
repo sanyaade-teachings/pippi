@@ -51,10 +51,6 @@ cdef extern from "astrid.h":
     cdef const int NOTE_OFF
     cdef const int CONTROL_CHANGE
 
-    ctypedef struct lpadcbuf_t:
-        size_t pos
-        char * buf
-
     ctypedef struct lpmsg_t:
         double timestamp
         size_t onset_delay
@@ -74,9 +70,9 @@ cdef extern from "astrid.h":
 
     int lpadc_create()
     int lpadc_destroy()
-    lpadcbuf_t * lpadc_open()
-    void lpadc_write_block(lpadcbuf_t * adcbuf, float * block, size_t blocksize_in_bytes)
-    lpfloat_t lpadc_read_sample(lpadcbuf_t * adcbuf, size_t pos)
+    int lpadc_write_block(float * block, size_t blocksize_in_samples)
+    int lpadc_read_sample(size_t pos, lpfloat_t * sample)
+    int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out)
 
     int send_message(lpmsg_t msg)
 

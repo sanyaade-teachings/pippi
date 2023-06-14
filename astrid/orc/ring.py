@@ -6,7 +6,7 @@ def play(ctx):
     length = dsp.rand(0.1, 3)
     out = ctx.adc(length)
 
-    ctx.log('Voice ID %s' % ctx.id)
+    ctx.log('Voice ID %s' % ctx.vid)
 
     freq = dsp.rand(1000, 10000)
     ctx.log('Ringmod freq %s' % freq)
