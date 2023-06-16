@@ -29,14 +29,7 @@ void handle_shutdown(int sig __attribute__((unused))) {
     }
 }
 
-void finalplay_callback(lpmsg_t msg) {
-    syslog(LOG_DEBUG, "FINALPLAY CALLBACK %d (msg.voice_id)\n", (int)msg.voice_id);
-    lpsessiondb_mark_voice_stopped(sessiondb, msg.voice_id, msg.count);
-    syslog(LOG_DEBUG, "FINALPLAY CALLBACK marked stopped\n");
-}
-
-void noop_callback(__attribute__((unused)) lpmsg_t msg) {}
-
+/* Message scheduler priority queue comparison callbacks */
 static int msgpq_cmp_pri(double next, double curr) {
     return (next < curr);
 }
@@ -57,7 +50,7 @@ static void msgpq_set_pos(void * a, size_t pos) {
     ((lpmsgpq_node_t *)a)->pos = pos;
 }
 
-
+/* Message scheduler priority queue thread handler */
 void * message_scheduler_pq(__attribute__((unused)) void * arg) {
     lpmsg_t * msg;
     lpmsgpq_node_t * node;
@@ -100,12 +93,14 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             continue;
         }
 
+        /*
         syslog(LOG_DEBUG, " MESSAGE PQ    %s MSG PRIORITY QUEUE SENDING MESSAGE %s\n", msg->instrument_name, msg->msg);
         syslog(LOG_DEBUG, " MESSAGE PQ    %s (msg.instrument_name)\n", msg->instrument_name);
         syslog(LOG_DEBUG, " MESSAGE PQ    %d (msg.voice_id)\n", (int)msg->voice_id);
         syslog(LOG_DEBUG, " MESSAGE PQ    %f (msg.timestamp)\n", msg->timestamp);
         syslog(LOG_DEBUG, " MESSAGE PQ    %d (msg.onset_delay)\n", (int)msg->onset_delay);
         syslog(LOG_DEBUG, " MESSAGE PQ    %f (now)\n", now);
+        */
 
         /* Send it along to the instrument message fifo */
         if(send_play_message(*msg) < 0) {
@@ -124,7 +119,9 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
         free(msg);
         free(node);
 
+        /*
         syslog(LOG_DEBUG, " MESSAGE PQ     DONE W/SENDING MESSAGE & CLEANUP\n");
+        */
     }
 
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
@@ -141,25 +138,27 @@ void * message_feed(__attribute__((unused)) void * arg) {
     lpmsgpq_node_t * d;
 
     if((qfd = astrid_msgq_open()) < 0) {
-        syslog(LOG_CRIT, "Could not open msgq: %s\n", strerror(errno));
+        syslog(LOG_CRIT, "Could not open msgq for message relay: %s\n", strerror(errno));
         exit(1);        
     }
 
-    syslog(LOG_INFO, "Message feed: Waiting for messages...\n");
+    syslog(LOG_INFO, "Message relay: Waiting for messages...\n");
 
     /* Wait for messages on the msgq fifo */
     while(astrid_is_running) {
         if(astrid_msgq_read(qfd, &msg) < 0) {
-            syslog(LOG_ERR, "Error while fetching message during msgq loop: %s\n", strerror(errno));
+            syslog(LOG_ERR, "Error while fetching message during message relay loop: %s\n", strerror(errno));
             continue;
         }
 
-        syslog(LOG_DEBUG, " MFT           %s MSG FEED THREAD GOT MESSAGE %s\n", msg.instrument_name, msg.msg);
-        syslog(LOG_DEBUG, " MFT           %s (msg.instrument_name)\n", msg.instrument_name);
-        syslog(LOG_DEBUG, " MFT           %d (msg.voice_id)\n", (int)msg.voice_id);
-        syslog(LOG_DEBUG, " MFT           %d (msg.type)\n", msg.type);
-        syslog(LOG_DEBUG, " MFT           %f (msg.timestamp)\n", msg.timestamp);
-        syslog(LOG_DEBUG, " MFT           %d (msg.onset_delay)\n", (int)msg.onset_delay);
+        /*
+        syslog(LOG_DEBUG, " MRT           %s MSG RELAY THREAD GOT MESSAGE %s\n", msg.instrument_name, msg.msg);
+        syslog(LOG_DEBUG, " MRT           %s (msg.instrument_name)\n", msg.instrument_name);
+        syslog(LOG_DEBUG, " MRT           %d (msg.voice_id)\n", (int)msg.voice_id);
+        syslog(LOG_DEBUG, " MRT           %d (msg.type)\n", msg.type);
+        syslog(LOG_DEBUG, " MRT           %f (msg.timestamp)\n", msg.timestamp);
+        syslog(LOG_DEBUG, " MRT           %d (msg.onset_delay)\n", (int)msg.onset_delay);
+        */
 
         d = (lpmsgpq_node_t *)calloc(1, sizeof(lpmsgpq_node_t));
         msgout = (lpmsg_t *)calloc(1, sizeof(lpmsg_t));
@@ -167,7 +166,9 @@ void * message_feed(__attribute__((unused)) void * arg) {
         d->msg = msgout;
         d->timestamp = msg.timestamp;
 
-        syslog(LOG_DEBUG, " MFT Inserting message into pq for scheduling\n");
+        /*
+        syslog(LOG_DEBUG, " MRT Inserting message into pq for scheduling\n");
+        */
 
         if(pqueue_insert(msgpq, (void *)d) < 0) {
             syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
@@ -424,9 +425,6 @@ int main() {
         syslog(LOG_ERR, "Could not initialize voice ID shared memory. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }
-
-    syslog(LOG_DEBUG, "voice counter init, shmid: %d\n", (int)voice_id_counter.shmid);
-    syslog(LOG_DEBUG, "voice counter init, semid: %d\n", (int)voice_id_counter.semid);
 
     /* Store a reference to the shared memory in well known files */
     if(lpipc_setid(LPVOICE_ID_SHMID, voice_id_counter.shmid) < 0) {

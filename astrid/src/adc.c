@@ -30,11 +30,10 @@ void miniaudio_callback(
           ma_uint32 count
 ) {
     if(adc_is_capturing == 0) return;
-    if(lpadc_write_block((float *)pIn, (size_t)(count * ASTRID_CHANNELS)) < 0) {
+    if(lpadc_write_block(pIn, (size_t)(count * ASTRID_CHANNELS)) < 0) {
         syslog(LOG_ERR, "Could not write input block to ADC");
         return;
     }
-    syslog(LOG_ERR, "Wrote %d frames to ADC...\n", (int)count);
 }
 
 int main() {
@@ -87,6 +86,11 @@ int main() {
 
     /* Get the selected device ID */
     device_id = lpipc_getid(ASTRID_DEVICEID_PATH);
+    if(device_id < 0) {
+        /* If no device has been selected, set it to the default device */
+        device_id = 0;
+        lpipc_setid(ASTRID_DEVICEID_PATH, device_id);
+    }
 
     /* Configure miniaudio for capture mode */
     ma_device_config audioconfig = ma_device_config_init(ma_device_type_capture);

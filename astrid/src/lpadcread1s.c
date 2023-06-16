@@ -2,7 +2,7 @@
 
 int main(int argc, char * argv[]) {
     int i;
-    double * block;
+    lpfloat_t * block;
     lpbuffer_t * out;
     char * out_path;
 
@@ -17,7 +17,7 @@ int main(int argc, char * argv[]) {
     */
 
     printf("Reading block of samples...\n");
-    if(lpadc_read_block_of_samples(0, ASTRID_SAMPLERATE, &block) < 0) {
+    if(lpadc_read_block_of_samples(0, ASTRID_SAMPLERATE * ASTRID_CHANNELS, &block) < 0) {
         fprintf(stderr, "Could not create adcbuf shared memory. Error: %s", strerror(errno));
         return 1;
     }
@@ -25,7 +25,7 @@ int main(int argc, char * argv[]) {
     printf("Copying block of samples...\n");
     out = LPBuffer.create(ASTRID_SAMPLERATE, ASTRID_CHANNELS, ASTRID_SAMPLERATE);
     for(i=0; i < ASTRID_SAMPLERATE * ASTRID_CHANNELS; i++) {
-        out->data[i] = (lpfloat_t)block[i];
+        out->data[i] = block[i];
     }
 
     printf("Writing block of samples...\n");

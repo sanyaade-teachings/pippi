@@ -21,7 +21,6 @@ import redis
 from pippi import dsp, midi
 from pippi.soundbuffer cimport SoundBuffer
 
-ADC_NAME = 'adc'
 
 logger = logging.getLogger('astrid-cyrenderer')
 if not logger.handlers:
@@ -69,35 +68,24 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, lpmsg
     for i in range(msgsize):
         strbuf.append(msgview[i])
 
-    logger.debug('strbuf loop: %s' % is_looping)
-    logger.debug('strbuf bytes: %d' % len(strbuf))
-
     return bytes(strbuf)
 
 cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
     cdef size_t i
     cdef int c
-    cdef double sample
-    cdef double * block
+    cdef lpfloat_t * block
 
     cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
-    cdef size_t framelength = len(snd)
-    cdef size_t frameoffset = <size_t>(offset * samplerate)
+    cdef size_t length_in_frames = len(snd)
+    cdef size_t offset_in_frames = <size_t>(offset * samplerate)
 
-    logger.debug('ADC: framelength %s (before)' % framelength)
-    logger.debug('ADC: frameoffset %s (before)' % frameoffset)
-
-    if lpadc_read_block_of_samples(frameoffset, framelength, &block) < 0:
-        logger.error('cyrenderer ADC read: failed to read %d frames at offset %d from ADC' % (framelength, frameoffset))
+    if lpadc_read_block_of_samples(offset_in_frames * channels, length_in_frames * channels, &block) < 0:
+        logger.error('cyrenderer ADC read: failed to read %d frames at offset %d from ADC' % (length_in_frames, offset_in_frames))
         return snd
 
-    logger.debug('ADC: framelength %s' % framelength)
-    logger.debug('ADC: frameoffset %s' % frameoffset)
-
-    for i in range(framelength):
-        for c in range(snd.channels):
-            sample = block[i * snd.channels + c]
-            snd.frames[i,c] = sample
+    for i in range(length_in_frames):
+        for c in range(channels):
+            snd.frames[i,c] = block[i * channels + c]
 
     free(block)
 
@@ -464,7 +452,6 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
         return 1
 
     lpscheduler_get_now_seconds(&now)
-    logger.info('NOW %f' % now)
 
     # Schedule the triggers
     for t in triggers:

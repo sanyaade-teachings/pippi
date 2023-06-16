@@ -199,7 +199,7 @@ typedef struct lpipc_buffer_t {
     size_t onset;
     int is_looping;
 
-    char data[];
+    lpfloat_t data[];
 } lpipc_buffer_t;
 
 typedef struct lpastridctx_t {
@@ -246,9 +246,9 @@ int lpmidi_trigger_notemap(int device_id, int note);
 
 int lpadc_create();
 int lpadc_destroy();
-int lpadc_write_block(float * block, size_t blocksize);
+int lpadc_write_block(const void * block, size_t blocksize);
 int lpadc_read_sample(size_t offset, lpfloat_t * sample);
-int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out);
+int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t ** out);
 
 int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate);
 int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf);

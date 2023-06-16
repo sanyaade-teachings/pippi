@@ -582,8 +582,8 @@ int lpipc_buffer_create(char * id_path, size_t length, int channels, int sampler
     syslog(LOG_DEBUG, "lpipc_buffer_create sem_open: Creating semaphore at %s\n", semname);
     /* Create the POSIX semaphore and initialize it to 1 */
     if(sem_open(semname, O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
-        syslog(LOG_ERR, "lpipc_buffer_create failed to create semaphore %s. Error: %s\n", semname, strerror(errno));
-        return -1;
+        syslog(LOG_INFO, "lpipc_buffer_create semaphore %s already exists. Destroy it first to recreate it. (%s)\n", semname, strerror(errno));
+        return 0;
     }
 
     syslog(LOG_DEBUG, "lpipc_buffer_create shmget: Creating shared memory segment\n");
@@ -753,11 +753,14 @@ int lpadc_create() {
     return 0;
 }
 
-int lpadc_write_block(float * block, size_t blocksize_in_samples) {
+int lpadc_write_block(const void * block, size_t blocksize_in_samples) {
     ssize_t write_pos, insert_pos;
     size_t i;
     lpipc_buffer_t * adcbuf;
-    lpfloat_t sample = 0;
+    float * blockp;
+    float sample = 0;
+
+    blockp = (float *)block;
 
     /* Aquire a lock on the buffer */
     if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
@@ -774,8 +777,10 @@ int lpadc_write_block(float * block, size_t blocksize_in_samples) {
     /* Copy the block of samples */
     for(i=0; i < blocksize_in_samples; i++) {
         insert_pos = (write_pos+i) % LPADCBUFSAMPLES;
-        sample = (lpfloat_t)block[i];
-        memcpy(adcbuf->data + (sizeof(lpfloat_t) * insert_pos), (char*)(&sample), sizeof(lpfloat_t));
+        sample = *blockp++;
+        syslog(LOG_DEBUG, "sample %f adcsize %d insert_pos %d write_pos %d\n", sample, (int)LPADCBUFSAMPLES, (int)insert_pos, (int)write_pos);
+        adcbuf->data[insert_pos] = sample;
+        /*memcpy(adcbuf->data + (sizeof(lpfloat_t) * insert_pos), (char*)(&sample), sizeof(lpfloat_t));*/
     }
 
     /* Increment the write position */
@@ -797,16 +802,15 @@ int lpadc_write_block(float * block, size_t blocksize_in_samples) {
     return 0;
 }
 
-int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out) {
+int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t ** out) {
     ssize_t write_pos, read_pos, copy_pos;
     size_t i;
-    lpfloat_t sample;
     lpipc_buffer_t * adcbuf;
-    double * _out;
+    lpfloat_t * _out;
 
 
     syslog(LOG_DEBUG, "Creating output block buffer...\n");
-    _out = (double *)calloc(size, sizeof(double));
+    _out = (lpfloat_t *)calloc(size, sizeof(lpfloat_t));
 
     syslog(LOG_DEBUG, "Get a lock on the buffer...\n");
     /* Aquire a lock on the buffer */
@@ -825,9 +829,7 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out) {
     syslog(LOG_DEBUG, "         writepos: %ld\n", write_pos);
 
     /* Determine the read position */
-    read_pos = write_pos - offset;
-    read_pos = read_pos % (LPADCBUFSAMPLES-1);
-    sample = 0;
+    read_pos = write_pos - offset - size-1;
     syslog(LOG_DEBUG, "         offset:   %ld\n", offset);
     syslog(LOG_DEBUG, "         readpos:  %ld\n", read_pos);
 
@@ -835,8 +837,7 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out) {
     /* Copy the block */
     for(i=0; i < size; i++) {
         copy_pos = (read_pos+i) % LPADCBUFSAMPLES;
-        memcpy(&sample, adcbuf->data + (copy_pos * sizeof(lpfloat_t)), sizeof(lpfloat_t));
-        _out[i] = sample;
+        _out[i] = adcbuf->data[copy_pos];
     }
 
     syslog(LOG_DEBUG, "Copy the block address pointer...\n");
