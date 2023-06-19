@@ -10,3 +10,5 @@ cpdef int getnote(int note=60, int device_id=0):
 cpdef int setnote(int note=60, int velocity=0, int device_id=0):
     return lpmidi_setnote(device_id, note, velocity)
 
+cpdef int trigger_notemap(int note=60, int device_id=0):
+    return lpmidi_trigger_notemap(device_id, note)

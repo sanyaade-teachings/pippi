@@ -1,6 +1,6 @@
 from pippi import dsp, oscs, fx
 
-LOOP = True
+#LOOP = True
 
 def play(ctx):
     length = dsp.rand(0.5, 3)

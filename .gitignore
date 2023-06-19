@@ -8,6 +8,7 @@
 
 pippi.world
 
+*.so
 pippi/*.so
 pippi/*.html
 pippi/*.c
@@ -34,6 +35,10 @@ libpippi/build
 astrid/build
 astrid/cython/cyrenderer.c
 astrid/cython/cyrenderer.h
+astrid/python/src
+astrid/python/cython
+astrid/python/build
+astrid/python/*.so
 
 garden/libDaisy
 garden/**/**/build/*

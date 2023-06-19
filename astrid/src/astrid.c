@@ -377,7 +377,7 @@ int lpipc_getid(char * path) {
     /* Map the file into memory */
     idp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, handle, 0);
     if(idp == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_getid mmap: %s. (size: %d) Error: %s\n", path, (int)st.st_size, strerror(errno));
+        syslog(LOG_ERR, "lpipc_getid mmap: %s. (size: %d) Error: (%d) %s\n", path, (int)st.st_size, errno, strerror(errno));
         close(handle);
         return -1;
     }
@@ -739,14 +739,14 @@ int lpadc_getid() {
 
 int lpadc_create() {
     /* Initialize the file storing the write position */
-    if(lpipc_setid(LPADC_WRITEPOS_PATH, 0) < 0) {
-        syslog(LOG_ERR, "Could not set ADC write_pos\n");
+    if(lpipc_createvalue(LPADC_WRITEPOS_PATH, sizeof(size_t)) < 0) {
+        syslog(LOG_ERR, "lpadc_create Could not create shm for ADC write_pos\n");
         return -1;
     }
 
     /* Initialize the shared memory buffer and semaphore for the ADC */
     if(lpipc_buffer_create(LPADC_BUFFER_PATH, LPADCBUFFRAMES, ASTRID_CHANNELS, ASTRID_SAMPLERATE) < 0) {
-        syslog(LOG_ERR, "Could create ADC buffer shared mem\n");
+        syslog(LOG_ERR, "lpadc_create Could not create ADC buffer shared mem\n");
         return -1;
     }
 
@@ -754,10 +754,11 @@ int lpadc_create() {
 }
 
 int lpadc_write_block(const void * block, size_t blocksize_in_samples) {
-    ssize_t write_pos, insert_pos;
+    size_t write_pos, insert_pos;
     size_t i;
     lpipc_buffer_t * adcbuf;
     float * blockp;
+    void * write_posp;
     float sample = 0;
 
     blockp = (float *)block;
@@ -769,18 +770,18 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples) {
     }
 
     /* Get the writepos value */
-    if((write_pos = lpipc_getid(LPADC_WRITEPOS_PATH)) < 0) {
+    if(lpipc_getvalue(LPADC_WRITEPOS_PATH, &write_posp) < 0) {
         syslog(LOG_ERR, "Could not get writepos value\n");
         return -1;
     }
+
+    write_pos = *((size_t *)write_posp);
 
     /* Copy the block of samples */
     for(i=0; i < blocksize_in_samples; i++) {
         insert_pos = (write_pos+i) % LPADCBUFSAMPLES;
         sample = *blockp++;
-        syslog(LOG_DEBUG, "sample %f adcsize %d insert_pos %d write_pos %d\n", sample, (int)LPADCBUFSAMPLES, (int)insert_pos, (int)write_pos);
         adcbuf->data[insert_pos] = sample;
-        /*memcpy(adcbuf->data + (sizeof(lpfloat_t) * insert_pos), (char*)(&sample), sizeof(lpfloat_t));*/
     }
 
     /* Increment the write position */
@@ -788,8 +789,11 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples) {
     write_pos = write_pos % LPADCBUFSAMPLES;
 
     /* Store the new write position */
-    if(lpipc_setid(LPADC_WRITEPOS_PATH, write_pos) < 0) {
-        syslog(LOG_ERR, "Could not set ADC write pos after update\n");
+    *((size_t *)write_posp) = write_pos;
+
+    /* Release the write position lock */
+    if(lpipc_releasevalue(LPADC_WRITEPOS_PATH) < 0) {
+        syslog(LOG_ERR, "Could not release writepos value\n");
         return -1;
     }
 
@@ -803,7 +807,8 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples) {
 }
 
 int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t ** out) {
-    ssize_t write_pos, read_pos, copy_pos;
+    size_t write_pos, read_pos, copy_pos;
+    void * write_posp;
     size_t i;
     lpipc_buffer_t * adcbuf;
     lpfloat_t * _out;
@@ -821,8 +826,15 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t ** out) {
 
     syslog(LOG_DEBUG, "Get the writepos...\n");
     /* Get the writepos value */
-    if((write_pos = lpipc_getid(LPADC_WRITEPOS_PATH)) < 0) {
-        syslog(LOG_ERR, "Could not get write_pos value\n");
+    if(lpipc_getvalue(LPADC_WRITEPOS_PATH, &write_posp) < 0) {
+        syslog(LOG_ERR, "lpadc_read_block_of_samples Could not get writepos value\n");
+        return -1;
+    }
+
+    write_pos = *((size_t *)write_posp);
+
+    if(lpipc_releasevalue(LPADC_WRITEPOS_PATH) < 0) {
+        syslog(LOG_ERR, "lpadc_read_block_of_samples Could not release writepos value\n");
         return -1;
     }
 
@@ -858,7 +870,8 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t ** out) {
 
 
 int lpadc_read_sample(size_t offset, lpfloat_t * sample) {
-    ssize_t write_pos;
+    size_t write_pos;
+    void * write_posp;
     lpipc_buffer_t * adcbuf;
 
     /* Aquire a lock on the buffer */
@@ -868,8 +881,15 @@ int lpadc_read_sample(size_t offset, lpfloat_t * sample) {
     }
 
     /* Get the writepos value */
-    if((write_pos = lpipc_getid(LPADC_WRITEPOS_PATH)) < 0) {
-        syslog(LOG_ERR, "Could not get write_pos value\n");
+    if(lpipc_getvalue(LPADC_WRITEPOS_PATH, &write_posp) < 0) {
+        syslog(LOG_ERR, "Could not get writepos value\n");
+        return -1;
+    }
+
+    write_pos = *((size_t *)write_posp);
+
+    if(lpipc_releasevalue(LPADC_WRITEPOS_PATH) < 0) {
+        syslog(LOG_ERR, "Could not release writepos value\n");
         return -1;
     }
 
@@ -1125,13 +1145,18 @@ int lpmidi_trigger_notemap(int device_id, int note) {
     notemap_path = (char *)calloc(1, notemap_path_length);
     snprintf(notemap_path, notemap_path_length, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note);
 
+    if(access(notemap_path, F_OK) < 0) {
+        syslog(LOG_DEBUG, "No notemap for %s\n", notemap_path);
+        return 0;
+    }
+
     if((fd = open(notemap_path, O_RDWR)) < 0) {
-        syslog(LOG_ERR, "Could not open file for printing. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "Could not open notemap file for triggering. Error: %s\n", strerror(errno));
         return -1;
     }
 
     if(fstat(fd, &statbuf) < 0) {
-        syslog(LOG_ERR, "Could not stat notemap file. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "Could not stat notemap file for triggering. Error: %s\n", strerror(errno));
         return -1;
     }
 

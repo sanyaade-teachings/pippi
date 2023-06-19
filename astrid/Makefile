@@ -87,7 +87,13 @@ astrid-dac:
 	mkdir -p build
 
 	echo "Building astrid dac...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) -I${LPDIR}/vendor/libpqueue/src $(LPSOURCES) $(LPDBSOURCES) ${LPDIR}/vendor/libpqueue/src/pqueue.c src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
+
+astrid-seq:
+	mkdir -p build
+
+	echo "Building astrid seq...";
+	gcc $(LPFLAGS) $(LPINCLUDES) -I${LPDIR}/vendor/libpqueue/src $(LPSOURCES) ${LPDIR}/vendor/libpqueue/src/pqueue.c src/astrid.c src/seq.c $(LPLIBS) -o build/astrid-seq
 
 astrid-midimap:
 	mkdir -p build
@@ -136,7 +142,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog
+build: clean astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq
 
-macos: astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog
+macos: clean astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq
 

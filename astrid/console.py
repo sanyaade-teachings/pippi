@@ -31,6 +31,7 @@ class AstridConsole(cmd.Cmd):
     instruments = {}
     dac = None
     adc = None
+    seq = None
     midi_relay = None
     midi_listener = None
 
@@ -61,7 +62,7 @@ to be restarted to take effect.
         print(txt)
 
     def do_sound(self, cmd):
-        if cmd == 'on' and self.dac is None:
+        if cmd == 'on':
             print('Starting dac & adc...')
             if self.dac is None:
                 self.dac = subprocess.Popen('./build/astrid-dac')
@@ -72,6 +73,11 @@ to be restarted to take effect.
                 self.adc = subprocess.Popen('./build/astrid-adc')
             else:
                 print('adc is already running')
+
+            if self.seq is None:
+                self.seq = subprocess.Popen('./build/astrid-seq')
+            else:
+                print('seq is already running')
 
         elif cmd == 'off':
             if self.dac is not None:
@@ -89,6 +95,15 @@ to be restarted to take effect.
                 self.adc = None
             else:
                 print('adc is already stopped')
+
+            if self.seq is not None:
+                print('Stopping seq...')
+                self.seq.terminate()
+                self.seq.wait()
+                self.seq = None
+            else:
+                print('seq is already stopped')
+
 
         elif cmd.startswith('device'):
             try:
@@ -136,6 +151,23 @@ to be restarted to take effect.
                 self.adc = None
             else:
                 print('adc is already stopped')
+
+    def do_seq(self, cmd):
+        if cmd == 'on' and self.seq is None:
+            print('Starting seq...')
+            if self.seq is None:
+                self.seq = subprocess.Popen('./build/astrid-seq')
+            else:
+                print('seq is already running')
+
+        elif cmd == 'off' and self.seq is not None:
+            print('Stopping seq...')
+            if self.seq is not None:
+                self.seq.terminate()
+                self.seq.wait()
+                self.seq = None
+            else:
+                print('seq is already stopped')
 
     def do_l(self, instrument):
         if instrument not in self.instruments:

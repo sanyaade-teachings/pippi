@@ -4,9 +4,13 @@
 #include <stdatomic.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <pthread.h>
+#include <signal.h>
 #include <sys/mman.h>
 #include <sys/file.h>
+#include <sys/syscall.h>
 #include <semaphore.h>
+#include <string.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/shm.h>
@@ -15,10 +19,6 @@
 #include <syslog.h>
 #include <time.h>
 #include <unistd.h>
-
-#ifdef __APPLE__
-#include <pthread.h>
-#endif
 
 #include "pippi.h"
 

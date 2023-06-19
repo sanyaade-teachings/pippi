@@ -13,17 +13,17 @@ int main(int argc, char * argv[]) {
     note = atoi(argv[2]);
 
     if(parse_message_from_args(argc, 2, argv, &msg) < 0) {
-        fprintf(stderr, "Could not parse message from args\n");
+        fprintf(stderr, "addnotemap: Could not parse message from args\n");
         return 1;
     }
 
     if(lpmidi_add_msg_to_notemap(device_id, note, msg) < 0) {
-        fprintf(stderr, "Could not add msg to notemap\n");
+        fprintf(stderr, "addnotemap: Could not add msg to notemap\n");
         return 1;
     }
 
     if(lpmidi_print_notemap(device_id, note) < 0) {
-        fprintf(stderr, "Could not print notemap\n");
+        fprintf(stderr, "addnotemap: Could not print notemap\n");
         return 1;
     }
 

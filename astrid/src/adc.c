@@ -1,6 +1,3 @@
-#include <signal.h>
-#include <string.h>
-
 #define MINIAUDIO_IMPLEMENTATION
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
