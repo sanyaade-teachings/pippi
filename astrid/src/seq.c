@@ -49,6 +49,10 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
     now = 0;
     syslog(LOG_DEBUG, " MPQ           STARTING\n");
 
+    d = NULL;
+    msg = NULL;
+    node = NULL;
+
     while(astrid_is_running) {
         /* peek into the queue */
         d = pqueue_peek(msgpq);
@@ -64,8 +68,6 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
         msg = node->msg;
 
         if(msg->type == LPMSG_SHUTDOWN) {
-            free(msg);
-            free(node);
             break;
         }
 
@@ -105,6 +107,8 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
         /* TODO do this somewhere else maybe? */
         free(msg);
         free(node);
+        msg = NULL;
+        node = NULL;
 
         syslog(LOG_DEBUG, " MESSAGE PQ     DONE W/SENDING MESSAGE & CLEANUP\n");
     }
@@ -112,6 +116,8 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
     /* Clean up the pq: TODO, check for orphan messages? */
     pqueue_free(msgpq);
+    if(msg != NULL) free(msg);
+    if(node != NULL) free(node);
     syslog(LOG_DEBUG, "Message scheduler pq thread exiting...\n");
     return 0;
 }
@@ -136,20 +142,13 @@ void * message_feed(__attribute__((unused)) void * arg) {
             continue;
         }
 
-        syslog(LOG_DEBUG, " MRT           %s MSG RELAY THREAD GOT MESSAGE %s\n", msg.instrument_name, msg.msg);
-        syslog(LOG_DEBUG, " MRT           %s (msg.instrument_name)\n", msg.instrument_name);
-        syslog(LOG_DEBUG, " MRT           %d (msg.voice_id)\n", (int)msg.voice_id);
-        syslog(LOG_DEBUG, " MRT           %d (msg.type)\n", msg.type);
-        syslog(LOG_DEBUG, " MRT           %f (msg.timestamp)\n", msg.timestamp);
-        syslog(LOG_DEBUG, " MRT           %d (msg.onset_delay)\n", (int)msg.onset_delay);
-
         d = (lpmsgpq_node_t *)calloc(1, sizeof(lpmsgpq_node_t));
         msgout = (lpmsg_t *)calloc(1, sizeof(lpmsg_t));
         memcpy(msgout, &msg, sizeof(lpmsg_t));
         d->msg = msgout;
         d->timestamp = msg.timestamp;
 
-        syslog(LOG_DEBUG, " MRT Inserting message into pq for scheduling\n");
+        syslog(LOG_DEBUG, "lpmsg_t relay: Inserting message into pq for scheduling\n");
 
         if(pqueue_insert(msgpq, (void *)d) < 0) {
             syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
@@ -161,7 +160,7 @@ void * message_feed(__attribute__((unused)) void * arg) {
         if(msg.type == LPMSG_SHUTDOWN) break;
     }
 
-    syslog(LOG_INFO, "Message feed shutting down...\n");
+    syslog(LOG_INFO, "lpmsg_t relay: Message relay shutting down...\n");
     if(qfd != -1) astrid_msgq_close(qfd);
 
     return 0;

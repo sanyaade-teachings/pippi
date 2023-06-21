@@ -281,11 +281,9 @@ int main() {
     }
 
     /* Get the selected device ID */
-    device_id = lpipc_getid(ASTRID_DEVICEID_PATH);
-    if(device_id < 0) {
-        /* If no device has been selected, set it to the default device */
-        device_id = 0;
-        lpipc_setid(ASTRID_DEVICEID_PATH, device_id);
+    if((device_id = astrid_get_playback_device_id()) < 0) {
+        syslog(LOG_CRIT, "Could not get playback device ID\n");
+        goto exit_with_error;
     }
 
     /* Setup and start miniaudio in playback mode */

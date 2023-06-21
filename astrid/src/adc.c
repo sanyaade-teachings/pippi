@@ -26,15 +26,20 @@ void miniaudio_callback(
        const void * pIn, 
           ma_uint32 count
 ) {
+    int adc_shmid;
+
     if(adc_is_capturing == 0) return;
-    if(lpadc_write_block(pIn, (size_t)(count * ASTRID_CHANNELS)) < 0) {
+
+    adc_shmid = *((int *)device->pUserData);
+
+    if(lpadc_write_block(pIn, (size_t)(count * ASTRID_CHANNELS), adc_shmid) < 0) {
         syslog(LOG_ERR, "Could not write input block to ADC");
         return;
     }
 }
 
 int main() {
-    int device_id;
+    int device_id, adc_shmid;
     ma_uint32 playback_device_count, capture_device_count;
     ma_device_info * playback_devices;
     ma_device_info * capture_devices;
@@ -63,7 +68,7 @@ int main() {
     /* Create a shared memory region to be used as a circular 
      * buffer for renderer processes to read from */
     syslog(LOG_DEBUG, "Creating shared memory buffer for ADC\n");
-    if(lpadc_create() < 0) {
+    if((adc_shmid = lpadc_create()) < 0) {
         perror("Could not create adcbuf shared memory");
         return 1;
     }
@@ -78,15 +83,13 @@ int main() {
     /* Populate it with some devices */
     if(ma_context_get_devices(&audio_device_context, &playback_devices, &playback_device_count, &capture_devices, &capture_device_count) != MA_SUCCESS) {
         syslog(LOG_ERR, "Error while attempting to get devices\n");
-        return -1;
+        goto exit_with_error;
     }
 
     /* Get the selected device ID */
-    device_id = lpipc_getid(ASTRID_DEVICEID_PATH);
-    if(device_id < 0) {
-        /* If no device has been selected, set it to the default device */
-        device_id = 0;
-        lpipc_setid(ASTRID_DEVICEID_PATH, device_id);
+    if((device_id = astrid_get_capture_device_id()) < 0) {
+        syslog(LOG_CRIT, "Could not get capture device ID\n");
+        goto exit_with_error;
     }
 
     /* Configure miniaudio for capture mode */
@@ -96,6 +99,7 @@ int main() {
     audioconfig.capture.pDeviceID = &capture_devices[device_id].id;
     audioconfig.sampleRate = ASTRID_SAMPLERATE;
     audioconfig.dataCallback = miniaudio_callback;
+    audioconfig.pUserData = &adc_shmid;
 
     /* init miniaudio device */
     ma_device mad;

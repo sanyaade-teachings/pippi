@@ -13,7 +13,7 @@ def before(ctx):
 
 def play(ctx):
     #length = dsp.rand(0.01, ctx.m.cc(26) * 1 + 0.02)
-    length = 1
+    length = dsp.rand(3, 6)
 
     # ctx.p contains parameters passed with 
     # the triggering play command.

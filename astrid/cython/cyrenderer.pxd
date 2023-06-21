@@ -50,6 +50,8 @@ cdef extern from "astrid.h":
     cdef const int NOTE_ON
     cdef const int NOTE_OFF
     cdef const int CONTROL_CHANGE
+    cdef const int LPADCBUFSAMPLES
+    cdef const char * LPADC_BUFFER_PATH
 
     ctypedef struct lpmsg_t:
         double timestamp
@@ -70,9 +72,11 @@ cdef extern from "astrid.h":
 
     int lpadc_create()
     int lpadc_destroy()
-    int lpadc_write_block(float * block, size_t blocksize_in_samples)
-    int lpadc_read_sample(size_t pos, lpfloat_t * sample)
-    int lpadc_read_block_of_samples(size_t offset, size_t size, double ** out)
+    int lpadc_write_block(float * block, size_t blocksize_in_samples, int adc_shmid)
+    int lpadc_read_sample(size_t pos, lpfloat_t * sample, int adc_shmid)
+    int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES], int adc_shmid)
+
+    int lpipc_getid(char * path)
 
     int send_message(lpmsg_t msg)
 
@@ -119,6 +123,7 @@ cdef class EventContext:
     cdef public int count
     cdef public int tick
     cdef public int vid
+    cdef public int adc_shmid
 
 cdef class Instrument:
     cdef public str name
@@ -127,6 +132,8 @@ cdef class Instrument:
     cdef public object sounds
     cdef public dict cache
     cdef public size_t last_reload
+    cdef public int adc_shmid
+    cpdef int get_adc_shmid(self)
 
 cdef tuple collect_players(object instrument)
 cdef int render_event(object instrument, lpmsg_t * msg)

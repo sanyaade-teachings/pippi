@@ -36,6 +36,8 @@ if not logger.handlers:
 _redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 bus = _redis.pubsub()
 
+cdef lpfloat_t[LPADCBUFSAMPLES] adc_block
+
 cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, lpmsg_t * msg):
     cdef bytearray strbuf
     cdef size_t audiosize, length, msgsize
@@ -70,24 +72,21 @@ cdef bytes serialize_buffer(SoundBuffer buf, size_t onset, int is_looping, lpmsg
 
     return bytes(strbuf)
 
-cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
+cdef SoundBuffer read_from_adc(int adc_shmid, double length, double offset=0, int channels=2, int samplerate=48000):
     cdef size_t i
     cdef int c
-    cdef lpfloat_t * block
 
     cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
     cdef size_t length_in_frames = len(snd)
     cdef size_t offset_in_frames = <size_t>(offset * samplerate)
 
-    if lpadc_read_block_of_samples(offset_in_frames * channels, length_in_frames * channels, &block) < 0:
+    if lpadc_read_block_of_samples(offset_in_frames * channels, length_in_frames * channels, &adc_block, adc_shmid) < 0:
         logger.error('cyrenderer ADC read: failed to read %d frames at offset %d from ADC' % (length_in_frames, offset_in_frames))
         return snd
 
     for i in range(length_in_frames):
         for c in range(channels):
-            snd.frames[i,c] = block[i * channels + c]
-
-    free(block)
+            snd.frames[i,c] = adc_block[i * channels + c]
 
     return snd
 
@@ -201,7 +200,8 @@ cdef class EventContext:
             str msg=None,
             object sounds=None,
             dict cache=None,
-            int voice_id=-1
+            int voice_id=-1,
+            int adc_shmid=-1,
         ):
 
         self.cache = cache
@@ -212,9 +212,10 @@ cdef class EventContext:
         self.instrument_name = instrument_name
         self.sounds = sounds
         self.vid = voice_id
+        self.adc_shmid = adc_shmid
 
     def adc(self, length=1, offset=0, channels=2):
-        return read_from_adc(length, offset=offset, channels=channels)
+        return read_from_adc(self.adc_shmid, length, offset=offset, channels=channels)
 
     def log(self, msg):
         logger.info('ctx.log[%s] %s' % (self.instrument_name, msg))
@@ -230,6 +231,17 @@ cdef class Instrument:
         self.sounds = self.load_sounds()
         self.cache = {}
         self.last_reload = 0
+        self.adc_shmid = self.get_adc_shmid()
+
+    cpdef int get_adc_shmid(self):
+        cdef int adc_shmid
+
+        adc_shmid = lpipc_getid(LPADC_BUFFER_PATH)
+        if adc_shmid < 0:
+            logger.error('cyrenderer: Could not get LPADC shmid')
+            return -1
+
+        return adc_shmid
 
     def reload(self):
         logger.debug('Reloading instrument %s from %s' % (self.name, self.path))
@@ -246,6 +258,7 @@ cdef class Instrument:
 
             self.renderer = renderer
             self.register_midi_triggers()
+            self.adc_shmid = self.get_adc_shmid()
         else:
             logger.error('Error reloading instrument. Null spec at path:\n  %s' % self.path)
 
@@ -352,6 +365,7 @@ cdef int render_event(object instrument, lpmsg_t * msg):
         sounds=instrument.sounds,
         cache=instrument.cache,
         voice_id=0,
+        adc_shmid=instrument.adc_shmid,
     )
 
     logger.debug('rendering event %s w/params %s' % (str(instrument), render_params))
@@ -427,6 +441,7 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
         sounds=instrument.sounds,
         cache=instrument.cache,
         voice_id=0,
+        adc_shmid=instrument.adc_shmid,
     )
 
     logger.debug('trigger generation event %s w/params %s' % (str(instrument), trigger_params))

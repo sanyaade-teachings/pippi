@@ -230,6 +230,9 @@ int astrid_msgq_open();
 int astrid_msgq_close(int qfd);
 int astrid_msgq_read(int qfd, lpmsg_t * msg);
 
+int astrid_get_playback_device_id();
+int astrid_get_capture_device_id();
+
 int midi_triggerq_open();
 int midi_triggerq_schedule(int qfd, lpmidievent_t t);
 int midi_triggerq_close(int qfd);
@@ -246,13 +249,13 @@ int lpmidi_trigger_notemap(int device_id, int note);
 
 int lpadc_create();
 int lpadc_destroy();
-int lpadc_write_block(const void * block, size_t blocksize);
-int lpadc_read_sample(size_t offset, lpfloat_t * sample);
-int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t ** out);
+int lpadc_write_block(const void * block, size_t blocksize, int shmid);
+int lpadc_read_sample(size_t offset, lpfloat_t * sample, int shmid);
+int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES], int shmid);
 
 int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate);
-int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf);
-int lpipc_buffer_release(char * id_path);
+int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf, int shmid);
+int lpipc_buffer_release(char * id_path, void * shmaddr);
 int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf);
 int lpipc_buffer_destroy(char * id_path);
 int lpipc_setid(char * path, int id); 
