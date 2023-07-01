@@ -39,6 +39,34 @@ static void msgpq_set_pos(void * a, size_t pos) {
     ((lpmsgpq_node_t *)a)->pos = pos;
 }
 
+int msgpq_remove_nodes_by_voice_id(size_t voice_id) {
+    lpmsgpq_node_t * node;
+    lpmsg_t * msg;
+    void * d;
+    size_t i;
+
+    for(i=0; i < msgpq->size; i++) {
+        d = msgpq->d[i];                
+        if(d == NULL) {
+            syslog(LOG_DEBUG, "STOP: d[%d] is NULL\n", (int)i);
+            continue;
+        }
+
+        node = (lpmsgpq_node_t *)d;
+        msg = node->msg;
+        if(msg->voice_id == voice_id) {
+            syslog(LOG_DEBUG, "STOP: removing node & freeing memory for voice id %ld\n", voice_id);
+            pqueue_remove(msgpq, d);
+            free(msg);
+            free(node);
+        }
+    }
+
+    syslog(LOG_DEBUG, "STOP: msgpq size AFTER: %d\n", (int)msgpq->size);
+
+    return 0;
+}
+
 /* Message scheduler priority queue thread handler */
 void * message_scheduler_pq(__attribute__((unused)) void * arg) {
     lpmsg_t * msg;
@@ -77,19 +105,30 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             exit(1);
         }
 
+        /* if this is a STOP_VOICE message, find all voice events and remove them */
+        if(msg->type == LPMSG_STOP_VOICE) {
+            if(msgpq_remove_nodes_by_voice_id(msg->voice_id) < 0) {
+                syslog(LOG_ERR, "Error removing voice %ld nodes from priority queue\n", msg->voice_id);
+                usleep((useconds_t)500);
+                continue;
+            }
+
+            syslog(LOG_INFO, "Got STOP_VOICE message... removed voice %ld nodes from pq\n", msg->voice_id);
+            continue;
+        }
+
+        /* If this is a STOP_INSTRUMENT message, find all instrument events and remove them */
+        if(msg->type == LPMSG_STOP_INSTRUMENT) {
+            syslog(LOG_INFO, "Got STOP_INSTRUMENT message... ignoring it\n");
+            continue;
+        }
+
         /* If msg timestamp is in the future, 
          * sleep for a bit and then try again */
         if(msg->timestamp > now) {
             usleep((useconds_t)500);
             continue;
         }
-
-        syslog(LOG_DEBUG, " MESSAGE PQ    %s MSG PRIORITY QUEUE SENDING MESSAGE %s\n", msg->instrument_name, msg->msg);
-        syslog(LOG_DEBUG, " MESSAGE PQ    %s (msg.instrument_name)\n", msg->instrument_name);
-        syslog(LOG_DEBUG, " MESSAGE PQ    %d (msg.voice_id)\n", (int)msg->voice_id);
-        syslog(LOG_DEBUG, " MESSAGE PQ    %f (msg.timestamp)\n", msg->timestamp);
-        syslog(LOG_DEBUG, " MESSAGE PQ    %d (msg.onset_delay)\n", (int)msg->onset_delay);
-        syslog(LOG_DEBUG, " MESSAGE PQ    %f (now)\n", now);
 
         /* Send it along to the instrument message fifo */
         if(send_play_message(*msg) < 0) {
@@ -109,8 +148,6 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
         free(node);
         msg = NULL;
         node = NULL;
-
-        syslog(LOG_DEBUG, " MESSAGE PQ     DONE W/SENDING MESSAGE & CLEANUP\n");
     }
 
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
@@ -118,17 +155,24 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
     pqueue_free(msgpq);
     if(msg != NULL) free(msg);
     if(node != NULL) free(node);
-    syslog(LOG_DEBUG, "Message scheduler pq thread exiting...\n");
     return 0;
 }
 
 void * message_feed(__attribute__((unused)) void * arg) {
-    int qfd;
+#ifdef ASTRID_USE_FIFO_QUEUES
+    int qd;
+#else
+    mqd_t qd;
+#endif
     lpmsg_t msg = {0};
     lpmsg_t * msgout;
     lpmsgpq_node_t * d;
 
-    if((qfd = astrid_msgq_open()) < 0) {
+#ifdef ASTRID_USE_FIFO_QUEUES
+    if((qd = astrid_msgq_open()) < 0) {
+#else
+    if((qd = astrid_msgq_open()) == (mqd_t) -1) {
+#endif
         syslog(LOG_CRIT, "Could not open msgq for message relay: %s\n", strerror(errno));
         exit(1);        
     }
@@ -137,7 +181,7 @@ void * message_feed(__attribute__((unused)) void * arg) {
 
     /* Wait for messages on the msgq fifo */
     while(astrid_is_running) {
-        if(astrid_msgq_read(qfd, &msg) < 0) {
+        if(astrid_msgq_read(qd, &msg) < 0) {
             syslog(LOG_ERR, "Error while fetching message during message relay loop: %s\n", strerror(errno));
             continue;
         }
@@ -155,13 +199,19 @@ void * message_feed(__attribute__((unused)) void * arg) {
             continue;
         }
 
+        syslog(LOG_DEBUG, "lpmsg_t relay: msg.type %d\n", msg.type);
+
         /* Exit the loop on shutdown message after sending 
          * it along to the priority queue as well */
         if(msg.type == LPMSG_SHUTDOWN) break;
     }
 
     syslog(LOG_INFO, "lpmsg_t relay: Message relay shutting down...\n");
-    if(qfd != -1) astrid_msgq_close(qfd);
+#ifdef ASTRID_USE_FIFO_QUEUES
+    if(qd != -1) astrid_msgq_close(qd);
+#else
+    if(qd != (mqd_t) -1) astrid_msgq_close(qd);
+#endif
 
     return 0;
 }
@@ -198,7 +248,8 @@ int main() {
     /* Set shutdown signal handlers */
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
-    shutdown_action.sa_flags = 0;
+    shutdown_action.sa_flags = SA_RESTART; /* Prevent open, read, write etc from EINTR */
+
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
         syslog(LOG_ERR, "Could not init SIGINT signal handler. Error: %s\n", strerror(errno));
         exit(1);
@@ -229,7 +280,7 @@ int main() {
     }
 
     /* Create the message priority queue */
-    if((msgpq = pqueue_init(LPMSG_MAX_PQ, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
+    if((msgpq = pqueue_init(100, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }

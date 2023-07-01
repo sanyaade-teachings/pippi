@@ -1,12 +1,12 @@
 import cmd
 import logging
 from logging.handlers import SysLogHandler
+import random
 import platform
 import subprocess
 import traceback
 import warnings
 
-import mido
 import rtmidi
 
 
@@ -63,7 +63,7 @@ to be restarted to take effect.
 
     def do_sound(self, cmd):
         if cmd == 'on':
-            print('Starting dac & adc...')
+            print('Starting dac, adc & seq...')
             if self.dac is None:
                 self.dac = subprocess.Popen('./build/astrid-dac')
             else:
@@ -237,14 +237,16 @@ to be restarted to take effect.
     def do_i(self, cmd):
         print(self.instruments)
 
-    def do_s(self, instrument):
-        #if instrument in self.instruments:
-        #    r.lpush('astrid-play-%s' % instrument, 'stop')
-        pass
+    def do_s(self, voice_id):
+        try:
+            logger.info('Sending stop msg to voice %s\n' % voice_id)
+            subprocess.run(['./build/astrid-qmessage', 's', voice_id])
+        except Exception as e:
+            print('Could not invoke qmessage: %s' % e)
+            print(traceback.format_exc())
 
     def do_k(self, instrument):
         if instrument in self.instruments:
-            #r.lpush('astrid-play-%s' % instrument, 'kill')
             self.instruments[instrument].terminate()
 
     def help_midi(self):

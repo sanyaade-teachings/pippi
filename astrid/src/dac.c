@@ -5,9 +5,6 @@
 #include <hiredis/hiredis.h>
 #include "astrid.h"
 
-/* FIXME: message passing and triggering should 
- * be moved into its own process */
-
 
 static volatile int astrid_is_running = 1;
 lpscheduler_t * astrid_scheduler;
@@ -60,13 +57,16 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     syslog(LOG_INFO, "Waiting for buffers...\n");
     while(astrid_is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
         if(redis_reply->type == REDIS_REPLY_ARRAY) {
-            syslog(LOG_DEBUG, "Got message on redis buffer channel...\n");
             if(redis_reply->element[2]->str[0] == 's') {
                 syslog(LOG_INFO, "Buffer feed got shutdown message\n");
                 syslog(LOG_INFO, "    message: %s\n", redis_reply->element[2]->str);
                 break;
             }
-            buf = deserialize_buffer(redis_reply->element[2]->str, &msg);
+
+            if((buf = deserialize_buffer(redis_reply->element[2]->str, &msg)) == NULL) {
+                syslog(LOG_ERR, "DAC could not deserialize buffer. Error: (%d) %s\n", errno, strerror(errno));
+                continue;
+            }
 
             /* Increment the message count */
             msg.count += 1;
@@ -77,9 +77,13 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             /* Mark the voice active on the first render and 
              * increment the render count if looping */
             if(msg.count == 1) {
-                lpsessiondb_mark_voice_active(sessiondb, msg.voice_id);
+                if(lpsessiondb_mark_voice_active(sessiondb, msg.voice_id) < 0) {
+                    syslog(LOG_ERR, "DAC could not mark voice active in sessiondb. Error: (%d) %s\n", errno, strerror(errno));
+                }
             } else if(msg.count > 1 && buf->is_looping) {
-                lpsessiondb_increment_voice_render_count(sessiondb, msg.voice_id, msg.count);
+                if(lpsessiondb_increment_voice_render_count(sessiondb, msg.voice_id, msg.count) < 0) {
+                    syslog(LOG_ERR, "DAC could not increment voice render count in sessiondb. Error: (%d) %s\n", errno, strerror(errno));
+                }
             }
 
             /* If the buffer is flagged to loop, schedule the next render 
@@ -88,6 +92,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
              * into the buffer playback, with an onset delay for the buffer 
              * making up the last 30%. TODO: measure jitter when scheduling 
              * in regular intervals. */
+
             if(buf->is_looping == 1) {
                 /* Get now to schedule the next render */
                 if(lpscheduler_get_now_seconds(&now) < 0) {
@@ -99,6 +104,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 delay = (delay_frames / (double)buf->samplerate);
                 msg.timestamp = now + delay;
                 msg.onset_delay = buf->length - delay_frames;
+                syslog(LOG_DEBUG, "scheduling next render with delay %f and onset_delay %ld\n", delay, msg.onset_delay);
 
                 if(send_message(msg) < 0) {
                     syslog(LOG_ERR, "Could not schedule message for loop retriggering\n");
@@ -212,7 +218,8 @@ int main() {
     /* Set shutdown signal handlers */
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
-    shutdown_action.sa_flags = 0;
+    shutdown_action.sa_flags = SA_RESTART; /* Prevent open, read, write etc from EINTR */
+
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
         syslog(LOG_ERR, "Could not init SIGINT signal handler. Error: %s\n", strerror(errno));
         exit(1);
@@ -306,9 +313,9 @@ int main() {
 
     syslog(LOG_INFO, "Astrid DAC is starting...\n");
     while(astrid_is_running) {
-        /* Twiddle thumbs */
-        usleep((useconds_t)1000);
-        /*LPScheduler.empty(ctx->s);*/
+        /* Twiddle thumbs & tidy up */
+        usleep((useconds_t)100000);
+        scheduler_cleanup_nursery(ctx->s);
     }
 
     return cleanup(&playback, ctx, buffer_feed_thread, sessiondb);

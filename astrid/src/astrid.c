@@ -158,17 +158,20 @@ int lpsessiondb_increment_voice_render_count(sqlite3 * db, int voice_id, size_t 
     clock_gettime(CLOCK_MONOTONIC, &ts);
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
-    /* Prepare the sql unsafely */
     sqlsize = snprintf(NULL, 0, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id)+1;
-    sql = calloc(1, sqlsize);
+    if((sql = calloc(1, sqlsize)) == NULL) {
+        syslog(LOG_ERR, "lpsessiondb_increment_voice_render_count Could not alloc space for sql query. Error: (%d) %s\n", errno, strerror(errno));
+        return -1;
+    }
+
     if(snprintf(sql, sqlsize, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id) < 0) {
-        syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "lpsessiondb_increment_voice_render_count Could not concat sql for update. Error: (%d) %s\n", errno, strerror(errno));
         return -1;
     }
 
     /* Mark the voice as active */
     if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
-        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        syslog(LOG_ERR, "lpsessiondb_increment_voice_render_count Could not exec sql statement: %s. Error: (%d) %s\n", sql, errno, strerror(errno));
         return -1;
     }
 
@@ -187,15 +190,19 @@ int lpsessiondb_mark_voice_stopped(sqlite3 * db, int voice_id, size_t count) {
 
     /* Prepare the sql unsafely */
     sqlsize = snprintf(NULL, 0, "update voices set active=0, ended=%lld, last_render=%lld, render_count=%ld where id=%d;", now, now, count, voice_id)+1;
-    sql = calloc(1, sqlsize);
+    if((sql = calloc(1, sqlsize)) == NULL) {
+        syslog(LOG_ERR, "lpsessiondb_mark_voice_stopped Could not alloc space for sql query. Error: (%d) %s\n", errno, strerror(errno));
+        return -1;
+    }
+
     if(snprintf(sql, sqlsize, "update voices set active=0, ended=%lld, last_render=%lld, render_count=%ld where id=%d;", now, now, count, voice_id) < 0) {
-        syslog(LOG_ERR, "Could not concat sql for update. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "lpsessiondb_mark_voice_stopped Could not concat sql for update. Error: (%d) %s\n", errno, strerror(errno));
         return -1;
     }
 
     /* Mark the voice as stopped */
     if(sqlite3_exec(db, sql, lpsessiondb_callback_debug, 0, &err) != SQLITE_OK) {
-        syslog(LOG_ERR, "Could not exec sql statement: %s. Error: %s\n", sql, strerror(errno));
+        syslog(LOG_ERR, "lpsessiondb_mark_voice_stopped Could not exec sql statement: %s. Error: (%d) %s\n", sql, errno, strerror(errno));
         return -1;
     }
 
@@ -355,8 +362,6 @@ int lpipc_getid(char * path) {
     int handle, id = 0;
     char * idp;
     struct stat st;
-
-    syslog(LOG_DEBUG, "lpipc_getid %s\n", path);
 
     /* Read the identifier from the well known file. mmap speeds 
      * up access when ids need to be fetched when timing matters */
@@ -611,8 +616,6 @@ int lpipc_buffer_create(char * id_path, size_t length, int channels, int sampler
         return -1;
     }
 
-    syslog(LOG_DEBUG, "lpipc_buffer_create sempahore (%s) value is %d\n", semname, semvalue);
-
     /* If the lock file exists, just look up and return the shmID */
     if(access(id_path, F_OK) == 0) {
         if((shmid = lpipc_getid(id_path)) < 0) {
@@ -771,10 +774,6 @@ int lpipc_buffer_destroy(char * id_path) {
     return 0;
 }
 
-int lpadc_getid() {
-    return lpipc_getid(LPADC_HANDLE);
-}
-
 int lpadc_create() {
     int shmid;
 
@@ -836,26 +835,16 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPA
     lpfloat_t sample;
     int nonzero;
 
-
-    syslog(LOG_DEBUG, "Get a lock on the buffer...\n");
     /* Aquire a lock on the buffer */
     if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf, shmid) < 0) {
         syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
         return -1;
     }
 
-    syslog(LOG_DEBUG, "Get the writepos...\n");
-    write_pos = adcbuf->pos;
-    syslog(LOG_DEBUG, "         writepos: %ld\n", write_pos);
-
     /* Determine the read position */
+    write_pos = adcbuf->pos;
     read_pos = write_pos - offset - size-1;
-    syslog(LOG_DEBUG, "         offset:              %ld\n", offset);
-    syslog(LOG_DEBUG, "         size:                %ld\n", size);
-    syslog(LOG_DEBUG, "         readpos mod samples: %ld\n", read_pos % LPADCBUFSAMPLES);
-    syslog(LOG_DEBUG, "         readpos + size:      %ld\n", read_pos + size);
 
-    syslog(LOG_DEBUG, "Copy the block...\n");
     /* Copy the block */
     nonzero = 0;
     for(i=0; i < size; i++) {
@@ -869,14 +858,11 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPA
         syslog(LOG_ERR, "ADC read all zeros\n");
     }
 
-    syslog(LOG_DEBUG, "Release the lock on the buffer...\n");
     /* Release the lock on the ADC buffer shm */
     if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
         return -1;
     }
-
-    syslog(LOG_DEBUG, "Done!\n");
 
     return 0;
 }
@@ -1292,42 +1278,11 @@ lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg) {
 /* MESSAGE
  * QUEUES
  * ******/
-int get_play_message(char * instrument_name, lpmsg_t * msg) {
-    int qfd;
-    ssize_t qname_length;
-    char qname[LPMAXQNAME] = {0};
-    ssize_t read_result;
-
-    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
-    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
-    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
-
-    umask(0);
-    if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        syslog(LOG_ERR, "get_play_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    qfd = open(qname, O_RDONLY);
-    if((read_result = read(qfd, msg, sizeof(lpmsg_t))) != sizeof(lpmsg_t)) {
-        syslog(LOG_INFO, "Play queue for %s has closed\n", instrument_name);
-        return -1;
-    }
-
-    if(close(qfd) == -1) {
-        syslog(LOG_ERR, "get_play_message mkfifo: Error closing q. Error: %s\n", strerror(errno));
-        return -1; 
-    }
-
-    return 0;
-}
-
+#ifdef ASTRID_USE_FIFO_QUEUES
 int astrid_playq_open(char * instrument_name) {
     int qfd;
     ssize_t qname_length;
     char qname[LPMAXQNAME] = {0};
-
-    syslog(LOG_DEBUG, "astrid_playq_open: %s\n", instrument_name);
 
     qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
     qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
@@ -1364,16 +1319,20 @@ int astrid_playq_read(int qfd, lpmsg_t * msg) {
         return -1;
     }
 
-    // do we need larger play messages?
+    if(read_result < 0 && errno == EINTR) {
+        syslog(LOG_INFO, "The play queue (%d) got EINTR, retrying.\n", qfd);
+        return astrid_playq_read(qfd, msg);
+    }
+
+    if(read_result < 0) {
+        syslog(LOG_INFO, "The play queue (%d) failed to read from the fifo. Error: (%d) %s\n", qfd, errno, strerror(errno));
+        return -1;
+    }
+
     if(read_result != sizeof(lpmsg_t)) {
         syslog(LOG_INFO, "The play queue (%d) returned %d bytes. Expecting sizeof(lpmsg_t)==%d\n", qfd, (int)read_result, (int)sizeof(lpmsg_t));
         return -1;
     }
-
-    syslog(LOG_DEBUG, " Q           %s MSG READ FROM Q %d\n", msg->instrument_name, qfd);
-    syslog(LOG_DEBUG, " Q           %s (msg.instrument_name)\n", msg->instrument_name);
-    syslog(LOG_DEBUG, " Q           %d (msg.voice_id)\n", (int)msg->voice_id);
-    syslog(LOG_DEBUG, " Q           %f (msg.timestamp)\n", msg->timestamp);
 
     return 0;
 }
@@ -1405,11 +1364,31 @@ int send_play_message(lpmsg_t msg) {
         return -1; 
     }
 
-    syslog(LOG_DEBUG, " P           %s MSG OUT %s\n", msg.instrument_name, msg.msg);
-    syslog(LOG_DEBUG, " P           %s (msg.instrument_name)\n", msg.instrument_name);
-    syslog(LOG_DEBUG, " P           %d (msg.voice_id)\n", (int)msg.voice_id);
-    syslog(LOG_DEBUG, " P           %f (msg.timestamp)\n", msg.timestamp);
+    return 0;
+}
 
+int send_message(lpmsg_t msg) {
+    int qfd;
+
+    umask(0);
+    if(mkfifo(ASTRID_MSGQ_PATH, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
+        syslog(LOG_ERR, "send_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if((qfd = open(ASTRID_MSGQ_PATH, O_WRONLY)) < 0) {
+        syslog(LOG_ERR, "send_message open: Could not open q. Error: %s\n", strerror(errno));
+    }
+
+    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
+        syslog(LOG_ERR, "send_message write: Could not write to q. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(close(qfd) == -1) {
+        syslog(LOG_ERR, "send_message close: Error closing play q. Error: %s\n", strerror(errno));
+        return -1; 
+    }
 
     return 0;
 }
@@ -1453,13 +1432,140 @@ int astrid_msgq_read(int qfd, lpmsg_t * msg) {
         return -1;
     }
 
-    syslog(LOG_DEBUG, " MQ           %s MSG READ FROM Q %d\n", msg->instrument_name, qfd);
-    syslog(LOG_DEBUG, " MQ           %s (msg.instrument_name)\n", msg->instrument_name);
-    syslog(LOG_DEBUG, " MQ           %d (msg.voice_id)\n", (int)msg->voice_id);
-    syslog(LOG_DEBUG, " MQ           %f (msg.timestamp)\n", msg->timestamp);
+    return 0;
+}
+#else
+int send_play_message(lpmsg_t msg) {
+    mqd_t mqd;
+    ssize_t qname_length;
+    char qname[LPMAXQNAME] = {0};
+    struct mq_attr attr;
+
+    attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
+    attr.mq_msgsize = sizeof(lpmsg_t);
+
+    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, msg.instrument_name) + 1;
+    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
+    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, msg.instrument_name);
+
+    if((mqd = mq_open(qname, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
+        syslog(LOG_ERR, "send_play_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(mq_send(mqd, (char *)(&msg), sizeof(lpmsg_t), 0) < 0) {
+        syslog(LOG_ERR, "send_play_message mq_send: Error allocing during message write. Error: %s\n", strerror(errno));
+        return -1;
+    }
 
     return 0;
 }
+
+int send_message(lpmsg_t msg) {
+    mqd_t mqd;
+    struct mq_attr attr;
+
+    attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
+    attr.mq_msgsize = sizeof(lpmsg_t);
+
+    if((mqd = mq_open(ASTRID_MSGQ_PATH, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
+        syslog(LOG_ERR, "send_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(mq_send(mqd, (char *)(&msg), sizeof(lpmsg_t), 0) < 0) {
+        syslog(LOG_ERR, "send_message mq_send: Error allocing during message write. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+mqd_t astrid_playq_open(char * instrument_name) {
+    mqd_t mqd;
+    ssize_t qname_length;
+    char qname[LPMAXQNAME] = {0};
+    struct mq_attr attr;
+
+    attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
+    attr.mq_msgsize = sizeof(lpmsg_t);
+
+    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
+    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
+    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
+
+    if((mqd = mq_open(qname, O_CREAT | O_RDONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
+        syslog(LOG_ERR, "astrid_playq_open mq_open: Error opening message queue. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return mqd;
+}
+
+int astrid_playq_close(mqd_t mqd) {
+    if(mq_close(mqd) == -1) {
+        syslog(LOG_ERR, "astrid_playq_close close: Error closing play queue FIFO. Error: %s\n", strerror(errno));
+        return -1; 
+    }
+
+    return 0;
+}
+
+int astrid_playq_read(mqd_t mqd, lpmsg_t * msg) {
+    char * msgp;
+    ssize_t read_result;
+    unsigned int msg_priority;
+
+    msgp = (char *)msg;
+
+    if((read_result = mq_receive(mqd, msgp, sizeof(lpmsg_t), &msg_priority)) < 0) {
+        syslog(LOG_ERR, "astrid_playq_read mq_receive: Error allocing during message read. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+mqd_t astrid_msgq_open() {
+    mqd_t mqd;
+    struct mq_attr attr;
+
+    attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
+    attr.mq_msgsize = sizeof(lpmsg_t);
+
+    if((mqd = mq_open(ASTRID_MSGQ_PATH, O_CREAT | O_RDONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
+        syslog(LOG_ERR, "astrid_playq_open mq_open: Error opening message queue. Error: %s\n", strerror(errno));
+        return (mqd_t) -1;
+    }
+
+    return mqd;
+}
+
+int astrid_msgq_close(mqd_t mqd) {
+    if(mq_close(mqd) == -1) {
+        syslog(LOG_ERR, "astrid_msgq_close close: Error closing msg queue FIFO. Error: %s\n", strerror(errno));
+        return -1; 
+    }
+
+    return 0;
+}
+
+int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg) {
+    char * msgp;
+    ssize_t read_result;
+    unsigned int msg_priority;
+
+    msgp = (char *)msg;
+
+    if((read_result = mq_receive(mqd, msgp, sizeof(lpmsg_t), &msg_priority)) < 0) {
+        syslog(LOG_ERR, "astrid_msgq_read mq_receive: Error reading message. (Got %ld bytes) Error: %s\n", read_result, strerror(errno));
+        free(msgp);
+        return -1;
+    }
+
+    return 0;
+}
+#endif
 
 int astrid_get_playback_device_id() {
     int device_id;
@@ -1536,7 +1642,7 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
             break;
 
         case STOP_MESSAGE:
-            msg->type = LPMSG_STOP;
+            msg->type = LPMSG_STOP_VOICE;
             break;
 
         case SHUTDOWN_MESSAGE:
@@ -1548,68 +1654,37 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
             return -1;
     }
 
-    /* Get the voice ID from the voice ID counter */
-    if((c.semid = lpipc_getid(LPVOICE_ID_SEMID)) < 0) {
-        syslog(LOG_ERR, "Problem trying to get voice ID sempahore handle when constructing play message from command input\n");
-        return -1;
+    if(msg->type == LPMSG_STOP_VOICE) {
+        /* Try to extract the voice ID from the stop command */
+        if((voice_id = atoi(argv[arg_offset + 2])) < 0) {
+            syslog(LOG_ERR, "Invalid voice ID passed with STOP message. Error: (%d) %s\n", errno, strerror(errno));
+            return -1;
+        }
+    } else {
+        /* Get the voice ID from the voice ID counter */
+        if((c.semid = lpipc_getid(LPVOICE_ID_SEMID)) < 0) {
+            syslog(LOG_ERR, "Problem trying to get voice ID sempahore handle when constructing play message from command input\n");
+            return -1;
+        }
+
+        if((c.shmid = lpipc_getid(LPVOICE_ID_SHMID)) < 0) {
+            syslog(LOG_ERR, "Problem trying to get voice ID shared memory handle when constructing play message from command input\n");
+            return -1;
+        }
+
+        if((voice_id = lpcounter_read_and_increment(&c)) < 0) {
+            syslog(LOG_ERR, "Problem trying to get voice ID when constructing play message from command input\n");
+            return -1;
+        }
     }
 
-    if((c.shmid = lpipc_getid(LPVOICE_ID_SHMID)) < 0) {
-        syslog(LOG_ERR, "Problem trying to get voice ID shared memory handle when constructing play message from command input\n");
-        return -1;
-    }
-
-    if((voice_id = lpcounter_read_and_increment(&c)) < 0) {
-        syslog(LOG_ERR, "Problem trying to get voice ID when constructing play message from command input\n");
-        return -1;
-    }
-
+    /* Initialize the count and set the voice_id */
+    msg->count = 0;
     msg->voice_id = voice_id;
 
-    /* Initialize the count */
-    msg->count = 0;
-
     return 0;
 }
 
-int send_message(lpmsg_t msg) {
-    int qfd;
-
-    syslog(LOG_ERR, "send_message SENDING MSG ts         %f\n", msg.timestamp);
-    syslog(LOG_ERR, "send_message SENDING MSG instrument %s\n", msg.instrument_name);
-
-    syslog(LOG_DEBUG, "SM mkfifo\n");
-
-    umask(0);
-    if(mkfifo(ASTRID_MSGQ_PATH, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        syslog(LOG_ERR, "send_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    syslog(LOG_DEBUG, "SM open\n");
-    if((qfd = open(ASTRID_MSGQ_PATH, O_WRONLY)) < 0) {
-        syslog(LOG_ERR, "send_message open: Could not open q. Error: %s\n", strerror(errno));
-    }
-
-    syslog(LOG_DEBUG, "SM write\n");
-    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
-        syslog(LOG_ERR, "send_message write: Could not write to q. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    syslog(LOG_DEBUG, "SM close\n");
-    if(close(qfd) == -1) {
-        syslog(LOG_ERR, "send_message close: Error closing play q. Error: %s\n", strerror(errno));
-        return -1; 
-    }
-
-    syslog(LOG_DEBUG, " SM           %s MSG OUT %s\n", msg.instrument_name, msg.msg);
-    syslog(LOG_DEBUG, " SM           %s (msg.instrument_name)\n", msg.instrument_name);
-    syslog(LOG_DEBUG, " SM           %d (msg.voice_id)\n", (int)msg.voice_id);
-    syslog(LOG_DEBUG, " SM           %f (msg.timestamp)\n", msg.timestamp);
-
-    return 0;
-}
 
 int midi_triggerq_open() {
     int qfd;
@@ -2092,15 +2167,15 @@ void scheduler_destroy(lpscheduler_t * s) {
 void scheduler_cleanup_nursery(lpscheduler_t * s) {
     /* Loop over nursey and free buffers */
     lpevent_t * current;
-    lpevent_t * next;
 
     if(s->nursery_head != NULL) {
         current = s->nursery_head;
         while(current->next != NULL) {
-            next = (lpevent_t *)current->next;
-            current->next = NULL;
-            LPBuffer.destroy(current->buf);
-            current = (lpevent_t *)next;        
+            if(current->buf != NULL) {
+                LPBuffer.destroy(current->buf);
+                current->buf = NULL;
+            }
+            current = (lpevent_t *)current->next;        
         }
     }
 }

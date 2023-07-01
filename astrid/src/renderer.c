@@ -35,7 +35,12 @@ int main(int argc, char * argv[]) {
 
     openlog("astrid-renderer", LOG_PID, LOG_USER);
 
-    int playqfd = -1;
+#ifdef ASTRID_USE_FIFO_QUEUES
+    int playqd = -1;
+#else
+    mqd_t playqd = -1;
+#endif
+
     lpmsg_t msg = {0};
 
     syslog(LOG_INFO, "Starting renderer...\n");
@@ -43,7 +48,8 @@ int main(int argc, char * argv[]) {
     /* Setup sigint handler for graceful shutdown */
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
-    shutdown_action.sa_flags = 0;
+    shutdown_action.sa_flags = SA_RESTART; /* Prevent open, read, write etc from EINTR */
+
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
         syslog(LOG_ERR, "Could not init SIGINT signal handler.\n");
         exit(1);
@@ -129,8 +135,17 @@ int main(int argc, char * argv[]) {
 
     syslog(LOG_INFO, "Astrid renderer... is now rendering!\n");
 
-    playqfd = astrid_playq_open(instrument_basename);
-    syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument_basename, playqfd);
+#ifdef ASTRID_USE_FIFO_QUEUES
+    if((playqd = astrid_playq_open(instrument_basename)) < 0) {
+#else
+    if((playqd = astrid_playq_open(instrument_basename)) == (mqd_t) -1) {
+#endif
+        syslog(LOG_CRIT, "Could not open playq for instrument %s. Error: %s\n", instrument_basename, strerror(errno));
+        goto lprender_cleanup;
+    }
+
+
+    syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument_basename, playqd);
 
     memcpy(msg.instrument_name, instrument_basename, instrument_name_length);
 
@@ -140,13 +155,19 @@ int main(int argc, char * argv[]) {
         memset(msg.msg, 0, LPMAXMSG);
 
         syslog(LOG_DEBUG, "Waiting for %s playqueue messages...\n", instrument_basename);
-        syslog(LOG_DEBUG, "            %s (msg.instrument_name)\n", msg.instrument_name);
-        syslog(LOG_DEBUG, "            %d (msg.voice_id)\n", (int)msg.voice_id);
         syslog(LOG_DEBUG, "            %d (ctx.voice_id)\n", (int)ctx->voice_id);
-        if(astrid_playq_read(playqfd, &msg) < 0) {
-            syslog(LOG_ERR, "Got errno (%d) while fetching message during renderer loop: %s\n", errno, strerror(errno));
+#ifdef ASTRID_USE_FIFO_QUEUES
+        if(astrid_playq_read(playqd, &msg) < 0) {
+#else
+        if(astrid_playq_read(playqd, &msg) == (mqd_t) -1) {
+#endif
+            syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument_basename, errno, strerror(errno));
             goto lprender_cleanup;
         }
+
+        syslog(LOG_DEBUG, "Renderer got %s message:\n", msg.instrument_name);
+        syslog(LOG_DEBUG, "             %d (msg.voice_id)\n", (int)msg.voice_id);
+        syslog(LOG_DEBUG, "             %d (msg.type)\n", (int)msg.type);
 
         switch(msg.type) {
             case LPMSG_PLAY:
@@ -187,7 +208,11 @@ int main(int argc, char * argv[]) {
 lprender_cleanup:
     syslog(LOG_INFO, "Astrid renderer shutting down...\n");
     Py_Finalize();
-    if(playqfd != -1) astrid_playq_close(playqfd);
+#ifdef ASTRID_USE_FIFO_QUEUES
+    if(playqd != -1) astrid_playq_close(playqd);
+#else
+    if(playqd != (mqd_t) -1) astrid_playq_close(playqd);
+#endif
     closelog();
     return 0;
 }

@@ -238,7 +238,7 @@ cdef class Instrument:
 
         adc_shmid = lpipc_getid(LPADC_BUFFER_PATH)
         if adc_shmid < 0:
-            logger.error('cyrenderer: Could not get LPADC shmid')
+            logger.warning('cyrenderer: Could not get LPADC shmid')
             return -1
 
         return adc_shmid
@@ -263,10 +263,25 @@ cdef class Instrument:
             logger.error('Error reloading instrument. Null spec at path:\n  %s' % self.path)
 
     def load_sounds(self):
+        """
         if hasattr(self.renderer, 'SOUNDS') and isinstance(self.renderer.SOUNDS, list):
             return [ dsp.read(snd) for snd in self.renderer.SOUNDS ]
         elif hasattr(self.renderer, 'SOUNDS') and isinstance(self.renderer.SOUNDS, dict):
             return { k: dsp.read(snd) for k, snd in self.renderer.SOUNDS.items() }
+        """
+
+        if hasattr(self.renderer, 'SOUNDBANK') and isinstance(self.renderer.SOUNDBANK, list):
+            sounds = []
+            for path in self.renderer.SOUNDBANK:
+                sounds += dsp.readall(path)
+            return sounds
+
+        elif hasattr(self.renderer, 'SOUNDBANK') and isinstance(self.renderer.SOUNDBANK, dict):
+            sounds = {}
+            for k, path in self.renderer.SOUNDBANK.items():
+                sounds[k] = dsp.readall(path)
+            return sounds
+
         return None
 
     def register_midi_triggers(self):

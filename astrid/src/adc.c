@@ -51,7 +51,7 @@ int main() {
     struct sigaction shutdown_action;
     shutdown_action.sa_handler = handle_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
-    shutdown_action.sa_flags = 0;
+    shutdown_action.sa_flags = SA_RESTART; /* Prevent open, read, write etc from EINTR */
 
     /* Keyboard interrupt triggers cleanup and shutdown */
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {

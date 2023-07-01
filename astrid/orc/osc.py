@@ -13,7 +13,7 @@ def before(ctx):
 
 def play(ctx):
     #length = dsp.rand(0.01, ctx.m.cc(26) * 1 + 0.02)
-    length = dsp.rand(3, 6)
+    length = dsp.rand(0.3, 6)
 
     # ctx.p contains parameters passed with 
     # the triggering play command.
@@ -21,7 +21,7 @@ def play(ctx):
     # will include the MIDI note as a parameter.
     # Parameters are provided as strings.
     note = float(ctx.p.note or dsp.randint(63, 90))
-    amp = float(ctx.p.velocity or dsp.rand(10, 120)) / 127
+    amp = float(ctx.p.velocity or dsp.rand(80, 120)) / 127
 
     #amp = ctx.m.cc(25)
 
@@ -32,6 +32,9 @@ def play(ctx):
 
     # Convert the MIDI note to a frequency
     freq = tune.mtf(note)
+    freqs = tune.chord('vi9', octave=dsp.randint(3,5))
+    freq = dsp.choice(freqs)
+
 
     # This sets up a polyphonic generator 
     # by looping over a yield. Each buffer in 

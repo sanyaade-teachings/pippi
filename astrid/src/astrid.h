@@ -4,6 +4,7 @@
 #include <stdatomic.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <mqueue.h>
 #include <pthread.h>
 #include <signal.h>
 #include <sys/mman.h>
@@ -29,8 +30,19 @@
 #define TOKEN_PROJECT_ID 'x'
 #define LPIPC_PERMS (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP)
 
-#define ASTRID_SESSIONDB_PATH "/tmp/astrid_session.db"
+#define ASTRID_MQ_MAXMSG 10
+
+/* queue paths */
+#ifdef ASTRID_USE_FIFO_QUEUES
+#define LPPLAYQ "/tmp/astridq" /* the path prefix used for instrument play queues */
 #define ASTRID_MSGQ_PATH "/tmp/astrid-msgq"
+#else
+#define LPPLAYQ "/astridq"
+#define ASTRID_MSGQ_PATH "/astrid-msgq"
+#endif
+#define LPMAXQNAME (12 + 1 + LPMAXNAME)
+
+#define ASTRID_SESSIONDB_PATH "/tmp/astrid_session.db"
 #define ASTRID_MIDI_TRIGGERQ_PATH "/tmp/astrid-miditriggerq"
 #define ASTRID_MIDI_CCBASE_PATH "/tmp/astrid-mididevice%d-cc%d"
 #define ASTRID_MIDI_NOTEBASE_PATH "/tmp/astrid-mididevice%d-note%d"
@@ -68,10 +80,6 @@
 #define LPADC_HANDLE "/tmp/astrid_adcbuf_shmid"
 #define LPADC_BUFNAME "/lpadcbuf"
 
-#define LPPLAYQ "/tmp/astridq" /* the path *prefix* used for instrument play queues */
-#define LPMAXQNAME (12 + 1 + LPMAXNAME)
-#define LPMSG_MAX_PQ 4096 /* preallocated message priority queue size */
-
 #define LPVOICE_ID_SHMID "/tmp/astrid_voice_id_shmid"
 #define LPVOICE_ID_SEMID "/tmp/astrid_voice_id_semid"
 
@@ -92,7 +100,8 @@ enum LPMessageTypes {
     LPMSG_EMPTY,
     LPMSG_PLAY,
     LPMSG_TRIGGER,
-    LPMSG_STOP,
+    LPMSG_STOP_INSTRUMENT,
+    LPMSG_STOP_VOICE,
     LPMSG_LOAD,
     LPMSG_SHUTDOWN,
     NUM_LPMESSAGETYPES
@@ -175,6 +184,7 @@ void lpscheduler_tick(lpscheduler_t * s);
 lpscheduler_t * scheduler_create(int, int, lpfloat_t);
 void scheduler_destroy(lpscheduler_t * s);
 int lpscheduler_get_now_seconds(double * now);
+void scheduler_cleanup_nursery(lpscheduler_t * s);
 
 int lpcounter_create(lpcounter_t * c);
 int lpcounter_read_and_increment(lpcounter_t * c);
@@ -217,22 +227,34 @@ typedef struct lpastridctx_t {
 
 char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg); 
 lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg); 
+
+int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
+
+
+int send_message(lpmsg_t msg);
 int send_play_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
 
+#ifdef ASTRID_USE_FIFO_QUEUES
 int astrid_playq_open(char * instrument_name);
 int astrid_playq_read(int qfd, lpmsg_t * msg);
 int astrid_playq_close(int qfd);
 
-int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
-int send_message(lpmsg_t msg);
 int astrid_msgq_open();
 int astrid_msgq_close(int qfd);
 int astrid_msgq_read(int qfd, lpmsg_t * msg);
+#else
+mqd_t astrid_playq_open(char * instrument_name);
+int astrid_playq_read(mqd_t mqd, lpmsg_t * msg);
+int astrid_playq_close(mqd_t mqd);
 
-int astrid_get_playback_device_id();
-int astrid_get_capture_device_id();
+mqd_t astrid_msgq_open();
+int astrid_msgq_close(mqd_t mqd);
+int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg);
+#endif
 
+
+/* TODO add POSIX message queues for these too */
 int midi_triggerq_open();
 int midi_triggerq_schedule(int qfd, lpmidievent_t t);
 int midi_triggerq_close(int qfd);
@@ -246,6 +268,9 @@ int lpmidi_add_msg_to_notemap(int device_id, int note, lpmsg_t msg);
 int lpmidi_remove_msg_from_notemap(int device_id, int note, int index);
 int lpmidi_print_notemap(int device_id, int note);
 int lpmidi_trigger_notemap(int device_id, int note);
+
+int astrid_get_playback_device_id();
+int astrid_get_capture_device_id();
 
 int lpadc_create();
 int lpadc_destroy();
