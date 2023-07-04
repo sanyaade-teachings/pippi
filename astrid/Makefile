@@ -27,7 +27,7 @@ LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
 LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic
-LPLIBS = -lm -ldl -lpthread
+LPLIBS = -lm -ldl -lpthread -lrt
 
 clean:
 	rm -rf build/*
