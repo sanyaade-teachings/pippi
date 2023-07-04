@@ -90,6 +90,7 @@ cdef SoundBuffer read_from_adc(int adc_shmid, double length, double offset=0, in
 
     return snd
 
+""" TODO
 cdef class AstridMessage:
     def __cinit__(self,
             str instrument_name,
@@ -118,6 +119,7 @@ cdef class AstridMessage:
         if self.msg is not NULL:
             free(self.msg)
 
+"""
 
 cdef class MidiEvent:
     def __cinit__(self,
