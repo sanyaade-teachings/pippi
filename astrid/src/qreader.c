@@ -15,7 +15,7 @@ struct response {
     char msg[MAXMSG];
 };
 
-void handle_shutdown(int) {
+void handle_shutdown(int sig __attribute__((unused))) {
     is_running = 0;
 }
 

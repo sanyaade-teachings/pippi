@@ -10,7 +10,7 @@ int astrid_channels = 2;
 char * instrument_fullpath; /* eg ../orc/ding.py */
 char * instrument_basename; /* eg ding           */
 
-void handle_shutdown(int) {
+void handle_shutdown(int sig __attribute__((unused))) {
     astrid_is_running = 0;
 }
 

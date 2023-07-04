@@ -12,7 +12,7 @@
 
 static volatile int is_running = 1;
 
-void handle_shutdown(int) {
+void handle_shutdown(int sig __attribute__((unused))) {
     is_running = 0;
 }
 
