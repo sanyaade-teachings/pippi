@@ -819,6 +819,8 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples, int shmid
     /* Store the new write position */
     adcbuf->pos = write_pos;
 
+    syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);
+
     /* Release the lock on the ADC buffer shm */
     if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
@@ -1458,6 +1460,11 @@ int send_play_message(lpmsg_t msg) {
         return -1;
     }
 
+    if(mq_close(mqd) == -1) {
+        syslog(LOG_ERR, "send_play_message close: Error closing play queue. Error: %s\n", strerror(errno));
+        return -1; 
+    }
+
     return 0;
 }
 
@@ -1476,6 +1483,11 @@ int send_message(lpmsg_t msg) {
     if(mq_send(mqd, (char *)(&msg), sizeof(lpmsg_t), 0) < 0) {
         syslog(LOG_ERR, "send_message mq_send: Error allocing during message write. Error: %s\n", strerror(errno));
         return -1;
+    }
+
+    if(mq_close(mqd) == -1) {
+        syslog(LOG_ERR, "send_message close: Error closing message relay queue. Error: %s\n", strerror(errno));
+        return -1; 
     }
 
     return 0;

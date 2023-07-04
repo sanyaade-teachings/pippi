@@ -1,8 +1,9 @@
 import cmd
 import logging
 from logging.handlers import SysLogHandler
-import random
+import os
 import platform
+import random
 import subprocess
 import traceback
 import warnings
@@ -204,6 +205,44 @@ to be restarted to take effect.
         except Exception as e:
             print('Could not invoke qmessage: %s' % e)
             print(traceback.format_exc())
+
+    def do_tm(self, cmd):
+        """ Manage trigger maps
+        """
+        parts = [ p.strip() for p in cmd.split() ]
+
+        if len(parts) < 3:
+            print('Invalid arguments. Usage: \n  tm <a|c> <device> <note/noterange> <p|s|t> <instrument_name> (<params>)')
+            return
+
+        action = parts.pop(0)
+        device = parts.pop(0)
+        notes = parts.pop(0)
+
+        if '-' in notes:
+            nbeg, nend = tuple(notes.split('-'))
+            notes = list(map(str, range(int(nbeg), int(nend)+1)))
+        else:
+            notes = [notes]
+
+        cmd = ' '.join(parts)
+
+        if action == 'a':
+            for note in notes:
+                subprocess.run(['./build/astrid-addnotemap', device, note] + parts)
+                print('Added notemap for device %s note %s' % (device, note))
+
+        elif action == 'c':
+            for note in notes:
+                try:
+                    os.unlink('/tmp/astrid-midimap-device%s-note%s' % (device, note))
+                    print('Removed all notemaps for device %s note %s' % (device, note))
+                except FileNotFoundError as e:
+                    pass
+
+        elif action == 'l':
+            for note in notes:
+                subprocess.run(['./build/astrid-printnotemap', device, note])
 
     def do_p(self, cmd):
         parts = cmd.split(' ')

@@ -3,7 +3,7 @@
 import array
 from cpython cimport array
 from libc.stdlib cimport calloc, free
-from libc.string cimport memcpy
+from libc.string cimport strcpy, memcpy
 import logging
 from logging.handlers import SysLogHandler
 import warnings
@@ -90,6 +90,35 @@ cdef SoundBuffer read_from_adc(int adc_shmid, double length, double offset=0, in
 
     return snd
 
+cdef class AstridMessage:
+    def __cinit__(self,
+            str instrument_name,
+            double onset,
+            int msgtype,
+            str params
+        ):
+
+        cdef char * byte_params = params.encode('utf-8')
+        cdef char * byte_instrument_name = instrument_name.encode('utf-8')
+
+        self.msg = <lpmsg_t *>calloc(1, sizeof(lpmsg_t))
+        self.msg.timestamp = onset
+        self.msg.onset_delay = 0
+        self.msg.voice_id = 0
+        self.msg.count = 0
+        self.msg.type = msgtype
+
+        strcpy(self.msg.msg[0], byte_params)
+        strcpy(self.msg.instrument_name[0], byte_instrument_name)
+
+    cpdef int schedule_message(AstridMessage self):
+        return send_message(self.msg[0])
+
+    def __dealloc__(self):
+        if self.msg is not NULL:
+            free(self.msg)
+
+
 cdef class MidiEvent:
     def __cinit__(self,
             double onset,
@@ -144,7 +173,14 @@ cdef class EventTriggerFactory:
         noteoff = MidiEvent(onset + length, 0, <char>NOTE_OFF, note, velocity, <char>channel)
 
         return [noteon, noteoff]
- 
+
+    def play(self, str instrument_name, double onset, *args, **kwargs):
+        params = ' '.join(map(str, args)) 
+        params += ' ' 
+        params += ' '.join([ '%s=%s' % (k, v) for k, v in kwargs.items() ])
+
+
+
 cdef class SessionParamBucket:
     """ params[key] to params.key
 

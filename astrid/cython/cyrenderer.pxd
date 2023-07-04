@@ -53,6 +53,16 @@ cdef extern from "astrid.h":
     cdef const int LPADCBUFSAMPLES
     cdef const char * LPADC_BUFFER_PATH
 
+    cdef enum LPMessageTypes:
+        LPMSG_EMPTY,
+        LPMSG_PLAY,
+        LPMSG_TRIGGER,
+        LPMSG_STOP_INSTRUMENT,
+        LPMSG_STOP_VOICE,
+        LPMSG_LOAD,
+        LPMSG_SHUTDOWN,
+        NUM_LPMESSAGETYPES
+
     ctypedef struct lpmsg_t:
         double timestamp
         size_t onset_delay

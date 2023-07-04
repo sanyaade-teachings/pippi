@@ -1,7 +1,7 @@
 #include "astrid.h"
 
 int main(int argc, char * argv[]) {
-    int device_id, note;
+    int device_id, note, i;
     lpmsg_t msg = {0};
 
     if(argc < 3) {
@@ -19,11 +19,6 @@ int main(int argc, char * argv[]) {
 
     if(lpmidi_add_msg_to_notemap(device_id, note, msg) < 0) {
         fprintf(stderr, "addnotemap: Could not add msg to notemap\n");
-        return 1;
-    }
-
-    if(lpmidi_print_notemap(device_id, note) < 0) {
-        fprintf(stderr, "addnotemap: Could not print notemap\n");
         return 1;
     }
 
