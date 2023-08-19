@@ -1,16 +1,12 @@
-#define MINIAUDIO_IMPLEMENTATION
-#ifdef __linux__
-#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
-#define MA_ENABLE_JACK
-#endif
-#define MA_NO_ENCODING
-#define MA_NO_DECODING
-#include "miniaudio/miniaudio.h"
 #include <hiredis/hiredis.h>
+#include <jack/jack.h>
 #include "astrid.h"
+#include "jack_helpers.h"
 
 
 static volatile int astrid_is_running = 1;
+jack_port_t * astrid_outport1, * astrid_outport2;
+jack_client_t * jack_client;
 lpscheduler_t * astrid_scheduler;
 sqlite3 * sessiondb;
 
@@ -74,7 +70,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             }
 
             /* Increment the message count */
-            msg.count += 1;
+            /*msg.count += 1;*/
 
             /* Get now */
             if(lpscheduler_get_now_seconds(&now) < 0) {
@@ -82,8 +78,10 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 now = 0;
             }
 
+            /*
             syslog(LOG_DEBUG, "DAC: Message type %d for %s arrived in buffer feed\n", msg.type, msg.instrument_name);
             syslog(LOG_DEBUG, "initiated=%f scheduled=%f voice_id=%ld\n", msg.initiated, msg.scheduled, msg.voice_id);
+            */
 
             processing_time_so_far = now - msg.initiated;
             onset_delay_in_seconds = fmax(0.0f, msg.scheduled - processing_time_so_far);
@@ -93,10 +91,13 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             /* Schedule the buffer for playback */
             scheduler_schedule_event(astrid_scheduler, buf, msg.onset_delay);
 
+            /*
             syslog(LOG_DEBUG, "DAC: scheduled event in mixer. processing_time_so_far=%f onset_delay_in_seconds=%f\n", processing_time_so_far, onset_delay_in_seconds);
+            */
 
             /* Mark the voice active on the first render and 
              * increment the render count if looping */
+            /*
             if(msg.count == 1) {
                 if(lpsessiondb_mark_voice_active(sessiondb, msg.voice_id) < 0) {
                     syslog(LOG_ERR, "DAC could not mark voice active in sessiondb. Error: (%d) %s\n", errno, strerror(errno));
@@ -106,6 +107,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                     syslog(LOG_ERR, "DAC could not increment voice render count in sessiondb. Error: (%d) %s\n", errno, strerror(errno));
                 }
             }
+            */
 
             /* If the buffer is flagged to loop, schedule the next render 
              * by placing the message onto the message scheduling priority 
@@ -118,8 +120,10 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
                 delay_frames = (size_t)(buf->length * 0.7f);
                 msg.initiated = now;
                 msg.scheduled = (delay_frames / (double)buf->samplerate);
+                /*
                 syslog(LOG_DEBUG, "scheduling next render with onset_delay %ld\n", msg.onset_delay);
                 syslog(LOG_DEBUG, "initiated=%f scheduled=%f voice_id=%ld\n", msg.initiated, msg.scheduled, msg.voice_id);
+                */
 
                 if(send_message(msg) < 0) {
                     syslog(LOG_ERR, "Could not schedule message for loop retriggering\n");
@@ -141,31 +145,23 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
  * It asks for samples from the mixer inside the scheduler 
  * and sends the mixed audio to the soundcard.
  */
-void miniaudio_callback(
-        ma_device * device, 
-             void * pOut, 
-    __attribute__((unused)) const void * pIn, 
-          ma_uint32 count
-) {
-    ma_uint32 i;
-    float * out;
-    int c;
-    lpdacctx_t * ctx;
+int audio_callback(jack_nframes_t nframes, void * arg) {
+    jack_nframes_t i;
+    jack_default_audio_sample_t * out1, * out2;
 
-    ctx = (lpdacctx_t *)device->pUserData;
-    out = (float *)pOut;
+    out1 = (jack_default_audio_sample_t *)jack_port_get_buffer(astrid_outport1, nframes);
+    out2 = (jack_default_audio_sample_t *)jack_port_get_buffer(astrid_outport2, nframes);
 
-    for(i=0; i < count; i++) {
-        lpscheduler_tick(ctx->s);
-        for(c=0; c < ASTRID_CHANNELS; c++) {
-            *out++ = (float)ctx->s->current_frame[c];
-        }
+    for(i=0; i < nframes; i++) {
+        lpscheduler_tick(astrid_scheduler);
+        out1[i] = astrid_scheduler->current_frame[0];
+        out2[i] = astrid_scheduler->current_frame[1];
     }
+
+    return 0;
 }
 
 int cleanup(
-    ma_device * playback, 
-    lpdacctx_t * ctx, 
     pthread_t buffer_feed_thread, 
     sqlite3 * sessiondb
 ) {
@@ -197,16 +193,13 @@ int cleanup(
     }
 
     syslog(LOG_INFO, "Closing audio thread...\n");
-    if(playback != NULL) ma_device_uninit(playback);
+    jack_client_close(jack_client);
 
     syslog(LOG_INFO, "Cleaning up scheduler...\n");
-    if(ctx != NULL) scheduler_destroy(ctx->s);
+    if(astrid_scheduler != NULL) scheduler_destroy(astrid_scheduler);
 
     syslog(LOG_INFO, "Closing sessiondb...\n");
     if(sessiondb != NULL) lpsessiondb_close(sessiondb);
-
-    syslog(LOG_INFO, "Freeing astrid context...\n");
-    if(ctx != NULL) free(ctx);
 
     syslog(LOG_INFO, "Done with cleanup!\n");
 
@@ -217,17 +210,12 @@ int cleanup(
 
 int main() {
     struct sigaction shutdown_action;
-    lpdacctx_t * ctx;
     lpcounter_t voice_id_counter;
     pthread_t buffer_feed_thread;
-    int device_id;
-    ma_uint32 playback_device_count, capture_device_count;
-    ma_device playback;
-    ma_device_info * playback_devices;
-    ma_device_info * capture_devices;
+    jack_status_t jack_status;
+    jack_options_t jack_options = JackNullOption;
 
     sessiondb = NULL;
-    ctx = NULL;
     openlog("astrid-dac", LOG_PID, LOG_USER);
 
     /* Set shutdown signal handlers */
@@ -245,7 +233,7 @@ int main() {
         exit(1);
     }
 
-    /* init scheduler and ctx 
+    /* init scheduler
      * 
      * The scheduler is shared between the miniaudio callback 
      * and astrid buffer feed threads. The buffer feed thread 
@@ -255,10 +243,6 @@ int main() {
      * flag buffers as having playback completed. 
      **/
     astrid_scheduler = scheduler_create(1, ASTRID_CHANNELS, ASTRID_SAMPLERATE);
-    ctx = (lpdacctx_t*)LPMemoryPool.alloc(1, sizeof(lpdacctx_t));
-    ctx->s = astrid_scheduler;
-    ctx->channels = ASTRID_CHANNELS;
-    ctx->samplerate = ASTRID_SAMPLERATE;
 
     /* Set up shared memory IPC for voice IDs */
     if(lpcounter_create(&voice_id_counter) < 0) {
@@ -284,59 +268,55 @@ int main() {
     }
 
     /* Start buffer feed thread */
-    if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, ctx) != 0) {
+    if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, NULL) != 0) {
         syslog(LOG_ERR, "Could not initialize buffer feed thread. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }
 
-    /* Set up the miniaudio device context */
-    ma_context audio_device_context;
-    if (ma_context_init(NULL, 0, NULL, &audio_device_context) != MA_SUCCESS) {
-        syslog(LOG_ERR, "Error while attempting to initialize miniaudio device context\n");
+    /* Set up JACK */
+    jack_client = jack_client_open("astrid-dac", jack_options, &jack_status, NULL);
+    print_jack_status(jack_status);
+    if(jack_client == NULL) {
+        syslog(LOG_ERR, "Could not open jack client. Client is NULL: %s\n", strerror(errno));
+
+        if((jack_status & JackServerFailed) == JackServerFailed) {
+            syslog(LOG_ERR, "Could not open jack client. Jack server failed with status %2.0x\n", jack_status);
+        } else {
+            syslog(LOG_ERR, "Could not open jack client. Unknown error: %s\n", strerror(errno));
+        }
         goto exit_with_error;
     }
 
-    /* Populate it with some devices */
-    if(ma_context_get_devices(&audio_device_context, &playback_devices, &playback_device_count, &capture_devices, &capture_device_count) != MA_SUCCESS) {
-        syslog(LOG_ERR, "Error while attempting to get devices\n");
-        return -1;
-    }
-
-    /* Get the selected device ID */
-    if((device_id = astrid_get_playback_device_id()) < 0) {
-        syslog(LOG_CRIT, "Could not get playback device ID\n");
+    if((jack_status & JackServerStarted) == JackServerStarted) {
+        syslog(LOG_INFO, "Jack server started!\n");
         goto exit_with_error;
     }
 
-    /* Setup and start miniaudio in playback mode */
-    ma_device_config audioconfig = ma_device_config_init(ma_device_type_playback);
-    audioconfig.playback.format = ma_format_f32;
-    audioconfig.playback.channels = ASTRID_CHANNELS;
-    audioconfig.playback.pDeviceID = &playback_devices[device_id].id;
-    audioconfig.sampleRate = ASTRID_SAMPLERATE;
-    audioconfig.dataCallback = miniaudio_callback;
-    audioconfig.pUserData = ctx;
+    jack_set_process_callback(jack_client, audio_callback, NULL);
+    astrid_outport1 = jack_port_register(jack_client, "outL", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+    astrid_outport2 = jack_port_register(jack_client, "outR", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
-    syslog(LOG_INFO, "Opening device ID %d\n", device_id);
-    if(ma_device_init(&audio_device_context, &audioconfig, &playback) != MA_SUCCESS) {
-        syslog(LOG_ERR, "Error while attempting to configure device %d for playback\n", device_id);
+    if((astrid_outport1 == NULL) || (astrid_outport2 == NULL)) {
+        syslog(LOG_ERR, "No more JACK ports available, shutting down...\n");
         goto exit_with_error;
     }
 
-    syslog(LOG_INFO, "Audio callback starting...\n");
-    ma_device_start(&playback);
+    if(jack_activate(jack_client) != 0) {
+        syslog(LOG_ERR, "Could not activate JACK client, shutting down...\n");
+        goto exit_with_error;
+    }
 
     syslog(LOG_INFO, "Astrid DAC is starting...\n");
     while(astrid_is_running) {
         /* Twiddle thumbs & tidy up */
-        usleep((useconds_t)100000);
-        scheduler_cleanup_nursery(ctx->s);
+        usleep((useconds_t)10000);
+        scheduler_cleanup_nursery(astrid_scheduler);
     }
 
-    return cleanup(&playback, ctx, buffer_feed_thread, sessiondb);
+    return cleanup(buffer_feed_thread, sessiondb);
 
 exit_with_error:
-    cleanup(&playback, ctx, buffer_feed_thread, sessiondb);
+    cleanup(buffer_feed_thread, sessiondb);
     syslog(LOG_ERR, "Exited with error\n");
     return 1;
 }

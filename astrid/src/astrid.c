@@ -102,9 +102,9 @@ int lpsessiondb_insert_voice(lpmsg_t msg) {
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
 
     /* Prepare the sql unsafely */
-    sqlsize = snprintf(NULL, 0, _sql, now, msg.timestamp, (int)msg.voice_id, msg.instrument_name, msg.msg)+1;
+    sqlsize = snprintf(NULL, 0, _sql, now, msg.initiated, (int)msg.voice_id, msg.instrument_name, msg.msg)+1;
     sql = calloc(1, sqlsize);
-    if(snprintf(sql, sqlsize, _sql, now, msg.timestamp, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
+    if(snprintf(sql, sqlsize, _sql, now, msg.initiated, (int)msg.voice_id, msg.instrument_name, msg.msg) < 0) {
         syslog(LOG_ERR, "Could not concat sql for insert. Error: %s\n", strerror(errno));
         return -1;
     }
@@ -157,6 +157,10 @@ int lpsessiondb_increment_voice_render_count(sqlite3 * db, int voice_id, size_t 
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
     now = ts.tv_sec * 1000000000LL + ts.tv_nsec;
+
+    if(count == SIZE_MAX) {
+        count = 0;
+    }
 
     sqlsize = snprintf(NULL, 0, "update voices set active=1, last_render=%lld, render_count=%ld where id=%d;", now, count, voice_id)+1;
     if((sql = calloc(1, sqlsize)) == NULL) {
@@ -214,10 +218,10 @@ int lpsessiondb_mark_voice_stopped(sqlite3 * db, int voice_id, size_t count) {
 /* THREAD SAFE
  * COUNTER TOOLS
  * *************/
-int lpcounter_read_and_increment(lpcounter_t * c) {
+ssize_t lpcounter_read_and_increment(lpcounter_t * c) {
     struct sembuf sop;
     size_t * counter;
-    int counter_value;
+    size_t counter_value;
 
     /* Aquire lock */
     sop.sem_num = 0;
@@ -231,6 +235,10 @@ int lpcounter_read_and_increment(lpcounter_t * c) {
     /* Read the current value */
     counter = shmat(c->shmid, NULL, 0);
     counter_value = *counter;
+
+    if(counter_value == SIZE_MAX) {
+        counter_value = 0;
+    }
 
     /* Increment the counter */
     *counter += 1;
@@ -308,29 +316,40 @@ int lpcounter_create(lpcounter_t * c) {
  * COMMUNICATION TOOLS
  * *******************/
 int lpipc_setid(char * path, int id) {
-    FILE * handle;
-    int count;
+    char val[20];
+    int fd;
 
-    handle = fopen(path, "w");
-    if(handle == NULL) {
-        syslog(LOG_ERR, "lpipc_setid fopen: %s. Error: %s\n", path, strerror(errno));
+    if((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_setid open: %s. Could not open id file for locking. Error: %s\n", path, strerror(errno));
         return -1;
     }
 
-    count = fprintf(handle, "%d", id);
-    if(count < 0) {
-        syslog(LOG_ERR, "lpipc_setid fprintf: %s. Error: %s\n", path, strerror(errno));
-        fclose(handle);
+    if(flock(fd, LOCK_EX) < 0) {
+        syslog(LOG_ERR, "lpipc_setid flock: %s. Could not lock id file. Error: %s\n", path, strerror(errno));
         return -1;
     }
 
-    fclose(handle);
+    snprintf(val, sizeof(val), "%d", id);
+
+    if(write(fd, val, strlen(val)) < 0) {
+        syslog(LOG_ERR, "lpipc_setid write: %s. Could not write to id file. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    if(flock(fd, LOCK_UN) < 0) {
+        syslog(LOG_ERR, "lpipc_setid flock: %s. Could not unlock id file. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    close(fd);
+
     return 0;
 }
 
+
 int lpipc_lockid(char * path) {
     int fd;
-    if((fd = open(path, O_RDWR))) {
+    if((fd = open(path, O_RDWR)) < 0) {
         syslog(LOG_ERR, "lpipc_lockid open: %s. Could not open id file for locking. Error: %s\n", path, strerror(errno));
         return -1;
     }
@@ -340,12 +359,12 @@ int lpipc_lockid(char * path) {
         return -1;
     }
 
-    return 0;
+    return fd;
 }
 
 int lpipc_unlockid(char * path) {
     int fd;
-    if((fd = open(path, O_RDWR))) {
+    if((fd = open(path, O_RDWR)) < 0) {
         syslog(LOG_ERR, "lpipc_lockid open: %s. Could not open id file for locking. Error: %s\n", path, strerror(errno));
         return -1;
     }
@@ -359,37 +378,69 @@ int lpipc_unlockid(char * path) {
 }
 
 int lpipc_getid(char * path) {
-    int handle, id = 0;
-    char * idp;
+    int fd, id = 0;
+    /*char * idp;*/
     struct stat st;
+    int bytes_read;
+    char val[20];
+
+    if(access(path, F_OK) != 0) {
+        if(lpipc_setid(path, 0) < 0) {
+            syslog(LOG_ERR, "lpipc_getid could not write new id file: %s. Error: %s\n", path, strerror(errno));
+            return -1;
+        }
+        return 0;
+    }
 
     /* Read the identifier from the well known file. mmap speeds 
      * up access when ids need to be fetched when timing matters */
-    handle = open(path, O_RDONLY);
-    if(handle < 0) {
+    fd = open(path, O_RDONLY);
+    if(fd < 0) {
         syslog(LOG_ERR, "lpipc_getid could not open path: %s. Error: %s\n", path, strerror(errno));
+        close(fd);
         return -1;
     }
 
-    /* Get the file size */
-    if(fstat(handle, &st) == -1) {
+    if(flock(fd, LOCK_EX) < 0) {
+        syslog(LOG_ERR, "lpipc_getid flock: %s. Could not lock id file. Error: %s\n", path, strerror(errno));
+        close(fd);
+        return -1;
+    }
+
+    if(fstat(fd, &st) == -1) {
         syslog(LOG_ERR, "lpipc_getid fstat: %s. Error: %s\n", path, strerror(errno));
-        close(handle);
+        close(fd);
         return -1;
     }
 
-    /* Map the file into memory */
-    idp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, handle, 0);
+    if((bytes_read = read(fd, val, st.st_size)) < 0) {
+        syslog(LOG_ERR, "lpipc_getid read: %s. Could not read from id file. Error: %s\n", path, strerror(errno));
+        close(fd);
+        return -1;
+    }
+
+    val[bytes_read] = '\0';
+    id = atoi(val);
+
+    /*
+    idp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
     if(idp == MAP_FAILED) {
         syslog(LOG_ERR, "lpipc_getid mmap: %s. (size: %d) Error: (%d) %s\n", path, (int)st.st_size, errno, strerror(errno));
-        close(handle);
+        close(fd);
         return -1;
     }
 
-    /* Copy the identifier from the mmaped file & cleanup */
     sscanf(idp, "%d", &id);
     munmap(idp, st.st_size);
-    close(handle);
+    */
+
+    if(flock(fd, LOCK_UN) < 0) {
+        syslog(LOG_ERR, "lpipc_setid flock: %s. Could not unlock id file. Error: %s\n", path, strerror(errno));
+        close(fd);
+        return -1;
+    }
+
+    close(fd);
 
     return id;
 }
@@ -786,6 +837,83 @@ int lpadc_create() {
     return shmid;
 }
 
+int lpadc_write_2d_block(const float ** block, int channels, size_t blocksize_in_frames, int shmid) {
+    size_t write_pos, insert_pos;
+    size_t i;
+    int c;
+    lpipc_buffer_t * adcbuf;
+    float * blockp;
+    float sample = 0;
+
+    /* Aquire a lock on the buffer */
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf, shmid) < 0) {
+        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
+        return -1;
+    }
+
+    write_pos = adcbuf->pos / channels;
+
+    for(c=0; c < channels; c++) {
+        blockp = (float *)block;
+
+        /* Copy the block of samples */
+        for(i=0; i < blocksize_in_frames; i++) {
+            insert_pos = (write_pos+i) % LPADCBUFSAMPLES;
+            sample = *blockp++;
+            adcbuf->data[insert_pos] = sample;
+        }
+    }
+
+    /* Increment the write position */
+    write_pos += blocksize_in_frames * channels;
+    while(write_pos >= LPADCBUFSAMPLES) {
+        write_pos -= LPADCBUFSAMPLES;
+    }
+
+    /* Store the new write position */
+    adcbuf->pos = write_pos;
+
+    /*syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);*/
+
+    /* Release the lock on the ADC buffer shm */
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
+        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpadc_aquire(lpipc_buffer_t ** adcbuf, int shmid) {
+    lpipc_buffer_t * adcbufp;
+    /* Aquire a lock on the buffer */
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbufp, shmid) < 0) {
+        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
+        return -1;
+    }
+
+    *adcbuf = adcbufp;
+
+    return 0;
+}
+
+int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_samples) {
+    /* Increment the write position */
+    adcbuf->pos += increment_in_samples;
+    while(adcbuf->pos >= LPADCBUFSAMPLES) {
+        adcbuf->pos -= LPADCBUFSAMPLES;
+    }
+
+    /* Release the lock on the ADC buffer shm */
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
+        syslog(LOG_ERR, "Could not release ADC buffer shm after increment\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+
 int lpadc_write_block(const void * block, size_t blocksize_in_samples, int shmid) {
     size_t write_pos, insert_pos;
     size_t i;
@@ -819,7 +947,7 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples, int shmid
     /* Store the new write position */
     adcbuf->pos = write_pos;
 
-    syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);
+    /*syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);*/
 
     /* Release the lock on the ADC buffer shm */
     if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
@@ -905,6 +1033,7 @@ int lpadc_destroy() {
     return 0;
 }
 
+
 /* MIDI STATUS IPC
  * GETTERS & SETTERS
  * ****************/
@@ -927,21 +1056,13 @@ int lpmidi_setcc(int device_id, int cc, int value) {
 }
 
 int lpmidi_getcc(int device_id, int cc) {
-    char * cc_path;
+    char cc_path[50];
     size_t path_length;
-    int value;
 
     path_length = snprintf(NULL, 0, ASTRID_MIDI_CCBASE_PATH, device_id, cc) + 1;
-    cc_path = (char *)calloc(1, path_length);
     snprintf(cc_path, path_length,  ASTRID_MIDI_CCBASE_PATH, device_id, cc);
 
-    value = lpipc_getid(cc_path);
-    if(value < 0) {
-        value = 0;
-        lpipc_setid(cc_path, value); 
-    }
-
-    return value;
+    return lpipc_getid(cc_path);
 }
 
 int lpmidi_setnote(int device_id, int note, int velocity) {
@@ -965,19 +1086,12 @@ int lpmidi_setnote(int device_id, int note, int velocity) {
 int lpmidi_getnote(int device_id, int note) {
     char * note_path;
     size_t path_length;
-    int value;
 
     path_length = snprintf(NULL, 0, ASTRID_MIDI_NOTEBASE_PATH, device_id, note) + 1;
     note_path = (char *)calloc(1, path_length);
     snprintf(note_path, path_length,  ASTRID_MIDI_NOTEBASE_PATH, device_id, note);
 
-    value = lpipc_getid(note_path);
-    if(value < 0) {
-        value = 0;
-        lpipc_setid(note_path, value); 
-    }
-
-    return value;
+    return lpipc_getid(note_path);
 }
 
 /* MIDI trigger maps for noteon 
@@ -1105,7 +1219,7 @@ int lpmidi_print_notemap(int device_id, int note) {
 
         printf("\nmap_index: %d\n", map_index);
         printf("bytes_read: %d, read_pos: %ld, notemap_size: %ld\n", bytes_read, read_pos, notemap_size);
-        printf("msg.type: %d msg.timestamp: %f msg.instrument_name: %s\n", msg.type, msg.timestamp, msg.instrument_name);
+        printf("msg.type: %d msg.initiated: %f msg.instrument_name: %s\n", msg.type, msg.initiated, msg.instrument_name);
         if(msg.type == LPMSG_EMPTY) {
             printf("this message is empty!\n");
         }
@@ -1128,6 +1242,7 @@ int lpmidi_trigger_notemap(int device_id, int note) {
     struct stat statbuf;
     size_t notemap_path_length, notemap_size, read_pos;
     char * notemap_path;
+    double now = 0;
     lpmsg_t msg = {0};
 
     notemap_path_length = snprintf(NULL, 0, ASTRID_MIDIMAP_NOTEBASE_PATH, device_id, note) + 1;
@@ -1158,6 +1273,13 @@ int lpmidi_trigger_notemap(int device_id, int note) {
 
         if(msg.type == LPMSG_EMPTY) continue;
 
+        if(lpscheduler_get_now_seconds(&now) < 0) {
+            syslog(LOG_ERR, "Could not get now seconds during notemap trigger. Error: %s\n", strerror(errno));
+            return -1;
+        }
+
+        msg.initiated = now;
+
         syslog(LOG_INFO, "Sending message from lpmidi trigger notemap\n");
         if(send_message(msg) < 0) {
             syslog(LOG_ERR, "Could not schedule msg for sending during notemap trigger. Error: %s\n", strerror(errno));
@@ -1174,6 +1296,30 @@ int lpmidi_trigger_notemap(int device_id, int note) {
     free(notemap_path);
 
     return 0;
+}
+
+/* VOICES
+ * ******/
+ssize_t astrid_get_voice_id() {
+    lpcounter_t c;
+    ssize_t voice_id = 0;
+
+    if((c.semid = lpipc_getid(LPVOICE_ID_SEMID)) < 0) {
+        syslog(LOG_ERR, "Problem trying to get voice ID sempahore handle when constructing play message from command input\n");
+        return -1;
+    }
+
+    if((c.shmid = lpipc_getid(LPVOICE_ID_SHMID)) < 0) {
+        syslog(LOG_ERR, "Problem trying to get voice ID shared memory handle when constructing play message from command input\n");
+        return -1;
+    }
+
+    if((voice_id = lpcounter_read_and_increment(&c)) < 0) {
+        syslog(LOG_ERR, "Problem trying to get voice ID when constructing play message from command input\n");
+        return -1;
+    }
+
+    return voice_id;
 }
 
 
@@ -1475,6 +1621,8 @@ int send_message(lpmsg_t msg) {
     attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
     attr.mq_msgsize = sizeof(lpmsg_t);
 
+    /*syslog(LOG_DEBUG, "Sending message type %d to %s\n", msg.type, msg.instrument_name);*/
+
     if((mqd = mq_open(ASTRID_MSGQ_PATH, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
         syslog(LOG_ERR, "send_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
         return -1;
@@ -1489,6 +1637,8 @@ int send_message(lpmsg_t msg) {
         syslog(LOG_ERR, "send_message close: Error closing message relay queue. Error: %s\n", strerror(errno));
         return -1; 
     }
+
+    /*syslog(LOG_DEBUG, "Finished sending message type %d to %s\n", msg.type, msg.instrument_name);*/
 
     return 0;
 }
@@ -1608,13 +1758,16 @@ int astrid_get_capture_device_id() {
 }
 
 int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg) {
-    int bytesread, a, i, length, voice_id;
+    int bytesread, a, i, length, voice_id, counter_value;
     char msgtype;
     char message_params[LPMAXMSG] = {0};
     char instrument_name[LPMAXNAME] = {0};
-    size_t instrument_name_length;
-    lpcounter_t c;
+    size_t instrument_name_length, counter_path_length;
+    char * counter_name;
+    char counter_path[50];
 
+    voice_id = 0;
+    instrument_name_length = 0;
     msgtype = argv[arg_offset + 1][0];
 
     /* Prepare the message param string */
@@ -1661,6 +1814,10 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
             msg->type = LPMSG_SHUTDOWN;
             break;
 
+        case SET_COUNTER_MESSAGE:
+            msg->type = LPMSG_SET_COUNTER;
+            break;
+
         default:
             syslog(LOG_CRIT, "Bad msgtype! %c\n", msgtype);
             return -1;
@@ -1672,20 +1829,26 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
             syslog(LOG_ERR, "Invalid voice ID passed with STOP message. Error: (%d) %s\n", errno, strerror(errno));
             return -1;
         }
+
+    } else if(msg->type == LPMSG_SET_COUNTER) {
+        counter_name = argv[arg_offset + 2];
+        if((counter_value = atoi(argv[arg_offset + 3])) < 0) {
+            syslog(LOG_ERR, "Invalid counter value passed with STOP message. Error: (%d) %s\n", errno, strerror(errno));
+            return -1;
+        }
+
+        counter_path_length = snprintf(NULL, 0, ASTRID_IPC_IDBASE_PATH, counter_name) + 1;
+        snprintf(counter_path, counter_path_length,  ASTRID_IPC_IDBASE_PATH, counter_name);
+
+        if(lpipc_setid(counter_path, counter_value) < 0) {
+            syslog(LOG_ERR, "Could not store counter value at path %s. Error: (%d) %s\n", counter_path, errno, strerror(errno));
+            return -1;
+        }
+
     } else {
         /* Get the voice ID from the voice ID counter */
-        if((c.semid = lpipc_getid(LPVOICE_ID_SEMID)) < 0) {
-            syslog(LOG_ERR, "Problem trying to get voice ID sempahore handle when constructing play message from command input\n");
-            return -1;
-        }
-
-        if((c.shmid = lpipc_getid(LPVOICE_ID_SHMID)) < 0) {
-            syslog(LOG_ERR, "Problem trying to get voice ID shared memory handle when constructing play message from command input\n");
-            return -1;
-        }
-
-        if((voice_id = lpcounter_read_and_increment(&c)) < 0) {
-            syslog(LOG_ERR, "Problem trying to get voice ID when constructing play message from command input\n");
+        if((voice_id = astrid_get_voice_id()) < 0) {
+            syslog(LOG_ERR, "Error getting voice ID: (%d) %s\n", errno, strerror(errno));
             return -1;
         }
     }
@@ -1992,16 +2155,15 @@ static inline void scheduler_update(lpscheduler_t * s) {
         current = s->playing_stack_head;
         while(current->next != NULL) {
             next = current->next;
-            if(current->pos >= current->buf->length-1) {
+            if(current->buf != NULL && current->pos >= current->buf->length-1) {
                 stop_playing(s, current);
             }
             current = (lpevent_t *)next;
         }
-        if(current->pos >= current->buf->length-1) {
+
+        if(current->buf != NULL && current->pos >= current->buf->length-1) {
             stop_playing(s, current);
         }
-
-
     }
 }
 
@@ -2022,14 +2184,14 @@ static inline void scheduler_mix_buffers(lpscheduler_t * s) {
 
         current = s->playing_stack_head;
         while(current->next != NULL) {
-            if(current->pos < current->buf->length) {
+            if(current->buf != NULL && current->pos < current->buf->length) {
                 bufc = c % current->buf->channels;
                 sample += current->buf->data[current->pos * current->buf->channels + bufc];
             }
             current = (lpevent_t *)current->next;
         }
 
-        if(current->pos < current->buf->length) {
+        if(current->buf != NULL && current->pos < current->buf->length) {
             bufc = c % current->buf->channels;
             sample += current->buf->data[current->pos * current->buf->channels + bufc];
         }
@@ -2096,7 +2258,7 @@ void lpscheduler_tick(lpscheduler_t * s) {
     }
 }
 
-void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay) {
+void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t onset_delay) {
     lpevent_t * e;
 
     if(s->nursery_head != NULL) {
@@ -2113,7 +2275,7 @@ void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay)
 
     e->buf = buf;
     e->pos = 0;
-    e->onset = s->ticks + delay;
+    e->onset = s->ticks + onset_delay;
 
     start_waiting(s, e);
 }
@@ -2182,7 +2344,7 @@ void scheduler_cleanup_nursery(lpscheduler_t * s) {
 
     if(s->nursery_head != NULL) {
         current = s->nursery_head;
-        while(current->next != NULL) {
+        while(current != NULL && current->next != NULL) {
             if(current->buf != NULL) {
                 LPBuffer.destroy(current->buf);
                 current->buf = NULL;

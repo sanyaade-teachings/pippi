@@ -14,7 +14,7 @@ import warnings
 
 import rtmidi
 from rtmidi.midiutil import open_midioutput
-from rtmidi.midiconstants import NOTE_ON, NOTE_OFF, CONTROL_CHANGE
+from rtmidi.midiconstants import NOTE_ON, NOTE_OFF, CONTROL_CHANGE, PROGRAM_CHANGE, BANK_SELECT
 
 MIDIEVENTQ_PATH = '/tmp/astrid-miditriggerq'
 MIDIDEVICE_PATH = '/tmp/astrid-default-midiout-device'
@@ -33,10 +33,13 @@ if not logger.handlers:
 class MIDIEvent(ctypes.Structure):
     _fields_ = [
         ('onset', ctypes.c_double),
+        ('now', ctypes.c_double),
         ('length', ctypes.c_double),
         ('type', ctypes.c_ubyte),
         ('note', ctypes.c_ubyte),
         ('velocity', ctypes.c_ubyte),
+        ('program', ctypes.c_ubyte),
+        ('bank', ctypes.c_ubyte),
         ('channel', ctypes.c_ubyte),
     ]
 
@@ -92,12 +95,15 @@ def relay_thread_comrade(q, stop_event):
             e = se.event
 
             try:
+                #out.send_message([CONTROL_CHANGE | e.channel, BANK_SELECT_MSB, e.bank_msb])
+                #out.send_message([CONTROL_CHANGE | e.channel, BANK_SELECT_LSB, e.bank_lsb])
+                out.send_message([PROGRAM_CHANGE | e.channel, max(0, e.program-1)])
                 out.send_message([e.type | e.channel, e.note, e.velocity])
             except Exception as e:
                 logger.error('Could not send midi out message %s' % str(e))
                 break
 
-            #logger.info('MIDI scheduler: sent message %s' % str(e))
+            logger.info('MIDI scheduler: sent message %s' % str(e))
     del out
 
 def event_thread_comrade(pq, stop_event):
@@ -117,10 +123,10 @@ def event_thread_comrade(pq, stop_event):
             #assert(len(event_bytes) == ctypes.sizeof(MIDIEvent))
             event = MIDIEvent.from_buffer_copy(event_bytes)
 
-            #logger.info('Got event on midiq %s' % event)
-            now = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
-            #logger.info('Sending MIDI event to pq %s' % str(event))
-            pq.put(ScheduledEvent(now + event.onset, event))
+            logger.info('Got event on midiq %s' % event)
+            #now = time.clock_gettime(time.CLOCK_MONOTONIC_RAW)
+            logger.info('Sending MIDI event to pq %s' % str(event))
+            pq.put(ScheduledEvent(event.now + event.onset, event))
         except Exception as e:
             logger.error('Error reading from midiq: %s' % e)
 

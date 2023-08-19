@@ -51,6 +51,8 @@ cdef extern from "astrid.h":
     cdef const int NOTE_OFF
     cdef const int CONTROL_CHANGE
     cdef const int LPADCBUFSAMPLES
+    cdef const int ASTRID_SAMPLERATE
+    cdef const int ASTRID_CHANNELS
     cdef const char * LPADC_BUFFER_PATH
 
     cdef enum LPMessageTypes:
@@ -64,7 +66,10 @@ cdef extern from "astrid.h":
         NUM_LPMESSAGETYPES
 
     ctypedef struct lpmsg_t:
-        double timestamp
+        double initiated;     
+        double scheduled;     
+        double completed;     
+        double max_processing_time;     
         size_t onset_delay
         size_t voice_id
         size_t count
@@ -74,10 +79,14 @@ cdef extern from "astrid.h":
 
     ctypedef struct lpmidievent_t:
         double onset
+        double now
         double length
         char type
         char note
         char velocity
+        char program
+        char bank_msb
+        char bank_lsb
         char channel
 
     int lpadc_create()
@@ -87,6 +96,7 @@ cdef extern from "astrid.h":
     int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES], int adc_shmid)
 
     int lpipc_getid(char * path)
+    ssize_t astrid_get_voice_id()
 
     int send_message(lpmsg_t msg)
 
@@ -102,9 +112,13 @@ cdef extern from "astrid.h":
     int lpscheduler_get_now_seconds(double * now)
 
 
+cdef class MessageEvent:
+    cdef lpmsg_t * msg
+    cpdef int schedule(MessageEvent self, double now)
+
 cdef class MidiEvent:
     cdef lpmidievent_t * event
-    cpdef double schedule_event(MidiEvent self, int qfd)
+    cpdef int schedule(MidiEvent self, double now)
 
 cdef class SessionParamBucket:
     cdef object _bus
@@ -114,7 +128,7 @@ cdef class ParamBucket:
     cdef str _play_params
 
 cdef class EventTriggerFactory:
-    cpdef midi(self, double onset, double length, double freq, double amp, int channel=*, int device=*)
+    cpdef midi(self, double onset, double length, double freq=*, double amp=*, int note=*, int program=*, int bank_msb=*, int bank_lsb=*, int channel=*, int device=*)
 
 cdef class MidiEventListenerProxy:
     cpdef float cc(self, int cc, int device_id=*)
@@ -134,15 +148,17 @@ cdef class EventContext:
     cdef public int tick
     cdef public int vid
     cdef public int adc_shmid
+    cdef public double now
+    cdef public double max_processing_time
 
 cdef class Instrument:
     cdef public str name
     cdef public str path
     cdef public object renderer
-    cdef public object sounds
     cdef public dict cache
     cdef public size_t last_reload
     cdef public int adc_shmid
+    cdef public double max_processing_time
     cpdef int get_adc_shmid(self)
 
 cdef tuple collect_players(object instrument)

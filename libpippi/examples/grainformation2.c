@@ -8,6 +8,7 @@ int main() {
     lpbuffer_t * snd;
     lpbuffer_t * out;
     lpbuffer_t * pw;
+    int window_type;
 
     lpmultishapeosc_t * cutoffs;
     lpformation_t * formation;
@@ -15,6 +16,7 @@ int main() {
     lpfloat_t cutoff;
     lpfloat_t ys[CHANNELS];
 
+    window_type = WIN_HANN;
     length = 10 * SR;
     numgrains = 1;
 
@@ -26,7 +28,7 @@ int main() {
     out = LPBuffer.create(length, CHANNELS, SR);
     snd = LPSoundFile.read("../tests/sounds/living.wav");
 
-    formation = LPFormation.create(numgrains, SR/4.f, SR/4.f, length, CHANNELS, SR);
+    formation = LPFormation.create(window_type, numgrains, SR/4.f, SR/4.f, length, CHANNELS, SR, NULL);
     formation->speed = 1.f;
 
     cutoffs = LPShapeOsc.multi(4, WT_COS, WT_TRI, WT_SINE, WT_SINE);

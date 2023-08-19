@@ -138,6 +138,9 @@ microsound-examples:
 	echo "Building grainformation2.c example...";
 	gcc $(LPFLAGS) examples/grainformation2.c $(LPSOURCES) $(LPLIBS) -o build/grainformation2
 
+	echo "Building grainformation3.c example...";
+	gcc $(LPFLAGS) examples/grainformation3.c $(LPSOURCES) $(LPLIBS) -o build/grainformation3
+
 convolution-examples:
 	mkdir -p build renders
 

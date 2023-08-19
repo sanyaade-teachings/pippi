@@ -64,6 +64,9 @@ cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow
 cpdef list snap(list source, double mult=0, object pattern=None):
     return lists.snap(source, mult, pattern)
 
+cpdef double tolog(double value, int base=10):
+    return (pow(base, value) - 1) / (base - 1)
+
 cpdef SoundBuffer mix(list sounds, align_end=False):
     """ Mix a list of sounds into a new sound
     """
@@ -206,6 +209,11 @@ cpdef SoundBuffer read(object filename, double length=-1, int offset=0):
 
 cpdef list readall(str path, double length=-1, int offset=0):
     return [ read(filename, length, offset) for filename in Path('.').glob(path) ]
+
+cpdef SoundBuffer readchoice(str path):
+    soundpaths = list(Path('.').glob(path))
+    soundpath = choice(soundpaths)
+    return read(soundpath)
 
 cpdef double rand(double low=0, double high=1):
     return _rand.rand(low, high)

@@ -1,5 +1,99 @@
-from pippi.soundbuffer cimport SoundBuffer
+cimport cython
+cimport numpy as np
+import numpy as np
 
+from pippi.soundbuffer cimport SoundBuffer
+from pippi.wavetables cimport Wavetable, to_window
+
+np.import_array()
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef inline double _linear_pos(double[:] data, double phase) nogil:
+    cdef int dlength = <int>len(data)
+    phase *= <double>(dlength-1)
+
+    if dlength == 1:
+        return data[0]
+
+    elif dlength < 1:
+        return 0
+
+    cdef double frac = phase - <long>phase
+    cdef long i = <long>phase
+    cdef double a, b
+
+    if i >= dlength-1:
+        return 0
+
+    a = data[i]
+    b = data[i+1]
+
+    return (1.0 - frac) * a + (frac * b)
+
+cdef lpbuffer_t * to_lpbuffer_window_from_wavetable(Wavetable window):
+    cdef lpbuffer_t * win
+    cdef int i, length
+
+    length = len(window.data)
+    win = LPBuffer.create(length, 1, 48000)
+
+    for i in range(length):
+        win.data[i] = <lpfloat_t>window.data[i]
+
+    return win
+
+cdef lpbuffer_t * to_lpbuffer_window_from_soundbuffer(SoundBuffer window):
+    cdef lpbuffer_t * win
+    cdef int i, length
+
+    length = len(window.frames)
+    win = LPBuffer.create(4096, 1, 48000)
+
+    for i in range(length):
+        win.data[i] = <lpfloat_t>window.frames[i,0]
+
+    return win
+
+cdef int to_window_flag(str window_name=None):
+    if window_name == 'sine':
+        return WIN_SINE
+
+    if window_name == 'sinein':
+        return WIN_SINEIN
+
+    if window_name == 'sineout':
+        return WIN_SINEOUT
+
+    if window_name == 'cos':
+        return WIN_COS
+
+    if window_name == 'tri':
+        return WIN_TRI
+
+    if window_name == 'phasor':
+        return WIN_PHASOR
+
+    if window_name == 'hann':
+        return WIN_HANN
+
+    if window_name == 'hannin':
+        return WIN_HANNIN
+
+    if window_name == 'hannout':
+        return WIN_HANNOUT
+
+    if window_name == 'rnd':
+        return WIN_RND
+
+    if window_name == 'saw':
+        return WIN_SAW
+
+    if window_name == 'rsaw':
+        return WIN_RSAW
+
+    return WIN_HANN
 
 cdef class Cloud2:
     def __cinit__(self, 
@@ -13,82 +107,82 @@ cdef class Cloud2:
             object grainlength=0.2, 
             object grid=None,
             object mask=None,
+            int numgrains=2,
             unsigned int wtsize=4096,
         ):
 
+        cdef size_t i, c, sndlength
+        cdef lpbuffer_t * win
+        cdef int window_type
+
         self.channels = snd.channels
         self.samplerate = snd.samplerate
-
-        """
-        if window is None:
-            window = 'sine'
-        self.window = to_window(window)
-
-        if position is None:
-            self.position = Wavetable('phasor', 0, 1, window=True).data
-        else:
-            self.position = to_window(position)
-
-        self.amp = to_window(amp)
-        self.speed = to_window(speed)
-        self.spread = to_window(spread)
-        self.jitter = to_wavetable(jitter)
         self.grainlength = to_window(grainlength)
+
+        if isinstance(window, SoundBuffer):
+            window_type = WIN_USER
+            win = to_lpbuffer_window_from_soundbuffer(window)
+
+        elif isinstance(window, Wavetable):
+            window_type = WIN_USER
+            win = to_lpbuffer_window_from_wavetable(window)
+
+        else:
+            window_type = to_window_flag(window)
+            win = NULL
 
         if grid is None:
             self.grid = np.multiply(self.grainlength, 0.3)
         else:
             self.grid = to_window(grid)
 
-        if mask is None:
-            self.has_mask = False
-        else:
-            self.has_mask = True
-            self.mask = array.array('i', mask)
-        """
-
-        self.snd = snd.frames
-
-    def play(self, double length):
-        cdef size_t i, c, sndlength, framelength, numgrains, maxgrainlength, mingrainlength
-        cdef lpbuffer_t * snd
-        cdef SoundBuffer out
-        cdef lpformation_t * formation
-
-        sndlength = <size_t>len(self.snd)
-        framelength = <size_t>(length * self.samplerate)
-        numgrains = 20
-        maxgrainlength = 4800
-        mingrainlength = 48
-
-        snd = LPBuffer.create(sndlength, self.channels, self.samplerate)
-        out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
-
-        print(framelength, len(out.frames))
+        sndlength = <size_t>len(snd.frames)
+        srcbuf = LPBuffer.create(sndlength, self.channels, self.samplerate)
 
         for i in range(sndlength):
             for c in range(self.channels):
-                snd.data[i * self.channels + c] = self.snd[i, c]
+                srcbuf.data[i * self.channels + c] = snd.frames[i, c]
 
-        formation = LPFormation.create(
+        self.formation = LPFormation.create(
+                window_type,
                 numgrains, 
-                maxgrainlength, 
-                mingrainlength, 
+                0, 
+                0, 
                 sndlength, 
                 self.channels, 
-                self.samplerate
+                self.samplerate,
+                win
         )
 
-        LPRingBuffer.write(formation.rb, snd)
+        LPRingBuffer.write(self.formation.rb, srcbuf)
+        LPBuffer.destroy(srcbuf)
+
+    def __dealloc__(self):
+        if self.formation != NULL:
+            LPFormation.destroy(self.formation)
+
+    def play(self, double length):
+        cdef size_t i, c, framelength
+        cdef SoundBuffer out
+        cdef size_t maxgrainlength, mingrainlength
+        cdef double pos=0, gridphase=0
+
+        framelength = <size_t>(length * self.samplerate)
+        out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
 
         for i in range(framelength):
-            LPFormation.process(formation)
-            for c in range(self.channels):
-                out.frames[i, c] = formation.current_frame.data[c]
+            pos = <double>i / framelength
+            self.formation.maxlength = <size_t>(_linear_pos(self.grainlength, pos) * self.samplerate)
+            self.formation.minlength = self.formation.maxlength
+            self.formation.pos = gridphase / length
 
-        LPBuffer.destroy(snd)
-        LPFormation.destroy(formation)
+            LPFormation.process(self.formation)
+            for c in range(self.channels):
+                out.frames[i, c] = self.formation.current_frame.data[c]
+
+            gridphase += _linear_pos(self.grid, pos)
+            while gridphase >= length:
+                gridphase -= length
 
         return out
-
 

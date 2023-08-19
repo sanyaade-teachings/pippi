@@ -11,6 +11,30 @@ import array
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
+cdef inline double _linear_pos(double[:] data, double phase) nogil:
+    cdef int dlength = <int>len(data)
+    phase *= <double>(dlength-1)
+
+    if dlength == 1:
+        return data[0]
+
+    elif dlength < 1:
+        return 0
+
+    cdef double frac = phase - <long>phase
+    cdef long i = <long>phase
+    cdef double a, b
+
+    if i >= dlength-1:
+        return 0
+
+    a = data[i]
+    b = data[i+1]
+
+    return (1.0 - frac) * a + (frac * b)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 @cython.cdivision(True)
 cdef double[:,:] _speed(double speed, double[:,:] original, double[:,:] out, int channels) nogil:
     cdef unsigned int inlength = len(original)
@@ -96,6 +120,8 @@ cdef class Cloud:
         cdef unsigned int masklength = 0
         cdef unsigned int count = 0
 
+        cdef int i, c
+
         cdef double minspeed = min(self.speed)
         cdef unsigned long maxgrainlength = <unsigned long>(max(self.grainlength) * self.samplerate)
         cdef double[:,:] grain = np.zeros((maxgrainlength, self.channels), dtype='d')
@@ -105,30 +131,65 @@ cdef class Cloud:
         if self.has_mask:
             masklength = <unsigned int>len(self.mask)
 
+        cdef int grain_window_index
+        cdef double grain_window_pos
+        cdef double grain_window_frac
+
         while pos <= 1:
             write_pos = <unsigned int>(pos * write_boundry)
-            write_jitter = <int>(interpolation._linear_pos(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
+            write_jitter = <int>(_linear_pos(self.jitter, pos) * (rand()/<double>RAND_MAX) * self.samplerate)
             write_pos += max(-write_jitter, write_jitter)
 
             if self.has_mask and self.mask[<int>(count % masklength)] == 0:
-                pos += interpolation._linear_pos(grid, pos)
+                pos += _linear_pos(grid, pos)
                 count += 1
                 continue
 
-            grainlength = <unsigned int>(interpolation._linear_pos(self.grainlength, pos) * self.samplerate)
+            grainlength = <unsigned int>(_linear_pos(self.grainlength, pos) * self.samplerate)
             if write_pos + grainlength > write_boundry:
                 break
 
-            speed = interpolation._linear_pos(self.speed, pos)
-            read_pos = <unsigned int>(interpolation._linear_pos(self.position, pos) * (read_boundry-grainlength))
-            spread = interpolation._linear_pos(self.spread, pos)
+            speed = _linear_pos(self.speed, pos)
+            read_pos = <unsigned int>(_linear_pos(self.position, pos) * (read_boundry-grainlength))
+            spread = _linear_pos(self.spread, pos)
             panpos = (rand()/<double>RAND_MAX) * spread + (0.5 - (spread * 0.5))
             pans = [panpos, 1-panpos]
 
             for i in range(grainlength):
                 grainpos = <double>i / (grainlength-1)
-                amp = <double>interpolation._linear_pos(self.amp, pos)
-                amp *= interpolation._linear_pos(self.window, grainpos) 
+                amp = <double>_linear_pos(self.amp, pos)
+
+                """
+                cdef int dlength = <int>len(data)
+                phase *= <double>(dlength-1)
+
+                if dlength == 1:
+                    return data[0]
+
+                elif dlength < 1:
+                    return 0
+
+                cdef double frac = phase - <long>phase
+                cdef long i = <long>phase
+                cdef double a, b
+
+                if i >= dlength-1:
+                    return 0
+
+                a = data[i]
+                b = data[i+1]
+
+                return (1.0 - frac) * a + (frac * b)
+                """
+
+                grain_window_pos = grainpos * (len(self.window)-2)
+                grain_window_index = <int>grain_window_pos
+                grain_window_frac = grain_window_pos - grain_window_index
+
+                amp *= (1.0 - grain_window_frac) * self.window[grain_window_index] + (grain_window_frac * self.window[grain_window_index+1])
+        
+                #amp *= _linear_pos(self.window, grainpos) 
+
                 if read_pos + i > read_boundry:
                     break
 
@@ -155,7 +216,7 @@ cdef class Cloud:
                     for c in range(self.channels):
                         out[write_pos+i, c] += grain[i,c]
 
-            pos += interpolation._linear_pos(grid, pos)
+            pos += _linear_pos(grid, pos)
             count += 1
 
         return SoundBuffer(out, channels=self.channels, samplerate=self.samplerate)

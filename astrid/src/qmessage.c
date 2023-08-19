@@ -20,10 +20,12 @@ int main(int argc, char * argv[]) {
         }
 
         /* Record the voice in the sessiondb */
+        /*
         if(lpsessiondb_insert_voice(msg) < 0) {
             fprintf(stderr, "qmessage: Could not insert voice record in sessiondb...\n");
             return 1;
         }
+        */
     } else {
         /* Send the message to the dac message q */
         if(send_message(msg) < 0) {

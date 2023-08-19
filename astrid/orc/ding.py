@@ -23,7 +23,7 @@ def play(ctx):
     # Generate a list of floats: frequencies to choose from
     # the degrees function turns a list of scale degrees into 
     # a list of frequencies.
-    freqs = tune.degrees([dsp.randint(1,11)], key='c', scale=tune.MINOR, octave=dsp.randint(2,5))
+    freqs = tune.degrees([dsp.randint(1,11)], key='c', scale=tune.MINOR, octave=dsp.randint(4,5))
 
     # Render a buffer of output
     out = oscs.Pulsar2d(
@@ -46,13 +46,13 @@ def play(ctx):
     # Apply an envelope to the buffer: rnd is a special 
     # built-in wavetable that randomly selects one of
     # pippi's built-in wavetables.
-    out = out.env('hann')
+    out = out.env('sineout')
 
     # Pan the stereo buffer randomly and 
     # add a 10ms taper to smooth out pops
     out = out.pan(dsp.rand()).taper(dsp.MS*10)
 
-    out = fx.lpf(out, 3000)
+    #out = fx.lpf(out, 3000)
 
     # off to the renderer!
-    yield out.env('pluckout') * 2
+    yield out

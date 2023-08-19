@@ -97,6 +97,7 @@ enum Windows {
     WIN_RND,
     WIN_SAW,
     WIN_RSAW,
+    WIN_USER,
     NUM_WINDOWS
 };
 

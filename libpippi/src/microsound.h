@@ -12,6 +12,7 @@ typedef struct lpgrain_t {
     size_t start;
     size_t offset;
 
+    lpfloat_t phase_offset;
     lpfloat_t phase;
     lpfloat_t pan;
     lpfloat_t amp;
@@ -30,6 +31,7 @@ typedef struct lpformation_t {
     size_t numgrains;
     size_t maxlength;
     size_t minlength;
+    lpfloat_t pos; /* sample start position in source buffer: 0-1 */
     lpfloat_t spread; /* pan spread */
     lpfloat_t speed;
     lpfloat_t scrub;
@@ -49,7 +51,7 @@ typedef struct lpgrain_factory_t {
 } lpgrain_factory_t;
 
 typedef struct lpformation_factory_t {
-    lpformation_t * (*create)(int, size_t, size_t, size_t, int, int);
+    lpformation_t * (*create)(int, int, size_t, size_t, size_t, int, int, lpbuffer_t *);
     void (*process)(lpformation_t *);
     void (*destroy)(lpformation_t *);
 } lpformation_factory_t;

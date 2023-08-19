@@ -6,13 +6,7 @@ int main(int argc, char * argv[]) {
     ssize_t bytesread;
     char trigger = LPSOLEALL;
 
-    lpmsg_t msg = {
-        0, 0,
-        "osc",
-        "",
-    };
-    //char message_params[LPMAXMSG] = {0};
-    //char instrument_name[LPMAXNAME] = {0};
+    lpmsg_t msg = {0};
 
     soletty = open("/dev/ttyACM0", O_RDONLY);
     if(soletty < 0) {

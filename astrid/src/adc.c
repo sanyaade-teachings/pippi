@@ -1,4 +1,8 @@
 #define MINIAUDIO_IMPLEMENTATION
+#ifdef __linux__
+#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
+#define MA_ENABLE_JACK
+#endif
 #define MA_NO_ENCODING
 #define MA_NO_DECODING
 #include "miniaudio/miniaudio.h"

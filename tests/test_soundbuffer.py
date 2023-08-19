@@ -26,6 +26,12 @@ class TestSoundBuffer(TestCase):
         self.assertEqual(len(sound), DEFAULT_SAMPLERATE)
         self.assertTrue(sound)
 
+    def test_fadeout(self):
+        snd = SoundBuffer(filename='tests/sounds/guitar10s.wav')
+        snd.fadeout(0).write('tests/renders/soundbuffer_fadeout_0.0.wav')
+        snd.fadeout(0.5).write('tests/renders/soundbuffer_fadeout_0.5.wav')
+        snd.fadeout(1).write('tests/renders/soundbuffer_fadeout_1.0.wav')
+
     def test_mix_operator(self):
         snd1 = SoundBuffer(filename='tests/sounds/guitar1s.wav')
         snd2 = SoundBuffer(filename='tests/sounds/LittleTikes-A1.wav')

@@ -9,7 +9,7 @@ import warnings
 
 from rtmidi import MidiIn
 from rtmidi.midiutil import open_midiinput
-from cymidi_statuslog import setcc, setnote
+from cymidi_statuslog import setcc, setnote, trigger_notemap
 
 NOTE_ON = 144
 NOTE_OFF = 128

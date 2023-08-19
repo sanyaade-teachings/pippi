@@ -64,7 +64,7 @@ cdef double _hermite_point(double[:] data, double phase) nogil:
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double _linear_point_pw(double[:] data, double phase, double pulsewidth) nogil:
+cdef inline double _linear_point_pw(double[:] data, double phase, double pulsewidth) nogil:
     cdef int dlength = <int>len(data)
 
     if dlength == 1:
@@ -73,7 +73,8 @@ cdef double _linear_point_pw(double[:] data, double phase, double pulsewidth) no
     elif dlength < 1 or pulsewidth == 0:
         return 0
 
-    phase *= 1.0/pulsewidth
+    if pulsewidth < 1:
+        phase *= 1.0/pulsewidth
 
     cdef double frac = phase - <long>phase
     cdef long i = <long>phase
@@ -89,12 +90,12 @@ cdef double _linear_point_pw(double[:] data, double phase, double pulsewidth) no
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double _linear_point(double[:] data, double phase) nogil:
+cdef inline double _linear_point(double[:] data, double phase) nogil:
     return _linear_point_pw(data, phase, 1)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cdef double _linear_pos(double[:] data, double pos) nogil:
+cdef inline double _linear_pos(double[:] data, double pos) nogil:
     return _linear_point(data, pos * <double>(len(data)-1))
 
 @cython.boundscheck(False)

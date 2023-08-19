@@ -2,8 +2,12 @@
 #include "pqueue.h"
 
 
+#define NUM_NODES 4096
+
 static volatile int astrid_is_running = 1;
+int pqnode_index = 0;
 pqueue_t * msgpq;
+lpmsgpq_node_t * pqnodes;
 
 /* Callback for SIGINT */
 void handle_shutdown(int sig __attribute__((unused))) {
@@ -20,7 +24,7 @@ void handle_shutdown(int sig __attribute__((unused))) {
 
 /* Message scheduler priority queue comparison callbacks */
 static int msgpq_cmp_pri(double next, double curr) {
-    return (next < curr);
+    return (next > curr);
 }
 
 static double msgpq_get_pri(void * a) {
@@ -53,16 +57,16 @@ int msgpq_remove_nodes_by_voice_id(size_t voice_id) {
         }
 
         node = (lpmsgpq_node_t *)d;
-        msg = node->msg;
+        msg = &node->msg;
         if(msg->voice_id == voice_id) {
             syslog(LOG_DEBUG, "STOP: removing node & freeing memory for voice id %ld\n", voice_id);
             pqueue_remove(msgpq, d);
-            free(msg);
-            free(node);
+            /*free(msg);*/
+            /*free(node);*/
         }
     }
 
-    syslog(LOG_DEBUG, "STOP: msgpq size AFTER: %d\n", (int)msgpq->size);
+    /*syslog(LOG_DEBUG, "STOP: msgpq size AFTER: %d\n", (int)msgpq->size);*/
 
     return 0;
 }
@@ -93,7 +97,7 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
 
         /* There is a message! */
         node = (lpmsgpq_node_t *)d;
-        msg = node->msg;
+        msg = &node->msg;
 
         if(msg->type == LPMSG_SHUTDOWN) {
             break;
@@ -125,10 +129,16 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
 
         /* If msg timestamp is in the future, 
          * sleep for a bit and then try again */
-        if(msg->timestamp > now) {
+        if(node->timestamp > now) {
             usleep((useconds_t)500);
             continue;
         }
+
+        /*
+        syslog(LOG_DEBUG, "SEQ: Sending message type %d to %s\n", msg->type, msg->instrument_name);
+        syslog(LOG_DEBUG, "initiated=%f scheduled=%f voice_id=%ld\n", msg->initiated, msg->scheduled, msg->voice_id);
+        syslog(LOG_DEBUG, "        now=%f\n", now);
+        */
 
         /* Send it along to the instrument message fifo */
         if(send_play_message(*msg) < 0) {
@@ -136,6 +146,7 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             usleep((useconds_t)500);
             continue;
         }
+        /*syslog(LOG_DEBUG, "Finished sending play message (type %d) to %s\n", msg->type, msg->instrument_name);*/
 
         /* And remove it from the pq */
         if(pqueue_remove(msgpq, d) < 0) {
@@ -143,22 +154,32 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             usleep((useconds_t)500);
         }
 
-        /* TODO do this somewhere else maybe? */
-        free(msg);
-        free(node);
-        msg = NULL;
-        node = NULL;
+        /*
+        if(msg != NULL) {
+            free(msg);
+            msg = NULL;
+        }
+
+        if(node != NULL) {
+            free(node);
+            node = NULL;
+        }
+        */
     }
 
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
     /* Clean up the pq: TODO, check for orphan messages? */
     pqueue_free(msgpq);
+    /*
     if(msg != NULL) free(msg);
     if(node != NULL) free(node);
+    */
+    free(pqnodes);
     return 0;
 }
 
 void * message_feed(__attribute__((unused)) void * arg) {
+    double seq_delay;
 #ifdef ASTRID_USE_FIFO_QUEUES
     int qd;
 #else
@@ -167,6 +188,7 @@ void * message_feed(__attribute__((unused)) void * arg) {
     lpmsg_t msg = {0};
     lpmsg_t * msgout;
     lpmsgpq_node_t * d;
+    double now = 0;
 
 #ifdef ASTRID_USE_FIFO_QUEUES
     if((qd = astrid_msgq_open()) < 0) {
@@ -186,20 +208,42 @@ void * message_feed(__attribute__((unused)) void * arg) {
             continue;
         }
 
+        /*
         d = (lpmsgpq_node_t *)calloc(1, sizeof(lpmsgpq_node_t));
         msgout = (lpmsg_t *)calloc(1, sizeof(lpmsg_t));
         memcpy(msgout, &msg, sizeof(lpmsg_t));
         d->msg = msgout;
-        d->timestamp = msg.timestamp;
+        */
 
-        syslog(LOG_DEBUG, "lpmsg_t relay: Inserting message into pq for scheduling\n");
+        d = &pqnodes[pqnode_index];
+        memcpy(&d->msg, &msg, sizeof(lpmsg_t));
+        pqnode_index += 1;
+        while(pqnode_index >= NUM_NODES) pqnode_index -= NUM_NODES;
+
+        if(lpscheduler_get_now_seconds(&now) < 0) {
+            syslog(LOG_CRIT, "Error getting now in seq relay\n");
+            exit(1);
+        }
+
+        /* Hold on to the message as long as possible while still 
+         * trying to leave some time for processing before the target deadline */
+        seq_delay = msg.scheduled - (msg.max_processing_time * 2);
+        d->timestamp = msg.initiated + seq_delay;
+
+        /*
+        syslog(LOG_DEBUG, "SEQ: lpmsg_t relay: Inserting message into pq for scheduling\n");
+        syslog(LOG_DEBUG, "SEQ: seq_delay %f\n", seq_delay);
+        syslog(LOG_DEBUG, "SEQ: timestamp %f\n", d->timestamp);
+        */
 
         if(pqueue_insert(msgpq, (void *)d) < 0) {
             syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
             continue;
         }
 
+        /*
         syslog(LOG_DEBUG, "lpmsg_t relay: msg.type %d\n", msg.type);
+        */
 
         /* Exit the loop on shutdown message after sending 
          * it along to the priority queue as well */
@@ -243,6 +287,8 @@ int main() {
     pthread_t message_feed_thread;
     pthread_t message_scheduler_pq_thread;
 
+    int i = 0;
+
     openlog("astrid-seq", LOG_PID, LOG_USER);
 
     /* Set shutdown signal handlers */
@@ -279,8 +325,18 @@ int main() {
         }
     }
 
+    /* Allocate the pq message nodes */
+    if((pqnodes = (lpmsgpq_node_t *)calloc(NUM_NODES, sizeof(lpmsgpq_node_t))) == NULL) {
+        syslog(LOG_ERR, "Could not initialize message priority queue nodes. Error: %s\n", strerror(errno));
+        goto exit_with_error;
+    }
+
+    for(i=0; i < NUM_NODES; i++) {
+        pqnodes[i].index = i;
+    }
+
     /* Create the message priority queue */
-    if((msgpq = pqueue_init(100, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
+    if((msgpq = pqueue_init(NUM_NODES, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
         goto exit_with_error;
     }

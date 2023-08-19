@@ -2,14 +2,23 @@ import cmd
 import logging
 from logging.handlers import SysLogHandler
 import os
+from pathlib import Path
 import platform
+from pprint import pprint
 import random
 import subprocess
+import sys
+import tomllib
 import traceback
 import warnings
 
+import redis
 import rtmidi
 
+from pippi import dsp
+
+
+_redis = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 logger = logging.getLogger('astrid-console')
 if not logger.handlers:
@@ -22,6 +31,64 @@ if not logger.handlers:
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
 
+TRIGGERMAP_SECTION_TYPES = ('[midi]', '[messages]')
+
+def parse_triggermapfile_section(maps: dict, section_type: str, section_lines: list):
+    if section_type == '[midi]':
+        maps['midi'] = {}
+        for l in section_lines:
+            print(section_type, l)
+            k, v = tuple(l.split('='))
+            if k == 'id':
+                maps['midi']['device_id'] = v
+            elif k == 'notes':
+                if v == 'all':
+                    maps['midi']['notes'] = list(range(21, 128))
+                elif '-' in v:
+                    nbeg, nend = tuple(notes.split('-'))
+                    maps['midi']['notes'] = list(map(str, range(int(nbeg), int(nend)+1)))
+                else:
+                    maps['midi']['notes'] = [int(v)]
+    elif section_type == '[messages]':
+        maps['messages'] = []
+        for msg in section_lines:
+            maps['messages'] += [ msg.split() ]
+
+    return maps
+
+def load_triggermaps_from_file(path):
+    maps = {}
+    with open(path, 'r') as f:
+        section_type = None
+        section = []
+        for line in f:
+            line = line.strip()
+            if line == '':
+                continue
+
+            if line in TRIGGERMAP_SECTION_TYPES:
+                # Section headers trigger parsing of any previous section
+                if section_type is not None:
+                    maps = parse_triggermapfile_section(maps, section_type, section)
+
+                # and start a new section
+                section_type = line
+                section = []
+
+            else:
+                # Everything else gets collected for parsing later
+                section += [ line ]
+
+        # Parse the final section
+        if len(section) > 0:
+            maps = parse_triggermapfile_section(maps, section_type, section)
+
+    for note in maps['midi']['notes']:
+        for msg in maps['messages']:
+            note_params = ['note=%s' % note, 'midi_device=%s' % maps['midi']['device_id']]
+            cmd = ['astrid-addnotemap', maps['midi']['device_id'], note] + msg + note_params
+            subprocess.run(cmd)
+            print(cmd)
 
 class AstridConsole(cmd.Cmd):
     """ Astrid Console 
@@ -36,21 +103,40 @@ class AstridConsole(cmd.Cmd):
     midi_relay = None
     midi_listener = None
 
-    def __init__(self, client=None):
+    def __init__(self, sessionfile=None):
         cmd.Cmd.__init__(self)
+
+        print('Starting dac...')
+        self.dac = subprocess.Popen('astrid-dac')
+        print('done!')
+
+        print('Starting seq...')
+        self.seq = subprocess.Popen('astrid-seq')
+        print('done!')
+
+        # Load the session file if there is one to load
+        if sessionfile is not None and Path('%s.toml' % sessionfile).exists():
+            print('Loading %s session file...' % sessionfile)
+            with open('%s.toml' % sessionfile, 'r') as f:
+                cfgs = f.read()
+
+            cfg = tomllib.loads(cfgs)
+            for c in cfg['init']['commands']:
+                self.onecmd(c)
+            print('done!')
+
+        _redis.set('mididevice'.encode('ascii'), '1'.encode('ascii'))
+
+    def do_cue(self, name):
+        with open('%s.toml' % name, 'r') as f:
+            cfgs = f.read()
+
+        cfg = tomllib.loads(cfgs)
+        for cmd in cfg['init']['commands']:
+            self.onecmd(cmd)
 
     def help_sound(self):
         txt = """
-Turn sound on (Starts the DAC & ADC)
-
-    ^_- sound on
-
-Turn sound off (Stops the DAC & ADC)
-
-    ^_- sound off
-
-List available sound devices
-
     ^_- sound device
 
 Set the selected sound device to device 1
@@ -63,71 +149,28 @@ to be restarted to take effect.
         print(txt)
 
     def do_sound(self, cmd):
-        if cmd == 'on':
-            print('Starting dac, adc & seq...')
-            if self.dac is None:
-                self.dac = subprocess.Popen('./build/astrid-dac')
-            else:
-                print('dac is already running')
-
-            if self.adc is None:
-                self.adc = subprocess.Popen('./build/astrid-adc')
-            else:
-                print('adc is already running')
-
-            if self.seq is None:
-                self.seq = subprocess.Popen('./build/astrid-seq')
-            else:
-                print('seq is already running')
-
-        elif cmd == 'off':
-            if self.dac is not None:
-                print('Stopping dac...')
-                self.dac.terminate()
-                self.dac.wait()
-                self.dac = None
-            else:
-                print('dac is already stopped')
-
-            if self.adc is not None:
-                print('Stopping adc...')
-                self.adc.terminate()
-                self.adc.wait()
-                self.adc = None
-            else:
-                print('adc is already stopped')
-
-            if self.seq is not None:
-                print('Stopping seq...')
-                self.seq.terminate()
-                self.seq.wait()
-                self.seq = None
-            else:
-                print('seq is already stopped')
-
-
-        elif cmd.startswith('device'):
+        if cmd.startswith('device'):
             try:
-                _, device = cmd.split(' ')
+                _, device = tuple(cmd.split())
             except ValueError:
                 print()
                 print('Available audio devices')
                 print()
-                subprocess.run(['./build/astrid-getdeviceids'])
+                subprocess.run(['astrid-getdeviceids'])
                 print()
                 return
 
-            subprocess.run(['./build/astrid-setdeviceid', device])
+            subprocess.run(['astrid-setdeviceid', device])
 
     def do_dac(self, cmd):
-        if cmd == 'on' and self.dac is None:
+        if cmd == 'on':
             print('Starting dac...')
             if self.dac is None:
-                self.dac = subprocess.Popen('./build/astrid-dac')
+                self.dac = subprocess.Popen('astrid-dac')
             else:
                 print('dac is already running')
 
-        elif cmd == 'off' and self.dac is not None:
+        elif cmd == 'off':
             print('Stopping dac...')
             if self.dac is not None:
                 self.dac.terminate()
@@ -137,14 +180,14 @@ to be restarted to take effect.
                 print('dac is already stopped')
 
     def do_adc(self, cmd):
-        if cmd == 'on' and self.adc is None:
+        if cmd == 'on':
             print('Starting adc...')
             if self.adc is None:
-                self.adc = subprocess.Popen('./build/astrid-adc')
+                self.adc = subprocess.Popen('astrid-adc')
             else:
                 print('adc is already running')
 
-        elif cmd == 'off' and self.adc is not None:
+        elif cmd == 'off':
             print('Stopping adc...')
             if self.adc is not None:
                 self.adc.terminate()
@@ -154,14 +197,14 @@ to be restarted to take effect.
                 print('adc is already stopped')
 
     def do_seq(self, cmd):
-        if cmd == 'on' and self.seq is None:
+        if cmd == 'on':
             print('Starting seq...')
             if self.seq is None:
-                self.seq = subprocess.Popen('./build/astrid-seq')
+                self.seq = subprocess.Popen('astrid-seq')
             else:
                 print('seq is already running')
 
-        elif cmd == 'off' and self.seq is not None:
+        elif cmd == 'off':
             print('Stopping seq...')
             if self.seq is not None:
                 self.seq.terminate()
@@ -173,7 +216,7 @@ to be restarted to take effect.
     def do_l(self, instrument):
         if instrument not in self.instruments:
             try:
-                rcmd = './build/astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
+                rcmd = 'astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
                 print(rcmd)
                 self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
             except Exception as e:
@@ -191,7 +234,7 @@ to be restarted to take effect.
 
         if instrument not in self.instruments:
             try:
-                rcmd = './build/astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
+                rcmd = 'astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
                 print(rcmd)
                 self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
             except Exception as e:
@@ -201,48 +244,94 @@ to be restarted to take effect.
 
         try:
             logger.info('Sending play msg to %s renderer w/params:\n  %s' % (instrument, params))
-            subprocess.run(['./build/astrid-qmessage', 't', instrument, params])
+            subprocess.run(['astrid-qmessage', 't', instrument, params])
         except Exception as e:
             print('Could not invoke qmessage: %s' % e)
             print(traceback.format_exc())
+
+    def do_h(self, cmd):
+        parts = [ p.strip() for p in cmd.split() ]
+
+        if parts[0] == 'clearall':
+            print('Clearing all freq banks')
+            return
+
+        bank_index = parts[0]
+        bank_mode = parts[1]
+        bank_vals = ' '.join(parts[2:])
+
+        if bank_mode == 'rnd':
+            bank_mode = 'degrees'
+            parts = [ p.strip() for p in bank_vals.split() ]
+
+            degree_groups = []
+            if len(parts) == 0:
+                degree_groups += [[ dsp.randint(1, 11) for _ in range(dsp.randint(3, 7)) ]]
+
+            else:
+                for p in parts:
+                    if '-' in p and p != '-':
+                        low, high = tuple(p.split('-'))
+                        degree_groups += [[ dsp.randint(int(low), int(high)) for _ in range(dsp.randint(3, 7)) ]]
+                    else:
+                        degree_groups += [[ dsp.randint(1, 11) for _ in range(dsp.randint(3, 7)) ]]
+
+            bank_vals = ''
+            for g in degree_groups:
+                bank_vals += ','.join([ str(d) for d in g]) + ' '
+
+        bank_key = 'fb%s' % bank_index
+        bank_vals_key = '%s-%s' % (bank_key, bank_mode)
+
+        _redis.set(bank_key.encode('ascii'), bank_mode.encode('ascii'))
+        _redis.set(bank_vals_key.encode('ascii'), bank_vals.encode('ascii'))
+
+        print('Set freq bank %s harmony to mode %s with vals %s' % (bank_key, bank_mode, bank_vals))
 
     def do_tm(self, cmd):
         """ Manage trigger maps
         """
         parts = [ p.strip() for p in cmd.split() ]
 
-        if len(parts) < 3:
-            print('Invalid arguments. Usage: \n  tm <a|c> <device> <note/noterange> <p|s|t> <instrument_name> (<params>)')
+        if parts[0] == 'load':
+            load_triggermaps_from_file(parts[1])
             return
 
         action = parts.pop(0)
-        device = parts.pop(0)
+        devices = parts.pop(0)
         notes = parts.pop(0)
+
+        # FIXME device IDs should be optional or runtime configurable
+        devices = ['1','2','3']
 
         if '-' in notes:
             nbeg, nend = tuple(notes.split('-'))
             notes = list(map(str, range(int(nbeg), int(nend)+1)))
+        elif notes == 'all':
+            notes = list(range(21, 128))
         else:
             notes = [notes]
 
-        cmd = ' '.join(parts)
-
         if action == 'a':
-            for note in notes:
-                subprocess.run(['./build/astrid-addnotemap', device, note] + parts)
-                print('Added notemap for device %s note %s' % (device, note))
+            for device in devices:
+                for note in notes:
+                    note_params = ['note=%s' % note, 'midi_device=%s' % device]
+                    subprocess.run(['astrid-addnotemap', device, note] + parts + note_params)
+                    print('Added notemap for device %s note %s cmd %s' % (device, note, parts + note_params))
 
         elif action == 'c':
-            for note in notes:
-                try:
-                    os.unlink('/tmp/astrid-midimap-device%s-note%s' % (device, note))
-                    print('Removed all notemaps for device %s note %s' % (device, note))
-                except FileNotFoundError as e:
-                    pass
+            for device in devices:
+                for note in notes:
+                    try:
+                        os.unlink('/tmp/astrid-midimap-device%s-note%s' % (device, note))
+                        print('Removed all notemaps for device %s note %s' % (device, note))
+                    except FileNotFoundError as e:
+                        pass
 
         elif action == 'l':
-            for note in notes:
-                subprocess.run(['./build/astrid-printnotemap', device, note])
+            for device in devices:
+                for note in notes:
+                    subprocess.run(['astrid-printnotemap', device, note])
 
     def do_p(self, cmd):
         parts = cmd.split(' ')
@@ -254,7 +343,7 @@ to be restarted to take effect.
 
         if instrument not in self.instruments:
             try:
-                rcmd = './build/astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
+                rcmd = 'astrid-renderer "orc/%s.py" "%s"' % (instrument, instrument)
                 print(rcmd)
                 self.instruments[instrument] = subprocess.Popen(rcmd, shell=True)
             except Exception as e:
@@ -264,14 +353,32 @@ to be restarted to take effect.
 
         try:
             logger.info('Sending play msg to %s renderer w/params:\n  %s' % (instrument, params))
-            subprocess.run(['./build/astrid-qmessage', 'p', instrument, params])
+            subprocess.run(['astrid-qmessage', 'p', instrument, params])
         except Exception as e:
             print('Could not invoke qmessage: %s' % e)
             print(traceback.format_exc())
 
-    def do_v(self, cmd):
-        k, v = tuple(cmd.split('='))
-        r.set(k.encode('ascii'), v.encode('ascii'))
+    def do_set(self, cmd):
+        parts = [ p.strip() for p in cmd.split() ]
+        k = parts[0]
+        v = ' '.join(parts[1:])
+        _redis.set(k.encode('ascii'), v.encode('ascii'))
+
+    def do_setid(self, cmd):
+        try:
+            name, value = tuple(cmd.split(' '))
+            value = int(value)
+        except Exception as e:
+            print('Bad command. Naughty!')
+            print(traceback.format_exc())
+            return
+
+        try:
+            logger.info('Setting value %s to %s' % (name, value))
+            subprocess.run(['astrid-qmessage', 'v', name, value])
+        except Exception as e:
+            print('Could not set value with qmessage: %s' % e)
+            print(traceback.format_exc())
 
     def do_i(self, cmd):
         print(self.instruments)
@@ -279,7 +386,7 @@ to be restarted to take effect.
     def do_s(self, voice_id):
         try:
             logger.info('Sending stop msg to voice %s\n' % voice_id)
-            subprocess.run(['./build/astrid-qmessage', 's', voice_id])
+            subprocess.run(['astrid-qmessage', 's', voice_id])
         except Exception as e:
             print('Could not invoke qmessage: %s' % e)
             print(traceback.format_exc())
@@ -333,17 +440,17 @@ Set the default MIDI input device to device 1
         inputs = midiin.get_ports()
         outputs = midiout.get_ports()
 
-        if cmd == 'on' and self.dac is None:
+        if cmd == 'on':
             print('Starting MIDI relay...')
             if self.midi_relay is None:
-                self.midi_relay = subprocess.Popen('./python/midiseq.py')
+                self.midi_relay = subprocess.Popen('/home/hecanjog/code/pippi/astrid/python/midiseq.py')
                 print('MIDI relay has started')
             else:
                 print('MIDI relay is already on')
 
             print('Starting MIDI listener...')
             if self.midi_listener is None:
-                self.midi_listener = subprocess.Popen('./python/midistatus.py')
+                self.midi_listener = subprocess.Popen('/home/hecanjog/code/pippi/astrid/python/midistatus.py')
                 print('MIDI listener has started')
             else:
                 print('MIDI listener is already on')
@@ -466,7 +573,11 @@ Set the default MIDI input device to device 1
         exit(0)
 
 if __name__ == '__main__':
-    c = AstridConsole()
+    sessionfile = None
+    if len(sys.argv) > 1:
+        sessionfile = sys.argv[1]
+
+    c = AstridConsole(sessionfile)
 
     try:
         c.start()

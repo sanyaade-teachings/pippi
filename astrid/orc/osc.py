@@ -1,6 +1,6 @@
 from pippi import dsp, oscs, tune, fx, shapes
 
-LOOP = True
+#LOOP = True
 
 #MIDI = ('MidiSport 2x2:MidiSport 2x2 MIDI 1 20:0', 0, 128)
 
@@ -13,7 +13,7 @@ def before(ctx):
 
 def play(ctx):
     #length = dsp.rand(0.01, ctx.m.cc(26) * 1 + 0.02)
-    length = dsp.rand(0.3, 6)
+    length = dsp.rand(1, 8)
 
     # ctx.p contains parameters passed with 
     # the triggering play command.
@@ -32,8 +32,9 @@ def play(ctx):
 
     # Convert the MIDI note to a frequency
     freq = tune.mtf(note)
-    freqs = tune.chord('vi9', octave=dsp.randint(3,5))
-    freq = dsp.choice(freqs)
+    #freqs = tune.chord('vi9', octave=dsp.randint(3,5))
+    freqs = tune.degrees([1,2,5,6,7,8], key='c', octave=dsp.randint(2,4))
+    freq = dsp.choice(freqs) * dsp.randint(2,3)
 
 
     # This sets up a polyphonic generator 
@@ -59,10 +60,10 @@ def play(ctx):
 
         # Sometimes warble the pitch
         if dsp.rand() > 0.75:
-            out = out.vspeed(shapes.win('sine', 0.5, 1.5))
+            out = out.vspeed(shapes.win('sine', 0.5, 1, length=dsp.rand(0.5, 2)))
 
         # Off to the mixer for playback
-        yield out * 0.125
+        yield out
 
 def done(ctx):
     # The done callback is fired after each 

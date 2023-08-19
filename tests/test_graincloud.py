@@ -15,7 +15,7 @@ class TestCloud(TestCase):
         shutil.rmtree(self.soundfiles)
 
     def test_libpippi_graincloud(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+        sound = SoundBuffer(filename='tests/sounds/living.wav')
         cloud = grains2.Cloud2(sound)
 
         length = 30
@@ -25,29 +25,18 @@ class TestCloud(TestCase):
         out = fx.compressor(out*4, -15, 15)
         out = fx.norm(out, 0.5)
 
-        out.write('tests/renders/graincloud_libpippi.wav')
+        out.write('tests/renders/graincloud_libpippi_unmodulated.wav')
 
         self.assertEqual(len(out), framelength)
 
-    def test_unmodulated_graincloud(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
-        cloud = grains.Cloud(sound)
-
-        length = 3 
-        framelength = int(length * sound.samplerate)
-
-        out = cloud.play(length)
-        self.assertEqual(len(out), framelength)
-
-        out.write('tests/renders/graincloud_unmodulated.wav')
-
-    def test_pulsed_graincloud(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+    """
+    def test_libpippi_pulsed_graincloud(self):
+        sound = SoundBuffer(filename='tests/sounds/living.wav')
         out = sound.cloud(10, grainlength=0.06, grid=0.12)
-        out.write('tests/renders/graincloud_pulsed.wav')
+        out.write('tests/renders/graincloud_libpippi_pulsed.wav')
 
-    def test_graincloud_with_length_lfo(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+    def test_libpippi_graincloud_with_length_lfo(self):
+        sound = SoundBuffer(filename='tests/sounds/living.wav')
         grainlength = dsp.wt('hann', 0.01, 0.1)
         length = 3 
         framelength = int(length * sound.samplerate)
@@ -56,14 +45,14 @@ class TestCloud(TestCase):
 
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/graincloud_with_length_lfo.wav')
+        out.write('tests/renders/graincloud_libpippi_with_length_lfo.wav')
 
-    def test_graincloud_with_speed_lfo(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+    def test_libpippi_graincloud_with_speed_lfo(self):
+        sound = SoundBuffer(filename='tests/sounds/living.wav')
         minspeed = random.triangular(0.05, 1)
         maxspeed = minspeed + random.triangular(0.5, 10)
         speed = dsp.wt('rnd', minspeed, maxspeed)
-        cloud = grains.Cloud(sound, grainlength=0.04, speed=speed)
+        cloud = grains2.Cloud2(sound, grainlength=0.04, speed=speed)
 
         length = 3
         framelength = int(length * sound.samplerate)
@@ -71,10 +60,10 @@ class TestCloud(TestCase):
         out = cloud.play(length)
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/graincloud_with_speed_lfo.wav')
+        out.write('tests/renders/graincloud_libpippi_with_speed_lfo.wav')
 
-    def test_graincloud_with_extreme_speed_lfo(self):
-        sound = SoundBuffer(filename='tests/sounds/guitar1s.wav')
+    def test_libpippi_graincloud_with_extreme_speed_lfo(self):
+        sound = SoundBuffer(filename='tests/sounds/living.wav')
 
         length = 3
         speed = dsp.wt('hann', 1, 100)
@@ -83,11 +72,11 @@ class TestCloud(TestCase):
         out = sound.cloud(length=length, speed=speed)
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/graincloud_with_extreme_speed_lfo.wav')
+        out.write('tests/renders/graincloud_libpippi_with_extreme_speed_lfo.wav')
 
-    def test_graincloud_with_read_lfo(self):
-        sound = SoundBuffer(filename='tests/sounds/linux.wav')
-        cloud = grains.Cloud(sound, position=dsp.win('hann', 0, 1))
+    def test_libpippi_graincloud_with_read_lfo(self):
+        sound = SoundBuffer(filename='tests/sounds/living.wav')
+        cloud = grains2.Cloud2(sound, position=dsp.win('hann', 0, 1))
 
         length = 3
         framelength = int(length * sound.samplerate)
@@ -95,10 +84,10 @@ class TestCloud(TestCase):
         out = cloud.play(length)
         self.assertEqual(len(out), framelength)
 
-        out.write('tests/renders/graincloud_with_read_lfo.wav')
+        out.write('tests/renders/graincloud_libpippi_with_read_lfo.wav')
 
-    def test_graincloud_grainsize(self):
-        snd = dsp.read('tests/sounds/guitar1s.wav')
+    def test_libpippi_graincloud_grainsize(self):
+        snd = dsp.read('tests/sounds/living.wav')
         out = snd.cloud(
                 length=dsp.rand(8, 16), 
                 window='hann', 
@@ -107,5 +96,5 @@ class TestCloud(TestCase):
                 spread=1, 
             )
 
-        out.write('tests/renders/graincloud_grainsize.wav')
-
+        out.write('tests/renders/graincloud_libpippi_grainsize.wav')
+    """

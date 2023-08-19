@@ -4,9 +4,17 @@ from setuptools.extension import Extension
 from Cython.Build import cythonize
 import numpy as np
 
+dev = False
+
 INCLUDES = ['libpippi/vendor', 'libpippi/src', '/usr/local/include', np.get_include()]
 MACROS = [("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+DIRECTIVES = {}
 
+if dev:
+    MACROS += [("CYTHON_TRACE_NOGIL", "1")]
+    DIRECTIVES['profile'] = True
+    DIRECTIVES['linetrace'] = True
+    DIRECTIVES['binding'] = True
 
 ext_modules = cythonize([
         Extension('pippi.microcontrollers', ['pippi/microcontrollers.pyx'],
@@ -253,9 +261,9 @@ ext_modules = cythonize([
             define_macros=MACROS
         ), 
     ], 
-    annotate=True, 
-    compiler_directives={'profile': True},
-    gdb_debug=True,
+    annotate=dev, 
+    compiler_directives=DIRECTIVES,
+    gdb_debug=dev,
 ) 
 
 with open('README.md') as f:

@@ -1,4 +1,20 @@
 cdef extern from "pippicore.h":
+    cdef enum Windows:
+        WIN_SINE,
+        WIN_SINEIN,
+        WIN_SINEOUT,
+        WIN_COS,
+        WIN_TRI, 
+        WIN_PHASOR, 
+        WIN_HANN, 
+        WIN_HANNIN, 
+        WIN_HANNOUT, 
+        WIN_RND,
+        WIN_SAW,
+        WIN_RSAW,
+        WIN_USER,
+        NUM_WINDOWS
+
     ctypedef double lpfloat_t
 
     ctypedef struct lpbuffer_t:
@@ -100,6 +116,7 @@ cdef extern from "microsound.h":
         size_t numgrains
         size_t maxlength
         size_t minlength
+        lpfloat_t pos
         lpfloat_t spread
         lpfloat_t speed
         lpfloat_t scrub
@@ -117,7 +134,7 @@ cdef extern from "microsound.h":
         void (*destroy)(lpgrain_t *)
 
     ctypedef struct lpformation_factory_t:
-        lpformation_t * (*create)(int, size_t, size_t, size_t, int, int)
+        lpformation_t * (*create)(int, int, size_t, size_t, size_t, int, int, lpbuffer_t *)
         void (*process)(lpformation_t *)
         void (*destroy)(lpformation_t *)
 
@@ -125,23 +142,22 @@ cdef extern from "microsound.h":
     extern const lpformation_factory_t LPFormation
 
 cdef class Cloud2:
-    cdef double[:,:] snd
-    cdef unsigned int framelength
-    cdef double length
     cdef unsigned int channels
     cdef unsigned int samplerate
 
-    cdef unsigned int wtsize
+    cdef lpformation_t * formation
 
-    cdef double[:] window
+    cdef double[:] grainlength
+    cdef double[:] grid
+
+    """
     cdef double[:] position
     cdef double[:] amp
     cdef double[:] speed
     cdef double[:] spread
     cdef double[:] jitter
-    cdef double[:] grainlength
-    cdef double[:] grid
 
     cdef int[:] mask
     cdef bint has_mask
+    """
 

@@ -47,12 +47,14 @@
 #define ASTRID_MIDI_CCBASE_PATH "/tmp/astrid-mididevice%d-cc%d"
 #define ASTRID_MIDI_NOTEBASE_PATH "/tmp/astrid-mididevice%d-note%d"
 #define ASTRID_MIDIMAP_NOTEBASE_PATH "/tmp/astrid-midimap-device%d-note%d"
+#define ASTRID_IPC_IDBASE_PATH "/tmp/astrid-idfile-%s"
 
 #define PLAY_MESSAGE 'p'
 #define TRIGGER_MESSAGE 't'
 #define STOP_MESSAGE 's'
 #define LOAD_MESSAGE 'l'
 #define SHUTDOWN_MESSAGE 'k'
+#define SET_COUNTER_MESSAGE 'v'
 
 #ifndef NOTE_ON
 #define NOTE_ON 144
@@ -68,7 +70,7 @@
 
 #define SPACE ' '
 #define LPMAXNAME 24
-#define LPMAXMSG (PIPE_BUF - sizeof(double) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
+#define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
 
 #define ASTRID_ADCSECONDS 10
 #define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
@@ -104,6 +106,7 @@ enum LPMessageTypes {
     LPMSG_STOP_VOICE,
     LPMSG_LOAD,
     LPMSG_SHUTDOWN,
+    LPMSG_SET_COUNTER,
     NUM_LPMESSAGETYPES
 };
 
@@ -116,10 +119,61 @@ typedef struct lpcounter_t {
  * since it must fit into exactly PIPE_BUF bytes. 
  * The members are arranged to eliminate padding. */
 typedef struct lpmsg_t {
-    double timestamp; /* Used to schedule the message itself */
-    size_t onset_delay;     /* Used to supply an onset delay interval for playback or triggering */
+    /* Timestamp when the message was initiated. 
+     *
+     * This is assigned at the same time that the 
+     * voice ID is assigned to the message sequence.
+     * */
+    double initiated;     
+
+    /* Relative delay for target completion time 
+     * from initiation time.
+     *
+     * This value is given by the score as the onset time
+     * in seconds and is relative to the initiation time.
+     * */
+    double scheduled;     
+
+    /* Timestamp of render completion or trigger away.
+     *
+     * This is assigned either at the point that the message 
+     * is deserialized along with the buffer and placed onto 
+     * the mixer queue, or just after a MIDI event or other 
+     * trigger has been sent away.
+     *
+     * Donno if it is needed, since the message will be 
+     * destroyed just after it is set, ideally? Or will it be?
+     *
+     * Possibly better just to log this at the debug level.
+     * */
+    double completed;     
+
+    /* The longest a message in this sequence has taken 
+     * so far to be processed and reach completion.
+     *
+     * This is used by the seq scheduler to estimate how
+     * far ahead of the target time the message should be
+     * sent to the renderer.
+     *
+     * The initial value before any estimates can be made 
+     * is 75% of the scheduled interval time.
+     *
+     * The estimated value is overwritten each time the 
+     * completed timestamp is recorded, by taking the difference 
+     * between the initiation time and the completed time.
+     *
+     * It is preserved... where, in the instrument cache? sqlite?
+     * */
+    double max_processing_time;     
+
+    /* Time of arrival at mixer minus scheduled target
+     * time rounded to nearest frame */
+    size_t onset_delay;   
+
+    /* The voice ID is also a message sequence ID */
     size_t voice_id;
     size_t count;
+
     uint16_t type;
     char msg[LPMAXMSG];
     char instrument_name[LPMAXNAME];
@@ -127,8 +181,9 @@ typedef struct lpmsg_t {
 
 typedef struct lpmsgpq_node_t {
     double timestamp;
-    lpmsg_t * msg;
+    lpmsg_t msg;
     size_t pos;
+    int index; /* index in node pool */
 } lpmsgpq_node_t;
 
 
@@ -138,10 +193,14 @@ typedef struct lpmsgpq_node_t {
  * the MIDI trigger fifo. */
 typedef struct lpmidievent_t {
     double onset;
+    double now;
     double length;
     char type;
     char note;
     char velocity;
+    char program;
+    char bank_msb;
+    char bank_lsb;
     char channel;
 } lpmidievent_t;
 
@@ -187,7 +246,7 @@ int lpscheduler_get_now_seconds(double * now);
 void scheduler_cleanup_nursery(lpscheduler_t * s);
 
 int lpcounter_create(lpcounter_t * c);
-int lpcounter_read_and_increment(lpcounter_t * c);
+ssize_t lpcounter_read_and_increment(lpcounter_t * c);
 int lpcounter_destroy(lpcounter_t * c);
 
 typedef struct lpdacctx_t {
@@ -230,6 +289,7 @@ lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg);
 
 int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
 
+ssize_t astrid_get_voice_id();
 
 int send_message(lpmsg_t msg);
 int send_play_message(lpmsg_t msg);
@@ -274,6 +334,8 @@ int astrid_get_capture_device_id();
 
 int lpadc_create();
 int lpadc_destroy();
+int lpadc_aquire(lpipc_buffer_t ** adcbuf, int shmid);
+int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_samples);
 int lpadc_write_block(const void * block, size_t blocksize, int shmid);
 int lpadc_read_sample(size_t offset, lpfloat_t * sample, int shmid);
 int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES], int shmid);
@@ -292,6 +354,7 @@ int lpipc_releasevalue(char * id_path);
 int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
+
 
 #ifdef LPSESSIONDB
 #include <sqlite3.h>

@@ -11,7 +11,11 @@ char * instrument_fullpath; /* eg ../orc/ding.py */
 char * instrument_basename; /* eg ding           */
 
 void handle_shutdown(int sig __attribute__((unused))) {
-    astrid_is_running = 0;
+    lpmsg_t msg = {0};
+    syslog(LOG_INFO, "Sending shutdown to renderer (SIG %d)...\n", sig);
+    msg.type = LPMSG_SHUTDOWN;
+    memcpy(&msg.instrument_name, instrument_basename, LPMAXNAME);
+    send_play_message(msg);
 }
 
 int main(int argc, char * argv[]) {
@@ -25,7 +29,6 @@ int main(int argc, char * argv[]) {
     wchar_t * python_path;
 
     char * _astrid_channels;
-    lpastridctx_t * ctx;
     PyObject * pmodule;
 
     if(argc != 3) {
@@ -80,17 +83,6 @@ int main(int argc, char * argv[]) {
         astrid_channels = atoi(_astrid_channels);
     }
     astrid_channels = 2;
-
-    /* Setup context */
-    ctx = (lpastridctx_t*)LPMemoryPool.alloc(1, sizeof(lpastridctx_t));
-    ctx->channels = astrid_channels;
-    ctx->samplerate = ASTRID_SAMPLERATE;
-    ctx->is_playing = 1;
-    ctx->is_looping = 1;
-    ctx->voice_index = -1;
-
-    /* TODO this is the renderer ID, rename it.. */
-    ctx->voice_id = (long)syscall(SYS_gettid);
 
     /* Set python path */
     Py_SetPath(python_path);
@@ -154,8 +146,7 @@ int main(int argc, char * argv[]) {
         msg.onset_delay = 0;
         memset(msg.msg, 0, LPMAXMSG);
 
-        syslog(LOG_DEBUG, "Waiting for %s playqueue messages...\n", instrument_basename);
-        syslog(LOG_DEBUG, "            %d (ctx.voice_id)\n", (int)ctx->voice_id);
+        /*syslog(LOG_DEBUG, "Waiting for %s playqueue messages...\n", instrument_basename);*/
 #ifdef ASTRID_USE_FIFO_QUEUES
         if(astrid_playq_read(playqd, &msg) < 0) {
 #else
@@ -165,9 +156,11 @@ int main(int argc, char * argv[]) {
             goto lprender_cleanup;
         }
 
+        /*
         syslog(LOG_DEBUG, "Renderer got %s message:\n", msg.instrument_name);
         syslog(LOG_DEBUG, "             %d (msg.voice_id)\n", (int)msg.voice_id);
         syslog(LOG_DEBUG, "             %d (msg.type)\n", (int)msg.type);
+        */
 
         switch(msg.type) {
             case LPMSG_PLAY:
@@ -199,13 +192,14 @@ int main(int argc, char * argv[]) {
                 break;
 
             default:
-                break;
+                continue;
         }
 
         /* astrid_begin_python_stream(&msg) */
     }
 
 lprender_cleanup:
+    free(python_path);
     syslog(LOG_INFO, "Astrid renderer shutting down...\n");
     Py_Finalize();
 #ifdef ASTRID_USE_FIFO_QUEUES

@@ -78,7 +78,7 @@ cdef class Pulsar2d:
         cdef int i
         cdef int j
 
-        if wavetables is None:
+        if wavetables is None or len(wavetables) == 0:
             wavetables = ['sine']
 
         self.wt_length = DEFAULT_WTSIZE

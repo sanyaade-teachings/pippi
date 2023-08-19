@@ -11,14 +11,16 @@ int main() {
     lpbuffer_t * amp;
     lpformation_t * formation;
     lpsineosc_t * osc;
+    int window_type;
 
     length = 10 * SR;
     numgrains = 1;
     maxgrainlength = SR;
     mingrainlength = SR/10.;
+    window_type = WIN_HANN;
 
     out = LPBuffer.create(length, CHANNELS, SR);
-    formation = LPFormation.create(numgrains, maxgrainlength, mingrainlength, length, CHANNELS, SR);
+    formation = LPFormation.create(window_type, numgrains, maxgrainlength, mingrainlength, length, CHANNELS, SR, NULL);
 
     /* Render a sine tone and fill the ringbuffer with it, 
      * to simulate a live input. */

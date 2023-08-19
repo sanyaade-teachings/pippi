@@ -13,7 +13,7 @@ def trigger(ctx):
         amp = dsp.rand(0.5, 1)
 
         midi_events += ctx.t.midi(pos, length, freq, amp)
-        play_events += ctx.t.play('osc', pos, length=length, freq=freq, amp=amp)
+        play_events += [ctx.t.play(pos, 'osc', length=length, freq=freq, amp=amp)]
 
         pos += dsp.rand(0.1, 0.5)
 

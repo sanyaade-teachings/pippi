@@ -19,7 +19,7 @@ from pippi cimport fx
 from pippi cimport fft
 from pippi import graph
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE, PI
-from pippi cimport grains
+from pippi cimport grains2
 from pippi cimport soundpipe
 
 np.import_array()
@@ -704,7 +704,7 @@ cdef class SoundBuffer:
     def cloud(SoundBuffer self, double length=-1, *args, **kwargs):
         """ Create a new Cloud from this SoundBuffer
         """
-        return grains.Cloud(self, *args, **kwargs).play(length)
+        return grains2.Cloud2(self, *args, **kwargs).play(length)
 
     def copy(self):
         """ Return a new copy of this SoundBuffer.
@@ -1103,6 +1103,36 @@ cdef class SoundBuffer:
     def taper(self, double length):
         cdef int framelength = <int>(self.samplerate * length)
         return self * _adsr(len(self), framelength, 0, 1, framelength)
+
+    def fadeout(self, double amount):
+        cdef int c = 0
+        cdef double phase
+        cdef size_t framelength = len(self.frames)
+        cdef double[:,:] out = np.zeros((framelength, self.channels))
+
+        amount *= -50
+
+        for i in range(framelength):
+            phase = <double>i / framelength
+            for c in range(self.channels):
+                out[i,c] = self.frames[i,c] * math.exp(amount * phase)
+
+        return SoundBuffer(out, samplerate=self.samplerate, channels=self.channels)
+
+    def fadein(self, double amount):
+        cdef int c = 0
+        cdef double phase
+        cdef size_t framelength = len(self.frames)
+        cdef double[:,:] out = np.zeros((framelength, self.channels))
+
+        amount *= -50
+
+        for i in range(framelength):
+            phase = <double>i / framelength
+            for c in range(self.channels):
+                out[i,c] = self.frames[i,c] * (1-math.exp(amount * phase))
+
+        return SoundBuffer(out, samplerate=self.samplerate, channels=self.channels)
 
     cpdef SoundBuffer transpose(SoundBuffer self, object speed, object length=None, object position=None, double amp=1.0):
         """ Change the pitch of the sound without changing the length.
