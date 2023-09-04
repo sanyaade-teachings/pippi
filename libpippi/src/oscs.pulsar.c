@@ -1,10 +1,30 @@
 #include "oscs.pulsar.h"
 
+lpfloat_t interpolate_waveset(lpfloat_t * buf, lpfloat_t phase, size_t length) {
+    lpfloat_t frac, a, b;
+    size_t i, boundry;
+
+    boundry = length - 1;
+
+    if(length < 2) return buf[0];
+    
+    frac = phase - (int)phase;
+    i = (int)phase;
+
+    if (i >= boundry) return 0;
+
+    a = buf[i];
+    b = buf[i+1];
+
+    return (1.0f - frac) * a + (frac * b);
+}
+
+
 lppulsarosc_t * create_pulsarosc(void) {
     lppulsarosc_t * p = (lppulsarosc_t *)LPMemoryPool.alloc(1, sizeof(lppulsarosc_t));
 
-    p->wts = NULL;
-    p->wins = NULL;
+    p->wavetables = NULL;
+    p->windows = NULL;
     p->burst = NULL;
 
     p->saturation = 1.f;
@@ -20,16 +40,19 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
      * is zero, skip everything except phase incrementing and return 
      * a zero down the line.
      */
-    lpfloat_t ipw, isr, sample, mod, burst, a, b;
+    lpfloat_t ipw, isr, sample, mod, burst, a, b, phase;
     lpfloat_t wtmorphpos, wtmorphfrac;
     lpfloat_t winmorphpos, winmorphfrac;
     int wtmorphidx, wtmorphmul;
     int winmorphidx, winmorphmul;
 
     /* The wavetable and window stacks must be populated by the user after creation */
-    assert(p->wts != NULL);
-    assert(p->wins != NULL);
+    assert(p->wavetables != NULL);
+    assert(p->num_wavetables > 0);
+    assert(p->windows != NULL);
+    assert(p->num_windows > 0);
 
+    phase = 0.f;
     ipw = 0.f;
     sample = 0.f;
     mod = 0.f;
@@ -47,14 +70,16 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     }
 
     if(ipw > 0 && burst > 0) {
-        if(p->wts->length == 1) {
+        if(p->num_wavetables == 1) {
             /* If there is just a single wavetable in the stack, get the current value */
-            sample = LPInterpolation.linear(p->wts->stack[0], p->wts->phase * ipw);
+            sample = interpolate_waveset(p->wavetables, phase * ipw, p->wavetable_lengths[0]);
         } else {
             /* If there are multiple wavetables in the stack, get their values  
              * and then interpolate the value at the morph position between them.
              */
-            wtmorphmul = p->wts->length-1 > 1 ? p->wts->length-1 : 1;
+            waveset_length = p->waveset_lengths[waveset_index];
+            wtmorphmul = waveset_length-1 > 1 ? waveset_length-1 : 1;
+
             wtmorphpos = lpwv(p->wts->pos, 0, 1) * wtmorphmul;
             wtmorphidx = (int)wtmorphpos;
             wtmorphfrac = wtmorphpos - wtmorphidx;

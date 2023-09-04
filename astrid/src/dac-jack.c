@@ -11,7 +11,7 @@ lpscheduler_t * astrid_scheduler;
 sqlite3 * sessiondb;
 
 /* Callback for SIGINT */
-void handle_shutdown(int sig __attribute__((unused))) {
+void handle_shutdown(__attribute__((unused)) int sig) {
     astrid_is_running = 0;
 }
 
@@ -145,7 +145,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
  * It asks for samples from the mixer inside the scheduler 
  * and sends the mixed audio to the soundcard.
  */
-int audio_callback(jack_nframes_t nframes, void * arg) {
+int audio_callback(jack_nframes_t nframes, __attribute__((unused)) void * arg) {
     jack_nframes_t i;
     jack_default_audio_sample_t * out1, * out2;
 

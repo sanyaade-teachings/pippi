@@ -81,6 +81,7 @@ enum Wavetables {
     WT_SAW,
     WT_RSAW,
     WT_RND,
+    WT_USER,
     NUM_WAVETABLES
 };
 

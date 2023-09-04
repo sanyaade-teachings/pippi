@@ -49,6 +49,8 @@
 #define ASTRID_MIDIMAP_NOTEBASE_PATH "/tmp/astrid-midimap-device%d-note%d"
 #define ASTRID_IPC_IDBASE_PATH "/tmp/astrid-idfile-%s"
 
+#define ASTRID_SERIAL_CTLBASE_PATH "/tmp/astrid-serialdevice%d-ctl%d"
+
 #define PLAY_MESSAGE 'p'
 #define TRIGGER_MESSAGE 't'
 #define STOP_MESSAGE 's'
@@ -75,8 +77,9 @@
 #define ASTRID_ADCSECONDS 10
 #define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
 #define LPADCBUFSAMPLES (LPADCBUFFRAMES * ASTRID_CHANNELS)
+#define LPADCBUFBYTES (LPADCBUFSAMPLES * sizeof(lpfloat_t))
 #define LPADC_WRITEPOS_PATH "/tmp/astrid-adc-writepos"
-#define LPADC_BUFFER_PATH "/tmp/astrid-adc-buffer"
+#define LPADC_BUFFER_PATH "/astrid-adc-buffer"
 
 /* deprecated */
 #define LPADC_HANDLE "/tmp/astrid_adcbuf_shmid"
@@ -185,6 +188,28 @@ typedef struct lpmsgpq_node_t {
     size_t pos;
     int index; /* index in node pool */
 } lpmsgpq_node_t;
+
+
+enum LPSerialParamTypes {
+    LPSERIAL_PARAM_BOOL,    /*  0/1 */
+    LPSERIAL_PARAM_CTL,     /*  0-1 */
+    LPSERIAL_PARAM_SIG,     /* -1-1 */
+    LPSERIAL_PARAM_NUM,     /* size_t */
+    LPSERIAL_PARAM_CC,      /* 0-127 */
+    LPSERIAL_PARAM_NOTEON,  /* 0-127 */
+    LPSERIAL_PARAM_NOTEOFF, /* 0-127 */
+    LPSERIAL_PARAM_SHUTDOWN,
+    NUM_LPSERIAL_PARAMS
+};
+
+
+typedef struct lpserial_param_t {
+    int id;
+    int type;
+    int group;
+    int device;
+    size_t value;
+} lpserial_param_t;
 
 
 /* When instrument scripts produce MIDI triggers, 
@@ -329,20 +354,24 @@ int lpmidi_remove_msg_from_notemap(int device_id, int note, int index);
 int lpmidi_print_notemap(int device_id, int note);
 int lpmidi_trigger_notemap(int device_id, int note);
 
+int lpserial_setctl(int device_id, int param_id, size_t value);
+int lpserial_getctl(int device_id, int ctl, lpfloat_t * value);
+
 int astrid_get_playback_device_id();
 int astrid_get_capture_device_id();
 
 int lpadc_create();
 int lpadc_destroy();
-int lpadc_aquire(lpipc_buffer_t ** adcbuf, int shmid);
+int lpadc_aquire(lpipc_buffer_t ** adcbuf);
 int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_samples);
-int lpadc_write_block(const void * block, size_t blocksize, int shmid);
-int lpadc_read_sample(size_t offset, lpfloat_t * sample, int shmid);
-int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES], int shmid);
+int lpadc_write_block(const void * block, size_t blocksize);
+int lpadc_read_sample(size_t offset, lpfloat_t * sample);
+/*int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES]);*/
+int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out);
 
 int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate);
-int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf, int shmid);
-int lpipc_buffer_release(char * id_path, void * shmaddr);
+int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf);
+int lpipc_buffer_release(char * id_path);
 int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf);
 int lpipc_buffer_destroy(char * id_path);
 int lpipc_setid(char * path, int id); 

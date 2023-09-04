@@ -186,7 +186,6 @@ void * message_feed(__attribute__((unused)) void * arg) {
     mqd_t qd;
 #endif
     lpmsg_t msg = {0};
-    lpmsg_t * msgout;
     lpmsgpq_node_t * d;
     double now = 0;
 
@@ -207,13 +206,6 @@ void * message_feed(__attribute__((unused)) void * arg) {
             syslog(LOG_ERR, "Error while fetching message during message relay loop: %s\n", strerror(errno));
             continue;
         }
-
-        /*
-        d = (lpmsgpq_node_t *)calloc(1, sizeof(lpmsgpq_node_t));
-        msgout = (lpmsg_t *)calloc(1, sizeof(lpmsg_t));
-        memcpy(msgout, &msg, sizeof(lpmsg_t));
-        d->msg = msgout;
-        */
 
         d = &pqnodes[pqnode_index];
         memcpy(&d->msg, &msg, sizeof(lpmsg_t));

@@ -15,7 +15,7 @@ lpscheduler_t * astrid_scheduler;
 sqlite3 * sessiondb;
 
 /* Callback for SIGINT */
-void handle_shutdown(int sig __attribute__((unused))) {
+void handle_shutdown(__attribute__((unused)) int sig) {
     astrid_is_running = 0;
 }
 

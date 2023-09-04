@@ -72,7 +72,7 @@ cdef bytes serialize_buffer(SoundBuffer buf, int is_looping, lpmsg_t * msg):
 
     return bytes(strbuf)
 
-cdef SoundBuffer read_from_adc(int adc_shmid, double length, double offset=0, int channels=2, int samplerate=48000):
+cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
     cdef size_t i
     cdef int c
 
@@ -80,7 +80,7 @@ cdef SoundBuffer read_from_adc(int adc_shmid, double length, double offset=0, in
     cdef size_t length_in_frames = len(snd)
     cdef size_t offset_in_frames = <size_t>(offset * samplerate)
 
-    if lpadc_read_block_of_samples(offset_in_frames * channels, length_in_frames * channels, &adc_block, adc_shmid) < 0:
+    if lpadc_read_block_of_samples(offset_in_frames * channels, length_in_frames * channels, adc_block) < 0:
         logger.error('cyrenderer ADC read: failed to read %d frames at offset %d from ADC' % (length_in_frames, offset_in_frames))
         return snd
 
@@ -193,6 +193,12 @@ cdef class MidiEventListenerProxy:
     cpdef int notei(self, int note, int device_id=0):
         return lpmidi_getnote(device_id, note)
 
+cdef class SerialEventListenerProxy:
+    cpdef lpfloat_t ctl(self, int ctl, int device_id=0):
+        cdef lpfloat_t value = 0
+        if lpserial_getctl(device_id, ctl, &value) < 0:
+            return 0
+        return value
 
 cdef class EventTriggerFactory:
     def _parse_params(self, *args, **kwargs):
@@ -286,7 +292,6 @@ cdef class EventContext:
             str msg=None,
             dict cache=None,
             int voice_id=-1,
-            int adc_shmid=-1,
             double max_processing_time=1,
             size_t count=0,
         ):
@@ -300,7 +305,6 @@ cdef class EventContext:
         self.m = MidiEventListenerProxy()
         self.instrument_name = instrument_name
         self.vid = voice_id
-        self.adc_shmid = adc_shmid
         self.count = count
         if lpscheduler_get_now_seconds(&now) < 0:
             logger.exception('Error getting now seconds during %s event ctx init' % instrument_name)
@@ -308,7 +312,7 @@ cdef class EventContext:
         self.now = now
 
     def adc(self, length=1, offset=0, channels=2):
-        return read_from_adc(self.adc_shmid, length, offset=offset, channels=channels)
+        return read_from_adc(length, offset=offset, channels=channels)
 
     def log(self, msg):
         logger.info('ctx.log[%s] %s' % (self.instrument_name, msg))
@@ -323,21 +327,7 @@ cdef class Instrument:
         self.renderer = renderer
         self.cache = {}
         self.last_reload = 0
-        self.adc_shmid = self.get_adc_shmid()
         self.max_processing_time = 0
-
-    cpdef int get_adc_shmid(self):
-        cdef int adc_shmid
-
-        """
-        adc_shmid = lpipc_getid(LPADC_BUFFER_PATH)
-        if adc_shmid < 0:
-            logger.warning('cyrenderer: Could not get LPADC shmid')
-            return -1
-
-        return adc_shmid
-        """
-        return 0
 
     def reload(self):
         logger.debug('Reloading instrument %s from %s' % (self.name, self.path))
@@ -354,7 +344,6 @@ cdef class Instrument:
 
             self.renderer = renderer
             self.register_midi_triggers()
-            self.adc_shmid = self.get_adc_shmid()
         else:
             logger.error('Error reloading instrument. Null spec at path:\n  %s' % self.path)
 
@@ -459,7 +448,6 @@ cdef int render_event(object instrument, lpmsg_t * msg):
         msg=msgstr,
         cache=instrument.cache,
         voice_id=msg.voice_id,
-        adc_shmid=instrument.adc_shmid,
         max_processing_time=instrument.max_processing_time,
         count=msg.count,
     )
@@ -479,6 +467,8 @@ cdef int render_event(object instrument, lpmsg_t * msg):
 
             try:
                 for snd in generator:
+                    if snd is None:
+                        continue
                     bufstr = serialize_buffer(snd, loop, msg)
                     _redis.publish('astridbuffers', bufstr)
 
@@ -524,6 +514,7 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
     cdef bint loop
     cdef EventContext ctx 
     cdef str msgstr
+    cdef list eventlist
     cdef int qfd
     cdef double now = 0
     cdef bytes trigger_params = msg.msg
@@ -535,7 +526,6 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
         msg=msgstr,
         cache=instrument.cache,
         voice_id=msg.voice_id,
-        adc_shmid=instrument.adc_shmid,
         max_processing_time=instrument.max_processing_time,
         count=msg.count,
     )
@@ -552,7 +542,10 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
         ctx.count = 0
         ctx.tick = 0
         try:
-            trigger_events += p(ctx)
+            eventlist = p(ctx)
+            if eventlist is None:
+                continue
+            trigger_events += eventlist
         except Exception as e:
             logger.exception('Error during %s trigger generation: %s' % (ctx.instrument_name, e))
             return 1

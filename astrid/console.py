@@ -106,9 +106,15 @@ class AstridConsole(cmd.Cmd):
     def __init__(self, sessionfile=None):
         cmd.Cmd.__init__(self)
 
+        self.serial_listeners = {}
+
         print('Starting dac...')
         self.dac = subprocess.Popen('astrid-dac')
         print('done!')
+
+        #print('Starting adc...')
+        #self.adc = subprocess.Popen('astrid-adc')
+        #print('done!')
 
         print('Starting seq...')
         self.seq = subprocess.Popen('astrid-seq')
@@ -249,44 +255,9 @@ to be restarted to take effect.
             print('Could not invoke qmessage: %s' % e)
             print(traceback.format_exc())
 
-    def do_h(self, cmd):
-        parts = [ p.strip() for p in cmd.split() ]
-
-        if parts[0] == 'clearall':
-            print('Clearing all freq banks')
-            return
-
-        bank_index = parts[0]
-        bank_mode = parts[1]
-        bank_vals = ' '.join(parts[2:])
-
-        if bank_mode == 'rnd':
-            bank_mode = 'degrees'
-            parts = [ p.strip() for p in bank_vals.split() ]
-
-            degree_groups = []
-            if len(parts) == 0:
-                degree_groups += [[ dsp.randint(1, 11) for _ in range(dsp.randint(3, 7)) ]]
-
-            else:
-                for p in parts:
-                    if '-' in p and p != '-':
-                        low, high = tuple(p.split('-'))
-                        degree_groups += [[ dsp.randint(int(low), int(high)) for _ in range(dsp.randint(3, 7)) ]]
-                    else:
-                        degree_groups += [[ dsp.randint(1, 11) for _ in range(dsp.randint(3, 7)) ]]
-
-            bank_vals = ''
-            for g in degree_groups:
-                bank_vals += ','.join([ str(d) for d in g]) + ' '
-
-        bank_key = 'fb%s' % bank_index
-        bank_vals_key = '%s-%s' % (bank_key, bank_mode)
-
-        _redis.set(bank_key.encode('ascii'), bank_mode.encode('ascii'))
-        _redis.set(bank_vals_key.encode('ascii'), bank_vals.encode('ascii'))
-
-        print('Set freq bank %s harmony to mode %s with vals %s' % (bank_key, bank_mode, bank_vals))
+    def do_cb(self, chords):
+        _redis.set('chordbank'.encode('ascii'), chords.encode('ascii'))
+        print('Set chord bank to %s' % chords)
 
     def do_tm(self, cmd):
         """ Manage trigger maps
@@ -394,6 +365,30 @@ to be restarted to take effect.
     def do_k(self, instrument):
         if instrument in self.instruments:
             self.instruments[instrument].terminate()
+
+    def do_serial(self, params):
+        cmd, tty = tuple([ p.strip() for p in params.split() ])
+
+        if cmd == 'on':
+            print('Starting serial listener...')
+            if tty in self.serial_listeners and self.serial_listeners[tty] is None:
+                self.serial_listeners[tty] = subprocess.Popen('astrid-seriallistener /dev/%s' % tty)
+                print('Serial listener %s has started' % tty)
+            else:
+                print('Serial listener %s is already on' % tty)
+
+        elif cmd == 'off':
+            if tty in self.serial_listeners and self.serial_listeners[tty] is None:
+                print('Stopping serial listener...')
+                self.serial_listeners[tty].terminate()
+                self.serial_listeners[tty].wait()
+                del self.serial_listeners[tty]
+                print('Serial listener has stopped')
+            else:
+                print('Serial listener is already off')
+
+        elif cmd == 'list' or cmd == '':
+            pass
 
     def help_midi(self):
         txt = """

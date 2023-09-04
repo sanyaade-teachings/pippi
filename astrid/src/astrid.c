@@ -18,7 +18,7 @@ void lptimeit_since(struct timespec * start) {
 /* SESSION
  * DATABASE
  * ********/
-static int lpsessiondb_callback_debug(void * unused, int argc, char ** argv, char ** colname) {
+static int lpsessiondb_callback_debug(__attribute__((unused)) void * unused, int argc, char ** argv, char ** colname) {
     int i;
     for(i=0; i < argc; i++) {
         syslog(LOG_DEBUG, "lpsessiondb_callback %s=%s\n", colname[i], argv[i] ? argv[i] : "None");
@@ -26,7 +26,7 @@ static int lpsessiondb_callback_debug(void * unused, int argc, char ** argv, cha
     return 0;
 }
 
-static int lpsessiondb_callback_noop(void * unused, int argc, char ** argv, char ** colname) {
+static int lpsessiondb_callback_noop(__attribute__((unused)) void * unused, __attribute__((unused)) int argc, __attribute__((unused)) char ** argv, __attribute__((unused)) char ** colname) {
     return 0;
 }
 
@@ -455,7 +455,7 @@ int lpipc_destroyid(char * path) {
 }
 
 int lpipc_createvalue(char * path, size_t size) {
-    int shmid;
+    int shmfd;
     char * semname;
 
     /* Construct the sempahore name by stripping the /tmp prefix */
@@ -467,23 +467,22 @@ int lpipc_createvalue(char * path, size_t size) {
         return -1;
     }
 
-    /* Create the shared memory segment */
-    if((shmid = shmget(IPC_PRIVATE, size, LPIPC_PERMS)) < 0) {
-        syslog(LOG_ERR, "lpipc_createvalue shmget. Error: %s\n", strerror(errno));
+    /* Create the POSIX shared memory segment */
+    if((shmfd = shm_open(path, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_createvalue Could not create shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
 
-    /* Store the shm IPC ID */
-    if(lpipc_setid(path, shmid) < 0) {
-        syslog(LOG_ERR, "lpipc_createvalue could not store shm IPC ID. Error: %s\n", strerror(errno));
+    if(ftruncate(shmfd, size) < 0) {
+        syslog(LOG_ERR, "lpipc_createvalue Could not truncate shared memory segment to size %ld. (%s) %s\n", size, semname, strerror(errno));
         return -1;
     }
 
-    return shmid;
+    return 0;
 }
 
 int lpipc_setvalue(char * path, void * value, size_t size) {
-    int shmid;
+    int fd;
     sem_t * sem;
     void * shmaddr;
     char * semname;
@@ -503,16 +502,15 @@ int lpipc_setvalue(char * path, void * value, size_t size) {
         return -1;
     }
 
-    /* Get the shared memory segment ID */
-    if((shmid = lpipc_getid(path)) < 0) {
-        syslog(LOG_ERR, "lpipc_setvalue could not read shm IPC ID. Error: %s\n", strerror(errno));
+    /* Get the file descriptor for the shared memory segment */
+    if((fd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
 
-    /* Attach the shared memory */
-    shmaddr = (void *)shmat(shmid, NULL, 0);
-    if(shmaddr == (void *)-1) {
-        syslog(LOG_ERR, "lpipc_setvalue shmat. Error: %s\n", strerror(errno));
+    /* Attach the shared memory to the pointer */
+    if((shmaddr = (void*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", size, semname, strerror(errno));
         return -1;
     }
 
@@ -535,28 +533,39 @@ int lpipc_setvalue(char * path, void * value, size_t size) {
 }
 
 int lpipc_unsafe_getvalue(char * path, void ** value) {
-    int shmid;
+    struct stat statbuf;
+    void * shmaddr;
+    int fd;
 
-    /* Get the shared memory segment ID */
-    if((shmid = lpipc_getid(path)) < 0) {
-        syslog(LOG_ERR, "lpipc_setvalue could not read shm IPC ID. Error: %s\n", strerror(errno));
+    /* Get the file descriptor for the shared memory segment */
+    if((fd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_unsafe_getvalue Could not open shared memory segment. (%s) %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    /* Get the size of the segment */
+    if(fstat(fd, &statbuf) < 0) {
+        syslog(LOG_ERR, "lpipc_unsafe_getvalue Could not stat shm. Error: %s\n", strerror(errno));
         return -1;
     }
 
     /* Attach the shared memory to the pointer */
-    *value = (void *)shmat(shmid, NULL, 0);
-    if(*value == (void *)-1) {
-        syslog(LOG_ERR, "lpipc_getvalue shmat. Could not attach to shm. Error: %s\n", strerror(errno));
+    if((shmaddr = (void*)mmap(NULL, statbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "lpipc_unsafe_getvalue Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, path, strerror(errno));
         return -1;
     }
+
+    memcpy(*value, shmaddr, statbuf.st_size);
 
     return 0;
 }
 
 
 int lpipc_getvalue(char * path, void ** value) {
-    int shmid;
+    struct stat statbuf;
+    int fd;
     sem_t * sem;
+    void * shmaddr;
     char * semname;
 
     /* Construct the sempahore name by stripping the /tmp prefix */
@@ -574,18 +583,25 @@ int lpipc_getvalue(char * path, void ** value) {
         return -1;
     }
 
-    /* Get the shared memory segment ID */
-    if((shmid = lpipc_getid(path)) < 0) {
-        syslog(LOG_ERR, "lpipc_setvalue could not read shm IPC ID. Error: %s\n", strerror(errno));
+    /* Get the file descriptor for the shared memory segment */
+    if((fd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Get the size of the segment */
+    if(fstat(fd, &statbuf) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not stat shm. Error: %s\n", strerror(errno));
         return -1;
     }
 
     /* Attach the shared memory to the pointer */
-    *value = (void *)shmat(shmid, NULL, 0);
-    if(*value == (void *)-1) {
-        syslog(LOG_ERR, "lpipc_getvalue shmat. Could not attach to shm. Error: %s\n", strerror(errno));
+    if((shmaddr = (void*)mmap(NULL, statbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, semname, strerror(errno));
         return -1;
     }
+
+    memcpy(value, shmaddr, statbuf.st_size);
 
     /* Clean up sempahore resources */
     if(sem_close(sem) < 0) {
@@ -643,7 +659,8 @@ int lpipc_destroyvalue(char * path) {
  * BUFFER TOOLS
  * ************/
 int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate) {
-    int shmid, semvalue;
+    int semvalue;
+    int shmfd;
     sem_t * sem;
     lpipc_buffer_t * buf;
     size_t bufdatasize, buftotalsize;
@@ -658,7 +675,7 @@ int lpipc_buffer_create(char * id_path, size_t length, int channels, int sampler
 
     /* Create the POSIX semaphore and initialize it to 1 */
     if((sem = sem_open(semname, O_CREAT, LPIPC_PERMS, 1)) == NULL) {
-        syslog(LOG_ERR, "lpipc_buffer_create Could not open or create semaphore. (%s) %s\n", semname, strerror(errno));
+        syslog(LOG_ERR, "lpipc_buffer_create Could not create semaphore. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
 
@@ -667,35 +684,19 @@ int lpipc_buffer_create(char * id_path, size_t length, int channels, int sampler
         return -1;
     }
 
-    /* If the lock file exists, just look up and return the shmID */
-    if(access(id_path, F_OK) == 0) {
-        if((shmid = lpipc_getid(id_path)) < 0) {
-            syslog(LOG_ERR, "lpipc_buffer_create failed to look up shmid in lock file: %s. Error: %s\n", id_path, strerror(errno));
-            return -1;
-        }
-
-        syslog(LOG_INFO, "lpipc_buffer_create The lockfile (%s) exists, returning shmid %d\n", id_path, shmid);
-        return shmid;
-    }
-
-    /* Create the system V shared memory segment */
-    shmid = shmget(IPC_PRIVATE, buftotalsize, IPC_CREAT | LPIPC_PERMS);
-    if(shmid < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_create shmget. Error: %s\n", strerror(errno));
+    /* POSIX shm */
+    if((shmfd = shm_open(id_path, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_create Could not create shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
 
-    /* Write the identifier for the shared memory buffer into a 
-     * well known file other processes can use to attach and read */
-    if(lpipc_setid(id_path, shmid) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_create failed to store token to path %s. Error: %s\n", id_path, strerror(errno));
+    if(ftruncate(shmfd, buftotalsize) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_create Could not truncate shared memory segment to size %ld. (%s) %s\n", buftotalsize, semname, strerror(errno));
         return -1;
     }
 
-    /* Attach the shared memory */
-    buf = (lpipc_buffer_t *)shmat(shmid, NULL, 0);
-    if(buf == (void *)-1) {
-        syslog(LOG_ERR, "lpipc_buffer_create shmat. Error: %s\n", strerror(errno));
+    if((buf = mmap(NULL, buftotalsize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_create Could not mmap shared memory segment to size %ld. (%s) %s\n", buftotalsize, semname, strerror(errno));
         return -1;
     }
 
@@ -712,10 +713,14 @@ int lpipc_buffer_create(char * id_path, size_t length, int channels, int sampler
     buf->is_looping = 0;
     memset(buf->data, 0, bufdatasize);
 
-    return shmid;
+    close(shmfd);
+
+    return 0;
 }
 
-int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf, int shmid) {
+int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf) {
+    struct stat statbuf;
+    int fd;
     sem_t * sem;
     char * semname;
 
@@ -734,10 +739,21 @@ int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf, int shmid) {
         return -1;
     }
 
+    /* Get the file descriptor for the shared memory segment */
+    if((fd = shm_open(id_path, O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
+        return -1;
+    }
+
+    /* Get the size of the segment */
+    if(fstat(fd, &statbuf) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not stat shm. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
     /* Attach the shared memory to the pointer */
-    *buf = (lpipc_buffer_t *)shmat(shmid, NULL, 0);
-    if(*buf == (void *)-1) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire shmat. Could not attach to shm. Error: %s\n", strerror(errno));
+    if((*buf = mmap(NULL, statbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, semname, strerror(errno));
         return -1;
     }
 
@@ -747,18 +763,14 @@ int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf, int shmid) {
         return -1;
     }
 
+    close(fd);
+
     return 0;
 }
 
-int lpipc_buffer_release(char * id_path, void * shmaddr) {
+int lpipc_buffer_release(char * id_path) {
     sem_t * sem;
     char * semname;
-
-    /* Detach the shared memory segment */
-    if(shmdt(shmaddr) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release failed to detach shared memory. Error: (%d) %s\n", errno, strerror(errno));
-        return -1;
-    }
 
     /* Construct the sempahore name by stripping the /tmp prefix */
     semname = id_path + 4;
@@ -793,30 +805,18 @@ int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf) {
 }
 
 int lpipc_buffer_destroy(char * id_path) {
-   char * semname;
-   int shmid;
+    char * semname;
 
-    /* Look up the shared memory ID */
-    if((shmid = lpipc_getid(id_path)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release Could not get shmid %s. Error: %s\n", id_path, strerror(errno));
+    /* Unlink the shared memory buffer */
+    if(shm_unlink(id_path) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_destroy shm_unlink. Error: %s\n", strerror(errno));
         return -1;
-    }
 
-    /* Remove the shared memory buffer */
-    if(shmctl(shmid, IPC_RMID, NULL) < 0) {
-        syslog(LOG_ERR, "lpcounter_destroy shmctl. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Clean up the id file */
-    if(lpipc_destroyid(id_path) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_destroy failed to destroy %s. Error: %s\n", id_path, strerror(errno));
-        return -1;
     }
 
     semname = id_path + 4;
 
-    /* Destroy the sempahore */
+    /* Unlink the sempahore */
     if(sem_unlink(semname) < 0) {
         syslog(LOG_ERR, "lpipc_destroyvalue sem_unlink Could not destroy semaphore\n");
         return -1;
@@ -826,18 +826,16 @@ int lpipc_buffer_destroy(char * id_path) {
 }
 
 int lpadc_create() {
-    int shmid;
-
     /* Initialize the shared memory buffer and semaphore for the ADC */
-    if((shmid = lpipc_buffer_create(LPADC_BUFFER_PATH, LPADCBUFFRAMES, ASTRID_CHANNELS, ASTRID_SAMPLERATE)) < 0) {
+    if(lpipc_buffer_create(LPADC_BUFFER_PATH, LPADCBUFFRAMES, ASTRID_CHANNELS, ASTRID_SAMPLERATE) < 0) {
         syslog(LOG_ERR, "lpadc_create Could not create ADC buffer shared mem\n");
         return -1;
     }
 
-    return shmid;
+    return 0;
 }
 
-int lpadc_write_2d_block(const float ** block, int channels, size_t blocksize_in_frames, int shmid) {
+int lpadc_write_2d_block(const float ** block, int channels, size_t blocksize_in_frames) {
     size_t write_pos, insert_pos;
     size_t i;
     int c;
@@ -846,7 +844,7 @@ int lpadc_write_2d_block(const float ** block, int channels, size_t blocksize_in
     float sample = 0;
 
     /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf, shmid) < 0) {
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
         syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
         return -1;
     }
@@ -876,7 +874,7 @@ int lpadc_write_2d_block(const float ** block, int channels, size_t blocksize_in
     /*syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);*/
 
     /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
         return -1;
     }
@@ -884,10 +882,10 @@ int lpadc_write_2d_block(const float ** block, int channels, size_t blocksize_in
     return 0;
 }
 
-int lpadc_aquire(lpipc_buffer_t ** adcbuf, int shmid) {
+int lpadc_aquire(lpipc_buffer_t ** adcbuf) {
     lpipc_buffer_t * adcbufp;
     /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbufp, shmid) < 0) {
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbufp) < 0) {
         syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
         return -1;
     }
@@ -899,13 +897,10 @@ int lpadc_aquire(lpipc_buffer_t ** adcbuf, int shmid) {
 
 int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_samples) {
     /* Increment the write position */
-    adcbuf->pos += increment_in_samples;
-    while(adcbuf->pos >= LPADCBUFSAMPLES) {
-        adcbuf->pos -= LPADCBUFSAMPLES;
-    }
+    adcbuf->pos = (adcbuf->pos + increment_in_samples) % LPADCBUFSAMPLES;
 
     /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after increment\n");
         return -1;
     }
@@ -914,7 +909,7 @@ int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_sam
 }
 
 
-int lpadc_write_block(const void * block, size_t blocksize_in_samples, int shmid) {
+int lpadc_write_block(const void * block, size_t blocksize_in_samples) {
     size_t write_pos, insert_pos;
     size_t i;
     lpipc_buffer_t * adcbuf;
@@ -924,7 +919,7 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples, int shmid
     blockp = (float *)block;
 
     /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf, shmid) < 0) {
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
         syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
         return -1;
     }
@@ -950,7 +945,7 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples, int shmid
     /*syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);*/
 
     /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
         return -1;
     }
@@ -958,38 +953,46 @@ int lpadc_write_block(const void * block, size_t blocksize_in_samples, int shmid
     return 0;
 }
 
-int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES], int shmid) {
-    size_t write_pos, read_pos, copy_pos;
-    size_t i;
+int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out) {
+    size_t read_pos, start, end, readsize, lastreadsize;
     lpipc_buffer_t * adcbuf;
-    lpfloat_t sample;
-    int nonzero;
 
     /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf, shmid) < 0) {
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
         syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
         return -1;
     }
 
-    /* Determine the read position */
-    write_pos = adcbuf->pos;
-    read_pos = write_pos - offset - size-1;
-
-    /* Copy the block */
-    nonzero = 0;
-    for(i=0; i < size; i++) {
-        copy_pos = (read_pos+i) % LPADCBUFSAMPLES;
-        sample = adcbuf->data[copy_pos];
-        if(sample != 0) nonzero = 1;
-        (*out)[i] = sample;
+    /* Maximum read size == buffer length */
+    if(size > LPADCBUFSAMPLES) {
+        size = LPADCBUFSAMPLES;
     }
 
-    if(nonzero == 0) {
-        syslog(LOG_ERR, "ADC read all zeros\n");
+    /* Get the read position with the offset and read as far 
+     * to the start of the buffer before wrapping as possible */
+    if(adcbuf->pos >= offset) {
+        read_pos = (adcbuf->pos - offset) % LPADCBUFSAMPLES;
+    } else {
+        read_pos = (adcbuf->pos + (LPADCBUFSAMPLES - offset)) % LPADCBUFSAMPLES;
+    }
+
+    start = read_pos >= size ? read_pos - size : 0;
+    end = read_pos;
+    readsize = end - start;
+    memcpy(out, adcbuf->data + start, readsize * sizeof(lpfloat_t));
+
+    /* If there are remaining samples to be read on the other end of 
+     * the buffer, read those samples back from the end. */
+    if (readsize < size) {
+        lastreadsize = readsize;
+        start = LPADCBUFSAMPLES - (size - readsize);
+        end = LPADCBUFSAMPLES;
+        readsize = end - start;
+        memcpy(out + lastreadsize, adcbuf->data + start, readsize * sizeof(lpfloat_t));
     }
 
     /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
         return -1;
     }
@@ -998,12 +1001,12 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPA
 }
 
 
-int lpadc_read_sample(size_t offset, lpfloat_t * sample, int adc_shmid) {
+int lpadc_read_sample(size_t offset, lpfloat_t * sample) {
     size_t write_pos;
     lpipc_buffer_t * adcbuf;
 
     /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf, adc_shmid) < 0) {
+    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
         syslog(LOG_ERR, "Could not aquire ADC buffer shm for reading\n");
         return -1;
     }
@@ -1016,7 +1019,7 @@ int lpadc_read_sample(size_t offset, lpfloat_t * sample, int adc_shmid) {
     memcpy(sample, adcbuf->data + (write_pos * sizeof(lpfloat_t)), sizeof(lpfloat_t));
 
     /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH, (void *)adcbuf) < 0) {
+    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
         return -1;
     }
@@ -1093,6 +1096,46 @@ int lpmidi_getnote(int device_id, int note) {
 
     return lpipc_getid(note_path);
 }
+
+/* MIDI STATUS IPC
+ * GETTERS & SETTERS
+ * ****************/
+int lpserial_setctl(int device_id, int param_id, size_t value) {
+    char * ctl_path;
+    size_t path_length;
+
+    path_length = snprintf(NULL, 0, ASTRID_SERIAL_CTLBASE_PATH, device_id, param_id) + 1;
+    ctl_path = (char *)calloc(1, path_length);
+    snprintf(ctl_path, path_length,  ASTRID_SERIAL_CTLBASE_PATH, device_id, param_id);
+
+    if(lpipc_setvalue(ctl_path, &value, sizeof(size_t)) < 0) {
+        syslog(LOG_ERR, "Could not store %ld for MIDI CC %d from device %d\n", value, param_id, device_id);
+        return -1;
+    }
+
+    free(ctl_path);
+
+    return 0;
+}
+
+int lpserial_getctl(int device_id, int ctl, lpfloat_t * value) {
+    char ctl_path[50];
+    size_t path_length;
+    size_t ctl_value = 0;
+    void * ctl_valuep = &ctl_value;
+
+    path_length = snprintf(NULL, 0, ASTRID_SERIAL_CTLBASE_PATH, device_id, ctl) + 1;
+    snprintf(ctl_path, path_length,  ASTRID_SERIAL_CTLBASE_PATH, device_id, ctl);
+
+    if(lpipc_getvalue(ctl_path, &ctl_valuep)) {
+        return -1;        
+    }
+
+    *value = (lpfloat_t)ctl_value / SIZE_MAX;
+
+    return 0;
+}
+
 
 /* MIDI trigger maps for noteon 
  * (and eventually cc triggers)

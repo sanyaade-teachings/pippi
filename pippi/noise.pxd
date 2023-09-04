@@ -1,11 +1,13 @@
 cdef extern from "pippicore.h":
     cdef enum Wavetables:
         WT_SINE,
+        WT_COS,
         WT_SQUARE, 
         WT_TRI, 
-        WT_PHASOR, 
-        WT_HANN, 
+        WT_SAW,
+        WT_RSAW,
         WT_RND,
+        WT_USER,
         NUM_WAVETABLES
 
     ctypedef double lpfloat_t

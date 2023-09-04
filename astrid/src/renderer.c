@@ -156,12 +156,6 @@ int main(int argc, char * argv[]) {
             goto lprender_cleanup;
         }
 
-        /*
-        syslog(LOG_DEBUG, "Renderer got %s message:\n", msg.instrument_name);
-        syslog(LOG_DEBUG, "             %d (msg.voice_id)\n", (int)msg.voice_id);
-        syslog(LOG_DEBUG, "             %d (msg.type)\n", (int)msg.type);
-        */
-
         switch(msg.type) {
             case LPMSG_PLAY:
                 if(astrid_schedule_python_render(&msg) < 0) {
@@ -188,6 +182,10 @@ int main(int argc, char * argv[]) {
                 break;
 
             case LPMSG_SHUTDOWN:
+                syslog(LOG_DEBUG, "Renderer got %s shutdown message:\n", msg.instrument_name);
+                syslog(LOG_DEBUG, "             %d (msg.voice_id)\n", (int)msg.voice_id);
+                syslog(LOG_DEBUG, "             %d (msg.type)\n", (int)msg.type);
+
                 astrid_is_running = 0;
                 break;
 

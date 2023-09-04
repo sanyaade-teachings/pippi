@@ -91,9 +91,10 @@ cdef extern from "astrid.h":
 
     int lpadc_create()
     int lpadc_destroy()
-    int lpadc_write_block(float * block, size_t blocksize_in_samples, int adc_shmid)
-    int lpadc_read_sample(size_t pos, lpfloat_t * sample, int adc_shmid)
-    int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES], int adc_shmid)
+    int lpadc_write_block(float * block, size_t blocksize_in_samples)
+    int lpadc_read_sample(size_t pos, lpfloat_t * sample)
+    #int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES])
+    int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out)
 
     int lpipc_getid(char * path)
     ssize_t astrid_get_voice_id()
@@ -108,6 +109,8 @@ cdef extern from "astrid.h":
     int lpmidi_getcc(int device_id, int cc)
     int lpmidi_setnote(int device_id, int note, int velocity)
     int lpmidi_getnote(int device_id, int note)
+
+    int lpserial_getctl(int device_id, int ctl, lpfloat_t * value)
 
     int lpscheduler_get_now_seconds(double * now)
 
@@ -136,18 +139,21 @@ cdef class MidiEventListenerProxy:
     cpdef float note(self, int note, int device_id=*)
     cpdef int notei(self, int note, int device_id=*)
 
+cdef class SerialEventListenerProxy:
+    cpdef lpfloat_t ctl(self, int ctl, int device_id=*)
+
 cdef class EventContext:
     cdef public dict cache
     cdef public ParamBucket p
     cdef public SessionParamBucket s
     cdef public EventTriggerFactory t
     cdef public MidiEventListenerProxy m
+    cdef public SerialEventListenerProxy b
     cdef public str instrument_name
     cdef public object sounds
     cdef public int count
     cdef public int tick
     cdef public int vid
-    cdef public int adc_shmid
     cdef public double now
     cdef public double max_processing_time
 
@@ -157,9 +163,7 @@ cdef class Instrument:
     cdef public object renderer
     cdef public dict cache
     cdef public size_t last_reload
-    cdef public int adc_shmid
     cdef public double max_processing_time
-    cpdef int get_adc_shmid(self)
 
 cdef tuple collect_players(object instrument)
 cdef int render_event(object instrument, lpmsg_t * msg)

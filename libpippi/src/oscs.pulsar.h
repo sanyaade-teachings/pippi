@@ -4,8 +4,16 @@
 #include "pippicore.h"
 
 typedef struct lppulsarosc_t {
-    lpstack_t * wts;   /* Wavetable stack */
-    lpstack_t * wins;  /* Window stack */
+    lpfloat_t * wavetables;   /* Wavetable stack */
+    int num_wavetables;
+    size_t * wavetable_onsets;
+    size_t * wavetable_lengths;
+
+    lpfloat_t * windows;  /* Window stack */
+    int num_windows;
+    size_t * window_onsets;
+    size_t * window_lengths;
+
     lparray_t * burst;    /* Burst table - null always on */
 
     lpfloat_t saturation; /* Probability of all pulses to no pulses */

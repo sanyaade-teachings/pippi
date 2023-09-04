@@ -161,6 +161,60 @@ void formation_destroy(lpformation_t * c) {
     LPMemoryPool.free(c);
 }
 
+/**
+ * Waveset segmentation tools
+ */
+int extract_wavesets(
+    int num_wavesets,
+    int num_crossings,
+    lpfloat_t * source_buffer, 
+    size_t source_buffer_length, 
+    lpfloat_t * waveset_buffer, 
+    size_t waveset_buffer_length,
+    size_t * waveset_onsets,
+    size_t * waveset_lengths
+) {
+    size_t i, j, lastonset;
+    int current, lastsign, crossing_count, waveset_count;
+    lpfloat_t input;
+
+    input = 0.f;
+    lastsign = 0;
+    lastonset = 0;
+    crossing_count = 0;
+    waveset_count = 0;
+
+    for(i=0; i < source_buffer_length; i++) {
+        if(j >= waveset_buffer_length) break;
+        if(waveset_count >= num_wavesets) break;
+
+        input = source_buffer[i];
+
+        current = signbit(input); 
+        if((lastsign && !current) || (!lastsign && current)) {
+            crossing_count += 1;
+
+            if(crossing_count >= num_crossings) {
+                waveset_lengths[waveset_count] = lastonset - j;
+                waveset_onsets[waveset_count] = j;
+                lastonset = j;
+
+                waveset_count += 1;
+                crossing_count = 0;
+            }
+        }
+
+        lastsign = current;
+        waveset_buffer[j] = input;
+
+        j += 1;
+    }
+
+    return 0;
+}
+
+
+
 const lpgrain_factory_t LPGrain = { grain_create, grain_process, grain_destroy };
 const lpformation_factory_t LPFormation = { formation_create, formation_process, formation_destroy };
 

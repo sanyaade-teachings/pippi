@@ -26,7 +26,7 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
 LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
-LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic
+LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0
 LPLIBS = -lm -ldl -lpthread -lrt
 
 clean:
@@ -144,6 +144,7 @@ astrid-adc-jack:
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwriteval.c $(LPLIBS) -o build/astrid-adcwriteval
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwritewav.c $(LPLIBS) -o build/astrid-adcwritewav
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcsave.c $(LPLIBS) -o build/astrid-adcsave
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcinfo.c $(LPLIBS) -o build/astrid-adcinfo
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcread1s.c $(LPLIBS) -o build/astrid-adcread1s
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcdestroy.c $(LPLIBS) -o build/astrid-adcdestroy
 
@@ -164,5 +165,5 @@ build: clean astrid-dac-jack astrid-adc-jack astrid-renderer astrid-q astrid-ser
 
 macos: clean astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq
 
-install: build
+install: 
 	cp build/astrid-* /usr/local/bin/

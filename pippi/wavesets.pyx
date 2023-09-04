@@ -133,10 +133,10 @@ cdef class Waveset:
             self._slice(raw, end, length)
 
     cdef void _slice(Waveset self, double[:] raw, int start, int end):
-        cdef Wave* w = <Wave*>malloc(sizeof(Wave))
-        w.start = start
-        w.end = end
-        w.length = end-start
+        #cdef Wave* w = <Wave*>malloc(sizeof(Wave))
+        #w.start = start
+        #w.end = end
+        #w.length = end-start
 
         cdef int waveset_length = end-start
         waveset = np.zeros(waveset_length, dtype='d')

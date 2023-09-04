@@ -1,7 +1,7 @@
 #include "astrid.h"
 
 int main(int argc, char * argv[]) {
-    int device_id, note, i;
+    int device_id, note;
     lpmsg_t msg = {0};
 
     if(argc < 3) {
