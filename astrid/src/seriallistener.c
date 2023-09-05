@@ -56,6 +56,7 @@ int main(int argc, char * argv[]) {
 
         if(param.type == LPSERIAL_PARAM_SHUTDOWN) break;
 
+        /*
         if (param.type == LPSERIAL_PARAM_BOOL) {
             if(lpserial_setbool(param.device, param.id, param.value.as_int) < 0) {
                 syslog(LOG_ERR, "Could not set ctl value...\n");
@@ -89,6 +90,7 @@ int main(int argc, char * argv[]) {
                 syslog(LOG_ERR, "Could not set note...\n");
             }
         }
+        */
     }
 
     close(tty);
