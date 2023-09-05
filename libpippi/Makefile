@@ -44,8 +44,8 @@ fx-examples:
 osc-examples:
 	mkdir -p build renders
 
-	echo "Building pulsarosc.c example...";
-	gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
+	#echo "Building pulsarosc.c example...";
+	#gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
 
 	echo "Building phasorosc.c example...";
 	gcc $(LPFLAGS) examples/phasorosc.c $(LPSOURCES) $(LPLIBS) -o build/phasorosc
@@ -129,8 +129,8 @@ microsound-examples:
 	echo "Building crossings.c example...";
 	gcc $(LPFLAGS) examples/crossings.c $(LPSOURCES) $(LPLIBS) -o build/crossings
 
-	echo "Building crossings2.c example...";
-	gcc $(LPFLAGS) examples/crossings2.c $(LPSOURCES) $(LPLIBS) -o build/crossings2
+	#echo "Building crossings2.c example...";
+	#gcc $(LPFLAGS) examples/crossings2.c $(LPSOURCES) $(LPLIBS) -o build/crossings2
 
 	echo "Building grainformation.c example...";
 	gcc $(LPFLAGS) examples/grainformation.c $(LPSOURCES) $(LPLIBS) -o build/grainformation

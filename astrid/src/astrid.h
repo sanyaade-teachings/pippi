@@ -202,13 +202,18 @@ enum LPSerialParamTypes {
     NUM_LPSERIAL_PARAMS
 };
 
+typedef union {
+    size_t as_size_t;
+    lpfloat_t as_lpfloat_t;
+    int as_int;
+} lpserial_param_value_t;
 
 typedef struct lpserial_param_t {
     int id;
     int type;
     int group;
     int device;
-    size_t value;
+    lpserial_param_value_t value;
 } lpserial_param_t;
 
 

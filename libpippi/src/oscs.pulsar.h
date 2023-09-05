@@ -23,7 +23,16 @@ typedef struct lppulsarosc_t {
 } lppulsarosc_t;
 
 typedef struct lppulsarosc_factory_t {
-    lppulsarosc_t * (*create)(void);
+    lppulsarosc_t * (*create)(int num_wavetables, 
+        lpfloat_t * wavetables, 
+        size_t * wavetable_onsets,
+        size_t * wavetable_lengths,
+
+        int num_windows, 
+        lpfloat_t * windows, 
+        size_t * window_onsets,
+        size_t * window_lengths
+    );
     lpfloat_t (*process)(lppulsarosc_t *);
     void (*destroy)(lppulsarosc_t*);
 } lppulsarosc_factory_t;

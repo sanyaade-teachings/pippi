@@ -56,28 +56,39 @@ int main(int argc, char * argv[]) {
 
         if(param.type == LPSERIAL_PARAM_SHUTDOWN) break;
 
-        if(param.type == LPSERIAL_PARAM_NOTEON) {
-            if(lpmidi_setnote(param.id, (int)param.value, param.device) < 0) {
+        if (param.type == LPSERIAL_PARAM_BOOL) {
+            if(lpserial_setbool(param.device, param.id, param.value.as_int) < 0) {
+                syslog(LOG_ERR, "Could not set ctl value...\n");
+            }
+        } else if (param.type == LPSERIAL_PARAM_CTL) {
+            if(lpserial_setctl(param.device, param.id, param.value.as_lpfloat_t) < 0) {
+                syslog(LOG_ERR, "Could not set ctl value...\n");
+            }
+        } else if (param.type == LPSERIAL_PARAM_SIG) {
+            if(lpserial_setsig(param.device, param.id, param.value.as_lpfloat_t) < 0) {
+                syslog(LOG_ERR, "Could not set ctl value...\n");
+            }
+        } else if (param.type == LPSERIAL_PARAM_NUM) {
+            if(lpserial_setnum(param.device, param.id, param.value.as_size_t) < 0) {
+                syslog(LOG_ERR, "Could not set ctl value...\n");
+            }
+        } else if (param.type == LPSERIAL_PARAM_CC) {
+            if(lpmidi_setcc(param.device, param.id, param.value.as_int) < 0) {
+                syslog(LOG_ERR, "Could not set cc value...\n");
+            }
+        } else if(param.type == LPSERIAL_PARAM_NOTEON) {
+            if(lpmidi_setnote(param.id, param.value.as_int, param.device) < 0) {
                 syslog(LOG_ERR, "Could not set note...\n");
             }
 
             if(lpmidi_trigger_notemap(param.device, param.id) < 0) {
                 syslog(LOG_ERR, "Could not trigger notemap...\n");
-                continue;
             }
-
-        } else if (param.type == LPSERIAL_PARAM_CC) {
-            if(lpmidi_setcc(param.device, param.id, (int)param.value) < 0) {
-                syslog(LOG_ERR, "Could not set cc value...\n");
-                continue;
-            }
-        } else if (param.type == LPSERIAL_PARAM_CTL) {
-            if(lpserial_setctl(param.device, param.id, param.value) < 0) {
-                syslog(LOG_ERR, "Could not set ctl value...\n");
-                continue;
+        } else if(param.type == LPSERIAL_PARAM_NOTEOFF) {
+            if(lpmidi_setnote(param.id, param.value.as_int, param.device) < 0) {
+                syslog(LOG_ERR, "Could not set note...\n");
             }
         }
-
     }
 
     close(tty);
