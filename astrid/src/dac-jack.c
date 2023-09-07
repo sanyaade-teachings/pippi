@@ -91,39 +91,17 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             /* Schedule the buffer for playback */
             scheduler_schedule_event(astrid_scheduler, buf, msg.onset_delay);
 
-            /*
-            syslog(LOG_DEBUG, "DAC: scheduled event in mixer. processing_time_so_far=%f onset_delay_in_seconds=%f\n", processing_time_so_far, onset_delay_in_seconds);
-            */
-
-            /* Mark the voice active on the first render and 
-             * increment the render count if looping */
-            /*
-            if(msg.count == 1) {
-                if(lpsessiondb_mark_voice_active(sessiondb, msg.voice_id) < 0) {
-                    syslog(LOG_ERR, "DAC could not mark voice active in sessiondb. Error: (%d) %s\n", errno, strerror(errno));
-                }
-            } else if(msg.count > 1 && buf->is_looping) {
-                if(lpsessiondb_increment_voice_render_count(sessiondb, msg.voice_id, msg.count) < 0) {
-                    syslog(LOG_ERR, "DAC could not increment voice render count in sessiondb. Error: (%d) %s\n", errno, strerror(errno));
-                }
-            }
-            */
-
             /* If the buffer is flagged to loop, schedule the next render 
              * by placing the message onto the message scheduling priority 
-             * queue with a timestamp for sending the render message 70% 
+             * queue with a timestamp for sending the render message 50% 
              * into the buffer playback, with an onset delay for the buffer 
-             * making up the last 30%. TODO: measure jitter when scheduling 
+             * making up the remaining 50%. TODO: measure jitter when scheduling 
              * in regular intervals. */
 
             if(buf->is_looping == 1) {
-                delay_frames = (size_t)(buf->length * 0.7f);
+                delay_frames = (size_t)(buf->length * 0.5f);
                 msg.initiated = now;
                 msg.scheduled = (delay_frames / (double)buf->samplerate);
-                /*
-                syslog(LOG_DEBUG, "scheduling next render with onset_delay %ld\n", msg.onset_delay);
-                syslog(LOG_DEBUG, "initiated=%f scheduled=%f voice_id=%ld\n", msg.initiated, msg.scheduled, msg.voice_id);
-                */
 
                 if(send_message(msg) < 0) {
                     syslog(LOG_ERR, "Could not schedule message for loop retriggering\n");
