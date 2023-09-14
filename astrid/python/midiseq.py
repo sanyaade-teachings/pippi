@@ -97,8 +97,10 @@ def relay_thread_comrade(q, stop_event):
             try:
                 #out.send_message([CONTROL_CHANGE | e.channel, BANK_SELECT_MSB, e.bank_msb])
                 #out.send_message([CONTROL_CHANGE | e.channel, BANK_SELECT_LSB, e.bank_lsb])
-                out.send_message([PROGRAM_CHANGE | e.channel, max(0, e.program-1)])
-                out.send_message([e.type | e.channel, e.note, e.velocity])
+                #out.send_message([PROGRAM_CHANGE | e.channel, max(0, e.program-1)])
+                msg = [e.type | e.channel, e.note, e.velocity]
+                logger.debug('sending midi message on device %s: %s' % (port, msg))
+                out.send_message(msg)
             except Exception as e:
                 logger.error('Could not send midi out message %s' % str(e))
                 break
