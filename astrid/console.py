@@ -8,6 +8,7 @@ from pprint import pprint
 import random
 import subprocess
 import sys
+import time
 import tomllib
 import traceback
 import warnings
@@ -140,6 +141,9 @@ class AstridConsole(cmd.Cmd):
         cfg = tomllib.loads(cfgs)
         for cmd in cfg['init']['commands']:
             self.onecmd(cmd)
+
+    def do_pause(self, seconds):
+        time.sleep(float(seconds))
 
     def help_sound(self):
         txt = """
