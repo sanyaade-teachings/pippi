@@ -283,7 +283,7 @@ to be restarted to take effect.
             nbeg, nend = tuple(notes.split('-'))
             notes = list(map(str, range(int(nbeg), int(nend)+1)))
         elif notes == 'all':
-            notes = list(range(21, 128))
+            notes = list(map(str, range(21, 128)))
         else:
             notes = [notes]
 
