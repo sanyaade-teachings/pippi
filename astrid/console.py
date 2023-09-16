@@ -273,11 +273,11 @@ to be restarted to take effect.
             return
 
         action = parts.pop(0)
-        devices = parts.pop(0)
+        device = parts.pop(0)
         notes = parts.pop(0)
 
         # FIXME device IDs should be optional or runtime configurable
-        devices = ['1','2','3']
+        #devices = ['1','2','3']
 
         if '-' in notes:
             nbeg, nend = tuple(notes.split('-'))
@@ -288,25 +288,22 @@ to be restarted to take effect.
             notes = [notes]
 
         if action == 'a':
-            for device in devices:
-                for note in notes:
-                    note_params = ['note=%s' % note, 'midi_device=%s' % device]
-                    subprocess.run(['astrid-addnotemap', device, note] + parts + note_params)
-                    print('Added notemap for device %s note %s cmd %s' % (device, note, parts + note_params))
+            for note in notes:
+                note_params = ['note=%s' % note, 'midi_device=%s' % device]
+                subprocess.run(['astrid-addnotemap', device, note] + parts + note_params)
+                print('Added notemap for device %s note %s cmd %s' % (device, note, parts + note_params))
 
         elif action == 'c':
-            for device in devices:
-                for note in notes:
-                    try:
-                        os.unlink('/tmp/astrid-midimap-device%s-note%s' % (device, note))
-                        print('Removed all notemaps for device %s note %s' % (device, note))
-                    except FileNotFoundError as e:
-                        pass
+            for note in notes:
+                try:
+                    os.unlink('/tmp/astrid-midimap-device%s-note%s' % (device, note))
+                    print('Removed all notemaps for device %s note %s' % (device, note))
+                except FileNotFoundError as e:
+                    pass
 
         elif action == 'l':
-            for device in devices:
-                for note in notes:
-                    subprocess.run(['astrid-printnotemap', device, note])
+            for note in notes:
+                subprocess.run(['astrid-printnotemap', device, note])
 
     def do_p(self, cmd):
         parts = cmd.split(' ')
