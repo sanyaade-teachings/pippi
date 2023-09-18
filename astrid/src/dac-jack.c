@@ -29,7 +29,6 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     lpmsg_t msg = {0};
     double processing_time_so_far, onset_delay_in_seconds;
     double now = 0;
-    size_t delay_frames;
 
     struct timeval redis_timeout = {15, 0};
     size_t callback_delay = 0;
@@ -84,7 +83,8 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
             */
 
             processing_time_so_far = now - msg.initiated;
-            onset_delay_in_seconds = fmax(0.0f, msg.scheduled - processing_time_so_far);
+            onset_delay_in_seconds = msg.scheduled - processing_time_so_far;
+            if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
 
             msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
 
@@ -99,9 +99,12 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
              * in regular intervals. */
 
             if(buf->is_looping == 1) {
-                delay_frames = (size_t)(buf->length * 0.5f);
                 msg.initiated = now;
-                msg.scheduled = (delay_frames / (double)buf->samplerate);
+                msg.scheduled = (lpfloat_t)buf->length / ASTRID_SAMPLERATE;
+                msg.type = LPMSG_PLAY;
+                msg.count += 1;
+                msg.max_processing_time = msg.scheduled; /* This schedules the render as soon as possible */
+                syslog(LOG_INFO, "Scheduling message for loop retriggering: %f\n", msg.scheduled);
 
                 if(send_message(msg) < 0) {
                     syslog(LOG_ERR, "Could not schedule message for loop retriggering\n");
