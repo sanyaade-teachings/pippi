@@ -33,27 +33,20 @@ def midi_update_callback(event, device_id=None):
     mt = msg[0] & MSGTYPE # extract the message type
 
     if mt == NOTE_ON:
+        logger.info('NOTE ON event %s (device %s)' % (event, device_id))
         setnote(msg[1], msg[2], device_id)
         trigger_notemap(msg[1], device_id)
 
     elif mt == NOTE_OFF:
+        logger.info('NOTE OFF event %s (device %s)' % (event, device_id))
         setnote(msg[1], 0, device_id)
 
     elif mt == CONTROL_CHANGE:
+        logger.info('CC event %s (device %s)' % (event, device_id))
         setcc(msg[1], msg[2], device_id)
 
-    logger.info('NOTE_ON %s NOTE_OFF %s CC %s' % (
-        NOTE_ON,
-        NOTE_OFF,
-        CONTROL_CHANGE,
-    ))
-
-    logger.info('msg %s NOTE_ON %s NOTE_OFF %s CC %s' % (
-        msg, 
-        (mt == NOTE_ON),
-        (mt == NOTE_OFF),
-        (mt == CONTROL_CHANGE),
-    ))
+    else:
+        logger.info('UNKNOWN event %s (device %s)' % (event, device_id))
 
 def midi_device_listener(device_id, stop_event):
     try:
