@@ -556,6 +556,7 @@ Set the default MIDI input device to device 1
             print('Stopping renderer for %s...' % instrument)
             self.instruments[instrument].terminate()
             self.instruments[instrument].wait()
+            del self.instruments[instrument]
 
         if self.dac is not None:
             print('Stopping DAC mixer...')
