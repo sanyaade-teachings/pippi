@@ -366,6 +366,8 @@ to be restarted to take effect.
     def do_k(self, instrument):
         if instrument in self.instruments:
             self.instruments[instrument].terminate()
+            self.instruments[instrument].wait()
+            del self.instruments[instrument]
 
     def do_serial(self, params):
         cmd, tty = tuple([ p.strip() for p in params.split() ])
