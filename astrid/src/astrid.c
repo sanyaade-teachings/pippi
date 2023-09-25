@@ -1323,7 +1323,19 @@ int lpmidi_trigger_notemap(int device_id, int note) {
 
         msg.initiated = now;
 
-        syslog(LOG_INFO, "Sending message from lpmidi trigger notemap\n");
+        syslog(LOG_INFO, "Sending message from lpmidi trigger notemap\ninitiated %f\nscheduled %f\ncompleted %f\nmax_processing_time %f\nonset_delay %ld\nvoice_id %ld\ncount %ld\ntype %d\nmsg %s\nname %s\n\n", 
+            msg.initiated,
+            msg.scheduled,
+            msg.completed,
+            msg.max_processing_time,
+            msg.onset_delay,
+            msg.voice_id, 
+            msg.count,
+            msg.type,
+            msg.msg,
+            msg.instrument_name
+        );
+
         if(send_message(msg) < 0) {
             syslog(LOG_ERR, "Could not schedule msg for sending during notemap trigger. Error: %s\n", strerror(errno));
             return -1;
