@@ -87,13 +87,7 @@ astrid-dac:
 	mkdir -p build
 
 	echo "Building astrid dac...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
-
-astrid-dac-jack:
-	mkdir -p build
-
-	echo "Building astrid dac-jack...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac-jack.c src/jack_helpers.c $(LPLIBS) -ljack -lhiredis -o build/astrid-dac
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c src/jack_helpers.c $(LPLIBS) -ljack -lhiredis -o build/astrid-dac
 
 astrid-seq:
 	mkdir -p build
@@ -126,20 +120,8 @@ astrid-voicestatus:
 astrid-adc:
 	mkdir -p build
 
-	echo "Building astrid adc and tools...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc.c $(LPLIBS) -o build/astrid-adc
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadccreate.c $(LPLIBS) -o build/astrid-adccreate
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwriteval.c $(LPLIBS) -o build/astrid-adcwriteval
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwritewav.c $(LPLIBS) -o build/astrid-adcwritewav
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcsave.c $(LPLIBS) -o build/astrid-adcsave
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcread1s.c $(LPLIBS) -o build/astrid-adcread1s
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcdestroy.c $(LPLIBS) -o build/astrid-adcdestroy
-
-astrid-adc-jack:
-	mkdir -p build
-
 	echo "Building astrid JACK adc and tools...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc-jack.c src/jack_helpers.c $(LPLIBS) -ljack -o build/astrid-adc
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc.c src/jack_helpers.c $(LPLIBS) -ljack -o build/astrid-adc
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadccreate.c $(LPLIBS) -o build/astrid-adccreate
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwriteval.c $(LPLIBS) -o build/astrid-adcwriteval
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwritewav.c $(LPLIBS) -o build/astrid-adcwritewav
@@ -161,7 +143,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: clean astrid-dac-jack astrid-adc-jack astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq astrid-midimap
+build: clean astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq astrid-midimap
 
 macos: clean astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq
 
