@@ -1,14 +1,11 @@
-#define MINIAUDIO_IMPLEMENTATION
-#ifdef __linux__
-#define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
-#define MA_ENABLE_JACK
-#endif
-#define MA_NO_ENCODING
-#define MA_NO_DECODING
-#include "miniaudio/miniaudio.h"
-
+#include <jack/jack.h>
 #include "astrid.h"
+#include "jack_helpers.h"
 
+
+jack_port_t * astrid_inport1, * astrid_inport2;
+jack_client_t * jack_client;
+int adc_shmid;
 
 /* When false, the inner loop exits and begins cleanup */
 static volatile int adc_is_running = 1;
@@ -16,7 +13,7 @@ static volatile int adc_is_running = 1;
 /* When false, no frames are written into the shared buffer */
 static volatile int adc_is_capturing = 1;
 
-void handle_shutdown(int sig __attribute__((unused))) {
+void handle_shutdown(__attribute__((unused)) int sig) {
     adc_is_capturing = 0;
     adc_is_running = 0;
 }
@@ -24,29 +21,40 @@ void handle_shutdown(int sig __attribute__((unused))) {
 /* Audio callback: writes a block of frames into 
  * the shared circular buffer and increments the 
  * write position in the buffer. */
-void miniaudio_callback(
-    __attribute__((unused)) ma_device * device, 
-    __attribute__((unused)) void * pOut, 
-       const void * pIn, 
-          ma_uint32 count
-) {
-    int adc_shmid;
+int audio_callback(jack_nframes_t nframes, __attribute__((unused)) void * arg) {
+    lpipc_buffer_t * adcbuf;
+    jack_nframes_t i;
+    jack_default_audio_sample_t * in1, * in2;
+    size_t idx;
 
-    if(adc_is_capturing == 0) return;
+    if(adc_is_capturing == 0) return 0;
 
-    adc_shmid = *((int *)device->pUserData);
-
-    if(lpadc_write_block(pIn, (size_t)(count * ASTRID_CHANNELS), adc_shmid) < 0) {
-        syslog(LOG_ERR, "Could not write input block to ADC");
-        return;
+    if(lpadc_aquire(&adcbuf) < 0) {
+        syslog(LOG_ERR, "Could not aquire ADC shared memory in JACK callback");
+        return -1;
     }
+
+    in1 = jack_port_get_buffer(astrid_inport1, nframes);
+    in2 = jack_port_get_buffer(astrid_inport2, nframes);
+
+    /* Copy the block of samples */
+    for(i=0; i < nframes; i++) {
+        idx = (adcbuf->pos + i * ASTRID_CHANNELS) % LPADCBUFSAMPLES;
+        adcbuf->data[idx] = (lpfloat_t)(*in1++);
+        adcbuf->data[(idx + 1) % LPADCBUFSAMPLES] = (lpfloat_t)(*in2++);
+    }
+
+    if(lpadc_increment_and_release(adcbuf, nframes * ASTRID_CHANNELS) < 0) {
+        syslog(LOG_ERR, "Could not write input block to ADC in JACK callback");
+        return -1;
+    }
+
+    return 0;
 }
 
 int main() {
-    int device_id, adc_shmid;
-    ma_uint32 playback_device_count, capture_device_count;
-    ma_device_info * playback_devices;
-    ma_device_info * capture_devices;
+    jack_status_t jack_status;
+    jack_options_t jack_options = JackNullOption;
 
     /* Open a handle to the system log */
     openlog("astrid-adc", LOG_PID, LOG_USER);
@@ -77,45 +85,50 @@ int main() {
         return 1;
     }
 
-    /* Set up the miniaudio device context */
-    ma_context audio_device_context;
-    if (ma_context_init(NULL, 0, NULL, &audio_device_context) != MA_SUCCESS) {
-        syslog(LOG_ERR, "Error while attempting to initialize miniaudio device context\n");
+    syslog(LOG_INFO, "Created ADC shared memory with shmid %d\n", adc_shmid);
+
+    /* Set up JACK */
+    syslog(LOG_DEBUG, "Starting jack...\n");
+    jack_client = jack_client_open("astrid-adc", jack_options, &jack_status, NULL);
+    syslog(LOG_DEBUG, "Got client pointer... printing status\n");
+    print_jack_status(jack_status);
+
+    if(jack_client == NULL) {
+        syslog(LOG_ERR, "Could not open jack client. Client is NULL: %s\n", strerror(errno));
+
+        if((jack_status & JackServerFailed) == JackServerFailed) {
+            syslog(LOG_ERR, "Could not open jack client. Jack server failed with status %2.0x\n", jack_status);
+        } else {
+            syslog(LOG_ERR, "Could not open jack client. Unknown error: %s\n", strerror(errno));
+        }
         goto exit_with_error;
     }
 
-    /* Populate it with some devices */
-    if(ma_context_get_devices(&audio_device_context, &playback_devices, &playback_device_count, &capture_devices, &capture_device_count) != MA_SUCCESS) {
-        syslog(LOG_ERR, "Error while attempting to get devices\n");
+    if((jack_status & JackServerStarted) == JackServerStarted) {
+        syslog(LOG_INFO, "Jack server started!\n");
+    }
+
+    syslog(LOG_DEBUG, "Setting process callback...\n");
+    jack_set_process_callback(jack_client, audio_callback, NULL);
+
+    syslog(LOG_DEBUG, "Registering inport1...\n");
+    astrid_inport1 = jack_port_register(jack_client, "inL", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+    syslog(LOG_DEBUG, "Registering inport2...\n");
+    astrid_inport2 = jack_port_register(jack_client, "inR", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+
+    if((astrid_inport1 == NULL) || (astrid_inport2 == NULL)) {
+        syslog(LOG_ERR, "No more JACK ports available, shutting down...\n");
         goto exit_with_error;
     }
 
-    /* Get the selected device ID */
-    if((device_id = astrid_get_capture_device_id()) < 0) {
-        syslog(LOG_CRIT, "Could not get capture device ID\n");
+    syslog(LOG_DEBUG, "Activating the client...\n");
+    if(jack_activate(jack_client) != 0) {
+        syslog(LOG_ERR, "Could not activate JACK client, shutting down...\n");
         goto exit_with_error;
     }
 
-    /* Configure miniaudio for capture mode */
-    ma_device_config audioconfig = ma_device_config_init(ma_device_type_capture);
-    audioconfig.capture.format = ma_format_f32;
-    audioconfig.capture.channels = ASTRID_CHANNELS;
-    audioconfig.capture.pDeviceID = &capture_devices[device_id].id;
-    audioconfig.sampleRate = ASTRID_SAMPLERATE;
-    audioconfig.dataCallback = miniaudio_callback;
-    audioconfig.pUserData = &adc_shmid;
-
-    /* init miniaudio device */
-    ma_device mad;
-    syslog(LOG_INFO, "Opening device ID %d\n", device_id);
-    if(ma_device_init(NULL, &audioconfig, &mad) != MA_SUCCESS) {
-        syslog(LOG_ERR, "Error while attempting to configure device %d for capture\n", device_id);
-        goto exit_with_error;
-    }
-
-    /* start miniaudio device */
-    syslog(LOG_DEBUG, "Starting audio callback\n");
-    ma_device_start(&mad);
+    /* Wait for JACK to settle */
+    usleep((useconds_t)1000000);
 
     syslog(LOG_DEBUG, "ADC is now running!\n");
     while(adc_is_running) {
@@ -123,7 +136,7 @@ int main() {
     }
 
     syslog(LOG_DEBUG, "Exiting normally: shutting down audio\n");
-    ma_device_uninit(&mad);
+    jack_client_close(jack_client);
 
     syslog(LOG_DEBUG, "Exiting normally: cleaning up shared buffer\n");
     lpadc_destroy();
@@ -131,7 +144,7 @@ int main() {
 
 exit_with_error:
     syslog(LOG_DEBUG, "Attempting to clean up after exiting with error\n");
-    ma_device_uninit(&mad);
+    jack_client_close(jack_client);
     lpadc_destroy();
     return 1;
 }
