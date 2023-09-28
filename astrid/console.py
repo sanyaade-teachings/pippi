@@ -98,7 +98,8 @@ class AstridConsole(cmd.Cmd):
     prompt = '^_- '
     intro = 'Astrid Console'
     instruments = {}
-    dac = None
+    serial_listeners = {}
+    dacs = {}
     adc = None
     seq = None
     midi_relay = None
@@ -107,19 +108,11 @@ class AstridConsole(cmd.Cmd):
     def __init__(self, sessionfile=None):
         cmd.Cmd.__init__(self)
 
-        self.serial_listeners = {}
-
-        print('Starting dac...')
-        self.dac = subprocess.Popen('astrid-dac')
-        print('done!')
-
-        #print('Starting adc...')
-        #self.adc = subprocess.Popen('astrid-adc')
-        #print('done!')
-
         print('Starting seq...')
         self.seq = subprocess.Popen('astrid-seq')
         print('done!')
+
+        _redis.set('mididevice'.encode('ascii'), '1'.encode('ascii'))
 
         # Load the session file if there is one to load
         if sessionfile is not None and Path('%s.toml' % sessionfile).exists():
@@ -131,8 +124,6 @@ class AstridConsole(cmd.Cmd):
             for c in cfg['init']['commands']:
                 self.onecmd(c)
             print('done!')
-
-        _redis.set('mididevice'.encode('ascii'), '1'.encode('ascii'))
 
     def do_cue(self, name):
         with open('%s.toml' % name, 'r') as f:
@@ -173,21 +164,36 @@ to be restarted to take effect.
             subprocess.run(['astrid-setdeviceid', device])
 
     def do_dac(self, cmd):
-        if cmd == 'on':
-            print('Starting dac...')
-            if self.dac is None:
-                self.dac = subprocess.Popen('astrid-dac')
-            else:
-                print('dac is already running')
+        cmds = cmd.split()
+        if len(cmds) == 1:
+            dac_id = 0
+            channels = 2
 
-        elif cmd == 'off':
-            print('Stopping dac...')
-            if self.dac is not None:
-                self.dac.terminate()
-                self.dac.wait()
-                self.dac = None
+        elif len(cmds) == 2:
+            dac_id = cmds[1]
+            channels = 2
+
+        elif len(cmds) == 3:
+            dac_id = cmds[1]
+            channels = cmds[2]
+
+        else:
+            print('Invalid cmd %s' % cmd)
+            return
+
+        if cmds[0] == 'on':
+            if self.dacs.get(dac_id, None) is None:
+                self.dacs[dac_id] = subprocess.Popen(['astrid-dac', str(dac_id), str(channels)])
             else:
-                print('dac is already stopped')
+                print('dac %s is already running' % dac_id)
+
+        elif cmds[0] == 'off':
+            if self.dacs.get(dac_id, None) is not None:
+                self.dacs[dac_id].terminate()
+                self.dacs[dac_id].wait()
+                self.dacs[dac_id] = None
+            else:
+                print('dac %s is already stopped' % dac_id)
 
     def do_adc(self, cmd):
         if cmd == 'on':

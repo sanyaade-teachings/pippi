@@ -440,7 +440,9 @@ cdef int render_event(object instrument, lpmsg_t * msg):
     cdef bint loop
     cdef EventContext ctx 
     cdef str msgstr
+    cdef bytes bufstr
     cdef bytes render_params = msg.msg
+    cdef int dacid = 0
 
     msgstr = render_params.decode('ascii')
     ctx = EventContext.__new__(EventContext,
@@ -469,8 +471,14 @@ cdef int render_event(object instrument, lpmsg_t * msg):
                 for snd in generator:
                     if snd is None:
                         continue
+
+                    if isinstance(snd, tuple):
+                        dacid, snd = snd
+                    else:
+                        dacid = 0
+
                     bufstr = serialize_buffer(snd, loop, msg)
-                    _redis.publish('astridbuffers', bufstr)
+                    _redis.publish('astrid-dac-%d-bufferfeed' % dacid, bufstr)
 
             except Exception as e:
                 logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))

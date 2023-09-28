@@ -5,7 +5,17 @@
 
 
 static volatile int astrid_is_running = 1;
-jack_port_t * astrid_outport1, * astrid_outport2;
+static volatile int dac_id = 0;
+static volatile int output_channels = 2;
+char dac_name_template[] = "astrid-dac-%d";
+char dac_name[50];
+char outport_name[50];
+char shutdown_cmd_template[] = "PUBLISH astrid-dac-%d-bufferfeed shutdown";
+char shutdown_cmd[100];
+char buffer_feed_cmd_template[] = "SUBSCRIBE astrid-dac-%d-bufferfeed";
+char buffer_feed_cmd[100];
+
+jack_port_t ** astrid_outports;
 jack_client_t * jack_client;
 lpscheduler_t * astrid_scheduler;
 sqlite3 * sessiondb;
@@ -27,9 +37,9 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     redisReply * redis_reply;
     lpbuffer_t * buf;
     lpmsg_t msg = {0};
+
     double processing_time_so_far, onset_delay_in_seconds;
     double now = 0;
-
     struct timeval redis_timeout = {15, 0};
     size_t callback_delay = 0;
 
@@ -49,7 +59,7 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
      * This is the only thread subscribed
      * to the buffer queue as a reader.
      */
-    redis_reply = redisCommand(redis_ctx, "SUBSCRIBE astridbuffers");
+    redis_reply = redisCommand(redis_ctx, buffer_feed_cmd);
     if(redis_reply->str != NULL) printf("subscribe result: %s\n", redis_reply->str); 
     freeReplyObject(redis_reply);
 
@@ -159,15 +169,15 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
  */
 int audio_callback(jack_nframes_t nframes, __attribute__((unused)) void * arg) {
     jack_nframes_t i;
-    jack_default_audio_sample_t * out1, * out2;
-
-    out1 = (jack_default_audio_sample_t *)jack_port_get_buffer(astrid_outport1, nframes);
-    out2 = (jack_default_audio_sample_t *)jack_port_get_buffer(astrid_outport2, nframes);
+    jack_default_audio_sample_t * out;
+    int c;
 
     for(i=0; i < nframes; i++) {
         lpscheduler_tick(astrid_scheduler);
-        out1[i] = astrid_scheduler->current_frame[0];
-        out2[i] = astrid_scheduler->current_frame[1];
+        for(c=0; c < output_channels; c++) {
+            out = (jack_default_audio_sample_t *)jack_port_get_buffer(astrid_outports[c], nframes);
+            out[i] = astrid_scheduler->current_frame[c];
+        }
     }
 
     return 0;
@@ -194,7 +204,7 @@ int cleanup(
 
     syslog(LOG_INFO, "Sending shutdown to buffer thread...\n");
     astrid_is_running = 0;
-    redis_reply = redisCommand(redis_ctx, "PUBLISH astridbuffers shutdown");
+    redis_reply = redisCommand(redis_ctx, shutdown_cmd);
     if(redis_reply->str != NULL) syslog(LOG_INFO, "astridbuffers shutdown result: %s\n", redis_reply->str); 
     freeReplyObject(redis_reply);
     if(redis_ctx != NULL) redisFree(redis_ctx); 
@@ -220,15 +230,28 @@ int cleanup(
     return 0;
 }
 
-int main() {
+int main(int argc, char * argv[]) {
     struct sigaction shutdown_action;
     lpcounter_t voice_id_counter;
     pthread_t buffer_feed_thread;
     jack_status_t jack_status;
     jack_options_t jack_options = JackNullOption;
+    int c = 0;
+
+    if(argc > 1) {
+        dac_id = atoi(argv[1]);
+    }
+
+    if(argc > 2) {
+        output_channels = atoi(argv[2]);
+    }
+
+    snprintf(dac_name, sizeof(dac_name), dac_name_template, dac_id);
+    snprintf(buffer_feed_cmd, sizeof(buffer_feed_cmd), buffer_feed_cmd_template, dac_id);
+    snprintf(shutdown_cmd, sizeof(shutdown_cmd), shutdown_cmd_template, dac_id);
 
     sessiondb = NULL;
-    openlog("astrid-dac", LOG_PID, LOG_USER);
+    openlog(dac_name, LOG_PID, LOG_USER);
 
     /* Set shutdown signal handlers */
     shutdown_action.sa_handler = handle_shutdown;
@@ -236,12 +259,12 @@ int main() {
     shutdown_action.sa_flags = SA_RESTART; /* Prevent open, read, write etc from EINTR */
 
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
-        syslog(LOG_ERR, "Could not init SIGINT signal handler. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not init SIGINT signal handler. Error: %s\n", dac_name, strerror(errno));
         exit(1);
     }
 
     if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
-        syslog(LOG_ERR, "Could not init SIGTERM signal handler. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not init SIGTERM signal handler. Error: %s\n", dac_name, strerror(errno));
         exit(1);
     }
 
@@ -254,34 +277,36 @@ int main() {
      * the linked list, increment counts in playing buffers and 
      * flag buffers as having playback completed. 
      **/
-    astrid_scheduler = scheduler_create(1, ASTRID_CHANNELS, ASTRID_SAMPLERATE);
+    astrid_scheduler = scheduler_create(1, output_channels, ASTRID_SAMPLERATE);
+
+    astrid_outports = (jack_port_t **)calloc(output_channels, sizeof(jack_port_t *));
 
     /* Set up shared memory IPC for voice IDs */
     if(lpcounter_create(&voice_id_counter) < 0) {
-        syslog(LOG_ERR, "Could not initialize voice ID shared memory. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not initialize voice ID shared memory. Error: %s\n", dac_name, strerror(errno));
         goto exit_with_error;
     }
 
     /* Store a reference to the shared memory in well known files */
     if(lpipc_setid(LPVOICE_ID_SHMID, voice_id_counter.shmid) < 0) {
-        syslog(LOG_ERR, "Could not store voice ID shmid. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not store voice ID shmid. Error: %s\n", dac_name, strerror(errno));
         goto exit_with_error;
     }
 
     if(lpipc_setid(LPVOICE_ID_SEMID, voice_id_counter.semid) < 0) {
-        syslog(LOG_ERR, "Could not store voice ID shmid. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not store voice ID shmid. Error: %s\n", dac_name, strerror(errno));
         goto exit_with_error;
     }
 
     /* Initialize the sessiondb */
     if(lpsessiondb_create(&sessiondb) < 0) {
-        syslog(LOG_ERR, "Could not initialize the sessiondb. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not initialize the sessiondb. Error: %s\n", dac_name, strerror(errno));
         goto exit_with_error;
     }
 
     /* Start buffer feed thread */
     if(pthread_create(&buffer_feed_thread, NULL, buffer_feed, NULL) != 0) {
-        syslog(LOG_ERR, "Could not initialize buffer feed thread. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not initialize buffer feed thread. Error: %s\n", dac_name, strerror(errno));
         goto exit_with_error;
     }
 
@@ -289,12 +314,12 @@ int main() {
     jack_client = jack_client_open("astrid-dac", jack_options, &jack_status, NULL);
     print_jack_status(jack_status);
     if(jack_client == NULL) {
-        syslog(LOG_ERR, "Could not open jack client. Client is NULL: %s\n", strerror(errno));
+        syslog(LOG_ERR, "%s Could not open jack client. Client is NULL: %s\n", dac_name, strerror(errno));
 
         if((jack_status & JackServerFailed) == JackServerFailed) {
-            syslog(LOG_ERR, "Could not open jack client. Jack server failed with status %2.0x\n", jack_status);
+            syslog(LOG_ERR, "%s Could not open jack client. Jack server failed with status %2.0x\n", dac_name, jack_status);
         } else {
-            syslog(LOG_ERR, "Could not open jack client. Unknown error: %s\n", strerror(errno));
+            syslog(LOG_ERR, "%s Could not open jack client. Unknown error: %s\n", dac_name, strerror(errno));
         }
         goto exit_with_error;
     }
@@ -305,20 +330,24 @@ int main() {
     }
 
     jack_set_process_callback(jack_client, audio_callback, NULL);
-    astrid_outport1 = jack_port_register(jack_client, "outL", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-    astrid_outport2 = jack_port_register(jack_client, "outR", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+    for(c=0; c < output_channels; c++) {
+        snprintf(outport_name, sizeof(outport_name), "out%d", c);
+        astrid_outports[c] = jack_port_register(jack_client, outport_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+    }
 
-    if((astrid_outport1 == NULL) || (astrid_outport2 == NULL)) {
-        syslog(LOG_ERR, "No more JACK ports available, shutting down...\n");
-        goto exit_with_error;
+    for(c=0; c < output_channels; c++) {
+        if((astrid_outports[c] == NULL)) {
+            syslog(LOG_ERR, "No more JACK ports available, shutting down...\n");
+            goto exit_with_error;
+        }
     }
 
     if(jack_activate(jack_client) != 0) {
-        syslog(LOG_ERR, "Could not activate JACK client, shutting down...\n");
+        syslog(LOG_ERR, "%s Could not activate JACK client, shutting down...\n", dac_name);
         goto exit_with_error;
     }
 
-    syslog(LOG_INFO, "Astrid DAC is starting...\n");
+    syslog(LOG_INFO, "Astrid DAC %s is starting...\n", dac_name);
     while(astrid_is_running) {
         /* Twiddle thumbs & tidy up */
         usleep((useconds_t)10000);
