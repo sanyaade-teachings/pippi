@@ -311,7 +311,7 @@ int main(int argc, char * argv[]) {
     }
 
     /* Set up JACK */
-    jack_client = jack_client_open("astrid-dac", jack_options, &jack_status, NULL);
+    jack_client = jack_client_open(dac_name, jack_options, &jack_status, NULL);
     print_jack_status(jack_status);
     if(jack_client == NULL) {
         syslog(LOG_ERR, "%s Could not open jack client. Client is NULL: %s\n", dac_name, strerror(errno));

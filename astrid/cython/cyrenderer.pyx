@@ -179,18 +179,29 @@ cdef class MidiEvent:
             free(self.event)
 
 cdef class MidiEventListenerProxy:
-    cpdef float cc(self, int cc, int device_id=0):
+    def __cinit__(self, default_device_id=1):
+        self.default_device_id = default_device_id
+
+    cpdef float cc(self, int cc, int device_id=-1):
+        if device_id < 0:
+            device_id = self.default_device_id
         cdef int value = lpmidi_getcc(device_id, cc)
         return float(value) / 127
 
-    cpdef int cci(self, int cc, int device_id=0):
+    cpdef int cci(self, int cc, int device_id=-1):
+        if device_id < 0:
+            device_id = self.default_device_id
         return lpmidi_getcc(device_id, cc)
 
-    cpdef float note(self, int note, int device_id=0):
+    cpdef float note(self, int note, int device_id=-1):
+        if device_id < 0:
+            device_id = self.default_device_id
         cdef int velocity = lpmidi_getnote(device_id, note)
         return float(velocity) / 127
 
-    cpdef int notei(self, int note, int device_id=0):
+    cpdef int notei(self, int note, int device_id=-1):
+        if device_id < 0:
+            device_id = self.default_device_id
         return lpmidi_getnote(device_id, note)
 
 cdef class SerialEventListenerProxy:
@@ -292,6 +303,7 @@ cdef class EventContext:
             str msg=None,
             dict cache=None,
             int voice_id=-1,
+            int default_midi_device=1,
             double max_processing_time=1,
             size_t count=0,
         ):
@@ -302,7 +314,7 @@ cdef class EventContext:
         self.p = ParamBucket(str(msg))
         self.s = SessionParamBucket() 
         self.t = EventTriggerFactory()
-        self.m = MidiEventListenerProxy()
+        self.m = MidiEventListenerProxy(default_midi_device)
         self.instrument_name = instrument_name
         self.vid = voice_id
         self.count = count
@@ -398,6 +410,11 @@ def _load_instrument(name, path):
             if hasattr(instrument.renderer, 'cache'):
                 instrument.cache = instrument.renderer.cache()
 
+            if hasattr(instrument.renderer, 'MIDI_DEVICE'):
+                instrument.default_midi_device = instrument.renderer.MIDI_DEVICE
+            else:
+                instrument.default_midi_device = 1
+
         else:
             logger.error('Could not load instrument - spec is None: %s %s' % (path, name))
             raise InstrumentNotFoundError(name)
@@ -450,6 +467,7 @@ cdef int render_event(object instrument, lpmsg_t * msg):
         msg=msgstr,
         cache=instrument.cache,
         voice_id=msg.voice_id,
+        default_midi_device=instrument.default_midi_device,
         max_processing_time=instrument.max_processing_time,
         count=msg.count,
     )
@@ -535,6 +553,7 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
         cache=instrument.cache,
         voice_id=msg.voice_id,
         max_processing_time=instrument.max_processing_time,
+        default_midi_device=instrument.default_midi_device,
         count=msg.count,
     )
 

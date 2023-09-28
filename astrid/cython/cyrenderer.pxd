@@ -134,6 +134,7 @@ cdef class EventTriggerFactory:
     cpdef midi(self, double onset, double length, double freq=*, double amp=*, int note=*, int program=*, int bank_msb=*, int bank_lsb=*, int channel=*, int device=*)
 
 cdef class MidiEventListenerProxy:
+    cdef int default_device_id
     cpdef float cc(self, int cc, int device_id=*)
     cpdef int cci(self, int cc, int device_id=*)
     cpdef float note(self, int note, int device_id=*)
@@ -164,6 +165,7 @@ cdef class Instrument:
     cdef public dict cache
     cdef public size_t last_reload
     cdef public double max_processing_time
+    cdef public int default_midi_device
 
 cdef tuple collect_players(object instrument)
 cdef int render_event(object instrument, lpmsg_t * msg)
