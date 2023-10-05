@@ -5,7 +5,7 @@ import tempfile
 from unittest import TestCase
 
 from pippi.soundbuffer import SoundBuffer
-from pippi import dsp, grains, grains2, fx
+from pippi import dsp, grains, grains2, fx, shapes
 
 class TestCloud(TestCase):
     def setUp(self):
@@ -28,6 +28,31 @@ class TestCloud(TestCase):
         out.write('tests/renders/graincloud_libpippi_unmodulated.wav')
 
         self.assertEqual(len(out), framelength)
+
+    def test_grainlength_modulation(self):
+        snd = dsp.read('tests/sounds/living.wav')
+        grainlength = shapes.win('sine', dsp.MS*10, 0.2)
+        out = snd.cloud(snd.dur*2, grainlength=grainlength)
+        out.write('tests/renders/graincloud_libpippi_grainlength_modulated.wav')
+
+    def test_user_window(self):
+        snd = dsp.read('tests/sounds/living.wav')
+        win = dsp.win('pluckout')
+        grainlength = shapes.win('sine', dsp.MS*10, 0.2)
+        out = snd.cloud(snd.dur*2, window=win, grainlength=grainlength)
+        out.write('tests/renders/graincloud_libpippi_user_window.wav')
+
+    def test_phase_modulation(self):
+        snd = dsp.read('tests/sounds/living.wav')
+        phase = [1,0.5,1,0,0.5]
+        out = snd.cloud(snd.dur*2, grainlength=0.1, phase=phase)
+        out.write('tests/renders/graincloud_libpippi_phase_modulated.wav')
+
+    def test_phase_unmodulated(self):
+        snd = dsp.read('tests/sounds/living.wav')
+        out = snd.cloud(snd.dur*2, grainlength=0.1)
+        out.write('tests/renders/graincloud_libpippi_phase_unmodulated.wav')
+
 
     """
     def test_libpippi_pulsed_graincloud(self):

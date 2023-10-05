@@ -4,7 +4,7 @@
 #define CHANNELS 2
 
 int main() {
-    size_t i, c, length, numgrains, maxgrainlength, mingrainlength;
+    size_t i, c, length, numlayers, grainlength;
     lpbuffer_t * fake_input;
     lpbuffer_t * out;
     lpbuffer_t * freq;
@@ -14,20 +14,19 @@ int main() {
     int window_type;
 
     length = 10 * SR;
-    numgrains = 1;
-    maxgrainlength = SR;
-    mingrainlength = SR/10.;
+    numlayers = 1;
+    grainlength = SR/10.;
     window_type = WIN_HANN;
 
     out = LPBuffer.create(length, CHANNELS, SR);
-    formation = LPFormation.create(window_type, numgrains, maxgrainlength, mingrainlength, length, CHANNELS, SR, NULL);
+    formation = LPFormation.create(window_type, numlayers, grainlength, length, CHANNELS, SR, NULL);
 
     /* Render a sine tone and fill the ringbuffer with it, 
      * to simulate a live input. */
     osc = LPSineOsc.create();
     osc->samplerate = SR;
 
-    freq = LPParam.from_float(220.0f);
+    freq = LPParam.from_float(440.0f);
     amp = LPParam.from_float(0.8f);
 
     fake_input = LPSineOsc.render(osc, length, freq, amp, CHANNELS);
@@ -43,6 +42,7 @@ int main() {
         }
     }
 
+    printf("wat %f\n", amp->data[0]);
     LPSoundFile.write("renders/grainformation-out.wav", out);
 
     LPSineOsc.destroy(osc);

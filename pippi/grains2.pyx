@@ -107,9 +107,19 @@ cdef class Cloud2:
             object grainlength=0.2, 
             object grid=None,
             object mask=None,
+            object phase=None,
             int numgrains=2,
             unsigned int wtsize=4096,
         ):
+        """ TODO:
+            [ ] position
+            [ ] amp 
+            [ ] speed
+            [ ] spread
+            [ ] jitter
+            [ ] mask
+            [ ] numgrains modulation
+        """
 
         cdef size_t i, c, sndlength
         cdef lpbuffer_t * win
@@ -131,6 +141,10 @@ cdef class Cloud2:
             window_type = to_window_flag(window)
             win = NULL
 
+        if phase is None:
+            phase = [0,1]
+        self.phase = to_window(phase)
+
         if grid is None:
             self.grid = np.multiply(self.grainlength, 0.3)
         else:
@@ -146,7 +160,6 @@ cdef class Cloud2:
         self.formation = LPFormation.create(
                 window_type,
                 numgrains, 
-                0, 
                 0, 
                 sndlength, 
                 self.channels, 
@@ -164,25 +177,19 @@ cdef class Cloud2:
     def play(self, double length):
         cdef size_t i, c, framelength
         cdef SoundBuffer out
-        cdef size_t maxgrainlength, mingrainlength
-        cdef double pos=0, gridphase=0
+        cdef double phase=0
 
         framelength = <size_t>(length * self.samplerate)
         out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
 
         for i in range(framelength):
-            pos = <double>i / framelength
-            self.formation.maxlength = <size_t>(_linear_pos(self.grainlength, pos) * self.samplerate)
-            self.formation.minlength = self.formation.maxlength
-            self.formation.pos = gridphase / length
+            phase = _linear_pos(self.phase, <double>i / framelength)
+            self.formation.grainlength = <size_t>(_linear_pos(self.grainlength, phase) * self.samplerate)
+            self.formation.graininterval = <size_t>(_linear_pos(self.grid, phase) * self.samplerate)
 
             LPFormation.process(self.formation)
             for c in range(self.channels):
                 out.frames[i, c] = self.formation.current_frame.data[c]
-
-            gridphase += _linear_pos(self.grid, pos)
-            while gridphase >= length:
-                gridphase -= length
 
         return out
 

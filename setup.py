@@ -221,7 +221,7 @@ ext_modules = cythonize([
             ],
             include_dirs=INCLUDES + ['libpippi/vendor/fft'],
             define_macros=MACROS,
-            extra_compile_args=['-O0', '-g3'],
+            extra_compile_args=['-g3'],
         ),
         Extension('pippi.wavetables', [
                 'libpippi/src/pippicore.c',

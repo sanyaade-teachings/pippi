@@ -1,65 +1,25 @@
 #include "microsound.h"
 
-lpgrain_t * grain_create(lpfloat_t length, lpbuffer_t * window, lpbuffer_t * source) {
-    lpgrain_t * g;
-
-    g = (lpgrain_t *)LPMemoryPool.alloc(1, sizeof(lpgrain_t));
-    g->speed = 1.f;
-    g->pulsewidth = 1.f;
-    g->length = length;
-    g->range = length;
-    g->buf = source;
-    g->start = 0;
-    g->offset = 0;
-
-    g->phase = 0.f;
-    g->phase_offset = LPRand.rand(0.f, 1.f);
-
-    g->pan = 0.5f;
-    g->amp = 1.f;
-    g->gate = 0;
-    g->skew = 0.f;
-
-    g->window = window;
-    g->current_frame = LPBuffer.create(1, source->channels, source->samplerate);
-
-    return g;
-}
-
 void grain_process(lpgrain_t * g, lpbuffer_t * out) {
-    lpfloat_t sample, f, a, b, ipw, phase, window_phase;
-    int c, channels, is_odd;
-    size_t idxa, idxb;
+    lpfloat_t sample, ipw, phase, window_phase;
+    int c;
 
     ipw = 1.f;
     if(g->pulsewidth > 0) ipw = 1.0f/g->pulsewidth;
 
     phase = g->phase * ipw + g->start;
-    channels = g->buf->channels;
-
-    f = phase - (int)phase;
-    idxa = (size_t)phase;
-    idxb = idxa + 1;
 
     window_phase = (g->phase / g->length)  * ipw;
     while(window_phase >= 1.f) window_phase -= 1.f;
     window_phase *= g->window->length;
 
-    if(ipw == 0.f || phase >= g->buf->length - 1) {
-        for(c=0; c < channels; c++) {
-            g->current_frame->data[c] = 0.f;
-        }
-    } else {
-        for(c=0; c < channels; c++) {
-            a = g->buf->data[idxa * channels + c];
-            b = g->buf->data[idxb * channels + c];
-            sample = (1.f - f) * a + (f * b);
+    if(ipw > 0.f && phase < g->buf->length - 1) {
+        for(c=0; c < g->buf->channels; c++) {
+            sample = LPInterpolation.linear_channel(g->buf, phase, c);
             sample *= LPInterpolation.linear(g->window, window_phase);
-            g->current_frame->data[c] = sample;
 
             if(g->pan != 0.5f) {
-                is_odd = (2-(c & 1));
-                if(is_odd == 1) {
+                if((2-(c & 1)) == 1) { /* checks if c is odd */
                     sample *= (1.f - g->pan);
                 } else {
                     sample *= g->pan;
@@ -73,24 +33,14 @@ void grain_process(lpgrain_t * g, lpbuffer_t * out) {
     g->phase += g->speed;
 
     if(g->phase >= g->length) {
-        g->phase -= g->length;
-        g->gate = 1;
-    } else {
-        g->gate = 0;
+        /* recycle this grain, we're done with it now */
+        g->phase = 0;
+        g->in_use = 0; 
     }
 }
 
-void grain_destroy(lpgrain_t * g) {
-    if(g != NULL) {
-        LPBuffer.destroy(g->current_frame);
-        LPMemoryPool.free(g);
-    }
-}
-
-lpformation_t * formation_create(int window_type, int numgrains, size_t maxgrainlength, size_t mingrainlength, size_t rblength, int channels, int samplerate, lpbuffer_t * user_window) {
+lpformation_t * formation_create(int window_type, int numlayers, size_t grainlength, size_t rblength, int channels, int samplerate, lpbuffer_t * user_window) {
     lpformation_t * formation;
-    size_t i;
-    lpfloat_t grainlength;
 
     formation = (lpformation_t *)LPMemoryPool.alloc(1, sizeof(lpformation_t));
     if(window_type == WIN_USER) {
@@ -100,11 +50,9 @@ lpformation_t * formation_create(int window_type, int numgrains, size_t maxgrain
     }
 
     formation->rb = LPRingBuffer.create(rblength, channels, samplerate);
-    formation->maxlength = maxgrainlength;
-    formation->minlength = mingrainlength;
-    formation->numgrains = numgrains;
-    formation->grains = (lpgrain_t **)LPMemoryPool.alloc(formation->numgrains, sizeof(lpgrain_t *));
-    formation->grainamp = 1.f;
+    formation->grainlength = grainlength;
+    formation->numlayers = numlayers;
+    formation->amp = 1.f;
     formation->current_frame = LPBuffer.create(1, channels, samplerate);
     formation->speed = 1.f;
     formation->scrub = 1.f;
@@ -112,49 +60,128 @@ lpformation_t * formation_create(int window_type, int numgrains, size_t maxgrain
     formation->skew = 0.f;
     formation->pulsewidth = 1.f;
     formation->pos = 0.f;
+    formation->pan = 0.5f;
 
-    for(i=0; i < formation->numgrains; i++) {
-        grainlength = LPRand.rand(formation->minlength, formation->maxlength);
-        formation->grains[i] = grain_create(grainlength, formation->window, formation->rb);
-        formation->grains[i]->amp = formation->grainamp;
-        formation->grains[i]->pulsewidth = formation->pulsewidth;
-    }
+    formation->num_active_grains = 0;
+
+    formation->phase = 0.f;
+    formation->phase_inc = 1.f / samplerate;
+
+    formation->onset_phase = 0.f;
+    formation->onset_phase_inc = 1.f / rblength;
+
+    formation->graininterval = grainlength / 2;
 
     return formation;
 }
 
 void formation_process(lpformation_t * c) {
-    int i;
-    size_t j, grainlength;
+    int i, g, gi, active_grains, activated_grains, requested_grains, new_grain;
+    size_t grainlength;
     lpfloat_t pan;
+    int grain_indexes[LPFORMATION_MAXGRAINS];
 
     for(i=0; i < c->current_frame->channels; i++) {
         c->current_frame->data[i] = 0.f;
     }
 
-    for(j=0; j < c->numgrains; j++) {
-        if(c->grains[j]->gate == 1) {
-            grainlength = (size_t)LPRand.rand(c->minlength, c->maxlength);
-            c->grains[j]->skew = c->skew;
-            c->grains[j]->speed = c->speed;
-            c->grains[j]->length = grainlength;
-            c->grains[j]->range = grainlength;
-            c->grains[j]->start = (size_t)(c->rb->length * c->pos);
+    /* calculate the grid phase */
+
+    /* if the grid phase has reset, add some grains to the stack 
+     * at this point, formation params are taken as a snapshot and 
+     * copied into the new grains.
+     * */
+    requested_grains = 0;
+    if(c->onset_phase >= 1.f) {
+        requested_grains = c->numlayers;
+    }
+
+    /* adding a grain to the stack: */
+    /* reset grain indexes, loop over to find active indexes, 
+     * use first open indexes for new grains */
+    active_grains = 0;
+    activated_grains = 0;
+    g = 0;
+    gi = 0;
+
+    if(requested_grains == 0 && c->num_active_grains == 0) {
+        requested_grains += 1;
+    }
+
+    while(1) {
+        if(active_grains == 0 && requested_grains == 0) break;
+
+        new_grain = 0;
+        if(c->grains[g].in_use == 0 && activated_grains < requested_grains) {
+            if(c->grainlength_jitter > 0) {
+                grainlength = c->grainlength + (size_t)LPRand.rand(0, c->grainlength_jitter * c->grainlength_maxjitter);
+            } else {
+                grainlength = c->grainlength;
+            }
+
+            /* add a new grain to the stack by reusing this one */
+            c->grains[g].in_use = 1;
+            c->grains[g].phase = 0;
+
+            c->grains[g].buf = c->rb;
+            c->grains[g].offset = c->offset / (lpfloat_t)c->rb->samplerate;
+            c->grains[g].pulsewidth = c->pulsewidth;
+
+            c->grains[g].phase = 0.f;
+            c->grains[g].phase_offset = LPRand.rand(0.f, 1.f);
+
+            c->grains[g].amp = c->amp;
+
+            c->grains[g].window = c->window;
+
+            c->grains[g].skew = c->skew;
+            c->grains[g].speed = c->speed;
+
+            c->grains[g].length = grainlength;
+            c->grains[g].range = grainlength;
+            c->grains[g].start = (size_t)(c->rb->length * c->pos);
+
+            c->grains[g].pan = c->pan;
             if(c->spread > 0) {
                 pan = 0.5f + LPRand.rand(-.5f, 0.5f) * c->spread;
-                c->grains[j]->pan = pan;
+                c->grains[g].pan = pan;
             }
+
+            activated_grains += 1;
+            new_grain = 1;
         }
-        grain_process(c->grains[j], c->current_frame);
+
+        if(c->grains[g].in_use == 1) {
+            grain_indexes[gi] = g;
+            gi += 1;
+            if(new_grain == 0) active_grains += 1;
+        }
+
+        g += 1;
+        if(g >= LPFORMATION_MAXGRAINS) g -= LPFORMATION_MAXGRAINS;
+        if(gi >= LPFORMATION_MAXGRAINS) break;
+        if(active_grains + activated_grains >= c->num_active_grains + requested_grains) break;
     }
+
+    /* process all the active grains into the output buffer */
+    active_grains += activated_grains;
+    c->num_active_grains = active_grains;
+    for(gi=0; gi < active_grains; gi++) {
+        grain_process(&c->grains[grain_indexes[gi]], c->current_frame);
+    }
+
+    /* increment the internal phases */
+    c->phase += c->phase_inc;
+    while(c->phase >= 1.f) c->phase -= 1.f;
+
+    c->onset_phase += c->onset_phase_inc;
+    while(c->onset_phase >= 1.f) c->onset_phase -= 1.f;
+
+    c->pos += c->phase_inc;
+    while(c->pos >= 1.f) c->pos -= 1.f;
 }
 
 void formation_destroy(lpformation_t * c) {
-    size_t i;
-    for(i=0; i < c->numgrains; i++) {
-        LPMemoryPool.free(c->grains[i]);
-    }
-    LPMemoryPool.free(c->grains);
     LPBuffer.destroy(c->window);
     LPBuffer.destroy(c->rb);
     LPBuffer.destroy(c->current_frame);
@@ -183,6 +210,7 @@ int extract_wavesets(
     lastonset = 0;
     crossing_count = 0;
     waveset_count = 0;
+    j = 0;
 
     for(i=0; i < source_buffer_length; i++) {
         if(j >= waveset_buffer_length) break;
@@ -214,8 +242,6 @@ int extract_wavesets(
 }
 
 
-
-const lpgrain_factory_t LPGrain = { grain_create, grain_process, grain_destroy };
 const lpformation_factory_t LPFormation = { formation_create, formation_process, formation_destroy };
 
 

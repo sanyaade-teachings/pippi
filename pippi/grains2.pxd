@@ -100,45 +100,57 @@ cdef extern from "oscs.tape.h":
 
 cdef extern from "microsound.h":
     ctypedef struct lpgrain_t:
-        lpfloat_t length
-        lpfloat_t window_phase_offset
+        size_t length
+        int channels
         lpfloat_t pulsewidth
-        lptapeosc_t * osc
+
+        size_t range
+        size_t start
+        size_t offset
+
+        lpfloat_t phase_offset
         lpfloat_t phase
         lpfloat_t pan
         lpfloat_t amp
         lpfloat_t speed
         lpfloat_t skew
+
+        int unused
+        int gate
+
+        lpbuffer_t * buf
         lpbuffer_t * window
 
     ctypedef struct lpformation_t:
-        lpgrain_t ** grains
-        size_t numgrains
-        size_t maxlength
-        size_t minlength
-        lpfloat_t pos
+        int num_active_grains
+        size_t numlayers
+        size_t grainlength
+        lpfloat_t grainlength_maxjitter
+        lpfloat_t grainlength_jitter
+
+        size_t graininterval
+        lpfloat_t graininterval_phase
+        lpfloat_t graininterval_phase_inc
+
         lpfloat_t spread
         lpfloat_t speed
         lpfloat_t scrub
         lpfloat_t offset
         lpfloat_t skew
-        lpfloat_t grainamp
-        lpfloat_t pulsewidth 
+        lpfloat_t amp
+        lpfloat_t pan
+        lpfloat_t pulsewidth
+
+        lpfloat_t pos
         lpbuffer_t * window
         lpbuffer_t * current_frame
         lpbuffer_t * rb
 
-    ctypedef struct lpgrain_factory_t:
-        lpgrain_t * (*create)(lpfloat_t, lpbuffer_t *, lpbuffer_t *)
-        void (*process)(lpgrain_t *, lpbuffer_t *)
-        void (*destroy)(lpgrain_t *)
-
     ctypedef struct lpformation_factory_t:
-        lpformation_t * (*create)(int, int, size_t, size_t, size_t, int, int, lpbuffer_t *)
+        lpformation_t * (*create)(int, int, size_t, size_t, int, int, lpbuffer_t *)
         void (*process)(lpformation_t *)
         void (*destroy)(lpformation_t *)
 
-    extern const lpgrain_factory_t LPGrain
     extern const lpformation_factory_t LPFormation
 
 cdef class Cloud2:
@@ -149,6 +161,7 @@ cdef class Cloud2:
 
     cdef double[:] grainlength
     cdef double[:] grid
+    cdef double[:] phase
 
     """
     cdef double[:] position
