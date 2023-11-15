@@ -2,6 +2,6 @@ Cython==3.0.0a11
 importlib-resources==5.12.0
 mido==1.2.10
 numpy==1.24.2
-Pillow==9.4.0
+Pillow==10.1.0
 soundfile==0.12.1
-wheel==0.40.0
+wheel==0.41.3

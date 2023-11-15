@@ -116,7 +116,7 @@ def write(object data,
             CHI = str(files(pippi).joinpath('chicago.ttf'))
             fontsize = fontsize * upsample_mult
             font = ImageFont.truetype(CHI, fontsize)
-            fontwidth, fontheight = font.getsize(label_top)
+            fontwidth = font.getlength(label_top)
             fontx = width//2 - (fontwidth//2)
             fonty = 10
             draw.text((fontx, fonty), label_top, font=font, fill=(0, 0, 0, 200))
@@ -125,7 +125,9 @@ def write(object data,
             CHI = str(files(pippi).joinpath('chicago.ttf'))
             fontsize = fontsize * upsample_mult
             font = ImageFont.truetype(CHI, fontsize)
-            fontwidth, fontheight = font.getsize(label_bottom)
+            fontwidth = font.getlength(label_bottom)
+            fl, lr, lt, lb = font.getbbox(label_bottom)
+            fontheight = lb - lt
             fontx = width//2 - (fontwidth//2)
             fonty = height - int(fontheight*2)
             draw.text((fontx, fonty), label_bottom, font=font, fill=(0, 0, 0, 200))
