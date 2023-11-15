@@ -177,9 +177,8 @@ int main(int argc, char * argv[]) {
                 if(astrid_schedule_python_triggers(&msg) < 0) {
                     PyErr_Print();
                     syslog(LOG_ERR, "CPython error during trigger planning loop\n");
-                    goto lprender_cleanup;
                 }
-                break;
+                continue;
 
             case LPMSG_SHUTDOWN:
                 syslog(LOG_DEBUG, "Renderer got %s shutdown message:\n", msg.instrument_name);

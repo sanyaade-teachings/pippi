@@ -665,6 +665,9 @@ cdef public int astrid_schedule_python_triggers(void * msgp) except -1:
         ASTRID_INSTRUMENT.reload()
         ASTRID_INSTRUMENT.last_reload = last_edit
 
-    return trigger_events(ASTRID_INSTRUMENT, msg)
-
+    try:
+        return trigger_events(ASTRID_INSTRUMENT, msg)
+    except Exception as e:
+        logger.exception('Error during scheduling of python triggers: %s' % e)
+        return -1
 
