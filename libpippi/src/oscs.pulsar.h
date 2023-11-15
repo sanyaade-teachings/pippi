@@ -8,13 +8,19 @@ typedef struct lppulsarosc_t {
     int num_wavetables;
     size_t * wavetable_onsets;
     size_t * wavetable_lengths;
+    lpfloat_t * wavetable_positions;
+    lpfloat_t wavetable_phase;
 
     lpfloat_t * windows;  /* Window stack */
     int num_windows;
     size_t * window_onsets;
     size_t * window_lengths;
+    lpfloat_t * window_positions;
+    lpfloat_t window_phase;
 
-    lparray_t * burst;    /* Burst table - null always on */
+    void * burst;         /* Burst table - null table == pulses always on */
+    size_t burst_size;
+    lpfloat_t burst_pos;
 
     lpfloat_t saturation; /* Probability of all pulses to no pulses */
     lpfloat_t pulsewidth;

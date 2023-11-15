@@ -92,6 +92,7 @@ lpfloat_t interpolate_hermite(lpbuffer_t * buf, lpfloat_t phase);
 lpfloat_t interpolate_hermite_pos(lpbuffer_t * buf, lpfloat_t pos);
 lpfloat_t interpolate_linear(lpbuffer_t * buf, lpfloat_t phase);
 lpfloat_t interpolate_linear_pos(lpbuffer_t * buf, lpfloat_t pos);
+lpfloat_t interpolate_linear_pos2(lpfloat_t * buf, size_t length, lpfloat_t pos);
 lpfloat_t interpolate_linear_channel(lpbuffer_t* buf, lpfloat_t phase, int channel);
 
 lpbuffer_t * param_create_from_float(lpfloat_t value);
@@ -121,7 +122,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
 const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_stereo_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, varispeed_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, taper_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
-const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
+const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear_pos2, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
@@ -253,7 +254,7 @@ int rand_randbool(void) {
 int rand_choice(int numchoices) {
     assert(numchoices > 0);
     if(numchoices == 1) return 0;
-    return rand_randint(0, numchoices-1);
+    return rand_randint(0, numchoices);
 }
 
 lparray_t * create_array(size_t length) {
@@ -1585,6 +1586,26 @@ lpfloat_t interpolate_linear(lpbuffer_t* buf, lpfloat_t phase) {
 lpfloat_t interpolate_linear_pos(lpbuffer_t* buf, lpfloat_t pos) {
     return interpolate_linear(buf, pos * buf->length);
 }
+
+lpfloat_t interpolate_linear_pos2(lpfloat_t * buf, size_t length, lpfloat_t pos) {
+    lpfloat_t frac, a, b, phase;
+    size_t i;
+
+    phase = pos * length;
+
+    if(length == 1) return buf[0];
+    
+    frac = phase - (int)phase;
+    i = (int)phase;
+
+    if (i >= length-1) return 0;
+
+    a = buf[i];
+    b = buf[i+1];
+
+    return (1.0f - frac) * a + (frac * b);
+}
+
 
 /* Wavetable generators
  * 

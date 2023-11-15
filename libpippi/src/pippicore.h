@@ -282,6 +282,7 @@ typedef struct lpmemorypool_factory_t {
 
 typedef struct lpinterpolation_factory_t {
     lpfloat_t (*linear_pos)(lpbuffer_t *, lpfloat_t);
+    lpfloat_t (*linear_pos2)(lpfloat_t *, size_t, lpfloat_t);
     lpfloat_t (*linear)(lpbuffer_t *, lpfloat_t);
     lpfloat_t (*linear_channel)(lpbuffer_t *, lpfloat_t, int);
     lpfloat_t (*hermite_pos)(lpbuffer_t *, lpfloat_t);

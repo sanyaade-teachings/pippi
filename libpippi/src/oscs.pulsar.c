@@ -54,7 +54,6 @@ lppulsarosc_t * create_pulsarosc(
 }
 
 lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
-    /*
     lpfloat_t ipw, isr, sample, mod, burst, a, b, 
               wavetable_phase, window_phase,
               wtmorphpos, wtmorphfrac,
@@ -79,58 +78,71 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     burst = 1.f;
     isr = 1.f / p->samplerate;
 
+    /* Store the inverse pulsewidth if non-zero */
     if(p->pulsewidth > 0) ipw = 1.0/p->pulsewidth;
 
+    /* Look up the burst value if there's a burst table */
+    if(p->burst != NULL) {
+        
+    }
+
+    /*
     if(p->burst != NULL && p->burst->data != NULL && p->burst->phase < p->burst->length) {
         burst = p->burst->data[(int)p->burst->phase];
     }
+    */
 
+    /* Override burst if desaturation is triggered */
     if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
         burst = 0; 
     }
 
+    /* If there's a non-zero pulsewidth, and the burst value is 1, 
+     * then syntesize a pulse */
     if(ipw > 0 && burst > 0) {
         if(p->num_wavetables == 1) {
             sample = interpolate_waveset(p->wavetables, wavetable_phase * ipw, p->wavetable_lengths[0]);
         } else {
             wavetable_length = p->wavetable_lengths[wavetable_index];
             wtmorphmul = wavetable_length-1 > 1 ? wavetable_length-1 : 1;
-
-            wtmorphpos = lpwv(p->wts->pos, 0, 1) * wtmorphmul;
+            wtmorphpos = lpwv(p->wavetable_positions[wavetable_index], 0, 1) * wtmorphmul;
             wavetable_index = (int)wtmorphpos;
             wtmorphfrac = wtmorphpos - wavetable_index;
-            a = LPInterpolation.linear_pos(p->wavetables[wavetable_index], p->wts->phase * ipw);
-            b = LPInterpolation.linear_pos(p->wavetables[wtmorphidx+1], p->wts->phase * ipw);
+
+            a = LPInterpolation.linear_pos2(&p->wavetables[wavetable_index], p->wavetable_lengths[wavetable_index], p->wavetable_phase * ipw);
+            b = LPInterpolation.linear_pos2(&p->wavetables[wtmorphidx+1], p->wavetable_lengths[wtmorphidx+1], p->wavetable_phase * ipw);
             sample = (1.0 - wtmorphfrac) * a + (wtmorphfrac * b);
         }
 
         if(p->num_windows == 1) {
             mod = interpolate_waveset(p->windows, window_phase * ipw, p->window_lengths[0]);
         } else {
-            winmorphmul = p->wins->length-1 > 1 ? p->wins->length-1 : 1;
-            winmorphpos = p->wins->pos * winmorphmul;
-            winmorphidx = (int)winmorphpos;
-            winmorphfrac = winmorphpos - winmorphidx;
-            a = LPInterpolation.linear_pos(p->wins->stack[winmorphidx], p->wins->phase * ipw);
-            b = LPInterpolation.linear_pos(p->wins->stack[winmorphidx+1], p->wins->phase * ipw);
+            window_length = p->window_lengths[window_index];
+            winmorphmul = window_length-1 > 1 ? window_length-1 : 1;
+            winmorphpos = lpwv(p->window_positions[window_index], 0, 1) * winmorphmul;
+            window_index = (int)winmorphpos;
+            winmorphfrac = winmorphpos - window_index;
+
+            a = LPInterpolation.linear_pos2(&p->windows[window_index], p->window_lengths[window_index], p->window_phase * ipw);
+            b = LPInterpolation.linear_pos2(&p->windows[winmorphidx+1], p->window_lengths[winmorphidx+1], p->window_phase * ipw);
             mod = (1.0 - winmorphfrac) * a + (winmorphfrac * b);
         }
     } 
 
-    p->wts->phase += isr * p->freq;
-    p->wins->phase += isr * p->freq;
+    p->wavetable_phase += isr * p->freq;
+    p->window_phase += isr * p->freq;
 
+    /*
     if(p->burst != NULL && window_phase >= p->window_lengths[window_index]) {
         p->burst->phase += 1;
     }
+    */
 
     if(wavetable_phase >= 1.f) wavetable_phase -= 1.f;
     if(window_phase >= 1.f) window_phase -= 1.f;
-    if(p->burst != NULL && p->burst->phase >= p->burst->length) p->burst->phase -= p->burst->length;
+    //if(p->burst != NULL && p->burst->phase >= p->burst->length) p->burst->phase -= p->burst->length;
 
     return sample * mod;
-    */
-    return 0.f * p->freq;
 }
 
 void destroy_pulsarosc(lppulsarosc_t* p) {

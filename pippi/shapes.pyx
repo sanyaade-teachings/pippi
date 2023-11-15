@@ -102,18 +102,21 @@ cpdef SoundBuffer synth(
 
     return SoundBuffer(out, samplerate=samplerate, channels=channels)
 
-cdef double[:] _table(double[:] out, unsigned int length, double[:] wt, double[:] density, double[:] periodicity, double[:] stability, double maxfreq, double minfreq, int samplerate):
+cdef double[:] _table(double[:] out, unsigned int length, double[:] wt, double[:] density, double[:] periodicity, double[:] stability, double[:] maxfreq, double[:] minfreq, int samplerate):
     cdef unsigned int wt_length = len(wt)
     cdef unsigned int wt_boundry = max(wt_length-1, 1)
 
     cdef int i=0
     cdef double isamplerate = 1.0/samplerate
     cdef double pos=0, d=0, p=0, s=0, freq=1, phase=0
-    cdef double freqwidth = maxfreq - minfreq
+    cdef double freqwidth, _maxfreq, _minfreq
 
     d = density[0]
     p = 1 - periodicity[0]
-    freq = max((d * freqwidth) + minfreq + rand(freqwidth * -p, freqwidth * p), minfreq)
+    _minfreq = minfreq[0]
+    _maxfreq = maxfreq[0]
+    freqwidth = _maxfreq - _minfreq
+    freq = max((d * freqwidth) + _minfreq + rand(freqwidth * -p, freqwidth * p), _minfreq)
 
     for i in range(length):
         pos = <double>i / <double>length
@@ -128,44 +131,52 @@ cdef double[:] _table(double[:] out, unsigned int length, double[:] wt, double[:
             d = math.log(d * (math.e-1) + 1)
             p = 1 - _linear_pos(periodicity, pos)
             #p = math.log(p * (math.e-1) + 1)
-            freq = max((d * freqwidth) + minfreq + rand(freqwidth * -p, freqwidth * p), minfreq)
+            _minfreq = _linear_pos(minfreq, pos)
+            _maxfreq = _linear_pos(maxfreq, pos)
+            freqwidth = _maxfreq - _minfreq
+            freq = max((d * freqwidth) + _minfreq + rand(freqwidth * -p, freqwidth * p), _minfreq)
 
         while phase >= wt_boundry:
             phase -= wt_boundry
 
     return out
 
-cpdef Wavetable win(object waveform, double lowvalue=0, double highvalue=1, double length=1, object density=0.5, object periodicity=0.5, object stability=0.5, double minfreq=0, double maxfreq=0, int samplerate=DEFAULT_SAMPLERATE):
-    if minfreq <= 0:
+cpdef Wavetable win(object waveform, double lowvalue=0, double highvalue=1, double length=1, object density=0.5, object periodicity=0.5, object stability=0.5, object minfreq=None, object maxfreq=None, int samplerate=DEFAULT_SAMPLERATE):
+    if minfreq is None:
         minfreq = MIN_WT_FREQ
 
-    if maxfreq <= 0:
+    if maxfreq is None:
         maxfreq = MAX_WT_FREQ
 
     cdef double[:] _wt = to_window(waveform)
     cdef double[:] _density = to_window(density)
     cdef double[:] _periodicity = to_window(periodicity)
     cdef double[:] _stability = to_window(stability)
+    cdef double[:] _minfreq = to_window(minfreq)
+    cdef double[:] _maxfreq = to_window(maxfreq)
 
     cdef unsigned int framelength = <unsigned int>(length * samplerate)
     cdef double[:] out = np.zeros(framelength, dtype='d')
 
-    return Wavetable(_table(out, framelength, _wt, _density, _periodicity, _stability, maxfreq, minfreq, samplerate), lowvalue, highvalue)
+    return Wavetable(_table(out, framelength, _wt, _density, _periodicity, _stability, _maxfreq, _minfreq, samplerate), lowvalue, highvalue)
 
-cpdef Wavetable wt(object waveform, double lowvalue=-1, double highvalue=1, double length=1, object density=0.5, object periodicity=0.5, object stability=0.5, double minfreq=0, double maxfreq=0, int samplerate=DEFAULT_SAMPLERATE):
-    if minfreq <= 0:
+cpdef Wavetable wt(object waveform, double lowvalue=-1, double highvalue=1, double length=1, object density=0.5, object periodicity=0.5, object stability=0.5, object minfreq=None, object maxfreq=None, int samplerate=DEFAULT_SAMPLERATE):
+    if minfreq is None:
         minfreq = MIN_WT_FREQ
 
-    if maxfreq <= 0:
+    if maxfreq is None:
         maxfreq = MAX_WT_FREQ
 
     cdef double[:] _wt = to_wavetable(waveform)
     cdef double[:] _density = to_window(density)
     cdef double[:] _periodicity = to_window(periodicity)
     cdef double[:] _stability = to_window(stability)
+    cdef double[:] _minfreq = to_window(minfreq)
+    cdef double[:] _maxfreq = to_window(maxfreq)
+
 
     cdef unsigned int framelength = <unsigned int>(length * samplerate)
     cdef double[:] out = np.zeros(framelength, dtype='d')
 
-    return Wavetable(_table(out, framelength, _wt, _density, _periodicity, _stability, maxfreq, minfreq, samplerate), lowvalue, highvalue)
+    return Wavetable(_table(out, framelength, _wt, _density, _periodicity, _stability, _maxfreq, _minfreq, samplerate), lowvalue, highvalue)
 
