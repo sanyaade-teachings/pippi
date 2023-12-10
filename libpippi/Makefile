@@ -13,6 +13,7 @@ LPSOURCES = vendor/fft/fft.c \
 	src/oscs.tape.c \
 	src/oscs.table.c \
 	src/oscs.tukey.c \
+	src/ugens.sine.c \
 	src/microsound.c \
 	src/mir.c \
 	src/soundfile.c \
@@ -24,7 +25,7 @@ LPLIBS = -lm
 
 clean:
 	rm -rf build/*
-	rm renders/*.wav
+	rm -rf renders/*.wav
 
 silencer:
 	mkdir -p build renders
@@ -158,6 +159,9 @@ soundfile-examples:
 
 	echo "Building readrawfile.c example...";
 	gcc $(LPFLAGS) examples/readrawfile.c $(LPSOURCES) $(LPLIBS) -o build/readrawfile
+
+ugens:
+	gcc $(LPFLAGS) src/ugens/sineosc.c $(LPSOURCES) $(LPLIBS) -o build/ugen_sineosc
 
 render:
 	mkdir -p build renders

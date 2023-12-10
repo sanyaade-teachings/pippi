@@ -152,6 +152,16 @@ typedef struct lparray_t {
     lpfloat_t phase;
 } lparray_t;
 
+/* ugen wrapper interface */
+typedef struct ugen_t ugen_t;
+struct ugen_t {
+    void * params;
+    lpfloat_t (*get_output)(ugen_t * u, int index);
+    void (*set_param)(ugen_t * u, int index, lpfloat_t value);
+    void (*process)(ugen_t * u);
+    void (*destroy)(ugen_t * u);
+};
+
 /* Users may create custom memorypools. 
  * If the primary memorypool is active, 
  * it will be used to allocate the pool.

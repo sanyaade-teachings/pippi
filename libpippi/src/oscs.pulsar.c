@@ -68,6 +68,8 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     assert(p->windows != NULL);
     assert(p->num_windows > 0);
 
+    wtmorphidx = 0;
+    winmorphidx = 0;
     wavetable_index = 0;
     wavetable_phase = 0.f;
     window_index = 0;

@@ -203,7 +203,7 @@ cdef double[:,:] _fold(double[:,:] out, double[:,:] snd, double[:] amp, double s
             sample = snd[i,c] * _linear_pos(amp, pos)
             sample = _fold_point(sample, last, samplerate)
             last = sample
-            out[i,c] = sample
+            out[i,c] = lpzapgremlins(sample)
 
     return out
 

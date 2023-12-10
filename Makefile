@@ -1,4 +1,4 @@
-.PHONY: test test-hyperupic test-chords test-multiband test-breakpoints test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph test-slonimsky test-rhythm test-rand test-newbuffer build docs deploy
+.PHONY: test test-hyperupic test-chords test-multiband test-breakpoints test-fft test-soundfont test-grains test-wavesets test-fx test-noise test-shapes test-oscs test-soundbuffer test-lists test-pitches test-graph test-slonimsky test-rhythm test-rand test-newbuffer test-ugens build docs deploy
 
 all: build test
 
@@ -76,6 +76,9 @@ test-rand:
 
 test-newbuffer:
 	python -m unittest tests/test_newbuffer.py -v
+
+test-ugens:
+	python -m unittest tests/test_ugens.py -v
 
 docs:
 	bash scripts/docs.sh
