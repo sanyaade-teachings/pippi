@@ -19,11 +19,13 @@ void destroy_sine_ugen(ugen_t * u) {
     free(u);
 }
 
-void set_sine_ugen_param(ugen_t * u, int index, lpfloat_t value) {
+void set_sine_ugen_param(ugen_t * u, int index, void * value) {
+    lpfloat_t * v;
     lpugensine_t * params;
     params = (lpugensine_t *)u->params;
-    if(index == USINEIN_FREQ) params->osc->freq = value;
-    if(index == USINEIN_PHASE) params->osc->phase = value;
+    v = (lpfloat_t *)value;
+    if(index == USINEIN_FREQ) params->osc->freq = *v;
+    if(index == USINEIN_PHASE) params->osc->phase = *v;
 }
 
 lpfloat_t get_sine_ugen_output(ugen_t * u, int index) {

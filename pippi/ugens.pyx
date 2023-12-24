@@ -12,12 +12,23 @@ np.import_array()
 cdef dict UGEN_INPUTNAME_MAP = {
     'sine.freq': USINEIN_FREQ,
     'sine.phase': USINEIN_PHASE,
+    'mult.a': UMULTIN_A,
+    'mult.b': UMULTIN_B,
+    'tape.speed': UTAPEIN_SPEED,
+    'tape.phase': UTAPEIN_PHASE,
+    'tape.buf': UTAPEIN_BUF,
 }
 
 cdef dict UGEN_OUTPUTNAME_MAP = {
     'sine.output': USINEOUT_MAIN,
     'sine.freq': USINEOUT_FREQ,
     'sine.phase': USINEOUT_PHASE,
+    'mult.output': UMULTOUT_MAIN,
+    'mult.a': UMULTOUT_A,
+    'mult.b': UMULTOUT_B,
+    'tape.output': UTAPEOUT_MAIN,
+    'tape.speed': UTAPEOUT_SPEED,
+    'tape.phase': UTAPEOUT_PHASE,
 }
 
 
@@ -25,6 +36,10 @@ cdef class Node:
     def __cinit__(self, str name, str ugen, *args, **kwargs):
         if ugen == 'sine':
             self.u = create_sine_ugen()
+        elif ugen == 'mult':
+            self.u = create_mult_ugen()
+        elif ugen == 'tape':
+            self.u = create_tape_ugen()
         else:
             raise AttributeError('Invalid ugen type "%s"' % ugen)
 
@@ -41,8 +56,27 @@ cdef class Node:
     def get_output(self, str name):
         return self.u.get_output(self.u, UGEN_OUTPUTNAME_MAP.get('.'.join([self.ugen_name, name]), 0))
 
-    def set_param(self, str name, double value):
-        self.u.set_param(self.u, UGEN_INPUTNAME_MAP.get('.'.join([self.ugen_name, name]), 0), value)
+    def set_param(self, str name, object value):
+        cdef lpbuffer_t * out
+        cdef void * vp
+        cdef double d
+        cdef double * dp
+        cdef size_t i
+        cdef int c
+
+        if 'buf' in name:
+            out = LPBuffer.create(len(value), value.channels, value.samplerate)
+            for i in range(out.length):
+                for c in range(out.channels):
+                    out.data[i * out.channels + c] = value.frames[i,c]
+            vp = <void *>out
+
+        else:
+            d = value
+            dp = &d
+            vp = <void *>dp
+
+        self.u.set_param(self.u, UGEN_INPUTNAME_MAP.get('.'.join([self.ugen_name, name]), 0), vp)
 
     def process(self):
         self.u.process(self.u)
@@ -56,10 +90,24 @@ cdef class Graph:
     def add_node(self, str name, str ugen, *args, **kwargs):
         self.nodes[name] = Node(name, ugen, *args, **kwargs)
 
-    def connect(self, str a, str b, double mult=1, double add=0):
+    def connect(self, str a, str b, object outmin=None, object outmax=None, double inmin=-1, double inmax=1, object mult=None, object add=None):
+        cdef double _mult = 1
+        cdef double _add = 0
+
         anodename, aportname = tuple(a.split('.'))
         bnodename, bportname = tuple(b.split('.'))
-        self.nodes[anodename].connections[aportname] += [(bnodename, bportname, mult, add)]
+
+        if outmin is not None and outmax is not None:
+            _mult = (outmax - outmin) / (inmax - inmin)
+            _add = outmin - inmin * _mult
+
+        if mult is not None:
+            _mult = mult
+
+        if add is not None:
+            _add = add
+
+        self.nodes[anodename].connections[aportname] += [(bnodename, bportname, _mult, _add)]
 
     def render(self, double length, int samplerate=DEFAULT_SAMPLERATE, int channels=DEFAULT_CHANNELS):
         cdef size_t framelength = <size_t>(length * samplerate)

@@ -191,30 +191,42 @@ typedef struct lpmsgpq_node_t {
 
 
 enum LPSerialParamTypes {
-    LPSERIAL_PARAM_BOOL,    /*  0/1 */
-    LPSERIAL_PARAM_CTL,     /*  0-1 */
-    LPSERIAL_PARAM_SIG,     /* -1-1 */
-    LPSERIAL_PARAM_NUM,     /* size_t */
-    LPSERIAL_PARAM_CC,      /* 0-127 */
-    LPSERIAL_PARAM_NOTEON,  /* 0-127 */
-    LPSERIAL_PARAM_NOTEOFF, /* 0-127 */
+    LPSERIAL_PARAM_BOOL,    /*  0 or 1 */
+    LPSERIAL_PARAM_CTL,     /*  0 to 1 */
+    LPSERIAL_PARAM_SIG,     /* -1 to 1 */
+    LPSERIAL_PARAM_CHAR,    /* unsigned char */
+    LPSERIAL_PARAM_INT,     /* signed int */
+    LPSERIAL_PARAM_SIZE,    /* ssize_t */
+    LPSERIAL_PARAM_UINT,    /* unsigned int */
+    LPSERIAL_PARAM_USIZE,   /* size_t */
+    LPSERIAL_PARAM_DOUBLE,  /* double */
+    LPSERIAL_PARAM_FLOAT,   /* float */
+
+    /* TODO add support for these */
+    LPSERIAL_PARAM_MIDI,    /* midi bytes */
+    LPSERIAL_PARAM_PCM,     /* PCM audio */
     LPSERIAL_PARAM_SHUTDOWN,
     NUM_LPSERIAL_PARAMS
 };
 
 typedef union {
+    ssize_t as_ssize_t;
     size_t as_size_t;
-    lpfloat_t as_lpfloat_t;
-    int as_int;
+    double as_double_t;
+    float as_float_t;
+    int as_int_t;
+    unsigned char as_char;
+    bool as_bool_t;
 } lpserial_param_value_t;
 
-typedef struct lpserial_param_t {
-    int id;
-    int type;
+typedef struct lpserialevent_t {
+    size_t id;
+    unsigned int flag : 1;
+    unsigned int type : 31;
     int group;
     int device;
     lpserial_param_value_t value;
-} lpserial_param_t;
+} lpserialevent_t;
 
 
 /* When instrument scripts produce MIDI triggers, 

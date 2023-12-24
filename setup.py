@@ -262,8 +262,11 @@ ext_modules = cythonize([
         ), 
         Extension('pippi.ugens', [
                 'libpippi/src/pippicore.c',
+                'libpippi/src/ugens.utils.c',
                 'libpippi/src/oscs.sine.c',
                 'libpippi/src/ugens.sine.c',
+                'libpippi/src/oscs.tape.c',
+                'libpippi/src/ugens.tape.c',
                 'pippi/ugens.pyx'
             ],
             include_dirs=INCLUDES, 

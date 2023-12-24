@@ -131,6 +131,41 @@ cdef class MessageEvent:
         if self.msg is not NULL:
             free(self.msg)
 
+cdef class SerialEvent:
+    def __cinit__(self,
+            double onset,
+            char msg,
+            object value=None,
+        ):
+
+        self.event = <lpserialevent_t *>calloc(1, sizeof(lpserialevent_t))
+        self.event.onset = onset
+        self.event.now = 0
+        self.event.length = length
+        self.event.type = type
+        self.event.note = note
+
+    cpdef int schedule(MidiEvent self, double now):
+        self.event.now = now
+        cdef int qfd = midi_triggerq_open()
+        if qfd < 0:
+            logger.exception('Error opening MIDI fifo q')
+            return -1
+
+        if midi_triggerq_schedule(qfd, self.event[0]) < 0:
+            logger.exception('Error scheduling MidiEvent')
+            return -1
+
+        if midi_triggerq_close(qfd) < 0:
+            logger.exception('Error closing MIDI fifo q')
+            return -1
+
+        return 0 
+
+    def __dealloc__(self):
+        if self.event is not NULL:
+            free(self.event)
+
 
 cdef class MidiEvent:
     def __cinit__(self,

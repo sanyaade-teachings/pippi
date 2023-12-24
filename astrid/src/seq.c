@@ -61,12 +61,8 @@ int msgpq_remove_nodes_by_voice_id(size_t voice_id) {
         if(msg->voice_id == voice_id) {
             syslog(LOG_DEBUG, "STOP: removing node & freeing memory for voice id %ld\n", voice_id);
             pqueue_remove(msgpq, d);
-            /*free(msg);*/
-            /*free(node);*/
         }
     }
-
-    /*syslog(LOG_DEBUG, "STOP: msgpq size AFTER: %d\n", (int)msgpq->size);*/
 
     return 0;
 }
@@ -134,46 +130,22 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             continue;
         }
 
-        /*
-        syslog(LOG_DEBUG, "SEQ: Sending message type %d to %s\n", msg->type, msg->instrument_name);
-        syslog(LOG_DEBUG, "initiated=%f scheduled=%f voice_id=%ld\n", msg->initiated, msg->scheduled, msg->voice_id);
-        syslog(LOG_DEBUG, "        now=%f\n", now);
-        */
-
         /* Send it along to the instrument message fifo */
         if(send_play_message(*msg) < 0) {
             syslog(LOG_ERR, "Error sending play message from message priority queue\n");
             usleep((useconds_t)500);
             continue;
         }
-        /*syslog(LOG_DEBUG, "Finished sending play message (type %d) to %s\n", msg->type, msg->instrument_name);*/
 
         /* And remove it from the pq */
         if(pqueue_remove(msgpq, d) < 0) {
             syslog(LOG_ERR, "pqueue_remove: problem removing message from the pq\n");
             usleep((useconds_t)500);
         }
-
-        /*
-        if(msg != NULL) {
-            free(msg);
-            msg = NULL;
-        }
-
-        if(node != NULL) {
-            free(node);
-            node = NULL;
-        }
-        */
     }
 
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
-    /* Clean up the pq: TODO, check for orphan messages? */
     pqueue_free(msgpq);
-    /*
-    if(msg != NULL) free(msg);
-    if(node != NULL) free(node);
-    */
     free(pqnodes);
     return 0;
 }
@@ -222,20 +194,10 @@ void * message_feed(__attribute__((unused)) void * arg) {
         seq_delay = msg.scheduled - (msg.max_processing_time * 2);
         d->timestamp = msg.initiated + seq_delay;
 
-        /*
-        syslog(LOG_DEBUG, "SEQ: lpmsg_t relay: Inserting message into pq for scheduling\n");
-        syslog(LOG_DEBUG, "SEQ: seq_delay %f\n", seq_delay);
-        syslog(LOG_DEBUG, "SEQ: timestamp %f\n", d->timestamp);
-        */
-
         if(pqueue_insert(msgpq, (void *)d) < 0) {
             syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
             continue;
         }
-
-        /*
-        syslog(LOG_DEBUG, "lpmsg_t relay: msg.type %d\n", msg.type);
-        */
 
         /* Exit the loop on shutdown message after sending 
          * it along to the priority queue as well */

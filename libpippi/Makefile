@@ -14,6 +14,8 @@ LPSOURCES = vendor/fft/fft.c \
 	src/oscs.table.c \
 	src/oscs.tukey.c \
 	src/ugens.sine.c \
+	src/ugens.tape.c \
+	src/ugens.utils.c \
 	src/microsound.c \
 	src/mir.c \
 	src/soundfile.c \
@@ -45,8 +47,11 @@ fx-examples:
 osc-examples:
 	mkdir -p build renders
 
-	#echo "Building pulsarosc.c example...";
-	#gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
+	echo "Building pulsarosc.c example...";
+	gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
+
+	echo "Building pulsarosc2.c example...";
+	gcc $(LPFLAGS) examples/pulsarosc2.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc2
 
 	echo "Building phasorosc.c example...";
 	gcc $(LPFLAGS) examples/phasorosc.c $(LPSOURCES) $(LPLIBS) -o build/phasorosc
@@ -160,8 +165,19 @@ soundfile-examples:
 	echo "Building readrawfile.c example...";
 	gcc $(LPFLAGS) examples/readrawfile.c $(LPSOURCES) $(LPLIBS) -o build/readrawfile
 
+wavetable-examples:
+	mkdir -p build renders
+
+	echo "Building wavetables.c example...";
+	gcc $(LPFLAGS) examples/wavetables.c $(LPSOURCES) $(LPLIBS) -o build/wavetables
+
+	echo "Building windows.c example...";
+	gcc $(LPFLAGS) examples/windows.c $(LPSOURCES) $(LPLIBS) -o build/windows
+
 ugens:
 	gcc $(LPFLAGS) src/ugens/sineosc.c $(LPSOURCES) $(LPLIBS) -o build/ugen_sineosc
+	gcc $(LPFLAGS) src/ugens/mult.c $(LPSOURCES) $(LPLIBS) -o build/ugen_mult
+	gcc $(LPFLAGS) src/ugens/tape.c $(LPSOURCES) $(LPLIBS) -o build/ugen_tape
 
 render:
 	mkdir -p build renders

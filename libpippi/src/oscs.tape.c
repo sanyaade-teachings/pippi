@@ -15,9 +15,21 @@ const lptapeosc_factory_t LPTapeOsc = {
 };
 
 lptapeosc_t * create_tapeosc(lpbuffer_t * buf, lpfloat_t range) {
+    lpfloat_t samplerate;
+    int channels;
+
     lptapeosc_t* osc = (lptapeosc_t*)LPMemoryPool.alloc(1, sizeof(lptapeosc_t));
     osc->buf = buf;
-    osc->samplerate = buf->samplerate;
+
+    if(buf == NULL) {
+        samplerate = (lpfloat_t)DEFAULT_SAMPLERATE;
+        channels = DEFAULT_CHANNELS;
+    } else {
+        samplerate = buf->samplerate;
+        channels = buf->channels;
+    }
+
+    osc->samplerate = samplerate;
     osc->range = range;
     osc->gate = 0;
     osc->pulsewidth = 1.f;
@@ -26,7 +38,7 @@ lptapeosc_t * create_tapeosc(lpbuffer_t * buf, lpfloat_t range) {
     osc->speed = 1.f;
     osc->start = 0.f;
     osc->start_increment = range;
-    osc->current_frame = LPBuffer.create(1, buf->channels, buf->samplerate);
+    osc->current_frame = LPBuffer.create(1, channels, samplerate);
     return osc;
 }
 
@@ -35,6 +47,39 @@ void rewind_tapeosc(lptapeosc_t * osc) {
     osc->phase = osc->phase - (int)osc->phase;
 }
 
+void process_tapeosc(lptapeosc_t * osc) {
+    lpfloat_t sample, f, a, b;
+    int c, channels;
+    size_t idxa, idxb, boundry;
+
+    channels = osc->buf->channels;
+    boundry = osc->range + osc->start;
+
+    printf("phase %f channels %i boundry %ld speed %f\n", osc->phase, channels, boundry, osc->speed);
+
+    f = osc->phase - (int)osc->phase;
+    idxa = (size_t)osc->phase;
+    idxb = idxa + 1;
+
+    for(c=0; c < channels; c++) {
+        a = osc->buf->data[idxa * channels + c];
+        b = osc->buf->data[idxb * channels + c];
+        sample = (1.f - f) * a + (f * b);
+        osc->current_frame->data[c] = sample;
+    }
+
+    osc->phase += osc->speed;
+    printf("phase %f channels %i boundry %ld speed %f\n", osc->phase, channels, boundry, osc->speed);
+
+    if(osc->phase >= boundry) {
+        osc->phase = osc->start;
+        osc->gate = 1;
+    } else {
+        osc->gate = 0;
+    }
+}
+
+/*
 void process_tapeosc(lptapeosc_t * osc) {
     lpfloat_t sample, f, a, b, ipw, phase;
     int c, channels;
@@ -67,14 +112,13 @@ void process_tapeosc(lptapeosc_t * osc) {
     osc->phase += osc->speed;
 
     if(osc->phase >= boundry) {
-        /*printf("Tapeosc phase reset! Phase: %f Length: %f boundry: %f idxb: %f\n", osc->phase, (float)osc->buf->length, (float)boundry, (float)idxb);*/
-        /*osc->start += osc->start_increment;*/
         osc->phase = osc->start;
         osc->gate = 1;
     } else {
         osc->gate = 0;
     }
 }
+*/
 
 lpbuffer_t * render_tapeosc(lptapeosc_t * osc, size_t length, lpbuffer_t * amp, int channels) {
     lpbuffer_t * out;
