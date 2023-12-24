@@ -78,6 +78,7 @@ enum Wavetables {
     WT_COS,
     WT_SQUARE, 
     WT_TRI, 
+    WT_TRI2, 
     WT_SAW,
     WT_RSAW,
     WT_RND,
@@ -138,14 +139,6 @@ typedef struct lpbuffer_t {
 #endif
 extern const lpfloat_t LPHANN_WINDOW[];
 
-typedef struct lpstack_t {
-    lpbuffer_t ** stack;
-    size_t length;
-    lpfloat_t phase; /* Pos within table */
-    lpfloat_t pos; /* Pos within stack */
-    int read_index;
-} lpstack_t;
-
 typedef struct lparray_t {
     int * data;
     size_t length;
@@ -157,7 +150,7 @@ typedef struct ugen_t ugen_t;
 struct ugen_t {
     void * params;
     lpfloat_t (*get_output)(ugen_t * u, int index);
-    void (*set_param)(ugen_t * u, int index, lpfloat_t value);
+    void (*set_param)(ugen_t * u, int index, void * value);
     void (*process)(ugen_t * u);
     void (*destroy)(ugen_t * u);
 };
@@ -216,7 +209,6 @@ typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create)(size_t, int, int);
     lpbuffer_t * (*create_from_float)(lpfloat_t value, size_t length, int channels, int samplerate);
     lpbuffer_t * (*create_from_bytes)(char * bytes, size_t length, int channels, int samplerate);
-    lpstack_t * (*create_stack)(int, size_t, int, int);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
     void (*clear)(lpbuffer_t *);
     void (*split2)(lpbuffer_t *, lpbuffer_t *, lpbuffer_t *);
@@ -256,7 +248,6 @@ typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*resize)(lpbuffer_t *, size_t);
     void (*plot)(lpbuffer_t * buf);
     void (*destroy)(lpbuffer_t *);
-    void (*destroy_stack)(lpstack_t *);
 } lpbuffer_factory_t;
 
 typedef struct lpringbuffer_factory_t {
@@ -301,13 +292,13 @@ typedef struct lpinterpolation_factory_t {
 
 typedef struct lpwavetable_factory_t {
     lpbuffer_t * (*create)(int name, size_t length);
-    lpstack_t * (*create_stack)(int numtables, ...);
+    lpbuffer_t * (*create_stack)(int numtables, size_t * onsets, size_t * lengths, ...);
     void (*destroy)(lpbuffer_t*);
 } lpwavetable_factory_t;
 
 typedef struct lpwindow_factory_t {
     lpbuffer_t * (*create)(int name, size_t length);
-    lpstack_t * (*create_stack)(int numtables, ...);
+    lpbuffer_t * (*create_stack)(int numtables, size_t * onsets, size_t * lengths, ...);
     void (*destroy)(lpbuffer_t*);
 } lpwindow_factory_t;
 
@@ -360,5 +351,7 @@ lpfloat_t lpfmax(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfabs(lpfloat_t value);
 lpfloat_t lpfpow(lpfloat_t value, int exp);
+
+lpfloat_t lpphaseinc(lpfloat_t freq, lpfloat_t samplerate);
 
 #endif

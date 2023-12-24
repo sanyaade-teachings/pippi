@@ -22,7 +22,6 @@ void destroy_array(lparray_t * array);
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
 lpbuffer_t * create_buffer_from_float(lpfloat_t value, size_t length, int channels, int samplerate);
 lpbuffer_t * create_buffer_from_bytes(char * bytes, size_t length, int channels, int samplerate);
-lpstack_t * create_uniform_stack(int numbuffers, size_t buffer_length, int channels, int samplerate);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void clear_buffer(lpbuffer_t * buf);
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max);
@@ -63,7 +62,6 @@ lpbuffer_t * repeat_buffer(lpbuffer_t * buf, size_t repeats);
 lpbuffer_t * reverse_buffer(lpbuffer_t * buf);
 lpbuffer_t * resize_buffer(lpbuffer_t *, size_t);
 void destroy_buffer(lpbuffer_t * buf);
-void destroy_stack(lpstack_t * stack);
 
 lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
 lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
@@ -99,10 +97,10 @@ lpbuffer_t * param_create_from_float(lpfloat_t value);
 lpbuffer_t * param_create_from_int(int value);
 
 lpbuffer_t * create_wavetable(int name, size_t length);
-lpstack_t * create_wavetable_stack(int numtables, ...);
+lpbuffer_t * create_wavetable_stack(int numtables, size_t * onsets, size_t * lengths, ...);
 void destroy_wavetable(lpbuffer_t* buf);
 lpbuffer_t* create_window(int name, size_t length);
-lpstack_t * create_window_stack(int numtables, ...);
+lpbuffer_t * create_window_stack(int numtables, size_t * onsets, size_t * lengths, ...);
 void destroy_window(lpbuffer_t* buf);
 
 #ifdef LP_FLOAT
@@ -121,7 +119,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, create_uniform_stack, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_stereo_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, varispeed_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, taper_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer, destroy_stack };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_stereo_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, varispeed_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, taper_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear_pos2, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -1218,17 +1216,6 @@ void destroy_buffer(lpbuffer_t * buf) {
     }
 }
 
-void destroy_stack(lpstack_t * stack) {
-    size_t i;
-    if(stack->stack != NULL) {
-        for(i=0; i < stack->length; i++) {
-            LPBuffer.destroy(stack->stack[i]);
-        }
-        /*LPMemoryPool.free(stack->stack);*/
-    }
-    LPMemoryPool.free(stack);
-}
-
 /* Basic FX / waveshaping
  */
 lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew) {
@@ -1606,7 +1593,6 @@ lpfloat_t interpolate_linear_pos2(lpfloat_t * buf, size_t length, lpfloat_t pos)
     return (1.0f - frac) * a + (frac * b);
 }
 
-
 /* Wavetable generators
  * 
  * All these functions return a table of values 
@@ -1639,6 +1625,14 @@ void wavetable_square(lpfloat_t* out, int length) {
 
 void wavetable_tri(lpfloat_t* out, int length) {
     int i;
+    int offset = (int)(length * 0.25f);
+    for(i=0; i < length; i++) {
+        out[(i+offset) % length] = (lpfloat_t)fabs((i/(lpfloat_t)length) * 2.0f - 1.0f) * 2.0f - 1.0f;
+    }
+}
+
+void wavetable_tri2(lpfloat_t* out, int length) {
+    int i;
     for(i=0; i < length; i++) {
         out[i] = (lpfloat_t)fabs((i/(lpfloat_t)length) * 2.0f - 1.0f) * 2.0f - 1.0f;
     }
@@ -1667,6 +1661,8 @@ lpbuffer_t* create_wavetable(int name, size_t length) {
         wavetable_cosine(buf->data, length);            
     } else if (name == WT_TRI) {
         wavetable_tri(buf->data, length);            
+    } else if (name == WT_TRI2) {
+        wavetable_tri2(buf->data, length);            
     } else if (name == WT_SQUARE) {
         wavetable_square(buf->data, length);            
     } else if (name == WT_SAW) {
@@ -1681,47 +1677,53 @@ lpbuffer_t* create_wavetable(int name, size_t length) {
     return buf;
 }
 
-lpstack_t * create_wavetable_stack(int numtables, ...) {
+lpbuffer_t * create_wavetable_stack(int numtables, size_t * onsets, size_t * lengths, ...) {
     va_list vl;
-    lpstack_t * stack;
-    int i, name;
+    lpbuffer_t * stack;
+    int i;
+    size_t tablesize, stacklength, pos, j;
+    lpbuffer_t * bufs[numtables] = {};
+    size_t tablesizes[numtables] = {};
+    int tables[numtables] = {};
 
     va_start(vl, numtables);
 
-    stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
-    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(numtables, sizeof(lpbuffer_t *));
-    stack->length = numtables;
-    stack->phase = 0.f;
-    stack->pos = 0.f;
+    stacklength = 0;
 
+    // first pass get all sizes
     for(i=0; i < numtables; i++) {
-        name = va_arg(vl, int);
-        stack->stack[i] = LPWavetable.create(name, DEFAULT_TABLESIZE); 
+        tables[i] = va_arg(vl, int);
+        if(tables[i] == WT_USER) {
+            bufs[i] = va_arg(vl, lpbuffer_t *);
+            stacklength += bufs[i]->length;
+        } else {
+            tablesize = va_arg(vl, size_t);
+            stacklength += tablesize;
+            tablesizes[i] = tablesize;
+        }
     }
 
-    va_end(vl);
+    printf("stacklength %d\n", (int)stacklength);
+    stack = LPBuffer.create(stacklength, 1, DEFAULT_SAMPLERATE);
+
+    pos = 0;
+    for(i=0; i < numtables; i++) {
+        if(tables[i] != WT_USER) {
+            bufs[i] = LPWavetable.create(tables[i], tablesizes[i]); 
+        }
+
+        for(j=0; j < bufs[i]->length; j++) {
+            stack->data[j + pos] = bufs[i]->data[j];
+        }
+
+        onsets[i] = pos;
+        lengths[i] = tablesizes[i];
+
+        pos += bufs[i]->length;
+    }
 
     return stack;
 }
-
-lpstack_t * create_uniform_stack(int numbuffers, size_t buffer_length, int channels, int samplerate) {
-    lpstack_t * stack;
-    int i;
-
-    stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
-    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(numbuffers, sizeof(lpbuffer_t *));
-    stack->length = numbuffers;
-    stack->phase = 0.f;
-    stack->pos = 0.f;
-    stack->read_index = 0;
-
-    for(i=0; i < numbuffers; i++) {
-        stack->stack[i] = LPBuffer.create(buffer_length, channels, samplerate); 
-    }
-
-    return stack;
-}
-
 
 void destroy_wavetable(lpbuffer_t* buf) {
     LPBuffer.destroy(buf);
@@ -1819,25 +1821,49 @@ lpbuffer_t * create_window(int name, size_t length) {
     return buf;
 }
 
-lpstack_t * create_window_stack(int numtables, ...) {
+lpbuffer_t * create_window_stack(int numtables, size_t * onsets, size_t * lengths, ...) {
     va_list vl;
-    lpstack_t * stack;
+    lpbuffer_t * stack;
     int i, name;
+    size_t tablesize, stacklength, pos, j;
+    lpbuffer_t * bufs[numtables] = {};
+    size_t tablesizes[numtables] = {};
+    int tables[numtables] = {};
 
     va_start(vl, numtables);
 
-    stack = (lpstack_t *)LPMemoryPool.alloc(1, sizeof(lpstack_t));
-    stack->stack = (lpbuffer_t **)LPMemoryPool.alloc(numtables, sizeof(lpbuffer_t *));
-    stack->length = numtables;
-    stack->phase = 0.f;
-    stack->pos = 0.f;
+    stacklength = 0;
 
+    // first pass get all sizes
     for(i=0; i < numtables; i++) {
         name = va_arg(vl, int);
-        stack->stack[i] = LPWindow.create(name, DEFAULT_TABLESIZE); 
+        if(name == WT_USER) {
+            bufs[i] = va_arg(vl, lpbuffer_t *);
+            stacklength += bufs[i]->length;
+        } else {
+            tablesize = va_arg(vl, size_t);
+            stacklength += tablesize;
+            tablesizes[i] = tablesize;
+        }
     }
 
-    va_end(vl);
+    stack = LPBuffer.create(stacklength, 1, DEFAULT_SAMPLERATE);
+
+    pos = 0;
+    for(i=0; i < numtables; i++) {
+        if(tables[i] != WIN_USER) {
+            bufs[i] = LPWindow.create(tables[i], tablesizes[i]); 
+        }
+
+        for(j=0; j < bufs[j]->length; j++) {
+            stack->data[j + pos] = bufs[i]->data[j];
+        }
+
+        onsets[i] = pos;
+        lengths[i] = tablesizes[i];
+
+        pos += bufs[i]->length;
+    }
 
     return stack;
 }

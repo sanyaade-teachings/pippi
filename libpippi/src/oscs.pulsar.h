@@ -5,23 +5,26 @@
 
 typedef struct lppulsarosc_t {
     lpfloat_t * wavetables;   /* Wavetable stack */
+    size_t wavetable_length; /* total length of wavetable stack */
     int num_wavetables;
-    size_t * wavetable_onsets;
-    size_t * wavetable_lengths;
-    lpfloat_t * wavetable_positions;
-    lpfloat_t wavetable_phase;
+    size_t * wavetable_onsets; /* The start position for each table */
+    size_t * wavetable_lengths; /* The length of each table */
+    lpfloat_t wavetable_morph;
+    lpfloat_t wavetable_morph_freq;
 
     lpfloat_t * windows;  /* Window stack */
+    size_t window_length; /* total length of window stack */
     int num_windows;
     size_t * window_onsets;
     size_t * window_lengths;
-    lpfloat_t * window_positions;
-    lpfloat_t window_phase;
+    lpfloat_t window_morph;
+    lpfloat_t window_morph_freq;
 
     void * burst;         /* Burst table - null table == pulses always on */
     size_t burst_size;
-    lpfloat_t burst_pos;
+    size_t burst_pos; 
 
+    lpfloat_t phase;
     lpfloat_t saturation; /* Probability of all pulses to no pulses */
     lpfloat_t pulsewidth;
     lpfloat_t samplerate;
@@ -31,11 +34,13 @@ typedef struct lppulsarosc_t {
 typedef struct lppulsarosc_factory_t {
     lppulsarosc_t * (*create)(int num_wavetables, 
         lpfloat_t * wavetables, 
+        size_t wavetable_length,
         size_t * wavetable_onsets,
         size_t * wavetable_lengths,
 
         int num_windows, 
         lpfloat_t * windows, 
+        size_t window_length,
         size_t * window_onsets,
         size_t * window_lengths
     );
