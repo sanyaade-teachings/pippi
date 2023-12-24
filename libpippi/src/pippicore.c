@@ -1686,7 +1686,7 @@ lpbuffer_t * create_wavetable_stack(int numtables, size_t * onsets, size_t * len
     size_t tablesizes[numtables] = {};
     int tables[numtables] = {};
 
-    va_start(vl, numtables);
+    va_start(vl, lengths);
 
     stacklength = 0;
 
@@ -1830,7 +1830,7 @@ lpbuffer_t * create_window_stack(int numtables, size_t * onsets, size_t * length
     size_t tablesizes[numtables] = {};
     int tables[numtables] = {};
 
-    va_start(vl, numtables);
+    va_start(vl, lengths);
 
     stacklength = 0;
 

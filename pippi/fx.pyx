@@ -100,7 +100,7 @@ cdef double _blsc_integrated_clip(double val) nogil:
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) nogil:
+cdef double[:,:] _softclip(double[:,:] out, double[:,:] snd) noexcept nogil:
     cdef double val=0, lastval=0, sample=0
     cdef int c=0, i=0
     cdef int channels = snd.shape[1]
@@ -729,7 +729,7 @@ cdef bint _is_2d_window(object item):
 @cython.wraparound(False)
 @cython.cdivision(True)
 @cython.initializedcheck(False)
-cdef void _svf_core(SVFData* data) nogil:
+cdef void _svf_core(SVFData* data) noexcept nogil:
     
     data.res = max(min(data.res, 1), 0)
     cdef double g = math.tan(PI * data.freq) * data.shelf
