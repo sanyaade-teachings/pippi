@@ -36,8 +36,8 @@ ugen_t * create_mult_ugen(void) {
     ugen_t * u;
     lpugenmult_t * params;
 
-    u = (ugen_t *)calloc(sizeof(ugen_t), 1);
-    params = (lpugenmult_t *)calloc(sizeof(lpugenmult_t), 1);
+    u = (ugen_t *)LPMemoryPool.alloc(sizeof(ugen_t), 1);
+    params = (lpugenmult_t *)LPMemoryPool.alloc(sizeof(lpugenmult_t), 1);
     params->a = 1;
     params->b = 1;
 

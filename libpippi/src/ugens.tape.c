@@ -70,9 +70,9 @@ ugen_t * create_tape_ugen(void) {
     ugen_t * u;
     lpugentape_t * params;
 
-    params = (lpugentape_t *)calloc(sizeof(lpugentape_t), 1);
+    params = (lpugentape_t *)LPMemoryPool.alloc(sizeof(lpugentape_t), 1);
     params->osc = LPTapeOsc.create(NULL, 1);
-    u = (ugen_t *)calloc(sizeof(ugen_t), 1);
+    u = (ugen_t *)LPMemoryPool.alloc(sizeof(ugen_t), 1);
 
     u->params = (void *)params;
     u->process = process_tape_ugen;

@@ -38,9 +38,9 @@ ugen_t * create_sine_ugen(void) {
     ugen_t * u;
     lpugensine_t * params;
 
-    params = (lpugensine_t *)calloc(sizeof(lpugensine_t), 1);
+    params = (lpugensine_t *)LPMemoryPool.alloc(sizeof(lpugensine_t), 1);
     params->osc = LPSineOsc.create();
-    u = (ugen_t *)calloc(sizeof(ugen_t), 1);
+    u = (ugen_t *)LPMemoryPool.alloc(sizeof(ugen_t), 1);
 
     u->params = (void *)params;
     u->process = process_sine_ugen;
