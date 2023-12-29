@@ -16,6 +16,7 @@ LPSOURCES = vendor/fft/fft.c \
 	src/oscs.tukey.c \
 	src/ugens.sine.c \
 	src/ugens.tape.c \
+	src/ugens.pulsar.c \
 	src/ugens.utils.c \
 	src/microsound.c \
 	src/mir.c \
@@ -182,6 +183,7 @@ ugens:
 	gcc $(LPFLAGS) src/ugens/sineosc.c $(LPSOURCES) $(LPLIBS) -o build/ugen_sineosc
 	gcc $(LPFLAGS) src/ugens/mult.c $(LPSOURCES) $(LPLIBS) -o build/ugen_mult
 	gcc $(LPFLAGS) src/ugens/tape.c $(LPSOURCES) $(LPLIBS) -o build/ugen_tape
+	gcc $(LPFLAGS) src/ugens/pulsar.c $(LPSOURCES) $(LPLIBS) -o build/ugen_pulsar
 
 render:
 	mkdir -p build renders

@@ -153,7 +153,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
         burst = 0; 
     }
 
-    printf("pw=%f/ipw=%f\tburst=%d\tburst_pos=%d\n", (float)p->pulsewidth, (float)ipw, (int)burst, (int)p->burst_pos);
+    //printf("pw=%f/ipw=%f\tburst=%d\tburst_pos=%d\n", (float)p->pulsewidth, (float)ipw, (int)burst, (int)p->burst_pos);
 
     /* If there's a non-zero pulsewidth, and the burst value is 1, 
      * then syntesize a pulse */

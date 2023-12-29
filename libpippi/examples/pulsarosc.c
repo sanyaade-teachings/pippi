@@ -54,14 +54,10 @@ int main() {
             WT_SINE, 4096
     );
 
-    LPSoundFile.write("renders/pulsarwts.wav", wts);
-
     win = LPWindow.create_stack(num_wins, 
             win_onsets, win_lengths,
             WIN_HANN, 4096
     );
-
-    LPSoundFile.write("renders/pulsarwin.wav", win);
 
     lpbuffer_t * buf = LPBuffer.create(length, CHANNELS, SR);    
 
