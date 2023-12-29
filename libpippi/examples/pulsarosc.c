@@ -1,11 +1,27 @@
 #include "pippi.h"
-
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
 #define VOICES 4
 #define CHANNELS 2
 #define SR 48000
 #define num_wts 10
 #define num_wins 1
 #define TABLESIZE 128
+
+/**
+ * 1 open file
+ * 2 read N bytes from file (N=sizeof char / burstsize + 1)
+ *   into tmp char buffer.
+ * 3 loop over each char value
+ * 4 loop over each bit value
+ *   store bits as bools
+ *
+ *   in: char buffer?
+ *      bool * burst_bytes(unsigned char * bytes)
+ *      bool * burst_file(char * filename)
+ *
+ * */
 
 int main() {
     size_t length = SR * 10;
@@ -38,10 +54,14 @@ int main() {
             WT_SINE, 4096
     );
 
-    win = LPWavetable.create_stack(num_wins, 
+    LPSoundFile.write("renders/pulsarwts.wav", wts);
+
+    win = LPWindow.create_stack(num_wins, 
             win_onsets, win_lengths,
-            WT_HANN, 4096
+            WIN_HANN, 4096
     );
+
+    LPSoundFile.write("renders/pulsarwin.wav", win);
 
     lpbuffer_t * buf = LPBuffer.create(length, CHANNELS, SR);    
 
@@ -51,13 +71,13 @@ int main() {
         oscs[i]->freq = freqs[i];
         oscs[i]->saturation = 1;
         oscs[i]->pulsewidth = LPRand.rand(0.01, 1);
-        oscs[i]->burst = LPArray.create_from(4, 1, 1, 0, 1);
+        LPPulsarOsc.burst_file(oscs[i], "examples/kcore.raw", 4096);
     }
 
     for(i=0; i < length; i++) {
         sample = 0;
         for(v=0; v < VOICES; v++) {
-            sample += LPPulsarOsc.process(oscs[v]) * 0.15f;
+            sample += LPPulsarOsc.process(oscs[v]) * 0.5f;
         }
 
         for(c=0; c < CHANNELS; c++) {

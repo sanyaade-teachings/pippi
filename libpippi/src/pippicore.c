@@ -1855,7 +1855,7 @@ lpbuffer_t * create_window_stack(int numtables, size_t * onsets, size_t * length
             bufs[i] = LPWindow.create(tables[i], tablesizes[i]); 
         }
 
-        for(j=0; j < bufs[j]->length; j++) {
+        for(j=0; j < bufs[i]->length; j++) {
             stack->data[j + pos] = bufs[i]->data[j];
         }
 

@@ -2,6 +2,9 @@
 #define LP_PULSAR_H
 
 #include "pippicore.h"
+#include <stdbool.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 typedef struct lppulsarosc_t {
     lpfloat_t * wavetables;   /* Wavetable stack */
@@ -20,7 +23,7 @@ typedef struct lppulsarosc_t {
     lpfloat_t window_morph;
     lpfloat_t window_morph_freq;
 
-    void * burst;         /* Burst table - null table == pulses always on */
+    bool * burst;         /* Burst table - null table == pulses always on */
     size_t burst_size;
     size_t burst_pos; 
 
@@ -44,6 +47,8 @@ typedef struct lppulsarosc_factory_t {
         size_t * window_onsets,
         size_t * window_lengths
     );
+    void (*burst_file)(lppulsarosc_t * osc, char * filename, size_t burst_size);
+    void (*burst_bytes)(lppulsarosc_t * osc, unsigned char * bytes, size_t burst_size);
     lpfloat_t (*process)(lppulsarosc_t *);
     void (*destroy)(lppulsarosc_t*);
 } lppulsarosc_factory_t;

@@ -1,4 +1,5 @@
 #include "oscs.pulsar.h"
+#include <errno.h>
 
 #define DEBUG 1
 
@@ -19,37 +20,65 @@ lpfloat_t get_stack_value(
     size_t region_index;
     lpfloat_t a, b, frac;
 
-    //if(DEBUG) printf("IN stack_length=%d, region_offset=%d, region_length=%d, phase=%f\n", (int)stack_length, (int)region_offset, (int)region_length, (float)phase);
-
     phase *= region_length;
     region_index = (size_t)phase;
     frac = phase - (size_t)phase;
 
-    //if(DEBUG) printf("TO stack_length=%d, region_offset=%d, region_length=%d, phase=%f, frac=%f\n", (int)stack_length, (int)region_offset, (int)region_length, (float)phase, (float)frac);
-
     a = stack[(region_index % region_length) + region_offset];
     b = stack[((region_index+1) % region_length) + region_offset];
-    //printf("   a=%f b=%f\n", (float)a, (float)b);
-    //printf("\n");
 
     return (1.0f - frac) * a + (frac * b);
 }
 
-int read_burst_value(void * burst, size_t burst_pos) {
-    size_t burst_buffer_size = burst_pos / sizeof(unsigned int) + 1;
-    unsigned int * burst_source;
-    unsigned int burst_buffer[burst_buffer_size];
-    int burst_mask;
+void burst_table_from_bytes(lppulsarosc_t * osc, unsigned char * bytes, size_t burst_size) {
+    int mask;
+    size_t i, c, pos;
+    bool * burst_table;
+    size_t num_bytes = burst_size / sizeof(unsigned char) + 1;
 
-    if(burst == NULL) return 1;
+    burst_table = (bool *)LPMemoryPool.alloc(burst_size, sizeof(bool));
 
-    /* Copy the memory area to a local buffer */
-    burst_source = (unsigned int *)burst;
-    memcpy(burst_buffer, burst_source, burst_buffer_size);
+    pos = 0;
+    for(i=0; i < num_bytes; i++) {
+        for(c=0; c < sizeof(unsigned char); c++) {
+            mask = 1 << c;
+            burst_table[pos] = (bool)((bytes[i] & mask) >> c);
+            pos += 1;
+            if(pos >= burst_size) break;
+        }
+    }
 
-    /* Find the bit position at the burst_pos */
+    osc->burst = burst_table;
+    osc->burst_size = burst_size;
+}
+
+void burst_table_from_file(lppulsarosc_t * osc, char * filename, size_t burst_size) {
+    int fp;
+    size_t num_bytes = burst_size / sizeof(unsigned char) + 1;
+    unsigned char burst_buffer[num_bytes] = {};
+
+    fp = open(filename, O_RDONLY);
+    if(fp < 0) {
+        printf("could not read burst file %s (%d)\n", strerror(errno), errno);
+        return;
+    }
+
+    if(read(fp, burst_buffer, num_bytes) < 0) {
+        printf("Could not copy burst data\n");
+        return;
+    }
+
+    /*
+    for(i=0; i < burst_size; i++) {
+        mask = 1 << i;
+        burst_table[i] = (*burst_buffer[i] & mask) >> i+j;
+    }
     burst_mask = 1 << burst_pos;
-    return (*burst_source & burst_mask) >> burst_pos;
+    return (*burst_buffer & burst_mask) >> burst_pos;
+
+    */
+
+    burst_table_from_bytes(osc, burst_buffer, burst_size);
 }
 
 lppulsarosc_t * create_pulsarosc(
@@ -65,7 +94,6 @@ lppulsarosc_t * create_pulsarosc(
     size_t * window_onsets,
     size_t * window_lengths
 ) {
-    int i;
     lppulsarosc_t * p = (lppulsarosc_t *)LPMemoryPool.alloc(1, sizeof(lppulsarosc_t));
 
     p->wavetables = wavetables;
@@ -89,18 +117,6 @@ lppulsarosc_t * create_pulsarosc(
     p->wavetable_morph_freq = .12f;
     p->window_morph_freq = .12f;
 
-    printf("num wavetables %d\n", (int)num_wavetables);
-    for(i=0; i < num_wavetables; i++) {
-        printf("onset %d\n", (int)wavetable_onsets[i]);
-        printf("length %d\n", (int)wavetable_lengths[i]);
-    }
-
-    printf("num windows %d\n", (int)num_windows);
-    for(i=0; i < num_windows; i++) {
-        printf("onset %d\n", (int)window_onsets[i]);
-        printf("length %d\n", (int)window_lengths[i]);
-    }
-
     return p;
 }
 
@@ -109,7 +125,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
               wtmorphpos, wtmorphfrac,
               winmorphpos, winmorphfrac;
     int wavetable_index, window_index;
-    //int burst;
+    int burst;
 
     assert(p->wavetables != NULL);
     assert(p->num_wavetables > 0);
@@ -122,30 +138,32 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     ipw = 1.f;
     sample = 0.f;
     mod = 0.f;
-    //burst = 1;
+    burst = 1;
 
     /* Store the inverse pulsewidth if non-zero */
     if(p->pulsewidth > 0) ipw = 1.0/p->pulsewidth;
 
-    /* Look up the burst value -- NULL burst is always on */
-    //burst = read_burst_value(p->burst, p->burst_pos);
+    /* Look up the burst value -- NULL burst is always on. 
+     * In other words, bursting only happens when the burst 
+     * table is non-NULL. Otherwise all pulses sound. */
+    if(p->burst != NULL) burst = p->burst[p->burst_pos % p->burst_size];
 
     /* Override burst if desaturation is triggered */
-    //if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
-    //    burst = 0; 
-    //}
+    if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
+        burst = 0; 
+    }
+
+    printf("pw=%f/ipw=%f\tburst=%d\tburst_pos=%d\n", (float)p->pulsewidth, (float)ipw, (int)burst, (int)p->burst_pos);
 
     /* If there's a non-zero pulsewidth, and the burst value is 1, 
      * then syntesize a pulse */
-    if(ipw > 0) {
-        //printf("wavetable\n");
+    if(ipw > 0 && burst) {
         if(p->num_wavetables == 1) {
             sample = get_stack_value(p->wavetables, p->phase, p->wavetable_length, 0, p->wavetable_length);
         } else {
             wtmorphpos = p->wavetable_morph * p->num_wavetables;
             wavetable_index = (int)wtmorphpos;
             wtmorphfrac = wtmorphpos - wavetable_index;
-            //if(DEBUG) printf("wavetable index: %i (num wavetables %i)\n", wavetable_index, p->num_wavetables);
 
             a = get_stack_value(p->wavetables, p->phase, p->wavetable_length,
                 p->wavetable_onsets[wavetable_index],
@@ -160,15 +178,12 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
             sample = (1.f - wtmorphfrac) * a + (wtmorphfrac * b);
         }
 
-        //printf("window\n");
         if(p->num_windows == 1) {
             mod = get_stack_value(p->windows, p->phase, p->window_length, 0, p->window_length);
-            //if(DEBUG) printf("window index: %i (num windows %i, window length %d)\n", window_index, p->num_windows, p->window_length);
         } else {
             winmorphpos = p->window_morph * p->num_windows;
             window_index = (int)winmorphpos;
             winmorphfrac = winmorphpos - window_index;
-            //if(DEBUG) printf("window index: %i (num windows %i)\n", window_index, p->num_windows);
 
             a = get_stack_value(p->windows, p->phase, p->window_length, 
                 p->window_onsets[window_index], 
@@ -188,21 +203,13 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     p->wavetable_morph += isr * p->wavetable_morph_freq;
     p->window_morph += isr * p->window_morph_freq;
     p->phase += isr * p->freq;
-    //if(p->burst != NULL && p->phase >= 1.f) p->burst_pos += 1;
+    if(p->burst != NULL && p->phase >= 1.f) p->burst_pos += 1;
     
-    if(p->phase >= 1.f) {
-        //printf("phase overflow %f\n", (float)p->phase);
-        //if(DEBUG) printf("wavetables=%d windows=%d\n", (int)p->num_wavetables, (int)p->num_windows);
-        //if(DEBUG) printf("sample = %f\tmod = %f\n", (float)sample, (float)mod);
-        //if(DEBUG) printf("\n");
-        //printf("sample %f mod %f\n", sample, mod);
-    }
-
     // wrap phases
     while(p->phase >= 1.f) p->phase -= 1.f;
     while(p->wavetable_morph >= 1.f) p->wavetable_morph -= 1.f;
     while(p->window_morph >= 1.f) p->window_morph -= 1.f;
-    //while(p->burst_pos >= p->burst_size) p->burst_pos -= p->burst_size;
+    if(p->burst_size > 0) while(p->burst_pos >= p->burst_size) p->burst_pos -= p->burst_size;
 
     return sample * mod;
 }
@@ -212,4 +219,4 @@ void destroy_pulsarosc(lppulsarosc_t* p) {
 }
 
 
-const lppulsarosc_factory_t LPPulsarOsc = { create_pulsarosc, process_pulsarosc, destroy_pulsarosc };
+const lppulsarosc_factory_t LPPulsarOsc = { create_pulsarosc, burst_table_from_file, burst_table_from_bytes, process_pulsarosc, destroy_pulsarosc };

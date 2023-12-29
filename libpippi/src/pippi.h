@@ -8,6 +8,7 @@
 #include "oscs.pulsar.h"
 #include "oscs.shape.h"
 #include "oscs.sine.h"
+#include "oscs.fract.h"
 #include "oscs.tape.h"
 #include "oscs.table.h"
 #include "oscs.tukey.h"

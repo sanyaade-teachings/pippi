@@ -8,6 +8,7 @@ LPSOURCES = vendor/fft/fft.c \
 	src/oscs.node.c \
 	src/oscs.phasor.c \
 	src/oscs.sine.c \
+	src/oscs.fract.c \
 	src/oscs.pulsar.c \
 	src/oscs.shape.c \
 	src/oscs.tape.c \
@@ -61,6 +62,9 @@ osc-examples:
 
 	echo "Building sineosc.c example...";
 	gcc $(LPFLAGS) examples/sineosc.c $(LPSOURCES) $(LPLIBS) -o build/sineosc
+
+	echo "Building fractosc.c example...";
+	gcc $(LPFLAGS) examples/fractosc.c $(LPSOURCES) $(LPLIBS) -o build/fractosc
 
 	echo "Building tukeyosc.c example...";
 	gcc $(LPFLAGS) examples/tukeyosc.c $(LPSOURCES) $(LPLIBS) -o build/tukeyosc
