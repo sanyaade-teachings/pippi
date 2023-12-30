@@ -4,6 +4,7 @@ import warnings
 cimport numpy as np
 import numpy as np
 
+from pippi import dsp
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS
 from pippi.soundbuffer cimport SoundBuffer
 
@@ -17,6 +18,28 @@ cdef dict UGEN_INPUTNAME_MAP = {
     'tape.speed': UTAPEIN_SPEED,
     'tape.phase': UTAPEIN_PHASE,
     'tape.buf': UTAPEIN_BUF,
+    'pulsar.wavetables': UPULSARIN_WTTABLE,
+    'pulsar.wavetable_length': UPULSARIN_WTTABLELENGTH,
+    'pulsar.num_wavetables': UPULSARIN_NUMWTS,
+    'pulsar.wavetable_offsets': UPULSARIN_WTOFFSETS,
+    'pulsar.wavetable_lengths': UPULSARIN_WTLENGTHS,
+    'pulsar.wavetable_morph': UPULSARIN_WTMORPH,
+    'pulsar.wavetable_morph_freq': UPULSARIN_WTMORPHFREQ,
+    'pulsar.windows': UPULSARIN_WINTABLE,
+    'pulsar.window_length': UPULSARIN_WINTABLELENGTH,
+    'pulsar.num_windows': UPULSARIN_NUMWINS,
+    'pulsar.window_offsets': UPULSARIN_WINOFFSETS,
+    'pulsar.window_lengths': UPULSARIN_WINLENGTHS,
+    'pulsar.window_morph': UPULSARIN_WINMORPH,
+    'pulsar.window_morph_freq': UPULSARIN_WINMORPHFREQ,
+    'pulsar.burst': UPULSARIN_BURSTTABLE,
+    'pulsar.burst_size': UPULSARIN_BURSTSIZE,
+    'pulsar.burst_pos': UPULSARIN_BURSTPOS,
+    'pulsar.phase': UPULSARIN_PHASE,
+    'pulsar.saturation': UPULSARIN_SATURATION,
+    'pulsar.pulsewidth': UPULSARIN_PULSEWIDTH,
+    'pulsar.samplerate': UPULSARIN_SAMPLERATE,
+    'pulsar.freq': UPULSARIN_FREQ,
 }
 
 cdef dict UGEN_OUTPUTNAME_MAP = {
@@ -29,6 +52,18 @@ cdef dict UGEN_OUTPUTNAME_MAP = {
     'tape.output': UTAPEOUT_MAIN,
     'tape.speed': UTAPEOUT_SPEED,
     'tape.phase': UTAPEOUT_PHASE,
+    'pulsar.main': UPULSAROUT_MAIN,
+    'pulsar.wavetable_morph': UPULSAROUT_WTMORPH,
+    'pulsar.wavetable_morph_freq': UPULSAROUT_WTMORPHFREQ,
+    'pulsar.window_morph': UPULSAROUT_WINMORPH,
+    'pulsar.window_morph_freq': UPULSAROUT_WINMORPHFREQ,
+    'pulsar.burst_size': UPULSAROUT_BURSTSIZE,
+    'pulsar.burst_pos': UPULSAROUT_BURSTPOS,
+    'pulsar.phase': UPULSAROUT_PHASE,
+    'pulsar.saturation': UPULSAROUT_SATURATION,
+    'pulsar.pulsewidth': UPULSAROUT_PULSEWIDTH,
+    'pulsar.samplerate': UPULSAROUT_SAMPLERATE,
+    'pulsar.freq': UPULSAROUT_FREQ,
 }
 
 
@@ -40,6 +75,8 @@ cdef class Node:
             self.u = create_mult_ugen()
         elif ugen == 'tape':
             self.u = create_tape_ugen()
+        elif ugen == 'pulsar':
+            self.u = create_pulsar_ugen()
         else:
             raise AttributeError('Invalid ugen type "%s"' % ugen)
 
@@ -69,6 +106,41 @@ cdef class Node:
             for i in range(out.length):
                 for c in range(out.channels):
                     out.data[i * out.channels + c] = value.frames[i,c]
+            vp = <void *>out
+
+        elif 'wavetables' in name:
+            stack = []
+            for b in value:
+                if isinstance(b, str):
+                    b = dsp.wt(b)
+                stack += [dsp.buffer(b)] 
+            stack = dsp.join(stack)
+
+            out = LPBuffer.create(len(stack), 1, stack.samplerate)
+            for i in range(out.length):
+                out.data[i] = stack.frames[i,0]
+            vp = <void *>out
+
+            # set wavetable stack total length
+            self.u.set_param(self.u, UGEN_INPUTNAME_MAP.get('.'.join([self.ugen_name, 'wavetable_length']), 0), vp)
+
+            # set wavetable stack offsets
+            self.u.set_param(self.u, UGEN_INPUTNAME_MAP.get('.'.join([self.ugen_name, 'wavetable_offsets']), 0), vp)
+
+            # set wavetable stack lengths
+            self.u.set_param(self.u, UGEN_INPUTNAME_MAP.get('.'.join([self.ugen_name, 'wavetable_lengths']), 0), vp)
+
+        elif 'windows' in name:
+            stack = []
+            for b in value:
+                if isinstance(b, str):
+                    b = dsp.win(b)
+                stack += [dsp.buffer(b)] 
+            stack = dsp.join(stack)
+
+            out = LPBuffer.create(len(stack), 1, stack.samplerate)
+            for i in range(out.length):
+                out.data[i] = stack.frames[i,0]
             vp = <void *>out
 
         else:

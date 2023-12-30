@@ -3,6 +3,30 @@ from pippi import dsp, fx, ugens
 import numpy as np
 
 class TestUgens(TestCase):
+    def test_ugen_pulsar(self):
+        graph = ugens.Graph()
+        graph.add_node('s1', 'sine', freq=100)
+        graph.add_node('s2', 'sine', freq=0.1)
+
+        graph.add_node('p1', 'pulsar', 
+            wavetables=['rnd','rnd'], 
+            windows=['hann']
+        )
+
+        graph.add_node('p2', 'pulsar', 
+            wavetables=['rnd','rnd'], 
+            windows=['hann']
+        )
+
+        graph.connect('s1.output', 'p1.freq', 0.1, 1)
+        graph.connect('p1.output', 'p2.pulsewidth', 0.1, 1)
+        graph.connect('s2.output', 'p2.freq', 10, 2000)
+        graph.connect('p2.output', 'main.output', mult=0.5)
+
+        out = graph.render(10)
+        out = fx.norm(out, 1)
+        out.write('tests/renders/ugens_pulsar.wav')
+
     def test_ugen_tape(self):
         buf = dsp.read('tests/sounds/living.wav')
 

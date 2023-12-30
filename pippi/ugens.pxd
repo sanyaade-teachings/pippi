@@ -44,6 +44,35 @@ cdef extern from "oscs.tape.h":
         lpbuffer_t * current_frame
         int gate
 
+cdef extern from "oscs.pulsar.h":
+    ctypedef struct lppulsarosc_t:
+        lpfloat_t * wavetables
+        size_t wavetable_length
+        int num_wavetables
+        size_t * wavetable_onsets
+        size_t * wavetable_lengths
+        lpfloat_t wavetable_morph
+        lpfloat_t wavetable_morph_freq
+
+        lpfloat_t * windows
+        size_t window_length
+        int num_windows
+        size_t * window_onsets
+        size_t * window_lengths
+        lpfloat_t window_morph
+        lpfloat_t window_morph_freq
+
+        #bool * burst
+        size_t burst_size
+        size_t burst_pos 
+
+        lpfloat_t phase
+        lpfloat_t saturation
+        lpfloat_t pulsewidth
+        lpfloat_t samplerate
+        lpfloat_t freq
+
+
 cdef extern from "ugens.tape.h":
     cdef enum UgenTapeParams:
         UTAPEIN_SPEED,
@@ -95,6 +124,69 @@ cdef extern from "ugens.sine.h":
         int outputs[3]
 
     cdef ugen_t * create_sine_ugen()
+
+cdef extern from "ugens.pulsar.h":
+    cdef enum UgenPulsarParams:
+        UPULSARIN_WTTABLE,
+        UPULSARIN_WTTABLELENGTH,
+        UPULSARIN_NUMWTS,
+        UPULSARIN_WTOFFSETS,
+        UPULSARIN_WTLENGTHS,
+        UPULSARIN_WTMORPH,
+        UPULSARIN_WTMORPHFREQ,
+
+        UPULSARIN_WINTABLE,
+        UPULSARIN_WINTABLELENGTH,
+        UPULSARIN_NUMWINS,
+        UPULSARIN_WINOFFSETS,
+        UPULSARIN_WINLENGTHS,
+        UPULSARIN_WINMORPH,
+        UPULSARIN_WINMORPHFREQ,
+
+        UPULSARIN_BURSTTABLE,
+        UPULSARIN_BURSTSIZE,
+        UPULSARIN_BURSTPOS,
+
+        UPULSARIN_PHASE,
+        UPULSARIN_SATURATION,
+        UPULSARIN_PULSEWIDTH,
+        UPULSARIN_SAMPLERATE,
+        UPULSARIN_FREQ
+
+    cdef enum UgenPulsarOutputs:
+        UPULSAROUT_MAIN,
+        UPULSAROUT_WTTABLE,
+        UPULSAROUT_WTTABLELENGTH,
+        UPULSAROUT_NUMWTS,
+        UPULSAROUT_WTOFFSETS,
+        UPULSAROUT_WTLENGTHS,
+        UPULSAROUT_WTMORPH,
+        UPULSAROUT_WTMORPHFREQ,
+
+        UPULSAROUT_WINTABLE,
+        UPULSAROUT_WINTABLELENGTH,
+        UPULSAROUT_NUMWINS,
+        UPULSAROUT_WINOFFSETS,
+        UPULSAROUT_WINLENGTHS,
+        UPULSAROUT_WINMORPH,
+        UPULSAROUT_WINMORPHFREQ,
+
+        UPULSAROUT_BURSTTABLE,
+        UPULSAROUT_BURSTSIZE,
+        UPULSAROUT_BURSTPOS,
+
+        UPULSAROUT_PHASE,
+        UPULSAROUT_SATURATION,
+        UPULSAROUT_PULSEWIDTH,
+        UPULSAROUT_SAMPLERATE,
+        UPULSAROUT_FREQ
+
+    ctypedef struct lpugenpulsar_t:
+        lppulsarosc_t * osc
+        lpfloat_t outputs[23]
+
+    cdef ugen_t * create_pulsar_ugen()
+
 
 cdef class Node:
     cdef ugen_t * u
