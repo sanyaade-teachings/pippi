@@ -149,6 +149,10 @@ bool Fft_transformBluestein(double real[], double imag[], size_t n) {
 	size_m = m * sizeof(double);
 	cos_table = malloc(size_n);
 	sin_table = malloc(size_n);
+
+    memset(cos_table, 0, size_n);
+    memset(sin_table, 0, size_n);
+
 	areal = calloc(m, sizeof(double));
 	aimag = calloc(m, sizeof(double));
 	breal = calloc(m, sizeof(double));

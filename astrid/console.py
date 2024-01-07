@@ -260,9 +260,9 @@ to be restarted to take effect.
 
         try:
             logger.info('Sending play msg to %s renderer w/params:\n  %s' % (instrument, params))
-            subprocess.run(['astrid-qmessage', 't', instrument, params])
+            subprocess.run(['astrid-msg', 't', instrument, params])
         except Exception as e:
-            print('Could not invoke qmessage: %s' % e)
+            print('Could not invoke astrid-msg: %s' % e)
             print(traceback.format_exc())
 
     def do_cb(self, chords):
@@ -331,9 +331,9 @@ to be restarted to take effect.
 
         try:
             logger.info('Sending play msg to %s renderer w/params:\n  %s' % (instrument, params))
-            subprocess.run(['astrid-qmessage', 'p', instrument, params])
+            subprocess.run(['astrid-msg', 'p', instrument, params])
         except Exception as e:
-            print('Could not invoke qmessage: %s' % e)
+            print('Could not invoke astrid-msg: %s' % e)
             print(traceback.format_exc())
 
     def do_set(self, cmd):
@@ -353,9 +353,9 @@ to be restarted to take effect.
 
         try:
             logger.info('Setting value %s to %s' % (name, value))
-            subprocess.run(['astrid-qmessage', 'v', name, value])
+            subprocess.run(['astrid-msg', 'v', name, value])
         except Exception as e:
-            print('Could not set value with qmessage: %s' % e)
+            print('Could not set value with astrid-msg: %s' % e)
             print(traceback.format_exc())
 
     def do_i(self, cmd):
@@ -364,9 +364,9 @@ to be restarted to take effect.
     def do_s(self, voice_id):
         try:
             logger.info('Sending stop msg to voice %s\n' % voice_id)
-            subprocess.run(['astrid-qmessage', 's', voice_id])
+            subprocess.run(['astrid-msg', 's', voice_id])
         except Exception as e:
-            print('Could not invoke qmessage: %s' % e)
+            print('Could not invoke astrid-msg: %s' % e)
             print(traceback.format_exc())
 
     def do_k(self, instrument):

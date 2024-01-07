@@ -20,16 +20,12 @@ void handle_shutdown(int sig __attribute__((unused))) {
 
 int main(int argc, char * argv[]) {
     struct sigaction shutdown_action;
-
     char * _instrument_fullpath; 
     char * _instrument_basename; 
     size_t instrument_name_length;
-    char * astrid_pythonpath_env;
-    size_t astrid_pythonpath_length;
-    wchar_t * python_path;
-
-    char * _astrid_channels;
     PyObject * pmodule;
+    PyConfig config;
+    PyStatus status;
 
     if(argc != 3) {
         syslog(LOG_ERR, "Error: invalid number of arguments to astrid renderer\n");
@@ -38,12 +34,7 @@ int main(int argc, char * argv[]) {
 
     openlog("astrid-renderer", LOG_PID, LOG_USER);
 
-#ifdef ASTRID_USE_FIFO_QUEUES
-    int playqd = -1;
-#else
     mqd_t playqd = -1;
-#endif
-
     lpmsg_t msg = {0};
 
     syslog(LOG_INFO, "Starting renderer...\n");
@@ -63,44 +54,28 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
 
-    /* Get python path from env */
-    astrid_pythonpath_env = getenv("ASTRID_PYTHONPATH");
-    astrid_pythonpath_length = mbstowcs(NULL, astrid_pythonpath_env, 0);
-    python_path = calloc(astrid_pythonpath_length+1, sizeof(*python_path));
-    if(python_path == NULL) {
-        syslog(LOG_ERR, "Error: could not allocate memory for wide char path\n");
-        exit(1);
-    }
-
-    if(mbstowcs(python_path, astrid_pythonpath_env, astrid_pythonpath_length) == (size_t) -1) {
-        syslog(LOG_ERR, "Error: Could not convert path to wchar_t\n");
-        exit(1);
-    }
-
-    /* Set channels from env */
-    _astrid_channels = getenv("ASTRID_CHANNELS");
-    if(_astrid_channels != NULL) {
-        astrid_channels = atoi(_astrid_channels);
-    }
-    astrid_channels = 2;
-
-    /* Set python path */
-    Py_SetPath(python_path);
-
     /* Prepare cyrenderer module for import */
     if(PyImport_AppendInittab("cyrenderer", PyInit_cyrenderer) == -1) {
         syslog(LOG_ERR, "Error: could not extend in-built modules table for renderer\n");
         exit(1);
     }
 
-    /* Set python program name */
-    Py_SetProgramName(L"astrid-renderer");
-
     /* Init python interpreter */
-    Py_InitializeEx(0);
+    PyConfig_InitPythonConfig(&config);
 
-    /* Check renderer python path */
-    /*printf("Renderer embedded python path: %ls\n", Py_GetPath());*/
+    status = PyConfig_SetString(&config, &config.program_name, L"astrid-renderer");
+    if (PyStatus_Exception(status)) {
+        PyConfig_Clear(&config);
+        return 1;
+    }
+
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config);
+    if (PyStatus_Exception(status)) {
+        return 1;
+    }
+
+    astrid_channels = ASTRID_CHANNELS; // FIXME
 
     /* Import cyrenderer */
     pmodule = PyImport_ImportModule("cyrenderer");
@@ -127,15 +102,10 @@ int main(int argc, char * argv[]) {
 
     syslog(LOG_INFO, "Astrid renderer... is now rendering!\n");
 
-#ifdef ASTRID_USE_FIFO_QUEUES
-    if((playqd = astrid_playq_open(instrument_basename)) < 0) {
-#else
     if((playqd = astrid_playq_open(instrument_basename)) == (mqd_t) -1) {
-#endif
         syslog(LOG_CRIT, "Could not open playq for instrument %s. Error: %s\n", instrument_basename, strerror(errno));
         goto lprender_cleanup;
     }
-
 
     syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument_basename, playqd);
 
@@ -147,11 +117,7 @@ int main(int argc, char * argv[]) {
         memset(msg.msg, 0, LPMAXMSG);
 
         /*syslog(LOG_DEBUG, "Waiting for %s playqueue messages...\n", instrument_basename);*/
-#ifdef ASTRID_USE_FIFO_QUEUES
-        if(astrid_playq_read(playqd, &msg) < 0) {
-#else
         if(astrid_playq_read(playqd, &msg) == (mqd_t) -1) {
-#endif
             syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument_basename, errno, strerror(errno));
             goto lprender_cleanup;
         }
@@ -196,14 +162,9 @@ int main(int argc, char * argv[]) {
     }
 
 lprender_cleanup:
-    free(python_path);
     syslog(LOG_INFO, "Astrid renderer shutting down...\n");
     Py_Finalize();
-#ifdef ASTRID_USE_FIFO_QUEUES
-    if(playqd != -1) astrid_playq_close(playqd);
-#else
     if(playqd != (mqd_t) -1) astrid_playq_close(playqd);
-#endif
     closelog();
     return 0;
 }

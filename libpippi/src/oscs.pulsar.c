@@ -104,7 +104,10 @@ lppulsarosc_t * create_pulsarosc(
     p->window_lengths = window_lengths;
 
     p->burst = NULL;
+    p->burst_pos = 0;
+    p->burst_size = 0;
 
+    p->pulse_edge = 0;
     p->saturation = 1.f;
     p->pulsewidth = 1.f;
     p->samplerate = DEFAULT_SAMPLERATE;
@@ -129,6 +132,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     assert(p->num_windows > 0);
 #endif
 
+    assert(p->samplerate > 0);
     wavetable_index = 0;
     window_index = 0;
     isr = 1.f / (lpfloat_t)p->samplerate;
@@ -143,7 +147,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     /* Look up the burst value -- NULL burst is always on. 
      * In other words, bursting only happens when the burst 
      * table is non-NULL. Otherwise all pulses sound. */
-    if(p->burst != NULL) burst = p->burst[p->burst_pos % p->burst_size];
+    if(p->burst != NULL && p->burst_size > 0) burst = p->burst[p->burst_pos % p->burst_size];
 
     /* Override burst if desaturation is triggered */
     if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
@@ -201,7 +205,11 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     p->window_morph += isr * p->window_morph_freq;
     p->phase += isr * p->freq;
     if(p->burst != NULL && p->phase >= 1.f) p->burst_pos += 1;
-    
+
+    // Set the pulse boundry flag so external programs can know
+    // about phase boundries (and do things when they happen)
+    p->pulse_edge = (p->phase >= 1.f);
+
     // wrap phases
     while(p->phase >= 1.f) p->phase -= 1.f;
     while(p->wavetable_morph >= 1.f) p->wavetable_morph -= 1.f;

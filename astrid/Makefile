@@ -21,13 +21,14 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 	$(LPDIR)/src/mir.c \
 	$(LPDIR)/src/soundfile.c \
 	$(LPDIR)/src/spectral.c \
-	$(LPDIR)/src/pippicore.c
+	$(LPDIR)/src/pippicore.c \
+ 	src/jack_helpers.c
 
 LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
 LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0
-LPLIBS = -lm -ldl -lpthread -lrt
+LPLIBS = -lm -ldl -lpthread -lrt -ljack
 
 clean:
 	rm -rf build/*
@@ -46,7 +47,7 @@ astrid-renderer:
 
 	echo "Building astrid renderer...";
 	cython cython/cyrenderer.pyx
-	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-renderer
+	$(CC) -g -std=gnu2x -Wall -Wextra -fno-strict-aliasing $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-renderer
 
 astrid-midilog:
 	mkdir -p build
@@ -74,7 +75,7 @@ astrid-q:
 	echo "Building astrid queue reader...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qreader.c $(LPLIBS) -o build/astrid-qreader
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qserver.c $(LPLIBS) -o build/astrid-qserver
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/qmessage.c $(LPLIBS) -o build/astrid-qmessage
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/msg.c $(LPLIBS) -o build/astrid-msg
 
 astrid-renderer-macos:
 	mkdir -p build
@@ -87,7 +88,7 @@ astrid-dac:
 	mkdir -p build
 
 	echo "Building astrid dac...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c src/jack_helpers.c $(LPLIBS) -ljack -lhiredis -o build/astrid-dac
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
 
 astrid-seq:
 	mkdir -p build
@@ -108,7 +109,6 @@ astrid-devices:
 	mkdir -p build
 
 	echo "Building astrid device tools...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getdeviceids.c $(LPLIBS) -o build/astrid-getdeviceids
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/setdeviceid.c $(LPLIBS) -o build/astrid-setdeviceid
 
 astrid-voicestatus:
@@ -121,7 +121,7 @@ astrid-adc:
 	mkdir -p build
 
 	echo "Building astrid JACK adc and tools...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc.c src/jack_helpers.c $(LPLIBS) -ljack -o build/astrid-adc
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc.c $(LPLIBS) -o build/astrid-adc
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadccreate.c $(LPLIBS) -o build/astrid-adccreate
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwriteval.c $(LPLIBS) -o build/astrid-adcwriteval
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwritewav.c $(LPLIBS) -o build/astrid-adcwritewav
@@ -135,6 +135,12 @@ astrid-seriallistener:
 
 	echo "Building astrid serial listener...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seriallistener.c $(LPLIBS) -o build/astrid-seriallistener
+
+astrid-pulsar:
+	mkdir -p build
+
+	echo "Building astrid pulsar...";
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 
 follow-log:
 ifeq ($(shell uname),Darwin)

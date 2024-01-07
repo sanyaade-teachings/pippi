@@ -89,6 +89,13 @@ cdef extern from "astrid.h":
         char bank_lsb
         char channel
 
+    ctypedef struct lpserialevent_t:
+        double onset
+        double now
+        lpmsg_t msg
+        int group
+        int device
+
     int lpadc_create()
     int lpadc_destroy()
     int lpadc_write_block(float * block, size_t blocksize_in_samples)
@@ -122,6 +129,10 @@ cdef class MessageEvent:
 cdef class MidiEvent:
     cdef lpmidievent_t * event
     cpdef int schedule(MidiEvent self, double now)
+
+cdef class SerialEvent:
+    cdef lpserialevent_t * event
+    cpdef int schedule(SerialEvent self, double now)
 
 cdef class SessionParamBucket:
     cdef object _bus

@@ -134,18 +134,20 @@ cdef class MessageEvent:
 cdef class SerialEvent:
     def __cinit__(self,
             double onset,
-            char msg,
-            object value=None,
+            lpmsg_t msg,
+            int group=0, 
+            int device=0
         ):
 
         self.event = <lpserialevent_t *>calloc(1, sizeof(lpserialevent_t))
         self.event.onset = onset
         self.event.now = 0
-        self.event.length = length
-        self.event.type = type
-        self.event.note = note
+        self.event.msg = msg
+        self.event.group = group
+        self.event.device = device
 
-    cpdef int schedule(MidiEvent self, double now):
+    cpdef int schedule(SerialEvent self, double now):
+        """
         self.event.now = now
         cdef int qfd = midi_triggerq_open()
         if qfd < 0:
@@ -159,6 +161,7 @@ cdef class SerialEvent:
         if midi_triggerq_close(qfd) < 0:
             logger.exception('Error closing MIDI fifo q')
             return -1
+        """
 
         return 0 
 

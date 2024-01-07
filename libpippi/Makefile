@@ -49,6 +49,9 @@ fx-examples:
 osc-examples:
 	mkdir -p build renders
 
+	echo "Building shapeosc.c example...";
+	gcc $(LPFLAGS) examples/shapeosc.c $(LPSOURCES) $(LPLIBS) -o build/shapeosc
+
 	echo "Building pulsarosc.c example...";
 	gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
 

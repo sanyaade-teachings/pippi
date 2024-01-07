@@ -13,7 +13,7 @@ int main(int argc, char * argv[]) {
     ssize_t bytesread;
     char * tty_path;
 
-    lpserial_param_t param = {0};
+    lpmsg_t msg = {0};
 
     openlog("astrid-seriallistener", LOG_PID, LOG_USER);
 
@@ -48,49 +48,13 @@ int main(int argc, char * argv[]) {
     }
 
     while(serial_listener_is_running) {
-        bytesread = read(tty, &param, sizeof(lpserial_param_t));
-        if(bytesread != sizeof(lpserial_param_t)) {
+        bytesread = read(tty, &msg, sizeof(lpmsg_t));
+        if(bytesread != sizeof(lpmsg_t)) {
             syslog(LOG_ERR, "serial listener read %ld bytes on device %s...\n", bytesread, tty_path);
             continue;
         }
 
-        if(param.type == LPSERIAL_PARAM_SHUTDOWN) break;
-
-        /*
-        if (param.type == LPSERIAL_PARAM_BOOL) {
-            if(lpserial_setbool(param.device, param.id, param.value.as_int) < 0) {
-                syslog(LOG_ERR, "Could not set ctl value...\n");
-            }
-        } else if (param.type == LPSERIAL_PARAM_CTL) {
-            if(lpserial_setctl(param.device, param.id, param.value.as_lpfloat_t) < 0) {
-                syslog(LOG_ERR, "Could not set ctl value...\n");
-            }
-        } else if (param.type == LPSERIAL_PARAM_SIG) {
-            if(lpserial_setsig(param.device, param.id, param.value.as_lpfloat_t) < 0) {
-                syslog(LOG_ERR, "Could not set ctl value...\n");
-            }
-        } else if (param.type == LPSERIAL_PARAM_NUM) {
-            if(lpserial_setnum(param.device, param.id, param.value.as_size_t) < 0) {
-                syslog(LOG_ERR, "Could not set ctl value...\n");
-            }
-        } else if (param.type == LPSERIAL_PARAM_CC) {
-            if(lpmidi_setcc(param.device, param.id, param.value.as_int) < 0) {
-                syslog(LOG_ERR, "Could not set cc value...\n");
-            }
-        } else if(param.type == LPSERIAL_PARAM_NOTEON) {
-            if(lpmidi_setnote(param.id, param.value.as_int, param.device) < 0) {
-                syslog(LOG_ERR, "Could not set note...\n");
-            }
-
-            if(lpmidi_trigger_notemap(param.device, param.id) < 0) {
-                syslog(LOG_ERR, "Could not trigger notemap...\n");
-            }
-        } else if(param.type == LPSERIAL_PARAM_NOTEOFF) {
-            if(lpmidi_setnote(param.id, param.value.as_int, param.device) < 0) {
-                syslog(LOG_ERR, "Could not set note...\n");
-            }
-        }
-        */
+        if(msg.type == LPMSG_SHUTDOWN) break;
     }
 
     close(tty);

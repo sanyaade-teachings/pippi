@@ -26,7 +26,7 @@ static int lpsessiondb_callback_debug(__attribute__((unused)) void * unused, int
     return 0;
 }
 
-static int lpsessiondb_callback_noop(__attribute__((unused)) void * unused, __attribute__((unused)) int argc, __attribute__((unused)) char ** argv, __attribute__((unused)) char ** colname) {
+static int __attribute__((unused)) lpsessiondb_callback_noop(__attribute__((unused)) void * unused, __attribute__((unused)) int argc, __attribute__((unused)) char ** argv, __attribute__((unused)) char ** colname) {
     return 0;
 }
 
@@ -228,7 +228,7 @@ ssize_t lpcounter_read_and_increment(lpcounter_t * c) {
     sop.sem_op = -1;
     sop.sem_flg = 0;
     if(semop(c->semid, &sop, 1) < 0) {
-        syslog(LOG_ERR, "lpcounter_read_and_increment semop. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "lpcounter_read_and_increment semop aquire. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -248,7 +248,7 @@ ssize_t lpcounter_read_and_increment(lpcounter_t * c) {
     sop.sem_op = 1;
     sop.sem_flg = 0;
     if(semop(c->semid, &sop, 1) < 0) {
-        syslog(LOG_ERR, "lpcounter_read_and_increment semop. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "lpcounter_read_and_increment semop release. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -1356,25 +1356,74 @@ int lpmidi_trigger_notemap(int device_id, int note) {
 /* VOICES
  * ******/
 ssize_t astrid_get_voice_id() {
-    lpcounter_t c;
-    ssize_t voice_id = 0;
+    int fd, shmfd;
+    sem_t * sem;
+    void * shmaddr;
+    size_t voice_id=0, current_voice_id=0;
 
-    if((c.semid = lpipc_getid(LPVOICE_ID_SEMID)) < 0) {
-        syslog(LOG_ERR, "Problem trying to get voice ID sempahore handle when constructing play message from command input\n");
-        return -1;
+    if(access("/tmp/astridvoiceid", F_OK) == 0) {
+        /* Open the semaphore */
+        if((sem = sem_open("/astridvoiceid", 0)) == SEM_FAILED) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to open semaphore. Error: %s\n", strerror(errno));
+            return -1;
+        }
+
+        /* Aquire a lock on the semaphore */
+        if(sem_wait(sem) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to decrementsem. Error: %s\n", strerror(errno));
+            return -1;
+        }
+
+        /* Get the file descriptor for the shared memory segment */
+        if((fd = shm_open("/tmp/astridvoiceid", O_RDWR, LPIPC_PERMS)) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id Could not open shared memory segment. (%d) %s\n", errno, strerror(errno));
+            return -1;
+        }
+
+        /* Attach the shared memory to the pointer */
+        if((shmaddr = (void*)mmap(NULL, sizeof(size_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+            syslog(LOG_ERR, "astrid_get_voice_id Could not mmap shared memory segment. (%d) %s\n", errno, strerror(errno));
+            return -1;
+        }
+
+        /* Read and increment the voice ID */
+        memcpy(&current_voice_id, shmaddr, sizeof(size_t));
+        voice_id = current_voice_id + 1;
+
+        /* Write the new voice ID */
+        memcpy(shmaddr, &voice_id, sizeof(size_t));
+
+        /* Release the lock on the semaphore */
+        if(sem_post(sem) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to unlock. Error: (%d) %s\n", errno, strerror(errno));
+            return -1;
+        }
+        
+        /* Clean up sempahore resources */
+        if(sem_close(sem) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id sem_close Could not close semaphore\n");
+            return -1;
+        }
+    } else {
+        /* Create the POSIX semaphore and initialize it to 1 */
+        if(sem_open("/astridvoiceid", O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to create semaphore %d. Error: %s\n", errno, strerror(errno));
+            return -1;
+        }
+
+        /* Create the POSIX shared memory segment */
+        if((shmfd = shm_open("/tmp/astridvoiceid", O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id Could not create shared memory segment. (%d) %s\n", errno, strerror(errno));
+            return -1;
+        }
+
+        if(ftruncate(shmfd, sizeof(size_t)) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id Could not truncate shared memory segment. (%d) %s\n", errno, strerror(errno));
+            return -1;
+        }
     }
 
-    if((c.shmid = lpipc_getid(LPVOICE_ID_SHMID)) < 0) {
-        syslog(LOG_ERR, "Problem trying to get voice ID shared memory handle when constructing play message from command input\n");
-        return -1;
-    }
-
-    if((voice_id = lpcounter_read_and_increment(&c)) < 0) {
-        syslog(LOG_ERR, "Problem trying to get voice ID when constructing play message from command input\n");
-        return -1;
-    }
-
-    return voice_id;
+    return current_voice_id;
 }
 
 
@@ -1481,163 +1530,6 @@ lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg) {
 /* MESSAGE
  * QUEUES
  * ******/
-#ifdef ASTRID_USE_FIFO_QUEUES
-int astrid_playq_open(char * instrument_name) {
-    int qfd;
-    ssize_t qname_length;
-    char qname[LPMAXQNAME] = {0};
-
-    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, instrument_name) + 1;
-    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
-    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
-
-    umask(0);
-    if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        syslog(LOG_ERR, "astrid_playq_open mkfifo: Error creating play queue FIFO. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if((qfd = open(qname, O_RDWR)) < 0) {
-        syslog(LOG_ERR, "astrid_playq_open open: Error opening play queue FIFO. Error: %s\n", strerror(errno));
-        return -1;
-    };
-
-    return qfd;
-}
-
-int astrid_playq_close(int qfd) {
-    if(close(qfd) == -1) {
-        syslog(LOG_ERR, "astrid_playq_close close: Error closing play queue FIFO. Error: %s\n", strerror(errno));
-        return -1; 
-    }
-
-    return 0;
-}
-
-int astrid_playq_read(int qfd, lpmsg_t * msg) {
-    ssize_t read_result;
-    read_result = read(qfd, msg, sizeof(lpmsg_t));
-    if(read_result == 0) {
-        syslog(LOG_DEBUG, "The play queue (%d) has been closed. (EOF)\n", qfd);
-        return -1;
-    }
-
-    if(read_result < 0 && errno == EINTR) {
-        syslog(LOG_INFO, "The play queue (%d) got EINTR, retrying.\n", qfd);
-        return astrid_playq_read(qfd, msg);
-    }
-
-    if(read_result < 0) {
-        syslog(LOG_INFO, "The play queue (%d) failed to read from the fifo. Error: (%d) %s\n", qfd, errno, strerror(errno));
-        return -1;
-    }
-
-    if(read_result != sizeof(lpmsg_t)) {
-        syslog(LOG_INFO, "The play queue (%d) returned %d bytes. Expecting sizeof(lpmsg_t)==%d\n", qfd, (int)read_result, (int)sizeof(lpmsg_t));
-        return -1;
-    }
-
-    return 0;
-}
-
-int send_play_message(lpmsg_t msg) {
-    char qname[LPMAXQNAME] = {0};
-    ssize_t qname_length;
-    int qfd;
-
-    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, msg.instrument_name) + 1;
-    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
-    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, msg.instrument_name);
-
-    umask(0);
-    if(mkfifo(qname, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        syslog(LOG_ERR, "send_play_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    qfd = open(qname, O_WRONLY);
-
-    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
-        syslog(LOG_ERR, "send_play_message write: Could not write to q. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if(close(qfd) == -1) {
-        syslog(LOG_ERR, "send_play_message close: Error closing play q. Error: %s\n", strerror(errno));
-        return -1; 
-    }
-
-    return 0;
-}
-
-int send_message(lpmsg_t msg) {
-    int qfd;
-
-    umask(0);
-    if(mkfifo(ASTRID_MSGQ_PATH, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        syslog(LOG_ERR, "send_message mkfifo: Error creating named pipe. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if((qfd = open(ASTRID_MSGQ_PATH, O_WRONLY)) < 0) {
-        syslog(LOG_ERR, "send_message open: Could not open q. Error: %s\n", strerror(errno));
-    }
-
-    if(write(qfd, &msg, sizeof(lpmsg_t)) != sizeof(lpmsg_t)) {
-        syslog(LOG_ERR, "send_message write: Could not write to q. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if(close(qfd) == -1) {
-        syslog(LOG_ERR, "send_message close: Error closing play q. Error: %s\n", strerror(errno));
-        return -1; 
-    }
-
-    return 0;
-}
-
-int astrid_msgq_open() {
-    int qfd;
-
-    umask(0);
-    if(mkfifo(ASTRID_MSGQ_PATH, S_IRUSR | S_IWUSR | S_IWGRP) == -1 && errno != EEXIST) {
-        syslog(LOG_ERR, "astrid_msgq_open mkfifo: Error creating msg queue FIFO. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if((qfd = open(ASTRID_MSGQ_PATH, O_RDWR)) < 0) {
-        syslog(LOG_ERR, "astrid_msgq_open open: Error opening msg queue FIFO. Error: %s\n", strerror(errno));
-        return -1;
-    };
-
-    return qfd;
-}
-
-int astrid_msgq_close(int qfd) {
-    if(close(qfd) == -1) {
-        syslog(LOG_ERR, "astrid_msgq_close close: Error closing msg queue FIFO. Error: %s\n", strerror(errno));
-        return -1; 
-    }
-
-    return 0;
-}
-
-int astrid_msgq_read(int qfd, lpmsg_t * msg) {
-    ssize_t read_result;
-    read_result = read(qfd, msg, sizeof(lpmsg_t));
-    if(read_result == 0) {
-        syslog(LOG_DEBUG, "The msg queue (%d) has been closed. (EOF)\n", qfd);
-        return -1;
-    }
-
-    if(read_result != sizeof(lpmsg_t)) {
-        syslog(LOG_INFO, "The msg queue (%d) returned %d bytes. Expecting sizeof(lpmsg_t)==%d\n", qfd, (int)read_result, (int)sizeof(lpmsg_t));
-        return -1;
-    }
-
-    return 0;
-}
-#else
 int send_play_message(lpmsg_t msg) {
     mqd_t mqd;
     ssize_t qname_length;
@@ -1782,7 +1674,6 @@ int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg) {
 
     return 0;
 }
-#endif
 
 int astrid_get_playback_device_id() {
     int device_id;
@@ -1855,6 +1746,10 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
 
         case TRIGGER_MESSAGE:
             msg->type = LPMSG_TRIGGER;
+            break;
+
+        case SERIAL_MESSAGE:
+            msg->type = LPMSG_SERIAL;
             break;
 
         case LOAD_MESSAGE:
@@ -2407,5 +2302,185 @@ void scheduler_cleanup_nursery(lpscheduler_t * s) {
             current = (lpevent_t *)current->next;        
         }
     }
+}
+
+int send_serial_message(lpmsg_t msg) {
+    int fp;
+    ssize_t bytes_written;
+
+    if((fp = open(msg.instrument_name, O_WRONLY)) < 0) {
+        syslog(LOG_CRIT, "Could not open %s for writing\n", msg.instrument_name);
+        return -1;
+    }
+
+    if((bytes_written = write(fp, msg.msg, strlen(msg.msg))) < 0) {
+        syslog(LOG_CRIT, "Could not write serial msg %s\n", msg.msg);
+        close(fp);
+        return -1;
+    }
+
+    if(close(fp) < 0) {
+        syslog(LOG_CRIT, "Could not close serial connection %s\n", msg.instrument_name);
+        return -1;
+    }
+
+    return 0;
+}
+
+/** dac / adc **/
+int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+    jack_nframes_t i;
+    jack_default_audio_sample_t * out;
+    jack_default_audio_sample_t * inp;
+    int c;
+    int channels = instrument->channels;
+
+    float output_channels[channels * nframes];
+    float input_channels[channels * nframes];
+    for(c=0; c < instrument->channels; c++) {
+        inp = jack_port_get_buffer(instrument->inports[c], nframes);
+        for(i=0; i < nframes; i++) {
+            input_channels[i * channels + c] = inp[i];
+        }
+    }
+
+    instrument->callback(
+        channels, 
+        (size_t)nframes, 
+        (float *)input_channels, (float *)output_channels,
+        (void *)instrument->context
+    );
+
+    for(c=0; c < channels; c++) {
+        out = jack_port_get_buffer(instrument->outports[c], nframes);
+        for(i=0; i < nframes; i++) {
+            out[i] = output_channels[i * channels + c];
+        }
+    }
+
+    return 0;
+}
+
+int start_astrid_instrument(const char * name, int channels, lpinstrument_t * instrument) {
+    struct sigaction shutdown_action;
+    jack_status_t jack_status;
+    jack_options_t jack_options = JackNullOption;
+    const char ** ports;
+    char outport_name[50];
+    char inport_name[50];
+    int c = 0;
+
+    instrument->name = name;
+    instrument->channels = channels;
+
+    openlog(name, LOG_PID, LOG_USER);
+
+    /* Set shutdown signal handlers */
+    shutdown_action.sa_handler = instrument->shutdown;
+    sigemptyset(&shutdown_action.sa_mask);
+    shutdown_action.sa_flags = SA_RESTART; /* Prevent open, read, write etc from EINTR */
+
+    if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
+        syslog(LOG_ERR, "%s Could not init SIGINT signal handler. Error: %s\n", name, strerror(errno));
+        exit(1);
+    }
+
+    if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
+        syslog(LOG_ERR, "%s Could not init SIGTERM signal handler. Error: %s\n", name, strerror(errno));
+        exit(1);
+    }
+
+    instrument->inports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
+    instrument->outports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
+
+    /* Set up JACK */
+    instrument->jack_client = jack_client_open(name, jack_options, &jack_status, NULL);
+    print_jack_status(jack_status);
+    if(instrument->jack_client == NULL) {
+        syslog(LOG_ERR, "%s Could not open jack client. Client is NULL: %s\n", name, strerror(errno));
+        if((jack_status & JackServerFailed) == JackServerFailed) {
+            syslog(LOG_ERR, "%s Could not open jack client. Jack server failed with status %2.0x\n", name, jack_status);
+        } else {
+            syslog(LOG_ERR, "%s Could not open jack client. Unknown error: %s\n", name, strerror(errno));
+        }
+        goto astrid_instrument_shutdown_with_error;
+    }
+
+    if((jack_status & JackServerStarted) == JackServerStarted) {
+        syslog(LOG_INFO, "Jack server started!\n");
+        goto astrid_instrument_shutdown_with_error;
+    }
+
+    jack_set_process_callback(instrument->jack_client, astrid_instrument_jack_callback, (void *)instrument);
+    for(c=0; c < channels; c++) {
+        snprintf(outport_name, sizeof(outport_name), "out%d", c);
+        instrument->outports[c] = jack_port_register(instrument->jack_client, outport_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+
+        snprintf(inport_name, sizeof(inport_name), "in%d", c);
+        instrument->inports[c] = jack_port_register(instrument->jack_client, inport_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+    }
+
+    for(c=0; c < channels; c++) {
+        if((instrument->outports[c] == NULL)) {
+            syslog(LOG_ERR, "No more JACK output ports available, shutting down...\n");
+            goto astrid_instrument_shutdown_with_error;
+        }
+
+        if((instrument->inports[c] == NULL)) {
+            syslog(LOG_ERR, "No more JACK input ports available, shutting down...\n");
+            goto astrid_instrument_shutdown_with_error;
+        }
+    }
+
+    if(jack_activate(instrument->jack_client) != 0) {
+        syslog(LOG_ERR, "%s Could not activate JACK client, shutting down...\n", name);
+        goto astrid_instrument_shutdown_with_error;
+    }
+
+    /* connect ports */
+    if((ports = jack_get_ports(instrument->jack_client, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
+		fprintf(stderr, "Cannot find any physical capture ports");
+		exit(1);
+	}
+
+    for(c=0; c < instrument->channels; c++) {
+        if(jack_connect(instrument->jack_client, ports[c], jack_port_name(instrument->inports[c]))) {
+            fprintf(stderr, "cannot connect input ports\n");
+        }
+    }
+
+	free(ports);
+	
+	if((ports = jack_get_ports(instrument->jack_client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
+		fprintf(stderr, "Cannot find any physical playback ports");
+		exit(1);
+	}
+
+    for(c=0; c < instrument->channels; c++) {
+        if(jack_connect(instrument->jack_client, jack_port_name(instrument->outports[c]), ports[c])) {
+            fprintf(stderr, "cannot connect output ports\n");
+        }
+    }
+
+	free(ports);
+
+    syslog(LOG_INFO, "%s is running...\n", name);
+    instrument->is_running = 1;
+
+    return 0;
+
+astrid_instrument_shutdown_with_error:
+    instrument->is_running = 0;
+    jack_client_close(instrument->jack_client);
+    closelog();
+    return 1;
+}
+
+int stop_astrid_instrument(lpinstrument_t * instrument) {
+    instrument->is_running = 0;
+    jack_client_close(instrument->jack_client);
+    closelog();
+    return 0;
 }
 

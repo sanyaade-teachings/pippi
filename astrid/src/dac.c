@@ -41,7 +41,6 @@ void * buffer_feed(__attribute__((unused)) void * arg) {
     double processing_time_so_far, onset_delay_in_seconds;
     double now = 0;
     struct timeval redis_timeout = {15, 0};
-    size_t callback_delay = 0;
 
     syslog(LOG_INFO, "Buffer feed starting up...\n");
     redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);

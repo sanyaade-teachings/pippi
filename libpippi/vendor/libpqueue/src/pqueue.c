@@ -229,14 +229,14 @@ pqueue_dump(pqueue_t *q,
             FILE *out,
             pqueue_print_entry_f print)
 {
-    int i;
+    size_t i;
 
     fprintf(stdout,"posn\tleft\tright\tparent\tmaxchild\t...\n");
     for (i = 1; i < q->size ;i++) {
         fprintf(stdout,
                 "%d\t%d\t%d\t%d\t%ul\t",
-                i,
-                left(i), right(i), parent(i),
+                (int)i,
+                (int)left(i), (int)right(i), (int)parent(i),
                 (unsigned int)maxchild(q, i));
         print(out, q->d[i]);
     }
@@ -244,14 +244,14 @@ pqueue_dump(pqueue_t *q,
 
 
 static void
-set_pos(void *d, size_t val)
+set_pos(__attribute__((unused)) void *d, __attribute__((unused)) size_t val)
 {
     /* do nothing */
 }
 
 
 static void
-set_pri(void *d, pqueue_pri_t pri)
+set_pri(__attribute__((unused)) void *d, __attribute__((unused)) pqueue_pri_t pri)
 {
     /* do nothing */
 }
@@ -284,14 +284,14 @@ pqueue_print(pqueue_t *q,
 static int
 subtree_is_valid(pqueue_t *q, int pos)
 {
-    if (left(pos) < q->size) {
+    if ((size_t)left(pos) < q->size) {
         /* has a left child */
         if (q->cmppri(q->getpri(q->d[pos]), q->getpri(q->d[left(pos)])))
             return 0;
         if (!subtree_is_valid(q, left(pos)))
             return 0;
     }
-    if (right(pos) < q->size) {
+    if ((size_t)right(pos) < q->size) {
         /* has a right child */
         if (q->cmppri(q->getpri(q->d[pos]), q->getpri(q->d[right(pos)])))
             return 0;

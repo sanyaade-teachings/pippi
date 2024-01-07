@@ -15,7 +15,6 @@
 int selected_row_index, x, y;
 
 int main() {
-    char * err = 0;
     sqlite3 * sessiondb;
     sqlite3_stmt * stmt;
     int width, height, i;
@@ -84,8 +83,8 @@ int main() {
                 break;
 
             case ENTER_KEY:
-                //mvprintw(NUM_ITEMS + 1, 0, "You selected %d: %s", items[highlight].num, items[highlight].name);
-                //clrtoeol();
+                mvprintw(1, 0, "width: %d", (int)width);
+                clrtoeol();
                 break;
 
             case 'q':

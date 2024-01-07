@@ -1,6 +1,6 @@
 #include "astrid.h"
 
-int main(int argc, char * argv[]) {
+int main() {
     lpcounter_t c;
     int voice_id;
 

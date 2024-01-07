@@ -152,20 +152,12 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
 
 void * message_feed(__attribute__((unused)) void * arg) {
     double seq_delay;
-#ifdef ASTRID_USE_FIFO_QUEUES
-    int qd;
-#else
     mqd_t qd;
-#endif
     lpmsg_t msg = {0};
     lpmsgpq_node_t * d;
     double now = 0;
 
-#ifdef ASTRID_USE_FIFO_QUEUES
-    if((qd = astrid_msgq_open()) < 0) {
-#else
     if((qd = astrid_msgq_open()) == (mqd_t) -1) {
-#endif
         syslog(LOG_CRIT, "Could not open msgq for message relay: %s\n", strerror(errno));
         exit(1);        
     }
@@ -205,11 +197,7 @@ void * message_feed(__attribute__((unused)) void * arg) {
     }
 
     syslog(LOG_INFO, "lpmsg_t relay: Message relay shutting down...\n");
-#ifdef ASTRID_USE_FIFO_QUEUES
-    if(qd != -1) astrid_msgq_close(qd);
-#else
     if(qd != (mqd_t) -1) astrid_msgq_close(qd);
-#endif
 
     return 0;
 }

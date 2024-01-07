@@ -21,6 +21,9 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <jack/jack.h>
+#include "jack_helpers.h"
+
 #include "pippi.h"
 
 #define NUM_RENDERERS 10
@@ -33,13 +36,8 @@
 #define ASTRID_MQ_MAXMSG 10
 
 /* queue paths */
-#ifdef ASTRID_USE_FIFO_QUEUES
-#define LPPLAYQ "/tmp/astridq" /* the path prefix used for instrument play queues */
-#define ASTRID_MSGQ_PATH "/tmp/astrid-msgq"
-#else
 #define LPPLAYQ "/astridq"
 #define ASTRID_MSGQ_PATH "/astrid-msgq"
-#endif
 #define LPMAXQNAME (12 + 1 + LPMAXNAME)
 
 #define ASTRID_SESSIONDB_PATH "/tmp/astrid_session.db"
@@ -53,6 +51,7 @@
 
 #define PLAY_MESSAGE 'p'
 #define TRIGGER_MESSAGE 't'
+#define SERIAL_MESSAGE 'b'
 #define STOP_MESSAGE 's'
 #define LOAD_MESSAGE 'l'
 #define SHUTDOWN_MESSAGE 'k'
@@ -105,6 +104,7 @@ enum LPMessageTypes {
     LPMSG_EMPTY,
     LPMSG_PLAY,
     LPMSG_TRIGGER,
+    LPMSG_SERIAL,
     LPMSG_STOP_INSTRUMENT,
     LPMSG_STOP_VOICE,
     LPMSG_LOAD,
@@ -118,9 +118,19 @@ typedef struct lpcounter_t {
     int semid;
 } lpcounter_t;
 
-/* The order of the members of this struct matters, 
- * since it must fit into exactly PIPE_BUF bytes. 
- * The members are arranged to eliminate padding. */
+typedef struct lpinstrument_t {
+    const char * name;
+    int channels;
+    volatile int is_running;
+    lpfloat_t samplerate;
+    jack_port_t ** inports;
+    jack_port_t ** outports;
+    jack_client_t * jack_client;
+    void * context;
+    void (*callback)(int channels, size_t blocksize, float * input, float * output, void * ctx);
+    void (*shutdown)(int sig);
+} lpinstrument_t;
+
 typedef struct lpmsg_t {
     /* Timestamp when the message was initiated. 
      *
@@ -209,25 +219,14 @@ enum LPSerialParamTypes {
     NUM_LPSERIAL_PARAMS
 };
 
-typedef union {
-    ssize_t as_ssize_t;
-    size_t as_size_t;
-    double as_double_t;
-    float as_float_t;
-    int as_int_t;
-    unsigned char as_char;
-    bool as_bool_t;
-} lpserial_param_value_t;
-
 typedef struct lpserialevent_t {
-    size_t id;
-    unsigned int flag : 1;
-    unsigned int type : 31;
+    double onset;
+    double now;
+    double length;
+    lpmsg_t msg;
     int group;
     int device;
-    lpserial_param_value_t value;
 } lpserialevent_t;
-
 
 /* When instrument scripts produce MIDI triggers, 
  * they schedule them (with the onset value, which 
@@ -334,18 +333,10 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
 ssize_t astrid_get_voice_id();
 
 int send_message(lpmsg_t msg);
+int send_serial_message(lpmsg_t msg);
 int send_play_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
 
-#ifdef ASTRID_USE_FIFO_QUEUES
-int astrid_playq_open(char * instrument_name);
-int astrid_playq_read(int qfd, lpmsg_t * msg);
-int astrid_playq_close(int qfd);
-
-int astrid_msgq_open();
-int astrid_msgq_close(int qfd);
-int astrid_msgq_read(int qfd, lpmsg_t * msg);
-#else
 mqd_t astrid_playq_open(char * instrument_name);
 int astrid_playq_read(mqd_t mqd, lpmsg_t * msg);
 int astrid_playq_close(mqd_t mqd);
@@ -353,7 +344,6 @@ int astrid_playq_close(mqd_t mqd);
 mqd_t astrid_msgq_open();
 int astrid_msgq_close(mqd_t mqd);
 int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg);
-#endif
 
 
 /* TODO add POSIX message queues for these too */
@@ -401,6 +391,8 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
+int start_astrid_instrument(const char * name, int channels, lpinstrument_t * instrument);
+int stop_astrid_instrument(lpinstrument_t * instrument);
 
 #ifdef LPSESSIONDB
 #include <sqlite3.h>
