@@ -2330,32 +2330,26 @@ int send_serial_message(lpmsg_t msg) {
 /** dac / adc **/
 int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
-    jack_nframes_t i;
-    jack_default_audio_sample_t * out;
-    jack_default_audio_sample_t * inp;
+    float * output_channels[instrument->channels];
+    float * input_channels[instrument->channels];
+    size_t i;
     int c;
-    int channels = instrument->channels;
 
-    float output_channels[channels * nframes];
-    float input_channels[channels * nframes];
     for(c=0; c < instrument->channels; c++) {
-        inp = jack_port_get_buffer(instrument->inports[c], nframes);
-        for(i=0; i < nframes; i++) {
-            input_channels[i * channels + c] = inp[i];
-        }
+        input_channels[c] = (float *)jack_port_get_buffer(instrument->inports[c], nframes);
+        output_channels[c] = (float *)jack_port_get_buffer(instrument->outports[c], nframes);
     }
 
     instrument->callback(
-        channels, 
+        instrument->channels, 
         (size_t)nframes, 
-        (float *)input_channels, (float *)output_channels,
+        input_channels, output_channels,
         (void *)instrument->context
     );
 
-    for(c=0; c < channels; c++) {
-        out = jack_port_get_buffer(instrument->outports[c], nframes);
-        for(i=0; i < nframes; i++) {
-            out[i] = output_channels[i * channels + c];
+    for(c=0; c < instrument->channels; c++) {
+        for(i=0; i < (size_t)nframes; i++) {
+            output_channels[c][i] = fmax(-1.f, fmin(output_channels[c][i], 1.f));
         }
     }
 

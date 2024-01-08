@@ -127,7 +127,7 @@ typedef struct lpinstrument_t {
     jack_port_t ** outports;
     jack_client_t * jack_client;
     void * context;
-    void (*callback)(int channels, size_t blocksize, float * input, float * output, void * ctx);
+    void (*callback)(int channels, size_t blocksize, float ** input, float ** output, void * ctx);
     void (*shutdown)(int sig);
 } lpinstrument_t;
 

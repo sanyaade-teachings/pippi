@@ -96,24 +96,25 @@ lppulsarosc_t * create_pulsarosc(
     p->num_wavetables = num_wavetables;
     p->wavetable_onsets = wavetable_onsets;
     p->wavetable_lengths = wavetable_lengths;
+    p->wavetable_morph_freq = .12f;
 
     p->windows = windows;
     p->window_length = window_length;
     p->num_windows = num_windows;
     p->window_onsets = window_onsets;
     p->window_lengths = window_lengths;
+    p->window_morph_freq = .12f;
 
     p->burst = NULL;
     p->burst_pos = 0;
     p->burst_size = 0;
 
     p->pulse_edge = 0;
+    p->phase = 0.f;
     p->saturation = 1.f;
     p->pulsewidth = 1.f;
     p->samplerate = DEFAULT_SAMPLERATE;
     p->freq = 220.0;
-    p->wavetable_morph_freq = .12f;
-    p->window_morph_freq = .12f;
 
     return p;
 }
@@ -153,8 +154,6 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
         burst = 0; 
     }
-
-    //printf("pw=%f/ipw=%f\tburst=%d\tburst_pos=%d\n", (float)p->pulsewidth, (float)ipw, (int)burst, (int)p->burst_pos);
 
     /* If there's a non-zero pulsewidth, and the burst value is 1, 
      * then syntesize a pulse */
@@ -204,6 +203,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     p->wavetable_morph += isr * p->wavetable_morph_freq;
     p->window_morph += isr * p->window_morph_freq;
     p->phase += isr * p->freq;
+
     if(p->burst != NULL && p->phase >= 1.f) p->burst_pos += 1;
 
     // Set the pulse boundry flag so external programs can know
@@ -211,7 +211,12 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     p->pulse_edge = (p->phase >= 1.f);
 
     // wrap phases
-    while(p->phase >= 1.f) p->phase -= 1.f;
+    if(p->phase < 0) {
+        while(p->phase < 0) p->phase += 1.f;
+    } else if(p->phase >= 1.f) {
+        while(p->phase >= 1.f) p->phase -= 1.f;
+    }
+
     while(p->wavetable_morph >= 1.f) p->wavetable_morph -= 1.f;
     while(p->window_morph >= 1.f) p->window_morph -= 1.f;
     if(p->burst_size > 0) while(p->burst_pos >= p->burst_size) p->burst_pos -= p->burst_size;
