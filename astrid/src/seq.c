@@ -225,7 +225,6 @@ int cleanup(pthread_t message_feed_thread, pthread_t message_scheduler_pq_thread
 
 int main() {
     struct sigaction shutdown_action;
-    lpcounter_t voice_id_counter;
     pthread_t message_feed_thread;
     pthread_t message_scheduler_pq_thread;
 
@@ -246,25 +245,6 @@ int main() {
     if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
         syslog(LOG_ERR, "Could not init SIGTERM signal handler. Error: %s\n", strerror(errno));
         exit(1);
-    }
-
-    if(!access(LPVOICE_ID_SEMID, F_OK)) {
-        /* Set up shared memory IPC for voice IDs */
-        if(lpcounter_create(&voice_id_counter) < 0) {
-            syslog(LOG_ERR, "Could not initialize voice ID shared memory. Error: %s\n", strerror(errno));
-            goto exit_with_error;
-        }
-
-        /* Store a reference to the shared memory in well known files */
-        if(lpipc_setid(LPVOICE_ID_SHMID, voice_id_counter.shmid) < 0) {
-            syslog(LOG_ERR, "Could not store voice ID shmid. Error: %s\n", strerror(errno));
-            goto exit_with_error;
-        }
-
-        if(lpipc_setid(LPVOICE_ID_SEMID, voice_id_counter.semid) < 0) {
-            syslog(LOG_ERR, "Could not store voice ID shmid. Error: %s\n", strerror(errno));
-            goto exit_with_error;
-        }
     }
 
     /* Allocate the pq message nodes */

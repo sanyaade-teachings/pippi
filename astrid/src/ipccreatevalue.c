@@ -6,5 +6,10 @@ int main() {
         return 1;
     }
 
+    if(lpipc_releasevalue("/tmp/ipcvalue-test") < 0) {
+        fprintf(stderr, "Could not release value\n");
+        return 1;
+    }
+
     return 0;
 }

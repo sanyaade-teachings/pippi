@@ -80,25 +80,7 @@
 #define LPADC_WRITEPOS_PATH "/tmp/astrid-adc-writepos"
 #define LPADC_BUFFER_PATH "/astrid-adc-buffer"
 
-/* deprecated */
-#define LPADC_HANDLE "/tmp/astrid_adcbuf_shmid"
-#define LPADC_BUFNAME "/lpadcbuf"
-
-#define LPVOICE_ID_SHMID "/tmp/astrid_voice_id_shmid"
-#define LPVOICE_ID_SEMID "/tmp/astrid_voice_id_semid"
-
 #define ASTRID_DEVICEID_PATH "/tmp/astrid_device_id"
-
-/* This struct is required for historical reasons by POSIX to be defined 
- * for system V semaphores. Astrid uses them for voice ID assignment. */
-union semun {
-    int val;
-    struct semid_ds * buf;
-    unsigned short * array;
-#if defined(__linux__)
-    struct seminfo * __buf;
-#endif
-};
 
 enum LPMessageTypes {
     LPMSG_EMPTY,

@@ -231,7 +231,6 @@ int cleanup(
 
 int main(int argc, char * argv[]) {
     struct sigaction shutdown_action;
-    lpcounter_t voice_id_counter;
     pthread_t buffer_feed_thread;
     jack_status_t jack_status;
     jack_options_t jack_options = JackNullOption;
@@ -279,23 +278,6 @@ int main(int argc, char * argv[]) {
     astrid_scheduler = scheduler_create(1, output_channels, ASTRID_SAMPLERATE);
 
     astrid_outports = (jack_port_t **)calloc(output_channels, sizeof(jack_port_t *));
-
-    /* Set up shared memory IPC for voice IDs */
-    if(lpcounter_create(&voice_id_counter) < 0) {
-        syslog(LOG_ERR, "%s Could not initialize voice ID shared memory. Error: %s\n", dac_name, strerror(errno));
-        goto exit_with_error;
-    }
-
-    /* Store a reference to the shared memory in well known files */
-    if(lpipc_setid(LPVOICE_ID_SHMID, voice_id_counter.shmid) < 0) {
-        syslog(LOG_ERR, "%s Could not store voice ID shmid. Error: %s\n", dac_name, strerror(errno));
-        goto exit_with_error;
-    }
-
-    if(lpipc_setid(LPVOICE_ID_SEMID, voice_id_counter.semid) < 0) {
-        syslog(LOG_ERR, "%s Could not store voice ID shmid. Error: %s\n", dac_name, strerror(errno));
-        goto exit_with_error;
-    }
 
     /* Initialize the sessiondb */
     if(lpsessiondb_create(&sessiondb) < 0) {

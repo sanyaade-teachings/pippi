@@ -215,103 +215,6 @@ int lpsessiondb_mark_voice_stopped(sqlite3 * db, int voice_id, size_t count) {
 
 #endif
 
-/* THREAD SAFE
- * COUNTER TOOLS
- * *************/
-ssize_t lpcounter_read_and_increment(lpcounter_t * c) {
-    struct sembuf sop;
-    size_t * counter;
-    size_t counter_value;
-
-    /* Aquire lock */
-    sop.sem_num = 0;
-    sop.sem_op = -1;
-    sop.sem_flg = 0;
-    if(semop(c->semid, &sop, 1) < 0) {
-        syslog(LOG_ERR, "lpcounter_read_and_increment semop aquire. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Read the current value */
-    counter = shmat(c->shmid, NULL, 0);
-    counter_value = *counter;
-
-    if(counter_value == SIZE_MAX) {
-        counter_value = 0;
-    }
-
-    /* Increment the counter */
-    *counter += 1;
-
-    /* Release lock */
-    sop.sem_num = 0;
-    sop.sem_op = 1;
-    sop.sem_flg = 0;
-    if(semop(c->semid, &sop, 1) < 0) {
-        syslog(LOG_ERR, "lpcounter_read_and_increment semop release. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    return counter_value;
-}
-
-int lpcounter_destroy(lpcounter_t * c) {
-    union semun dummy;
-
-    /* Remove the semaphore and shared memory counter */
-    if(shmctl(c->shmid, IPC_RMID, NULL) < 0) {
-        syslog(LOG_ERR, "lpcounter_destroy shmctl. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if(semctl(c->semid, 0, IPC_RMID, dummy) < 0) {
-        syslog(LOG_ERR, "lpcounter_destroy semctl. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Don't need to free the struct since it's just two 
-     * ints on the stack... */
-    return 0;
-}
-
-int lpcounter_create(lpcounter_t * c) {
-    size_t * counter;
-    union semun arg;
-
-    /* Create the shared memory space for the counter value */
-    c->shmid = shmget(IPC_PRIVATE, sizeof(size_t), IPC_CREAT | LPIPC_PERMS);
-    if (c->shmid < 0) {
-        syslog(LOG_ERR, "lpcounter_create shmget. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Create the semaphore used as a read/write lock on the counter */
-    c->semid = semget(IPC_PRIVATE, 1, IPC_CREAT | LPIPC_PERMS);
-    if (c->semid < 0) {
-        syslog(LOG_ERR, "lpcounter_create semget. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Attach the shared memory for reading and writing */
-    counter = shmat(c->shmid, NULL, 0);
-    if (counter == (void*)-1) {
-        syslog(LOG_ERR, "lpcounter_create shmat. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Start the voice IDs at 1 */
-    *counter = 1;
-
-    /* Prime the lock by initalizing the sempahore to 1 */
-    arg.val = 1;
-    if(semctl(c->semid, 0, SETVAL, arg) < 0) {
-        syslog(LOG_ERR, "lpcounter_create semctl. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    return 0;
-}
-
 /* SHARED MEMORY
  * COMMUNICATION TOOLS
  * *******************/
@@ -345,7 +248,6 @@ int lpipc_setid(char * path, int id) {
 
     return 0;
 }
-
 
 int lpipc_lockid(char * path) {
     int fd;
@@ -468,7 +370,7 @@ int lpipc_createvalue(char * path, size_t size) {
     }
 
     /* Create the POSIX shared memory segment */
-    if((shmfd = shm_open(path, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
+    if((shmfd = shm_open(semname, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
         syslog(LOG_ERR, "lpipc_createvalue Could not create shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
@@ -503,7 +405,7 @@ int lpipc_setvalue(char * path, void * value, size_t size) {
     }
 
     /* Get the file descriptor for the shared memory segment */
-    if((fd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
+    if((fd = shm_open(semname, O_RDWR, LPIPC_PERMS)) < 0) {
         syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
@@ -538,7 +440,7 @@ int lpipc_unsafe_getvalue(char * path, void ** value) {
     int fd;
 
     /* Get the file descriptor for the shared memory segment */
-    if((fd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
+    if((fd = shm_open(path+4, O_RDWR, LPIPC_PERMS)) < 0) {
         syslog(LOG_ERR, "lpipc_unsafe_getvalue Could not open shared memory segment. (%s) %s\n", path, strerror(errno));
         return -1;
     }
@@ -560,7 +462,6 @@ int lpipc_unsafe_getvalue(char * path, void ** value) {
     return 0;
 }
 
-
 int lpipc_getvalue(char * path, void ** value) {
     struct stat statbuf;
     int fd;
@@ -572,7 +473,7 @@ int lpipc_getvalue(char * path, void ** value) {
     semname = path + 4;
 
     /* Open the semaphore */
-    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
+    if((sem = sem_open(semname, 0, LPIPC_PERMS)) == SEM_FAILED) {
         syslog(LOG_ERR, "lpipc_setvalue failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
         return -1;
     }
@@ -584,7 +485,7 @@ int lpipc_getvalue(char * path, void ** value) {
     }
 
     /* Get the file descriptor for the shared memory segment */
-    if((fd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
+    if((fd = shm_open(semname, O_RDWR, LPIPC_PERMS)) < 0) {
         syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
@@ -601,7 +502,7 @@ int lpipc_getvalue(char * path, void ** value) {
         return -1;
     }
 
-    memcpy(value, shmaddr, statbuf.st_size);
+    memcpy(*value, shmaddr, statbuf.st_size);
 
     /* Clean up sempahore resources */
     if(sem_close(sem) < 0) {
@@ -639,7 +540,6 @@ int lpipc_releasevalue(char * id_path) {
 
     return 0;
 }
-
 
 int lpipc_destroyvalue(char * path) {
     char * semname;
@@ -1355,75 +1255,137 @@ int lpmidi_trigger_notemap(int device_id, int note) {
 
 /* VOICES
  * ******/
+#if 0
 ssize_t astrid_get_voice_id() {
-    int fd, shmfd;
-    sem_t * sem;
-    void * shmaddr;
-    size_t voice_id=0, current_voice_id=0;
+    size_t voice_id = 0;
+    void * voice_idp = &voice_id;
 
-    if(access("/tmp/astridvoiceid", F_OK) == 0) {
-        /* Open the semaphore */
-        if((sem = sem_open("/astridvoiceid", 0)) == SEM_FAILED) {
-            syslog(LOG_ERR, "astrid_get_voice_id failed to open semaphore. Error: %s\n", strerror(errno));
+    if(access("/tmp/astridvoiceid", F_OK) != 0) {
+        if(lpipc_createvalue("/tmp/astridvoiceid", sizeof(size_t)) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to create value. Error: %s\n", strerror(errno));
             return -1;
         }
 
-        /* Aquire a lock on the semaphore */
-        if(sem_wait(sem) < 0) {
-            syslog(LOG_ERR, "astrid_get_voice_id failed to decrementsem. Error: %s\n", strerror(errno));
-            return -1;
-        }
-
-        /* Get the file descriptor for the shared memory segment */
-        if((fd = shm_open("/tmp/astridvoiceid", O_RDWR, LPIPC_PERMS)) < 0) {
-            syslog(LOG_ERR, "astrid_get_voice_id Could not open shared memory segment. (%d) %s\n", errno, strerror(errno));
-            return -1;
-        }
-
-        /* Attach the shared memory to the pointer */
-        if((shmaddr = (void*)mmap(NULL, sizeof(size_t), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
-            syslog(LOG_ERR, "astrid_get_voice_id Could not mmap shared memory segment. (%d) %s\n", errno, strerror(errno));
-            return -1;
-        }
-
-        /* Read and increment the voice ID */
-        memcpy(&current_voice_id, shmaddr, sizeof(size_t));
-        voice_id = current_voice_id + 1;
-
-        /* Write the new voice ID */
-        memcpy(shmaddr, &voice_id, sizeof(size_t));
-
-        /* Release the lock on the semaphore */
-        if(sem_post(sem) < 0) {
-            syslog(LOG_ERR, "astrid_get_voice_id failed to unlock. Error: (%d) %s\n", errno, strerror(errno));
+        if(lpipc_setid("/tmp/astridvoiceid", 0) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to set id for value. Error: %s\n", strerror(errno));
             return -1;
         }
         
-        /* Clean up sempahore resources */
-        if(sem_close(sem) < 0) {
-            syslog(LOG_ERR, "astrid_get_voice_id sem_close Could not close semaphore\n");
+        if(lpipc_unsafe_getvalue("/tmp/astridvoiceid", &voice_idp) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to get value. Error: %s\n", strerror(errno));
             return -1;
         }
+
     } else {
-        /* Create the POSIX semaphore and initialize it to 1 */
-        if(sem_open("/astridvoiceid", O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
-            syslog(LOG_ERR, "astrid_get_voice_id failed to create semaphore %d. Error: %s\n", errno, strerror(errno));
-            return -1;
-        }
-
-        /* Create the POSIX shared memory segment */
-        if((shmfd = shm_open("/tmp/astridvoiceid", O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
-            syslog(LOG_ERR, "astrid_get_voice_id Could not create shared memory segment. (%d) %s\n", errno, strerror(errno));
-            return -1;
-        }
-
-        if(ftruncate(shmfd, sizeof(size_t)) < 0) {
-            syslog(LOG_ERR, "astrid_get_voice_id Could not truncate shared memory segment. (%d) %s\n", errno, strerror(errno));
+        if(lpipc_getvalue("/tmp/astridvoiceid", &voice_idp) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to get value. Error: %s\n", strerror(errno));
             return -1;
         }
     }
 
-    return current_voice_id;
+    if(lpipc_releasevalue("/tmp/astridvoiceid") < 0) {
+        syslog(LOG_ERR, "astrid_get_voice_id failed to release lock on value after read. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    voice_id += 1;
+
+    if(lpipc_setvalue("/tmp/astridvoiceid", voice_idp, sizeof(size_t)) < 0) {
+        syslog(LOG_ERR, "astrid_get_voice_id failed to release lock on value after read. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return voice_id;
+}
+#endif
+ssize_t astrid_get_voice_id() {
+    char * name = "/astridvoiceid";
+    size_t voice_id = 0;
+    size_t voice_id_next = 0;
+    void * voice_idp = &voice_id;
+    void * voice_id_nextp = &voice_id_next;
+    int shmfd;
+    sem_t * sem;
+    void * shmaddr;
+
+    if(access("/tmp/astridvoiceid", F_OK) != 0) {
+        // create the semaphore and aquire a lock on it
+        if((sem = sem_open(name, O_CREAT | O_EXCL, LPIPC_PERMS, 1)) == SEM_FAILED) {
+            syslog(LOG_ERR, "lpipc_createvalue failed to create semaphore %s. Error: %s\n", name, strerror(errno));
+            return -1;
+        }
+
+        // create shared memory segment
+        if((shmfd = shm_open(name, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
+            syslog(LOG_ERR, "lpipc_createvalue Could not create shared memory segment. (%s) %s\n", name, strerror(errno));
+            return -1;
+        }
+
+        // zero it
+        if(ftruncate(shmfd, sizeof(size_t)) < 0) {
+            syslog(LOG_ERR, "lpipc_createvalue Could not truncate shared memory segment to size %ld. (%s) %s\n", sizeof(size_t), name, strerror(errno));
+            return -1;
+        }
+       
+        // Attach to the shared memory
+        if((shmaddr = mmap(NULL, sizeof(size_t), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
+            syslog(LOG_ERR, "lpipc_setvalue Could not mmap shared memory segment. (%s) %s\n", name, strerror(errno));
+            return -1;
+        }
+
+        // Initialize the shared memory with 0
+        memcpy(shmaddr, &voice_id, sizeof(size_t)); 
+
+        // Set the id file
+        if(lpipc_setid("/tmp/astridvoiceid", 0) < 0) {
+            syslog(LOG_ERR, "astrid_get_voice_id failed to set id for value. Error: %s\n", strerror(errno));
+            return -1;
+        }
+ 
+    } else {
+        // Open the semaphore
+        if((sem = sem_open(name, 0)) == SEM_FAILED) {
+            syslog(LOG_ERR, "lpipc_getvalue failed to open semaphore %s. Error: %s\n", name, strerror(errno));
+            return -1;
+        }
+
+        // Aquire a lock on the semaphore
+        if(sem_wait(sem) < 0) {
+            syslog(LOG_ERR, "lpipc_getvalue failed to decrement sem %s. Error: %s\n", name, strerror(errno));
+            return -1;
+        }
+
+        // Attach to the shared memory
+        if((shmfd = shm_open(name, O_RDWR, LPIPC_PERMS)) < 0) {
+            syslog(LOG_ERR, "lpipc_getvalue Could not open shared memory segment. (%s) %s\n", name, strerror(errno));
+            return -1;
+        }
+
+        if((shmaddr = mmap(NULL, sizeof(size_t), PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
+            syslog(LOG_ERR, "lpipc_getvalue Could not mmap shared memory segment. (%s) %s\n", name, strerror(errno));
+            return -1;
+        }
+
+        // Copy the voice id
+        memcpy(voice_idp, shmaddr, sizeof(size_t));
+    }
+
+    // increment the voice id and copy it back to the shm
+    voice_id_next = voice_id + 1;
+    memcpy(shmaddr, voice_id_nextp, sizeof(size_t));
+
+    // Release the lock on the semaphore
+    if(sem_post(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue failed to unlock %s. Error: %s\n", name, strerror(errno));
+        return -1;
+    }
+
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_setvalue sem_close Could not close semaphore\n");
+        return -1;
+    }
+
+    return voice_id;
 }
 
 
@@ -1704,13 +1666,11 @@ int astrid_get_capture_device_id() {
 }
 
 int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg) {
-    int bytesread, a, i, length, voice_id, counter_value;
+    int bytesread, a, i, length, voice_id;
     char msgtype;
     char message_params[LPMAXMSG] = {0};
     char instrument_name[LPMAXNAME] = {0};
-    size_t instrument_name_length, counter_path_length;
-    char * counter_name;
-    char counter_path[50];
+    size_t instrument_name_length;
 
     voice_id = 0;
     instrument_name_length = 0;
@@ -1777,21 +1737,6 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
         /* Try to extract the voice ID from the stop command */
         if((voice_id = atoi(argv[arg_offset + 2])) < 0) {
             syslog(LOG_ERR, "Invalid voice ID passed with STOP message. Error: (%d) %s\n", errno, strerror(errno));
-            return -1;
-        }
-
-    } else if(msg->type == LPMSG_SET_COUNTER) {
-        counter_name = argv[arg_offset + 2];
-        if((counter_value = atoi(argv[arg_offset + 3])) < 0) {
-            syslog(LOG_ERR, "Invalid counter value passed with STOP message. Error: (%d) %s\n", errno, strerror(errno));
-            return -1;
-        }
-
-        counter_path_length = snprintf(NULL, 0, ASTRID_IPC_IDBASE_PATH, counter_name) + 1;
-        snprintf(counter_path, counter_path_length,  ASTRID_IPC_IDBASE_PATH, counter_name);
-
-        if(lpipc_setid(counter_path, counter_value) < 0) {
-            syslog(LOG_ERR, "Could not store counter value at path %s. Error: (%d) %s\n", counter_path, errno, strerror(errno));
             return -1;
         }
 

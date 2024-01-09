@@ -2,16 +2,16 @@
 
 int main() {
     size_t value;
-    void * valuep;
+    void * valuep = &value;
 
-    if(lpipc_getvalue(LPADC_WRITEPOS_PATH, &valuep) < 0) {
-        fprintf(stderr, "Could not set value\n");
+    if(lpipc_getvalue("/tmp/ipcvalue-test", &valuep) < 0) {
+        fprintf(stderr, "Could not get value\n");
         return 1;
     }
 
     value = *((size_t *)valuep);
 
-    if(lpipc_releasevalue(LPADC_WRITEPOS_PATH) < 0) {
+    if(lpipc_releasevalue("/tmp/ipcvalue-test") < 0) {
         fprintf(stderr, "Could not release value\n");
         return 1;
     }
