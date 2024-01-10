@@ -138,7 +138,7 @@ astrid-pulsar:
 	mkdir -p build
 
 	echo "Building astrid pulsar...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
+	gcc $(LPFLAGS) -fanalyzer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 
 follow-log:
 ifeq ($(shell uname),Darwin)
