@@ -32,7 +32,7 @@ lpnode_t * lpnode_create(int node_type) {
 
 void lpnode_connect(lpnode_t * node, int param_type, lpnode_t * param, lpfloat_t minval, lpfloat_t maxval) {
     if(node->type == NODE_SINEOSC) {
-        if(param_type == PARAM_FREQ) {
+        if(param_type == NODE_PARAM_FREQ) {
             node->params.sineosc->freq = param;
             node->params.sineosc->freq_mul = (maxval - minval) / 2.f;
             node->params.sineosc->freq_add = minval + node->params.sineosc->freq_mul;
@@ -42,7 +42,7 @@ void lpnode_connect(lpnode_t * node, int param_type, lpnode_t * param, lpfloat_t
 
 void lpnode_connect_signal(lpnode_t * node, int param_type, lpfloat_t value) {
     if(node->type == NODE_SINEOSC) {
-        if(param_type == PARAM_FREQ) {
+        if(param_type == NODE_PARAM_FREQ) {
             node->params.sineosc->freq = lpnode_create(NODE_SIGNAL);
             node->params.sineosc->freq->last = value;
             node->params.sineosc->freq->params.signal->value = value;

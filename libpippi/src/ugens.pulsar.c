@@ -27,7 +27,7 @@ void set_pulsar_ugen_param(ugen_t * u, int index, void * value) {
     size_t * s;
     size_t ** sp;
     lpfloat_t * v;
-    lpfloat_t ** vp;
+    //lpfloat_t ** vp;
     lpugenpulsar_t * params;
 
     params = (lpugenpulsar_t *)u->params;
@@ -53,13 +53,13 @@ void set_pulsar_ugen_param(ugen_t * u, int index, void * value) {
             break;
 
         case UPULSARIN_WTTABLE:
-            vp = (lpfloat_t **)value;
-            params->osc->wavetables = *vp;
+            //vp = (lpfloat_t **)value;
+            params->osc->wavetables = NULL;
             break;
 
         case UPULSARIN_WTTABLELENGTH:
             s = (size_t *)value;
-            params->osc->wavetable_length = *s;
+            params->osc->wavetable_lengths = s;
             break;
 
         case UPULSARIN_NUMWTS:
@@ -88,13 +88,13 @@ void set_pulsar_ugen_param(ugen_t * u, int index, void * value) {
             break;
             
         case UPULSARIN_WINTABLE:
-            vp = (lpfloat_t **)value;
-            params->osc->windows = *vp;
+            //vp = (lpfloat_t **)value;
+            params->osc->windows = NULL;
             break;
 
         case UPULSARIN_WINTABLELENGTH:
             s = (size_t *)value;
-            params->osc->window_length = *s;
+            params->osc->window_lengths = s;
             break;
 
         case UPULSARIN_NUMWINS:
@@ -139,8 +139,8 @@ ugen_t * create_pulsar_ugen(void) {
 
     params = (lpugenpulsar_t *)LPMemoryPool.alloc(sizeof(lpugenpulsar_t), 1);
     params->osc = LPPulsarOsc.create(
-        0, NULL, 0, NULL, NULL, 
-        0, NULL, 0, NULL, NULL
+        0, NULL, 0, NULL, 
+        0, NULL, 0, NULL
     );
 
     u = (ugen_t *)LPMemoryPool.alloc(sizeof(ugen_t), 1);

@@ -5,7 +5,6 @@
 #define NUM_NODES 4096
 
 static volatile int astrid_is_running = 1;
-int pqnode_index = 0;
 pqueue_t * msgpq;
 lpmsgpq_node_t * pqnodes;
 
@@ -156,6 +155,7 @@ void * message_feed(__attribute__((unused)) void * arg) {
     lpmsg_t msg = {0};
     lpmsgpq_node_t * d;
     double now = 0;
+    int pqnode_index = 0;
 
     if((qd = astrid_msgq_open()) == (mqd_t) -1) {
         syslog(LOG_CRIT, "Could not open msgq for message relay: %s\n", strerror(errno));

@@ -19,13 +19,18 @@
 #include <sys/time.h>
 #include <syslog.h>
 #include <time.h>
+#include <termios.h>
 #include <unistd.h>
-
-#include <jack/jack.h>
-#include "jack_helpers.h"
 
 #include "pippi.h"
 
+#include "lmdb.h"
+#include "midl.h"
+#include "pqueue.h"
+#include <hiredis/hiredis.h>
+#include <jack/jack.h>
+
+#define NUM_NODES 4096
 #define NUM_RENDERERS 10
 #define ASTRID_CHANNELS 2
 #define ASTRID_SAMPLERATE 48000
@@ -50,6 +55,7 @@
 #define ASTRID_SERIAL_CTLBASE_PATH "/tmp/astrid-serialdevice%d-ctl%d"
 
 #define PLAY_MESSAGE 'p'
+#define UPDATE_MESSAGE 'u'
 #define TRIGGER_MESSAGE 't'
 #define SERIAL_MESSAGE 'b'
 #define STOP_MESSAGE 's'
@@ -70,8 +76,6 @@
 #endif
 
 #define SPACE ' '
-#define LPMAXNAME 24
-#define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
 
 #define ASTRID_ADCSECONDS 10
 #define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
@@ -82,97 +86,10 @@
 
 #define ASTRID_DEVICEID_PATH "/tmp/astrid_device_id"
 
-enum LPMessageTypes {
-    LPMSG_EMPTY,
-    LPMSG_PLAY,
-    LPMSG_TRIGGER,
-    LPMSG_SERIAL,
-    LPMSG_STOP_INSTRUMENT,
-    LPMSG_STOP_VOICE,
-    LPMSG_LOAD,
-    LPMSG_SHUTDOWN,
-    LPMSG_SET_COUNTER,
-    NUM_LPMESSAGETYPES
-};
-
 typedef struct lpcounter_t {
     int shmid;
     int semid;
 } lpcounter_t;
-
-typedef struct lpinstrument_t {
-    const char * name;
-    int channels;
-    volatile int is_running;
-    lpfloat_t samplerate;
-    jack_port_t ** inports;
-    jack_port_t ** outports;
-    jack_client_t * jack_client;
-    void * context;
-    void (*callback)(int channels, size_t blocksize, float ** input, float ** output, void * ctx);
-    void (*shutdown)(int sig);
-} lpinstrument_t;
-
-typedef struct lpmsg_t {
-    /* Timestamp when the message was initiated. 
-     *
-     * This is assigned at the same time that the 
-     * voice ID is assigned to the message sequence.
-     * */
-    double initiated;     
-
-    /* Relative delay for target completion time 
-     * from initiation time.
-     *
-     * This value is given by the score as the onset time
-     * in seconds and is relative to the initiation time.
-     * */
-    double scheduled;     
-
-    /* Timestamp of render completion or trigger away.
-     *
-     * This is assigned either at the point that the message 
-     * is deserialized along with the buffer and placed onto 
-     * the mixer queue, or just after a MIDI event or other 
-     * trigger has been sent away.
-     *
-     * Donno if it is needed, since the message will be 
-     * destroyed just after it is set, ideally? Or will it be?
-     *
-     * Possibly better just to log this at the debug level.
-     * */
-    double completed;     
-
-    /* The longest a message in this sequence has taken 
-     * so far to be processed and reach completion.
-     *
-     * This is used by the seq scheduler to estimate how
-     * far ahead of the target time the message should be
-     * sent to the renderer.
-     *
-     * The initial value before any estimates can be made 
-     * is 75% of the scheduled interval time.
-     *
-     * The estimated value is overwritten each time the 
-     * completed timestamp is recorded, by taking the difference 
-     * between the initiation time and the completed time.
-     *
-     * It is preserved... where, in the instrument cache? sqlite?
-     * */
-    double max_processing_time;     
-
-    /* Time of arrival at mixer minus scheduled target
-     * time rounded to nearest frame */
-    size_t onset_delay;   
-
-    /* The voice ID is also a message sequence ID */
-    size_t voice_id;
-    size_t count;
-
-    uint16_t type;
-    char msg[LPMAXMSG];
-    char instrument_name[LPMAXNAME];
-} lpmsg_t;
 
 typedef struct lpmsgpq_node_t {
     double timestamp;
@@ -181,34 +98,6 @@ typedef struct lpmsgpq_node_t {
     int index; /* index in node pool */
 } lpmsgpq_node_t;
 
-
-enum LPSerialParamTypes {
-    LPSERIAL_PARAM_BOOL,    /*  0 or 1 */
-    LPSERIAL_PARAM_CTL,     /*  0 to 1 */
-    LPSERIAL_PARAM_SIG,     /* -1 to 1 */
-    LPSERIAL_PARAM_CHAR,    /* unsigned char */
-    LPSERIAL_PARAM_INT,     /* signed int */
-    LPSERIAL_PARAM_SIZE,    /* ssize_t */
-    LPSERIAL_PARAM_UINT,    /* unsigned int */
-    LPSERIAL_PARAM_USIZE,   /* size_t */
-    LPSERIAL_PARAM_DOUBLE,  /* double */
-    LPSERIAL_PARAM_FLOAT,   /* float */
-
-    /* TODO add support for these */
-    LPSERIAL_PARAM_MIDI,    /* midi bytes */
-    LPSERIAL_PARAM_PCM,     /* PCM audio */
-    LPSERIAL_PARAM_SHUTDOWN,
-    NUM_LPSERIAL_PARAMS
-};
-
-typedef struct lpserialevent_t {
-    double onset;
-    double now;
-    double length;
-    lpmsg_t msg;
-    int group;
-    int device;
-} lpserialevent_t;
 
 /* When instrument scripts produce MIDI triggers, 
  * they schedule them (with the onset value, which 
@@ -260,6 +149,41 @@ typedef struct lpscheduler_t {
     lpevent_t * playing_stack_head;
     lpevent_t * nursery_head;
 } lpscheduler_t;
+
+typedef struct lpinstrument_t {
+    const char * name;
+    int channels;
+    volatile int is_running;
+    int has_been_initialized;
+    lpfloat_t samplerate;
+
+    MDB_cursor * dbcur;
+    MDB_env * dbenv;
+    MDB_dbi dbi;
+    MDB_txn * dbtxn_read;
+    MDB_txn * dbtxn_write;
+
+    mqd_t playqd;
+    lpmsg_t msg;
+
+    pqueue_t * msgpq;
+    lpmsgpq_node_t * pqnodes;
+
+    pthread_t message_feed_thread;
+    pthread_t message_scheduler_pq_thread;
+    pthread_t buffer_feed_thread;
+    lpscheduler_t * async_mixer;
+    lpbuffer_t * lastbuf;
+
+    jack_port_t ** inports;
+    jack_port_t ** outports;
+    jack_client_t * jack_client;
+
+    void * context;
+    void (*callback)(int channels, size_t blocksize, float ** input, float ** output, void * ctx);
+    void (*shutdown)(int sig);
+} lpinstrument_t;
+
 
 void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay);
 void lpscheduler_tick(lpscheduler_t * s);
@@ -319,7 +243,7 @@ int send_serial_message(lpmsg_t msg);
 int send_play_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
 
-mqd_t astrid_playq_open(char * instrument_name);
+mqd_t astrid_playq_open(const char * instrument_name);
 int astrid_playq_read(mqd_t mqd, lpmsg_t * msg);
 int astrid_playq_close(mqd_t mqd);
 
@@ -373,8 +297,20 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-int start_astrid_instrument(const char * name, int channels, lpinstrument_t * instrument);
-int stop_astrid_instrument(lpinstrument_t * instrument);
+int astrid_instrument_audio_start(const char * name, int channels, lpinstrument_t * instrument);
+int astrid_instrument_audio_stop(lpinstrument_t * instrument);
+int astrid_instrument_seq_start(lpinstrument_t * instrument);
+int astrid_instrument_seq_stop(lpinstrument_t * instrument);
+int astrid_instrument_session_open(lpinstrument_t * instrument);
+void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
+lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t default_value);
+int astrid_instrument_session_close(lpinstrument_t * instrument);
+void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size);
+void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list);
+lpfloat_t astrid_instrument_get_param_float_list_item(lpinstrument_t * instrument, int param_index, size_t size, int item_index, lpfloat_t default_value);
+int astrid_instrument_msg_read_next(lpinstrument_t * instrument);
+int setup_async_mixer(lpinstrument_t * instrument);
+int cleanup_async_mixer(lpinstrument_t * instrument);
 
 #ifdef LPSESSIONDB
 #include <sqlite3.h>

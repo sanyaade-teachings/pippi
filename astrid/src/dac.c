@@ -1,7 +1,6 @@
 #include <hiredis/hiredis.h>
 #include <jack/jack.h>
 #include "astrid.h"
-#include "jack_helpers.h"
 
 
 static volatile int astrid_is_running = 1;
@@ -293,7 +292,7 @@ int main(int argc, char * argv[]) {
 
     /* Set up JACK */
     jack_client = jack_client_open(dac_name, jack_options, &jack_status, NULL);
-    print_jack_status(jack_status);
+    syslog(LOG_DEBUG, "JACK STATUS %d\n", (int)jack_status);
     if(jack_client == NULL) {
         syslog(LOG_ERR, "%s Could not open jack client. Client is NULL: %s\n", dac_name, strerror(errno));
 

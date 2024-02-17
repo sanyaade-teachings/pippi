@@ -150,6 +150,8 @@ bool Fft_transformBluestein(double real[], double imag[], size_t n) {
 	cos_table = malloc(size_n);
 	sin_table = malloc(size_n);
 
+    if(cos_table == NULL || sin_table == NULL) return false;
+
     memset(cos_table, 0, size_n);
     memset(sin_table, 0, size_n);
 

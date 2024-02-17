@@ -1,5 +1,7 @@
 #include "astrid.h"
 
+#define MSGBUFFER_SIZE 100
+
 
 static volatile int serial_listener_is_running = 1;
 
@@ -11,9 +13,12 @@ void handle_shutdown(__attribute__((unused)) int sig) {
 int main(int argc, char * argv[]) {
     int tty;
     ssize_t bytesread;
-    char * tty_path;
-
+    char * tty_path, * token, * tokencache;
+    struct termios options;
     lpmsg_t msg = {0};
+    char msgstr[MSGBUFFER_SIZE];
+    char * fakeargv[LPMAXMSG+1];
+
 
     openlog("astrid-seriallistener", LOG_PID, LOG_USER);
 
@@ -22,6 +27,7 @@ int main(int argc, char * argv[]) {
     }
 
     tty_path = argv[1];
+
 
     /* setup signal handlers */
     struct sigaction shutdown_action;
@@ -41,20 +47,59 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
  
-    tty = open(tty_path, O_RDONLY);
+    printf("Opening tty...\n");
+    /* open tty */
+    tty = open(tty_path, O_RDONLY | O_NOCTTY);
     if(tty < 0) {
         syslog(LOG_ERR, "Problem connecting to TTY\n");
         exit(1);
     }
 
+    printf("Setting baud rate...\n");
+    /* set baud rate */
+    tcgetattr(tty, &options);
+    cfsetispeed(&options, B1000000);
+    tcsetattr(tty, TCSANOW, &options);
+
+    printf("Waiting for messages...\n");
+
     while(serial_listener_is_running) {
-        bytesread = read(tty, &msg, sizeof(lpmsg_t));
-        if(bytesread != sizeof(lpmsg_t)) {
-            syslog(LOG_ERR, "serial listener read %ld bytes on device %s...\n", bytesread, tty_path);
+        printf("Reading messages...\n");
+        bytesread = read(tty, &msgstr, MSGBUFFER_SIZE);
+        printf("serial listener read %ld bytes on device %s...\n", bytesread, tty_path);
+        printf("msgstr: %s (char1: %u)\n", msgstr, msgstr[0]);
+
+        if(bytesread <= 1) {
+            memset(msgstr, 0, MSGBUFFER_SIZE);
             continue;
         }
 
-        if(msg.type == LPMSG_SHUTDOWN) break;
+        printf("Converting to argv format\n");
+        int i = 0;
+        fakeargv[0] = strtok_r(msgstr, " ", &tokencache);
+
+        for(i=1; ; i++) {
+            token = strtok_r(NULL, " ", &tokencache);
+            fakeargv[i] = token;
+            if(token == NULL) break;
+        }
+
+        /* -1 offset to skip the usual program name 0 index in real argv */
+        if(parse_message_from_args(i, -1, fakeargv, &msg) < 0) {
+            fprintf(stderr, "astrid-msg: Could not parse message from args\n");
+            return 1;
+        }
+
+        memset(msgstr, 0, MSGBUFFER_SIZE);
+
+        printf("message:\t%s\n", msg.instrument_name);
+        printf("\t%d (msg.voice_id)\n", (int)msg.voice_id);
+        printf("\t%d (msg.type)\n", (int)msg.type);
+
+        if(send_play_message(msg) < 0) {
+            fprintf(stderr, "astrid-msg: Could not send play message...\n");
+            return 1;
+        }
     }
 
     close(tty);

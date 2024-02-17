@@ -12,8 +12,8 @@ enum NodeTypes {
 };
 
 enum ParamTypes {
-    PARAM_FREQ,
-    PARAM_AMP
+    NODE_PARAM_FREQ,
+    NODE_PARAM_AMP
 };
 
 typedef struct lpnode_table_t {

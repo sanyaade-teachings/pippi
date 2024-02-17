@@ -1,6 +1,5 @@
 #include <jack/jack.h>
 #include "astrid.h"
-#include "jack_helpers.h"
 
 
 jack_port_t * astrid_inport1, * astrid_inport2;
@@ -91,7 +90,7 @@ int main() {
     syslog(LOG_DEBUG, "Starting jack...\n");
     jack_client = jack_client_open("astrid-adc", jack_options, &jack_status, NULL);
     syslog(LOG_DEBUG, "Got client pointer... printing status\n");
-    print_jack_status(jack_status);
+    syslog(LOG_DEBUG, "JACK STATUS %d\n", (int)jack_status);
 
     if(jack_client == NULL) {
         syslog(LOG_ERR, "Could not open jack client. Client is NULL: %s\n", strerror(errno));

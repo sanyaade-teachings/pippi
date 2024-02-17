@@ -1552,7 +1552,7 @@ int send_message(lpmsg_t msg) {
     return 0;
 }
 
-mqd_t astrid_playq_open(char * instrument_name) {
+mqd_t astrid_playq_open(const char * instrument_name) {
     mqd_t mqd;
     ssize_t qname_length;
     char qname[LPMAXQNAME] = {0};
@@ -1630,7 +1630,6 @@ int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg) {
 
     if((read_result = mq_receive(mqd, msgp, sizeof(lpmsg_t), &msg_priority)) < 0) {
         syslog(LOG_ERR, "astrid_msgq_read mq_receive: Error reading message. (Got %ld bytes) Error: %s\n", read_result, strerror(errno));
-        free(msgp);
         return -1;
     }
 
@@ -1710,6 +1709,10 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
 
         case SERIAL_MESSAGE:
             msg->type = LPMSG_SERIAL;
+            break;
+
+        case UPDATE_MESSAGE:
+            msg->type = LPMSG_UPDATE;
             break;
 
         case LOAD_MESSAGE:
@@ -2172,6 +2175,9 @@ void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t onset_
     e->pos = 0;
     e->onset = s->ticks + onset_delay;
 
+    syslog(LOG_INFO, "scheduler got buffer with onset %d\n", (int)e->onset);
+    syslog(LOG_INFO, "scheduler got buffer value 1000 %f\n", (float)buf->data[1000]);
+
     start_waiting(s, e);
 }
 
@@ -2273,12 +2279,159 @@ int send_serial_message(lpmsg_t msg) {
 }
 
 /** dac / adc **/
+void * astrid_async_buffer_feed(__attribute__((unused)) void * arg) {
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+
+    char buffer_feed_cmd_template[] = "SUBSCRIBE astrid-dac-%s-bufferfeed";
+    char buffer_feed_cmd[100];
+
+    redisContext * redis_ctx;
+    redisReply * redis_reply;
+    lpbuffer_t * buf;
+    lpmsg_t msg = {0};
+
+    double processing_time_so_far, onset_delay_in_seconds;
+    double now = 0;
+    struct timeval redis_timeout = {15, 0};
+
+    snprintf(buffer_feed_cmd, sizeof(buffer_feed_cmd), buffer_feed_cmd_template, instrument->name);
+
+    syslog(LOG_INFO, "Buffer feed starting up...\n");
+    redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
+    if(redis_ctx == NULL) {
+        syslog(LOG_CRIT, "Could not start connection to redis.\n");
+        exit(1);
+    }
+
+    if(redis_ctx->err) {
+        syslog(LOG_CRIT, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
+        exit(1);
+    }
+
+    /* Subscribe to the buffer queue. 
+     * This is the only thread subscribed
+     * to the buffer queue as a reader.
+     */
+    redis_reply = redisCommand(redis_ctx, buffer_feed_cmd);
+    if(redis_reply->str != NULL) printf("subscribe result: %s\n", redis_reply->str); 
+    freeReplyObject(redis_reply);
+
+    /* Wait on buffers from the queue */
+    syslog(LOG_INFO, "Waiting for buffers...\n");
+    while(instrument->is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
+        if(redis_reply->type == REDIS_REPLY_ARRAY) {
+            if(redis_reply->element[2]->str[0] == 's') {
+                syslog(LOG_INFO, "Buffer feed got shutdown message\n");
+                syslog(LOG_INFO, "    message: %s\n", redis_reply->element[2]->str);
+                break;
+            }
+
+            if((buf = deserialize_buffer(redis_reply->element[2]->str, &msg)) == NULL) {
+                syslog(LOG_ERR, "DAC could not deserialize buffer. Error: (%d) %s\n", errno, strerror(errno));
+                continue;
+            }
+
+            /* Increment the message count */
+            /*msg.count += 1;*/
+
+            /* Get now */
+            if(lpscheduler_get_now_seconds(&now) < 0) {
+                syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
+                now = 0;
+            }
+
+            /*
+            syslog(LOG_DEBUG, "DAC: Message type %d for %s arrived in buffer feed\n", msg.type, msg.instrument_name);
+            syslog(LOG_DEBUG, "initiated=%f scheduled=%f voice_id=%ld\n", msg.initiated, msg.scheduled, msg.voice_id);
+            */
+
+            processing_time_so_far = now - msg.initiated;
+            onset_delay_in_seconds = msg.scheduled - processing_time_so_far;
+            if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
+
+            msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
+
+            syslog(LOG_INFO, "\n\nmsg.onset_delay %ld\n", msg.onset_delay);
+
+            /* Schedule the buffer for playback */
+            scheduler_schedule_event(instrument->async_mixer, buf, msg.onset_delay);
+
+            /* If the buffer is flagged to loop, schedule the next render 
+             * by placing the message onto the message scheduling priority 
+             * queue with a timestamp for sending the render message 50% 
+             * into the buffer playback, with an onset delay for the buffer 
+             * making up the remaining 50%. TODO: measure jitter when scheduling 
+             * in regular intervals. */
+
+            syslog(LOG_INFO, "Finished scheduling rendered event for playback from message\n");
+            syslog(LOG_INFO, "\ninitiated %f\nscheduled %f\ncompleted %f\nmax_processing_time %f\nonset_delay %ld\nvoice_id %ld\ncount %ld\ntype %d\nmsg %s\nname %s\n\n", 
+                msg.initiated,
+                msg.scheduled,
+                msg.completed,
+                msg.max_processing_time,
+                msg.onset_delay,
+                msg.voice_id, 
+                msg.count,
+                msg.type,
+                msg.msg,
+                msg.instrument_name
+            );
+
+
+            if(buf->is_looping == 1) {
+                msg.initiated = now;
+                msg.scheduled = (lpfloat_t)buf->length / ASTRID_SAMPLERATE;
+                msg.type = LPMSG_PLAY;
+                msg.count += 1;
+                //msg.max_processing_time = msg.scheduled; /* This schedules the render as soon as possible */
+                msg.max_processing_time = 0;
+
+                syslog(LOG_INFO, "Scheduling message for loop retriggering\n");
+                syslog(LOG_INFO, "\ninitiated %f\nscheduled %f\ncompleted %f\nmax_processing_time %f\nonset_delay %ld\nvoice_id %ld\ncount %ld\ntype %d\nmsg %s\nname %s\n\n", 
+                    msg.initiated,
+                    msg.scheduled,
+                    msg.completed,
+                    msg.max_processing_time,
+                    msg.onset_delay,
+                    msg.voice_id, 
+                    msg.count,
+                    msg.type,
+                    msg.msg,
+                    msg.instrument_name
+                );
+
+                if(send_message(msg) < 0) {
+                    syslog(LOG_ERR, "Could not schedule message for loop retriggering\n");
+                    continue;
+                }
+            }
+
+        }
+        freeReplyObject(redis_reply);
+    }
+
+    syslog(LOG_INFO, "Buffer feed shutting down...\n");
+
+    if(redis_ctx != NULL) redisFree(redis_ctx); 
+    return 0;
+}
+
 int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     float * output_channels[instrument->channels];
     float * input_channels[instrument->channels];
     size_t i;
     int c;
+
+    if(!instrument->is_running) return 0;
+
+    if(!instrument->has_been_initialized) {
+        syslog(LOG_DEBUG, "Seeding the random number generator from the audio callback. %s\n", instrument->name);
+        LPRand.preseed();
+        instrument->has_been_initialized = 1;
+        // TODO could run the before callback here maybe, 
+        // or is there a reason to have mainthread-before AND audiothread-before?
+    }
 
     for(c=0; c < instrument->channels; c++) {
         input_channels[c] = (float *)jack_port_get_buffer(instrument->inports[c], nframes);
@@ -2292,6 +2445,17 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         (void *)instrument->context
     );
 
+    /* mix in async renders */
+    if(instrument->async_mixer != NULL) {
+        for(i=0; i < (size_t)nframes; i++) {
+            lpscheduler_tick(instrument->async_mixer);
+            for(c=0; c < instrument->channels; c++) {
+                output_channels[c][i] += instrument->async_mixer->current_frame[c];
+            }
+        }
+    }
+
+    /* clamp output */
     for(c=0; c < instrument->channels; c++) {
         for(i=0; i < (size_t)nframes; i++) {
             output_channels[c][i] = fmax(-1.f, fmin(output_channels[c][i], 1.f));
@@ -2301,7 +2465,306 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     return 0;
 }
 
-int start_astrid_instrument(const char * name, int channels, lpinstrument_t * instrument) {
+/* instrument seq priority queue callbacks */
+static int msgpq_cmp_pri(double next, double curr) {
+    return (next > curr);
+}
+
+static double msgpq_get_pri(void * a) {
+    return ((lpmsgpq_node_t *)a)->timestamp;
+}
+
+static void msgpq_set_pri(void * a, double timestamp) {
+    ((lpmsgpq_node_t *)a)->timestamp = timestamp;
+}
+
+static size_t msgpq_get_pos(void * a) {
+    return ((lpmsgpq_node_t *)a)->pos;
+}
+
+static void msgpq_set_pos(void * a, size_t pos) {
+    ((lpmsgpq_node_t *)a)->pos = pos;
+}
+
+int instrument_seq_remove_nodes_by_voice_id(pqueue_t * msgpq, size_t voice_id) {
+    lpmsgpq_node_t * node;
+    lpmsg_t * msg;
+    void * d;
+    size_t i;
+
+    for(i=0; i < msgpq->size; i++) {
+        d = msgpq->d[i];                
+        if(d == NULL) {
+            syslog(LOG_DEBUG, "STOP: d[%d] is NULL\n", (int)i);
+            continue;
+        }
+
+        node = (lpmsgpq_node_t *)d;
+        msg = &node->msg;
+        if(msg->voice_id == voice_id) {
+            syslog(LOG_DEBUG, "STOP: removing node & freeing memory for voice id %ld\n", voice_id);
+            pqueue_remove(msgpq, d);
+        }
+    }
+
+    return 0;
+}
+
+void * instrument_seq_pq(void * arg) {
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+    lpmsg_t * msg;
+    lpmsgpq_node_t * node;
+    void * d;
+    double now;
+
+    now = 0;
+    syslog(LOG_DEBUG, ":::: INSTRUMENT SEQ PQ STARTING ::::\n");
+
+    d = NULL;
+    msg = NULL;
+    node = NULL;
+
+    while(instrument->is_running) {
+        /* peek into the queue */
+        d = pqueue_peek(instrument->msgpq);
+
+        /* No messages have arrived */
+        if(d == NULL) {
+            usleep((useconds_t)500);
+            continue;
+        }
+
+        /* There is a message! */
+        node = (lpmsgpq_node_t *)d;
+        msg = &node->msg;
+
+        if(msg->type == LPMSG_SHUTDOWN) {
+            break;
+        }
+
+        /* Get now */
+        if(lpscheduler_get_now_seconds(&now) < 0) {
+            syslog(LOG_CRIT, "Error getting now in message scheduler\n");
+            exit(1);
+        }
+
+        /* if this is a STOP_VOICE message, find all voice events and remove them */
+        if(msg->type == LPMSG_STOP_VOICE) {
+            if(instrument_seq_remove_nodes_by_voice_id(instrument->msgpq, msg->voice_id) < 0) {
+                syslog(LOG_ERR, "Error removing voice %ld nodes from priority queue\n", msg->voice_id);
+                usleep((useconds_t)500);
+                continue;
+            }
+
+            syslog(LOG_INFO, "Got STOP_VOICE message... removed voice %ld nodes from pq\n", msg->voice_id);
+            continue;
+        }
+
+        /* If this is a STOP_INSTRUMENT message, find all instrument events and remove them */
+        if(msg->type == LPMSG_STOP_INSTRUMENT) {
+            syslog(LOG_INFO, "Got STOP_INSTRUMENT message... ignoring it\n");
+            continue;
+        }
+
+        /* If msg timestamp is in the future, 
+         * sleep for a bit and then try again */
+        if(node->timestamp > now) {
+            usleep((useconds_t)500);
+            continue;
+        }
+
+        /* Send it along to the instrument message fifo */
+        if(send_play_message(*msg) < 0) {
+            syslog(LOG_ERR, "Error sending play message from message priority queue\n");
+            usleep((useconds_t)500);
+            continue;
+        }
+
+        /* And remove it from the pq */
+        if(pqueue_remove(instrument->msgpq, d) < 0) {
+            syslog(LOG_ERR, "pqueue_remove: problem removing message from the pq\n");
+            usleep((useconds_t)500);
+        }
+    }
+
+    syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
+    //pqueue_free(msgpq);
+    //free(instrument->pqnodes);
+    return 0;
+}
+
+void * instrument_seq_message_feed(void * arg) {
+    lpinstrument_t * instrument;
+    double seq_delay;
+    mqd_t qd;
+    lpmsg_t msg = {0};
+    lpmsgpq_node_t * d;
+    double now = 0;
+    int pqnode_index = 0;
+
+    instrument = (lpinstrument_t *)arg;
+
+    if((qd = astrid_msgq_open()) == (mqd_t) -1) {
+        syslog(LOG_CRIT, "Could not open msgq for message relay: %s\n", strerror(errno));
+        exit(1);        
+    }
+
+    syslog(LOG_INFO, "Message relay: Waiting for messages...\n");
+
+    /* Wait for messages on the msgq fifo */
+    while(instrument->is_running) {
+        if(astrid_msgq_read(qd, &msg) < 0) {
+            syslog(LOG_ERR, "Error while fetching message during message relay loop: %s\n", strerror(errno));
+            continue;
+        }
+
+        d = &instrument->pqnodes[pqnode_index];
+        memcpy(&d->msg, &msg, sizeof(lpmsg_t));
+        pqnode_index += 1;
+        while(pqnode_index >= NUM_NODES) pqnode_index -= NUM_NODES;
+
+        if(lpscheduler_get_now_seconds(&now) < 0) {
+            syslog(LOG_CRIT, "Error getting now in seq relay\n");
+            exit(1);
+        }
+
+        /* Hold on to the message as long as possible while still 
+         * trying to leave some time for processing before the target deadline */
+        seq_delay = msg.scheduled - (msg.max_processing_time * 2);
+        d->timestamp = msg.initiated + seq_delay;
+
+        if(pqueue_insert(instrument->msgpq, (void *)d) < 0) {
+            syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
+            continue;
+        }
+
+        /* Exit the loop on shutdown message after sending 
+         * it along to the priority queue as well */
+        if(msg.type == LPMSG_SHUTDOWN) break;
+    }
+
+    syslog(LOG_INFO, "lpmsg_t relay: Message relay shutting down...\n");
+    if(qd != (mqd_t) -1) astrid_msgq_close(qd);
+
+    return 0;
+}
+
+
+int astrid_instrument_seq_start(lpinstrument_t * instrument) {
+    int i;
+
+    printf("alloc pqnodes\n");
+    /* Allocate the pq message nodes */
+    if((instrument->pqnodes = (lpmsgpq_node_t *)calloc(NUM_NODES, sizeof(lpmsgpq_node_t))) == NULL) {
+        syslog(LOG_ERR, "Could not initialize message priority queue nodes. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    for(i=0; i < NUM_NODES; i++) {
+        instrument->pqnodes[i].index = i;
+    }
+
+    printf("pqueue init\n");
+    /* Create the message priority queue */
+    if((instrument->msgpq = pqueue_init(NUM_NODES, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
+        syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("msg feed init\n");
+    /* Start message feed thread */
+    if(pthread_create(&instrument->message_feed_thread, NULL, instrument_seq_message_feed, (void*)instrument) != 0) {
+        syslog(LOG_ERR, "Could not initialize message feed thread. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    printf("pq init\n");
+    /* Start message pq thread */
+    if(pthread_create(&instrument->message_scheduler_pq_thread, NULL, instrument_seq_pq, (void*)instrument) != 0) {
+        syslog(LOG_ERR, "Could not initialize message scheduler pq thread. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int astrid_instrument_seq_stop(lpinstrument_t * instrument) {
+    syslog(LOG_DEBUG, "Joining with message thread...\n");
+    if(pthread_join(instrument->message_feed_thread, NULL) != 0) {
+        syslog(LOG_ERR, "Error while attempting to join with message thread\n");
+    }
+
+    syslog(LOG_DEBUG, "Joining with message scheduler pq thread...\n");
+    if(pthread_join(instrument->message_scheduler_pq_thread, NULL) != 0) {
+        syslog(LOG_ERR, "Error while attempting to join with message scheduler pq thread\n");
+    }
+
+    syslog(LOG_INFO, "Done with cleanup!\n");
+
+    return 0;
+}
+
+int setup_async_mixer(lpinstrument_t * instrument) {
+    /* init scheduler
+     * 
+     * The scheduler is shared between the miniaudio callback 
+     * and astrid buffer feed threads. The buffer feed thread 
+     * may schedule buffers by adding them to the internal linked 
+     * list in the scheduler. The miniaudio callback may read from 
+     * the linked list, increment counts in playing buffers and 
+     * flag buffers as having playback completed. 
+     **/
+    instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
+
+    /* Start buffer feed thread */
+    /*
+    if(pthread_create(&instrument->buffer_feed_thread, NULL, astrid_async_buffer_feed, NULL) != 0) {
+        syslog(LOG_ERR, "Could not initialize %s buffer feed thread. Error: %s\n", instrument->name, strerror(errno));
+        return -1;
+    }
+    */
+
+    return 0;
+}
+
+int cleanup_async_mixer(lpinstrument_t * instrument) {
+    redisContext * redis_ctx;
+    redisReply * redis_reply;
+    struct timeval redis_timeout = {15, 0};
+    char shutdown_cmd_template[] = "PUBLISH astrid-dac-%s-bufferfeed shutdown";
+    char shutdown_cmd[100];
+
+    snprintf(shutdown_cmd, sizeof(shutdown_cmd), shutdown_cmd_template, instrument->name);
+
+    redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
+    if(redis_ctx == NULL) {
+        syslog(LOG_ERR, "Could not start connection to redis.\n");
+        exit(1);
+    }
+
+    if(redis_ctx->err) {
+        syslog(LOG_ERR, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
+        exit(1);
+    }
+
+    syslog(LOG_INFO, "Sending shutdown to %s buffer thread...\n", instrument->name);
+    redis_reply = redisCommand(redis_ctx, shutdown_cmd);
+    if(redis_reply->str != NULL) syslog(LOG_INFO, "astridbuffers shutdown result: %s\n", redis_reply->str); 
+    freeReplyObject(redis_reply);
+    if(redis_ctx != NULL) redisFree(redis_ctx); 
+
+    syslog(LOG_DEBUG, "Joining with buffer thread...\n");
+    if(pthread_join(instrument->buffer_feed_thread, NULL) != 0) {
+        syslog(LOG_ERR, "Error while attempting to join with buffer thread\n");
+    }
+
+    syslog(LOG_INFO, "Cleaning up scheduler...\n");
+    if(instrument->async_mixer != NULL) scheduler_destroy(instrument->async_mixer);
+
+    return 0;
+}
+
+int astrid_instrument_audio_start(const char * name, int channels, lpinstrument_t * instrument) {
     struct sigaction shutdown_action;
     jack_status_t jack_status;
     jack_options_t jack_options = JackNullOption;
@@ -2314,6 +2777,9 @@ int start_astrid_instrument(const char * name, int channels, lpinstrument_t * in
     instrument->channels = channels;
 
     openlog(name, LOG_PID, LOG_USER);
+
+    /* Seed the random number generator */
+    LPRand.preseed();
 
     /* Set shutdown signal handlers */
     shutdown_action.sa_handler = instrument->shutdown;
@@ -2330,12 +2796,16 @@ int start_astrid_instrument(const char * name, int channels, lpinstrument_t * in
         exit(1);
     }
 
-    instrument->inports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
-    instrument->outports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
+    /* Open the LMDB session */
+    astrid_instrument_session_open(instrument);
 
     /* Set up JACK */
+    instrument->inports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
+    instrument->outports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
     instrument->jack_client = jack_client_open(name, jack_options, &jack_status, NULL);
-    print_jack_status(jack_status);
+
+    syslog(LOG_DEBUG, "JACK STATUS %d\n", (int)jack_status);
+
     if(instrument->jack_client == NULL) {
         syslog(LOG_ERR, "%s Could not open jack client. Client is NULL: %s\n", name, strerror(errno));
         if((jack_status & JackServerFailed) == JackServerFailed) {
@@ -2404,7 +2874,17 @@ int start_astrid_instrument(const char * name, int channels, lpinstrument_t * in
 
 	free(ports);
 
+    // Ready for some messages now! Open the message queue...
+    if((instrument->playqd = astrid_playq_open(instrument->name)) == (mqd_t) -1) {
+        syslog(LOG_CRIT, "Could not open playq for instrument %s. Error: %s\n", instrument->name, strerror(errno));
+        return -1;
+    }
+
+    memcpy(instrument->msg.instrument_name, instrument->name, strlen(instrument->name));
+
+    syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument->name, instrument->playqd);
     syslog(LOG_INFO, "%s is running...\n", name);
+
     instrument->is_running = 1;
 
     return 0;
@@ -2416,10 +2896,330 @@ astrid_instrument_shutdown_with_error:
     return 1;
 }
 
-int stop_astrid_instrument(lpinstrument_t * instrument) {
+int astrid_instrument_audio_stop(lpinstrument_t * instrument) {
+    int c;
+
     instrument->is_running = 0;
+
+    syslog(LOG_DEBUG, "Closing instrument message queue...\n");
+    if(instrument->playqd != (mqd_t) -1) astrid_playq_close(instrument->playqd);
+
+    for(c=0; c < instrument->channels; c++) {
+        jack_port_unregister(instrument->jack_client, instrument->outports[c]);
+        jack_port_unregister(instrument->jack_client, instrument->inports[c]);
+    }
+
+    syslog(LOG_DEBUG, "Stopping JACK...\n");
     jack_client_close(instrument->jack_client);
+
+    syslog(LOG_DEBUG, "Closing lmdb session...\n");
+    astrid_instrument_session_close(instrument);
+
     closelog();
     return 0;
 }
 
+int astrid_instrument_get_or_create_datadir(const char * name, char * dbpath) {
+    int ret;
+    char astrid_data_path[PATH_MAX];
+    char xdg_data_home[PATH_MAX];
+    char * user_home;
+    char * _xdg_data_home = getenv("XDG_DATA_HOME");
+    char * default_data_dir = ".local/share";
+    char * instrument_subdir = "astrid_instruments";
+
+    if(_xdg_data_home == NULL) {
+        user_home = getenv("HOME");
+        ret = snprintf(xdg_data_home, PATH_MAX, "%s/%s", user_home, default_data_dir);
+        if(ret < 0) {
+            syslog(LOG_ERR, "astrid data path (%s) snprintf: (%d) %s\n", default_data_dir, errno, strerror(errno));
+            return -1;
+        }
+
+    } else {
+        memcpy(xdg_data_home, _xdg_data_home, PATH_MAX);
+    }
+
+    if(access(xdg_data_home, F_OK) != 0) {
+        /* create the xdg data home dir */
+        if(mkdir(xdg_data_home, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+            syslog(LOG_ERR, "session data path (%s) mkdir: (%d) %s\n", xdg_data_home, errno, strerror(errno));
+            return -1;
+        }
+    }
+
+    ret = snprintf(astrid_data_path, PATH_MAX, "%s/%s", xdg_data_home, instrument_subdir);
+    if(ret < 0) {
+        syslog(LOG_ERR, "astrid data path (%s) snprintf: (%d) %s\n", astrid_data_path, errno, strerror(errno));
+        return -1;
+    }
+
+    if(access(astrid_data_path, F_OK) != 0) {
+        /* create the astrid data path */
+        if(mkdir(astrid_data_path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+            syslog(LOG_ERR, "astrid data path (%s) mkdir: (%d) %s\n", astrid_data_path, errno, strerror(errno));
+            return -1;
+        }
+    }
+
+    ret = snprintf(dbpath, PATH_MAX, "%s/%s", astrid_data_path, name);
+    if(ret < 0) {
+        syslog(LOG_ERR, "astrid data path (%s) snprintf: (%d) %s\n", astrid_data_path, errno, strerror(errno));
+        return -1;
+    }
+
+    if(access(dbpath, F_OK) != 0) {
+        /* create the data dir */
+        if(mkdir(dbpath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+            syslog(LOG_ERR, "session data path (%s) mkdir: (%d) %s\n", dbpath, errno, strerror(errno));
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+int astrid_instrument_session_open(lpinstrument_t * instrument) {
+    int rc;
+    char dbpath[PATH_MAX];
+
+    if(astrid_instrument_get_or_create_datadir(instrument->name, dbpath) < 0) {
+        syslog(LOG_ERR, "session data path (%s) mkdir: (%d) %s\n", dbpath, errno, strerror(errno));
+        return -1;
+    }
+
+    /* create the environment */
+	rc = mdb_env_create(&instrument->dbenv);
+    if(rc != MDB_SUCCESS) {
+		syslog(LOG_ERR, "mdb_env_create: (%d) %s\n", rc, mdb_strerror(rc));
+        return -1;
+    }
+
+    /* open it at the db directory */
+	rc = mdb_env_open(instrument->dbenv, dbpath, 0, 0664);
+    if(rc != MDB_SUCCESS) {
+        syslog(LOG_ERR, "mdb_env_open: (%d) %s\n", rc, mdb_strerror(rc));
+        return -1;
+    }
+
+    /* begin a new read transaction */
+	rc = mdb_txn_begin(instrument->dbenv, NULL, MDB_RDONLY, &instrument->dbtxn_read);
+    if(rc != MDB_SUCCESS) {
+        syslog(LOG_ERR, "mdb_txn_begin: read (%d) %s\n", rc, mdb_strerror(rc));
+        return -1;
+    }
+
+    /* open the database inside the read transaction */
+	rc = mdb_dbi_open(instrument->dbtxn_read, NULL, 0, &instrument->dbi);
+    if(rc != MDB_SUCCESS) {
+        syslog(LOG_ERR, "mdb_dbi_open: read (%d) %s\n", rc, mdb_strerror(rc));
+        return -1;
+    }
+
+    /* begin a new read/write transaction */
+	rc = mdb_txn_begin(instrument->dbenv, NULL, 0, &instrument->dbtxn_write);
+    if(rc != MDB_SUCCESS) {
+        syslog(LOG_ERR, "mdb_txn_begin: (%d) %s\n", rc, mdb_strerror(rc));
+        return -1;
+    }
+
+    /* open the database inside the write transaction */
+	rc = mdb_dbi_open(instrument->dbtxn_write, NULL, 0, &instrument->dbi);
+    if(rc != MDB_SUCCESS) {
+        syslog(LOG_ERR, "mdb_dbi_open: read (%d) %s\n", rc, mdb_strerror(rc));
+        return -1;
+    }
+
+    /* finalize the transactions */
+	mdb_txn_reset(instrument->dbtxn_read);
+	mdb_txn_commit(instrument->dbtxn_write);
+
+	return 0;
+}
+
+int astrid_instrument_session_close(lpinstrument_t * instrument) {
+    syslog(LOG_DEBUG, "Closing read db...\n");
+	mdb_dbi_close(instrument->dbenv, instrument->dbi);
+
+    //syslog(LOG_DEBUG, "Closing write db...\n");
+	//mdb_dbi_close(instrument->dbenv, instrument->dbi_write);
+
+    syslog(LOG_DEBUG, "Closing mdb env...\n");
+	mdb_env_close(instrument->dbenv);
+
+    syslog(LOG_DEBUG, "Done cleaning up LMDB...\n");
+    return 0;
+}
+
+int astrid_instrument_msg_read_next(lpinstrument_t * instrument) {
+    if(astrid_playq_read(instrument->playqd, &instrument->msg) == (mqd_t) -1) {
+        syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+        usleep((useconds_t)10000);
+    }
+
+    syslog(LOG_DEBUG, "MSG: %s\n", instrument->msg.instrument_name);
+    syslog(LOG_DEBUG, "MSG: %d (msg.voice_id)\n", (int)instrument->msg.voice_id);
+    syslog(LOG_DEBUG, "MSG: %d (msg.type)\n", (int)instrument->msg.type);
+
+    return 0;
+}
+
+lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t default_value) {
+    int rc;
+    MDB_val key, data;
+    lpfloat_t param = default_value;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(lpfloat_t);
+
+	rc = mdb_txn_renew(instrument->dbtxn_read);
+    rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
+    if(rc == 0) {
+        param = *((lpfloat_t *)data.mv_data);
+    }
+    mdb_txn_reset(instrument->dbtxn_read);
+
+    return param;
+}
+
+void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value) {
+    int rc;
+	MDB_val key, data;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(lpfloat_t);
+    data.mv_data = (void *)(&value);
+
+	rc = mdb_txn_begin(instrument->dbenv, NULL, 0, &instrument->dbtxn_write);
+    rc = mdb_put(instrument->dbtxn_write, instrument->dbi, &key, &data, 0);
+    rc = mdb_txn_commit(instrument->dbtxn_write);
+    if(rc) {
+        syslog(LOG_WARNING, "astrid_instrument_get_param_float mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
+    }
+}
+
+void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size) {
+    int rc;
+	MDB_val key, data;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(lpfloat_t) * size;
+    data.mv_data = (void *)value;
+
+	rc = mdb_txn_begin(instrument->dbenv, NULL, 0, &instrument->dbtxn_write);
+    rc = mdb_put(instrument->dbtxn_write, instrument->dbi, &key, &data, 0);
+    rc = mdb_txn_commit(instrument->dbtxn_write);
+    if(rc) {
+        syslog(LOG_WARNING, "astrid_instrument_get_param_float_list mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
+    }
+}
+
+void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list) {
+    int rc;
+    MDB_val key, data;
+    //lpfloat_t * param = NULL;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(lpfloat_t) * size;
+
+	rc = mdb_txn_renew(instrument->dbtxn_read);
+    rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
+    if(rc == 0) {
+        //param = (lpfloat_t *)data.mv_data;
+        memcpy(list, data.mv_data, data.mv_size);
+    }
+    mdb_txn_reset(instrument->dbtxn_read);
+}
+
+lpfloat_t astrid_instrument_get_param_float_list_item(
+    lpinstrument_t * instrument, 
+    int param_index, 
+    size_t size, 
+    int item_index, 
+    lpfloat_t default_value
+) {
+    int rc;
+    MDB_val key, data;
+    lpfloat_t * param_list = NULL;
+    lpfloat_t param = default_value;
+
+    assert((size_t)item_index < size);
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(lpfloat_t) * size;
+
+    rc = mdb_txn_renew(instrument->dbtxn_read);
+    rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
+    if(rc == 0) {
+        param_list = (lpfloat_t *)data.mv_data;
+    }
+
+    if(param_list != NULL) {
+        param = param_list[item_index];
+    }
+
+    mdb_txn_reset(instrument->dbtxn_read);
+
+    return param;
+}
+
+#if 0
+int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, const char * python_script_path) {
+    PyObject * pmodule;
+    PyConfig config;
+    PyStatus status;
+
+    syslog(LOG_INFO, "Starting python renderer...\n");
+
+    /* Prepare cyrenderer module for import */
+    if(PyImport_AppendInittab("cyrenderer", PyInit_cyrenderer) == -1) {
+        syslog(LOG_ERR, "Error: could not extend in-built modules table for renderer\n");
+        return -1;
+    }
+
+    /* Init python interpreter */
+    PyConfig_InitPythonConfig(&config);
+
+    status = PyConfig_SetString(&config, &config.program_name, L"astrid-python-renderer");
+    if (PyStatus_Exception(status)) {
+        PyConfig_Clear(&config);
+        return -1;
+    }
+
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config);
+    if (PyStatus_Exception(status)) {
+        return -1;
+    }
+
+    /* Import cyrenderer */
+    pmodule = PyImport_ImportModule("cyrenderer");
+    if(!pmodule) {
+        PyErr_Print();
+        syslog(LOG_ERR, "Error: could not import cython renderer module\n");
+        goto lprender_python_cleanup;
+    }
+
+    /* Import python instrument module */
+    if(astrid_load_instrument(python_script_path) < 0) {
+        PyErr_Print();
+        syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
+        goto lprender_python_cleanup;
+    }
+
+    syslog(LOG_INFO, "Astrid python renderer is now rendering!\n");
+
+    return 0;
+}
+
+int astrid_instrument_renderer_python_stop() {
+    syslog(LOG_INFO, "Astrid python renderer shutting down...\n");
+    Py_Finalize();
+    return 0;
+}
+#endif

@@ -68,6 +68,7 @@ void burst_table_from_file(lppulsarosc_t * osc, char * filename, size_t burst_si
 #if DEBUG
         printf("could not read burst file %s (%d)\n", strerror(errno), errno);
 #endif
+        close(fp);
         return;
     }
 
@@ -75,8 +76,11 @@ void burst_table_from_file(lppulsarosc_t * osc, char * filename, size_t burst_si
 #if DEBUG
         printf("Could not copy burst data %s (%d)\n", strerror(errno), errno);
 #endif
+        close(fp);
         return;
     }
+
+    close(fp);
 
     burst_table_from_bytes(osc, burst_buffer, burst_size);
 }

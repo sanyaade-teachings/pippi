@@ -7,6 +7,9 @@ PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get
 LPDIR = ../libpippi
 
 LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
+	${LPDIR}/vendor/libpqueue/src/pqueue.c \
+	${LPDIR}/vendor/lmdb/libraries/liblmdb/mdb.c \
+	${LPDIR}/vendor/lmdb/libraries/liblmdb/midl.c \
     $(LPDIR)/src/fx.softclip.c \
 	$(LPDIR)/src/oscs.bln.c \
 	$(LPDIR)/src/oscs.node.c \
@@ -21,14 +24,13 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 	$(LPDIR)/src/mir.c \
 	$(LPDIR)/src/soundfile.c \
 	$(LPDIR)/src/spectral.c \
-	$(LPDIR)/src/pippicore.c \
- 	src/jack_helpers.c
+	$(LPDIR)/src/pippicore.c
 
 LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
-LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src
+LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0
-LPLIBS = -lm -ldl -lpthread -lrt -ljack
+LPLIBS = -lm -ldl -lpthread -lrt -ljack -lhiredis
 
 clean:
 	rm -rf build/*
@@ -86,13 +88,13 @@ astrid-dac:
 	mkdir -p build
 
 	echo "Building astrid dac...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -lhiredis -o build/astrid-dac
+	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -o build/astrid-dac
 
 astrid-seq:
 	mkdir -p build
 
 	echo "Building astrid seq...";
-	gcc $(LPFLAGS) $(LPINCLUDES) -I${LPDIR}/vendor/libpqueue/src $(LPSOURCES) ${LPDIR}/vendor/libpqueue/src/pqueue.c src/astrid.c src/seq.c $(LPLIBS) -o build/astrid-seq
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seq.c $(LPLIBS) -o build/astrid-seq
 
 astrid-midimap:
 	mkdir -p build
@@ -131,14 +133,16 @@ astrid-adc:
 astrid-seriallistener:
 	mkdir -p build
 
-	echo "Building astrid serial listener...";
+	echo "Building astrid serial listener & friends...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seriallistener.c $(LPLIBS) -o build/astrid-seriallistener
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/msgarg.c $(LPLIBS) -o build/astrid-msgarg
 
 astrid-pulsar:
 	mkdir -p build
 
 	echo "Building astrid pulsar...";
 	gcc $(LPFLAGS) -fanalyzer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
+	#gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 
 follow-log:
 ifeq ($(shell uname),Darwin)

@@ -37,19 +37,19 @@ int main() {
     // the freq param input of the carrier node.
     // Configure the modulator output to scale from 
     // 100hz to 300hz.
-    LPNode.connect(osc, PARAM_FREQ, mod1, 60, 300);
+    LPNode.connect(osc, NODE_PARAM_FREQ, mod1, 60, 300);
 
     // Connect the output of the second modulator node 
     // to the freq param of the first modulator node, 
     // ...and the second to the third...
-    LPNode.connect(mod1, PARAM_FREQ, mod2, 10, 400);
-    LPNode.connect(mod2, PARAM_FREQ, mod3, 1500, 4050);
+    LPNode.connect(mod1, NODE_PARAM_FREQ, mod2, 10, 400);
+    LPNode.connect(mod2, NODE_PARAM_FREQ, mod3, 1500, 4050);
 
     // Set the freq param on the modulator to a fixed value of
     // 200hz. Internally this creates a fixed signal node and 
     // connects it to the given param with a fixed node->last 
     // value. (NODE_SIGNAL)
-    LPNode.connect_signal(mod3, PARAM_FREQ, 0.15f);
+    LPNode.connect_signal(mod3, NODE_PARAM_FREQ, 0.15f);
 
     // Render some samples to the output buffer
     for(i=0; i < length; i++) {
