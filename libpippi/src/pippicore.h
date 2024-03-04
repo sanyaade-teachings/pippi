@@ -3,6 +3,7 @@
 
 /* std includes */
 #include <assert.h>
+#include <errno.h>
 #include <locale.h>
 #include <limits.h>
 #include <math.h>
@@ -230,5 +231,7 @@ lpfloat_t lpfabs(lpfloat_t value);
 lpfloat_t lpfpow(lpfloat_t value, int exp);
 
 lpfloat_t lpphaseinc(lpfloat_t freq, lpfloat_t samplerate);
+
+lpbuffer_t * lpbuffer_create_stack(lpbuffer_t * (*table_creator)(int name, size_t length), int numtables, size_t * onsets, size_t * lengths, va_list vl);
 
 #endif

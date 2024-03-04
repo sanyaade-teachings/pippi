@@ -34,16 +34,7 @@ typedef struct lppulsarosc_t {
 } lppulsarosc_t;
 
 typedef struct lppulsarosc_factory_t {
-    lppulsarosc_t * (*create)(int num_wavetables, 
-        lpbuffer_t * wavetables, 
-        size_t * wavetable_onsets,
-        size_t * wavetable_lengths,
-
-        int num_windows, 
-        lpbuffer_t * windows, 
-        size_t * window_onsets,
-        size_t * window_lengths
-    );
+    lppulsarosc_t * (*create)(int num_wavetables, int num_windows, ...);
     void (*burst_file)(lppulsarosc_t * osc, char * filename, size_t burst_size);
     void (*burst_bytes)(lppulsarosc_t * osc, unsigned char * bytes, size_t burst_size);
     lpfloat_t (*process)(lppulsarosc_t *);

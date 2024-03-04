@@ -1,5 +1,11 @@
 #include "astrid.h"
 
+static volatile int * astrid_instrument_is_running;
+
+void handle_instrument_shutdown(__attribute__((unused)) int sig) {
+    *astrid_instrument_is_running = 0;
+}
+
 void lptimeit_since(struct timespec * start) {
     struct timespec now;
     long long elapsed;
@@ -1031,7 +1037,7 @@ int lpserial_getctl(int device_id, int ctl, lpfloat_t * value) {
         return -1;        
     }
 
-    *value = (lpfloat_t)ctl_value / SIZE_MAX;
+    *value = (lpfloat_t)ctl_value / (lpfloat_t)SIZE_MAX;
 
     return 0;
 }
@@ -2206,7 +2212,7 @@ void scheduler_destroy(lpscheduler_t * s) {
     lpevent_t * current;
     lpevent_t * next;
 
-    if(s->waiting_queue_head) {
+    if(s->waiting_queue_head != NULL) {
         current = s->waiting_queue_head;
         while(current->next != NULL) {
             next = (lpevent_t *)current->next;
@@ -2216,7 +2222,7 @@ void scheduler_destroy(lpscheduler_t * s) {
         LPMemoryPool.free(current);
     }
 
-    if(s->playing_stack_head) {
+    if(s->playing_stack_head != NULL) {
         current = s->playing_stack_head;
         while(current->next != NULL) {
             next = (lpevent_t *)current->next;
@@ -2226,7 +2232,7 @@ void scheduler_destroy(lpscheduler_t * s) {
         LPMemoryPool.free(current);
     }
 
-    if(s->nursery_head) {
+    if(s->nursery_head != NULL) {
         current = s->nursery_head;
         while(current->next != NULL) {
             next = (lpevent_t *)current->next;
@@ -2235,6 +2241,7 @@ void scheduler_destroy(lpscheduler_t * s) {
         }
         LPMemoryPool.free(current);
     }
+    LPMemoryPool.free(s->now);
     LPMemoryPool.free(s->current_frame);
     LPMemoryPool.free(s);
 }
@@ -2436,14 +2443,9 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     for(c=0; c < instrument->channels; c++) {
         input_channels[c] = (float *)jack_port_get_buffer(instrument->inports[c], nframes);
         output_channels[c] = (float *)jack_port_get_buffer(instrument->outports[c], nframes);
+        memset(output_channels[c], 0, nframes * sizeof(float));
     }
 
-    instrument->callback(
-        instrument->channels, 
-        (size_t)nframes, 
-        input_channels, output_channels,
-        (void *)instrument->context
-    );
 
     /* mix in async renders */
     if(instrument->async_mixer != NULL) {
@@ -2453,6 +2455,15 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
                 output_channels[c][i] += instrument->async_mixer->current_frame[c];
             }
         }
+    }
+
+    if(instrument->callback != NULL) {
+        instrument->callback(
+            instrument->channels, 
+            (size_t)nframes, 
+            input_channels, output_channels, 
+            (void *)instrument
+        );
     }
 
     /* clamp output */
@@ -2764,7 +2775,12 @@ int cleanup_async_mixer(lpinstrument_t * instrument) {
     return 0;
 }
 
-int astrid_instrument_audio_start(const char * name, int channels, lpinstrument_t * instrument) {
+int astrid_instrument_start(
+    const char * name, 
+    int channels, 
+    void * ctx,
+    lpinstrument_t * instrument
+) {
     struct sigaction shutdown_action;
     jack_status_t jack_status;
     jack_options_t jack_options = JackNullOption;
@@ -2773,8 +2789,11 @@ int astrid_instrument_audio_start(const char * name, int channels, lpinstrument_
     char inport_name[50];
     int c = 0;
 
+    syslog(LOG_DEBUG, "starting %s instrument...\n", name);
+
     instrument->name = name;
     instrument->channels = channels;
+    instrument->context = ctx;
 
     openlog(name, LOG_PID, LOG_USER);
 
@@ -2782,9 +2801,10 @@ int astrid_instrument_audio_start(const char * name, int channels, lpinstrument_
     LPRand.preseed();
 
     /* Set shutdown signal handlers */
-    shutdown_action.sa_handler = instrument->shutdown;
+    shutdown_action.sa_handler = handle_instrument_shutdown;
     sigemptyset(&shutdown_action.sa_mask);
     shutdown_action.sa_flags = SA_RESTART; /* Prevent open, read, write etc from EINTR */
+    astrid_instrument_is_running = &instrument->is_running;
 
     if(sigaction(SIGINT, &shutdown_action, NULL) == -1) {
         syslog(LOG_ERR, "%s Could not init SIGINT signal handler. Error: %s\n", name, strerror(errno));
@@ -2793,6 +2813,12 @@ int astrid_instrument_audio_start(const char * name, int channels, lpinstrument_
 
     if(sigaction(SIGTERM, &shutdown_action, NULL) == -1) {
         syslog(LOG_ERR, "%s Could not init SIGTERM signal handler. Error: %s\n", name, strerror(errno));
+        exit(1);
+    }
+
+    /* Set up the async mixer and buffer scheduler */
+    if(setup_async_mixer(instrument) < 0) {
+        printf("Failed to set up async mixer: (%d) %s\n", errno, strerror(errno));
         exit(1);
     }
 
@@ -2831,12 +2857,12 @@ int astrid_instrument_audio_start(const char * name, int channels, lpinstrument_
     }
 
     for(c=0; c < channels; c++) {
-        if((instrument->outports[c] == NULL)) {
+        if(instrument->outports[c] == NULL) {
             syslog(LOG_ERR, "No more JACK output ports available, shutting down...\n");
             goto astrid_instrument_shutdown_with_error;
         }
 
-        if((instrument->inports[c] == NULL)) {
+        if(instrument->inports[c] == NULL) {
             syslog(LOG_ERR, "No more JACK input ports available, shutting down...\n");
             goto astrid_instrument_shutdown_with_error;
         }
@@ -2896,7 +2922,7 @@ astrid_instrument_shutdown_with_error:
     return 1;
 }
 
-int astrid_instrument_audio_stop(lpinstrument_t * instrument) {
+int astrid_instrument_stop(lpinstrument_t * instrument) {
     int c;
 
     instrument->is_running = 0;
@@ -2914,6 +2940,8 @@ int astrid_instrument_audio_stop(lpinstrument_t * instrument) {
 
     syslog(LOG_DEBUG, "Closing lmdb session...\n");
     astrid_instrument_session_close(instrument);
+
+    if(instrument->async_mixer != NULL) scheduler_destroy(instrument->async_mixer);
 
     closelog();
     return 0;
@@ -3038,28 +3066,96 @@ int astrid_instrument_session_open(lpinstrument_t * instrument) {
 }
 
 int astrid_instrument_session_close(lpinstrument_t * instrument) {
-    syslog(LOG_DEBUG, "Closing read db...\n");
+    syslog(LOG_DEBUG, "Closing LMDB session...\n");
 	mdb_dbi_close(instrument->dbenv, instrument->dbi);
-
-    //syslog(LOG_DEBUG, "Closing write db...\n");
-	//mdb_dbi_close(instrument->dbenv, instrument->dbi_write);
-
-    syslog(LOG_DEBUG, "Closing mdb env...\n");
 	mdb_env_close(instrument->dbenv);
-
     syslog(LOG_DEBUG, "Done cleaning up LMDB...\n");
     return 0;
 }
 
-int astrid_instrument_msg_read_next(lpinstrument_t * instrument) {
+int astrid_instrument_tick(lpinstrument_t * instrument) {
+    if(instrument->is_running == 0) return 0;
+
+    lpbuffer_t * buf; /* async renders: FIXME, add renderer thread */
+    double processing_time_so_far, onset_delay_in_seconds;
+    double now = 0;
+
     if(astrid_playq_read(instrument->playqd, &instrument->msg) == (mqd_t) -1) {
         syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
         usleep((useconds_t)10000);
+        return -1;
     }
 
     syslog(LOG_DEBUG, "MSG: %s\n", instrument->msg.instrument_name);
     syslog(LOG_DEBUG, "MSG: %d (msg.voice_id)\n", (int)instrument->msg.voice_id);
     syslog(LOG_DEBUG, "MSG: %d (msg.type)\n", (int)instrument->msg.type);
+
+    /* TODO -- run everything below in a thread -- */
+
+    switch(instrument->msg.type) {
+        case LPMSG_SHUTDOWN:
+            syslog(LOG_DEBUG, "MSG: shutdown\n");
+            syslog(LOG_INFO, "%s instrument shutting down and cleaning up...\n", instrument->name);
+
+            /* signal the shutdown */
+            instrument->is_running = 0;
+
+            /* Let the callbacks finish */
+            usleep((useconds_t)1000);
+
+            /* shut it down... */
+            if(astrid_instrument_stop(instrument) < 0) {
+                fprintf(stderr, "There was a problem stopping the instrument. (%d) %s\n", errno, strerror(errno));
+            }
+
+            break;
+
+        case LPMSG_LOAD:
+            syslog(LOG_DEBUG, "MSG: load\n");
+            break;
+
+        case LPMSG_PLAY:
+            syslog(LOG_DEBUG, "MSG: play\n");
+            break;
+
+        case LPMSG_TRIGGER:
+            syslog(LOG_DEBUG, "MSG: trigger\n");
+            if(instrument->renderer != NULL) {
+                /* Do the render */
+                buf = instrument->renderer(instrument);
+
+                if(buf == NULL) {
+                    syslog(LOG_ERR, "null buffer\n");
+                    break;
+                }
+
+                syslog(LOG_DEBUG, "rendered buffer is %d frames and %d channels...\n", (int)buf->length, buf->channels);
+
+                /* Get now */
+                if(lpscheduler_get_now_seconds(&now) < 0) {
+                    syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
+                    now = 0;
+                }
+
+                processing_time_so_far = now - instrument->msg.initiated;
+                onset_delay_in_seconds = instrument->msg.scheduled - processing_time_so_far;
+                if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
+
+                instrument->msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
+
+                syslog(LOG_INFO, "msg.onset_delay %ld\n", instrument->msg.onset_delay);
+
+                /* Schedule the buffer for playback */
+                scheduler_schedule_event(instrument->async_mixer, buf, 0);
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    /* free buffers that are done playing */
+    if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
 
     return 0;
 }

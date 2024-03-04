@@ -1,7 +1,8 @@
 #include "oscs.pulsar.h"
 
+#ifndef DEBUG
 #define DEBUG 0
-
+#endif
 #if DEBUG
 #include <errno.h>
 #endif
@@ -16,22 +17,24 @@ lpfloat_t get_stack_value(
 #if DEBUG
     assert(phase >= 0);
     assert(region_length > 0);
+    assert(stack != NULL);
+    assert(stack->data != NULL);
 #endif
 
-    size_t region_index;
+    size_t region_index, ai, bi;
     lpfloat_t a, b, frac;
 
     phase *= region_length;
     region_index = (size_t)phase;
     frac = phase - (size_t)phase;
 
-    //a = stack[(region_index % region_length) + region_offset];
-    //b = stack[((region_index+1) % region_length) + region_offset];
-
     region_index = region_index % region_length;
 
-    a = stack->data[(region_index+region_offset) % stack->length];
-    b = stack->data[(region_index+region_offset+1) % stack->length];
+    ai = (region_index+region_offset) % stack->length;
+    bi = (region_index+region_offset+1) % stack->length;
+
+    a = stack->data[ai];
+    b = stack->data[bi];
 
     return (1.0f - frac) * a + (frac * b);
 }
@@ -61,7 +64,9 @@ void burst_table_from_bytes(lppulsarosc_t * osc, unsigned char * bytes, size_t b
 void burst_table_from_file(lppulsarosc_t * osc, char * filename, size_t burst_size) {
     int fp;
     size_t num_bytes = burst_size / sizeof(unsigned char) + 1;
-    unsigned char burst_buffer[num_bytes] = {};
+    unsigned char burst_buffer[num_bytes];
+
+    memset(burst_buffer, 0, num_bytes * sizeof(unsigned char));
 
     fp = open(filename, O_RDONLY);
     if(fp < 0) {
@@ -85,29 +90,40 @@ void burst_table_from_file(lppulsarosc_t * osc, char * filename, size_t burst_si
     burst_table_from_bytes(osc, burst_buffer, burst_size);
 }
 
-lppulsarosc_t * create_pulsarosc(
-    int num_wavetables, 
-    lpbuffer_t * wavetables, 
-    size_t * wavetable_onsets,
-    size_t * wavetable_lengths,
 
-    int num_windows, 
-    lpbuffer_t * windows, 
-    size_t * window_onsets,
-    size_t * window_lengths
-) {
+void create_pulsarosc_wavetable_stack(lppulsarosc_t * p, int numtables, va_list vl) {
+    LPMemoryPool.free(p->wavetables);
+    LPMemoryPool.free(p->wavetable_onsets);
+    LPMemoryPool.free(p->wavetable_lengths);
+
+    p->num_wavetables = numtables;
+    p->wavetable_onsets = (size_t *)LPMemoryPool.alloc(numtables, sizeof(size_t));
+    p->wavetable_lengths = (size_t *)LPMemoryPool.alloc(numtables, sizeof(size_t));
+    p->wavetables = lpbuffer_create_stack(LPWavetable.create, numtables, p->wavetable_onsets, p->wavetable_lengths, vl);
+}
+
+void create_pulsarosc_window_stack(lppulsarosc_t * p, int numtables, va_list vl) {
+    LPMemoryPool.free(p->windows);
+    LPMemoryPool.free(p->window_onsets);
+    LPMemoryPool.free(p->window_lengths);
+
+    p->num_windows = numtables;
+    p->window_onsets = (size_t *)LPMemoryPool.alloc(numtables, sizeof(size_t));
+    p->window_lengths = (size_t *)LPMemoryPool.alloc(numtables, sizeof(size_t));
+    p->windows = lpbuffer_create_stack(LPWindow.create, numtables, p->window_onsets, p->window_lengths, vl);
+}
+
+
+lppulsarosc_t * create_pulsarosc(int num_wavetables, int num_windows, ...) {
+    va_list vl;
     lppulsarosc_t * p = (lppulsarosc_t *)LPMemoryPool.alloc(1, sizeof(lppulsarosc_t));
 
-    p->wavetables = wavetables;
-    p->num_wavetables = num_wavetables;
-    p->wavetable_onsets = wavetable_onsets;
-    p->wavetable_lengths = wavetable_lengths;
-    p->wavetable_morph_freq = .12f;
+    va_start(vl, num_windows);
+    create_pulsarosc_wavetable_stack(p, num_wavetables, vl);
+    create_pulsarosc_window_stack(p, num_windows, vl);
+    va_end(vl);
 
-    p->windows = windows;
-    p->num_windows = num_windows;
-    p->window_onsets = window_onsets;
-    p->window_lengths = window_lengths;
+    p->wavetable_morph_freq = .12f;
     p->window_morph_freq = .12f;
 
     p->burst = NULL;

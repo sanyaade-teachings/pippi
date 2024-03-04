@@ -1,16 +1,14 @@
 #include "astrid.h"
 
+#define NAME "pulsar"
+
 #define SR 48000
 #define CHANNELS 2
 
 #define NUMOSCS (CHANNELS * 10)
-#define NUMWINS 2
-#define NUMWTS 2
 #define WTSIZE 4096
 #define NUMFREQS 12
 
-lpinstrument_t instrument;
-char name[] = "astrid-pulsar";
 lpfloat_t scale[] = {
     55.000f, 
     110.000f, 
@@ -44,26 +42,17 @@ typedef struct localctx_t {
     lpfloat_t env_phaseincs[NUMOSCS];
 } localctx_t;
 
-
-void handle_shutdown(__attribute__((unused)) int sig) {
-    instrument.is_running = 0;
-}
-
-lpbuffer_t * renderer_callback(lpinstrument_t * instrument) {
+lpbuffer_t * renderer_callback(void * arg) {
     lpbuffer_t * out;
-    lpbuffer_t * snd;
-    lpbuffer_t * speed;
 
-    speed = LPWindow.create(WIN_RND, 4096);
-    snd = LPSoundFile.read("chimeC.wav");
-    LPBuffer.scale(speed, 0, 1, 0.9, 1.1);
-    out = LPBuffer.varispeed(snd, speed);
-    LPBuffer.multiply_scalar(out, LPRand.rand(0.1f, 0.5f));
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+    localctx_t * ctx = (localctx_t *)instrument->context;
 
-    free(speed);
-    free(snd);
+    out = LPBuffer.cut(ctx->ringbuf, LPRand.randint(0, SR*20), LPRand.randint(SR, SR*10));
+    if(LPBuffer.mag(out) > 0.01) {
+        LPFX.norm(out, LPRand.rand(0.6f, 0.8f));
+    }
 
-    syslog(LOG_DEBUG, "done rendering %d frames and %d channels...\n", (int)out->length, out->channels);
     return out;
 }
 
@@ -72,9 +61,10 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
     int j, c;
     lpfloat_t freqs[NUMFREQS];
     lpfloat_t sample, amp, pw, saturation;
-    localctx_t * ctx = (localctx_t *)arg;
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+    localctx_t * ctx = (localctx_t *)instrument->context;
 
-    if(!instrument.is_running) return;
+    if(!instrument->is_running) return;
 
     for(i=0; i < blocksize; i++) {
         idx = (ctx->ringbuf->pos + i) % ctx->ringbuf->length;
@@ -84,9 +74,9 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
     }
     ctx->ringbuf->pos += blocksize;
 
-    amp = astrid_instrument_get_param_float(&instrument, PARAM_AMP, 0.08f);
-    pw = astrid_instrument_get_param_float(&instrument, PARAM_PW, 1.f);
-    astrid_instrument_get_param_float_list(&instrument, PARAM_FREQS, NUMFREQS, freqs);
+    amp = astrid_instrument_get_param_float(instrument, PARAM_AMP, 0.08f);
+    pw = astrid_instrument_get_param_float(instrument, PARAM_PW, 1.f);
+    astrid_instrument_get_param_float_list(instrument, PARAM_FREQS, NUMFREQS, freqs);
 
     for(i=0; i < blocksize; i++) {
         sample = 0.f;
@@ -94,7 +84,7 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
             saturation = LPInterpolation.linear_pos(ctx->curves[j], ctx->curves[j]->phase);
             ctx->oscs[j]->saturation = saturation;
             ctx->oscs[j]->pulsewidth = pw;
-            ctx->oscs[j]->freq = freqs[j % NUMFREQS] * 4.f;
+            ctx->oscs[j]->freq = freqs[j % NUMFREQS] * 4.f * 0.6f;
 
             sample += LPPulsarOsc.process(ctx->oscs[j]) * amp * LPInterpolation.linear_pos(ctx->env, ctx->env_phases[j]) * 0.12f;
 
@@ -111,27 +101,15 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
         }
 
         for(c=0; c < channels; c++) {
-            //output[c][i] = (float)sample * input[c][i];
-            output[c][i] = (float)sample * 0.5f;
+            output[c][i] += (float)sample * 0.5f;
         }
     }
 }
 
 int main() {
-    lpfloat_t selected_freqs[NUMFREQS];
-    const char * instrument_basename = "pulsar";
-    //const char * python_script_path = "orc/pulsar.py";
-    double processing_time_so_far, onset_delay_in_seconds;
-    double now = 0;
-
-    lpbuffer_t * buf;
-    lpbuffer_t * wts;
-    lpbuffer_t * win;
-    size_t wt_onsets[NUMWTS];
-    size_t wt_lengths[NUMWTS];
-    size_t win_onsets[NUMWINS];
-    size_t win_lengths[NUMWINS];
-
+    lpinstrument_t instrument = {0};
+    lpfloat_t selected_freqs[NUMFREQS] = {0};
+    
     // create local context struct
     localctx_t * ctx = (localctx_t *)calloc(1, sizeof(localctx_t));
     if(ctx == NULL) {
@@ -141,19 +119,7 @@ int main() {
 
     // create env and ringbuf
     ctx->env = LPWindow.create(WIN_HANNOUT, 4096);
-    ctx->ringbuf = LPBuffer.create(SR * 10, CHANNELS, SR);
-
-    // create wt/win stacks
-    wts = LPWavetable.create_stack(NUMWTS, 
-            wt_onsets, wt_lengths,
-            WT_SINE, WTSIZE,
-            WT_TRI2, WTSIZE
-    );
-    win = LPWindow.create_stack(NUMWINS, 
-            win_onsets, win_lengths,
-            WIN_SINE, WTSIZE,
-            WIN_HANN, WTSIZE
-    );
+    ctx->ringbuf = LPBuffer.create(SR * 30, CHANNELS, SR);
 
     // setup oscs and curves
     for(int i=0; i < NUMOSCS; i++) {
@@ -161,105 +127,50 @@ int main() {
         ctx->env_phaseincs[i] = (1.f/SR) * LPRand.rand(0.001f, 0.1f);
         ctx->curves[i] = LPWindow.create(WIN_RND, 4096);
 
-        ctx->oscs[i] = LPPulsarOsc.create(
-            NUMWTS, wts, wt_onsets, wt_lengths, 
-            NUMWINS, win, win_onsets, win_lengths
+        ctx->oscs[i] = LPPulsarOsc.create(2, 2, // number of wavetables, windows
+            WT_SINE, WTSIZE, WT_TRI2, WTSIZE,   // wavetables and sizes
+            WIN_SINE, WTSIZE, WIN_HANN, WTSIZE  // windows and sizes
         );
 
-        selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
         ctx->oscs[i]->samplerate = (lpfloat_t)SR;
         ctx->oscs[i]->wavetable_morph_freq = LPRand.rand(0.001f, 0.15f);
         ctx->oscs[i]->phase = 0.f;
     }
 
-    instrument.callback = audio_callback;
-    instrument.context = (void*)ctx;
-    instrument.shutdown = handle_shutdown;
-    instrument.channels = CHANNELS; // FIXME merge all this together whydoncha
+    // Set the stream and async render callbacks
+    instrument.callback = audio_callback; // FIXME call this `stream` maybe, or `ugens`?
+    instrument.renderer = renderer_callback;
 
-    if(setup_async_mixer(&instrument) < 0) {
-        printf("Failed to set up async mixer: (%d) %s\n", errno, strerror(errno));
-        exit(1);
+    if(astrid_instrument_start(NAME, CHANNELS, (void*)ctx, &instrument) < 0) {
+        fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
+        exit(EXIT_FAILURE);
     }
 
-    if(astrid_instrument_audio_start(instrument_basename, CHANNELS, &instrument) < 0) {
-        printf("Could not start instrument: (%d) %s\n", errno, strerror(errno));
-        exit(1);
+    /* populate initial freqs */
+    for(int i=0; i < NUMFREQS; i++) {
+        selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
     }
-
-    // set initial freqs
     astrid_instrument_set_param_float_list(&instrument, PARAM_FREQS, selected_freqs, NUMFREQS);
 
     while(instrument.is_running) {
-        printf("Waiting for messages...\n");
+        astrid_instrument_tick(&instrument);
 
-        astrid_instrument_msg_read_next(&instrument);
-
-        switch(instrument.msg.type) {
-            case LPMSG_PLAY:
-                syslog(LOG_DEBUG, "MSG: play\n");
-                break;
-
-            case LPMSG_UPDATE:
-                for(int i=0; i < NUMFREQS; i++) {
-                    selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
-                }
-                astrid_instrument_set_param_float_list(&instrument, PARAM_FREQS, selected_freqs, NUMFREQS);
-                astrid_instrument_set_param_float(&instrument, PARAM_AMP, LPRand.rand(0.5f, 1.f));
-                astrid_instrument_set_param_float(&instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
-
-                syslog(LOG_DEBUG, "MSG: update | %s\n", instrument.msg.msg);
-                break;
-
-            case LPMSG_LOAD:
-                syslog(LOG_DEBUG, "MSG: load\n");
-                break;
-
-            case LPMSG_TRIGGER:
-                syslog(LOG_DEBUG, "MSG: trigger\n");
-
-                /* Do the render */
-                buf = renderer_callback(&instrument);
-
-                if(buf == NULL) {
-                    syslog(LOG_ERR, "null buffer\n");
-                    continue;
-                }
-
-                syslog(LOG_DEBUG, "rendered buffer is %d frames and %d channels...\n", (int)buf->length, buf->channels);
-
-                /* Get now */
-                if(lpscheduler_get_now_seconds(&now) < 0) {
-                    syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
-                    now = 0;
-                }
-
-                processing_time_so_far = now - instrument.msg.initiated;
-                onset_delay_in_seconds = instrument.msg.scheduled - processing_time_so_far;
-                if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
-
-                instrument.msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
-
-                syslog(LOG_INFO, "msg.onset_delay %ld\n", instrument.msg.onset_delay);
-
-                /* Schedule the buffer for playback */
-                scheduler_schedule_event(instrument.async_mixer, buf, 0);
-                continue;
-
-            case LPMSG_SHUTDOWN:
-                syslog(LOG_DEBUG, "MSG: shutdown\n");
-                instrument.is_running = 0;
-                break;
-
-            default:
-                continue;
+        // Respond to param update messages -- TODO: parse param args with PARAM_ consts
+        if(instrument.msg.type == LPMSG_UPDATE) {
+            syslog(LOG_DEBUG, "MSG: update | %s\n", instrument.msg.msg);
+            for(int i=0; i < NUMFREQS; i++) {
+                selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
+            }
+            astrid_instrument_set_param_float_list(&instrument, PARAM_FREQS, selected_freqs, NUMFREQS);
+            astrid_instrument_set_param_float(&instrument, PARAM_AMP, LPRand.rand(0.5f, 1.f));
+            astrid_instrument_set_param_float(&instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
         }
     }
 
-    printf("Cleaning up...\n");
-
-    astrid_instrument_audio_stop(&instrument);
-    if(instrument.async_mixer != NULL) scheduler_destroy(instrument.async_mixer);
+    if(astrid_instrument_stop(&instrument) < 0) {
+        fprintf(stderr, "There was a problem stopping the instrument. (%d) %s\n", errno, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     for(int o=0; o < NUMOSCS; o++) {
         LPPulsarOsc.destroy(ctx->oscs[o]);
@@ -268,8 +179,6 @@ int main() {
 
     LPBuffer.destroy(ctx->ringbuf);
     LPBuffer.destroy(ctx->env);
-    LPBuffer.destroy(win);
-    LPBuffer.destroy(wts);
 
     free(ctx);
 
