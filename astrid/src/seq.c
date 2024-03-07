@@ -104,6 +104,7 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             exit(1);
         }
 
+#if 0
         /* if this is a STOP_VOICE message, find all voice events and remove them */
         if(msg->type == LPMSG_STOP_VOICE) {
             if(msgpq_remove_nodes_by_voice_id(msg->voice_id) < 0) {
@@ -115,12 +116,7 @@ void * message_scheduler_pq(__attribute__((unused)) void * arg) {
             syslog(LOG_INFO, "Got STOP_VOICE message... removed voice %ld nodes from pq\n", msg->voice_id);
             continue;
         }
-
-        /* If this is a STOP_INSTRUMENT message, find all instrument events and remove them */
-        if(msg->type == LPMSG_STOP_INSTRUMENT) {
-            syslog(LOG_INFO, "Got STOP_INSTRUMENT message... ignoring it\n");
-            continue;
-        }
+#endif
 
         /* If msg timestamp is in the future, 
          * sleep for a bit and then try again */

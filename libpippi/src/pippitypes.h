@@ -87,14 +87,51 @@ typedef struct lpmsg_t {
     char instrument_name[LPMAXNAME];
 } lpmsg_t;
 
+enum Wavetables {
+    WT_SINE,
+    WT_COS,
+    WT_SQUARE, 
+    WT_TRI, 
+    WT_TRI2, 
+    WT_SAW,
+    WT_RSAW,
+    WT_RND,
+    WT_USER,
+    NUM_WAVETABLES
+};
+
+enum Windows {
+    WIN_SINE,
+    WIN_SINEIN,
+    WIN_SINEOUT,
+    WIN_COS,
+    WIN_TRI, 
+    WIN_PHASOR, 
+    WIN_HANN, 
+    WIN_HANNIN, 
+    WIN_HANNOUT, 
+    WIN_RND,
+    WIN_SAW,
+    WIN_RSAW,
+    WIN_USER,
+    NUM_WINDOWS
+};
+
+enum PanMethods {
+    PANMETHOD_CONSTANT,
+    PANMETHOD_LINEAR,
+    PANMETHOD_SINE,
+    PANMETHOD_GOGINS,
+    NUM_PANMETHODS
+};
+
 enum LPMessageTypes {
     LPMSG_EMPTY,
     LPMSG_PLAY,
     LPMSG_TRIGGER,
     LPMSG_UPDATE,
     LPMSG_SERIAL,
-    LPMSG_STOP_INSTRUMENT,
-    LPMSG_STOP_VOICE,
+    LPMSG_SCHEDULE,
     LPMSG_LOAD,
     LPMSG_SHUTDOWN,
     LPMSG_SET_COUNTER,

@@ -58,9 +58,9 @@
 #define UPDATE_MESSAGE 'u'
 #define TRIGGER_MESSAGE 't'
 #define SERIAL_MESSAGE 'b'
-#define STOP_MESSAGE 's'
+#define SCHEDULE_MESSAGE 's'
 #define LOAD_MESSAGE 'l'
-#define SHUTDOWN_MESSAGE 'k'
+#define SHUTDOWN_MESSAGE 'q'
 #define SET_COUNTER_MESSAGE 'v'
 
 #ifndef NOTE_ON
@@ -179,9 +179,19 @@ typedef struct lpinstrument_t {
     jack_port_t ** outports;
     jack_client_t * jack_client;
 
+    // Optional local context struct for callbacks
     void * context;
+
+    // Param update callback
+    void (*updates)(void * instrument);
+
+    // Async renderer callback (C-compat only)
     lpbuffer_t * (*renderer)(void * instrument);
-    void (*callback)(int channels, size_t blocksize, float ** input, float ** output, void * instrument);
+
+    // Stream callback
+    void (*stream)(int channels, size_t blocksize, float ** input, float ** output, void * instrument);
+
+    // Shutdown signal handler (SIGTERM & SIGKILL)
     void (*shutdown)(int sig);
 } lpinstrument_t;
 

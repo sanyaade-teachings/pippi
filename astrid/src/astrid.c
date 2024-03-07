@@ -1725,8 +1725,8 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
             msg->type = LPMSG_LOAD;
             break;
 
-        case STOP_MESSAGE:
-            msg->type = LPMSG_STOP_VOICE;
+        case SCHEDULE_MESSAGE:
+            msg->type = LPMSG_SCHEDULE;
             break;
 
         case SHUTDOWN_MESSAGE:
@@ -1742,19 +1742,10 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
             return -1;
     }
 
-    if(msg->type == LPMSG_STOP_VOICE) {
-        /* Try to extract the voice ID from the stop command */
-        if((voice_id = atoi(argv[arg_offset + 2])) < 0) {
-            syslog(LOG_ERR, "Invalid voice ID passed with STOP message. Error: (%d) %s\n", errno, strerror(errno));
-            return -1;
-        }
-
-    } else {
-        /* Get the voice ID from the voice ID counter */
-        if((voice_id = astrid_get_voice_id()) < 0) {
-            syslog(LOG_ERR, "Error getting voice ID: (%d) %s\n", errno, strerror(errno));
-            return -1;
-        }
+    /* Get the voice ID from the voice ID counter */
+    if((voice_id = astrid_get_voice_id()) < 0) {
+        syslog(LOG_ERR, "Error getting voice ID: (%d) %s\n", errno, strerror(errno));
+        return -1;
     }
 
     /* Initialize the count and set the voice_id */
@@ -2457,8 +2448,8 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         }
     }
 
-    if(instrument->callback != NULL) {
-        instrument->callback(
+    if(instrument->stream != NULL) {
+        instrument->stream(
             instrument->channels, 
             (size_t)nframes, 
             input_channels, output_channels, 
@@ -2559,24 +2550,6 @@ void * instrument_seq_pq(void * arg) {
             exit(1);
         }
 
-        /* if this is a STOP_VOICE message, find all voice events and remove them */
-        if(msg->type == LPMSG_STOP_VOICE) {
-            if(instrument_seq_remove_nodes_by_voice_id(instrument->msgpq, msg->voice_id) < 0) {
-                syslog(LOG_ERR, "Error removing voice %ld nodes from priority queue\n", msg->voice_id);
-                usleep((useconds_t)500);
-                continue;
-            }
-
-            syslog(LOG_INFO, "Got STOP_VOICE message... removed voice %ld nodes from pq\n", msg->voice_id);
-            continue;
-        }
-
-        /* If this is a STOP_INSTRUMENT message, find all instrument events and remove them */
-        if(msg->type == LPMSG_STOP_INSTRUMENT) {
-            syslog(LOG_INFO, "Got STOP_INSTRUMENT message... ignoring it\n");
-            continue;
-        }
-
         /* If msg timestamp is in the future, 
          * sleep for a bit and then try again */
         if(node->timestamp > now) {
@@ -2599,67 +2572,115 @@ void * instrument_seq_pq(void * arg) {
     }
 
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
-    //pqueue_free(msgpq);
-    //free(instrument->pqnodes);
+    pqueue_free(instrument->msgpq);
+    free(instrument->pqnodes);
     return 0;
 }
 
-void * instrument_seq_message_feed(void * arg) {
-    lpinstrument_t * instrument;
-    double seq_delay;
-    mqd_t qd;
-    lpmsg_t msg = {0};
-    lpmsgpq_node_t * d;
+void * instrument_message_thread(void * arg) {
+    lpbuffer_t * buf; /* async renders: FIXME, add renderer thread */
+    double processing_time_so_far, onset_delay_in_seconds;
     double now = 0;
+    double seq_delay;
+    lpmsgpq_node_t * d;
     int pqnode_index = 0;
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
-    instrument = (lpinstrument_t *)arg;
-
-    if((qd = astrid_msgq_open()) == (mqd_t) -1) {
-        syslog(LOG_CRIT, "Could not open msgq for message relay: %s\n", strerror(errno));
-        exit(1);        
-    }
-
-    syslog(LOG_INFO, "Message relay: Waiting for messages...\n");
-
-    /* Wait for messages on the msgq fifo */
     while(instrument->is_running) {
-        if(astrid_msgq_read(qd, &msg) < 0) {
-            syslog(LOG_ERR, "Error while fetching message during message relay loop: %s\n", strerror(errno));
-            continue;
+        if(astrid_playq_read(instrument->playqd, &instrument->msg) == (mqd_t) -1) {
+            syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+            usleep((useconds_t)10000);
+            return NULL;
         }
 
-        d = &instrument->pqnodes[pqnode_index];
-        memcpy(&d->msg, &msg, sizeof(lpmsg_t));
-        pqnode_index += 1;
-        while(pqnode_index >= NUM_NODES) pqnode_index -= NUM_NODES;
+        syslog(LOG_DEBUG, "MSG: %s\n", instrument->msg.instrument_name);
+        syslog(LOG_DEBUG, "MSG: %d (msg.voice_id)\n", (int)instrument->msg.voice_id);
+        syslog(LOG_DEBUG, "MSG: %d (msg.type)\n", (int)instrument->msg.type);
 
-        if(lpscheduler_get_now_seconds(&now) < 0) {
-            syslog(LOG_CRIT, "Error getting now in seq relay\n");
-            exit(1);
+        switch(instrument->msg.type) {
+            case LPMSG_SHUTDOWN:
+                syslog(LOG_DEBUG, "MSG: shutdown\n");
+                instrument->is_running = 0;
+                break;
+
+            case  LPMSG_UPDATE:
+                syslog(LOG_DEBUG, "MSG: update\n");
+                instrument->updates(instrument);
+                break;
+
+            case LPMSG_LOAD:
+                syslog(LOG_DEBUG, "MSG: load\n");
+                break;
+
+            case LPMSG_PLAY:
+                syslog(LOG_DEBUG, "MSG: play\n");
+                if(instrument->renderer != NULL) {
+                    /* Do the render */
+                    buf = instrument->renderer(instrument);
+
+                    if(buf == NULL) {
+                        syslog(LOG_ERR, "null buffer\n");
+                        break;
+                    }
+
+                    syslog(LOG_DEBUG, "rendered buffer is %d frames and %d channels...\n", (int)buf->length, buf->channels);
+
+                    /* Get now */
+                    if(lpscheduler_get_now_seconds(&now) < 0) {
+                        syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
+                        now = 0;
+                    }
+
+                    processing_time_so_far = now - instrument->msg.initiated;
+                    onset_delay_in_seconds = instrument->msg.scheduled - processing_time_so_far;
+                    if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
+
+                    instrument->msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
+
+                    syslog(LOG_INFO, "msg.onset_delay %ld\n", instrument->msg.onset_delay);
+
+                    /* Schedule the buffer for playback */
+                    scheduler_schedule_event(instrument->async_mixer, buf, 0);
+                }
+                break;
+
+            case LPMSG_TRIGGER:
+                syslog(LOG_DEBUG, "MSG: trigger\n");
+                break;
+
+            case LPMSG_SCHEDULE:
+                syslog(LOG_DEBUG, "MSG: schedule\n");
+
+                d = &instrument->pqnodes[pqnode_index];
+                memcpy(&d->msg, &instrument->msg, sizeof(lpmsg_t));
+                pqnode_index += 1;
+                while(pqnode_index >= NUM_NODES) pqnode_index -= NUM_NODES;
+
+                if(lpscheduler_get_now_seconds(&now) < 0) {
+                    syslog(LOG_CRIT, "Error getting now in seq relay\n");
+                    exit(1);
+                }
+
+                /* Hold on to the message as long as possible while still 
+                 * trying to leave some time for processing before the target deadline */
+                seq_delay = instrument->msg.scheduled - (instrument->msg.max_processing_time * 2);
+                d->timestamp = instrument->msg.initiated + seq_delay;
+
+                if(pqueue_insert(instrument->msgpq, (void *)d) < 0) {
+                    syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
+                    continue;
+                }
+                break;
+
+            default:
+                break;
         }
-
-        /* Hold on to the message as long as possible while still 
-         * trying to leave some time for processing before the target deadline */
-        seq_delay = msg.scheduled - (msg.max_processing_time * 2);
-        d->timestamp = msg.initiated + seq_delay;
-
-        if(pqueue_insert(instrument->msgpq, (void *)d) < 0) {
-            syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
-            continue;
-        }
-
-        /* Exit the loop on shutdown message after sending 
-         * it along to the priority queue as well */
-        if(msg.type == LPMSG_SHUTDOWN) break;
     }
 
-    syslog(LOG_INFO, "lpmsg_t relay: Message relay shutting down...\n");
-    if(qd != (mqd_t) -1) astrid_msgq_close(qd);
+    syslog(LOG_INFO, "\n");
 
     return 0;
 }
-
 
 int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     int i;
@@ -2684,8 +2705,8 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
 
     printf("msg feed init\n");
     /* Start message feed thread */
-    if(pthread_create(&instrument->message_feed_thread, NULL, instrument_seq_message_feed, (void*)instrument) != 0) {
-        syslog(LOG_ERR, "Could not initialize message feed thread. Error: %s\n", strerror(errno));
+    if(pthread_create(&instrument->message_feed_thread, NULL, instrument_message_thread, (void*)instrument) != 0) {
+        syslog(LOG_ERR, "Could not initialize instrument message thread. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -2695,22 +2716,6 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
         syslog(LOG_ERR, "Could not initialize message scheduler pq thread. Error: %s\n", strerror(errno));
         return -1;
     }
-
-    return 0;
-}
-
-int astrid_instrument_seq_stop(lpinstrument_t * instrument) {
-    syslog(LOG_DEBUG, "Joining with message thread...\n");
-    if(pthread_join(instrument->message_feed_thread, NULL) != 0) {
-        syslog(LOG_ERR, "Error while attempting to join with message thread\n");
-    }
-
-    syslog(LOG_DEBUG, "Joining with message scheduler pq thread...\n");
-    if(pthread_join(instrument->message_scheduler_pq_thread, NULL) != 0) {
-        syslog(LOG_ERR, "Error while attempting to join with message scheduler pq thread\n");
-    }
-
-    syslog(LOG_INFO, "Done with cleanup!\n");
 
     return 0;
 }
@@ -2884,7 +2889,6 @@ int astrid_instrument_start(
             fprintf(stderr, "cannot connect input ports\n");
         }
     }
-
 	free(ports);
 	
 	if((ports = jack_get_ports(instrument->jack_client, NULL, NULL, JackPortIsPhysical|JackPortIsInput)) == NULL) {
@@ -2897,21 +2901,23 @@ int astrid_instrument_start(
             fprintf(stderr, "cannot connect output ports\n");
         }
     }
-
 	free(ports);
 
-    // Ready for some messages now! Open the message queue...
+    // Start running callbacks...
+    instrument->is_running = 1;
+    syslog(LOG_INFO, "%s is running...\n", name);
+
+    // Ready for some messages now! Open the message queue and start up the seq threads...
     if((instrument->playqd = astrid_playq_open(instrument->name)) == (mqd_t) -1) {
         syslog(LOG_CRIT, "Could not open playq for instrument %s. Error: %s\n", instrument->name, strerror(errno));
         return -1;
     }
-
     memcpy(instrument->msg.instrument_name, instrument->name, strlen(instrument->name));
-
     syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument->name, instrument->playqd);
-    syslog(LOG_INFO, "%s is running...\n", name);
-
-    instrument->is_running = 1;
+    if(astrid_instrument_seq_start(instrument) < 0) {
+        syslog(LOG_CRIT, "Could not start message sequence threads for instrument %s. Error: %s\n", instrument->name, strerror(errno));
+        return -1;
+    }
 
     return 0;
 
@@ -2923,19 +2929,37 @@ astrid_instrument_shutdown_with_error:
 }
 
 int astrid_instrument_stop(lpinstrument_t * instrument) {
-    int c;
+    int c, ret;
 
-    instrument->is_running = 0;
+    syslog(LOG_INFO, "%s instrument shutting down and cleaning up...\n", instrument->name);
+
+    syslog(LOG_DEBUG, "Stopping message seq threads...\n");
+    syslog(LOG_DEBUG, "Joining with message thread...\n");
+
+    if((ret = pthread_join(instrument->message_feed_thread, NULL)) != 0) {
+        if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
+        if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
+        if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
+        syslog(LOG_ERR, "Error while attempting to join with message feed thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
+    }
+
+    syslog(LOG_DEBUG, "Joining with message scheduler pq thread...\n");
+    if((ret = pthread_join(instrument->message_scheduler_pq_thread, NULL)) != 0) {
+        if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
+        if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
+        if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
+        syslog(LOG_ERR, "Error while attempting to join with message scheduler pq thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
+    }
 
     syslog(LOG_DEBUG, "Closing instrument message queue...\n");
     if(instrument->playqd != (mqd_t) -1) astrid_playq_close(instrument->playqd);
 
+    syslog(LOG_DEBUG, "Stopping JACK...\n");
     for(c=0; c < instrument->channels; c++) {
         jack_port_unregister(instrument->jack_client, instrument->outports[c]);
         jack_port_unregister(instrument->jack_client, instrument->inports[c]);
     }
 
-    syslog(LOG_DEBUG, "Stopping JACK...\n");
     jack_client_close(instrument->jack_client);
 
     syslog(LOG_DEBUG, "Closing lmdb session...\n");
@@ -2943,6 +2967,7 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
 
     if(instrument->async_mixer != NULL) scheduler_destroy(instrument->async_mixer);
 
+    syslog(LOG_DEBUG, "All done, see ya later!\n");
     closelog();
     return 0;
 }
@@ -3076,86 +3101,10 @@ int astrid_instrument_session_close(lpinstrument_t * instrument) {
 int astrid_instrument_tick(lpinstrument_t * instrument) {
     if(instrument->is_running == 0) return 0;
 
-    lpbuffer_t * buf; /* async renders: FIXME, add renderer thread */
-    double processing_time_so_far, onset_delay_in_seconds;
-    double now = 0;
-
-    if(astrid_playq_read(instrument->playqd, &instrument->msg) == (mqd_t) -1) {
-        syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
-        usleep((useconds_t)10000);
-        return -1;
-    }
-
-    syslog(LOG_DEBUG, "MSG: %s\n", instrument->msg.instrument_name);
-    syslog(LOG_DEBUG, "MSG: %d (msg.voice_id)\n", (int)instrument->msg.voice_id);
-    syslog(LOG_DEBUG, "MSG: %d (msg.type)\n", (int)instrument->msg.type);
-
-    /* TODO -- run everything below in a thread -- */
-
-    switch(instrument->msg.type) {
-        case LPMSG_SHUTDOWN:
-            syslog(LOG_DEBUG, "MSG: shutdown\n");
-            syslog(LOG_INFO, "%s instrument shutting down and cleaning up...\n", instrument->name);
-
-            /* signal the shutdown */
-            instrument->is_running = 0;
-
-            /* Let the callbacks finish */
-            usleep((useconds_t)1000);
-
-            /* shut it down... */
-            if(astrid_instrument_stop(instrument) < 0) {
-                fprintf(stderr, "There was a problem stopping the instrument. (%d) %s\n", errno, strerror(errno));
-            }
-
-            break;
-
-        case LPMSG_LOAD:
-            syslog(LOG_DEBUG, "MSG: load\n");
-            break;
-
-        case LPMSG_PLAY:
-            syslog(LOG_DEBUG, "MSG: play\n");
-            break;
-
-        case LPMSG_TRIGGER:
-            syslog(LOG_DEBUG, "MSG: trigger\n");
-            if(instrument->renderer != NULL) {
-                /* Do the render */
-                buf = instrument->renderer(instrument);
-
-                if(buf == NULL) {
-                    syslog(LOG_ERR, "null buffer\n");
-                    break;
-                }
-
-                syslog(LOG_DEBUG, "rendered buffer is %d frames and %d channels...\n", (int)buf->length, buf->channels);
-
-                /* Get now */
-                if(lpscheduler_get_now_seconds(&now) < 0) {
-                    syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
-                    now = 0;
-                }
-
-                processing_time_so_far = now - instrument->msg.initiated;
-                onset_delay_in_seconds = instrument->msg.scheduled - processing_time_so_far;
-                if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
-
-                instrument->msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
-
-                syslog(LOG_INFO, "msg.onset_delay %ld\n", instrument->msg.onset_delay);
-
-                /* Schedule the buffer for playback */
-                scheduler_schedule_event(instrument->async_mixer, buf, 0);
-            }
-            break;
-
-        default:
-            break;
-    }
-
     /* free buffers that are done playing */
     if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
+
+    usleep((useconds_t)10000);
 
     return 0;
 }
@@ -3216,7 +3165,6 @@ void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int par
 void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list) {
     int rc;
     MDB_val key, data;
-    //lpfloat_t * param = NULL;
 
     key.mv_size = sizeof(int);
     key.mv_data = (void *)(&param_index);
@@ -3225,7 +3173,6 @@ void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int par
 	rc = mdb_txn_renew(instrument->dbtxn_read);
     rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
     if(rc == 0) {
-        //param = (lpfloat_t *)data.mv_data;
         memcpy(list, data.mv_data, data.mv_size);
     }
     mdb_txn_reset(instrument->dbtxn_read);

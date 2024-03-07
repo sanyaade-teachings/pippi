@@ -40,7 +40,22 @@ typedef struct localctx_t {
     lpbuffer_t * curves[NUMOSCS];
     lpfloat_t env_phases[NUMOSCS];
     lpfloat_t env_phaseincs[NUMOSCS];
+    lpfloat_t selected_freqs[NUMFREQS];
 } localctx_t;
+
+void param_update_callback(void * arg) {
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+    localctx_t * ctx = (localctx_t *)instrument->context;
+
+    // Respond to param update messages -- TODO: parse param args with PARAM_ consts
+    syslog(LOG_DEBUG, "MSG: update | %s\n", instrument->msg.msg);
+    for(int i=0; i < NUMFREQS; i++) {
+        ctx->selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
+    }
+    astrid_instrument_set_param_float_list(instrument, PARAM_FREQS, ctx->selected_freqs, NUMFREQS);
+    astrid_instrument_set_param_float(instrument, PARAM_AMP, LPRand.rand(0.5f, 1.f));
+    astrid_instrument_set_param_float(instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
+}
 
 lpbuffer_t * renderer_callback(void * arg) {
     lpbuffer_t * out;
@@ -108,7 +123,6 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
 
 int main() {
     lpinstrument_t instrument = {0};
-    lpfloat_t selected_freqs[NUMFREQS] = {0};
     
     // create local context struct
     localctx_t * ctx = (localctx_t *)calloc(1, sizeof(localctx_t));
@@ -137,41 +151,34 @@ int main() {
         ctx->oscs[i]->phase = 0.f;
     }
 
-    // Set the stream and async render callbacks
-    instrument.callback = audio_callback; // FIXME call this `stream` maybe, or `ugens`?
+    // Set the callbacks for streaming, async renders and param updates
+    instrument.stream = audio_callback;
     instrument.renderer = renderer_callback;
+    instrument.updates = param_update_callback;
 
     if(astrid_instrument_start(NAME, CHANNELS, (void*)ctx, &instrument) < 0) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    /* populate initial freqs */
+    /* now that LMDB is running, populate the initial freqs */
     for(int i=0; i < NUMFREQS; i++) {
-        selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
+        ctx->selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
     }
-    astrid_instrument_set_param_float_list(&instrument, PARAM_FREQS, selected_freqs, NUMFREQS);
+    astrid_instrument_set_param_float_list(&instrument, PARAM_FREQS, ctx->selected_freqs, NUMFREQS);
 
+    /* twiddle thumbs until shutdown */
     while(instrument.is_running) {
         astrid_instrument_tick(&instrument);
-
-        // Respond to param update messages -- TODO: parse param args with PARAM_ consts
-        if(instrument.msg.type == LPMSG_UPDATE) {
-            syslog(LOG_DEBUG, "MSG: update | %s\n", instrument.msg.msg);
-            for(int i=0; i < NUMFREQS; i++) {
-                selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
-            }
-            astrid_instrument_set_param_float_list(&instrument, PARAM_FREQS, selected_freqs, NUMFREQS);
-            astrid_instrument_set_param_float(&instrument, PARAM_AMP, LPRand.rand(0.5f, 1.f));
-            astrid_instrument_set_param_float(&instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
-        }
     }
 
+    /* stop jack and cleanup threads */
     if(astrid_instrument_stop(&instrument) < 0) {
         fprintf(stderr, "There was a problem stopping the instrument. (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
+    /* clean up local memory */
     for(int o=0; o < NUMOSCS; o++) {
         LPPulsarOsc.destroy(ctx->oscs[o]);
         LPBuffer.destroy(ctx->curves[o]);

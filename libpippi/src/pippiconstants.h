@@ -63,43 +63,4 @@
 #define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
 
 
-enum Wavetables {
-    WT_SINE,
-    WT_COS,
-    WT_SQUARE, 
-    WT_TRI, 
-    WT_TRI2, 
-    WT_SAW,
-    WT_RSAW,
-    WT_RND,
-    WT_USER,
-    NUM_WAVETABLES
-};
-
-enum Windows {
-    WIN_SINE,
-    WIN_SINEIN,
-    WIN_SINEOUT,
-    WIN_COS,
-    WIN_TRI, 
-    WIN_PHASOR, 
-    WIN_HANN, 
-    WIN_HANNIN, 
-    WIN_HANNOUT, 
-    WIN_RND,
-    WIN_SAW,
-    WIN_RSAW,
-    WIN_USER,
-    NUM_WINDOWS
-};
-
-enum PanMethods {
-    PANMETHOD_CONSTANT,
-    PANMETHOD_LINEAR,
-    PANMETHOD_SINE,
-    PANMETHOD_GOGINS,
-    NUM_PANMETHODS
-};
-
-
 
