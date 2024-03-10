@@ -1,4 +1,5 @@
 #cython: language_level=3
+from sys import exit
 
 from pippi.soundbuffer cimport SoundBuffer
 from pippi.wavetables cimport Wavetable

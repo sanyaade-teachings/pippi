@@ -36,6 +36,7 @@ typedef struct localctx_t {
     lppulsarosc_t * oscs[NUMOSCS];
     lpbuffer_t * ringbuf;
     lpbuffer_t * env;
+    int last;
 
     lpbuffer_t * curves[NUMOSCS];
     lpfloat_t env_phases[NUMOSCS];
@@ -64,9 +65,7 @@ lpbuffer_t * renderer_callback(void * arg) {
     localctx_t * ctx = (localctx_t *)instrument->context;
 
     out = LPBuffer.cut(ctx->ringbuf, LPRand.randint(0, SR*20), LPRand.randint(SR, SR*10));
-    if(LPBuffer.mag(out) > 0.01) {
-        LPFX.norm(out, LPRand.rand(0.6f, 0.8f));
-    }
+    LPFX.norm(out, LPRand.rand(0.26f, 0.5f));
 
     return out;
 }
@@ -75,7 +74,7 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
     size_t idx, i;
     int j, c;
     lpfloat_t freqs[NUMFREQS];
-    lpfloat_t sample, amp, pw, saturation;
+    lpfloat_t sample, left, right, amp, pw, saturation, pan;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
 
@@ -96,7 +95,8 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
     for(i=0; i < blocksize; i++) {
         sample = 0.f;
         for(j=0; j < NUMOSCS; j++) {
-            saturation = LPInterpolation.linear_pos(ctx->curves[j], ctx->curves[j]->phase);
+            saturation = LPInterpolation.linear_pos(ctx->curves[j], ctx->curves[j]->phase) * 0.05f + 0.95f;
+            pan = LPInterpolation.linear_pos(ctx->curves[j], ctx->curves[j]->phase);
             ctx->oscs[j]->saturation = saturation;
             ctx->oscs[j]->pulsewidth = pw;
             ctx->oscs[j]->freq = freqs[j % NUMFREQS] * 4.f * 0.6f;
@@ -106,7 +106,10 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
             ctx->env_phases[j] += ctx->env_phaseincs[j];
 
             if(ctx->env_phases[j] >= 1.f) {
-                // env boundries
+                // change the pitch when the env boundry is crossed
+                ctx->selected_freqs[ctx->last] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
+                ctx->last += 1;
+                while(ctx->last >= NUMFREQS) ctx->last -= NUMFREQS;
             }
 
             while(ctx->env_phases[j] >= 1.f) ctx->env_phases[j] -= 1.f;
@@ -115,9 +118,17 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
             while(ctx->curves[j]->phase >= 1.f) ctx->curves[j]->phase -= 1.f;
         }
 
+        /*
         for(c=0; c < channels; c++) {
             output[c][i] += (float)sample * 0.5f;
         }
+        */
+
+        left = right = sample;
+        pan_stereo_constant(pan, left, right, &left, &right);
+
+        output[0][i] += left;
+        output[1][i] += right;
     }
 }
 
@@ -138,7 +149,7 @@ int main() {
     // setup oscs and curves
     for(int i=0; i < NUMOSCS; i++) {
         ctx->env_phases[i] = LPRand.rand(0.f, 1.f);
-        ctx->env_phaseincs[i] = (1.f/SR) * LPRand.rand(0.001f, 0.1f);
+        ctx->env_phaseincs[i] = (1.f/SR) * LPRand.rand(0.005f, 0.03f);
         ctx->curves[i] = LPWindow.create(WIN_RND, 4096);
 
         ctx->oscs[i] = LPPulsarOsc.create(2, 2, // number of wavetables, windows

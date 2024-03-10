@@ -84,7 +84,7 @@ docs:
 	bash scripts/docs.sh
 
 deploy:
-	rsync -avz pippi.world/ deploy@radio.af:/srv/www/pippi.world --delete
+	rsync -avz pippi.world/ hecanjog.com:www/pippi.world --delete
 
 clean:
 	rm -rf build/

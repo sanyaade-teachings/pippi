@@ -234,4 +234,6 @@ lpfloat_t lpphaseinc(lpfloat_t freq, lpfloat_t samplerate);
 
 lpbuffer_t * lpbuffer_create_stack(lpbuffer_t * (*table_creator)(int name, size_t length), int numtables, size_t * onsets, size_t * lengths, va_list vl);
 
+void pan_stereo_constant(lpfloat_t pos, lpfloat_t left_in, lpfloat_t right_in, lpfloat_t * left_out, lpfloat_t * right_out);
+
 #endif
