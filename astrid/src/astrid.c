@@ -2683,7 +2683,6 @@ void * instrument_message_thread(void * arg) {
 int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     int i;
 
-    printf("alloc pqnodes\n");
     /* Allocate the pq message nodes */
     if((instrument->pqnodes = (lpmsgpq_node_t *)calloc(NUM_NODES, sizeof(lpmsgpq_node_t))) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue nodes. Error: %s\n", strerror(errno));
@@ -2694,21 +2693,18 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
         instrument->pqnodes[i].index = i;
     }
 
-    printf("pqueue init\n");
     /* Create the message priority queue */
     if((instrument->msgpq = pqueue_init(NUM_NODES, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
         return -1;
     }
 
-    printf("msg feed init\n");
     /* Start message feed thread */
     if(pthread_create(&instrument->message_feed_thread, NULL, instrument_message_thread, (void*)instrument) != 0) {
         syslog(LOG_ERR, "Could not initialize instrument message thread. Error: %s\n", strerror(errno));
         return -1;
     }
 
-    printf("pq init\n");
     /* Start message pq thread */
     if(pthread_create(&instrument->message_scheduler_pq_thread, NULL, instrument_seq_pq, (void*)instrument) != 0) {
         syslog(LOG_ERR, "Could not initialize message scheduler pq thread. Error: %s\n", strerror(errno));
