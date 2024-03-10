@@ -154,6 +154,7 @@ typedef struct lpinstrument_t {
     const char * name;
     int channels;
     volatile int is_running;
+    volatile int is_waiting;
     int has_been_initialized;
     lpfloat_t samplerate;
 

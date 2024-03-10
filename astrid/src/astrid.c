@@ -2579,13 +2579,12 @@ void * instrument_seq_pq(void * arg) {
 
 void * instrument_message_thread(void * arg) {
     lpbuffer_t * buf; /* async renders: FIXME, add renderer thread */
-    double processing_time_so_far, onset_delay_in_seconds;
-    double now = 0;
-    double seq_delay;
+    double processing_time_so_far, onset_delay_in_seconds, seq_delay, now=0;
+    int pqnode_index=0;
     lpmsgpq_node_t * d;
-    int pqnode_index = 0;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
+    instrument->is_waiting = 1;
     while(instrument->is_running) {
         if(astrid_playq_read(instrument->playqd, &instrument->msg) == (mqd_t) -1) {
             syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
@@ -2677,8 +2676,7 @@ void * instrument_message_thread(void * arg) {
         }
     }
 
-    syslog(LOG_INFO, "\n");
-
+    instrument->is_waiting = 0;
     return 0;
 }
 
@@ -2932,6 +2930,13 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
     int c, ret;
 
     syslog(LOG_INFO, "%s instrument shutting down and cleaning up...\n", instrument->name);
+    syslog(LOG_INFO, "Sending shutdown message to threads and queues...\n");
+    if(instrument->is_waiting) {
+        instrument->msg.type = LPMSG_SHUTDOWN;
+        if(send_play_message(instrument->msg) < 0) {
+            fprintf(stderr, "astrid instrument message thread cleanup: Could not send shutdown message...\n");
+        }
+    }
 
     syslog(LOG_DEBUG, "Stopping message seq threads...\n");
     syslog(LOG_DEBUG, "Joining with message thread...\n");
