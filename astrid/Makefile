@@ -137,6 +137,12 @@ astrid-seriallistener:
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seriallistener.c $(LPLIBS) -o build/astrid-seriallistener
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/msgarg.c $(LPLIBS) -o build/astrid-msgarg
 
+astrid-bufstr:
+	mkdir -p build
+
+	echo "Building astrid bufstr...";
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/bufstr.c $(LPLIBS) -o build/astrid-bufstr
+
 astrid-pulsar:
 	mkdir -p build
 

@@ -132,7 +132,7 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
     }
 }
 
-int main() {
+int main(int argc, char ** argv) {
     lpinstrument_t instrument = {0};
     
     // create local context struct
@@ -167,7 +167,7 @@ int main() {
     instrument.renderer = renderer_callback;
     instrument.updates = param_update_callback;
 
-    if(astrid_instrument_start(NAME, CHANNELS, (void*)ctx, &instrument) < 0) {
+    if(astrid_instrument_start(NAME, CHANNELS, (void*)ctx, &instrument, argc, argv) < 0) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }

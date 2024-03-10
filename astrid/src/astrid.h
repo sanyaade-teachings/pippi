@@ -309,7 +309,7 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-int astrid_instrument_start(const char * name, int channels, void * ctx, lpinstrument_t * instrument);
+int astrid_instrument_start(const char * name, int channels, void * ctx, lpinstrument_t * instrument, int argc, char ** argv);
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
@@ -320,6 +320,10 @@ lpfloat_t astrid_instrument_get_param_float_list_item(lpinstrument_t * instrumen
 int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
+
+int lpencode_with_prefix(char * prefix, size_t val, char * hash);
+size_t lpdecode_with_prefix(size_t prefix_offset, char * hash);
+
 
 #ifdef LPSESSIONDB
 #include <sqlite3.h>

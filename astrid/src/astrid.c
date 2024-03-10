@@ -2683,7 +2683,6 @@ void * instrument_message_thread(void * arg) {
 int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     int i;
 
-    printf("alloc pqnodes\n");
     /* Allocate the pq message nodes */
     if((instrument->pqnodes = (lpmsgpq_node_t *)calloc(NUM_NODES, sizeof(lpmsgpq_node_t))) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue nodes. Error: %s\n", strerror(errno));
@@ -2694,21 +2693,18 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
         instrument->pqnodes[i].index = i;
     }
 
-    printf("pqueue init\n");
     /* Create the message priority queue */
     if((instrument->msgpq = pqueue_init(NUM_NODES, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
         return -1;
     }
 
-    printf("msg feed init\n");
     /* Start message feed thread */
     if(pthread_create(&instrument->message_feed_thread, NULL, instrument_message_thread, (void*)instrument) != 0) {
         syslog(LOG_ERR, "Could not initialize instrument message thread. Error: %s\n", strerror(errno));
         return -1;
     }
 
-    printf("pq init\n");
     /* Start message pq thread */
     if(pthread_create(&instrument->message_scheduler_pq_thread, NULL, instrument_seq_pq, (void*)instrument) != 0) {
         syslog(LOG_ERR, "Could not initialize message scheduler pq thread. Error: %s\n", strerror(errno));
@@ -2718,30 +2714,7 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     return 0;
 }
 
-int setup_async_mixer(lpinstrument_t * instrument) {
-    /* init scheduler
-     * 
-     * The scheduler is shared between the miniaudio callback 
-     * and astrid buffer feed threads. The buffer feed thread 
-     * may schedule buffers by adding them to the internal linked 
-     * list in the scheduler. The miniaudio callback may read from 
-     * the linked list, increment counts in playing buffers and 
-     * flag buffers as having playback completed. 
-     **/
-    instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
-
-    /* Start buffer feed thread */
-    /*
-    if(pthread_create(&instrument->buffer_feed_thread, NULL, astrid_async_buffer_feed, NULL) != 0) {
-        syslog(LOG_ERR, "Could not initialize %s buffer feed thread. Error: %s\n", instrument->name, strerror(errno));
-        return -1;
-    }
-    */
-
-    return 0;
-}
-
-int cleanup_async_mixer(lpinstrument_t * instrument) {
+int cleanup_buffer_feed(lpinstrument_t * instrument) {
     redisContext * redis_ctx;
     redisReply * redis_reply;
     struct timeval redis_timeout = {15, 0};
@@ -2772,9 +2745,6 @@ int cleanup_async_mixer(lpinstrument_t * instrument) {
         syslog(LOG_ERR, "Error while attempting to join with buffer thread\n");
     }
 
-    syslog(LOG_INFO, "Cleaning up scheduler...\n");
-    if(instrument->async_mixer != NULL) scheduler_destroy(instrument->async_mixer);
-
     return 0;
 }
 
@@ -2782,7 +2752,9 @@ int astrid_instrument_start(
     const char * name, 
     int channels, 
     void * ctx,
-    lpinstrument_t * instrument
+    lpinstrument_t * instrument,
+    int argc,
+    char ** argv
 ) {
     struct sigaction shutdown_action;
     jack_status_t jack_status;
@@ -2819,11 +2791,29 @@ int astrid_instrument_start(
         exit(1);
     }
 
-    /* Set up the async mixer and buffer scheduler */
-    if(setup_async_mixer(instrument) < 0) {
-        printf("Failed to set up async mixer: (%d) %s\n", errno, strerror(errno));
-        exit(1);
+    /* init scheduler
+     * 
+     * The scheduler is shared between the miniaudio callback 
+     * and astrid buffer feed threads. The buffer feed thread 
+     * may schedule buffers by adding them to the internal linked 
+     * list in the scheduler. The miniaudio callback may read from 
+     * the linked list, increment counts in playing buffers and 
+     * flag buffers as having playback completed. 
+     **/
+    instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
+
+    if(argc > 1) {
+        printf("argv[1]: %s\n", argv[1]);
     }
+
+    /* Start buffer feed thread */
+    /*
+    if(pthread_create(&instrument->buffer_feed_thread, NULL, astrid_async_buffer_feed, NULL) != 0) {
+        syslog(LOG_ERR, "Could not initialize %s buffer feed thread. Error: %s\n", instrument->name, strerror(errno));
+        return -1;
+    }
+    */
+
 
     /* Open the LMDB session */
     astrid_instrument_session_open(instrument);
@@ -3214,6 +3204,39 @@ lpfloat_t astrid_instrument_get_param_float_list_item(
     mdb_txn_reset(instrument->dbtxn_read);
 
     return param;
+}
+
+int lpencode_with_prefix(char * prefix, size_t val, char * hash) {
+    size_t size = sizeof(size_t) + strlen(prefix);
+    int prefix_offset = strlen(prefix)-1;
+    int i;
+    char c;
+    unsigned char * valp = (unsigned char *)(&val);
+
+    // write the prefix and zero the rest of the hash buffer
+    memset(hash, 0, size);
+    memcpy(hash, prefix, prefix_offset);
+
+    // write the serialized values into the string
+    for(i=prefix_offset; i < (int)sizeof(size_t); i++) {
+        c = '0' + *(valp + i - prefix_offset);
+        strncpy(hash + i, &c, 1);
+    }
+    hash[i] = '\0';
+
+    return 0;
+}
+
+size_t lpdecode_with_prefix(size_t prefix_offset, char * hash) {
+    ssize_t decoded = 0;
+    char c;
+    unsigned char b;
+    for(int i=prefix_offset; i < (int)sizeof(size_t); i++) {
+        c = *(hash+i);
+        b = c-'0';
+        memcpy((&decoded)+i, &b, 1);
+    }
+    return decoded;
 }
 
 #if 0
