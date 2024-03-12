@@ -138,10 +138,7 @@ ugen_t * create_pulsar_ugen(void) {
     lpugenpulsar_t * params;
 
     params = (lpugenpulsar_t *)LPMemoryPool.alloc(sizeof(lpugenpulsar_t), 1);
-    params->osc = LPPulsarOsc.create(
-        0, NULL, 0, NULL, 
-        0, NULL, 0, NULL
-    );
+    params->osc = LPPulsarOsc.create(0, 0);
 
     u = (ugen_t *)LPMemoryPool.alloc(sizeof(ugen_t), 1);
 

@@ -3206,37 +3206,46 @@ lpfloat_t astrid_instrument_get_param_float_list_item(
     return param;
 }
 
-int lpencode_with_prefix(char * prefix, size_t val, char * hash) {
-    size_t size = sizeof(size_t) + strlen(prefix);
-    int prefix_offset = strlen(prefix)-1;
-    int i;
-    char c;
-    unsigned char * valp = (unsigned char *)(&val);
+int lpencode_with_prefix(char * prefix, size_t val, char * encoded) {
+    size_t size = 0;
+    unsigned char * bytes = (unsigned char *)(&val);
+    size = snprintf(NULL, size,  "%s-%d-%d-%d-%d-%d-%d-%d-%d\n", prefix,
+        bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], 
+        bytes[6], bytes[7]);
 
-    // write the prefix and zero the rest of the hash buffer
-    memset(hash, 0, size);
-    memcpy(hash, prefix, prefix_offset);
-
-    // write the serialized values into the string
-    for(i=prefix_offset; i < (int)sizeof(size_t); i++) {
-        c = '0' + *(valp + i - prefix_offset);
-        strncpy(hash + i, &c, 1);
+    if(!size) {
+        syslog(LOG_ERR, "Could not estimate space for key. (%d) %s\n", errno, strerror(errno));
+        return -1;
     }
-    hash[i] = '\0';
+
+    assert(size+1 < LPKEY_MAXLENGTH);
+
+    if(snprintf(encoded, size, "%s-%d-%d-%d-%d-%d-%d-%d-%d\n", prefix,
+        bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5], 
+        bytes[6], bytes[7]) < 0) {
+        syslog(LOG_ERR, "Could not encode key. (%d) %s\n", errno, strerror(errno));
+        return -1;
+    }
 
     return 0;
 }
 
-size_t lpdecode_with_prefix(size_t prefix_offset, char * hash) {
-    ssize_t decoded = 0;
-    char c;
-    unsigned char b;
-    for(int i=prefix_offset; i < (int)sizeof(size_t); i++) {
-        c = *(hash+i);
-        b = c-'0';
-        memcpy((&decoded)+i, &b, 1);
+size_t lpdecode_with_prefix(char * encoded) {
+    char *token, *save=NULL;
+    char copy[LPKEY_MAXLENGTH] = {};
+    unsigned char bytes[sizeof(size_t)] = {};
+
+    // strtok clobbers input
+    memcpy(copy, encoded, sizeof(copy));
+
+    token = strtok_r(copy, "-", &save);
+
+    int i = 0;
+    while((token = strtok_r(NULL, "-", &save)) != NULL) {
+        bytes[i] = atoi(token); i++;
     }
-    return decoded;
+
+    return *((size_t *)bytes);
 }
 
 #if 0

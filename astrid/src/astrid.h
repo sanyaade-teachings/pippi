@@ -54,6 +54,8 @@
 
 #define ASTRID_SERIAL_CTLBASE_PATH "/tmp/astrid-serialdevice%d-ctl%d"
 
+#define LPKEY_MAXLENGTH 4096
+
 #define PLAY_MESSAGE 'p'
 #define UPDATE_MESSAGE 'u'
 #define TRIGGER_MESSAGE 't'
@@ -321,8 +323,8 @@ int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
 
-int lpencode_with_prefix(char * prefix, size_t val, char * hash);
-size_t lpdecode_with_prefix(size_t prefix_offset, char * hash);
+int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
+size_t lpdecode_with_prefix(char * encoded);
 
 
 #ifdef LPSESSIONDB
