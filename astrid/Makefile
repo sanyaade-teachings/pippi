@@ -7,6 +7,7 @@ PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get
 LPDIR = ../libpippi
 
 LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
+	${LPDIR}/vendor/linenoise/linenoise.c \
 	${LPDIR}/vendor/libpqueue/src/pqueue.c \
 	${LPDIR}/vendor/lmdb/libraries/liblmdb/mdb.c \
 	${LPDIR}/vendor/lmdb/libraries/liblmdb/midl.c \
@@ -27,7 +28,7 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 	$(LPDIR)/src/pippicore.c
 
 LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
-LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
+LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/linenoise -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0
 LPLIBS = -lm -ldl -lpthread -lrt -ljack -lhiredis
@@ -147,8 +148,12 @@ astrid-pulsar:
 	mkdir -p build
 
 	echo "Building astrid pulsar...";
+
+	cython cython/cyrenderer.pyx
+	$(CC) -g -std=gnu2x -Wall -Wextra -fno-strict-aliasing $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c orc/pulsar.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-pulsar
+
 	#clang $(LPFLAGS) -fsanitize=address -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
-	clang $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
+	#clang $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 	#gcc $(LPFLAGS) -fanalyzer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 
 follow-log:

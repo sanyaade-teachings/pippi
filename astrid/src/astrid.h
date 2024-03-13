@@ -24,6 +24,7 @@
 
 #include "pippi.h"
 
+#include "linenoise.h"
 #include "lmdb.h"
 #include "midl.h"
 #include "pqueue.h"
@@ -168,6 +169,7 @@ typedef struct lpinstrument_t {
 
     mqd_t playqd;
     lpmsg_t msg;
+    lpmsg_t cmd;
 
     pqueue_t * msgpq;
     lpmsgpq_node_t * pqnodes;
@@ -181,6 +183,11 @@ typedef struct lpinstrument_t {
     jack_port_t ** inports;
     jack_port_t ** outports;
     jack_client_t * jack_client;
+
+#ifndef NOPYTHON
+    int python_is_enabled;
+    int (*schedule_python_render)(void *);
+#endif
 
     // Optional local context struct for callbacks
     void * context;
@@ -249,6 +256,7 @@ char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg);
 lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg); 
 
 int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
+int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg);
 
 ssize_t astrid_get_voice_id();
 
@@ -326,6 +334,10 @@ int astrid_instrument_session_close(lpinstrument_t * instrument);
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
 size_t lpdecode_with_prefix(char * encoded);
 
+#ifndef NOPYTHON
+int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, char * python_script_path);
+int astrid_instrument_renderer_python_stop();
+#endif
 
 #ifdef LPSESSIONDB
 #include <sqlite3.h>

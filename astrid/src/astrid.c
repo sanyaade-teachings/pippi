@@ -1,3 +1,6 @@
+#ifndef NOPYTHON
+#include "cyrenderer.h"
+#endif
 #include "astrid.h"
 
 static volatile int * astrid_instrument_is_running;
@@ -48,7 +51,7 @@ int lpsessiondb_open_for_reading(sqlite3 ** db) {
     if(sqlite3_open_v2(ASTRID_SESSIONDB_PATH, db, SQLITE_OPEN_READONLY, NULL) > 0) {
         syslog(LOG_ERR, "Could not open db at path: %s. Error: %s\n", ASTRID_SESSIONDB_PATH, strerror(errno));
         return -1;
-    }
+}
     return 0;
 }
 
@@ -396,6 +399,7 @@ int lpipc_setvalue(char * path, void * value, size_t size) {
     char * semname;
 
     /* Construct the sempahore name by stripping the /tmp prefix */
+    /* FIXME move path prefixes to config */
     semname = path + 4;
 
     /* Open the semaphore */
@@ -1755,6 +1759,76 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
     return 0;
 }
 
+int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg) {
+    int cmdlength, tokenlength, voice_id=0;
+    char *token, *save=NULL;
+    char msgtype;
+    char cmd_copy[LPMAXMSG] = {0};
+
+    // strtok clobbers input
+    memcpy(cmd_copy, cmdline, sizeof(cmd_copy));
+
+    cmdlength = strlen(cmdline);
+
+    // Get the message type, and ignore everything else for now...
+    token = strtok_r(cmd_copy, " ", &save);
+    msgtype = token[0]; // msg types only use the first char
+    tokenlength = strlen(token);
+
+    memset(msg->msg, 0, LPMAXMSG);
+    strncpy(msg->msg, cmdline + tokenlength, cmdlength - tokenlength);
+
+    /* Set the message type from the first arg */
+    switch(msgtype) {
+        case PLAY_MESSAGE:
+            msg->type = LPMSG_PLAY;
+            break;
+
+        case TRIGGER_MESSAGE:
+            msg->type = LPMSG_TRIGGER;
+            break;
+
+        case SERIAL_MESSAGE:
+            msg->type = LPMSG_SERIAL;
+            break;
+
+        case UPDATE_MESSAGE:
+            msg->type = LPMSG_UPDATE;
+            break;
+
+        case LOAD_MESSAGE:
+            msg->type = LPMSG_LOAD;
+            break;
+
+        case SCHEDULE_MESSAGE:
+            msg->type = LPMSG_SCHEDULE;
+            break;
+
+        case SHUTDOWN_MESSAGE:
+            msg->type = LPMSG_SHUTDOWN;
+            break;
+
+        case SET_COUNTER_MESSAGE:
+            msg->type = LPMSG_SET_COUNTER;
+            break;
+
+        default:
+            syslog(LOG_CRIT, "Bad msgtype! %c\n", msgtype);
+            return -1;
+    }
+
+    /* Get the voice ID from the voice ID counter */
+    if((voice_id = astrid_get_voice_id()) < 0) {
+        syslog(LOG_ERR, "Error getting voice ID: (%d) %s\n", errno, strerror(errno));
+        return -1;
+    }
+
+    /* Initialize the count and set the voice_id */
+    msg->count = 0;
+    msg->voice_id = voice_id;
+
+    return 0;
+}
 
 int midi_triggerq_open() {
     int qfd;
@@ -2613,8 +2687,19 @@ void * instrument_message_thread(void * arg) {
 
             case LPMSG_PLAY:
                 syslog(LOG_DEBUG, "MSG: play\n");
+#ifndef NOPYTHON
+                // Schedule a python render if there is a renderer
+                if(instrument->python_is_enabled) {
+                    if(instrument->schedule_python_render(&instrument->msg) < 0) {
+                        PyErr_Print();
+                        syslog(LOG_ERR, "CPython error during renderer loop\n");
+                    }
+                }
+#endif
+
+                // Schedule a C callback render if there's a callback defined
                 if(instrument->renderer != NULL) {
-                    /* Do the render */
+                    /* Do the render: FIXME do this in another thread */
                     buf = instrument->renderer(instrument);
 
                     if(buf == NULL) {
@@ -2763,6 +2848,9 @@ int astrid_instrument_start(
     char outport_name[50];
     char inport_name[50];
     int c = 0;
+#ifndef NOPYTHON
+    char * python_script_path = NULL;
+#endif
 
     syslog(LOG_DEBUG, "starting %s instrument...\n", name);
 
@@ -2802,9 +2890,13 @@ int astrid_instrument_start(
      **/
     instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
 
+#ifndef NOPYTHON
     if(argc > 1) {
-        printf("argv[1]: %s\n", argv[1]);
+        printf("Enabling embedded python renderer and setting python script path to:\n\t%s\n", argv[1]);
+        python_script_path = argv[1];
+        instrument->python_is_enabled = 1;
     }
+#endif
 
     /* Start buffer feed thread */
     /*
@@ -2814,9 +2906,17 @@ int astrid_instrument_start(
     }
     */
 
-
     /* Open the LMDB session */
     astrid_instrument_session_open(instrument);
+
+#ifndef NOPYTHON
+    /* Start the embedded python renderer */
+    if(instrument->python_is_enabled) {
+        if(astrid_instrument_renderer_python_start(instrument, python_script_path) < 0) {
+            syslog(LOG_ERR, "%s Could not start embedded python renderer. (%d) %s\n", name, errno, strerror(errno));
+        }
+    }
+#endif
 
     /* Set up JACK */
     instrument->inports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
@@ -2901,11 +3001,15 @@ int astrid_instrument_start(
         return -1;
     }
     memcpy(instrument->msg.instrument_name, instrument->name, strlen(instrument->name));
+    memcpy(instrument->cmd.instrument_name, instrument->name, strlen(instrument->name));
     syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument->name, instrument->playqd);
     if(astrid_instrument_seq_start(instrument) < 0) {
         syslog(LOG_CRIT, "Could not start message sequence threads for instrument %s. Error: %s\n", instrument->name, strerror(errno));
         return -1;
     }
+
+    /* setup linenoise repl */
+    linenoiseHistoryLoad("history.txt"); // FIXME this goes in the instrument config dir / or share?
 
     return 0;
 
@@ -2961,6 +3065,13 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
     astrid_instrument_session_close(instrument);
 
     if(instrument->async_mixer != NULL) scheduler_destroy(instrument->async_mixer);
+
+#ifndef NOPYTHON
+    if(instrument->python_is_enabled) {
+        syslog(LOG_DEBUG, "Stopping python renderer...\n");
+        astrid_instrument_renderer_python_stop();
+    }
+#endif
 
     syslog(LOG_DEBUG, "All done, see ya later!\n");
     closelog();
@@ -3094,12 +3205,38 @@ int astrid_instrument_session_close(lpinstrument_t * instrument) {
 }
 
 int astrid_instrument_tick(lpinstrument_t * instrument) {
+    char * line;
+
+
     if(instrument->is_running == 0) return 0;
+
+    line = linenoise("^_- ");
+
+    printf("msg: %s\n", line);
+    if(parse_message_from_cmdline(line, &instrument->cmd) < 0) {
+        syslog(LOG_ERR, "Could not parse message from cmdline %s\n", line);
+        return -1;
+    }
+
+    if(instrument->cmd.type == LPMSG_SERIAL) {
+        if(send_serial_message(instrument->cmd) < 0) {
+            syslog(LOG_ERR, "Could not send serial message...\n");
+            return -1;
+        }
+    } else {
+        if(send_play_message(instrument->cmd) < 0) {
+            syslog(LOG_ERR, "Could not send play message...\n");
+            return -1;
+        }
+    }
 
     /* free buffers that are done playing */
     if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
 
-    usleep((useconds_t)10000);
+    //usleep((useconds_t)10000);
+    free(line);
+
+    if(instrument->cmd.type == LPMSG_SHUTDOWN) instrument->is_running = 0;
 
     return 0;
 }
@@ -3248,8 +3385,8 @@ size_t lpdecode_with_prefix(char * encoded) {
     return *((size_t *)bytes);
 }
 
-#if 0
-int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, const char * python_script_path) {
+#ifndef NOPYTHON
+int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, char * python_script_path) {
     PyObject * pmodule;
     PyConfig config;
     PyStatus status;
@@ -3281,16 +3418,20 @@ int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, const c
     pmodule = PyImport_ImportModule("cyrenderer");
     if(!pmodule) {
         PyErr_Print();
+        Py_Finalize();
         syslog(LOG_ERR, "Error: could not import cython renderer module\n");
-        goto lprender_python_cleanup;
+        return -1;
     }
 
     /* Import python instrument module */
     if(astrid_load_instrument(python_script_path) < 0) {
         PyErr_Print();
+        Py_Finalize();
         syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
-        goto lprender_python_cleanup;
+        return -1;
     }
+
+    instrument->schedule_python_render = astrid_schedule_python_render;
 
     syslog(LOG_INFO, "Astrid python renderer is now rendering!\n");
 
