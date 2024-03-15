@@ -120,6 +120,7 @@ cdef extern from "astrid.h":
     int lpserial_getctl(int device_id, int ctl, lpfloat_t * value)
 
     int lpscheduler_get_now_seconds(double * now)
+    int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size)
 
 
 cdef class MessageEvent:

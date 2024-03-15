@@ -330,6 +330,7 @@ lpfloat_t astrid_instrument_get_param_float_list_item(lpinstrument_t * instrumen
 int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
+int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size);
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
 size_t lpdecode_with_prefix(char * encoded);

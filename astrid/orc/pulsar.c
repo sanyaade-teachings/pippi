@@ -164,7 +164,7 @@ int main(int argc, char ** argv) {
 
     // Set the callbacks for streaming, async renders and param updates
     instrument.stream = audio_callback;
-    instrument.renderer = renderer_callback;
+    //instrument.renderer = renderer_callback;
     instrument.updates = param_update_callback;
 
     if(astrid_instrument_start(NAME, CHANNELS, (void*)ctx, &instrument, argc, argv) < 0) {

@@ -8,6 +8,7 @@ setup(ext_modules=cythonize([
         include_dirs=[
             '../libpippi/vendor', 
             '../libpippi/vendor/libpqueue/src', 
+            '../libpippi/vendor/linenoise', 
             '../libpippi/vendor/lmdb/libraries/liblmdb',
             '../libpippi/src', 
             'src'

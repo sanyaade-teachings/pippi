@@ -510,7 +510,7 @@ cdef int render_event(object instrument, lpmsg_t * msg):
         count=msg.count,
     )
 
-    #logger.debug('rendering event %s w/params %s' % (str(instrument), render_params))
+    logger.debug('rendering event %s w/params %s' % (str(instrument), render_params))
 
     if hasattr(instrument.renderer, 'before'):
         instrument.renderer.before(ctx)
@@ -534,7 +534,8 @@ cdef int render_event(object instrument, lpmsg_t * msg):
                         dacid = 0
 
                     bufstr = serialize_buffer(snd, loop, msg)
-                    _redis.publish('astrid-dac-%d-bufferfeed' % dacid, bufstr)
+                    #_redis.publish('astrid-dac-%d-bufferfeed' % dacid, bufstr)
+                    astrid_instrument_publish_bufstr(msg.instrument_name, bufstr, len(bufstr))
 
             except Exception as e:
                 logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))

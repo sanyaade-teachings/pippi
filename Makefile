@@ -104,19 +104,15 @@ rpi-install:
 	cd modules/Soundpipe && make && sudo make install
 	python setup.py develop --user
 
-cirrus-install:
-	DEBIAN_FRONTEND=noninteractive apt update && apt install libsndfile1-dev --yes
-	pip install -r requirements.txt
-	git submodule update --init
-	cd modules/Soundpipe && make && make install
-	python setup.py develop
-
 install:
-	pip install --upgrade pip wheel cython setuptools numpy
-	pip install -r requirements.txt
+	rm -rf venv
+	python -m venv venv
+	./venv/bin/python -m ensurepip --upgrade
+	./venv/bin/pip install --upgrade pip wheel cython setuptools numpy
+	./venv/bin/pip install -r requirements.txt
 	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install
-	python setup.py develop
+	./venv/bin/python setup.py develop
 
 build:
 	python setup.py develop

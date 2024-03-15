@@ -30,7 +30,7 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
 LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/linenoise -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
-LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0
+LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0 -DNOPYTHON
 LPLIBS = -lm -ldl -lpthread -lrt -ljack -lhiredis
 
 clean:
@@ -44,7 +44,6 @@ clean:
 	rm -rf python/src
 	rm -f python/*.so
 
-
 astrid-renderer:
 	mkdir -p build
 
@@ -52,11 +51,11 @@ astrid-renderer:
 	cython cython/cyrenderer.pyx
 	$(CC) -g -std=gnu2x -Wall -Wextra -fno-strict-aliasing $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-renderer
 
-astrid-midilog:
-	mkdir -p build
-
-	echo "Building astrid midilog...";
-	python cython/setup.py build_ext --inplace --build-lib=python
+#astrid-midilog:
+#	mkdir -p build
+#
+#	echo "Building astrid midilog...";
+#	python cython/setup.py build_ext --inplace --build-lib=python
 
 astrid-ipc:
 	echo "Building astrid ipc tools...";
@@ -77,13 +76,6 @@ astrid-q:
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qreader.c $(LPLIBS) -o build/astrid-qreader
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qserver.c $(LPLIBS) -o build/astrid-qserver
 	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/msg.c $(LPLIBS) -o build/astrid-msg
-
-astrid-renderer-macos:
-	mkdir -p build
-
-	echo "Building astrid renderer...";
-	cython cython/cyrenderer.pyx
-	$(CC) -g -std=gnu2x -Wall -Wextra $(LPINCLUDES) `python3-config --cflags --ldflags` -Icython src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -l$(PYLIB) $(LPLIBS) -o build/astrid-renderer
 
 astrid-dac:
 	mkdir -p build
@@ -149,7 +141,7 @@ astrid-pulsar:
 
 	echo "Building astrid pulsar...";
 
-	cython cython/cyrenderer.pyx
+	../venv/bin/cython cython/cyrenderer.pyx
 	$(CC) -g -std=gnu2x -Wall -Wextra -fno-strict-aliasing $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c orc/pulsar.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-pulsar
 
 	#clang $(LPFLAGS) -fsanitize=address -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
@@ -163,9 +155,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: clean astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq astrid-midimap astrid-pulsar
-
-macos: clean astrid-dac astrid-adc astrid-renderer-macos astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midilog astrid-seq
+build: clean astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-seq astrid-midimap astrid-pulsar
 
 install: 
 	cp build/astrid-* /usr/local/bin/

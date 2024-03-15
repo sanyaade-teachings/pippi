@@ -1449,11 +1449,49 @@ char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg) {
     return str;
 }
 
-lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg) {
+lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
     size_t audiosize, offset, length, onset;
     int channels, samplerate, is_looping;
+    char * str; // bufstr
     lpbuffer_t * buf;
     lpfloat_t * audio;
+    struct stat statbuf;
+    int fd;
+    sem_t * sem;
+    void * shmaddr;
+
+    /* Open the semaphore */
+    if((sem = sem_open(buffer_code, 0, LPIPC_PERMS)) == SEM_FAILED) {
+        syslog(LOG_ERR, "deserialize_buffer: failed to open semaphore %s. Error: %s\n", buffer_code, strerror(errno));
+        return NULL;
+    }
+
+    /* Aquire a lock on the semaphore */
+    if(sem_wait(sem) < 0) {
+        syslog(LOG_ERR, "deserialize_buffer: failed to decrementsem %s. Error: %s\n", buffer_code, strerror(errno));
+        return NULL;
+    }
+
+    /* Get the file descriptor for the shared memory segment */
+    if((fd = shm_open(buffer_code, O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "deserialize_buffer: Could not open shared memory segment. (%s) %s\n", buffer_code, strerror(errno));
+        return NULL;
+    }
+
+    /* Get the size of the segment */
+    if(fstat(fd, &statbuf) < 0) {
+        syslog(LOG_ERR, "deserialize_buffer: Could not stat shm. Error: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    /* Attach the shared memory to the pointer */
+    if((shmaddr = (void*)mmap(NULL, statbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "deserialize_buffer: Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, buffer_code, strerror(errno));
+        return NULL;
+    }
+
+    str = (char *)LPMemoryPool.alloc(1, statbuf.st_size);
+    memcpy(str, shmaddr, statbuf.st_size);
 
     offset = 0;
 
@@ -1482,7 +1520,7 @@ lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg) {
     memcpy(msg, str + offset, sizeof(lpmsg_t));
     offset += sizeof(lpmsg_t);
 
-    buf = calloc(1, sizeof(lpbuffer_t));
+    buf = (lpbuffer_t *)LPMemoryPool.alloc(1, sizeof(lpbuffer_t));
 
     buf->length = length;
     buf->channels = channels;
@@ -2652,7 +2690,8 @@ void * instrument_seq_pq(void * arg) {
 }
 
 void * instrument_message_thread(void * arg) {
-    lpbuffer_t * buf; /* async renders: FIXME, add renderer thread */
+    lpmsg_t bufmsg = {0}; // the message serialized along with the async buffer...
+    lpbuffer_t * buf; // async renders: FIXME, do renders in a thread if possible... or fork out early for the python interpreter maybe?
     double processing_time_so_far, onset_delay_in_seconds, seq_delay, now=0;
     int pqnode_index=0;
     lpmsgpq_node_t * d;
@@ -2676,7 +2715,19 @@ void * instrument_message_thread(void * arg) {
                 instrument->is_running = 0;
                 break;
 
-            case  LPMSG_UPDATE:
+            case LPMSG_RENDER_COMPLETE:
+                syslog(LOG_DEBUG, "MSG: render complete\n");
+                syslog(LOG_DEBUG, "%s\n", instrument->msg.msg);
+
+                // Maybe just deserialize the buffer here for now? Everything blocks the main thread anyway...
+                if((buf = deserialize_buffer(instrument->msg.msg, &bufmsg)) == NULL) {
+                    syslog(LOG_ERR, "DAC could not deserialize buffer. Error: (%d) %s\n", errno, strerror(errno));
+                    continue;
+                }
+                scheduler_schedule_event(instrument->async_mixer, buf, 0);
+                break;
+
+            case LPMSG_UPDATE:
                 syslog(LOG_DEBUG, "MSG: update\n");
                 instrument->updates(instrument);
                 break;
@@ -2838,8 +2889,13 @@ int astrid_instrument_start(
     int channels, 
     void * ctx,
     lpinstrument_t * instrument,
+#ifndef NOPYTHON
     int argc,
     char ** argv
+#else
+    __attribute__((unused)) int argc,
+    __attribute__((unused)) char ** argv
+#endif
 ) {
     struct sigaction shutdown_action;
     jack_status_t jack_status;
@@ -3204,6 +3260,61 @@ int astrid_instrument_session_close(lpinstrument_t * instrument) {
     return 0;
 }
 
+int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size) {
+    int shmfd;
+    void * shmaddr;
+    char buffer_code[LPKEY_MAXLENGTH] = {0};
+    size_t buffer_id = 0;
+    lpmsg_t msg = {0};
+
+    // FIXME refactor astrid_get_voice_id for arbitrary named counters
+    buffer_id = astrid_get_voice_id();
+
+    // generate the buffer code using the instrument name as the prefix
+    if(lpencode_with_prefix(instrument_name, buffer_id, buffer_code) < 0) {
+        syslog(LOG_ERR, "Could not encode bufstr key. (%d) %s\n", errno, strerror(errno));
+        return -1;
+    }
+
+    // write the bufstr to shared memory at the key location
+    /* Create the POSIX semaphore and initialize it to 1 */
+    if(sem_open(buffer_code, O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
+        syslog(LOG_ERR, "publish_bufstr: failed to create semaphore %s. Error: %s\n", buffer_code, strerror(errno));
+        return -1;
+    }
+
+    /* Create the POSIX shared memory segment */
+    if((shmfd = shm_open(buffer_code, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "publish_bufstr: Could not create shared memory segment. (%s) %s\n", buffer_code, strerror(errno));
+        return -1;
+    }
+
+    if(ftruncate(shmfd, size) < 0) {
+        syslog(LOG_ERR, "publish_bufstr: Could not truncate shared memory segment to size %ld. (%s) %s\n", size, buffer_code, strerror(errno));
+        return -1;
+    }
+
+    /* Attach the shared memory to the pointer */
+    if((shmaddr = (void*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", size, buffer_code, strerror(errno));
+        return -1;
+    }
+
+    /* Write the bufstr into the shared memory segment */
+    memcpy(shmaddr, (void *)bufstr, size);
+
+    // Send the render complete message
+    memcpy(msg.instrument_name, instrument_name, strlen(instrument_name));
+    memcpy(msg.msg, buffer_code, strlen(buffer_code));
+    msg.type = LPMSG_RENDER_COMPLETE;
+    if(send_play_message(msg) < 0) {
+        syslog(LOG_ERR, "COuld not send render complete message. (%d) %s\n", errno, strerror(errno));
+        return 1;
+    }
+
+    return 0;
+}
+
 int astrid_instrument_tick(lpinstrument_t * instrument) {
     char * line;
 
@@ -3402,7 +3513,7 @@ int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, char * 
     /* Init python interpreter */
     PyConfig_InitPythonConfig(&config);
 
-    status = PyConfig_SetString(&config, &config.program_name, L"astrid-python-renderer");
+    status = PyConfig_SetString(&config, &config.program_name, L"python3");
     if (PyStatus_Exception(status)) {
         PyConfig_Clear(&config);
         return -1;
