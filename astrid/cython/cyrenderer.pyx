@@ -16,8 +16,6 @@ import struct
 import subprocess
 import threading
 
-import redis
-
 from pippi import dsp, midi
 from pippi.soundbuffer cimport SoundBuffer
 
@@ -32,9 +30,6 @@ if not logger.handlers:
     logger.addHandler(SysLogHandler(address=log_path))
     logger.setLevel(logging.DEBUG)
     warnings.simplefilter('always')
-
-_redis = redis.StrictRedis(host='localhost', port=6379, db=0)
-bus = _redis.pubsub()
 
 cdef lpfloat_t[LPADCBUFSAMPLES] adc_block
 
@@ -289,19 +284,20 @@ cdef class EventTriggerFactory:
 cdef class SessionParamBucket:
     """ params[key] to params.key
 
-        An interface to redis to get and set shared session params.
+        An interface to LMDB to get and set shared session params.
     """
     def __getattr__(self, key):
         return self.get(key)
 
     def get(self, key, default=None):
-        v = _redis.get(key.encode('ascii')) 
+        v = None # FIXME look up param in LMDB
         if v is None:
             return default
         return v.decode('utf-8')
 
     def __setattr__(self, key, value):
-        _redis.set(key.encode('ascii'), value.encode('ascii'))
+        # FIXME set param in LMDB
+        pass
 
 cdef class ParamBucket:
     """ params[key] to params.key
@@ -402,20 +398,13 @@ cdef class Instrument:
             self.cache = self.renderer.cache()
 
     def register_midi_triggers(self):
+        # FIXME prolly don't need this anymore?
         if hasattr(self.renderer, 'MIDI'): 
             devices = []
             if isinstance(self.renderer.MIDI, list):
                 devices += self.renderer.MIDI
             else:
                 devices = [ self.renderer.MIDI ]
-
-            try:
-                for device, low, high in devices:
-                    _redis.hset('%s-triggers' % device, self.name, 1)
-                    _redis.set('%s-%s-triglow' % (device, self.name), str(low))
-                    _redis.set('%s-%s-trighigh' % (device, self.name), str(high))
-            except (TypeError, ValueError):
-                logger.error('Could not unpack MIDI params from %s: %s' % (self.name, devices))
 
 
 class InstrumentNotFoundError(Exception):
@@ -534,7 +523,6 @@ cdef int render_event(object instrument, lpmsg_t * msg):
                         dacid = 0
 
                     bufstr = serialize_buffer(snd, loop, msg)
-                    #_redis.publish('astrid-dac-%d-bufferfeed' % dacid, bufstr)
                     astrid_instrument_publish_bufstr(msg.instrument_name, bufstr, len(bufstr))
 
             except Exception as e:

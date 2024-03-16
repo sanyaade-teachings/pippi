@@ -1803,6 +1803,8 @@ int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg) {
     char msgtype;
     char cmd_copy[LPMAXMSG] = {0};
 
+    if(cmdline == NULL) return 0;
+
     // strtok clobbers input
     memcpy(cmd_copy, cmdline, sizeof(cmd_copy));
 
@@ -2388,144 +2390,6 @@ int send_serial_message(lpmsg_t msg) {
     return 0;
 }
 
-/** dac / adc **/
-void * astrid_async_buffer_feed(__attribute__((unused)) void * arg) {
-    lpinstrument_t * instrument = (lpinstrument_t *)arg;
-
-    char buffer_feed_cmd_template[] = "SUBSCRIBE astrid-dac-%s-bufferfeed";
-    char buffer_feed_cmd[100];
-
-    redisContext * redis_ctx;
-    redisReply * redis_reply;
-    lpbuffer_t * buf;
-    lpmsg_t msg = {0};
-
-    double processing_time_so_far, onset_delay_in_seconds;
-    double now = 0;
-    struct timeval redis_timeout = {15, 0};
-
-    snprintf(buffer_feed_cmd, sizeof(buffer_feed_cmd), buffer_feed_cmd_template, instrument->name);
-
-    syslog(LOG_INFO, "Buffer feed starting up...\n");
-    redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
-    if(redis_ctx == NULL) {
-        syslog(LOG_CRIT, "Could not start connection to redis.\n");
-        exit(1);
-    }
-
-    if(redis_ctx->err) {
-        syslog(LOG_CRIT, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
-        exit(1);
-    }
-
-    /* Subscribe to the buffer queue. 
-     * This is the only thread subscribed
-     * to the buffer queue as a reader.
-     */
-    redis_reply = redisCommand(redis_ctx, buffer_feed_cmd);
-    if(redis_reply->str != NULL) printf("subscribe result: %s\n", redis_reply->str); 
-    freeReplyObject(redis_reply);
-
-    /* Wait on buffers from the queue */
-    syslog(LOG_INFO, "Waiting for buffers...\n");
-    while(instrument->is_running && redisGetReply(redis_ctx, (void *)&redis_reply) == REDIS_OK) {
-        if(redis_reply->type == REDIS_REPLY_ARRAY) {
-            if(redis_reply->element[2]->str[0] == 's') {
-                syslog(LOG_INFO, "Buffer feed got shutdown message\n");
-                syslog(LOG_INFO, "    message: %s\n", redis_reply->element[2]->str);
-                break;
-            }
-
-            if((buf = deserialize_buffer(redis_reply->element[2]->str, &msg)) == NULL) {
-                syslog(LOG_ERR, "DAC could not deserialize buffer. Error: (%d) %s\n", errno, strerror(errno));
-                continue;
-            }
-
-            /* Increment the message count */
-            /*msg.count += 1;*/
-
-            /* Get now */
-            if(lpscheduler_get_now_seconds(&now) < 0) {
-                syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
-                now = 0;
-            }
-
-            /*
-            syslog(LOG_DEBUG, "DAC: Message type %d for %s arrived in buffer feed\n", msg.type, msg.instrument_name);
-            syslog(LOG_DEBUG, "initiated=%f scheduled=%f voice_id=%ld\n", msg.initiated, msg.scheduled, msg.voice_id);
-            */
-
-            processing_time_so_far = now - msg.initiated;
-            onset_delay_in_seconds = msg.scheduled - processing_time_so_far;
-            if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
-
-            msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
-
-            syslog(LOG_INFO, "\n\nmsg.onset_delay %ld\n", msg.onset_delay);
-
-            /* Schedule the buffer for playback */
-            scheduler_schedule_event(instrument->async_mixer, buf, msg.onset_delay);
-
-            /* If the buffer is flagged to loop, schedule the next render 
-             * by placing the message onto the message scheduling priority 
-             * queue with a timestamp for sending the render message 50% 
-             * into the buffer playback, with an onset delay for the buffer 
-             * making up the remaining 50%. TODO: measure jitter when scheduling 
-             * in regular intervals. */
-
-            syslog(LOG_INFO, "Finished scheduling rendered event for playback from message\n");
-            syslog(LOG_INFO, "\ninitiated %f\nscheduled %f\ncompleted %f\nmax_processing_time %f\nonset_delay %ld\nvoice_id %ld\ncount %ld\ntype %d\nmsg %s\nname %s\n\n", 
-                msg.initiated,
-                msg.scheduled,
-                msg.completed,
-                msg.max_processing_time,
-                msg.onset_delay,
-                msg.voice_id, 
-                msg.count,
-                msg.type,
-                msg.msg,
-                msg.instrument_name
-            );
-
-
-            if(buf->is_looping == 1) {
-                msg.initiated = now;
-                msg.scheduled = (lpfloat_t)buf->length / ASTRID_SAMPLERATE;
-                msg.type = LPMSG_PLAY;
-                msg.count += 1;
-                //msg.max_processing_time = msg.scheduled; /* This schedules the render as soon as possible */
-                msg.max_processing_time = 0;
-
-                syslog(LOG_INFO, "Scheduling message for loop retriggering\n");
-                syslog(LOG_INFO, "\ninitiated %f\nscheduled %f\ncompleted %f\nmax_processing_time %f\nonset_delay %ld\nvoice_id %ld\ncount %ld\ntype %d\nmsg %s\nname %s\n\n", 
-                    msg.initiated,
-                    msg.scheduled,
-                    msg.completed,
-                    msg.max_processing_time,
-                    msg.onset_delay,
-                    msg.voice_id, 
-                    msg.count,
-                    msg.type,
-                    msg.msg,
-                    msg.instrument_name
-                );
-
-                if(send_message(msg) < 0) {
-                    syslog(LOG_ERR, "Could not schedule message for loop retriggering\n");
-                    continue;
-                }
-            }
-
-        }
-        freeReplyObject(redis_reply);
-    }
-
-    syslog(LOG_INFO, "Buffer feed shutting down...\n");
-
-    if(redis_ctx != NULL) redisFree(redis_ctx); 
-    return 0;
-}
-
 int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     float * output_channels[instrument->channels];
@@ -2732,10 +2596,6 @@ void * instrument_message_thread(void * arg) {
                 instrument->updates(instrument);
                 break;
 
-            case LPMSG_LOAD:
-                syslog(LOG_DEBUG, "MSG: load\n");
-                break;
-
             case LPMSG_PLAY:
                 syslog(LOG_DEBUG, "MSG: play\n");
 #ifndef NOPYTHON
@@ -2779,8 +2639,24 @@ void * instrument_message_thread(void * arg) {
                 }
                 break;
 
+            case LPMSG_LOAD:
+                syslog(LOG_DEBUG, "MSG: load\n");
+#ifndef NOPYTHON
+                if(astrid_reload_instrument(instrument->python_instrument_path) < 0) {
+                    PyErr_Print();
+                    syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
+                }
+#endif
+                break;
+
             case LPMSG_TRIGGER:
                 syslog(LOG_DEBUG, "MSG: trigger\n");
+#ifndef NOPYTHON
+                if(astrid_schedule_python_triggers(&instrument->msg) < 0) {
+                    PyErr_Print();
+                    syslog(LOG_ERR, "CPython error during trigger planning loop\n");
+                }
+#endif
                 break;
 
             case LPMSG_SCHEDULE:
@@ -2850,40 +2726,6 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     return 0;
 }
 
-int cleanup_buffer_feed(lpinstrument_t * instrument) {
-    redisContext * redis_ctx;
-    redisReply * redis_reply;
-    struct timeval redis_timeout = {15, 0};
-    char shutdown_cmd_template[] = "PUBLISH astrid-dac-%s-bufferfeed shutdown";
-    char shutdown_cmd[100];
-
-    snprintf(shutdown_cmd, sizeof(shutdown_cmd), shutdown_cmd_template, instrument->name);
-
-    redis_ctx = redisConnectWithTimeout("127.0.0.1", 6379, redis_timeout);
-    if(redis_ctx == NULL) {
-        syslog(LOG_ERR, "Could not start connection to redis.\n");
-        exit(1);
-    }
-
-    if(redis_ctx->err) {
-        syslog(LOG_ERR, "There was a problem while connecting to redis. %s\n", redis_ctx->errstr);
-        exit(1);
-    }
-
-    syslog(LOG_INFO, "Sending shutdown to %s buffer thread...\n", instrument->name);
-    redis_reply = redisCommand(redis_ctx, shutdown_cmd);
-    if(redis_reply->str != NULL) syslog(LOG_INFO, "astridbuffers shutdown result: %s\n", redis_reply->str); 
-    freeReplyObject(redis_reply);
-    if(redis_ctx != NULL) redisFree(redis_ctx); 
-
-    syslog(LOG_DEBUG, "Joining with buffer thread...\n");
-    if(pthread_join(instrument->buffer_feed_thread, NULL) != 0) {
-        syslog(LOG_ERR, "Error while attempting to join with buffer thread\n");
-    }
-
-    return 0;
-}
-
 int astrid_instrument_start(
     const char * name, 
     int channels, 
@@ -2904,9 +2746,6 @@ int astrid_instrument_start(
     char outport_name[50];
     char inport_name[50];
     int c = 0;
-#ifndef NOPYTHON
-    char * python_script_path = NULL;
-#endif
 
     syslog(LOG_DEBUG, "starting %s instrument...\n", name);
 
@@ -2949,18 +2788,10 @@ int astrid_instrument_start(
 #ifndef NOPYTHON
     if(argc > 1) {
         printf("Enabling embedded python renderer and setting python script path to:\n\t%s\n", argv[1]);
-        python_script_path = argv[1];
+        instrument->python_instrument_path = argv[1];
         instrument->python_is_enabled = 1;
     }
 #endif
-
-    /* Start buffer feed thread */
-    /*
-    if(pthread_create(&instrument->buffer_feed_thread, NULL, astrid_async_buffer_feed, NULL) != 0) {
-        syslog(LOG_ERR, "Could not initialize %s buffer feed thread. Error: %s\n", instrument->name, strerror(errno));
-        return -1;
-    }
-    */
 
     /* Open the LMDB session */
     astrid_instrument_session_open(instrument);
@@ -2968,7 +2799,7 @@ int astrid_instrument_start(
 #ifndef NOPYTHON
     /* Start the embedded python renderer */
     if(instrument->python_is_enabled) {
-        if(astrid_instrument_renderer_python_start(instrument, python_script_path) < 0) {
+        if(astrid_instrument_renderer_python_start(instrument, instrument->python_instrument_path) < 0) {
             syslog(LOG_ERR, "%s Could not start embedded python renderer. (%d) %s\n", name, errno, strerror(errno));
         }
     }
@@ -3329,15 +3160,17 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
         return -1;
     }
 
-    if(instrument->cmd.type == LPMSG_SERIAL) {
-        if(send_serial_message(instrument->cmd) < 0) {
-            syslog(LOG_ERR, "Could not send serial message...\n");
-            return -1;
-        }
-    } else {
-        if(send_play_message(instrument->cmd) < 0) {
-            syslog(LOG_ERR, "Could not send play message...\n");
-            return -1;
+    if(line != NULL) {
+        if(instrument->cmd.type == LPMSG_SERIAL) {
+            if(send_serial_message(instrument->cmd) < 0) {
+                syslog(LOG_ERR, "Could not send serial message...\n");
+                return -1;
+            }
+        } else {
+            if(send_play_message(instrument->cmd) < 0) {
+                syslog(LOG_ERR, "Could not send play message...\n");
+                return -1;
+            }
         }
     }
 

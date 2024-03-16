@@ -31,7 +31,7 @@ LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
 LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/linenoise -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0 -DNOPYTHON
-LPLIBS = -lm -ldl -lpthread -lrt -ljack -lhiredis
+LPLIBS = -lm -ldl -lpthread -lrt -ljack
 
 clean:
 	rm -rf build/*
@@ -43,13 +43,6 @@ clean:
 	rm -f python/cython/*.h
 	rm -rf python/src
 	rm -f python/*.so
-
-astrid-renderer:
-	mkdir -p build
-
-	echo "Building astrid renderer...";
-	cython cython/cyrenderer.pyx
-	$(CC) -g -std=gnu2x -Wall -Wextra -fno-strict-aliasing $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c src/renderer.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-renderer
 
 #astrid-midilog:
 #	mkdir -p build
@@ -77,18 +70,6 @@ astrid-q:
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qserver.c $(LPLIBS) -o build/astrid-qserver
 	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/msg.c $(LPLIBS) -o build/astrid-msg
 
-astrid-dac:
-	mkdir -p build
-
-	echo "Building astrid dac...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/dac.c $(LPLIBS) -o build/astrid-dac
-
-astrid-seq:
-	mkdir -p build
-
-	echo "Building astrid seq...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seq.c $(LPLIBS) -o build/astrid-seq
-
 astrid-midimap:
 	mkdir -p build
 
@@ -109,19 +90,6 @@ astrid-voicestatus:
 
 	echo "Building astrid voice status...";
 	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/voicestatus.c $(LPLIBS) -lncurses -o build/astrid-voicestatus
-
-astrid-adc:
-	mkdir -p build
-
-	echo "Building astrid JACK adc and tools...";
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/adc.c $(LPLIBS) -o build/astrid-adc
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadccreate.c $(LPLIBS) -o build/astrid-adccreate
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwriteval.c $(LPLIBS) -o build/astrid-adcwriteval
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcwritewav.c $(LPLIBS) -o build/astrid-adcwritewav
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcsave.c $(LPLIBS) -o build/astrid-adcsave
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcinfo.c $(LPLIBS) -o build/astrid-adcinfo
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcread1s.c $(LPLIBS) -o build/astrid-adcread1s
-	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/lpadcdestroy.c $(LPLIBS) -o build/astrid-adcdestroy
 
 astrid-seriallistener:
 	mkdir -p build
@@ -155,7 +123,7 @@ else
 	journalctl -xf --output=json | python -u python/colorize_logs.py
 endif
 
-build: clean astrid-dac astrid-adc astrid-renderer astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-seq astrid-midimap astrid-pulsar
+build: clean astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midimap astrid-pulsar
 
 install: 
 	cp build/astrid-* /usr/local/bin/

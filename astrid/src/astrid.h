@@ -187,6 +187,7 @@ typedef struct lpinstrument_t {
 #ifndef NOPYTHON
     int python_is_enabled;
     int (*schedule_python_render)(void *);
+    char * python_instrument_path;
 #endif
 
     // Optional local context struct for callbacks
