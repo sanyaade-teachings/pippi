@@ -17,6 +17,25 @@ if dev:
     DIRECTIVES['binding'] = True
 
 ext_modules = cythonize([
+        Extension('pippi.renderer', [
+                'pippi/renderer.pyx',
+                'libpippi/vendor/linenoise/linenoise.c',
+                'libpippi/vendor/libpqueue/src/pqueue.c',
+                'libpippi/vendor/lmdb/libraries/liblmdb/mdb.c',
+                'libpippi/vendor/lmdb/libraries/liblmdb/midl.c',
+                'libpippi/src/pippicore.c',
+                'astrid/src/astrid.c',
+            ],
+            libraries=['jack', 'rt'], 
+            include_dirs=INCLUDES+[
+                'libpippi/vendor/libpqueue/src', 
+                'libpippi/vendor/linenoise', 
+                'libpippi/vendor/lmdb/libraries/liblmdb',
+                'astrid/src'
+            ],           
+            define_macros=MACROS
+        ),
+
         Extension('pippi.microcontrollers', ['pippi/microcontrollers.pyx'],
             include_dirs=INCLUDES, 
             define_macros=MACROS

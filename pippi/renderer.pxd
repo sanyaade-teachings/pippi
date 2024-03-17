@@ -3,7 +3,6 @@
 from libc.stdint cimport uint16_t
 from pippi.soundbuffer cimport SoundBuffer
 
-
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 
@@ -54,6 +53,7 @@ cdef extern from "astrid.h":
     cdef const int ASTRID_SAMPLERATE
     cdef const int ASTRID_CHANNELS
     cdef const char * LPADC_BUFFER_PATH
+    cdef const int NAME_MAX
 
     cdef enum LPMessageTypes:
         LPMSG_EMPTY,
@@ -96,6 +96,16 @@ cdef extern from "astrid.h":
         int group
         int device
 
+    ctypedef struct lpinstrument_t:
+        const char * name
+        volatile int is_running
+        volatile int is_waiting
+        int has_been_initialized
+        int playqd
+        char python_message_relay_name[NAME_MAX]
+        int python_is_enabled
+        lpscheduler_t * async_mixer
+
     int lpadc_create()
     int lpadc_destroy()
     int lpadc_write_block(float * block, size_t blocksize_in_samples)
@@ -106,11 +116,15 @@ cdef extern from "astrid.h":
     int lpipc_getid(char * path)
     ssize_t astrid_get_voice_id()
 
-    int send_message(lpmsg_t msg)
+    int send_message(char * qname, lpmsg_t msg)
 
     int midi_triggerq_open()
     int midi_triggerq_schedule(int qfd, lpmidievent_t t)
     int midi_triggerq_close(int qfd)
+
+    int astrid_msgq_open(char * qname)
+    lpmsg_t astrid_msgq_read(int mqd)
+    int astrid_msgq_close(int mqd)
 
     int lpmidi_setcc(int device_id, int cc, int value)
     int lpmidi_getcc(int device_id, int cc)
@@ -121,6 +135,18 @@ cdef extern from "astrid.h":
 
     int lpscheduler_get_now_seconds(double * now)
     int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size)
+    lpinstrument_t * astrid_instrument_start(
+        const char * name, 
+        int channels, 
+        void * ctx, 
+        void (*stream)(int channels, size_t blocksize, float ** input, float ** output, void * instrument),
+        lpbuffer_t * (*renderer)(void * instrument),
+        void (*updates)(void * instrument)
+    )
+
+    int astrid_instrument_stop(lpinstrument_t * instrument)
+    void scheduler_cleanup_nursery(lpscheduler_t * s)
+
 
 
 cdef class MessageEvent:

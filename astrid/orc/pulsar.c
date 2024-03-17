@@ -132,8 +132,8 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
     }
 }
 
-int main(int argc, char ** argv) {
-    lpinstrument_t instrument = {0};
+int main() {
+    lpinstrument_t * instrument;
     
     // create local context struct
     localctx_t * ctx = (localctx_t *)calloc(1, sizeof(localctx_t));
@@ -163,11 +163,8 @@ int main(int argc, char ** argv) {
     }
 
     // Set the callbacks for streaming, async renders and param updates
-    instrument.stream = audio_callback;
-    //instrument.renderer = renderer_callback;
-    instrument.updates = param_update_callback;
-
-    if(astrid_instrument_start(NAME, CHANNELS, (void*)ctx, &instrument, argc, argv) < 0) {
+    if((instrument = astrid_instrument_start(NAME, CHANNELS, (void*)ctx, 
+                    audio_callback, renderer_callback, param_update_callback)) == NULL) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -176,15 +173,15 @@ int main(int argc, char ** argv) {
     for(int i=0; i < NUMFREQS; i++) {
         ctx->selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
     }
-    astrid_instrument_set_param_float_list(&instrument, PARAM_FREQS, ctx->selected_freqs, NUMFREQS);
+    astrid_instrument_set_param_float_list(instrument, PARAM_FREQS, ctx->selected_freqs, NUMFREQS);
 
     /* twiddle thumbs until shutdown */
-    while(instrument.is_running) {
-        astrid_instrument_tick(&instrument);
+    while(instrument->is_running) {
+        astrid_instrument_tick(instrument);
     }
 
     /* stop jack and cleanup threads */
-    if(astrid_instrument_stop(&instrument) < 0) {
+    if(astrid_instrument_stop(instrument) < 0) {
         fprintf(stderr, "There was a problem stopping the instrument. (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }

@@ -1,5 +1,3 @@
-.PHONY: cython astrid follow-log
-
 default: build
 
 PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBRARY')[3:-2])")
@@ -28,7 +26,7 @@ LPSOURCES = $(LPDIR)/vendor/fft/fft.c \
 	$(LPDIR)/src/pippicore.c
 
 LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
-LPINCLUDES = -Isrc -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/linenoise -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
+LPINCLUDES = -Isrc -I${LPDIR}../pippi -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/linenoise -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0 -DNOPYTHON
 LPLIBS = -lm -ldl -lpthread -lrt -ljack
@@ -60,15 +58,11 @@ astrid-ipc:
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/ipcsetvalue.c $(LPLIBS) -o build/astrid-ipcsetvalue
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/ipcdestroyvalue.c $(LPLIBS) -o build/astrid-ipcdestroyvalue
 
-astrid-sessiondb:
-	echo "Building astrid session db tools...";
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/createsessiondb.c $(LPLIBS) -o build/astrid-createsessiondb
-
 astrid-q:
 	echo "Building astrid queue reader...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qreader.c $(LPLIBS) -o build/astrid-qreader
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/qserver.c $(LPLIBS) -o build/astrid-qserver
-	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/msg.c $(LPLIBS) -o build/astrid-msg
+	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/msg.c $(LPLIBS) -o build/astrid-msg
 
 astrid-midimap:
 	mkdir -p build
@@ -109,21 +103,9 @@ astrid-pulsar:
 
 	echo "Building astrid pulsar...";
 
-	../venv/bin/cython cython/cyrenderer.pyx
-	$(CC) -g -std=gnu2x -Wall -Wextra -fno-strict-aliasing $(LPINCLUDES) `python3-config --cflags` -Icython -l$(PYLIB) $(LPLIBS) src/astrid.c orc/pulsar.c $(LPSOURCES) cython/cyrenderer.c -o build/astrid-pulsar
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 
-	#clang $(LPFLAGS) -fsanitize=address -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
-	#clang $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
-	#gcc $(LPFLAGS) -fanalyzer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
-
-follow-log:
-ifeq ($(shell uname),Darwin)
-	log stream --predicate 'subsystem == "astrid"'
-else
-	journalctl -xf --output=json | python -u python/colorize_logs.py
-endif
-
-build: clean astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-voicestatus astrid-midimap astrid-pulsar
+build: clean astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-midimap astrid-pulsar
 
 install: 
 	cp build/astrid-* /usr/local/bin/

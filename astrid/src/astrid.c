@@ -1,6 +1,3 @@
-#ifndef NOPYTHON
-#include "cyrenderer.h"
-#endif
 #include "astrid.h"
 
 static volatile int * astrid_instrument_is_running;
@@ -1246,7 +1243,7 @@ int lpmidi_trigger_notemap(int device_id, int note) {
             msg.instrument_name
         );
 
-        if(send_message(msg) < 0) {
+        if(send_message(msg.instrument_name, msg) < 0) {
             syslog(LOG_ERR, "Could not schedule msg for sending during notemap trigger. Error: %s\n", strerror(errno));
             return -1;
         }
@@ -1571,16 +1568,16 @@ int send_play_message(lpmsg_t msg) {
     return 0;
 }
 
-int send_message(lpmsg_t msg) {
+int send_message(char * qname, lpmsg_t msg) {
     mqd_t mqd;
     struct mq_attr attr;
 
     attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
     attr.mq_msgsize = sizeof(lpmsg_t);
 
-    /*syslog(LOG_DEBUG, "Sending message type %d to %s\n", msg.type, msg.instrument_name);*/
+    syslog(LOG_DEBUG, "Sending message type %d on queue %s\n", msg.type, qname);
 
-    if((mqd = mq_open(ASTRID_MSGQ_PATH, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
+    if((mqd = mq_open(qname, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
         syslog(LOG_ERR, "send_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
         return -1;
     }
@@ -1613,11 +1610,13 @@ mqd_t astrid_playq_open(const char * instrument_name) {
     qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
     snprintf(qname, qname_length, "%s-%s", LPPLAYQ, instrument_name);
 
+    syslog(LOG_DEBUG, "Opening playq %s\n", qname);
     if((mqd = mq_open(qname, O_CREAT | O_RDONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
         syslog(LOG_ERR, "astrid_playq_open mq_open: Error opening message queue. Error: %s\n", strerror(errno));
         return -1;
     }
 
+    syslog(LOG_DEBUG, "Opened playq mqd:%d\n", mqd);
     return mqd;
 }
 
@@ -1645,18 +1644,20 @@ int astrid_playq_read(mqd_t mqd, lpmsg_t * msg) {
     return 0;
 }
 
-mqd_t astrid_msgq_open() {
+mqd_t astrid_msgq_open(char * qname) {
     mqd_t mqd;
     struct mq_attr attr;
 
     attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
     attr.mq_msgsize = sizeof(lpmsg_t);
 
-    if((mqd = mq_open(ASTRID_MSGQ_PATH, O_CREAT | O_RDONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
+    syslog(LOG_DEBUG, "Opening msgq %s\n", qname);
+    if((mqd = mq_open(qname, O_CREAT | O_RDONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
         syslog(LOG_ERR, "astrid_playq_open mq_open: Error opening message queue. Error: %s\n", strerror(errno));
         return (mqd_t) -1;
     }
 
+    syslog(LOG_DEBUG, "Opened msgq mqd:%d\n", mqd);
     return mqd;
 }
 
@@ -1669,19 +1670,24 @@ int astrid_msgq_close(mqd_t mqd) {
     return 0;
 }
 
-int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg) {
+lpmsg_t astrid_msgq_read(mqd_t mqd) {
+    lpmsg_t msg = {0};
     char * msgp;
     ssize_t read_result;
-    unsigned int msg_priority;
+    unsigned int msg_priority = 0;
 
-    msgp = (char *)msg;
+    syslog(LOG_DEBUG, "Reading from msgq mqd:%d\n", mqd);
+    syslog(LOG_DEBUG, "Reading from msg.msg:%s\n", msg.msg);
+    syslog(LOG_DEBUG, "Reading from msg.instrument_name:%s\n", msg.instrument_name);
+    msgp = (char *)(&msg);
 
+    syslog(LOG_DEBUG, "calling mq_receive:%d\n", mqd);
     if((read_result = mq_receive(mqd, msgp, sizeof(lpmsg_t), &msg_priority)) < 0) {
         syslog(LOG_ERR, "astrid_msgq_read mq_receive: Error reading message. (Got %ld bytes) Error: %s\n", read_result, strerror(errno));
-        return -1;
     }
 
-    return 0;
+    syslog(LOG_DEBUG, "done calling mq_receive:%d\n", mqd);
+    return msg;
 }
 
 int astrid_get_playback_device_id() {
@@ -2396,6 +2402,8 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     float * input_channels[instrument->channels];
     size_t i;
     int c;
+    syslog(LOG_DEBUG, "inside the jack callback. %s\n", instrument->name);
+    syslog(LOG_DEBUG, "inside the jack callback. init: %d\n", instrument->has_been_initialized);
 
     if(!instrument->is_running) return 0;
 
@@ -2573,6 +2581,17 @@ void * instrument_message_thread(void * arg) {
         syslog(LOG_DEBUG, "MSG: %d (msg.voice_id)\n", (int)instrument->msg.voice_id);
         syslog(LOG_DEBUG, "MSG: %d (msg.type)\n", (int)instrument->msg.type);
 
+#ifndef NOPYTHON
+        // Relay a copy of all messages to python
+        if(instrument->python_is_enabled) {
+            if(send_message(instrument->python_message_relay_name, instrument->msg) < 0) {
+                //PyErr_Print();
+                syslog(LOG_ERR, "CPython error during renderer loop\n");
+            }
+        }
+#endif
+
+
         switch(instrument->msg.type) {
             case LPMSG_SHUTDOWN:
                 syslog(LOG_DEBUG, "MSG: shutdown\n");
@@ -2593,21 +2612,11 @@ void * instrument_message_thread(void * arg) {
 
             case LPMSG_UPDATE:
                 syslog(LOG_DEBUG, "MSG: update\n");
-                instrument->updates(instrument);
+                if(instrument->updates != NULL) instrument->updates(instrument);
                 break;
 
             case LPMSG_PLAY:
                 syslog(LOG_DEBUG, "MSG: play\n");
-#ifndef NOPYTHON
-                // Schedule a python render if there is a renderer
-                if(instrument->python_is_enabled) {
-                    if(instrument->schedule_python_render(&instrument->msg) < 0) {
-                        PyErr_Print();
-                        syslog(LOG_ERR, "CPython error during renderer loop\n");
-                    }
-                }
-#endif
-
                 // Schedule a C callback render if there's a callback defined
                 if(instrument->renderer != NULL) {
                     /* Do the render: FIXME do this in another thread */
@@ -2641,22 +2650,10 @@ void * instrument_message_thread(void * arg) {
 
             case LPMSG_LOAD:
                 syslog(LOG_DEBUG, "MSG: load\n");
-#ifndef NOPYTHON
-                if(astrid_reload_instrument(instrument->python_instrument_path) < 0) {
-                    PyErr_Print();
-                    syslog(LOG_ERR, "Error while attempting to load astrid instrument\n");
-                }
-#endif
                 break;
 
             case LPMSG_TRIGGER:
                 syslog(LOG_DEBUG, "MSG: trigger\n");
-#ifndef NOPYTHON
-                if(astrid_schedule_python_triggers(&instrument->msg) < 0) {
-                    PyErr_Print();
-                    syslog(LOG_ERR, "CPython error during trigger planning loop\n");
-                }
-#endif
                 break;
 
             case LPMSG_SCHEDULE:
@@ -2726,19 +2723,15 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     return 0;
 }
 
-int astrid_instrument_start(
+lpinstrument_t * astrid_instrument_start(
     const char * name, 
     int channels, 
     void * ctx,
-    lpinstrument_t * instrument,
-#ifndef NOPYTHON
-    int argc,
-    char ** argv
-#else
-    __attribute__((unused)) int argc,
-    __attribute__((unused)) char ** argv
-#endif
+    void (*stream)(int channels, size_t blocksize, float ** input, float ** output, void * instrument),
+    lpbuffer_t * (*renderer)(void * instrument),
+    void (*updates)(void * instrument)
 ) {
+    lpinstrument_t * instrument;
     struct sigaction shutdown_action;
     jack_status_t jack_status;
     jack_options_t jack_options = JackNullOption;
@@ -2747,11 +2740,18 @@ int astrid_instrument_start(
     char inport_name[50];
     int c = 0;
 
+    instrument = (lpinstrument_t *)LPMemoryPool.alloc(1, sizeof(lpinstrument_t));
+    memset(instrument, 0, sizeof(lpinstrument_t));
+
     syslog(LOG_DEBUG, "starting %s instrument...\n", name);
 
     instrument->name = name;
     instrument->channels = channels;
     instrument->context = ctx;
+
+    instrument->stream = stream;
+    instrument->renderer = renderer;
+    instrument->updates = updates;
 
     openlog(name, LOG_PID, LOG_USER);
 
@@ -2785,25 +2785,12 @@ int astrid_instrument_start(
      **/
     instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
 
-#ifndef NOPYTHON
-    if(argc > 1) {
-        printf("Enabling embedded python renderer and setting python script path to:\n\t%s\n", argv[1]);
-        instrument->python_instrument_path = argv[1];
-        instrument->python_is_enabled = 1;
-    }
-#endif
+    printf("Python is enabled\n");
+    instrument->python_is_enabled = 1;
+    snprintf(instrument->python_message_relay_name, sizeof(instrument->python_message_relay_name), "/%s-python-relay", instrument->name);
 
     /* Open the LMDB session */
     astrid_instrument_session_open(instrument);
-
-#ifndef NOPYTHON
-    /* Start the embedded python renderer */
-    if(instrument->python_is_enabled) {
-        if(astrid_instrument_renderer_python_start(instrument, instrument->python_instrument_path) < 0) {
-            syslog(LOG_ERR, "%s Could not start embedded python renderer. (%d) %s\n", name, errno, strerror(errno));
-        }
-    }
-#endif
 
     /* Set up JACK */
     instrument->inports = (jack_port_t **)calloc(channels, sizeof(jack_port_t *));
@@ -2885,26 +2872,26 @@ int astrid_instrument_start(
     // Ready for some messages now! Open the message queue and start up the seq threads...
     if((instrument->playqd = astrid_playq_open(instrument->name)) == (mqd_t) -1) {
         syslog(LOG_CRIT, "Could not open playq for instrument %s. Error: %s\n", instrument->name, strerror(errno));
-        return -1;
+        return NULL;
     }
     memcpy(instrument->msg.instrument_name, instrument->name, strlen(instrument->name));
     memcpy(instrument->cmd.instrument_name, instrument->name, strlen(instrument->name));
     syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument->name, instrument->playqd);
     if(astrid_instrument_seq_start(instrument) < 0) {
         syslog(LOG_CRIT, "Could not start message sequence threads for instrument %s. Error: %s\n", instrument->name, strerror(errno));
-        return -1;
+        return NULL;
     }
 
     /* setup linenoise repl */
     linenoiseHistoryLoad("history.txt"); // FIXME this goes in the instrument config dir / or share?
 
-    return 0;
+    return instrument;
 
 astrid_instrument_shutdown_with_error:
     instrument->is_running = 0;
     jack_client_close(instrument->jack_client);
     closelog();
-    return 1;
+    return NULL;
 }
 
 int astrid_instrument_stop(lpinstrument_t * instrument) {
@@ -2952,13 +2939,6 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
     astrid_instrument_session_close(instrument);
 
     if(instrument->async_mixer != NULL) scheduler_destroy(instrument->async_mixer);
-
-#ifndef NOPYTHON
-    if(instrument->python_is_enabled) {
-        syslog(LOG_DEBUG, "Stopping python renderer...\n");
-        astrid_instrument_renderer_python_stop();
-    }
-#endif
 
     syslog(LOG_DEBUG, "All done, see ya later!\n");
     closelog();
@@ -3027,10 +3007,9 @@ int astrid_instrument_get_or_create_datadir(const char * name, char * dbpath) {
 
 int astrid_instrument_session_open(lpinstrument_t * instrument) {
     int rc;
-    char dbpath[PATH_MAX];
 
-    if(astrid_instrument_get_or_create_datadir(instrument->name, dbpath) < 0) {
-        syslog(LOG_ERR, "session data path (%s) mkdir: (%d) %s\n", dbpath, errno, strerror(errno));
+    if(astrid_instrument_get_or_create_datadir(instrument->name, instrument->datapath) < 0) {
+        syslog(LOG_ERR, "session data path (%s) mkdir: (%d) %s\n", instrument->datapath, errno, strerror(errno));
         return -1;
     }
 
@@ -3042,7 +3021,7 @@ int astrid_instrument_session_open(lpinstrument_t * instrument) {
     }
 
     /* open it at the db directory */
-	rc = mdb_env_open(instrument->dbenv, dbpath, 0, 0664);
+	rc = mdb_env_open(instrument->dbenv, instrument->datapath, 0, 0664);
     if(rc != MDB_SUCCESS) {
         syslog(LOG_ERR, "mdb_env_open: (%d) %s\n", rc, mdb_strerror(rc));
         return -1;
@@ -3148,7 +3127,6 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
 
 int astrid_instrument_tick(lpinstrument_t * instrument) {
     char * line;
-
 
     if(instrument->is_running == 0) return 0;
 
@@ -3330,13 +3308,13 @@ size_t lpdecode_with_prefix(char * encoded) {
 }
 
 #ifndef NOPYTHON
+#if 0
 int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, char * python_script_path) {
     PyObject * pmodule;
     PyConfig config;
     PyStatus status;
 
     syslog(LOG_INFO, "Starting python renderer...\n");
-
     /* Prepare cyrenderer module for import */
     if(PyImport_AppendInittab("cyrenderer", PyInit_cyrenderer) == -1) {
         syslog(LOG_ERR, "Error: could not extend in-built modules table for renderer\n");
@@ -3357,7 +3335,6 @@ int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, char * 
     if (PyStatus_Exception(status)) {
         return -1;
     }
-
     /* Import cyrenderer */
     pmodule = PyImport_ImportModule("cyrenderer");
     if(!pmodule) {
@@ -3366,7 +3343,6 @@ int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, char * 
         syslog(LOG_ERR, "Error: could not import cython renderer module\n");
         return -1;
     }
-
     /* Import python instrument module */
     if(astrid_load_instrument(python_script_path) < 0) {
         PyErr_Print();
@@ -3387,4 +3363,5 @@ int astrid_instrument_renderer_python_stop() {
     Py_Finalize();
     return 0;
 }
+#endif
 #endif

@@ -184,11 +184,10 @@ typedef struct lpinstrument_t {
     jack_port_t ** outports;
     jack_client_t * jack_client;
 
-#ifndef NOPYTHON
+    char datapath[PATH_MAX];
+
+    char python_message_relay_name[NAME_MAX];
     int python_is_enabled;
-    int (*schedule_python_render)(void *);
-    char * python_instrument_path;
-#endif
 
     // Optional local context struct for callbacks
     void * context;
@@ -261,7 +260,7 @@ int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg);
 
 ssize_t astrid_get_voice_id();
 
-int send_message(lpmsg_t msg);
+int send_message(char * qname, lpmsg_t msg);
 int send_serial_message(lpmsg_t msg);
 int send_play_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
@@ -270,9 +269,9 @@ mqd_t astrid_playq_open(const char * instrument_name);
 int astrid_playq_read(mqd_t mqd, lpmsg_t * msg);
 int astrid_playq_close(mqd_t mqd);
 
-mqd_t astrid_msgq_open();
+mqd_t astrid_msgq_open(char * qname);
 int astrid_msgq_close(mqd_t mqd);
-int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg);
+lpmsg_t astrid_msgq_read(mqd_t mqd);
 
 
 /* TODO add POSIX message queues for these too */
@@ -320,7 +319,7 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-int astrid_instrument_start(const char * name, int channels, void * ctx, lpinstrument_t * instrument, int argc, char ** argv);
+lpinstrument_t * astrid_instrument_start(const char * name, int channels, void * ctx, void (*stream)(int channels, size_t blocksize, float ** input, float ** output, void * instrument), lpbuffer_t * (*renderer)(void * instrument), void (*updates)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
@@ -335,11 +334,6 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
 size_t lpdecode_with_prefix(char * encoded);
-
-#ifndef NOPYTHON
-int astrid_instrument_renderer_python_start(lpinstrument_t * instrument, char * python_script_path);
-int astrid_instrument_renderer_python_stop();
-#endif
 
 #ifdef LPSESSIONDB
 #include <sqlite3.h>

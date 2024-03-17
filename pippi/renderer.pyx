@@ -14,7 +14,9 @@ from pathlib import Path
 import platform
 import struct
 import subprocess
+import sys
 import threading
+import time
 
 from pippi import dsp, midi
 from pippi.soundbuffer cimport SoundBuffer
@@ -120,7 +122,7 @@ cdef class MessageEvent:
         self.msg.initiated = now
         #logger.debug('CYRENDERER: Sending message type %d to %s' % (self.msg.type, self.msg.instrument_name))
         #logger.debug('initiated=%f scheduled=%f voice_id=%d' % (self.msg.initiated, self.msg.scheduled, self.msg.voice_id))
-        return send_message(self.msg[0])
+        return send_message(self.msg.instrument_name, self.msg[0])
 
     def __dealloc__(self):
         if self.msg is not NULL:
@@ -449,8 +451,10 @@ def _load_instrument(name, path):
         logger.exception('TypeError loading instrument module: %s' % str(e))
         raise InstrumentNotFoundError(name) from e
 
+    logger.info('loaded instrument, setting metadata')
     instrument.last_reload = os.path.getmtime(path)
-    instrument.register_midi_triggers()
+    #logger.info('registering midi triggers')
+    #instrument.register_midi_triggers()
     return instrument
 
 cdef tuple collect_players(object instrument):
@@ -650,6 +654,8 @@ cdef public int astrid_load_instrument(char * path) except -1:
     _path = path.decode('utf-8')
     name = Path(_path).stem
 
+    print('NAME, _PATH', name, _path)
+
     ASTRID_INSTRUMENT = _load_instrument(name, _path)
     return 0
 
@@ -698,3 +704,57 @@ cdef public int astrid_schedule_python_triggers(void * msgp) except -1:
         logger.exception('Error during scheduling of python triggers: %s' % e)
         return -1
 
+def run_forever(str instrument_name, str script_path):
+    global ASTRID_INSTRUMENT
+    cdef lpinstrument_t * instrument
+    cdef lpmsg_t msg
+    path = os.path.dirname(sys.argv[0])
+    print('PATH', script_path) 
+
+    # Start the stream and setup the instrument
+    
+    instrument = astrid_instrument_start('fake', 2, NULL, NULL, NULL, NULL)
+
+    if instrument == NULL:
+        logger.error('Error trying to start instrument. Shutting down...')
+        return
+
+    if astrid_load_instrument('fake.py') < 0:
+        raise Exception(f'Could not load instrument at path {path}')
+
+    logger.info(f'loaded instrument {ASTRID_INSTRUMENT=}')
+    name = ASTRID_INSTRUMENT.name.encode('ascii')
+    logger.info(f'{name=}')
+    cdef int q = astrid_msgq_open('/astridq-fake')
+    logger.info(f'opened msgq {q}')
+
+    while True:
+        logger.info('reading messages...')
+        msg = astrid_msgq_read(q)
+
+        print('Got a message!')
+        print('msg.type', msg.type)
+        print('msg.msg', msg.msg)
+
+        if msg.type == LPMSG_SHUTDOWN:
+            break
+
+        elif msg.type == LPMSG_PLAY:
+            if astrid_schedule_python_render(&msg) < 0:
+                logger.error('Error trying to schedule python render...')
+
+        elif msg.type == LPMSG_TRIGGER:
+            if astrid_schedule_python_triggers(&msg) < 0:
+                logger.error('Error trying to schedule python triggers...')
+
+        elif msg.type == LPMSG_LOAD:
+            if astrid_reload_instrument('fake.py') < 0:
+                logger.error('Error trying to reload python module...')
+
+        scheduler_cleanup_nursery(instrument.async_mixer)
+
+    if astrid_msgq_close(q) < 0:
+        logger.error('Could not close the python message queue')
+
+    if astrid_instrument_stop(instrument) < 0:
+        logger.error('Could not stop the background instrument threads')
