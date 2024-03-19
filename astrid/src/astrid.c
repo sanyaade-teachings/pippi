@@ -2577,6 +2577,9 @@ int relay_message_to_seq(lpinstrument_t * instrument) {
     seq_delay = instrument->msg.scheduled - (instrument->msg.max_processing_time * 2);
     d->timestamp = instrument->msg.initiated + seq_delay;
 
+    // Remove the scheduled flag before relaying the message
+    d->msg.flags &= ~LPFLAG_IS_SCHEDULED;
+
     if(pqueue_insert(instrument->msgpq, (void *)d) < 0) {
         syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
         return -1;
@@ -2590,46 +2593,53 @@ void * instrument_message_thread(void * arg) {
     lpbuffer_t * buf; // async renders: FIXME, do renders in a thread if possible... or fork out early for the python interpreter maybe?
     double processing_time_so_far, onset_delay_in_seconds, now=0;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
+    int is_scheduled = 0;
 
     instrument->is_waiting = 1;
     while(instrument->is_running) {
-        instrument->msg.scheduled = 0;
         if(astrid_msgq_read(instrument->msgq, &instrument->msg) == (mqd_t) -1) {
             syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             usleep((useconds_t)10000);
             return NULL;
         }
 
-        syslog(LOG_DEBUG, "MSG: %s\n", instrument->msg.instrument_name);
-        syslog(LOG_DEBUG, "MSG: %d (msg.voice_id)\n", (int)instrument->msg.voice_id);
-        syslog(LOG_DEBUG, "MSG: %d (msg.type)\n", (int)instrument->msg.type);
-
-        // Relay a copy of all messages to python (or in the future maybe other things?)
-        // except render complete messages which always get handled here...
-        if(instrument->msg.type == LPMSG_RENDER_COMPLETE) {
-            if(send_message(instrument->external_relay_name, instrument->msg) < 0) {
-                syslog(LOG_ERR, "Could not relay message\n");
-            }
-        }
+        is_scheduled = ((instrument->msg.flags & LPFLAG_IS_SCHEDULED) == LPFLAG_IS_SCHEDULED);
+        syslog(LOG_DEBUG, "C MSG: name=%s\n", instrument->msg.instrument_name);
+        syslog(LOG_DEBUG, "C MSG: scheduled=%f\n", instrument->msg.scheduled);
+        syslog(LOG_DEBUG, "C MSG: voice_id=%d\n", (int)instrument->msg.voice_id);
+        syslog(LOG_DEBUG, "C MSG: type=%d\n", (int)instrument->msg.type);
+        syslog(LOG_DEBUG, "C MSG: flags=%d\n", (int)instrument->msg.flags);
+        syslog(LOG_DEBUG, "C MSG: is_scheduled=%d\n", is_scheduled);
 
         // Handle shutdown early
         if(instrument->msg.type == LPMSG_SHUTDOWN) {
-            syslog(LOG_DEBUG, "MSG: shutdown\n");
+            syslog(LOG_DEBUG, "C MSG: shutdown\n");
             instrument->is_running = 0;
 
-            // send the shutdown message to the seq thread too
+            // send the shutdown message to the seq thread and external relay
             if(relay_message_to_seq(instrument) < 0) {
                 syslog(LOG_ERR, "%s renderer: Could not read relay message to seq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             }
+            if(send_message(instrument->external_relay_name, instrument->msg) < 0) {
+                syslog(LOG_ERR, "Could not relay message\n");
+            }
+
             break;
         }
 
-        // Scheduled messages get sent to the sequencer for handling
-        if(instrument->msg.scheduled > 0) {
+        if(is_scheduled) {
+            // Scheduled messages get sent to the sequencer for handling later
+            syslog(LOG_ERR, "C IS SCHEDULED msg.scheduled %f\n", instrument->msg.scheduled);
             if(relay_message_to_seq(instrument) < 0) {
                 syslog(LOG_ERR, "%s renderer: Could not read relay message to seq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             }
             continue;
+        } else {
+            // All other messages get relayed externally, too
+            syslog(LOG_DEBUG, "C MSG: relaying to ext\n");
+            if(send_message(instrument->external_relay_name, instrument->msg) < 0) {
+                syslog(LOG_ERR, "Could not relay message\n");
+            }
         }
 
         // Now the fun stuff
@@ -2645,16 +2655,17 @@ void * instrument_message_thread(void * arg) {
                 break;
 
             case LPMSG_UPDATE:
-                syslog(LOG_DEBUG, "MSG: update\n");
+                syslog(LOG_DEBUG, "C MSG: update\n");
                 if(instrument->updates != NULL) instrument->updates(instrument);
                 break;
 
             case LPMSG_PLAY:
-                syslog(LOG_DEBUG, "MSG: play\n");
+                syslog(LOG_DEBUG, "C MSG: play\n");
                 // Schedule a C callback render if there's a callback defined
                 // python renders will also be triggered at this point if we're 
                 // inside a python instrument because of the message relay
                 if(instrument->renderer != NULL) {
+                    syslog(LOG_DEBUG, "C MSG: rendering play...\n");
                     /* FIXME do this in another thread */
                     buf = instrument->renderer(instrument);
 
@@ -2687,13 +2698,13 @@ void * instrument_message_thread(void * arg) {
             case LPMSG_LOAD:
                 // it would be interesting to explore live reloading of C modules
                 // in the tradition of CLIVE, but at the moment only python handles these
-                syslog(LOG_DEBUG, "MSG: load\n");
+                syslog(LOG_DEBUG, "C MSG: load\n");
                 break;
 
             case LPMSG_TRIGGER:
                 // Python only handles these for now, but maybe it would be nice to have optional 
                 // C callbacks here and maybe support raspberry pi GPIO pin toggling / triggers?
-                syslog(LOG_DEBUG, "MSG: trigger\n");
+                syslog(LOG_DEBUG, "C MSG: trigger\n");
                 break;
 
             default:

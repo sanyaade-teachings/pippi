@@ -114,6 +114,7 @@ cdef class MessageEvent:
         self.msg.voice_id = 0
         self.msg.count = 0
         self.msg.type = msgtype
+        self.msg.flags = LPFLAG_IS_SCHEDULED if onset > 0 else LPFLAG_NONE
 
         strcpy(self.msg.msg, byte_params)
         strcpy(self.msg.instrument_name, byte_instrument_name)
@@ -122,7 +123,7 @@ cdef class MessageEvent:
         self.msg.initiated = now
         #logger.debug('CYRENDERER: Sending message type %d to %s' % (self.msg.type, self.msg.instrument_name))
         #logger.debug('initiated=%f scheduled=%f voice_id=%d' % (self.msg.initiated, self.msg.scheduled, self.msg.voice_id))
-        return send_message(self.msg.instrument_name, self.msg[0])
+        return send_play_message(self.msg[0])
 
     def __dealloc__(self):
         if self.msg is not NULL:
@@ -272,14 +273,12 @@ cdef class EventTriggerFactory:
         return [noteon, noteoff]
 
     def play(self, double onset, str instrument_name, *args, **kwargs):
-        global ASTRID_INSTRUMENT
         params = self._parse_params(*args, **kwargs)
-        return MessageEvent(onset, instrument_name, LPMSG_PLAY, params, ASTRID_INSTRUMENT.max_processing_time)
+        return MessageEvent(onset, instrument_name, LPMSG_PLAY, params, 0)
 
     def trigger(self, double onset, str instrument_name, *args, **kwargs):
-        global ASTRID_INSTRUMENT
         params = self._parse_params(*args, **kwargs)
-        return MessageEvent(onset, instrument_name, LPMSG_TRIGGER, params, ASTRID_INSTRUMENT.max_processing_time)
+        return MessageEvent(onset, instrument_name, LPMSG_TRIGGER, params, 0)
 
 
 
@@ -694,8 +693,7 @@ def _wait_on_commands_forever(str instrument_name, stop_event):
 def _run_forever(str script_path, str instrument_name, int channels, stop_event):
     cdef Instrument instrument = None
     cdef lpinstrument_t * i = NULL
-    cdef lpmsg_t msg, bufmsg
-    cdef lpbuffer_t * buf = NULL
+    cdef lpmsg_t msg
     instrument_byte_string = instrument_name.encode('UTF-8')
     cdef char * _instrument_ascii_name = instrument_byte_string
 
@@ -715,25 +713,26 @@ def _run_forever(str script_path, str instrument_name, int channels, stop_event)
 
     while True:
         logger.info('reading messages...')
-        i.msg.scheduled = 0
-        if astrid_msgq_read(i.exmsgq, &i.msg) < 0:
+        if astrid_msgq_read(i.exmsgq, &msg) < 0:
             print('There was a problem reading from the msg q. Maybe try turning it off and on again?')
             continue
 
-        if i.msg.type == LPMSG_SHUTDOWN:
-            logger.info('Message loop got shutdown, breaking out!')
+        if msg.type == LPMSG_SHUTDOWN:
+            logger.info('PY MSG: shutdown')
             stop_event.set()
             break
 
-        elif i.msg.type == LPMSG_PLAY:
-            if astrid_schedule_python_render(instrument, &i.msg) < 0:
+        elif msg.type == LPMSG_PLAY:
+            logger.info('PY MSG: play')
+            if astrid_schedule_python_render(instrument, &msg) < 0:
                 logger.error('Error trying to schedule python render...')
 
-        elif i.msg.type == LPMSG_TRIGGER:
-            if astrid_schedule_python_triggers(instrument, &i.msg) < 0:
+        elif msg.type == LPMSG_TRIGGER:
+            logger.info('PY MSG: trigger')
+            if astrid_schedule_python_triggers(instrument, &msg) < 0:
                 logger.error('Error trying to schedule python triggers...')
 
-        elif i.msg.type == LPMSG_LOAD:
+        elif msg.type == LPMSG_LOAD:
             if instrument is None:
                 instrument = _load_instrument(instrument_name, script_path)
             else:
@@ -742,9 +741,7 @@ def _run_forever(str script_path, str instrument_name, int channels, stop_event)
                     instrument.reload()
                     instrument.last_reload = last_edit
 
-
     logger.info('python instrument shutting down...')
-    logger.info('done running forever!?')
 
 def run_forever(str script_path, str instrument_name=None, channels=2):
     instrument_name = instrument_name if instrument_name is not None else Path(script_path).stem

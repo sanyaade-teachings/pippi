@@ -80,6 +80,7 @@ typedef struct lpmsg_t {
     size_t voice_id;
     size_t count;
 
+    uint16_t flags;
     uint16_t type;
     char msg[LPMAXMSG];
     char instrument_name[LPMAXNAME];

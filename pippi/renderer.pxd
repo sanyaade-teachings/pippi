@@ -54,6 +54,11 @@ cdef extern from "astrid.h":
     ctypedef struct lpscheduler_t:
         pass
 
+    cdef enum LPMessageFlags:
+        LPFLAG_NONE,
+        LPFLAG_IS_SCHEDULED,
+        NUM_LPMESSAGEFLAGS
+
     cdef enum LPMessageTypes:
         LPMSG_EMPTY,
         LPMSG_PLAY,
@@ -75,6 +80,7 @@ cdef extern from "astrid.h":
         size_t onset_delay
         size_t voice_id
         size_t count
+        uint16_t flags
         uint16_t type
         char msg[LPMAXMSG]
         char instrument_name[LPMAXNAME]

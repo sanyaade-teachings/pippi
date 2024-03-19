@@ -60,7 +60,7 @@
 #endif
 
 #define LPMAXNAME 24
-#define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
+#define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - (sizeof(uint16_t) * 2) - LPMAXNAME)
 
 
 enum Wavetables {
@@ -99,6 +99,12 @@ enum PanMethods {
     PANMETHOD_SINE,
     PANMETHOD_GOGINS,
     NUM_PANMETHODS
+};
+
+enum LPMessageFlags {
+    LPFLAG_NONE,
+    LPFLAG_IS_SCHEDULED,
+    NUM_LPMESSAGEFLAGS
 };
 
 enum LPMessageTypes {
