@@ -39,10 +39,6 @@ cdef extern from "pippicore.h":
 
     extern const lpbuffer_factory_t LPBuffer
 
-cdef extern from "scheduler.h":
-    ctypedef struct lpscheduler_t:
-        pass
-
 cdef extern from "astrid.h":
     cdef const int LPMAXMSG
     cdef const int LPMAXNAME
@@ -55,14 +51,20 @@ cdef extern from "astrid.h":
     cdef const char * LPADC_BUFFER_PATH
     cdef const int NAME_MAX
 
+    ctypedef struct lpscheduler_t:
+        pass
+
     cdef enum LPMessageTypes:
         LPMSG_EMPTY,
         LPMSG_PLAY,
         LPMSG_TRIGGER,
-        LPMSG_STOP_INSTRUMENT,
-        LPMSG_STOP_VOICE,
+        LPMSG_UPDATE,
+        LPMSG_SERIAL,
+        LPMSG_SCHEDULE,
         LPMSG_LOAD,
+        LPMSG_RENDER_COMPLETE,
         LPMSG_SHUTDOWN,
+        LPMSG_SET_COUNTER,
         NUM_LPMESSAGETYPES
 
     ctypedef struct lpmsg_t:
@@ -98,12 +100,19 @@ cdef extern from "astrid.h":
 
     ctypedef struct lpinstrument_t:
         const char * name
+        int channels
         volatile int is_running
         volatile int is_waiting
         int has_been_initialized
-        int playqd
-        char python_message_relay_name[NAME_MAX]
-        int python_is_enabled
+        lpfloat_t samplerate
+
+        char qname[NAME_MAX]
+        char external_relay_name[NAME_MAX]
+        int msgq
+        int exmsgq
+        lpmsg_t msg
+        lpmsg_t cmd
+
         lpscheduler_t * async_mixer
 
     int lpadc_create()
@@ -123,7 +132,7 @@ cdef extern from "astrid.h":
     int midi_triggerq_close(int qfd)
 
     int astrid_msgq_open(char * qname)
-    lpmsg_t astrid_msgq_read(int mqd)
+    int astrid_msgq_read(int mqd, lpmsg_t * msg)
     int astrid_msgq_close(int mqd)
 
     int lpmidi_setcc(int device_id, int cc, int value)
@@ -133,8 +142,12 @@ cdef extern from "astrid.h":
 
     int lpserial_getctl(int device_id, int ctl, lpfloat_t * value)
 
+    void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay)
     int lpscheduler_get_now_seconds(double * now)
+
+    lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg)
     int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size)
+
     lpinstrument_t * astrid_instrument_start(
         const char * name, 
         int channels, 
@@ -146,8 +159,9 @@ cdef extern from "astrid.h":
 
     int astrid_instrument_stop(lpinstrument_t * instrument)
     void scheduler_cleanup_nursery(lpscheduler_t * s)
-
-
+    int astrid_instrument_console_readline(char * instrument_name)
+    int relay_message_to_seq(lpinstrument_t * instrument)
+    int send_play_message(lpmsg_t msg)
 
 cdef class MessageEvent:
     cdef lpmsg_t * msg

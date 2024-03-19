@@ -6,17 +6,17 @@ from libc.stdlib cimport calloc, free
 from libc.string cimport strcpy, memcpy
 import logging
 from logging.handlers import SysLogHandler
-import warnings
 import importlib
 import importlib.util
+from multiprocessing import Process, Event
 import os
 from pathlib import Path
 import platform
 import struct
 import subprocess
 import sys
-import threading
 import time
+import warnings
 
 from pippi import dsp, midi
 from pippi.soundbuffer cimport SoundBuffer
@@ -629,40 +629,9 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
     return 0
 
 
-ASTRID_INSTRUMENT = None
-
-cdef public int astrid_reload_instrument(char * path) except -1:
-    cdef size_t last_edit 
-    global ASTRID_INSTRUMENT
-
-    if ASTRID_INSTRUMENT is None:
-        _path = path.decode('utf-8')
-        name = Path(_path).stem
-        ASTRID_INSTRUMENT = _load_instrument(name, _path)
-        return 0
-
-    last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)
-    if last_edit > ASTRID_INSTRUMENT.last_reload:
-        ASTRID_INSTRUMENT.reload()
-        ASTRID_INSTRUMENT.last_reload = last_edit
-
-    return 0
-
-
-cdef public int astrid_load_instrument(char * path) except -1:
-    global ASTRID_INSTRUMENT
-    _path = path.decode('utf-8')
-    name = Path(_path).stem
-
-    print('NAME, _PATH', name, _path)
-
-    ASTRID_INSTRUMENT = _load_instrument(name, _path)
-    return 0
-
-cdef public int astrid_schedule_python_render(void * msgp) except -1:
-    global ASTRID_INSTRUMENT
+cdef int astrid_schedule_python_render(Instrument instrument, void * msgp) except -1:
     cdef lpmsg_t * msg = <lpmsg_t *>msgp
-    cdef size_t last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)
+    cdef size_t last_edit = os.path.getmtime(instrument.path)
     cdef int render_result
     cdef double start = 0
     cdef double end = 0
@@ -672,89 +641,122 @@ cdef public int astrid_schedule_python_render(void * msgp) except -1:
         return 1
 
     # Reload instrument
-    if last_edit > ASTRID_INSTRUMENT.last_reload:
-        ASTRID_INSTRUMENT.reload()
-        ASTRID_INSTRUMENT.last_reload = last_edit
+    if last_edit > instrument.last_reload:
+        instrument.reload()
+        instrument.last_reload = last_edit
 
-    render_result = render_event(ASTRID_INSTRUMENT, msg)
+    render_result = render_event(instrument, msg)
 
     if lpscheduler_get_now_seconds(&end) < 0:
         logger.exception('Error getting now seconds')
         return 1
 
-    ASTRID_INSTRUMENT.max_processing_time = max(ASTRID_INSTRUMENT.max_processing_time, end - start)
-    #logger.info('%s render time: %f seconds' % (ASTRID_INSTRUMENT.name, end - start))
+    instrument.max_processing_time = max(instrument.max_processing_time, end - start)
+    #logger.info('%s render time: %f seconds' % (instrument.name, end - start))
 
     return render_result
 
 
-cdef public int astrid_schedule_python_triggers(void * msgp) except -1:
-    global ASTRID_INSTRUMENT
+cdef int astrid_schedule_python_triggers(Instrument instrument, void * msgp) except -1:
     cdef lpmsg_t * msg = <lpmsg_t *>msgp
-    cdef size_t last_edit = os.path.getmtime(ASTRID_INSTRUMENT.path)
+    cdef size_t last_edit = os.path.getmtime(instrument.path)
 
     # Reload instrument
-    if last_edit > ASTRID_INSTRUMENT.last_reload:
-        ASTRID_INSTRUMENT.reload()
-        ASTRID_INSTRUMENT.last_reload = last_edit
+    if last_edit > instrument.last_reload:
+        instrument.reload()
+        instrument.last_reload = last_edit
 
     try:
-        return trigger_events(ASTRID_INSTRUMENT, msg)
+        return trigger_events(instrument, msg)
     except Exception as e:
         logger.exception('Error during scheduling of python triggers: %s' % e)
         return -1
 
-def run_forever(str instrument_name, str script_path):
-    global ASTRID_INSTRUMENT
-    cdef lpinstrument_t * instrument
-    cdef lpmsg_t msg
-    path = os.path.dirname(sys.argv[0])
-    print('PATH', script_path) 
+def _wait_on_commands_forever(str instrument_name, stop_event):
+    instrument_byte_string = instrument_name.encode('UTF-8')
+    cdef char * _instrument_ascii_name = instrument_byte_string
+
+    while True:
+        if stop_event.is_set():
+            break
+
+        ret = astrid_instrument_console_readline(_instrument_ascii_name)
+
+        if ret < 0:
+            logger.info('Could not read console line')
+            time.sleep(0.5)
+            continue
+
+        if ret > 0:
+            logger.info('Console has signaled stop, shutting down command loop...')
+            break
+
+def _run_forever(str script_path, str instrument_name, int channels, stop_event):
+    cdef Instrument instrument = None
+    cdef lpinstrument_t * i = NULL
+    cdef lpmsg_t msg, bufmsg
+    cdef lpbuffer_t * buf = NULL
+    instrument_byte_string = instrument_name.encode('UTF-8')
+    cdef char * _instrument_ascii_name = instrument_byte_string
+
+    logger.info(f'running forever... {script_path=} {instrument_name=}')
+
+    # Load the script as a module into the ASTRID_INSTRUMENT global
+    logger.info(f'loading python instrument... {script_path=} {instrument_name=}')
+    instrument = _load_instrument(instrument_name, script_path)
+    logger.info(f'loaded instrument {instrument=}')
 
     # Start the stream and setup the instrument
-    
-    instrument = astrid_instrument_start('fake', 2, NULL, NULL, NULL, NULL)
-
-    if instrument == NULL:
+    logger.info(f'starting instrument... {script_path=} {instrument_name=}')
+    i = astrid_instrument_start(_instrument_ascii_name, channels, NULL, NULL, NULL, NULL)
+    if i == NULL:
         logger.error('Error trying to start instrument. Shutting down...')
         return
 
-    if astrid_load_instrument('fake.py') < 0:
-        raise Exception(f'Could not load instrument at path {path}')
-
-    logger.info(f'loaded instrument {ASTRID_INSTRUMENT=}')
-    name = ASTRID_INSTRUMENT.name.encode('ascii')
-    logger.info(f'{name=}')
-    cdef int q = astrid_msgq_open('/astridq-fake')
-    logger.info(f'opened msgq {q}')
-
     while True:
         logger.info('reading messages...')
-        msg = astrid_msgq_read(q)
+        i.msg.scheduled = 0
+        if astrid_msgq_read(i.exmsgq, &i.msg) < 0:
+            print('There was a problem reading from the msg q. Maybe try turning it off and on again?')
+            continue
 
-        print('Got a message!')
-        print('msg.type', msg.type)
-        print('msg.msg', msg.msg)
-
-        if msg.type == LPMSG_SHUTDOWN:
+        if i.msg.type == LPMSG_SHUTDOWN:
+            logger.info('Message loop got shutdown, breaking out!')
+            stop_event.set()
             break
 
-        elif msg.type == LPMSG_PLAY:
-            if astrid_schedule_python_render(&msg) < 0:
+        elif i.msg.type == LPMSG_PLAY:
+            if astrid_schedule_python_render(instrument, &i.msg) < 0:
                 logger.error('Error trying to schedule python render...')
 
-        elif msg.type == LPMSG_TRIGGER:
-            if astrid_schedule_python_triggers(&msg) < 0:
+        elif i.msg.type == LPMSG_TRIGGER:
+            if astrid_schedule_python_triggers(instrument, &i.msg) < 0:
                 logger.error('Error trying to schedule python triggers...')
 
-        elif msg.type == LPMSG_LOAD:
-            if astrid_reload_instrument('fake.py') < 0:
-                logger.error('Error trying to reload python module...')
+        elif i.msg.type == LPMSG_LOAD:
+            if instrument is None:
+                instrument = _load_instrument(instrument_name, script_path)
+            else:
+                last_edit = os.path.getmtime(instrument.path)
+                if last_edit > instrument.last_reload:
+                    instrument.reload()
+                    instrument.last_reload = last_edit
 
-        scheduler_cleanup_nursery(instrument.async_mixer)
 
-    if astrid_msgq_close(q) < 0:
-        logger.error('Could not close the python message queue')
+    logger.info('python instrument shutting down...')
+    logger.info('done running forever!?')
 
-    if astrid_instrument_stop(instrument) < 0:
-        logger.error('Could not stop the background instrument threads')
+def run_forever(str script_path, str instrument_name=None, channels=2):
+    instrument_name = instrument_name if instrument_name is not None else Path(script_path).stem
+    stop_event = Event()
+    render_process = Process(target=_run_forever, args=(script_path, instrument_name, channels, stop_event))
+    render_process.start()
+
+    try:
+        _wait_on_commands_forever(instrument_name, stop_event)
+    except KeyboardInterrupt as e:
+        print('Got keyboard interrupt')
+
+    print('Waiting for the render process to complete')
+    render_process.join()
+    print('All done!')

@@ -115,4 +115,4 @@ install:
 	./venv/bin/python setup.py develop
 
 build:
-	python setup.py develop
+	./venv/bin/python setup.py develop

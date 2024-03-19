@@ -236,4 +236,7 @@ lpbuffer_t * lpbuffer_create_stack(lpbuffer_t * (*table_creator)(int name, size_
 
 void pan_stereo_constant(lpfloat_t pos, lpfloat_t left_in, lpfloat_t right_in, lpfloat_t * left_out, lpfloat_t * right_out);
 
+/* handle for built-in window TODO think about how to extend this in a simple way for other built-in compile time table defs */
+extern const lpfloat_t LPHANN_WINDOW[];
+
 #endif

@@ -1539,16 +1539,13 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
  * ******/
 int send_play_message(lpmsg_t msg) {
     mqd_t mqd;
-    ssize_t qname_length;
-    char qname[LPMAXQNAME] = {0};
+    char qname[NAME_MAX] = {0};
     struct mq_attr attr;
 
     attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
     attr.mq_msgsize = sizeof(lpmsg_t);
 
-    qname_length = snprintf(NULL, 0, "%s-%s", LPPLAYQ, msg.instrument_name) + 1;
-    qname_length = (LPMAXQNAME >= qname_length) ? LPMAXQNAME : qname_length;
-    snprintf(qname, qname_length, "%s-%s", LPPLAYQ, msg.instrument_name);
+    snprintf(qname, NAME_MAX, "/%s-msgq", msg.instrument_name);
 
     if((mqd = mq_open(qname, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
         syslog(LOG_ERR, "send_play_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
@@ -1670,24 +1667,23 @@ int astrid_msgq_close(mqd_t mqd) {
     return 0;
 }
 
-lpmsg_t astrid_msgq_read(mqd_t mqd) {
-    lpmsg_t msg = {0};
+int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg) {
     char * msgp;
     ssize_t read_result;
     unsigned int msg_priority = 0;
 
     syslog(LOG_DEBUG, "Reading from msgq mqd:%d\n", mqd);
-    syslog(LOG_DEBUG, "Reading from msg.msg:%s\n", msg.msg);
-    syslog(LOG_DEBUG, "Reading from msg.instrument_name:%s\n", msg.instrument_name);
-    msgp = (char *)(&msg);
+    syslog(LOG_DEBUG, "Reading from msg.instrument_name:%s\n", msg->instrument_name);
+    msgp = (char *)msg;
 
-    syslog(LOG_DEBUG, "calling mq_receive:%d\n", mqd);
     if((read_result = mq_receive(mqd, msgp, sizeof(lpmsg_t), &msg_priority)) < 0) {
         syslog(LOG_ERR, "astrid_msgq_read mq_receive: Error reading message. (Got %ld bytes) Error: %s\n", read_result, strerror(errno));
+        return -1;
     }
 
-    syslog(LOG_DEBUG, "done calling mq_receive:%d\n", mqd);
-    return msg;
+    syslog(LOG_DEBUG, "msg.msg is now:%s\n", msg->msg);
+
+    return 0;
 }
 
 int astrid_get_playback_device_id() {
@@ -2402,8 +2398,6 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     float * input_channels[instrument->channels];
     size_t i;
     int c;
-    syslog(LOG_DEBUG, "inside the jack callback. %s\n", instrument->name);
-    syslog(LOG_DEBUG, "inside the jack callback. init: %d\n", instrument->has_been_initialized);
 
     if(!instrument->is_running) return 0;
 
@@ -2561,17 +2555,46 @@ void * instrument_seq_pq(void * arg) {
     return 0;
 }
 
+int relay_message_to_seq(lpinstrument_t * instrument) {
+    int pqnode_index=0;
+    lpmsgpq_node_t * d;
+    double seq_delay, now=0;
+
+    syslog(LOG_DEBUG, "MSG: schedule\n");
+
+    d = &instrument->pqnodes[pqnode_index];
+    memcpy(&d->msg, &instrument->msg, sizeof(lpmsg_t));
+    pqnode_index += 1;
+    while(pqnode_index >= NUM_NODES) pqnode_index -= NUM_NODES;
+
+    if(lpscheduler_get_now_seconds(&now) < 0) {
+        syslog(LOG_CRIT, "Error getting now in seq relay\n");
+        return -1;
+    }
+
+    /* Hold on to the message as long as possible while still 
+     * trying to leave some time for processing before the target deadline */
+    seq_delay = instrument->msg.scheduled - (instrument->msg.max_processing_time * 2);
+    d->timestamp = instrument->msg.initiated + seq_delay;
+
+    if(pqueue_insert(instrument->msgpq, (void *)d) < 0) {
+        syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
 void * instrument_message_thread(void * arg) {
     lpmsg_t bufmsg = {0}; // the message serialized along with the async buffer...
     lpbuffer_t * buf; // async renders: FIXME, do renders in a thread if possible... or fork out early for the python interpreter maybe?
-    double processing_time_so_far, onset_delay_in_seconds, seq_delay, now=0;
-    int pqnode_index=0;
-    lpmsgpq_node_t * d;
+    double processing_time_so_far, onset_delay_in_seconds, now=0;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
     instrument->is_waiting = 1;
     while(instrument->is_running) {
-        if(astrid_playq_read(instrument->playqd, &instrument->msg) == (mqd_t) -1) {
+        instrument->msg.scheduled = 0;
+        if(astrid_msgq_read(instrument->msgq, &instrument->msg) == (mqd_t) -1) {
             syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             usleep((useconds_t)10000);
             return NULL;
@@ -2581,28 +2604,39 @@ void * instrument_message_thread(void * arg) {
         syslog(LOG_DEBUG, "MSG: %d (msg.voice_id)\n", (int)instrument->msg.voice_id);
         syslog(LOG_DEBUG, "MSG: %d (msg.type)\n", (int)instrument->msg.type);
 
-#ifndef NOPYTHON
-        // Relay a copy of all messages to python
-        if(instrument->python_is_enabled) {
-            if(send_message(instrument->python_message_relay_name, instrument->msg) < 0) {
-                //PyErr_Print();
-                syslog(LOG_ERR, "CPython error during renderer loop\n");
+        // Relay a copy of all messages to python (or in the future maybe other things?)
+        // except render complete messages which always get handled here...
+        if(instrument->msg.type == LPMSG_RENDER_COMPLETE) {
+            if(send_message(instrument->external_relay_name, instrument->msg) < 0) {
+                syslog(LOG_ERR, "Could not relay message\n");
             }
         }
-#endif
 
+        // Handle shutdown early
+        if(instrument->msg.type == LPMSG_SHUTDOWN) {
+            syslog(LOG_DEBUG, "MSG: shutdown\n");
+            instrument->is_running = 0;
 
+            // send the shutdown message to the seq thread too
+            if(relay_message_to_seq(instrument) < 0) {
+                syslog(LOG_ERR, "%s renderer: Could not read relay message to seq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+            }
+            break;
+        }
+
+        // Scheduled messages get sent to the sequencer for handling
+        if(instrument->msg.scheduled > 0) {
+            if(relay_message_to_seq(instrument) < 0) {
+                syslog(LOG_ERR, "%s renderer: Could not read relay message to seq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+            }
+            continue;
+        }
+
+        // Now the fun stuff
         switch(instrument->msg.type) {
-            case LPMSG_SHUTDOWN:
-                syslog(LOG_DEBUG, "MSG: shutdown\n");
-                instrument->is_running = 0;
-                break;
-
             case LPMSG_RENDER_COMPLETE:
-                syslog(LOG_DEBUG, "MSG: render complete\n");
-                syslog(LOG_DEBUG, "%s\n", instrument->msg.msg);
-
-                // Maybe just deserialize the buffer here for now? Everything blocks the main thread anyway...
+                /* FIXME do this in another thread */
+                // Renders from the internal callback AND/OR external renderers (AKA python)
                 if((buf = deserialize_buffer(instrument->msg.msg, &bufmsg)) == NULL) {
                     syslog(LOG_ERR, "DAC could not deserialize buffer. Error: (%d) %s\n", errno, strerror(errno));
                     continue;
@@ -2618,8 +2652,10 @@ void * instrument_message_thread(void * arg) {
             case LPMSG_PLAY:
                 syslog(LOG_DEBUG, "MSG: play\n");
                 // Schedule a C callback render if there's a callback defined
+                // python renders will also be triggered at this point if we're 
+                // inside a python instrument because of the message relay
                 if(instrument->renderer != NULL) {
-                    /* Do the render: FIXME do this in another thread */
+                    /* FIXME do this in another thread */
                     buf = instrument->renderer(instrument);
 
                     if(buf == NULL) {
@@ -2649,38 +2685,19 @@ void * instrument_message_thread(void * arg) {
                 break;
 
             case LPMSG_LOAD:
+                // it would be interesting to explore live reloading of C modules
+                // in the tradition of CLIVE, but at the moment only python handles these
                 syslog(LOG_DEBUG, "MSG: load\n");
                 break;
 
             case LPMSG_TRIGGER:
+                // Python only handles these for now, but maybe it would be nice to have optional 
+                // C callbacks here and maybe support raspberry pi GPIO pin toggling / triggers?
                 syslog(LOG_DEBUG, "MSG: trigger\n");
                 break;
 
-            case LPMSG_SCHEDULE:
-                syslog(LOG_DEBUG, "MSG: schedule\n");
-
-                d = &instrument->pqnodes[pqnode_index];
-                memcpy(&d->msg, &instrument->msg, sizeof(lpmsg_t));
-                pqnode_index += 1;
-                while(pqnode_index >= NUM_NODES) pqnode_index -= NUM_NODES;
-
-                if(lpscheduler_get_now_seconds(&now) < 0) {
-                    syslog(LOG_CRIT, "Error getting now in seq relay\n");
-                    exit(1);
-                }
-
-                /* Hold on to the message as long as possible while still 
-                 * trying to leave some time for processing before the target deadline */
-                seq_delay = instrument->msg.scheduled - (instrument->msg.max_processing_time * 2);
-                d->timestamp = instrument->msg.initiated + seq_delay;
-
-                if(pqueue_insert(instrument->msgpq, (void *)d) < 0) {
-                    syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
-                    continue;
-                }
-                break;
-
             default:
+                // Garbage typed messages will shut 'er down
                 break;
         }
     }
@@ -2705,12 +2722,6 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     /* Create the message priority queue */
     if((instrument->msgpq = pqueue_init(NUM_NODES, msgpq_cmp_pri, msgpq_get_pri, msgpq_set_pri, msgpq_get_pos, msgpq_set_pos)) == NULL) {
         syslog(LOG_ERR, "Could not initialize message priority queue. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Start message feed thread */
-    if(pthread_create(&instrument->message_feed_thread, NULL, instrument_message_thread, (void*)instrument) != 0) {
-        syslog(LOG_ERR, "Could not initialize instrument message thread. Error: %s\n", strerror(errno));
         return -1;
     }
 
@@ -2785,9 +2796,9 @@ lpinstrument_t * astrid_instrument_start(
      **/
     instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
 
-    printf("Python is enabled\n");
-    instrument->python_is_enabled = 1;
-    snprintf(instrument->python_message_relay_name, sizeof(instrument->python_message_relay_name), "/%s-python-relay", instrument->name);
+    // Set the message q names
+    snprintf(instrument->qname, NAME_MAX, "/%s-msgq", instrument->name);
+    snprintf(instrument->external_relay_name, NAME_MAX, "/%s-extrelay-msgq", instrument->name);
 
     /* Open the LMDB session */
     astrid_instrument_session_open(instrument);
@@ -2869,16 +2880,32 @@ lpinstrument_t * astrid_instrument_start(
     instrument->is_running = 1;
     syslog(LOG_INFO, "%s is running...\n", name);
 
+
     // Ready for some messages now! Open the message queue and start up the seq threads...
-    if((instrument->playqd = astrid_playq_open(instrument->name)) == (mqd_t) -1) {
-        syslog(LOG_CRIT, "Could not open playq for instrument %s. Error: %s\n", instrument->name, strerror(errno));
+    if((instrument->msgq = astrid_msgq_open(instrument->qname)) == (mqd_t) -1) {
+        syslog(LOG_CRIT, "Could not open msgq for instrument %s. Error: %s\n", instrument->name, strerror(errno));
         return NULL;
     }
-    memcpy(instrument->msg.instrument_name, instrument->name, strlen(instrument->name));
-    memcpy(instrument->cmd.instrument_name, instrument->name, strlen(instrument->name));
-    syslog(LOG_DEBUG, "Opened play queue for %s with fd %d\n", instrument->name, instrument->playqd);
+    syslog(LOG_DEBUG, "Opened message queue for %s with fd %d\n", instrument->name, instrument->msgq);
+    if((instrument->exmsgq = astrid_msgq_open(instrument->external_relay_name)) == (mqd_t) -1) {
+        syslog(LOG_CRIT, "Could not open external message relay for instrument %s. Error: %s\n", instrument->name, strerror(errno));
+        return NULL;
+    }
+    syslog(LOG_DEBUG, "Opened message relay queue for %s with fd %d\n", instrument->name, instrument->exmsgq);
+
+    // Write the instrument name into msg structs
+    snprintf(instrument->msg.instrument_name, strlen(instrument->name)+1, instrument->name);
+    snprintf(instrument->cmd.instrument_name, strlen(instrument->name)+1, instrument->name);
+
+    // Start the message sequencer
     if(astrid_instrument_seq_start(instrument) < 0) {
         syslog(LOG_CRIT, "Could not start message sequence threads for instrument %s. Error: %s\n", instrument->name, strerror(errno));
+        return NULL;
+    }
+
+    /* Start message feed thread */
+    if(pthread_create(&instrument->message_feed_thread, NULL, instrument_message_thread, (void*)instrument) != 0) {
+        syslog(LOG_ERR, "Could not initialize instrument message thread. Error: %s\n", strerror(errno));
         return NULL;
     }
 
@@ -2907,8 +2934,8 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
     }
 
     syslog(LOG_DEBUG, "Stopping message seq threads...\n");
-    syslog(LOG_DEBUG, "Joining with message thread...\n");
 
+    syslog(LOG_DEBUG, "Joining with message thread...\n");
     if((ret = pthread_join(instrument->message_feed_thread, NULL)) != 0) {
         if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
         if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
@@ -2925,7 +2952,7 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
     }
 
     syslog(LOG_DEBUG, "Closing instrument message queue...\n");
-    if(instrument->playqd != (mqd_t) -1) astrid_playq_close(instrument->playqd);
+    if(instrument->msgq != (mqd_t) -1) astrid_msgq_close(instrument->msgq);
 
     syslog(LOG_DEBUG, "Stopping JACK...\n");
     for(c=0; c < instrument->channels; c++) {
@@ -3121,6 +3148,45 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
         syslog(LOG_ERR, "COuld not send render complete message. (%d) %s\n", errno, strerror(errno));
         return 1;
     }
+
+    return 0;
+}
+
+int astrid_instrument_console_readline(char * instrument_name) {
+    char * line;
+    lpmsg_t cmd;
+
+    snprintf(cmd.instrument_name, strlen(instrument_name)+1, instrument_name);
+
+    line = linenoise("^_- ");
+    if(line != NULL) {
+        printf("Got a cmd!\n");
+
+        if(parse_message_from_cmdline(line, &cmd) < 0) {
+            syslog(LOG_ERR, "Could not parse message from cmdline %s\n", line);
+            return -1;
+        }
+
+        free(line);
+
+        if(cmd.type == LPMSG_SERIAL) {
+            if(send_serial_message(cmd) < 0) {
+                syslog(LOG_ERR, "Could not send serial message...\n");
+                return -1;
+            }
+        } else {
+            printf("Sending the command on the %s q\n", cmd.instrument_name);
+            if(send_play_message(cmd) < 0) {
+                syslog(LOG_ERR, "Could not send play message...\n");
+                return -1;
+            }
+        }
+
+        if(cmd.type == LPMSG_SHUTDOWN) {
+            return 1;
+        }
+    }
+
 
     return 0;
 }

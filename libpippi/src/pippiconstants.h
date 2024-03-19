@@ -63,4 +63,74 @@
 #define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - sizeof(uint16_t) - LPMAXNAME)
 
 
+enum Wavetables {
+    WT_SINE,
+    WT_COS,
+    WT_SQUARE, 
+    WT_TRI, 
+    WT_TRI2, 
+    WT_SAW,
+    WT_RSAW,
+    WT_RND,
+    WT_USER,
+    NUM_WAVETABLES
+};
 
+enum Windows {
+    WIN_SINE,
+    WIN_SINEIN,
+    WIN_SINEOUT,
+    WIN_COS,
+    WIN_TRI, 
+    WIN_PHASOR, 
+    WIN_HANN, 
+    WIN_HANNIN, 
+    WIN_HANNOUT, 
+    WIN_RND,
+    WIN_SAW,
+    WIN_RSAW,
+    WIN_USER,
+    NUM_WINDOWS
+};
+
+enum PanMethods {
+    PANMETHOD_CONSTANT,
+    PANMETHOD_LINEAR,
+    PANMETHOD_SINE,
+    PANMETHOD_GOGINS,
+    NUM_PANMETHODS
+};
+
+enum LPMessageTypes {
+    LPMSG_EMPTY,
+    LPMSG_PLAY,
+    LPMSG_TRIGGER,
+    LPMSG_UPDATE,
+    LPMSG_SERIAL,
+    LPMSG_SCHEDULE,
+    LPMSG_LOAD,
+    LPMSG_RENDER_COMPLETE,
+    LPMSG_SHUTDOWN,
+    LPMSG_SET_COUNTER,
+    NUM_LPMESSAGETYPES
+};
+
+// These serial message wrappers are experimental
+enum LPSerialParamTypes {
+    LPSERIAL_PARAM_BOOL,    /*  0 or 1 */
+    LPSERIAL_PARAM_CTL,     /*  0 to 1 */
+    LPSERIAL_PARAM_SIG,     /* -1 to 1 */
+    LPSERIAL_PARAM_CHAR,    /* unsigned char */
+    LPSERIAL_PARAM_INT,     /* signed int */
+    LPSERIAL_PARAM_SIZE,    /* ssize_t */
+    LPSERIAL_PARAM_UINT,    /* unsigned int */
+    LPSERIAL_PARAM_USIZE,   /* size_t */
+    LPSERIAL_PARAM_DOUBLE,  /* double */
+    LPSERIAL_PARAM_FLOAT,   /* float */
+
+    /* TODO add support for these */
+    LPSERIAL_PARAM_MIDI,    /* midi bytes */
+    LPSERIAL_PARAM_PCM,     /* PCM audio */
+    LPSERIAL_PARAM_SHUTDOWN,
+    NUM_LPSERIAL_PARAMS
+};

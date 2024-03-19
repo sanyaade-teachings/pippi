@@ -161,33 +161,38 @@ typedef struct lpinstrument_t {
     int has_been_initialized;
     lpfloat_t samplerate;
 
+    // LMDB session refs
     MDB_cursor * dbcur;
     MDB_env * dbenv;
     MDB_dbi dbi;
     MDB_txn * dbtxn_read;
     MDB_txn * dbtxn_write;
 
-    mqd_t playqd;
+    // the XDG config dir where LMDB sessions live
+    char datapath[PATH_MAX]; 
+
+    // The instrument message q(s)
+    char qname[NAME_MAX]; 
+    char external_relay_name[NAME_MAX]; // just python, really 
+    mqd_t msgq;
+    mqd_t exmsgq;
     lpmsg_t msg;
     lpmsg_t cmd;
 
+    // Message scheduling pq nodes
     pqueue_t * msgpq;
     lpmsgpq_node_t * pqnodes;
 
+    // Thread refs
     pthread_t message_feed_thread;
     pthread_t message_scheduler_pq_thread;
-    pthread_t buffer_feed_thread;
     lpscheduler_t * async_mixer;
     lpbuffer_t * lastbuf;
 
+    // Jack refs
     jack_port_t ** inports;
     jack_port_t ** outports;
     jack_client_t * jack_client;
-
-    char datapath[PATH_MAX];
-
-    char python_message_relay_name[NAME_MAX];
-    int python_is_enabled;
 
     // Optional local context struct for callbacks
     void * context;
@@ -271,7 +276,7 @@ int astrid_playq_close(mqd_t mqd);
 
 mqd_t astrid_msgq_open(char * qname);
 int astrid_msgq_close(mqd_t mqd);
-lpmsg_t astrid_msgq_read(mqd_t mqd);
+int astrid_msgq_read(mqd_t mqd, lpmsg_t * msg);
 
 
 /* TODO add POSIX message queues for these too */
@@ -331,6 +336,8 @@ int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
 int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size);
+int astrid_instrument_console_readline(char * instrument_name);
+int relay_message_to_seq(lpinstrument_t * instrument);
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
 size_t lpdecode_with_prefix(char * encoded);
