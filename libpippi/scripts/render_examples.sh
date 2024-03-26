@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 for b in build/*; do
     echo

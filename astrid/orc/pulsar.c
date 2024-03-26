@@ -4,6 +4,7 @@
 
 #define SR 48000
 #define CHANNELS 2
+#define ADC_LENGTH 30
 
 #define NUMOSCS (CHANNELS * 10)
 #define WTSIZE 4096
@@ -34,7 +35,6 @@ enum InstrumentParams {
 
 typedef struct localctx_t {
     lppulsarosc_t * oscs[NUMOSCS];
-    lpbuffer_t * ringbuf;
     lpbuffer_t * env;
     int last;
 
@@ -58,35 +58,27 @@ void param_update_callback(void * arg) {
     astrid_instrument_set_param_float(instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
 }
 
+#if 0
 lpbuffer_t * renderer_callback(void * arg) {
     lpbuffer_t * out;
-
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
-    localctx_t * ctx = (localctx_t *)instrument->context;
 
-    out = LPBuffer.cut(ctx->ringbuf, LPRand.randint(0, SR*20), LPRand.randint(SR, SR*10));
+    out = LPBuffer.cut(instrument->adcbuf, LPRand.randint(0, instrument->adcbuf->length/2), LPRand.randint(SR, instrument->adcbuf->length-2));
     LPFX.norm(out, LPRand.rand(0.26f, 0.5f));
 
     return out;
 }
+#endif
 
-void audio_callback(int channels, size_t blocksize, float ** input, float ** output, void * arg) {
-    size_t idx, i;
-    int j, c;
+void audio_callback(size_t blocksize, __attribute__((unused)) float ** input, float ** output, void * arg) {
+    size_t i;
+    int j;
     lpfloat_t freqs[NUMFREQS];
     lpfloat_t sample, left, right, amp, pw, saturation, pan;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
 
     if(!instrument->is_running) return;
-
-    for(i=0; i < blocksize; i++) {
-        idx = (ctx->ringbuf->pos + i) % ctx->ringbuf->length;
-        for(c=0; c < channels; c++) {
-            ctx->ringbuf->data[idx * channels + c] = input[c][i];
-        }
-    }
-    ctx->ringbuf->pos += blocksize;
 
     amp = astrid_instrument_get_param_float(instrument, PARAM_AMP, 0.08f);
     pw = astrid_instrument_get_param_float(instrument, PARAM_PW, 1.f);
@@ -118,12 +110,6 @@ void audio_callback(int channels, size_t blocksize, float ** input, float ** out
             while(ctx->curves[j]->phase >= 1.f) ctx->curves[j]->phase -= 1.f;
         }
 
-        /*
-        for(c=0; c < channels; c++) {
-            output[c][i] += (float)sample * 0.5f;
-        }
-        */
-
         left = right = sample;
         pan_stereo_constant(pan, left, right, &left, &right);
 
@@ -142,9 +128,8 @@ int main() {
         exit(1);
     }
 
-    // create env and ringbuf
+    // create env window for the footballs
     ctx->env = LPWindow.create(WIN_HANNOUT, 4096);
-    ctx->ringbuf = LPBuffer.create(SR * 30, CHANNELS, SR);
 
     // setup oscs and curves
     for(int i=0; i < NUMOSCS; i++) {
@@ -163,8 +148,8 @@ int main() {
     }
 
     // Set the callbacks for streaming, async renders and param updates
-    if((instrument = astrid_instrument_start(NAME, CHANNELS, (void*)ctx, 
-                    audio_callback, renderer_callback, param_update_callback)) == NULL) {
+    if((instrument = astrid_instrument_start(NAME, CHANNELS, ADC_LENGTH, (void*)ctx, 
+                    audio_callback, NULL, param_update_callback)) == NULL) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -192,7 +177,6 @@ int main() {
         LPBuffer.destroy(ctx->curves[o]);
     }
 
-    LPBuffer.destroy(ctx->ringbuf);
     LPBuffer.destroy(ctx->env);
 
     free(ctx);

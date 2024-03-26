@@ -106,6 +106,7 @@ typedef struct lpmsgpq_node_t {
  * they schedule them (with the onset value, which 
  * is relative to *now*) by sending this struct over 
  * the MIDI trigger fifo. */
+// FIXME these can probably just be normal lpmsg_t messages...?
 typedef struct lpmidievent_t {
     double onset;
     double now;
@@ -171,6 +172,9 @@ typedef struct lpinstrument_t {
     // the XDG config dir where LMDB sessions live
     char datapath[PATH_MAX]; 
 
+    // The adc ringbuf name
+    char adc_name[PATH_MAX];
+
     // The instrument message q(s)
     char qname[NAME_MAX]; 
     char external_relay_name[NAME_MAX]; // just python, really 
@@ -204,7 +208,7 @@ typedef struct lpinstrument_t {
     lpbuffer_t * (*renderer)(void * instrument);
 
     // Stream callback
-    void (*stream)(int channels, size_t blocksize, float ** input, float ** output, void * instrument);
+    void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument);
 
     // Shutdown signal handler (SIGTERM & SIGKILL)
     void (*shutdown)(int sig);
@@ -266,7 +270,7 @@ int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg);
 ssize_t astrid_get_voice_id();
 
 int send_message(char * qname, lpmsg_t msg);
-int send_serial_message(lpmsg_t msg);
+int send_serial_message(lpmsg_t msg, char * tty);
 int send_play_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
 
@@ -306,16 +310,24 @@ int lpadc_aquire(lpipc_buffer_t ** adcbuf);
 int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_samples);
 int lpadc_write_block(const void * block, size_t blocksize);
 int lpadc_read_sample(size_t offset, lpfloat_t * sample);
-/*int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES]);*/
 int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out);
+
+int lpsampler_aquire(char * name, lpbuffer_t ** buf);
+int lpsampler_release(char * name);
+int lpsampler_read_block_of_samples(char * name, size_t offset, size_t size, lpfloat_t * out);
+int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, size_t blocksize_in_samples);
+int lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate);
+int lpsampler_destroy(char * name);
 
 int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate);
 int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf);
 int lpipc_buffer_release(char * id_path);
 int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf);
 int lpipc_buffer_destroy(char * id_path);
+
 int lpipc_setid(char * path, int id); 
 int lpipc_getid(char * path); 
+
 int lpipc_createvalue(char * path, size_t size);
 int lpipc_setvalue(char * path, void * value, size_t size);
 int lpipc_getvalue(char * path, void ** value);
@@ -324,7 +336,7 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-lpinstrument_t * astrid_instrument_start(const char * name, int channels, void * ctx, void (*stream)(int channels, size_t blocksize, float ** input, float ** output, void * instrument), lpbuffer_t * (*renderer)(void * instrument), void (*updates)(void * instrument));
+lpinstrument_t * astrid_instrument_start(const char * name, int channels, double adc_length, void * ctx, void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), lpbuffer_t * (*renderer)(void * instrument), void (*updates)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);

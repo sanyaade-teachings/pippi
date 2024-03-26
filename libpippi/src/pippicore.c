@@ -298,29 +298,20 @@ void destroy_array(lparray_t * array) {
  * */
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate) {
     lpbuffer_t * buf;
-    buf = (lpbuffer_t*)LPMemoryPool.alloc(1, sizeof(lpbuffer_t));
+    size_t bufsize = sizeof(lpbuffer_t) + (length * channels * sizeof(lpfloat_t));
+
+    buf = (lpbuffer_t*)LPMemoryPool.alloc(1, bufsize);
     if(buf == NULL) {
         fprintf(stderr, "Could not alloc memory for buffer struct\n");
         return NULL;
     }
 
-    buf->data = (lpfloat_t*)LPMemoryPool.alloc(length * channels, sizeof(lpfloat_t));
-    if(buf->data == NULL) {
-        fprintf(stderr, "Could not alloc memory for buffer data\n");
-        if(buf != NULL) LPMemoryPool.free(buf);
-        return NULL;
-    }
-    memset(buf->data, 0, length * channels * sizeof(lpfloat_t));
-
+    memset(buf, 0, bufsize);
     buf->channels = channels;
     buf->length = length;
     buf->samplerate = samplerate;
-    buf->phase = 0.f;
-    buf->pos = 0;
     buf->boundry = length-1;
     buf->range = length;
-    buf->onset = 0;
-    buf->is_looping = 0;
     return buf;
 }
 
@@ -1224,7 +1215,6 @@ lpbuffer_t * resize_buffer(lpbuffer_t * buf, size_t length) {
 
 void destroy_buffer(lpbuffer_t * buf) {
     if(buf != NULL) {
-        LPMemoryPool.free(buf->data);
         LPMemoryPool.free(buf);
     }
 }

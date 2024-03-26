@@ -55,7 +55,7 @@ void process_tapeosc(lptapeosc_t * osc) {
     channels = osc->buf->channels;
     boundry = osc->range + osc->start;
 
-    printf("phase %f channels %i boundry %ld speed %f\n", osc->phase, channels, boundry, osc->speed);
+    //printf("phase %f channels %i boundry %ld speed %f\n", osc->phase, channels, boundry, osc->speed);
 
     f = osc->phase - (int)osc->phase;
     idxa = (size_t)osc->phase;
@@ -69,7 +69,7 @@ void process_tapeosc(lptapeosc_t * osc) {
     }
 
     osc->phase += osc->speed;
-    printf("phase %f channels %i boundry %ld speed %f\n", osc->phase, channels, boundry, osc->speed);
+    //printf("phase %f channels %i boundry %ld speed %f\n", osc->phase, channels, boundry, osc->speed);
 
     if(osc->phase >= boundry) {
         osc->phase = osc->start;

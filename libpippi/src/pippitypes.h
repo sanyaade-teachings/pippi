@@ -7,7 +7,6 @@ typedef double lpfloat_t;
 
 /* Core datatypes */
 typedef struct lpbuffer_t {
-    lpfloat_t * data;
     size_t length;
     int samplerate;
     int channels;
@@ -19,6 +18,7 @@ typedef struct lpbuffer_t {
     size_t pos;
     size_t onset;
     int is_looping;
+    lpfloat_t data[];
 } lpbuffer_t;
 
 // Used for messaging between astrid instruments,
@@ -85,15 +85,6 @@ typedef struct lpmsg_t {
     char msg[LPMAXMSG];
     char instrument_name[LPMAXNAME];
 } lpmsg_t;
-
-typedef struct lpserialevent_t {
-    double onset;
-    double now;
-    double length;
-    lpmsg_t msg;
-    int group;
-    int device;
-} lpserialevent_t;
 
 typedef struct lparray_t {
     int * data;

@@ -112,6 +112,7 @@ cdef class Node:
             stack = []
             for b in value:
                 if isinstance(b, str):
+                    # translate the string into a libpippi constant
                     b = dsp.wt(b)
                 stack += [dsp.buffer(b)] 
             stack = dsp.join(stack)
@@ -181,7 +182,26 @@ cdef class Graph:
 
         self.nodes[anodename].connections[aportname] += [(bnodename, bportname, _mult, _add)]
 
-    def render(self, double length, int samplerate=DEFAULT_SAMPLERATE, int channels=DEFAULT_CHANNELS):
+    cdef double next_sample(Graph self):
+        cdef double sample = 0
+
+        # first process all the nodes
+        for _, node in self.nodes.items():
+            node.process()
+
+            # connect the outputs to the inputs
+            for portname, connections in node.connections.items():
+                port = node.get_output(portname)
+                for connode, conport, mult, add in connections:
+                    value = port * mult + add
+                    if connode == 'main' and conport == 'output':
+                        sample += value
+                    else:
+                        self.nodes[connode].set_param(conport, value)
+
+        return sample
+
+    def render(Graph self, double length, int samplerate=DEFAULT_SAMPLERATE, int channels=DEFAULT_CHANNELS):
         cdef size_t framelength = <size_t>(length * samplerate)
         cdef double sample = 0
         cdef size_t i

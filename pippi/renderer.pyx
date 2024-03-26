@@ -18,9 +18,12 @@ import sys
 import time
 import warnings
 
-from pippi import dsp, midi
+from pippi import dsp, midi, ugens
 from pippi.soundbuffer cimport SoundBuffer
 
+
+class InstrumentError(Exception):
+    pass
 
 logger = logging.getLogger('astrid-cyrenderer')
 if not logger.handlers:
@@ -35,7 +38,7 @@ if not logger.handlers:
 
 cdef lpfloat_t[LPADCBUFSAMPLES] adc_block
 
-cdef bytes serialize_buffer(SoundBuffer buf, int is_looping, lpmsg_t * msg):
+cdef bytes serialize_buffer(SoundBuffer buf, int is_looping, lpmsg_t msg):
     cdef bytearray strbuf
     cdef size_t audiosize, length, msgsize
     cdef int channels, samplerate
@@ -63,30 +66,11 @@ cdef bytes serialize_buffer(SoundBuffer buf, int is_looping, lpmsg_t * msg):
         for c in range(channels):
             strbuf += struct.pack('d', buf.frames[i,c])
 
-    msgview = <unsigned char[:msgsize]>(<unsigned char *>msg)
+    msgview = <unsigned char[:msgsize]>(<unsigned char *>&msg)
     for i in range(msgsize):
         strbuf.append(msgview[i])
 
     return bytes(strbuf)
-
-cdef SoundBuffer read_from_adc(double length, double offset=0, int channels=2, int samplerate=48000):
-    cdef size_t i
-    cdef int c
-
-    cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
-    cdef size_t length_in_frames = len(snd)
-    cdef size_t offset_in_frames = <size_t>(offset * samplerate)
-
-    if lpadc_read_block_of_samples(offset_in_frames * channels, length_in_frames * channels, adc_block) < 0:
-        logger.error('cyrenderer ADC read: failed to read %d frames at offset %d from ADC' % (length_in_frames, offset_in_frames))
-        return snd
-
-    for i in range(length_in_frames):
-        for c in range(channels):
-            snd.frames[i,c] = adc_block[i * channels + c]
-
-    return snd
-
 
 cdef class MessageEvent:
     def __cinit__(self,
@@ -96,7 +80,6 @@ cdef class MessageEvent:
             str params,
             double max_processing_time
         ):
-
         cdef size_t onset_frames = 0
 
         params_byte_string = params.encode('utf-8')
@@ -121,51 +104,13 @@ cdef class MessageEvent:
 
     cpdef int schedule(MessageEvent self, double now):
         self.msg.initiated = now
-        #logger.debug('CYRENDERER: Sending message type %d to %s' % (self.msg.type, self.msg.instrument_name))
-        #logger.debug('initiated=%f scheduled=%f voice_id=%d' % (self.msg.initiated, self.msg.scheduled, self.msg.voice_id))
+        if self.msg.type == LPMSG_SERIAL:
+            return send_serial_message(self.msg[0], self.msg.instrument_name)
         return send_play_message(self.msg[0])
 
     def __dealloc__(self):
         if self.msg is not NULL:
             free(self.msg)
-
-cdef class SerialEvent:
-    def __cinit__(self,
-            double onset,
-            lpmsg_t msg,
-            int group=0, 
-            int device=0
-        ):
-
-        self.event = <lpserialevent_t *>calloc(1, sizeof(lpserialevent_t))
-        self.event.onset = onset
-        self.event.now = 0
-        self.event.msg = msg
-        self.event.group = group
-        self.event.device = device
-
-    cpdef int schedule(SerialEvent self, double now):
-        """
-        self.event.now = now
-        cdef int qfd = midi_triggerq_open()
-        if qfd < 0:
-            logger.exception('Error opening MIDI fifo q')
-            return -1
-
-        if midi_triggerq_schedule(qfd, self.event[0]) < 0:
-            logger.exception('Error scheduling MidiEvent')
-            return -1
-
-        if midi_triggerq_close(qfd) < 0:
-            logger.exception('Error closing MIDI fifo q')
-            return -1
-        """
-
-        return 0 
-
-    def __dealloc__(self):
-        if self.event is not NULL:
-            free(self.event)
 
 
 cdef class MidiEvent:
@@ -280,6 +225,9 @@ cdef class EventTriggerFactory:
         params = self._parse_params(*args, **kwargs)
         return MessageEvent(onset, instrument_name, LPMSG_TRIGGER, params, 0)
 
+    def serial(self, double onset, str tty, *args, **kwargs):
+        params = self._parse_params(*args, **kwargs)
+        return MessageEvent(onset, tty, LPMSG_SERIAL, params, 0)
 
 
 cdef class SessionParamBucket:
@@ -334,9 +282,10 @@ cdef class ParamBucket:
 
 cdef class EventContext:
     def __cinit__(self, 
-            str instrument_name=None, 
+            Instrument instrument,
             str msg=None,
             dict cache=None,
+            object graph=None,
             int voice_id=-1,
             int default_midi_device=1,
             double max_processing_time=1,
@@ -345,21 +294,22 @@ cdef class EventContext:
 
         cdef double now = 0
 
+        self.graph = graph
         self.cache = cache
         self.p = ParamBucket(str(msg))
         self.s = SessionParamBucket() 
         self.t = EventTriggerFactory()
         self.m = MidiEventListenerProxy(default_midi_device)
-        self.instrument_name = instrument_name
+        self.instrument = instrument
         self.vid = voice_id
         self.count = count
         if lpscheduler_get_now_seconds(&now) < 0:
-            logger.exception('Error getting now seconds during %s event ctx init' % instrument_name)
+            logger.exception('Error getting now seconds during %s event ctx init' % instrument.name)
             now = 0
         self.now = now
 
     def adc(self, length=1, offset=0, channels=2):
-        return read_from_adc(length, offset=offset, channels=channels)
+        return self.instrument.read_from_adc(length, offset=offset, channels=channels)
 
     def log(self, msg):
         logger.info('ctx.log[%s] %s' % (self.instrument_name, msg))
@@ -368,13 +318,111 @@ cdef class EventContext:
         return self.p._params
 
 cdef class Instrument:
-    def __init__(self, str name, str path, object renderer):
+    def __init__(self, str name, str path, int channels, double adc_length):
+        instrument_byte_string = name.encode('UTF-8')
+        cdef char * _instrument_ascii_name = instrument_byte_string
+
         self.name = name
         self.path = path
-        self.renderer = renderer
         self.cache = {}
         self.last_reload = 0
         self.max_processing_time = 0
+
+        self.i = astrid_instrument_start(_instrument_ascii_name, channels, adc_length, NULL, NULL, NULL, NULL)
+        if self.i == NULL:
+            raise InstrumentError('Could not initialize lpinstrument_t')
+
+        self.load_renderer(name, path)
+
+    def load_renderer(self, name, path):
+        """ Loads a renderer module from the script 
+            at self.path 
+
+            Failure to load the module raises an 
+            InstrumentNotFoundError
+        """
+        try:
+            logger.debug('Loading instrument %s from %s' % (name, path))
+            spec = importlib.util.spec_from_file_location(name, path)
+            if spec is not None:
+                renderer = importlib.util.module_from_spec(spec)
+                try:
+                    spec.loader.exec_module(renderer)
+                except Exception as e:
+                    logger.exception('Error loading instrument module: %s' % str(e))
+
+                if not hasattr(renderer, '_'):
+                    renderer._ = None
+
+                self.renderer = renderer
+
+                # fill the cache if there is something to fill:
+                if hasattr(self.renderer, 'cache'):
+                    self.cache = self.renderer.cache()
+
+                if hasattr(self.renderer, 'MIDI_DEVICE'):
+                    self.default_midi_device = self.renderer.MIDI_DEVICE
+                else:
+                    self.default_midi_device = 1
+
+            else:
+                logger.error('Could not load instrument - spec is None: %s %s' % (path, name))
+                raise InstrumentError('Instrument renderer has a null spec')
+
+        except TypeError as e:
+            logger.exception('TypeError loading renderer module: %s' % str(e))
+            raise InstrumentError('Problem loading the python renderer') from e
+
+        logger.info('loaded instrument, setting metadata')
+        self.last_reload = os.path.getmtime(path)
+        #logger.info('registering midi triggers')
+        #self.register_midi_triggers()
+
+    cpdef lpmsg_t get_message(Instrument self):
+        cdef lpmsg_t msg
+        if astrid_msgq_read(self.i.exmsgq, &msg) < 0:
+            raise InstrumentError('Could not get the instrument message')
+        self.msg = msg # so many copies omg
+        return msg
+
+    cpdef EventContext get_event_context(Instrument self, bint with_graph=False):
+        cdef bytes render_params = self.msg.msg
+        msgstr = render_params.decode('ascii')
+        graph = None
+        if with_graph:
+            graph = ugens.Graph()
+
+        return EventContext.__new__(EventContext,
+            self,
+            msg=msgstr,
+            cache=self.cache,
+            graph=graph,
+            voice_id=self.msg.voice_id,
+            max_processing_time=self.max_processing_time,
+            default_midi_device=self.default_midi_device,
+            count=self.msg.count,
+        )
+
+    cdef SoundBuffer read_from_adc(Instrument self, double length, double offset=0, int channels=2, int samplerate=48000):
+        cdef size_t i
+        cdef int c
+        name_byte_string = ("%s-adc" % self.name).encode('UTF-8')
+        cdef char * _ascii_name = name_byte_string
+
+        cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
+        cdef size_t length_in_frames = len(snd)
+        cdef size_t offset_in_frames = <size_t>(offset * samplerate)
+
+        # fixme add dcblock
+        if lpsampler_read_block_of_samples(_ascii_name, offset_in_frames * channels, length_in_frames * channels, adc_block) < 0:
+            logger.error('pippi.renderer ADC read: failed to read %d frames at offset %d from ADC' % (length_in_frames, offset_in_frames))
+            return snd
+
+        for i in range(length_in_frames):
+            for c in range(channels):
+                snd.frames[i,c] = adc_block[i * channels + c]
+
+        return snd
 
     def reload(self):
         logger.debug('Reloading instrument %s from %s' % (self.name, self.path))
@@ -408,56 +456,27 @@ cdef class Instrument:
                 devices = [ self.renderer.MIDI ]
 
 
-class InstrumentNotFoundError(Exception):
-    def __init__(self, instrument_name, *args, **kwargs):
-        self.message = 'No instrument named %s found' % instrument_name
+cdef int stream_graph_update(object instrument):
+    cdef EventContext ctx 
 
-def _load_instrument(name, path):
-    """ Loads a renderer module from the script 
-        at self.path 
+    if not hasattr(instrument.renderer, 'stream'):
+        return 0
 
-        Failure to load the module raises an 
-        InstrumentNotFoundError
-    """
+    ctx = instrument.get_event_context()
     try:
-        logger.debug('Loading instrument %s from %s' % (name, path))
-        spec = importlib.util.spec_from_file_location(name, path)
-        if spec is not None:
-            renderer = importlib.util.module_from_spec(spec)
-            try:
-                spec.loader.exec_module(renderer)
-            except Exception as e:
-                logger.exception('Error loading instrument module: %s' % str(e))
+        # Update the graph
+        instrument.graph = instrument.renderer.stream(ctx)
+    except Exception as e:
+        logger.exception('Error during %s stream graph update: %s' % (ctx.instrument.name, e))
+        return -1
 
-            if not hasattr(renderer, '_'):
-                renderer._ = None
+    return 0
 
-            instrument = Instrument(name, path, renderer)
-
-            # fill the cache if there is something to fill:
-            if hasattr(instrument.renderer, 'cache'):
-                instrument.cache = instrument.renderer.cache()
-
-            if hasattr(instrument.renderer, 'MIDI_DEVICE'):
-                instrument.default_midi_device = instrument.renderer.MIDI_DEVICE
-            else:
-                instrument.default_midi_device = 1
-
-        else:
-            logger.error('Could not load instrument - spec is None: %s %s' % (path, name))
-            raise InstrumentNotFoundError(name)
-    except TypeError as e:
-        logger.exception('TypeError loading instrument module: %s' % str(e))
-        raise InstrumentNotFoundError(name) from e
-
-    logger.info('loaded instrument, setting metadata')
-    instrument.last_reload = os.path.getmtime(path)
-    #logger.info('registering midi triggers')
-    #instrument.register_midi_triggers()
-    return instrument
-
-cdef tuple collect_players(object instrument):
+cdef tuple collect_players(Instrument instrument):
     loop = False
+    # FIXME it's still nice to support this, but 
+    # it should just schedule a message instead of 
+    # storing a flag on the serialized buffer...
     if hasattr(instrument.renderer, 'LOOP'):
         loop = instrument.renderer.LOOP
 
@@ -482,25 +501,17 @@ cdef tuple collect_players(object instrument):
     
     return players, loop
 
-cdef int render_event(object instrument, lpmsg_t * msg):
+cdef int render_event(Instrument instrument):
     cdef set players
     cdef bint loop
-    cdef EventContext ctx 
-    cdef str msgstr
     cdef bytes bufstr
-    cdef bytes render_params = msg.msg
+    cdef bytes render_params = instrument.msg.msg
     cdef int dacid = 0
+    cdef EventContext ctx 
+    instrument_byte_string = instrument.name.encode('UTF-8')
+    cdef char * _instrument_ascii_name = instrument_byte_string
 
-    msgstr = render_params.decode('ascii')
-    ctx = EventContext.__new__(EventContext,
-        instrument_name=instrument.name, 
-        msg=msgstr,
-        cache=instrument.cache,
-        voice_id=msg.voice_id,
-        default_midi_device=instrument.default_midi_device,
-        max_processing_time=instrument.max_processing_time,
-        count=msg.count,
-    )
+    ctx = instrument.get_event_context()
 
     logger.debug('rendering event %s w/params %s' % (str(instrument), render_params))
 
@@ -525,14 +536,14 @@ cdef int render_event(object instrument, lpmsg_t * msg):
                     else:
                         dacid = 0
 
-                    bufstr = serialize_buffer(snd, loop, msg)
-                    astrid_instrument_publish_bufstr(msg.instrument_name, bufstr, len(bufstr))
+                    bufstr = serialize_buffer(snd, loop, instrument.msg)
+                    astrid_instrument_publish_bufstr(_instrument_ascii_name, bufstr, len(bufstr))
 
             except Exception as e:
-                logger.exception('Error during %s generator render: %s' % (ctx.instrument_name, e))
+                logger.exception('Error during %s generator render: %s' % (instrument.name, e))
                 return 1
         except Exception as e:
-            logger.exception('Error allocating generator for %s render: %s' % (ctx.instrument_name, e))
+            logger.exception('Error allocating generator for %s render: %s' % (instrument.name, e))
             return 1
 
     if hasattr(instrument.renderer, 'done'):
@@ -540,7 +551,7 @@ cdef int render_event(object instrument, lpmsg_t * msg):
 
     return 0
 
-cdef set collect_trigger_planners(object instrument):
+cdef set collect_trigger_planners(Instrument instrument):
     # find all trigger planner functions
     planners = set()
 
@@ -562,30 +573,20 @@ cdef set collect_trigger_planners(object instrument):
     
     return planners
 
-cdef int trigger_events(object instrument, lpmsg_t * msg):
+cdef int trigger_events(Instrument instrument):
     """ Collect the trigger functions in the instrument module
         and compute the triggers to be scheduled.
     """
     cdef set planners
     cdef bint loop
     cdef EventContext ctx 
-    cdef str msgstr
     cdef list eventlist
     cdef int qfd
     cdef double now = 0
-    cdef bytes trigger_params = msg.msg
+    cdef bytes trigger_params = instrument.msg.msg
     cdef list trigger_events = []
 
-    msgstr = trigger_params.decode('ascii')
-    ctx = EventContext.__new__(EventContext,
-        instrument_name=instrument.name, 
-        msg=msgstr,
-        cache=instrument.cache,
-        voice_id=msg.voice_id,
-        max_processing_time=instrument.max_processing_time,
-        default_midi_device=instrument.default_midi_device,
-        count=msg.count,
-    )
+    ctx = instrument.get_event_context()
 
     #logger.debug('trigger generation event %s w/params %s' % (str(instrument), trigger_params))
 
@@ -604,7 +605,7 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
                 continue
             trigger_events += eventlist
         except Exception as e:
-            logger.exception('Error during %s trigger generation: %s' % (ctx.instrument_name, e))
+            logger.exception('Error during %s trigger generation: %s' % (ctx.instrument.name, e))
             return 1
 
     # Schedule the trigger events
@@ -628,8 +629,7 @@ cdef int trigger_events(object instrument, lpmsg_t * msg):
     return 0
 
 
-cdef int astrid_schedule_python_render(Instrument instrument, void * msgp) except -1:
-    cdef lpmsg_t * msg = <lpmsg_t *>msgp
+cdef int astrid_schedule_python_render(Instrument instrument) except -1:
     cdef size_t last_edit = os.path.getmtime(instrument.path)
     cdef int render_result
     cdef double start = 0
@@ -644,7 +644,7 @@ cdef int astrid_schedule_python_render(Instrument instrument, void * msgp) excep
         instrument.reload()
         instrument.last_reload = last_edit
 
-    render_result = render_event(instrument, msg)
+    render_result = render_event(instrument)
 
     if lpscheduler_get_now_seconds(&end) < 0:
         logger.exception('Error getting now seconds')
@@ -656,8 +656,7 @@ cdef int astrid_schedule_python_render(Instrument instrument, void * msgp) excep
     return render_result
 
 
-cdef int astrid_schedule_python_triggers(Instrument instrument, void * msgp) except -1:
-    cdef lpmsg_t * msg = <lpmsg_t *>msgp
+cdef int astrid_schedule_python_triggers(Instrument instrument) except -1:
     cdef size_t last_edit = os.path.getmtime(instrument.path)
 
     # Reload instrument
@@ -666,7 +665,7 @@ cdef int astrid_schedule_python_triggers(Instrument instrument, void * msgp) exc
         instrument.last_reload = last_edit
 
     try:
-        return trigger_events(instrument, msg)
+        return trigger_events(instrument)
     except Exception as e:
         logger.exception('Error during scheduling of python triggers: %s' % e)
         return -1
@@ -690,9 +689,8 @@ def _wait_on_commands_forever(str instrument_name, stop_event):
             logger.info('Console has signaled stop, shutting down command loop...')
             break
 
-def _run_forever(str script_path, str instrument_name, int channels, stop_event):
+def _run_forever(str script_path, str instrument_name, int channels, double adc_length, stop_event):
     cdef Instrument instrument = None
-    cdef lpinstrument_t * i = NULL
     cdef lpmsg_t msg
     instrument_byte_string = instrument_name.encode('UTF-8')
     cdef char * _instrument_ascii_name = instrument_byte_string
@@ -700,20 +698,21 @@ def _run_forever(str script_path, str instrument_name, int channels, stop_event)
     logger.info(f'running forever... {script_path=} {instrument_name=}')
 
     # Load the script as a module into the ASTRID_INSTRUMENT global
-    logger.info(f'loading python instrument... {script_path=} {instrument_name=}')
-    instrument = _load_instrument(instrument_name, script_path)
-    logger.info(f'loaded instrument {instrument=}')
-
-    # Start the stream and setup the instrument
-    logger.info(f'starting instrument... {script_path=} {instrument_name=}')
-    i = astrid_instrument_start(_instrument_ascii_name, channels, NULL, NULL, NULL, NULL)
-    if i == NULL:
+    try:
+        logger.info(f'loading python instrument... {script_path=} {instrument_name=}')
+        instrument = Instrument(instrument_name, script_path, channels, adc_length)
+        logger.info(f'loaded instrument {instrument=}')
+    except InstrumentError as e:
         logger.error('Error trying to start instrument. Shutting down...')
         return
 
+    # Start the stream and setup the instrument
+    logger.info(f'started instrument... {script_path=} {instrument_name=}')
     while True:
         logger.info('reading messages...')
-        if astrid_msgq_read(i.exmsgq, &msg) < 0:
+        try:
+            msg = instrument.get_message()
+        except InstrumentError as e:
             print('There was a problem reading from the msg q. Maybe try turning it off and on again?')
             continue
 
@@ -722,19 +721,24 @@ def _run_forever(str script_path, str instrument_name, int channels, stop_event)
             stop_event.set()
             break
 
+        elif msg.type == LPMSG_UPDATE:
+            logger.info('PY MSG: update')
+            if stream_graph_update(instrument) < 0:
+                logger.error('Error trying to schedule python render...')
+
         elif msg.type == LPMSG_PLAY:
             logger.info('PY MSG: play')
-            if astrid_schedule_python_render(instrument, &msg) < 0:
+            if astrid_schedule_python_render(instrument) < 0:
                 logger.error('Error trying to schedule python render...')
 
         elif msg.type == LPMSG_TRIGGER:
             logger.info('PY MSG: trigger')
-            if astrid_schedule_python_triggers(instrument, &msg) < 0:
+            if astrid_schedule_python_triggers(instrument) < 0:
                 logger.error('Error trying to schedule python triggers...')
 
         elif msg.type == LPMSG_LOAD:
             if instrument is None:
-                instrument = _load_instrument(instrument_name, script_path)
+                instrument = Instrument(instrument_name, script_path)
             else:
                 last_edit = os.path.getmtime(instrument.path)
                 if last_edit > instrument.last_reload:
@@ -743,10 +747,10 @@ def _run_forever(str script_path, str instrument_name, int channels, stop_event)
 
     logger.info('python instrument shutting down...')
 
-def run_forever(str script_path, str instrument_name=None, channels=2):
+def run_forever(str script_path, str instrument_name=None, int channels=2, double adc_length=30):
     instrument_name = instrument_name if instrument_name is not None else Path(script_path).stem
     stop_event = Event()
-    render_process = Process(target=_run_forever, args=(script_path, instrument_name, channels, stop_event))
+    render_process = Process(target=_run_forever, args=(script_path, instrument_name, channels, adc_length, stop_event))
     render_process.start()
 
     try:

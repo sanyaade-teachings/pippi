@@ -161,8 +161,8 @@ convolution-examples:
 	echo "Building convolution.c example...";
 	gcc $(LPFLAGS) examples/convolution.c $(LPSOURCES) $(LPLIBS) -o build/convolution
 
-	echo "Building convolution2.c example...";
-	gcc $(LPFLAGS) examples/convolution2.c $(LPSOURCES) $(LPLIBS) -o build/convolution2
+	#echo "Building convolution2.c example...";
+	#gcc $(LPFLAGS) examples/convolution2.c $(LPSOURCES) $(LPLIBS) -o build/convolution2
 
 soundfile-examples:
 	mkdir -p build renders

@@ -7,14 +7,16 @@ cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 
     ctypedef struct lpbuffer_t:
-        lpfloat_t * data
         size_t length
         int samplerate
         int channels
-
         lpfloat_t phase
         size_t boundry
+        size_t range
         size_t pos
+        size_t onset
+        int is_looping
+        lpfloat_t data[]
 
     ctypedef struct lpbuffer_factory_t: 
         lpbuffer_t * (*create)(size_t, int, int)
@@ -73,10 +75,10 @@ cdef extern from "astrid.h":
         NUM_LPMESSAGETYPES
 
     ctypedef struct lpmsg_t:
-        double initiated;     
-        double scheduled;     
-        double completed;     
-        double max_processing_time;     
+        double initiated
+        double scheduled 
+        double completed
+        double max_processing_time
         size_t onset_delay
         size_t voice_id
         size_t count
@@ -97,13 +99,6 @@ cdef extern from "astrid.h":
         char bank_lsb
         char channel
 
-    ctypedef struct lpserialevent_t:
-        double onset
-        double now
-        lpmsg_t msg
-        int group
-        int device
-
     ctypedef struct lpinstrument_t:
         const char * name
         int channels
@@ -121,12 +116,7 @@ cdef extern from "astrid.h":
 
         lpscheduler_t * async_mixer
 
-    int lpadc_create()
-    int lpadc_destroy()
-    int lpadc_write_block(float * block, size_t blocksize_in_samples)
-    int lpadc_read_sample(size_t pos, lpfloat_t * sample)
-    #int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t (*out)[LPADCBUFSAMPLES])
-    int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out)
+    int lpsampler_read_block_of_samples(char * name, size_t offset, size_t size, lpfloat_t * out)
 
     int lpipc_getid(char * path)
     ssize_t astrid_get_voice_id()
@@ -157,8 +147,9 @@ cdef extern from "astrid.h":
     lpinstrument_t * astrid_instrument_start(
         const char * name, 
         int channels, 
+        double adc_length,
         void * ctx, 
-        void (*stream)(int channels, size_t blocksize, float ** input, float ** output, void * instrument),
+        void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
         lpbuffer_t * (*renderer)(void * instrument),
         void (*updates)(void * instrument)
     )
@@ -168,6 +159,7 @@ cdef extern from "astrid.h":
     int astrid_instrument_console_readline(char * instrument_name)
     int relay_message_to_seq(lpinstrument_t * instrument)
     int send_play_message(lpmsg_t msg)
+    int send_serial_message(lpmsg_t msg, char * tty);
 
 cdef class MessageEvent:
     cdef lpmsg_t * msg
@@ -176,10 +168,6 @@ cdef class MessageEvent:
 cdef class MidiEvent:
     cdef lpmidievent_t * event
     cpdef int schedule(MidiEvent self, double now)
-
-cdef class SerialEvent:
-    cdef lpserialevent_t * event
-    cpdef int schedule(SerialEvent self, double now)
 
 cdef class SessionParamBucket:
     cdef object _bus
@@ -201,6 +189,21 @@ cdef class MidiEventListenerProxy:
 cdef class SerialEventListenerProxy:
     cpdef lpfloat_t ctl(self, int ctl, int device_id=*)
 
+cdef class Instrument:
+    cdef public str name
+    cdef public str path
+    cdef public object renderer
+    cdef public object graph
+    cdef public dict cache
+    cdef public lpmsg_t msg # a copy of the last message received
+    cdef public size_t last_reload
+    cdef public double max_processing_time
+    cdef public int default_midi_device
+    cdef lpinstrument_t * i
+    cpdef EventContext get_event_context(Instrument self, bint with_graph=*)
+    cpdef lpmsg_t get_message(Instrument self)
+    cdef SoundBuffer read_from_adc(Instrument self, double length, double offset=*, int channels=*, int samplerate=*)
+
 cdef class EventContext:
     cdef public dict cache
     cdef public ParamBucket p
@@ -210,23 +213,16 @@ cdef class EventContext:
     cdef public SerialEventListenerProxy b
     cdef public str instrument_name
     cdef public object sounds
+    cdef public object graph
     cdef public int count
     cdef public int tick
     cdef public int vid
     cdef public double now
     cdef public double max_processing_time
+    cdef public Instrument instrument
 
-cdef class Instrument:
-    cdef public str name
-    cdef public str path
-    cdef public object renderer
-    cdef public dict cache
-    cdef public size_t last_reload
-    cdef public double max_processing_time
-    cdef public int default_midi_device
-
-cdef tuple collect_players(object instrument)
-cdef int render_event(object instrument, lpmsg_t * msg)
-cdef set collect_trigger_planners(object instrument)
-cdef int trigger_events(object instrument, lpmsg_t * msg)
+cdef tuple collect_players(Instrument instrument)
+cdef int render_event(Instrument instrument)
+cdef set collect_trigger_planners(Instrument instrument)
+cdef int trigger_events(Instrument instrument)
 

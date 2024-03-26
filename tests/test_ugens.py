@@ -3,7 +3,7 @@ from pippi import dsp, fx, ugens
 import numpy as np
 
 class TestUgens(TestCase):
-    """ FIXME pulsar init is different now
+    """ There's a better way to handle param updates...
     def test_ugen_pulsar(self):
         graph = ugens.Graph()
         graph.add_node('s1', 'sine', freq=100)

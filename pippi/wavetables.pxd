@@ -4,14 +4,16 @@ cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 
     ctypedef struct lpbuffer_t:
-        lpfloat_t * data
         size_t length
         int samplerate
         int channels
-
         lpfloat_t phase
         size_t boundry
+        size_t range
         size_t pos
+        size_t onset
+        int is_looping
+        lpfloat_t data[]
 
     ctypedef struct lpwavetable_factory_t:
         lpbuffer_t * (*create)(const char * name, size_t length)

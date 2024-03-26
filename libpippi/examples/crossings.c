@@ -31,6 +31,10 @@ int main() {
                 }
                 /* increment the read index and add a fixed padding */
                 wavesets[c]->boundry += wavesets[c]->pos + 222;
+                if(wavesets[c]->boundry >= wavesets[c]->length) {
+                    wavesets[c]->boundry -= wavesets[c]->length;
+                }
+
                 /* reset the position - new waveset */
                 wavesets[c]->pos = 0;
             } else {

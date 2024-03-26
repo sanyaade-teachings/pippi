@@ -4,14 +4,16 @@ cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 
     ctypedef struct lpbuffer_t:
-        lpfloat_t * data
         size_t length
         int samplerate
         int channels
-
         lpfloat_t phase
         size_t boundry
+        size_t range
         size_t pos
+        size_t onset
+        int is_looping
+        lpfloat_t data[]
 
     ctypedef struct lpbuffer_factory_t: 
         lpbuffer_t * (*create)(size_t, int, int)
@@ -199,3 +201,4 @@ cdef class Node:
 cdef class Graph:
     cdef dict nodes
     cdef object outputs
+    cdef double next_sample(Graph self)

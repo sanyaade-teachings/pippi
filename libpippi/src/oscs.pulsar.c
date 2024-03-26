@@ -96,6 +96,8 @@ void create_pulsarosc_wavetable_stack(lppulsarosc_t * p, int numtables, va_list 
     LPMemoryPool.free(p->wavetable_onsets);
     LPMemoryPool.free(p->wavetable_lengths);
 
+    if(numtables == 0) return;
+
     p->num_wavetables = numtables;
     p->wavetable_onsets = (size_t *)LPMemoryPool.alloc(numtables, sizeof(size_t));
     p->wavetable_lengths = (size_t *)LPMemoryPool.alloc(numtables, sizeof(size_t));
@@ -106,6 +108,8 @@ void create_pulsarosc_window_stack(lppulsarosc_t * p, int numtables, va_list vl)
     LPMemoryPool.free(p->windows);
     LPMemoryPool.free(p->window_onsets);
     LPMemoryPool.free(p->window_lengths);
+
+    if(numtables == 0) return;
 
     p->num_windows = numtables;
     p->window_onsets = (size_t *)LPMemoryPool.alloc(numtables, sizeof(size_t));

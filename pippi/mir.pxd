@@ -8,7 +8,6 @@ cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 
     ctypedef struct lpbuffer_t:
-        lpfloat_t * data
         size_t length
         int samplerate
         int channels
@@ -16,6 +15,9 @@ cdef extern from "pippicore.h":
         size_t boundry
         size_t range
         size_t pos
+        size_t onset
+        int is_looping
+        lpfloat_t data[]
 
 cdef extern from "mir.h":
     ctypedef struct lpyin_t:
