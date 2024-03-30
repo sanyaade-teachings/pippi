@@ -116,7 +116,7 @@ cdef extern from "astrid.h":
 
         lpscheduler_t * async_mixer
 
-    int lpsampler_read_block_of_samples(char * name, size_t offset, size_t size, lpfloat_t * out)
+    int lpsampler_read_ringbuffer_block(char * name, size_t offset_in_frames, size_t length_in_frames, int channels, lpfloat_t * out)
 
     int lpipc_getid(char * path)
     ssize_t astrid_get_voice_id()

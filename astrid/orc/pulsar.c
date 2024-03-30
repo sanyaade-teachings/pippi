@@ -58,17 +58,18 @@ void param_update_callback(void * arg) {
     astrid_instrument_set_param_float(instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
 }
 
-#if 0
 lpbuffer_t * renderer_callback(void * arg) {
     lpbuffer_t * out;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
-    out = LPBuffer.cut(instrument->adcbuf, LPRand.randint(0, instrument->adcbuf->length/2), LPRand.randint(SR, instrument->adcbuf->length-2));
+    out = LPBuffer.create(LPRand.randint(0, SR), instrument->channels, SR);
+    if(lpsampler_read_ringbuffer_block("pulsar-adc", 0, out->length, instrument->channels, out->data) < 0) {
+        return NULL;
+    }
     LPFX.norm(out, LPRand.rand(0.26f, 0.5f));
 
     return out;
 }
-#endif
 
 void audio_callback(size_t blocksize, __attribute__((unused)) float ** input, float ** output, void * arg) {
     size_t i;
@@ -149,7 +150,7 @@ int main() {
 
     // Set the callbacks for streaming, async renders and param updates
     if((instrument = astrid_instrument_start(NAME, CHANNELS, ADC_LENGTH, (void*)ctx, 
-                    audio_callback, NULL, param_update_callback)) == NULL) {
+                    audio_callback, renderer_callback, param_update_callback)) == NULL) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }

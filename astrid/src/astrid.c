@@ -912,11 +912,6 @@ int lpsampler_get_path(char * name, char * path) {
     return 0;
 }
 
-int lpsampler_get_data_path(char * name, char * path) {
-    snprintf(path, PATH_MAX, "/astrid-sampler-%s-data", name);
-    return 0;
-}
-
 int lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate) {
     int semvalue, shmfd;
     sem_t * sem;
@@ -929,7 +924,7 @@ int lpsampler_create(char * name, double length_in_seconds, int channels, int sa
 
     /* Determine the size of the shared memory segment */
     bufsize = sizeof(lpbuffer_t) + (length * channels * sizeof(lpfloat_t));
-    printf("bufsize=%ld samplerate=%d length=%ld channels=%d\n", 
+    syslog(LOG_DEBUG, "bufsize=%ld samplerate=%d length=%ld channels=%d\n", 
             bufsize, samplerate, length, channels);
 
     /* Create the POSIX semaphore and initialize it to 1 */
@@ -1064,14 +1059,18 @@ int lpsampler_destroy(char * name) {
     return 0;
 }
 
-int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, size_t blocksize_in_samples) {
-    size_t write_pos, insert_pos, i, boundry;
+int lpsampler_write_ringbuffer_block(
+        char * name, 
+        float ** block, 
+        int channels, 
+        size_t blocksize_in_frames
+    ) {
+    size_t insert_pos, i;
     int c;
     lpbuffer_t * buf;
     float sample = 0;
     char path[PATH_MAX] = {0};
 
-    boundry = blocksize_in_samples * channels;
     lpsampler_get_path(name, path);
 
     /* Aquire a lock on the buffer */
@@ -1080,28 +1079,22 @@ int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, 
         return -1;
     }
 
-    printf("pos: %ld\n", buf->pos);
-    write_pos = buf->pos;
+    assert(buf->channels == channels);
 
-    /* Copy the block of samples */
-    for(i=0; i < blocksize_in_samples; i++) {
+    /* Copy the block */
+    for(i=0; i < blocksize_in_frames; i++) {
         for(c=0; c < channels; c++) {
-            insert_pos = ((write_pos+i) * channels + c) % boundry;
-            sample = *block[c]++;
+            insert_pos = ((buf->pos+i) * channels + c) % buf->length;
+            sample = *block[i]++;
             buf->data[insert_pos] = sample;
-            printf("sample: %f\n", buf->data[insert_pos]);
         }
     }
 
     /* Increment the write position */
-    write_pos += blocksize_in_samples;
-    while(write_pos >= boundry) {
-        write_pos -= boundry;
+    buf->pos += blocksize_in_frames;
+    while(buf->pos >= buf->length) {
+        buf->pos -= buf->length;
     }
-
-    /* Store the new write position */
-    buf->pos = write_pos;
-    printf("pos: %ld\n", buf->pos);
 
     /* Release the lock on the ADC buffer shm */
     if(lpsampler_release(name) < 0) {
@@ -1113,13 +1106,19 @@ int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, 
 }
 
 
-int lpsampler_read_block_of_samples(char * name, size_t offset, size_t size, lpfloat_t * out) {
-    size_t read_pos, start, end, readsize, lastreadsize, boundry;
+int lpsampler_read_ringbuffer_block(
+        char * name, 
+        size_t offset_in_frames, 
+        size_t length_in_frames, 
+        int channels, 
+        lpfloat_t * out
+    ) {
+    size_t start, i, bufidx;
+    int c;
     lpbuffer_t * buf;
     char path[PATH_MAX] = {0};
 
     lpsampler_get_path(name, path);
-    boundry = buf->length * buf->channels;
 
     /* Aquire a lock on the buffer */
     if(lpsampler_aquire(name, &buf) < 0) {
@@ -1127,30 +1126,22 @@ int lpsampler_read_block_of_samples(char * name, size_t offset, size_t size, lpf
         return -1;
     }
 
-    /* Maximum read size == buffer length */
-    if(size > boundry) size = boundry;
+    assert(buf->channels == channels);
 
-    /* Get the read position with the offset and read as far 
-     * to the start of the buffer before wrapping as possible */
-    if(buf->pos >= offset) {
-        read_pos = (buf->pos - offset) % boundry;
-    } else {
-        read_pos = (buf->pos + (boundry - offset)) % boundry;
-    }
+    /*
+     * buf->pos is the last frame written to the circular buffer
+     * offset is the number of frames backward from that point to start reading
+     * start is buf->pos - offset, wrapped to the length of the circular buffer
+     */
 
-    start = read_pos >= size ? read_pos - size : 0;
-    end = read_pos;
-    readsize = end - start;
-    memcpy(out, buf->data + start, readsize * sizeof(lpfloat_t));
+    start = (buf->pos - offset_in_frames) % buf->length;
+    syslog(LOG_DEBUG, "buffer read start: %ld\n", start);
 
-    /* If there are remaining samples to be read on the other end of 
-     * the buffer, read those samples back from the end. */
-if (readsize < size) {
-        lastreadsize = readsize;
-        start = boundry - (size - readsize);
-        end = boundry;
-        readsize = end - start;
-        memcpy(out + lastreadsize, buf->data + start, readsize * sizeof(lpfloat_t));
+    for(i=0; i < length_in_frames; i++) {
+        bufidx = (start + i) % buf->length;
+        for(c=0; c < buf->channels; c++) {
+            out[i * buf->channels + c] = buf->data[bufidx * buf->channels + c];
+        }
     }
 
     /* Release the lock on the buffer shm */
@@ -1706,7 +1697,6 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
     int channels, samplerate, is_looping;
     char * str; // bufstr
     lpbuffer_t * buf;
-    lpfloat_t * audio;
     struct stat statbuf;
     int fd;
     sem_t * sem;
@@ -1765,20 +1755,17 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
     memcpy(&onset, str + offset, sizeof(size_t));
     offset += sizeof(size_t);
 
-    audio = calloc(1, audiosize);
-    memcpy(audio, str + offset, audiosize);
+    buf = (lpbuffer_t *)LPMemoryPool.alloc(1, sizeof(lpbuffer_t) + audiosize);
+    memcpy(buf->data, str + offset, audiosize);
     offset += audiosize;
 
     memcpy(msg, str + offset, sizeof(lpmsg_t));
     offset += sizeof(lpmsg_t);
 
-    buf = (lpbuffer_t *)LPMemoryPool.alloc(1, sizeof(lpbuffer_t));
-
     buf->length = length;
     buf->channels = channels;
     buf->samplerate = samplerate;
     buf->is_looping = is_looping;
-    memcpy(buf->data, audio, audiosize);
     buf->onset = onset;
 
     buf->phase = 0.f;
@@ -2673,11 +2660,13 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         memset(output_channels[c], 0, nframes * sizeof(float));
     }
 
+#if 0
     /* write the block into the adc ringbuffer */
     if(lpsampler_write_ringbuffer_block(path, input_channels, instrument->channels, nframes) < 0) {
         syslog(LOG_ERR, "Error writing into adc ringbuf\n");
         return 0;
     }
+#endif
 
     /* mix in async renders */
     if(instrument->async_mixer != NULL) {
@@ -3179,8 +3168,8 @@ lpinstrument_t * astrid_instrument_start(
     syslog(LOG_DEBUG, "Opened message relay queue for %s with fd %d\n", instrument->name, instrument->exmsgq);
 
     // Write the instrument name into msg structs
-    snprintf(instrument->msg.instrument_name, strlen(instrument->name)+1, instrument->name);
-    snprintf(instrument->cmd.instrument_name, strlen(instrument->name)+1, instrument->name);
+    strncpy(instrument->msg.instrument_name, instrument->name, strlen(instrument->name)+1);
+    strncpy(instrument->cmd.instrument_name, instrument->name, strlen(instrument->name)+1);
 
     // Start the message sequencer
     if(astrid_instrument_seq_start(instrument) < 0) {
@@ -3450,7 +3439,7 @@ int astrid_instrument_console_readline(char * instrument_name) {
     char * line;
     lpmsg_t cmd;
 
-    snprintf(cmd.instrument_name, strlen(instrument_name)+1, instrument_name);
+    strncpy(cmd.instrument_name, instrument_name, strlen(instrument_name)+1);
 
     line = linenoise("^_- ");
     if(line != NULL) {

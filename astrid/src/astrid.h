@@ -314,8 +314,8 @@ int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out);
 
 int lpsampler_aquire(char * name, lpbuffer_t ** buf);
 int lpsampler_release(char * name);
-int lpsampler_read_block_of_samples(char * name, size_t offset, size_t size, lpfloat_t * out);
-int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, size_t blocksize_in_samples);
+int lpsampler_read_ringbuffer_block(char * name, size_t offset_in_frames, size_t length_in_frames, int channels, lpfloat_t * out);
+int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, size_t blocksize_in_frames);
 int lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate);
 int lpsampler_destroy(char * name);
 
