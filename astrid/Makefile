@@ -106,7 +106,13 @@ astrid-pulsar:
 
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 
-build: clean astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-midimap astrid-pulsar
+astrid-simple:
+	mkdir -p build
+
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/astrid-simple
+
+
+build: clean astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-midimap astrid-pulsar astrid-simple
 
 install: 
 	cp build/astrid-* /usr/local/bin/

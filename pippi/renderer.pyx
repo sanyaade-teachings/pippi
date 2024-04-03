@@ -18,6 +18,8 @@ import sys
 import time
 import warnings
 
+import numpy as np
+cimport numpy as np
 cimport cython
 
 from pippi import dsp, midi, ugens
@@ -407,24 +409,25 @@ cdef class Instrument:
     cdef SoundBuffer read_from_adc(Instrument self, double length, double offset=0, int channels=2, int samplerate=48000):
         cdef size_t i
         cdef int c
-        cdef double[:,:] block
-        cdef double * blockp
+        cdef double[::1] block
         name_byte_string = ("%s-adc" % self.name).encode('UTF-8')
         cdef char * _ascii_name = name_byte_string
 
         cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
         cdef size_t length_in_frames = len(snd)
         cdef size_t offset_in_frames = <size_t>(offset * samplerate)
-        block = snd.frames
-        if not block.flags['C_CONTIGUOUS']:
-            block = block.ascontiguousarray(block)
 
-        block_memview: cython.double[::1] = block.reshape(-1).flatten()
+        so_wasteful = np.zeros(length_in_frames * channels, dtype='double')
+        block_memview: cython.double[::1] = so_wasteful
 
         # fixme add dcblock
         if lpsampler_read_ringbuffer_block(_ascii_name, offset_in_frames, length_in_frames, channels, cython.address(block_memview[0])) < 0:
             logger.error('pippi.renderer ADC read: failed to read %d frames at offset %d from ADC' % (length_in_frames, offset_in_frames))
             return snd
+
+        for i in range(length_in_frames):
+            for c in range(channels):
+                snd.frames[i,c] = so_wasteful[i * channels + c]
 
         return snd
 

@@ -565,348 +565,6 @@ int lpipc_destroyvalue(char * path) {
 /* SHARED MEMORY
  * BUFFER TOOLS
  * ************/
-int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate) {
-    int semvalue;
-    int shmfd;
-    sem_t * sem;
-    lpipc_buffer_t * buf;
-    size_t bufdatasize, buftotalsize;
-    char * semname;
-
-    /* Determine the size of the shared memory segment */
-    bufdatasize = sizeof(lpfloat_t) * length * channels;
-    buftotalsize = sizeof(lpipc_buffer_t) + bufdatasize;
-
-    /* Construct the sempahore name by stripping the /tmp prefix */
-    semname = id_path + 4;
-
-    /* Create the POSIX semaphore and initialize it to 1 */
-    if((sem = sem_open(semname, O_CREAT, LPIPC_PERMS, 1)) == NULL) {
-        syslog(LOG_ERR, "lpipc_buffer_create Could not create semaphore. (%s) %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    if(sem_getvalue(sem, &semvalue) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_create Could not get semaphore value. (%s) %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    /* POSIX shm */
-    if((shmfd = shm_open(id_path, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_create Could not create shared memory segment. (%s) %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    if(ftruncate(shmfd, buftotalsize) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_create Could not truncate shared memory segment to size %ld. (%s) %s\n", buftotalsize, semname, strerror(errno));
-        return -1;
-    }
-
-    if((buf = mmap(NULL, buftotalsize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_create Could not mmap shared memory segment to size %ld. (%s) %s\n", buftotalsize, semname, strerror(errno));
-        return -1;
-    }
-
-    /* Initialize the buffer struct  */
-    buf->length = length;
-    buf->samplerate = samplerate;
-    buf->channels = channels;
-
-    buf->phase = 0;
-    buf->boundry = length-1;
-    buf->range = length;
-    buf->pos = 0;
-    buf->onset = 0;
-    buf->is_looping = 0;
-    memset(buf->data, 0, bufdatasize);
-
-    close(shmfd);
-
-    return 0;
-}
-
-int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf) {
-    struct stat statbuf;
-    int fd;
-    sem_t * sem;
-    char * semname;
-
-    /* Construct the sempahore name by stripping the /tmp prefix */
-    semname = id_path + 4;
-
-    /* Open the semaphore */
-    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    /* Aquire a lock on the semaphore */
-    if(sem_wait(sem) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire failed to decrementsem %s. Error: %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    /* Get the file descriptor for the shared memory segment */
-    if((fd = shm_open(id_path, O_RDWR, LPIPC_PERMS)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    /* Get the size of the segment */
-    if(fstat(fd, &statbuf) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not stat shm. Error: %s\n", strerror(errno));
-        return -1;
-    }
-
-    /* Attach the shared memory to the pointer */
-    if((*buf = mmap(NULL, statbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, semname, strerror(errno));
-        return -1;
-    }
-
-    /* Clean up sempahore resources */
-    if(sem_close(sem) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire sem_close Could not close semaphore\n");
-        return -1;
-    }
-
-    close(fd);
-
-    return 0;
-}
-
-int lpipc_buffer_release(char * id_path) {
-    sem_t * sem;
-    char * semname;
-
-    /* Construct the sempahore name by stripping the /tmp prefix */
-    semname = id_path + 4;
-
-    /* Open the semaphore */
-    if((sem = sem_open(semname, 0)) == SEM_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_release failed to open semaphore %s. Error: %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    /* Release the lock on the semaphore */
-    if(sem_post(sem) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release failed to unlock %s. Error: %s\n", semname, strerror(errno));
-        return -1;
-    }
-
-    /* Clean up sempahore resources */
-    if(sem_close(sem) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_release sem_close Could not close semaphore\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf) {
-    size_t bufsize;
-    *buf = LPBuffer.create(ipcbuf->length, ipcbuf->channels, ipcbuf->samplerate);
-    bufsize = sizeof(lpfloat_t) * (*buf)->length * (*buf)->channels;
-    memcpy((*buf)->data, (lpfloat_t *)ipcbuf->data, bufsize);
-    return 0;
-}
-
-int lpipc_buffer_destroy(char * id_path) {
-    char * semname;
-
-    /* Unlink the shared memory buffer */
-    if(shm_unlink(id_path) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_destroy shm_unlink. Error: %s\n", strerror(errno));
-        return -1;
-
-    }
-
-    semname = id_path + 4;
-
-    /* Unlink the sempahore */
-    if(sem_unlink(semname) < 0) {
-        syslog(LOG_ERR, "lpipc_destroyvalue sem_unlink Could not destroy semaphore\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-int lpadc_create() {
-    /* Initialize the shared memory buffer and semaphore for the ADC */
-    if(lpipc_buffer_create(LPADC_BUFFER_PATH, LPADCBUFFRAMES, ASTRID_CHANNELS, ASTRID_SAMPLERATE) < 0) {
-        syslog(LOG_ERR, "lpadc_create Could not create ADC buffer shared mem\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-int lpadc_write_2d_block(const float ** block, int channels, size_t blocksize_in_frames) {
-    size_t write_pos, insert_pos;
-    size_t i;
-    int c;
-    lpipc_buffer_t * adcbuf;
-    float * blockp;
-    float sample = 0;
-
-    /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
-        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
-        return -1;
-    }
-
-    write_pos = adcbuf->pos / channels;
-
-    for(c=0; c < channels; c++) {
-        blockp = (float *)block;
-
-        /* Copy the block of samples */
-        for(i=0; i < blocksize_in_frames; i++) {
-            insert_pos = (write_pos+i) % LPADCBUFSAMPLES;
-            sample = *blockp++;
-            adcbuf->data[insert_pos] = sample;
-        }
-    }
-
-    /* Increment the write position */
-    write_pos += blocksize_in_frames * channels;
-    while(write_pos >= LPADCBUFSAMPLES) {
-        write_pos -= LPADCBUFSAMPLES;
-    }
-
-    /* Store the new write position */
-    adcbuf->pos = write_pos;
-
-    /*syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);*/
-
-    /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
-        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-int lpadc_aquire(lpipc_buffer_t ** adcbuf) {
-    lpipc_buffer_t * adcbufp;
-    /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbufp) < 0) {
-        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
-        return -1;
-    }
-
-    *adcbuf = adcbufp;
-
-    return 0;
-}
-
-int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_samples) {
-    /* Increment the write position */
-    adcbuf->pos = (adcbuf->pos + increment_in_samples) % LPADCBUFSAMPLES;
-
-    /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
-        syslog(LOG_ERR, "Could not release ADC buffer shm after increment\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-
-int lpadc_write_block(const void * block, size_t blocksize_in_samples) {
-    size_t write_pos, insert_pos;
-    size_t i;
-    lpipc_buffer_t * adcbuf;
-    float * blockp;
-    float sample = 0;
-
-    blockp = (float *)block;
-
-    /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
-        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
-        return -1;
-    }
-
-    write_pos = adcbuf->pos;
-
-    /* Copy the block of samples */
-    for(i=0; i < blocksize_in_samples; i++) {
-        insert_pos = (write_pos+i) % LPADCBUFSAMPLES;
-        sample = *blockp++;
-        adcbuf->data[insert_pos] = sample;
-    }
-
-    /* Increment the write position */
-    write_pos += blocksize_in_samples;
-    while(write_pos >= LPADCBUFSAMPLES) {
-        write_pos -= LPADCBUFSAMPLES;
-    }
-
-    /* Store the new write position */
-    adcbuf->pos = write_pos;
-
-    /*syslog(LOG_DEBUG, "adc write pos: %.2f%%\n", ((double)write_pos / LPADCBUFSAMPLES) * 100);*/
-
-    /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
-        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out) {
-    size_t read_pos, start, end, readsize, lastreadsize;
-    lpipc_buffer_t * adcbuf;
-
-    /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
-        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
-        return -1;
-    }
-
-    /* Maximum read size == buffer length */
-    if(size > LPADCBUFSAMPLES) {
-        size = LPADCBUFSAMPLES;
-    }
-
-    /* Get the read position with the offset and read as far 
-     * to the start of the buffer before wrapping as possible */
-    if(adcbuf->pos >= offset) {
-        read_pos = (adcbuf->pos - offset) % LPADCBUFSAMPLES;
-    } else {
-        read_pos = (adcbuf->pos + (LPADCBUFSAMPLES - offset)) % LPADCBUFSAMPLES;
-    }
-
-    start = read_pos >= size ? read_pos - size : 0;
-    end = read_pos;
-    readsize = end - start;
-    memcpy(out, adcbuf->data + start, readsize * sizeof(lpfloat_t));
-
-    /* If there are remaining samples to be read on the other end of 
-     * the buffer, read those samples back from the end. */
-    if (readsize < size) {
-        lastreadsize = readsize;
-        start = LPADCBUFSAMPLES - (size - readsize);
-        end = LPADCBUFSAMPLES;
-        readsize = end - start;
-        memcpy(out + lastreadsize, adcbuf->data + start, readsize * sizeof(lpfloat_t));
-    }
-
-    /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
-        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
-        return -1;
-    }
-
-    return 0;
-}
-
 int lpsampler_get_path(char * name, char * path) {
     snprintf(path, PATH_MAX, "/astrid-sampler-%s", name);
     return 0;
@@ -961,6 +619,8 @@ int lpsampler_create(char * name, double length_in_seconds, int channels, int sa
     buf->boundry = length-1;
     buf->range = length;
 
+    close(shmfd);
+
     return 0;
 }
 
@@ -1007,7 +667,7 @@ int lpsampler_aquire(char * name, lpbuffer_t ** buf) {
         return -1;
     }
 
-    //close(fd);
+    close(fd);
 
     return 0;
 }
@@ -1038,7 +698,6 @@ int lpsampler_release(char * name) {
     return 0;
 }
 
-
 int lpsampler_destroy(char * name) {
     char path[PATH_MAX] = {0};
     lpsampler_get_path(name, path);
@@ -1067,6 +726,7 @@ int lpsampler_write_ringbuffer_block(
     ) {
     size_t insert_pos, i;
     int c;
+    float * channelp;
     lpbuffer_t * buf;
     float sample = 0;
     char path[PATH_MAX] = {0};
@@ -1082,10 +742,11 @@ int lpsampler_write_ringbuffer_block(
     assert(buf->channels == channels);
 
     /* Copy the block */
-    for(i=0; i < blocksize_in_frames; i++) {
-        for(c=0; c < channels; c++) {
+    for(c=0; c < channels; c++) {
+        channelp = block[c];
+        for(i=0; i < blocksize_in_frames; i++) {
             insert_pos = ((buf->pos+i) * channels + c) % buf->length;
-            sample = *block[i]++;
+            sample = *channelp++;
             buf->data[insert_pos] = sample;
         }
     }
@@ -1104,7 +765,6 @@ int lpsampler_write_ringbuffer_block(
 
     return 0;
 }
-
 
 int lpsampler_read_ringbuffer_block(
         char * name, 
@@ -1135,8 +795,6 @@ int lpsampler_read_ringbuffer_block(
      */
 
     start = (buf->pos - offset_in_frames) % buf->length;
-    syslog(LOG_DEBUG, "buffer read start: %ld\n", start);
-
     for(i=0; i < length_in_frames; i++) {
         bufidx = (start + i) % buf->length;
         for(c=0; c < buf->channels; c++) {
@@ -1147,42 +805,6 @@ int lpsampler_read_ringbuffer_block(
     /* Release the lock on the buffer shm */
     if(lpsampler_release(name) < 0) {
         syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-
-int lpadc_read_sample(size_t offset, lpfloat_t * sample) {
-    size_t write_pos;
-    lpipc_buffer_t * adcbuf;
-
-    /* Aquire a lock on the buffer */
-    if(lpipc_buffer_aquire(LPADC_BUFFER_PATH, &adcbuf) < 0) {
-        syslog(LOG_ERR, "Could not aquire ADC buffer shm for reading\n");
-        return -1;
-    }
-
-    write_pos = adcbuf->pos;
-
-    /* Copy the sample */
-    write_pos = write_pos - offset;
-    write_pos = write_pos % (LPADCBUFSAMPLES-1);
-    memcpy(sample, adcbuf->data + (write_pos * sizeof(lpfloat_t)), sizeof(lpfloat_t));
-
-    /* Release the lock on the ADC buffer shm */
-    if(lpipc_buffer_release(LPADC_BUFFER_PATH) < 0) {
-        syslog(LOG_ERR, "Could not release ADC buffer shm after update\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-int lpadc_destroy() {
-    if(lpipc_buffer_destroy(LPADC_BUFFER_PATH) < 0) {
-        syslog(LOG_ERR, "Could not destroy ADC buffer\n");
         return -1;
     }
 
@@ -2041,8 +1663,8 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
     return 0;
 }
 
-int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg) {
-    int cmdlength, tokenlength, voice_id=0;
+int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg) {
+    int tokenlength, voice_id=0;
     char *token, *save=NULL;
     char msgtype;
     char cmd_copy[LPMAXMSG] = {0};
@@ -2050,9 +1672,7 @@ int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg) {
     if(cmdline == NULL) return 0;
 
     // strtok clobbers input
-    memcpy(cmd_copy, cmdline, sizeof(cmd_copy));
-
-    cmdlength = strlen(cmdline);
+    memcpy(cmd_copy, cmdline, cmdlength);
 
     // Get the message type, and ignore everything else for now...
     token = strtok_r(cmd_copy, " ", &save);
@@ -2660,13 +2280,11 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         memset(output_channels[c], 0, nframes * sizeof(float));
     }
 
-#if 0
     /* write the block into the adc ringbuffer */
     if(lpsampler_write_ringbuffer_block(path, input_channels, instrument->channels, nframes) < 0) {
         syslog(LOG_ERR, "Error writing into adc ringbuf\n");
         return 0;
     }
-#endif
 
     /* mix in async renders */
     if(instrument->async_mixer != NULL) {
@@ -3098,7 +2716,7 @@ lpinstrument_t * astrid_instrument_start(
      **/
     instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
 
-
+    /* Set the main jack callback which always runs: maybe there is an analysis-only use to support too? */
     jack_set_process_callback(instrument->jack_client, astrid_instrument_jack_callback, (void *)instrument);
     for(c=0; c < channels; c++) {
         snprintf(outport_name, sizeof(outport_name), "out%d", c);
@@ -3108,6 +2726,7 @@ lpinstrument_t * astrid_instrument_start(
         instrument->inports[c] = jack_port_register(instrument->jack_client, inport_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
     }
 
+    /* Request some ports from jack */
     for(c=0; c < channels; c++) {
         if(instrument->outports[c] == NULL) {
             syslog(LOG_ERR, "No more JACK output ports available, shutting down...\n");
@@ -3120,12 +2739,13 @@ lpinstrument_t * astrid_instrument_start(
         }
     }
 
+    /* activate the jack client */
     if(jack_activate(instrument->jack_client) != 0) {
         syslog(LOG_ERR, "%s Could not activate JACK client, shutting down...\n", name);
         goto astrid_instrument_shutdown_with_error;
     }
 
-    /* connect ports */
+    /* connect the jack ports FIXME would be nice to optionally do routing in the instrument callback */
     if((ports = jack_get_ports(instrument->jack_client, NULL, NULL, JackPortIsPhysical|JackPortIsOutput)) == NULL) {
 		syslog(LOG_CRIT, "Cannot find any physical capture ports");
         goto astrid_instrument_shutdown_with_error;
@@ -3150,12 +2770,11 @@ lpinstrument_t * astrid_instrument_start(
     }
 	free(ports);
 
-    // Start running callbacks...
+    /* Register that everything is running and ready */
     instrument->is_running = 1;
     syslog(LOG_INFO, "%s is running...\n", name);
 
-
-    // Ready for some messages now! Open the message queue and start up the seq threads...
+    /* Open the message queue */
     if((instrument->msgq = astrid_msgq_open(instrument->qname)) == (mqd_t) -1) {
         syslog(LOG_CRIT, "Could not open msgq for instrument %s. Error: %s\n", instrument->name, strerror(errno));
         return NULL;
@@ -3167,17 +2786,17 @@ lpinstrument_t * astrid_instrument_start(
     }
     syslog(LOG_DEBUG, "Opened message relay queue for %s with fd %d\n", instrument->name, instrument->exmsgq);
 
-    // Write the instrument name into msg structs
-    strncpy(instrument->msg.instrument_name, instrument->name, strlen(instrument->name)+1);
-    strncpy(instrument->cmd.instrument_name, instrument->name, strlen(instrument->name)+1);
+    /* Prepare the message structs */ 
+    strncpy(instrument->msg.instrument_name, instrument->name, LPMAXNAME-1);
+    strncpy(instrument->cmd.instrument_name, instrument->name, LPMAXNAME-1);
 
-    // Start the message sequencer
+    /* Start the sequencer thread */
     if(astrid_instrument_seq_start(instrument) < 0) {
         syslog(LOG_CRIT, "Could not start message sequence threads for instrument %s. Error: %s\n", instrument->name, strerror(errno));
         return NULL;
     }
 
-    /* Start message feed thread */
+    /* Start listening for messages in the message feed thread */
     if(pthread_create(&instrument->message_feed_thread, NULL, instrument_message_thread, (void*)instrument) != 0) {
         syslog(LOG_ERR, "Could not initialize instrument message thread. Error: %s\n", strerror(errno));
         return NULL;
@@ -3206,10 +2825,6 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
             fprintf(stderr, "astrid instrument message thread cleanup: Could not send shutdown message...\n");
         }
     }
-
-
-
-    syslog(LOG_DEBUG, "Stopping message seq threads...\n");
 
     syslog(LOG_DEBUG, "Joining with message thread...\n");
     if((ret = pthread_join(instrument->message_feed_thread, NULL)) != 0) {
@@ -3436,68 +3051,76 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
 }
 
 int astrid_instrument_console_readline(char * instrument_name) {
-    char * line;
-    lpmsg_t cmd;
+    char * cmdline;
+    size_t cmdlength;
+    lpmsg_t cmd = {0};
+
+    cmdline = linenoise("^_- ");
+    if(cmdline == NULL) return 0;
 
     strncpy(cmd.instrument_name, instrument_name, strlen(instrument_name)+1);
+    cmdlength = strnlen(cmdline, ASTRID_MAX_CMDLINE);
 
-    line = linenoise("^_- ");
-    if(line != NULL) {
-        printf("Got a cmd!\n");
+    printf("Got a cmd!\n");
 
-        if(parse_message_from_cmdline(line, &cmd) < 0) {
-            syslog(LOG_ERR, "Could not parse message from cmdline %s\n", line);
+    if(parse_message_from_cmdline(cmdline, cmdlength, &cmd) < 0) {
+        syslog(LOG_ERR, "Could not parse message from cmdline %s\n", cmdline);
+        return -1;
+    }
+
+    free(cmdline);
+
+    if(cmd.type == LPMSG_SERIAL) {
+        if(send_serial_message(cmd, cmd.instrument_name) < 0) {
+            syslog(LOG_ERR, "Could not send serial message...\n");
             return -1;
         }
-
-        free(line);
-
-        if(cmd.type == LPMSG_SERIAL) {
-            if(send_serial_message(cmd, cmd.instrument_name) < 0) {
-                syslog(LOG_ERR, "Could not send serial message...\n");
-                return -1;
-            }
-        } else {
-            printf("Sending the command on the %s q\n", cmd.instrument_name);
-            if(send_play_message(cmd) < 0) {
-                syslog(LOG_ERR, "Could not send play message...\n");
-                return -1;
-            }
-        }
-
-        if(cmd.type == LPMSG_SHUTDOWN) {
-            return 1;
+    } else {
+        printf("Sending the command on the %s q\n", cmd.instrument_name);
+        if(send_play_message(cmd) < 0) {
+            syslog(LOG_ERR, "Could not send play message...\n");
+            return -1;
         }
     }
 
-
+    if(cmd.type == LPMSG_SHUTDOWN) {
+        return 1;
+    }
+ 
     return 0;
 }
 
 int astrid_instrument_tick(lpinstrument_t * instrument) {
-    char * line;
+    char * cmdline;
+    size_t cmdlength;
 
     if(instrument->is_running == 0) return 0;
 
-    line = linenoise("^_- ");
+    cmdline = linenoise("^_- ");
 
-    printf("msg: %s\n", line);
-    if(parse_message_from_cmdline(line, &instrument->cmd) < 0) {
-        syslog(LOG_ERR, "Could not parse message from cmdline %s\n", line);
+    if(cmdline == NULL) {
+        if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
+        return 0;
+    }
+
+    cmdlength = strnlen(cmdline, ASTRID_MAX_CMDLINE);
+
+    printf("msg: %s (%ld)\n", cmdline, cmdlength);
+
+    if(parse_message_from_cmdline(cmdline, cmdlength, &instrument->cmd) < 0) {
+        syslog(LOG_ERR, "Could not parse message from cmdline %s\n", cmdline);
         return -1;
     }
 
-    if(line != NULL) {
-        if(instrument->cmd.type == LPMSG_SERIAL) {
-            if(send_serial_message(instrument->cmd, instrument->cmd.instrument_name) < 0) {
-                syslog(LOG_ERR, "Could not send serial message...\n");
-                return -1;
-            }
-        } else {
-            if(send_play_message(instrument->cmd) < 0) {
-                syslog(LOG_ERR, "Could not send play message...\n");
-                return -1;
-            }
+    if(instrument->cmd.type == LPMSG_SERIAL) {
+        if(send_serial_message(instrument->cmd, instrument->cmd.instrument_name) < 0) {
+            syslog(LOG_ERR, "Could not send serial message...\n");
+            return -1;
+        }
+    } else {
+        if(send_play_message(instrument->cmd) < 0) {
+            syslog(LOG_ERR, "Could not send play message...\n");
+            return -1;
         }
     }
 
@@ -3505,7 +3128,7 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
     if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
 
     //usleep((useconds_t)10000);
-    free(line);
+    free(cmdline);
 
     if(instrument->cmd.type == LPMSG_SHUTDOWN) instrument->is_running = 0;
 

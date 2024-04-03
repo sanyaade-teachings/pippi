@@ -47,10 +47,8 @@ cdef extern from "astrid.h":
     cdef const int NOTE_ON
     cdef const int NOTE_OFF
     cdef const int CONTROL_CHANGE
-    cdef const int LPADCBUFSAMPLES
     cdef const int ASTRID_SAMPLERATE
     cdef const int ASTRID_CHANNELS
-    cdef const char * LPADC_BUFFER_PATH
     cdef const int NAME_MAX
 
     ctypedef struct lpscheduler_t:

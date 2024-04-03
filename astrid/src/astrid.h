@@ -56,6 +56,7 @@
 #define ASTRID_SERIAL_CTLBASE_PATH "/tmp/astrid-serialdevice%d-ctl%d"
 
 #define LPKEY_MAXLENGTH 4096
+#define ASTRID_MAX_CMDLINE 4096
 
 #define PLAY_MESSAGE 'p'
 #define UPDATE_MESSAGE 'u'
@@ -79,13 +80,6 @@
 #endif
 
 #define SPACE ' '
-
-#define ASTRID_ADCSECONDS 10
-#define LPADCBUFFRAMES (ASTRID_SAMPLERATE * ASTRID_ADCSECONDS)
-#define LPADCBUFSAMPLES (LPADCBUFFRAMES * ASTRID_CHANNELS)
-#define LPADCBUFBYTES (LPADCBUFSAMPLES * sizeof(lpfloat_t))
-#define LPADC_WRITEPOS_PATH "/tmp/astrid-adc-writepos"
-#define LPADC_BUFFER_PATH "/astrid-adc-buffer"
 
 #define ASTRID_DEVICEID_PATH "/tmp/astrid_device_id"
 
@@ -265,7 +259,7 @@ char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg);
 lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg); 
 
 int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
-int parse_message_from_cmdline(char * cmdline, lpmsg_t * msg);
+int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg);
 
 ssize_t astrid_get_voice_id();
 
@@ -304,26 +298,12 @@ int lpserial_getctl(int device_id, int ctl, lpfloat_t * value);
 int astrid_get_playback_device_id();
 int astrid_get_capture_device_id();
 
-int lpadc_create();
-int lpadc_destroy();
-int lpadc_aquire(lpipc_buffer_t ** adcbuf);
-int lpadc_increment_and_release(lpipc_buffer_t * adcbuf, size_t increment_in_samples);
-int lpadc_write_block(const void * block, size_t blocksize);
-int lpadc_read_sample(size_t offset, lpfloat_t * sample);
-int lpadc_read_block_of_samples(size_t offset, size_t size, lpfloat_t * out);
-
 int lpsampler_aquire(char * name, lpbuffer_t ** buf);
 int lpsampler_release(char * name);
 int lpsampler_read_ringbuffer_block(char * name, size_t offset_in_frames, size_t length_in_frames, int channels, lpfloat_t * out);
 int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, size_t blocksize_in_frames);
 int lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate);
 int lpsampler_destroy(char * name);
-
-int lpipc_buffer_create(char * id_path, size_t length, int channels, int samplerate);
-int lpipc_buffer_aquire(char * id_path, lpipc_buffer_t ** buf);
-int lpipc_buffer_release(char * id_path);
-int lpipc_buffer_tolpbuffer(lpipc_buffer_t * ipcbuf, lpbuffer_t ** buf);
-int lpipc_buffer_destroy(char * id_path);
 
 int lpipc_setid(char * path, int id); 
 int lpipc_getid(char * path); 
@@ -344,11 +324,11 @@ lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int par
 void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size);
 void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list);
 lpfloat_t astrid_instrument_get_param_float_list_item(lpinstrument_t * instrument, int param_index, size_t size, int item_index, lpfloat_t default_value);
+int astrid_instrument_console_readline(char * instrument_name);
 int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
 int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size);
-int astrid_instrument_console_readline(char * instrument_name);
 int relay_message_to_seq(lpinstrument_t * instrument);
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
