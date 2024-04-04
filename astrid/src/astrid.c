@@ -2280,11 +2280,13 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         memset(output_channels[c], 0, nframes * sizeof(float));
     }
 
+#if 0
     /* write the block into the adc ringbuffer */
     if(lpsampler_write_ringbuffer_block(path, input_channels, instrument->channels, nframes) < 0) {
         syslog(LOG_ERR, "Error writing into adc ringbuf\n");
         return 0;
     }
+#endif
 
     /* mix in async renders */
     if(instrument->async_mixer != NULL) {
@@ -2425,19 +2427,19 @@ void * instrument_seq_pq(void * arg) {
 }
 
 int relay_message_to_seq(lpinstrument_t * instrument) {
-    int pqnode_index=0;
     lpmsgpq_node_t * d;
     double seq_delay, now=0;
 
-    syslog(LOG_DEBUG, "MSG: schedule\n");
+    syslog(LOG_DEBUG, "SEQ PQ MSG: got a scheduled message to insert into the sequencer priority queue\n");
+    syslog(LOG_DEBUG, "SEQ PQ MSG: pqnode_index=%d\n", instrument->pqnode_index);
 
-    d = &instrument->pqnodes[pqnode_index];
+    d = &instrument->pqnodes[instrument->pqnode_index];
     memcpy(&d->msg, &instrument->msg, sizeof(lpmsg_t));
-    pqnode_index += 1;
-    while(pqnode_index >= NUM_NODES) pqnode_index -= NUM_NODES;
+    instrument->pqnode_index += 1;
+    while(instrument->pqnode_index >= NUM_NODES) instrument->pqnode_index -= NUM_NODES;
 
     if(lpscheduler_get_now_seconds(&now) < 0) {
-        syslog(LOG_CRIT, "Error getting now in seq relay\n");
+        syslog(LOG_CRIT, "SEQ PQ MSG: Error getting now in seq relay\n");
         return -1;
     }
 
@@ -2450,7 +2452,7 @@ int relay_message_to_seq(lpinstrument_t * instrument) {
     d->msg.flags &= ~LPFLAG_IS_SCHEDULED;
 
     if(pqueue_insert(instrument->msgpq, (void *)d) < 0) {
-        syslog(LOG_ERR, "Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
+        syslog(LOG_ERR, "SEQ PQ MSG: Error while inserting message into pq during msgq loop: %s\n", strerror(errno));
         return -1;
     }
 
@@ -2594,6 +2596,7 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
         syslog(LOG_ERR, "Could not initialize message priority queue nodes. Error: %s\n", strerror(errno));
         return -1;
     }
+    memset(instrument->pqnodes, 0, NUM_NODES * sizeof(lpmsgpq_node_t));
 
     for(i=0; i < NUM_NODES; i++) {
         instrument->pqnodes[i].index = i;
@@ -2856,6 +2859,9 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
     syslog(LOG_DEBUG, "Closing lmdb session...\n");
     astrid_instrument_session_close(instrument);
 
+    /* save the history FIXME save the path on the instrument */
+    linenoiseHistorySave("history.txt");
+
     if(instrument->async_mixer != NULL) scheduler_destroy(instrument->async_mixer);
 
     syslog(LOG_DEBUG, "Cleaning up adc ringbuf...\n");
@@ -3062,6 +3068,8 @@ int astrid_instrument_console_readline(char * instrument_name) {
     cmdlength = strnlen(cmdline, ASTRID_MAX_CMDLINE);
 
     printf("Got a cmd!\n");
+    /* write the line into the history */
+    linenoiseHistoryAdd(cmdline);
 
     if(parse_message_from_cmdline(cmdline, cmdlength, &cmd) < 0) {
         syslog(LOG_ERR, "Could not parse message from cmdline %s\n", cmdline);
@@ -3103,6 +3111,9 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
         return 0;
     }
 
+    /* add the command to the history */
+    linenoiseHistoryAdd(cmdline);
+
     cmdlength = strnlen(cmdline, ASTRID_MAX_CMDLINE);
 
     printf("msg: %s (%ld)\n", cmdline, cmdlength);
@@ -3111,6 +3122,8 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
         syslog(LOG_ERR, "Could not parse message from cmdline %s\n", cmdline);
         return -1;
     }
+
+    free(cmdline);
 
     if(instrument->cmd.type == LPMSG_SERIAL) {
         if(send_serial_message(instrument->cmd, instrument->cmd.instrument_name) < 0) {
@@ -3126,9 +3139,6 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
 
     /* free buffers that are done playing */
     if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
-
-    //usleep((useconds_t)10000);
-    free(cmdline);
 
     if(instrument->cmd.type == LPMSG_SHUTDOWN) instrument->is_running = 0;
 

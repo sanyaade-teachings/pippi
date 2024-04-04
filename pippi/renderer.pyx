@@ -678,6 +678,8 @@ cdef int astrid_schedule_python_triggers(Instrument instrument) except -1:
         return -1
 
 def _wait_on_commands_forever(str instrument_name, stop_event):
+    # takes console input with linenoise and sends parsed messages 
+    # on the instrument message q, or to an external serial device
     instrument_byte_string = instrument_name.encode('UTF-8')
     cdef char * _instrument_ascii_name = instrument_byte_string
 

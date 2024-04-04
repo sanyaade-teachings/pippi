@@ -180,6 +180,7 @@ typedef struct lpinstrument_t {
     // Message scheduling pq nodes
     pqueue_t * msgpq;
     lpmsgpq_node_t * pqnodes;
+    int pqnode_index;
 
     // Thread refs
     pthread_t message_feed_thread;
