@@ -149,7 +149,7 @@ typedef struct lpscheduler_t {
 } lpscheduler_t;
 
 typedef struct lpinstrument_t {
-    const char * name;
+    char * name;
     int channels;
     volatile int is_running;
     volatile int is_waiting;
@@ -200,7 +200,7 @@ typedef struct lpinstrument_t {
     void (*updates)(void * instrument);
 
     // Async renderer callback (C-compat only)
-    lpbuffer_t * (*renderer)(void * instrument);
+    int (*renderer)(void * instrument);
 
     // Stream callback
     void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument);
@@ -256,7 +256,7 @@ typedef struct lpastridctx_t {
 
 
 
-char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg); 
+unsigned char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg); 
 lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg); 
 
 int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
@@ -317,7 +317,7 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-lpinstrument_t * astrid_instrument_start(const char * name, int channels, double adc_length, void * ctx, void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), lpbuffer_t * (*renderer)(void * instrument), void (*updates)(void * instrument));
+lpinstrument_t * astrid_instrument_start(char * name, int channels, double adc_length, void * ctx, void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), void (*updates)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
@@ -329,6 +329,7 @@ int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
 int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size);
+int send_render_to_mixer(lpinstrument_t * instrument, lpbuffer_t * buf);
 int relay_message_to_seq(lpinstrument_t * instrument);
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);

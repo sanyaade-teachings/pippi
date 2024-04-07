@@ -6,16 +6,22 @@
 #define CHANNELS 2
 #define ADC_LENGTH 30
 
-lpbuffer_t * renderer_callback(void * arg) {
+int renderer_callback(void * arg) {
     lpbuffer_t * out;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
     out = LPBuffer.create(SR, instrument->channels, SR);
     if(lpsampler_read_ringbuffer_block("simplesea-adc", 0, out->length, instrument->channels, out->data) < 0) {
-        return NULL;
+        return -1;
     }
 
-    return out;
+    if(send_render_to_mixer(instrument, out) < 0) {
+        return -1;
+    }
+
+    LPBuffer.destroy(out);
+
+    return 0;
 }
 
 int main() {

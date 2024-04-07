@@ -1267,14 +1267,15 @@ ssize_t astrid_get_voice_id() {
 /* BUFFER
  * SERIALIZATION
  * *************/
-char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg) {
+unsigned char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg) {
     size_t strsize, audiosize, offset;
-    char * str;
+    unsigned char * str;
 
     audiosize = buf->length * buf->channels * sizeof(lpfloat_t);
 
     strsize =  0;
-    strsize += sizeof(size_t);  /* audio len     */
+    strsize += sizeof(size_t);  /* audio size in bytes */
+    strsize += sizeof(size_t);  /* audio length in frames */
     strsize += sizeof(int);     /* channels   */
     strsize += sizeof(int);     /* samplerate */
     strsize += sizeof(int);     /* is_looping */
@@ -1283,7 +1284,7 @@ char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg) {
     strsize += sizeof(lpmsg_t); /* message */
 
     /* initialize string buffer */
-    str = calloc(1, strsize);
+    str = (unsigned char *)calloc(1, strsize);
 
     offset = 0;
 
@@ -1317,7 +1318,7 @@ char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg) {
 lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
     size_t audiosize, offset, length, onset;
     int channels, samplerate, is_looping;
-    char * str; // bufstr
+    unsigned char * str; // bufstr
     lpbuffer_t * buf;
     struct stat statbuf;
     int fd;
@@ -1354,7 +1355,7 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
         return NULL;
     }
 
-    str = (char *)LPMemoryPool.alloc(1, statbuf.st_size);
+    str = (unsigned char *)LPMemoryPool.alloc(1, statbuf.st_size);
     memcpy(str, shmaddr, statbuf.st_size);
 
     offset = 0;
@@ -1394,6 +1395,21 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
     buf->pos = 0;
     buf->boundry = length-1;
     buf->range = length;
+
+    /* cleanup the bufstr shared memory*/
+    LPMemoryPool.free(str);
+
+    /* Unlink the shared memory buffer */
+    if(shm_unlink(buffer_code) < 0) {
+        syslog(LOG_ERR, "deserialize_buffer shm_unlink. Error: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    /* Unlink the sempahore */
+    if(sem_unlink(buffer_code) < 0) {
+        syslog(LOG_ERR, "deserialize_buffer sem_unlink Could not destroy semaphore\n");
+        return NULL;
+    }
 
     return buf;
 }
@@ -2518,6 +2534,22 @@ void * instrument_message_thread(void * arg) {
                     syslog(LOG_ERR, "DAC could not deserialize buffer. Error: (%d) %s\n", errno, strerror(errno));
                     continue;
                 }
+
+                /* Get now */
+                if(lpscheduler_get_now_seconds(&now) < 0) {
+                    syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
+                    now = 0;
+                }
+
+                processing_time_so_far = now - instrument->msg.initiated;
+                onset_delay_in_seconds = instrument->msg.scheduled - processing_time_so_far;
+                if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
+
+                instrument->msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
+
+                syslog(LOG_INFO, "msg.onset_delay %ld\n", instrument->msg.onset_delay);
+
+                /* Schedule the buffer for playback */
                 scheduler_schedule_event(instrument->async_mixer, buf, 0);
                 break;
 
@@ -2534,31 +2566,10 @@ void * instrument_message_thread(void * arg) {
                 if(instrument->renderer != NULL) {
                     syslog(LOG_DEBUG, "C MSG: rendering play...\n");
                     /* FIXME do this in another thread */
-                    buf = instrument->renderer(instrument);
-
-                    if(buf == NULL) {
-                        syslog(LOG_ERR, "null buffer\n");
-                        break;
+                    if(instrument->renderer(instrument) < 0) {
+                        syslog(LOG_ERR, "there was a problem rendering from the C instrument\n");
+                        continue;
                     }
-
-                    syslog(LOG_DEBUG, "rendered buffer is %d frames and %d channels...\n", (int)buf->length, buf->channels);
-
-                    /* Get now */
-                    if(lpscheduler_get_now_seconds(&now) < 0) {
-                        syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
-                        now = 0;
-                    }
-
-                    processing_time_so_far = now - instrument->msg.initiated;
-                    onset_delay_in_seconds = instrument->msg.scheduled - processing_time_so_far;
-                    if(onset_delay_in_seconds < 0) onset_delay_in_seconds = 0.f;
-
-                    instrument->msg.onset_delay = (size_t)(onset_delay_in_seconds * ASTRID_SAMPLERATE);
-
-                    syslog(LOG_INFO, "msg.onset_delay %ld\n", instrument->msg.onset_delay);
-
-                    /* Schedule the buffer for playback */
-                    scheduler_schedule_event(instrument->async_mixer, buf, 0);
                 }
                 break;
 
@@ -2614,12 +2625,12 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
 }
 
 lpinstrument_t * astrid_instrument_start(
-    const char * name, 
+    char * name, 
     int channels, 
     double adc_length,
     void * ctx,
     void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
-    lpbuffer_t * (*renderer)(void * instrument),
+    int (*renderer)(void * instrument),
     void (*updates)(void * instrument)
 ) {
     lpinstrument_t * instrument;
@@ -3006,6 +3017,35 @@ int astrid_instrument_session_close(lpinstrument_t * instrument) {
 	mdb_dbi_close(instrument->dbenv, instrument->dbi);
 	mdb_env_close(instrument->dbenv);
     syslog(LOG_DEBUG, "Done cleaning up LMDB...\n");
+    return 0;
+}
+
+int send_render_to_mixer(lpinstrument_t * instrument, lpbuffer_t * buf) {
+    size_t strsize;
+    unsigned char * bufstr;
+
+    /* FIXME do this in just one place */
+
+    strsize =  0;
+    strsize += sizeof(size_t);  /* audio size in bytes */
+    strsize += sizeof(size_t);  /* audio length in frames */
+    strsize += sizeof(int);                                     /* channels   */
+    strsize += sizeof(int);                                     /* samplerate */
+    strsize += sizeof(int);                                     /* is_looping */
+    strsize += sizeof(size_t);                                  /* onset      */
+    strsize += buf->length * buf->channels * sizeof(lpfloat_t); /* audio data */
+    strsize += sizeof(lpmsg_t);                                 /* message */
+
+    if((bufstr = serialize_buffer(buf, &instrument->msg)) == NULL) {
+        return -1;
+    }
+
+    if(astrid_instrument_publish_bufstr(instrument->name, bufstr, strsize) < 0) {
+        return -1;
+    }
+
+    free(bufstr);
+
     return 0;
 }
 

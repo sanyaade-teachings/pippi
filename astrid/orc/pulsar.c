@@ -58,17 +58,21 @@ void param_update_callback(void * arg) {
     astrid_instrument_set_param_float(instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
 }
 
-lpbuffer_t * renderer_callback(void * arg) {
+int renderer_callback(void * arg) {
     lpbuffer_t * out;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
     out = LPBuffer.create(LPRand.randint(0, SR), instrument->channels, SR);
     if(lpsampler_read_ringbuffer_block("pulsar-adc", 0, out->length, instrument->channels, out->data) < 0) {
-        return NULL;
+        return -1;
     }
     LPFX.norm(out, LPRand.rand(0.26f, 0.5f));
 
-    return out;
+    if(send_render_to_mixer(instrument, out) < 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
 void audio_callback(size_t blocksize, __attribute__((unused)) float ** input, float ** output, void * arg) {
