@@ -109,7 +109,7 @@ astrid-pulsar:
 astrid-simple:
 	mkdir -p build
 
-	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/astrid-simple
+	$(CC) $(LPFLAGS) -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/astrid-simple
 
 
 build: clean astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-midimap astrid-pulsar astrid-simple

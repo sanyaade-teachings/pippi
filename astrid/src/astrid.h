@@ -325,7 +325,6 @@ lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int par
 void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size);
 void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list);
 lpfloat_t astrid_instrument_get_param_float_list_item(lpinstrument_t * instrument, int param_index, size_t size, int item_index, lpfloat_t default_value);
-int astrid_instrument_console_readline(char * instrument_name);
 int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);

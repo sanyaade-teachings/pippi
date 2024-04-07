@@ -3,12 +3,12 @@
 import array
 from cpython cimport array
 from libc.stdlib cimport calloc, free
-from libc.string cimport strcpy, memcpy
+from libc.string cimport strcpy, memcpy, strncpy
 import logging
 from logging.handlers import SysLogHandler
 import importlib
 import importlib.util
-from multiprocessing import Process, Event
+from multiprocessing import Process
 import os
 from pathlib import Path
 import platform
@@ -321,9 +321,12 @@ cdef class EventContext:
         return self.p._params
 
 cdef class Instrument:
-    def __init__(self, str name, str path, int channels, double adc_length):
+    def __cinit__(self, str name, str path, int channels, double adc_length):
         instrument_byte_string = name.encode('UTF-8')
         cdef char * _instrument_ascii_name = instrument_byte_string
+        # _instrument_ascii_name will get garbage collected at the end of this function
+        self.ascii_name = <char *>calloc(LPMAXNAME, sizeof(char))
+        strncpy(self.ascii_name, _instrument_ascii_name, LPMAXNAME-1)
 
         self.name = name
         self.path = path
@@ -331,11 +334,14 @@ cdef class Instrument:
         self.last_reload = 0
         self.max_processing_time = 0
 
-        self.i = astrid_instrument_start(_instrument_ascii_name, channels, adc_length, NULL, NULL, NULL, NULL)
+        self.i = astrid_instrument_start(self.ascii_name, channels, adc_length, NULL, NULL, NULL, NULL)
         if self.i == NULL:
             raise InstrumentError('Could not initialize lpinstrument_t')
 
         self.load_renderer(name, path)
+
+    def __dealloc__(self):
+        free(self.ascii_name)
 
     def load_renderer(self, name, path):
         """ Loads a renderer module from the script 
@@ -677,46 +683,11 @@ cdef int astrid_schedule_python_triggers(Instrument instrument) except -1:
         logger.exception('Error during scheduling of python triggers: %s' % e)
         return -1
 
-def _wait_on_commands_forever(str instrument_name, stop_event):
-    # takes console input with linenoise and sends parsed messages 
-    # on the instrument message q, or to an external serial device
-    instrument_byte_string = instrument_name.encode('UTF-8')
-    cdef char * _instrument_ascii_name = instrument_byte_string
-
-    while True:
-        if stop_event.is_set():
-            break
-
-        ret = astrid_instrument_console_readline(_instrument_ascii_name)
-
-        if ret < 0:
-            logger.info('Could not read console line')
-            time.sleep(0.5)
-            continue
-
-        if ret > 0:
-            logger.info('Console has signaled stop, shutting down command loop...')
-            break
-
-def _run_forever(str script_path, str instrument_name, int channels, double adc_length, stop_event):
-    cdef Instrument instrument = None
+def _run_forever(Instrument instrument, str script_path, str instrument_name, int channels, double adc_length):
     cdef lpmsg_t msg
-    instrument_byte_string = instrument_name.encode('UTF-8')
-    cdef char * _instrument_ascii_name = instrument_byte_string
 
     logger.info(f'running forever... {script_path=} {instrument_name=}')
 
-    # Load the script as a module into the ASTRID_INSTRUMENT global
-    try:
-        logger.info(f'loading python instrument... {script_path=} {instrument_name=}')
-        instrument = Instrument(instrument_name, script_path, channels, adc_length)
-        logger.info(f'loaded instrument {instrument=}')
-    except InstrumentError as e:
-        logger.error('Error trying to start instrument. Shutting down...')
-        return
-
-    # Start the stream and setup the instrument
-    logger.info(f'started instrument... {script_path=} {instrument_name=}')
     while True:
         logger.info('reading messages...')
         try:
@@ -727,7 +698,6 @@ def _run_forever(str script_path, str instrument_name, int channels, double adc_
 
         if msg.type == LPMSG_SHUTDOWN:
             logger.info('PY MSG: shutdown')
-            stop_event.set()
             break
 
         elif msg.type == LPMSG_UPDATE:
@@ -746,24 +716,47 @@ def _run_forever(str script_path, str instrument_name, int channels, double adc_
                 logger.error('Error trying to schedule python triggers...')
 
         elif msg.type == LPMSG_LOAD:
-            if instrument is None:
-                instrument = Instrument(instrument_name, script_path)
-            else:
-                last_edit = os.path.getmtime(instrument.path)
-                if last_edit > instrument.last_reload:
-                    instrument.reload()
-                    instrument.last_reload = last_edit
+            try:
+                if instrument is None:
+                    instrument = Instrument(instrument_name, script_path, channels, adc_length)
+                else:
+                    last_edit = os.path.getmtime(instrument.path)
+                    if last_edit > instrument.last_reload:
+                        instrument.reload()
+                        instrument.last_reload = last_edit
+            except InstrumentError as e:
+                logger.error('Error trying to reload instrument. Shutting down...')
+                break
 
     logger.info('python instrument shutting down...')
 
 def run_forever(str script_path, str instrument_name=None, int channels=2, double adc_length=30):
+    cdef Instrument instrument = None
     instrument_name = instrument_name if instrument_name is not None else Path(script_path).stem
-    stop_event = Event()
-    render_process = Process(target=_run_forever, args=(script_path, instrument_name, channels, adc_length, stop_event))
+    instrument_byte_string = instrument_name.encode('UTF-8')
+    cdef char * _instrument_ascii_name = instrument_byte_string
+
+    try:
+        # Start the stream and setup the instrument
+        logger.info(f'loading python instrument... {script_path=} {instrument_name=}')
+        instrument = Instrument(instrument_name, script_path, channels, adc_length)
+        logger.info(f'started instrument... {script_path=} {instrument_name=}')
+    except InstrumentError as e:
+        logger.error('Error trying to start instrument. Shutting down...')
+        return
+
+    render_process = Process(target=_run_forever, args=(instrument, script_path, instrument_name, channels, adc_length))
     render_process.start()
 
     try:
-        _wait_on_commands_forever(instrument_name, stop_event)
+        while instrument.i.is_running:
+            # Read messages from the console and relay them to the q
+            # Also does memory cleanup on spent shared memory buffers
+            if astrid_instrument_tick(instrument.i) < 0:
+                logger.info('Could not read console line')
+                time.sleep(2)
+                continue
+
     except KeyboardInterrupt as e:
         print('Got keyboard interrupt')
 

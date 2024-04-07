@@ -153,8 +153,8 @@ cdef extern from "astrid.h":
     )
 
     int astrid_instrument_stop(lpinstrument_t * instrument)
+    int astrid_instrument_tick(lpinstrument_t * instrument)
     void scheduler_cleanup_nursery(lpscheduler_t * s)
-    int astrid_instrument_console_readline(char * instrument_name)
     int relay_message_to_seq(lpinstrument_t * instrument)
     int send_play_message(lpmsg_t msg)
     int send_serial_message(lpmsg_t msg, char * tty);
@@ -197,6 +197,7 @@ cdef class Instrument:
     cdef public size_t last_reload
     cdef public double max_processing_time
     cdef public int default_midi_device
+    cdef char * ascii_name
     cdef lpinstrument_t * i
     cpdef EventContext get_event_context(Instrument self, bint with_graph=*)
     cpdef lpmsg_t get_message(Instrument self)

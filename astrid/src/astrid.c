@@ -413,13 +413,13 @@ int lpipc_setvalue(char * path, void * value, size_t size) {
 
     /* Get the file descriptor for the shared memory segment */
     if((fd = shm_open(semname, O_RDWR, LPIPC_PERMS)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
+        syslog(LOG_ERR, "lpipc_setvalue Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
 
     /* Attach the shared memory to the pointer */
     if((shmaddr = (void*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", size, semname, strerror(errno));
+        syslog(LOG_ERR, "lpipc_setvalue Could not mmap shared memory segment to size %ld. (%s) %s\n", size, semname, strerror(errno));
         return -1;
     }
 
@@ -493,19 +493,19 @@ int lpipc_getvalue(char * path, void ** value) {
 
     /* Get the file descriptor for the shared memory segment */
     if((fd = shm_open(semname, O_RDWR, LPIPC_PERMS)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
+        syslog(LOG_ERR, "lpipc_getvalue Could not open shared memory segment. (%s) %s\n", semname, strerror(errno));
         return -1;
     }
 
     /* Get the size of the segment */
     if(fstat(fd, &statbuf) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not stat shm. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "lpipc_getvalue Could not stat shm. Error: %s\n", strerror(errno));
         return -1;
     }
 
     /* Attach the shared memory to the pointer */
     if((shmaddr = (void*)mmap(NULL, statbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, semname, strerror(errno));
+        syslog(LOG_ERR, "lpipc_getvalue Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, semname, strerror(errno));
         return -1;
     }
 
@@ -633,37 +633,37 @@ int lpsampler_aquire(char * name, lpbuffer_t ** buf) {
 
     /* Open the semaphore */
     if((sem = sem_open(path, 0)) == SEM_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire failed to open semaphore %s. Error: %s\n", path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_aquire failed to open semaphore %s. Error: %s\n", path, strerror(errno));
         return -1;
     }
 
     /* Aquire a lock on the semaphore */
     if(sem_wait(sem) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire failed to decrementsem %s. Error: %s\n", path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_aquire failed to decrementsem %s. Error: %s\n", path, strerror(errno));
         return -1;
     }
 
     /* Get the file descriptor for the shared memory segment */
     if((fd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not open shared memory segment. (%s) %s\n", path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_aquire Could not open shared memory segment. (%s) %s\n", path, strerror(errno));
         return -1;
     }
 
     /* Get the size of the segment */
     if(fstat(fd, &statbuf) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not stat shm. Error: %s\n", strerror(errno));
+        syslog(LOG_ERR, "lpsampler_aquire Could not stat shm. Error: %s\n", strerror(errno));
         return -1;
     }
 
     /* Attach the shared memory to the pointer */
     if((*buf = mmap(NULL, statbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)) == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_aquire Could not mmap shared memory segment to size %ld. (%s) %s\n", statbuf.st_size, path, strerror(errno));
         return -1;
     }
 
     /* Clean up sempahore resources */
     if(sem_close(sem) < 0) {
-        syslog(LOG_ERR, "lpipc_buffer_aquire sem_close Could not close semaphore\n");
+        syslog(LOG_ERR, "lpsampler_aquire sem_close Could not close semaphore\n");
         return -1;
     }
 
@@ -2280,13 +2280,11 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         memset(output_channels[c], 0, nframes * sizeof(float));
     }
 
-#if 0
     /* write the block into the adc ringbuffer */
     if(lpsampler_write_ringbuffer_block(path, input_channels, instrument->channels, nframes) < 0) {
         syslog(LOG_ERR, "Error writing into adc ringbuf\n");
         return 0;
     }
-#endif
 
     /* mix in async renders */
     if(instrument->async_mixer != NULL) {
@@ -2421,8 +2419,6 @@ void * instrument_seq_pq(void * arg) {
     }
 
     syslog(LOG_INFO, "Message scheduler pq thread shutting down...\n");
-    pqueue_free(instrument->msgpq);
-    free(instrument->pqnodes);
     return 0;
 }
 
@@ -2871,6 +2867,17 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
         return -1;
     }
 
+    /* cleanup the pq memory */
+    pqueue_free(instrument->msgpq);
+    free(instrument->pqnodes);
+
+    /* and the jack i/o buffers */
+    free(instrument->inports);
+    free(instrument->outports);
+
+    /* poof! */
+    free(instrument);
+
     syslog(LOG_DEBUG, "All done, see ya later!\n");
     closelog();
     return 0;
@@ -2995,6 +3002,7 @@ int astrid_instrument_session_open(lpinstrument_t * instrument) {
 
 int astrid_instrument_session_close(lpinstrument_t * instrument) {
     syslog(LOG_DEBUG, "Closing LMDB session...\n");
+    mdb_txn_abort(instrument->dbtxn_read);
 	mdb_dbi_close(instrument->dbenv, instrument->dbi);
 	mdb_env_close(instrument->dbenv);
     syslog(LOG_DEBUG, "Done cleaning up LMDB...\n");
@@ -3049,52 +3057,10 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
     memcpy(msg.msg, buffer_code, strlen(buffer_code));
     msg.type = LPMSG_RENDER_COMPLETE;
     if(send_play_message(msg) < 0) {
-        syslog(LOG_ERR, "COuld not send render complete message. (%d) %s\n", errno, strerror(errno));
+        syslog(LOG_ERR, "Could not send render complete message. (%d) %s\n", errno, strerror(errno));
         return 1;
     }
 
-    return 0;
-}
-
-int astrid_instrument_console_readline(char * instrument_name) {
-    char * cmdline;
-    size_t cmdlength;
-    lpmsg_t cmd = {0};
-
-    cmdline = linenoise("^_- ");
-    if(cmdline == NULL) return 0;
-
-    strncpy(cmd.instrument_name, instrument_name, strlen(instrument_name)+1);
-    cmdlength = strnlen(cmdline, ASTRID_MAX_CMDLINE);
-
-    printf("Got a cmd!\n");
-    /* write the line into the history */
-    linenoiseHistoryAdd(cmdline);
-
-    if(parse_message_from_cmdline(cmdline, cmdlength, &cmd) < 0) {
-        syslog(LOG_ERR, "Could not parse message from cmdline %s\n", cmdline);
-        return -1;
-    }
-
-    free(cmdline);
-
-    if(cmd.type == LPMSG_SERIAL) {
-        if(send_serial_message(cmd, cmd.instrument_name) < 0) {
-            syslog(LOG_ERR, "Could not send serial message...\n");
-            return -1;
-        }
-    } else {
-        printf("Sending the command on the %s q\n", cmd.instrument_name);
-        if(send_play_message(cmd) < 0) {
-            syslog(LOG_ERR, "Could not send play message...\n");
-            return -1;
-        }
-    }
-
-    if(cmd.type == LPMSG_SHUTDOWN) {
-        return 1;
-    }
- 
     return 0;
 }
 
