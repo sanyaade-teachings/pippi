@@ -17,7 +17,7 @@ int main(__attribute__((unused)) int argc, char * argv[]) {
 
     switch(cmd) {
         case 'c':
-            if(lpsampler_create(name, 1000, 2, 48000) < 0) {
+            if((buf = lpsampler_create(name, 1000, 2, 48000)) == NULL) {
                 fprintf(stderr, "Could not create buffer\n");
                 return 1;
             }
@@ -35,15 +35,24 @@ int main(__attribute__((unused)) int argc, char * argv[]) {
                 samples[1][i] = -1.f;
             }
 
+            if((buf = lpsampler_aquire_and_map(name)) == NULL) {
+                fprintf(stderr, "Could not aquire buffer\n");
+                return 1;
+            }
+            if(lpsampler_release(name) < 0) {
+                fprintf(stderr, "Could not release buffer\n");
+                return 1;
+            }
+
             /* write the block into the adc ringbuffer */
-            if(lpsampler_write_ringbuffer_block(name, samples, 2, 100) < 0) {
+            if(lpsampler_write_ringbuffer_block(name, buf, samples, 2, 100) < 0) {
                 syslog(LOG_ERR, "Error writing into adc ringbuf\n");
                 return 0;
             }
             break;
 
         case 'r':
-            if(lpsampler_aquire(name, &buf) < 0) {
+            if((buf = lpsampler_aquire_and_map(name)) == NULL) {
                 fprintf(stderr, "Could not aquire buffer\n");
                 return 1;
             }

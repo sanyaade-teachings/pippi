@@ -105,6 +105,9 @@ cdef extern from "astrid.h":
         int has_been_initialized
         lpfloat_t samplerate
 
+        char adcname[4096]
+        lpbuffer_t * adcbuf
+
         char qname[NAME_MAX]
         char external_relay_name[NAME_MAX]
         int msgq
@@ -114,7 +117,7 @@ cdef extern from "astrid.h":
 
         lpscheduler_t * async_mixer
 
-    int lpsampler_read_ringbuffer_block(char * name, size_t offset_in_frames, size_t length_in_frames, int channels, lpfloat_t * out)
+    int lpsampler_read_ringbuffer_block(char * name, lpbuffer_t * buf, size_t offset_in_frames, lpbuffer_t * out)
 
     int lpipc_getid(char * path)
     ssize_t astrid_get_voice_id()
@@ -145,11 +148,13 @@ cdef extern from "astrid.h":
     lpinstrument_t * astrid_instrument_start(
         const char * name, 
         int channels, 
+        int ext_relay_enabled,
         double adc_length,
         void * ctx, 
-        void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
-        lpbuffer_t * (*renderer)(void * instrument),
-        void (*updates)(void * instrument)
+        int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
+        int (*renderer)(void * instrument),
+        int (*update)(void * instrument),
+        int (*trigger)(void * instrument)
     )
 
     int astrid_instrument_stop(lpinstrument_t * instrument)

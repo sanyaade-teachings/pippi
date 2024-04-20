@@ -334,7 +334,7 @@ cdef class Instrument:
         self.last_reload = 0
         self.max_processing_time = 0
 
-        self.i = astrid_instrument_start(self.ascii_name, channels, adc_length, NULL, NULL, NULL, NULL)
+        self.i = astrid_instrument_start(self.ascii_name, channels, 1, adc_length, NULL, NULL, NULL, NULL, NULL)
         if self.i == NULL:
             raise InstrumentError('Could not initialize lpinstrument_t')
 
@@ -415,25 +415,24 @@ cdef class Instrument:
     cdef SoundBuffer read_from_adc(Instrument self, double length, double offset=0, int channels=2, int samplerate=48000):
         cdef size_t i
         cdef int c
-        cdef double[::1] block
-        name_byte_string = ("%s-adc" % self.name).encode('UTF-8')
-        cdef char * _ascii_name = name_byte_string
+        cdef lpbuffer_t * out
 
         cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
         cdef size_t length_in_frames = len(snd)
         cdef size_t offset_in_frames = <size_t>(offset * samplerate)
 
-        so_wasteful = np.zeros(length_in_frames * channels, dtype='double')
-        block_memview: cython.double[::1] = so_wasteful
+        out = LPBuffer.create(length_in_frames, channels, samplerate)
 
         # fixme add dcblock
-        if lpsampler_read_ringbuffer_block(_ascii_name, offset_in_frames, length_in_frames, channels, cython.address(block_memview[0])) < 0:
+        if lpsampler_read_ringbuffer_block(self.i.adcname, self.i.adcbuf, offset_in_frames, out) < 0:
             logger.error('pippi.renderer ADC read: failed to read %d frames at offset %d from ADC' % (length_in_frames, offset_in_frames))
             return snd
 
         for i in range(length_in_frames):
             for c in range(channels):
-                snd.frames[i,c] = so_wasteful[i * channels + c]
+                snd.frames[i,c] = out.data[i * channels + c]
+
+        LPBuffer.destroy(out)
 
         return snd
 

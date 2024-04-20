@@ -3,7 +3,7 @@
 int main() {
     ssize_t voice_id;
 
-    if((voice_id = (ssize_t)astrid_get_voice_id) < 0) {
+    if((voice_id = (ssize_t)lpcounter_read_and_increment("voiceid")) < 0) {
         perror("lpcounter_read_and_increment");
         return 1;
     }

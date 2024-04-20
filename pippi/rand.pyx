@@ -81,7 +81,7 @@ cpdef int randint(int low=0, int high=1):
     return LPRand.randint(low, high)
 
 cpdef object choice(list choices):
-    cdef int numchoices = <int>len(choices)
+    cdef int numchoices = <int>len(choices)-1
     if numchoices < 1: 
         return None
     cdef int choice_index = LPRand.choice(numchoices)

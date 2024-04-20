@@ -44,7 +44,7 @@ typedef struct localctx_t {
     lpfloat_t selected_freqs[NUMFREQS];
 } localctx_t;
 
-void param_update_callback(void * arg) {
+int param_update_callback(void * arg) {
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
 
@@ -56,6 +56,7 @@ void param_update_callback(void * arg) {
     astrid_instrument_set_param_float_list(instrument, PARAM_FREQS, ctx->selected_freqs, NUMFREQS);
     astrid_instrument_set_param_float(instrument, PARAM_AMP, LPRand.rand(0.5f, 1.f));
     astrid_instrument_set_param_float(instrument, PARAM_PW, LPRand.rand(0.05f, 1.f));
+    return 0;
 }
 
 int renderer_callback(void * arg) {
@@ -63,7 +64,7 @@ int renderer_callback(void * arg) {
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
     out = LPBuffer.create(LPRand.randint(0, SR), instrument->channels, SR);
-    if(lpsampler_read_ringbuffer_block("pulsar-adc", 0, out->length, instrument->channels, out->data) < 0) {
+    if(lpsampler_read_ringbuffer_block(instrument->adcname, instrument->adcbuf, 0, out) < 0) {
         return -1;
     }
     LPFX.norm(out, LPRand.rand(0.26f, 0.5f));
@@ -75,7 +76,7 @@ int renderer_callback(void * arg) {
     return 0;
 }
 
-void audio_callback(size_t blocksize, __attribute__((unused)) float ** input, float ** output, void * arg) {
+int audio_callback(size_t blocksize, __attribute__((unused)) float ** input, float ** output, void * arg) {
     size_t i;
     int j;
     lpfloat_t freqs[NUMFREQS];
@@ -83,7 +84,7 @@ void audio_callback(size_t blocksize, __attribute__((unused)) float ** input, fl
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
 
-    if(!instrument->is_running) return;
+    if(!instrument->is_running) return 1;
 
     amp = astrid_instrument_get_param_float(instrument, PARAM_AMP, 0.08f);
     pw = astrid_instrument_get_param_float(instrument, PARAM_PW, 1.f);
@@ -121,6 +122,8 @@ void audio_callback(size_t blocksize, __attribute__((unused)) float ** input, fl
         output[0][i] += left;
         output[1][i] += right;
     }
+
+    return 0;
 }
 
 int main() {
@@ -153,8 +156,8 @@ int main() {
     }
 
     // Set the callbacks for streaming, async renders and param updates
-    if((instrument = astrid_instrument_start(NAME, CHANNELS, ADC_LENGTH, (void*)ctx, 
-                    audio_callback, renderer_callback, param_update_callback)) == NULL) {
+    if((instrument = astrid_instrument_start(NAME, CHANNELS, 0, ADC_LENGTH, (void*)ctx, 
+                    audio_callback, renderer_callback, param_update_callback, NULL)) == NULL) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }

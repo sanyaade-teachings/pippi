@@ -83,11 +83,6 @@
 
 #define ASTRID_DEVICEID_PATH "/tmp/astrid_device_id"
 
-typedef struct lpcounter_t {
-    int shmid;
-    int semid;
-} lpcounter_t;
-
 typedef struct lpmsgpq_node_t {
     double timestamp;
     lpmsg_t msg;
@@ -167,11 +162,13 @@ typedef struct lpinstrument_t {
     char datapath[PATH_MAX]; 
 
     // The adc ringbuf name
-    char adc_name[PATH_MAX];
+    char adcname[PATH_MAX];
+    lpbuffer_t * adcbuf; // mmaped pointer to adcbuf
 
     // The instrument message q(s)
     char qname[NAME_MAX]; 
     char external_relay_name[NAME_MAX]; // just python, really 
+    int ext_relay_enabled;
     mqd_t msgq;
     mqd_t exmsgq;
     lpmsg_t msg;
@@ -196,14 +193,17 @@ typedef struct lpinstrument_t {
     // Optional local context struct for callbacks
     void * context;
 
+    // Trigger update callback
+    int (*trigger)(void * instrument);
+
     // Param update callback
-    void (*updates)(void * instrument);
+    int (*update)(void * instrument);
 
     // Async renderer callback (C-compat only)
     int (*renderer)(void * instrument);
 
     // Stream callback
-    void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument);
+    int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument);
 
     // Shutdown signal handler (SIGTERM & SIGKILL)
     void (*shutdown)(int sig);
@@ -217,9 +217,9 @@ void scheduler_destroy(lpscheduler_t * s);
 int lpscheduler_get_now_seconds(double * now);
 void scheduler_cleanup_nursery(lpscheduler_t * s);
 
-int lpcounter_create(lpcounter_t * c);
-ssize_t lpcounter_read_and_increment(lpcounter_t * c);
-int lpcounter_destroy(lpcounter_t * c);
+ssize_t lpcounter_create(char * name);
+ssize_t lpcounter_read_and_increment(char * name);
+int lpcounter_destroy(char * name);
 
 typedef struct lpdacctx_t {
     lpscheduler_t * s;
@@ -256,8 +256,8 @@ typedef struct lpastridctx_t {
 
 
 
-unsigned char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg); 
-lpbuffer_t * deserialize_buffer(char * str, lpmsg_t * msg); 
+unsigned char * serialize_buffer(lpbuffer_t * buf, lpmsg_t * msg, size_t * strsize); 
+lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg); 
 
 int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg);
 int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg);
@@ -299,11 +299,12 @@ int lpserial_getctl(int device_id, int ctl, lpfloat_t * value);
 int astrid_get_playback_device_id();
 int astrid_get_capture_device_id();
 
-int lpsampler_aquire(char * name, lpbuffer_t ** buf);
+lpbuffer_t * lpsampler_aquire_and_map(char * name);
+int lpsampler_aquire(char * name);
 int lpsampler_release(char * name);
-int lpsampler_read_ringbuffer_block(char * name, size_t offset_in_frames, size_t length_in_frames, int channels, lpfloat_t * out);
-int lpsampler_write_ringbuffer_block(char * name, float ** block, int channels, size_t blocksize_in_frames);
-int lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate);
+int lpsampler_read_ringbuffer_block(char * name, lpbuffer_t * buf, size_t offset_in_frames, lpbuffer_t * out);
+int lpsampler_write_ringbuffer_block(char * name, lpbuffer_t * buf, float ** block, int channels, size_t blocksize_in_frames);
+lpbuffer_t * lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate);
 int lpsampler_destroy(char * name);
 
 int lpipc_setid(char * path, int id); 
@@ -317,7 +318,7 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-lpinstrument_t * astrid_instrument_start(char * name, int channels, double adc_length, void * ctx, void (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), void (*updates)(void * instrument));
+lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument), int (*trigger)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
