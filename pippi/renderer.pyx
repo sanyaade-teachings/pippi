@@ -8,7 +8,7 @@ import logging
 from logging.handlers import SysLogHandler
 import importlib
 import importlib.util
-from multiprocessing import Process
+from multiprocessing import Process, SimpleQueue
 import os
 from pathlib import Path
 import platform
@@ -25,6 +25,7 @@ cimport cython
 from pippi import dsp, midi, ugens
 from pippi.soundbuffer cimport SoundBuffer
 
+NUM_COMRADES = 4
 
 class InstrumentError(Exception):
     pass
@@ -640,32 +641,39 @@ cdef int trigger_events(Instrument instrument):
 
     return 0
 
+def render_executor(Instrument instrument, object q, int comrade_id):
+    cdef size_t last_edit
+    cdef double start=0, end=0
 
-cdef int astrid_schedule_python_render(Instrument instrument) except -1:
-    cdef size_t last_edit = os.path.getmtime(instrument.path)
-    cdef int render_result
-    cdef double start = 0
-    cdef double end = 0
+    # Prevent multiple processes from sharing the same seed
+    dsp.seed(time.time() + comrade_id)
 
-    if lpscheduler_get_now_seconds(&start) < 0:
-        logger.exception('Error getting now seconds')
-        return 1
+    while instrument.i.is_running:
+        msg = q.get()
 
-    # Reload instrument
-    if last_edit > instrument.last_reload:
-        instrument.reload()
-        instrument.last_reload = last_edit
+        if msg is None:
+            logger.info('Renderer comrade %d shutting down' % comrade_id)
+            break
 
-    render_result = render_event(instrument)
+        last_edit = os.path.getmtime(instrument.path)
+        if last_edit > instrument.last_reload:
+            instrument.reload()
+            instrument.last_reload = last_edit
 
-    if lpscheduler_get_now_seconds(&end) < 0:
-        logger.exception('Error getting now seconds')
-        return 1
+        if lpscheduler_get_now_seconds(&start) < 0:
+            logger.exception('Error getting now seconds')
+            return
 
-    instrument.max_processing_time = max(instrument.max_processing_time, end - start)
-    #logger.info('%s render time: %f seconds' % (instrument.name, end - start))
+        if render_event(instrument) < 0:
+            logger.exception('Error trying to execute python render...')
+            return
 
-    return render_result
+        if lpscheduler_get_now_seconds(&end) < 0:
+            logger.exception('Error getting now seconds')
+            return
+
+        instrument.max_processing_time = max(instrument.max_processing_time, end - start)
+        logger.info('%s render time: %f seconds' % (instrument.name, end - start))
 
 
 cdef int astrid_schedule_python_triggers(Instrument instrument) except -1:
@@ -682,13 +690,19 @@ cdef int astrid_schedule_python_triggers(Instrument instrument) except -1:
         logger.exception('Error during scheduling of python triggers: %s' % e)
         return -1
 
-def _run_forever(Instrument instrument, str script_path, str instrument_name, int channels, double adc_length):
+def _run_forever(Instrument instrument, 
+        str script_path, 
+        str instrument_name, 
+        int channels, 
+        double adc_length,
+        object q
+    ):
     cdef lpmsg_t msg
 
     logger.info(f'running forever... {script_path=} {instrument_name=}')
 
     while True:
-        logger.info('reading messages...')
+        logger.info('waiting for a message...')
         try:
             msg = instrument.get_message()
         except InstrumentError as e:
@@ -697,6 +711,8 @@ def _run_forever(Instrument instrument, str script_path, str instrument_name, in
 
         if msg.type == LPMSG_SHUTDOWN:
             logger.info('PY MSG: shutdown')
+            for _ in range(NUM_COMRADES):
+                q.put(None)
             break
 
         elif msg.type == LPMSG_UPDATE:
@@ -706,8 +722,7 @@ def _run_forever(Instrument instrument, str script_path, str instrument_name, in
 
         elif msg.type == LPMSG_PLAY:
             logger.info('PY MSG: play')
-            if astrid_schedule_python_render(instrument) < 0:
-                logger.error('Error trying to schedule python render...')
+            q.put(1)
 
         elif msg.type == LPMSG_TRIGGER:
             logger.info('PY MSG: trigger')
@@ -715,6 +730,7 @@ def _run_forever(Instrument instrument, str script_path, str instrument_name, in
                 logger.error('Error trying to schedule python triggers...')
 
         elif msg.type == LPMSG_LOAD:
+            # FIXME pass this along to the comrades
             try:
                 if instrument is None:
                     instrument = Instrument(instrument_name, script_path, channels, adc_length)
@@ -744,8 +760,15 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
         logger.error('Error trying to start instrument. Shutting down...')
         return
 
-    render_process = Process(target=_run_forever, args=(instrument, script_path, instrument_name, channels, adc_length))
-    render_process.start()
+    render_pool = []
+    render_q = SimpleQueue()
+    for i in range(NUM_COMRADES):
+        comrade = Process(target=render_executor, args=(instrument, render_q, i))
+        comrade.start()
+        render_pool += [ comrade ]
+
+    message_process = Process(target=_run_forever, args=(instrument, script_path, instrument_name, channels, adc_length, render_q))
+    message_process.start()
 
     try:
         while instrument.i.is_running:
@@ -759,6 +782,8 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
     except KeyboardInterrupt as e:
         print('Got keyboard interrupt')
 
-    print('Waiting for the render process to complete')
-    render_process.join()
+    print('Waiting for the render processes to complete')
+    message_process.join()
+    for r in render_pool:
+        r.join()
     print('All done!')

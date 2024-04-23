@@ -3203,7 +3203,7 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
     cmdline = linenoise("^_- ");
 
     if(cmdline == NULL) {
-        if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
+        scheduler_cleanup_nursery(instrument->async_mixer);
         return 0;
     }
 
@@ -3234,7 +3234,7 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
     }
 
     /* free buffers that are done playing */
-    if(instrument->renderer != NULL) scheduler_cleanup_nursery(instrument->async_mixer);
+    scheduler_cleanup_nursery(instrument->async_mixer);
 
     if(instrument->cmd.type == LPMSG_SHUTDOWN) instrument->is_running = 0;
 
