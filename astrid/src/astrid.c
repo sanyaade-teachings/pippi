@@ -1,6 +1,7 @@
 #include "astrid.h"
 
 static volatile int * astrid_instrument_is_running;
+static pthread_mutex_t astrid_nursery_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void handle_instrument_shutdown(__attribute__((unused)) int sig) {
     *astrid_instrument_is_running = 0;
@@ -1957,10 +1958,10 @@ void ll_display(lpevent_t * head) {
     if(head) {
         current = head;
         while(current->next != NULL) {
-            printf("    e%d onset: %d pos: %d length: %d\n", (int)current->id, (int)current->onset, (int)current->pos, (int)current->buf->length);
+            syslog(LOG_DEBUG, "    e%ld onset: %ld pos: %ld length: %ld\n", current->id, current->onset, current->pos, current->buf->length);
             current = (lpevent_t *)current->next;        
         }
-        printf("    e%d onset: %d pos: %d length: %d\n", (int)current->id, (int)current->onset, (int)current->pos, (int)current->buf->length);
+        syslog(LOG_DEBUG, "    e%ld onset: %ld pos: %ld length: %ld\n", current->id, current->onset, current->pos, current->buf->length);
     }
 }
 
@@ -2001,6 +2002,8 @@ static inline void start_playing(lpscheduler_t * s, lpevent_t * e) {
     lpevent_t * current;
     lpevent_t * prev;
 
+    syslog(LOG_INFO, "START playing event ID %ld\n", e->id);
+
     /* Remove from the waiting queue */
     if(s->waiting_queue_head == NULL) {
         printf("Cannot move this event. There is nothing in the waiting queue!\n");
@@ -2036,6 +2039,8 @@ static inline void stop_playing(lpscheduler_t * s, lpevent_t * e) {
     lpevent_t * current;
     lpevent_t * prev;
 
+    syslog(LOG_INFO, "STOP playing event ID %ld\n", e->id);
+
     /* Remove from the playing stack */
     if(s->playing_stack_head == NULL) {
         syslog(LOG_CRIT, "Cannot move this event. There is nothing in the waiting queue!\n");
@@ -2058,6 +2063,10 @@ static inline void stop_playing(lpscheduler_t * s, lpevent_t * e) {
     current->next = NULL;
 
     /* Add to the tail of the garbage stack */
+    if(pthread_mutex_lock(&astrid_nursery_lock) != 0) {
+        syslog(LOG_ERR, "Error getting lock on nursery mutex\n");
+        return;
+    }
     if(s->nursery_head == NULL) {
         s->nursery_head = e;
     } else {
@@ -2066,6 +2075,10 @@ static inline void stop_playing(lpscheduler_t * s, lpevent_t * e) {
             current = (lpevent_t *)current->next;
         }
         current->next = (void *)e;
+    }
+    if(pthread_mutex_unlock(&astrid_nursery_lock) != 0) {
+        syslog(LOG_ERR, "Error getting lock on nursery mutex\n");
+        return;
     }
 }
 
@@ -2179,24 +2192,24 @@ static inline void scheduler_advance_buffers(lpscheduler_t * s) {
 
 void scheduler_debug(lpscheduler_t * s) {
     if(s->waiting_queue_head) {
-        printf("%d waiting\n", ll_count(s->waiting_queue_head));
+        syslog(LOG_DEBUG, "%d waiting\n", ll_count(s->waiting_queue_head));
         ll_display(s->waiting_queue_head);
     } else {
-        printf("none waiting\n");
+        syslog(LOG_DEBUG, "none waiting\n");
     }
 
     if(s->playing_stack_head) {
-        printf("%d playing\n", ll_count(s->playing_stack_head));
+        syslog(LOG_DEBUG, "%d playing\n", ll_count(s->playing_stack_head));
         ll_display(s->playing_stack_head);
     } else {
-        printf("none playing\n");
+        syslog(LOG_DEBUG, "none playing\n");
     }
 
     if(s->nursery_head) {
-        printf("%d done\n\n", ll_count(s->nursery_head));
+        syslog(LOG_DEBUG, "%d done\n\n", ll_count(s->nursery_head));
         ll_display(s->nursery_head);
     } else {
-        printf("none done\n");
+        syslog(LOG_DEBUG, "none done\n");
     }
 }
 
@@ -2224,6 +2237,7 @@ void lpscheduler_tick(lpscheduler_t * s) {
 void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t onset_delay) {
     lpevent_t * e;
 
+    /*
     if(s->nursery_head != NULL) {
         e = s->nursery_head;
         s->nursery_head = (void *)e->next;
@@ -2235,13 +2249,20 @@ void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t onset_
         e->onset = 0;
         e->callback_onset = 0;
     }
+    */
+    e = (lpevent_t *)LPMemoryPool.alloc(1, sizeof(lpevent_t));
+    s->event_count += 1;
+    e->id = s->event_count;
+    e->onset = 0;
+    e->callback_onset = 0;
 
     e->buf = buf;
     e->pos = 0;
     e->onset = s->ticks + onset_delay;
 
-    syslog(LOG_INFO, "scheduler got buffer with onset %d\n", (int)e->onset);
-    syslog(LOG_INFO, "scheduler got buffer value 10 %f\n", (float)buf->data[10]);
+    syslog(LOG_INFO, "scheduling event ID %ld\n", e->id);
+    syslog(LOG_INFO, "scheduler got buffer with onset %ld\n", e->onset);
+    syslog(LOG_INFO, "scheduler got buffer value 10 %f\n", buf->data[10]);
 
     start_waiting(s, e);
 }
@@ -2305,20 +2326,42 @@ void scheduler_destroy(lpscheduler_t * s) {
     LPMemoryPool.free(s);
 }
 
-void scheduler_cleanup_nursery(lpscheduler_t * s) {
-    /* Loop over nursey and free buffers */
+int scheduler_cleanup_nursery(lpscheduler_t * s) {
+    /* Loop over nursery and free buffers */
     lpevent_t * current;
+    lpevent_t * next;
 
-    if(s->nursery_head != NULL) {
-        current = s->nursery_head;
-        while(current != NULL && current->next != NULL) {
-            if(current->buf != NULL) {
-                LPBuffer.destroy(current->buf);
-                current->buf = NULL;
-            }
-            current = (lpevent_t *)current->next;        
-        }
+    if(s->nursery_head == NULL) return 0;
+
+    if(pthread_mutex_lock(&astrid_nursery_lock) != 0) {
+        syslog(LOG_ERR, "Error getting lock on nursery mutex\n");
+        return -1;
     }
+
+    current = s->nursery_head;
+    while(current->next != NULL) {
+        next = (lpevent_t *)current->next;
+        syslog(LOG_INFO, "freeing event ID %ld\n", current->id);
+        LPBuffer.destroy(current->buf);
+        free(current);
+        current = next;        
+    }
+
+    if(current != NULL) {
+        syslog(LOG_INFO, "freeing event ID %ld\n", current->id);
+        LPBuffer.destroy(current->buf);
+        free(current);
+    }
+
+    s->nursery_head = NULL;
+
+    if(pthread_mutex_unlock(&astrid_nursery_lock) != 0) {
+        syslog(LOG_ERR, "Error releasing lock on nursery mutex\n");
+        return -1;
+    }
+
+    //scheduler_debug(s);
+    return 0;
 }
 
 int send_serial_message(lpmsg_t msg, char * tty) {
@@ -2374,12 +2417,10 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     }
 
     /* mix in async renders */
-    if(instrument->async_mixer != NULL) {
-        for(i=0; i < (size_t)nframes; i++) {
-            lpscheduler_tick(instrument->async_mixer);
-            for(c=0; c < instrument->channels; c++) {
-                output_channels[c][i] += instrument->async_mixer->current_frame[c];
-            }
+    for(i=0; i < (size_t)nframes; i++) {
+        lpscheduler_tick(instrument->async_mixer);
+        for(c=0; c < instrument->channels; c++) {
+            output_channels[c][i] += instrument->async_mixer->current_frame[c];
         }
     }
 
@@ -2540,6 +2581,23 @@ int relay_message_to_seq(lpinstrument_t * instrument) {
     return 0;
 }
 
+void * instrument_cleanup_thread(void * arg) {
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+    /* free buffers that are done playing */
+    while(instrument->is_running) {
+        if(scheduler_cleanup_nursery(instrument->async_mixer) < 0) {
+            syslog(LOG_ERR, "%s cleanup thread: Could not cleanup nursery. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+        }
+        usleep((useconds_t)10000);
+    }
+
+    if(scheduler_cleanup_nursery(instrument->async_mixer) < 0) {
+        syslog(LOG_ERR, "%s cleanup thread: Could not cleanup nursery. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+    }
+
+    return NULL;
+}
+
 void * instrument_message_thread(void * arg) {
     lpmsg_t bufmsg = {0}; // the message serialized along with the async buffer...
     lpbuffer_t * buf; // async renders: FIXME, do renders in a thread if possible... or fork out early for the python interpreter maybe?
@@ -2626,6 +2684,7 @@ void * instrument_message_thread(void * arg) {
                 /* Schedule the buffer for playback */
                 syslog(LOG_INFO, "RENDER COMPLETE: scheduling buffer with value 10 %f\n", buf->data[10]);
                 scheduler_schedule_event(instrument->async_mixer, buf, 0);
+                //scheduler_debug(instrument->async_mixer);
                 break;
 
             case LPMSG_UPDATE:
@@ -2808,15 +2867,7 @@ lpinstrument_t * astrid_instrument_start(
         goto astrid_instrument_shutdown_with_error;
     }
 
-    /* init scheduler
-     * 
-     * The scheduler is shared between the miniaudio callback 
-     * and astrid buffer feed threads. The buffer feed thread 
-     * may schedule buffers by adding them to the internal linked 
-     * list in the scheduler. The miniaudio callback may read from 
-     * the linked list, increment counts in playing buffers and 
-     * flag buffers as having playback completed. 
-     **/
+    /* init scheduler */
     instrument->async_mixer = scheduler_create(1, instrument->channels, instrument->samplerate);
 
     /* Set the main jack callback which always runs: maybe there is an analysis-only use to support too? */
@@ -2908,6 +2959,12 @@ lpinstrument_t * astrid_instrument_start(
         return NULL;
     }
 
+    /* start the cleanup thread */
+    if(pthread_create(&instrument->cleanup_thread, NULL, instrument_cleanup_thread, (void*)instrument) != 0) {
+        syslog(LOG_ERR, "Could not initialize instrument cleanup thread. Error: %s\n", strerror(errno));
+        return NULL;
+    }
+
     /* setup linenoise repl */
     linenoiseHistoryLoad("history.txt"); // FIXME this goes in the instrument config dir / or share?
 
@@ -2946,6 +3003,14 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
         if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
         if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
         syslog(LOG_ERR, "Error while attempting to join with message scheduler pq thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
+    }
+
+    syslog(LOG_DEBUG, "Joining with cleanup thread...\n");
+    if((ret = pthread_join(instrument->cleanup_thread, NULL)) != 0) {
+        if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
+        if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
+        if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
+        syslog(LOG_ERR, "Error while attempting to join with cleanup thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
     }
 
     syslog(LOG_DEBUG, "Closing instrument message queue...\n");
@@ -3203,7 +3268,6 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
     cmdline = linenoise("^_- ");
 
     if(cmdline == NULL) {
-        scheduler_cleanup_nursery(instrument->async_mixer);
         return 0;
     }
 
@@ -3232,9 +3296,6 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
             return -1;
         }
     }
-
-    /* free buffers that are done playing */
-    scheduler_cleanup_nursery(instrument->async_mixer);
 
     if(instrument->cmd.type == LPMSG_SHUTDOWN) instrument->is_running = 0;
 

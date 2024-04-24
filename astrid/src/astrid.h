@@ -180,6 +180,7 @@ typedef struct lpinstrument_t {
     int pqnode_index;
 
     // Thread refs
+    pthread_t cleanup_thread;
     pthread_t message_feed_thread;
     pthread_t message_scheduler_pq_thread;
     lpscheduler_t * async_mixer;
@@ -215,7 +216,7 @@ void lpscheduler_tick(lpscheduler_t * s);
 lpscheduler_t * scheduler_create(int, int, lpfloat_t);
 void scheduler_destroy(lpscheduler_t * s);
 int lpscheduler_get_now_seconds(double * now);
-void scheduler_cleanup_nursery(lpscheduler_t * s);
+int scheduler_cleanup_nursery(lpscheduler_t * s);
 
 ssize_t lpcounter_create(char * name);
 ssize_t lpcounter_read_and_increment(char * name);
