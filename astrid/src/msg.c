@@ -13,7 +13,7 @@ int main(int argc, char * argv[]) {
     syslog(LOG_DEBUG, "             %d (msg.type)\n", (int)msg.type);
 
     if(msg.type == LPMSG_SERIAL) {
-        if(send_serial_message(msg, msg.instrument_name) < 0) {
+        if(send_serial_message(msg) < 0) {
             fprintf(stderr, "astrid-msg: Could not send serial message...\n");
             return 1;
         }

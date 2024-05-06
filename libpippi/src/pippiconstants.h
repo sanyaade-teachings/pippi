@@ -107,6 +107,24 @@ enum LPMessageFlags {
     NUM_LPMESSAGEFLAGS
 };
 
+enum LPParamTypes {
+    LPPARAM_STRING,
+    LPPARAM_INT,
+    LPPARAM_SIZE_T,
+    LPPARAM_FLOAT,
+    LPPARAM_DOUBLE,
+    NUM_LPPARAMTYPES,
+};
+
+#define PLAY_MESSAGE 'p'
+#define UPDATE_MESSAGE 'u'
+#define TRIGGER_MESSAGE 't'
+#define SERIAL_MESSAGE 'b'
+#define SCHEDULE_MESSAGE 's'
+#define LOAD_MESSAGE 'l'
+#define SHUTDOWN_MESSAGE 'q'
+#define SET_COUNTER_MESSAGE 'v'
+
 enum LPMessageTypes {
     LPMSG_EMPTY,
     LPMSG_PLAY,

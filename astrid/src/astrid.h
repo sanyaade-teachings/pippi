@@ -58,15 +58,6 @@
 #define LPKEY_MAXLENGTH 4096
 #define ASTRID_MAX_CMDLINE 4096
 
-#define PLAY_MESSAGE 'p'
-#define UPDATE_MESSAGE 'u'
-#define TRIGGER_MESSAGE 't'
-#define SERIAL_MESSAGE 'b'
-#define SCHEDULE_MESSAGE 's'
-#define LOAD_MESSAGE 'l'
-#define SHUTDOWN_MESSAGE 'q'
-#define SET_COUNTER_MESSAGE 'v'
-
 #ifndef NOTE_ON
 #define NOTE_ON 144
 #endif
@@ -108,6 +99,20 @@ typedef struct lpmidievent_t {
     char bank_lsb;
     char channel;
 } lpmidievent_t;
+
+enum SerialMessageTypes {
+    SMSG_EMPTY,
+    SMSG_MOTOR_SPEED,
+    SMSG_SOLENOID_TRIGGER,
+    SMSG_UNKNOWN,
+    NUM_SERIALMSGTYPES
+};
+
+typedef struct lpserialmsg_t {
+    uint16_t type;
+    uint16_t id;
+    float value;
+} lpserialmsg_t;
 
 /* These events are what is stored in the 
  * scheduler's linked lists where it tracks 
@@ -168,9 +173,11 @@ typedef struct lpinstrument_t {
     // The instrument message q(s)
     char qname[NAME_MAX]; 
     char external_relay_name[NAME_MAX]; // just python, really 
+    char serial_message_q_name[NAME_MAX]; 
     int ext_relay_enabled;
     mqd_t msgq;
     mqd_t exmsgq;
+    mqd_t serialmsgq;
     lpmsg_t msg;
     lpmsg_t cmd;
 
@@ -182,6 +189,7 @@ typedef struct lpinstrument_t {
     // Thread refs
     pthread_t cleanup_thread;
     pthread_t message_feed_thread;
+    pthread_t serial_listener_thread;
     pthread_t message_scheduler_pq_thread;
     lpscheduler_t * async_mixer;
     lpbuffer_t * lastbuf;
@@ -266,8 +274,9 @@ int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg);
 ssize_t astrid_get_voice_id();
 
 int send_message(char * qname, lpmsg_t msg);
-int send_serial_message(lpmsg_t msg, char * tty);
+int encode_serial_msg(lpmsg_t * msg);
 int send_play_message(lpmsg_t msg);
+int send_serial_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);
 
 mqd_t astrid_playq_open(const char * instrument_name);

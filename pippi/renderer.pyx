@@ -82,7 +82,7 @@ cdef class MessageEvent:
             str instrument_name,
             int msgtype,
             str params,
-            double max_processing_time
+            double max_processing_time,
         ):
         cdef size_t onset_frames = 0
 
@@ -108,8 +108,6 @@ cdef class MessageEvent:
 
     cpdef int schedule(MessageEvent self, double now):
         self.msg.initiated = now
-        if self.msg.type == LPMSG_SERIAL:
-            return send_serial_message(self.msg[0], self.msg.instrument_name)
         return send_play_message(self.msg[0])
 
     def __dealloc__(self):

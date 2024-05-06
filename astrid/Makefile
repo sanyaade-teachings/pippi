@@ -86,12 +86,15 @@ astrid-voicestatus:
 	echo "Building astrid voice status...";
 	gcc $(LPFLAGS) -DLPSESSIONDB $(LPINCLUDES) $(LPDBINCLUDES) $(LPSOURCES) $(LPDBSOURCES) src/astrid.c src/voicestatus.c $(LPLIBS) -lncurses -o build/astrid-voicestatus
 
-astrid-seriallistener:
+astrid-serial-tools:
 	mkdir -p build
 
 	echo "Building astrid serial listener & friends...";
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/seriallistener.c $(LPLIBS) -o build/astrid-seriallistener
 	gcc $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/msgarg.c $(LPLIBS) -o build/astrid-msgarg
+
+	#echo "Building astrid serial parser test program...";
+	#$(CC) $(LPFLAGS) -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/serialparser.c $(LPLIBS) -o build/astrid-serialparser
 
 astrid-bufstr:
 	mkdir -p build
@@ -105,6 +108,7 @@ astrid-pulsar:
 	echo "Building astrid pulsar...";
 
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar2.c $(LPLIBS) -o build/astrid-pulsar2
 
 astrid-simple:
 	mkdir -p build
@@ -113,7 +117,7 @@ astrid-simple:
 	#$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/astrid-simple
 
 
-build: clean astrid-q astrid-seriallistener astrid-ipc astrid-devices astrid-midimap astrid-pulsar astrid-simple
+build: clean astrid-q astrid-serial-tools astrid-ipc astrid-devices astrid-midimap astrid-pulsar astrid-simple
 
 install: 
 	cp build/astrid-* /usr/local/bin/

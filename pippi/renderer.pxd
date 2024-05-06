@@ -161,8 +161,9 @@ cdef extern from "astrid.h":
     int astrid_instrument_tick(lpinstrument_t * instrument)
     void scheduler_cleanup_nursery(lpscheduler_t * s)
     int relay_message_to_seq(lpinstrument_t * instrument)
+    int send_message(char * qname, lpmsg_t msg)
     int send_play_message(lpmsg_t msg)
-    int send_serial_message(lpmsg_t msg, char * tty);
+    int send_serial_message(lpmsg_t msg)
 
 cdef class MessageEvent:
     cdef lpmsg_t * msg

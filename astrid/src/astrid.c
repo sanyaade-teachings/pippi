@@ -1471,6 +1471,11 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
     /* cleanup the bufstr shared memory*/
     LPMemoryPool.free(str);
 
+    /* unmap the shared memory */
+    if(munmap(shmaddr, statbuf.st_size) < 0) {
+        syslog(LOG_ERR, "deserialize_buffer munmap. Error: %s\n", strerror(errno));
+        return NULL;
+    }
 
     /* Unlink the shared memory buffer */
     if(shm_unlink(buffer_code) < 0) {
@@ -1519,6 +1524,41 @@ int send_play_message(lpmsg_t msg) {
 
     return 0;
 }
+
+// FIXME this is dumb...
+int send_serial_message(lpmsg_t msg) {
+    mqd_t mqd;
+    char qname[NAME_MAX] = {0};
+    struct mq_attr attr;
+
+    attr.mq_maxmsg = ASTRID_MQ_MAXMSG;
+    attr.mq_msgsize = sizeof(lpmsg_t);
+
+    snprintf(qname, NAME_MAX, "/%s-serial-msgq", msg.instrument_name);
+
+    if(encode_serial_msg(&msg) < 0) {
+        syslog(LOG_ERR, "Error encoding serial message: (%d) %s\n", errno, strerror(errno));
+        return -1;
+    }
+
+    if((mqd = mq_open(qname, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
+        syslog(LOG_ERR, "send_serial_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(mq_send(mqd, (char *)(&msg), sizeof(lpmsg_t), 0) < 0) {
+        syslog(LOG_ERR, "send_serial_message mq_send: Error allocing during message write. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    if(mq_close(mqd) == -1) {
+        syslog(LOG_ERR, "send_serial_message close: Error closing play queue. Error: %s\n", strerror(errno));
+        return -1; 
+    }
+
+    return 0;
+}
+
 
 int send_message(char * qname, lpmsg_t msg) {
     mqd_t mqd;
@@ -1755,6 +1795,7 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
 }
 
 int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg) {
+    // FIXME it's all silly, silly, silly
     int tokenlength, voice_id=0;
     char *token, *save=NULL;
     char msgtype;
@@ -2364,29 +2405,6 @@ int scheduler_cleanup_nursery(lpscheduler_t * s) {
     return 0;
 }
 
-int send_serial_message(lpmsg_t msg, char * tty) {
-    int fp;
-    ssize_t bytes_written;
-
-    if((fp = open(tty, O_WRONLY)) < 0) {
-        syslog(LOG_CRIT, "Could not open %s for writing\n", tty);
-        return -1;
-    }
-
-    if((bytes_written = write(fp, msg.msg, strlen(msg.msg))) < 0) {
-        syslog(LOG_CRIT, "Could not write serial msg %s\n", msg.msg);
-        close(fp);
-        return -1;
-    }
-
-    if(close(fp) < 0) {
-        syslog(LOG_CRIT, "Could not close serial connection %s\n", msg.instrument_name);
-        return -1;
-    }
-
-    return 0;
-}
-
 int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     float * output_channels[instrument->channels];
@@ -2610,7 +2628,7 @@ void * instrument_message_thread(void * arg) {
         if(astrid_msgq_read(instrument->msgq, &instrument->msg) == (mqd_t) -1) {
             syslog(LOG_ERR, "%s renderer: Could not read message from playq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             usleep((useconds_t)10000);
-            return NULL;
+            return 0;
         }
 
         is_scheduled = ((instrument->msg.flags & LPFLAG_IS_SCHEDULED) == LPFLAG_IS_SCHEDULED);
@@ -2634,6 +2652,10 @@ void * instrument_message_thread(void * arg) {
                 if(send_message(instrument->external_relay_name, instrument->msg) < 0) {
                     syslog(LOG_ERR, "Could not relay message\n");
                 }
+            }
+
+            if(send_serial_message(instrument->msg) < 0) {
+                syslog(LOG_ERR, "Could not relay serial message\n");
             }
 
             break;
@@ -2707,6 +2729,13 @@ void * instrument_message_thread(void * arg) {
                 }
                 break;
 
+            case LPMSG_SERIAL:
+                syslog(LOG_DEBUG, "C MSG: serial\n");
+                if(send_serial_message(instrument->msg) < 0) {
+                    syslog(LOG_ERR, "Could not send serial message...\n");
+                }
+                break;
+
             case LPMSG_LOAD:
                 // it would be interesting to explore live reloading of C modules
                 // in the tradition of CLIVE, but at the moment only python handles these
@@ -2755,6 +2784,145 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
         syslog(LOG_ERR, "Could not initialize message scheduler pq thread. Error: %s\n", strerror(errno));
         return -1;
     }
+
+    return 0;
+}
+
+// FIXME this is a bit weird...? Break out the param parser into something more general and 
+// think about if wrapping messages like this is needed?
+int encode_serial_msg(lpmsg_t * msg) {
+    char c=0, lastc=SPACE;
+    char token[100] = {0}; // 100 chars is prolly enough for single precision floats
+    int scan_pos=0, token_chars_read=0, token_count=0;
+    uint8_t type=0, id=0;
+    float value = 0.f;
+    lpserialmsg_t smsg;
+
+    syslog(LOG_DEBUG, "Encoding msg.msg `%s` for serial transmission!\n", msg->msg);
+
+    int num_tokens = 3;
+    int parse_order[3] = {
+        LPPARAM_STRING, // The message type
+        LPPARAM_INT,    // The id
+        LPPARAM_FLOAT   // The value
+    };
+
+    c = msg->msg[scan_pos];
+    while(scan_pos < (int)LPMAXMSG && token_count < num_tokens) {
+        scan_pos += 1;
+
+        /* Prevent overflow on long-ass tokens */
+        if(token_chars_read >= 100) continue;
+
+        if((c == SPACE || c == '\0') && lastc != SPACE) {
+            token[token_chars_read] = '\0';
+            switch(parse_order[token_count]) {
+                case LPPARAM_STRING:
+                    // just look at the first char to determine the message type
+                    switch(token[0]) {
+                        case 'm':
+                            type = SMSG_MOTOR_SPEED;
+                            break;
+
+                        case 's':
+                            type = SMSG_SOLENOID_TRIGGER;
+                            break;
+
+                        default:
+                            type = SMSG_UNKNOWN;
+                            break;
+                    }
+                    break;
+
+                case LPPARAM_INT:
+                    id = atoi(token);
+                    break;
+
+                case LPPARAM_FLOAT:
+                    value = atof(token);
+                    break;
+
+                default:
+                    break;
+            }
+
+            token_chars_read = 0;
+            token_count += 1;
+        } else if(c != SPACE) {
+            token[token_chars_read] = c;
+            token_chars_read += 1;
+        }
+
+        if(c == '\0') break;
+        lastc = c;
+        c = msg->msg[scan_pos];
+    }
+
+    smsg.type = type;
+    smsg.id = id;
+    smsg.value = value;
+
+    syslog(LOG_DEBUG, "PARSER constructed message: type=%d id=%d value=%f\n", type, id, value);
+
+    if(memset(&msg->msg, 0, LPMAXMSG) == NULL) {
+        syslog(LOG_ERR, "%s encode_serial_msg: memset failure. Error: (%d) %s\n", msg->instrument_name, errno, strerror(errno));
+        return -1;
+    }
+
+    if(memcpy(&msg->msg, &smsg, sizeof(lpserialmsg_t)) == NULL) {
+        syslog(LOG_ERR, "%s encode_serial_msg: memcpy failure. Error: (%d) %s\n", msg->instrument_name, errno, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+void * instrument_serial_listener_thread(void * arg) {
+    struct termios options;
+    lpmsg_t msg = {0};
+    int tty=0, bytes_written=0;
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+
+    // Open the tty 
+    // TODO support multiple ttys, duuuh
+    tty = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+    if(tty < 0) {
+        syslog(LOG_ERR, "Problem connecting to TTY -- shutting down serial listener thread...\n");
+        return NULL;
+    }
+
+    tcgetattr(tty, &options);
+    cfsetispeed(&options, B1000000);
+    tcsetattr(tty, TCSANOW, &options);
+   
+    // create or open the serial message queue
+
+    while(instrument->is_running) {
+        // if there's a message on the queue, write it to the tty
+        if(astrid_msgq_read(instrument->serialmsgq, &msg) == (mqd_t) -1) {
+            syslog(LOG_ERR, "%s serial listener: Could not read message from the q. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+            usleep((useconds_t)10000);
+            continue;
+        }
+
+        if(msg.type == LPMSG_SHUTDOWN) break;
+
+        syslog(LOG_DEBUG, "Got a serial message! Writing it to the tty...\n");
+
+        bytes_written = write(tty, &msg.msg, sizeof(lpserialmsg_t));
+        if(bytes_written != sizeof(lpserialmsg_t)) {
+            syslog(LOG_ERR, "%s serial listener: unexpected number of bytes written to tty. (%d) Error: (%d) %s\n", instrument->name, bytes_written, errno, strerror(errno));
+            usleep((useconds_t)10000);
+            continue;
+        }
+
+        syslog(LOG_DEBUG, "Got a serial message! Wrote %d bytes to the tty...\n", bytes_written);
+
+        // TODO if there's something on the tty, relay it to the instrument queue
+    }
+
+    syslog(LOG_INFO, "%s serial listener: shutting down here!\n", instrument->name);
+    close(tty);
 
     return 0;
 }
@@ -2817,6 +2985,7 @@ lpinstrument_t * astrid_instrument_start(
 
     // Set the message q names
     snprintf(instrument->qname, NAME_MAX, "/%s-msgq", instrument->name);
+    snprintf(instrument->serial_message_q_name, NAME_MAX, "/%s-serial-msgq", instrument->name);
 
     if(instrument->ext_relay_enabled) {
         snprintf(instrument->external_relay_name, NAME_MAX, "/%s-extrelay-msgq", instrument->name);
@@ -2935,6 +3104,12 @@ lpinstrument_t * astrid_instrument_start(
     }
     syslog(LOG_DEBUG, "Opened message queue for %s with fd %d\n", instrument->name, instrument->msgq);
 
+    if((instrument->serialmsgq = astrid_msgq_open(instrument->serial_message_q_name)) == (mqd_t) -1) {
+        syslog(LOG_CRIT, "Could not open serial msgq for instrument %s. Error: %s\n", instrument->name, strerror(errno));
+        return NULL;
+    }
+    syslog(LOG_DEBUG, "Opened serial message queue for %s with fd %d\n", instrument->name, instrument->serialmsgq);
+
     if(instrument->ext_relay_enabled) {
         if((instrument->exmsgq = astrid_msgq_open(instrument->external_relay_name)) == (mqd_t) -1) {
             syslog(LOG_CRIT, "Could not open external message relay for instrument %s. Error: %s\n", instrument->name, strerror(errno));
@@ -2962,6 +3137,13 @@ lpinstrument_t * astrid_instrument_start(
     /* start the cleanup thread */
     if(pthread_create(&instrument->cleanup_thread, NULL, instrument_cleanup_thread, (void*)instrument) != 0) {
         syslog(LOG_ERR, "Could not initialize instrument cleanup thread. Error: %s\n", strerror(errno));
+        return NULL;
+    }
+
+    /* start the serial listener thread */
+    // TODO support multiple devices -- maybe just register them in the session?
+    if(pthread_create(&instrument->serial_listener_thread, NULL, instrument_serial_listener_thread, (void*)instrument) != 0) {
+        syslog(LOG_ERR, "Could not initialize serial listener thread. Error: %s\n", strerror(errno));
         return NULL;
     }
 
@@ -3013,8 +3195,22 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
         syslog(LOG_ERR, "Error while attempting to join with cleanup thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
     }
 
+    syslog(LOG_DEBUG, "Joining with serial listener thread...\n");
+    if((ret = pthread_join(instrument->serial_listener_thread, NULL)) != 0) {
+        if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
+        if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
+        if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
+        syslog(LOG_ERR, "Error while attempting to join with serial listener thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
+    }
+
     syslog(LOG_DEBUG, "Closing instrument message queue...\n");
     if(instrument->msgq != (mqd_t) -1) astrid_msgq_close(instrument->msgq);
+
+    syslog(LOG_DEBUG, "Closing serial message queue...\n");
+    if(instrument->serialmsgq != (mqd_t) -1) astrid_msgq_close(instrument->serialmsgq);
+
+    syslog(LOG_DEBUG, "Closing external message queue...\n");
+    if(instrument->exmsgq != (mqd_t) -1) astrid_msgq_close(instrument->exmsgq);
 
     syslog(LOG_DEBUG, "Stopping JACK...\n");
     for(c=0; c < instrument->channels; c++) {
@@ -3285,16 +3481,9 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
 
     free(cmdline);
 
-    if(instrument->cmd.type == LPMSG_SERIAL) {
-        if(send_serial_message(instrument->cmd, instrument->cmd.instrument_name) < 0) {
-            syslog(LOG_ERR, "Could not send serial message...\n");
-            return -1;
-        }
-    } else {
-        if(send_play_message(instrument->cmd) < 0) {
-            syslog(LOG_ERR, "Could not send play message...\n");
-            return -1;
-        }
+    if(send_play_message(instrument->cmd) < 0) {
+        syslog(LOG_ERR, "Could not send play message...\n");
+        return -1;
     }
 
     if(instrument->cmd.type == LPMSG_SHUTDOWN) instrument->is_running = 0;
