@@ -59,7 +59,7 @@
 #define PIPE_BUF 4096
 #endif
 
-#define LPMAXNAME 24
+#define LPMAXNAME 16
 #define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - (sizeof(uint16_t) * 2) - LPMAXNAME)
 
 
@@ -134,6 +134,7 @@ enum LPMessageTypes {
     LPMSG_SCHEDULE,
     LPMSG_LOAD,
     LPMSG_RENDER_COMPLETE,
+    LPMSG_DATA,
     LPMSG_SHUTDOWN,
     LPMSG_SET_COUNTER,
     NUM_LPMESSAGETYPES

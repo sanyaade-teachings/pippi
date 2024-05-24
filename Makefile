@@ -108,7 +108,8 @@ install:
 	rm -rf venv
 	python -m venv venv
 	./venv/bin/python -m ensurepip --upgrade
-	./venv/bin/pip install --upgrade pip wheel cython setuptools numpy
+	./venv/bin/pip install --upgrade setuptools
+	./venv/bin/pip install --upgrade pip wheel cython numpy
 	./venv/bin/pip install -r requirements.txt
 	git submodule update --init
 	cd modules/Soundpipe && make && sudo make install

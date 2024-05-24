@@ -5,7 +5,7 @@ from pippi.soundbuffer cimport SoundBuffer
 cdef extern from "stdbool.h":
     ctypedef bint bool
 
-cdef extern from "fft.h":
+cdef extern from "fft/fft.h":
     bool Fft_transform(double real[], double imag[], size_t n)
     bool Fft_inverseTransform(double real[], double imag[], size_t n)
     bool Fft_transformRadix2(double real[], double imag[], size_t n)

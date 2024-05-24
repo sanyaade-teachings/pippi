@@ -1,6 +1,7 @@
 #ifndef LPASTRID_H
 #define LPASTRID_H
 
+#include <ctype.h>
 #include <stdatomic.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -99,20 +100,6 @@ typedef struct lpmidievent_t {
     char bank_lsb;
     char channel;
 } lpmidievent_t;
-
-enum SerialMessageTypes {
-    SMSG_EMPTY,
-    SMSG_MOTOR_SPEED,
-    SMSG_SOLENOID_TRIGGER,
-    SMSG_UNKNOWN,
-    NUM_SERIALMSGTYPES
-};
-
-typedef struct lpserialmsg_t {
-    uint16_t type;
-    uint16_t id;
-    float value;
-} lpserialmsg_t;
 
 /* These events are what is stored in the 
  * scheduler's linked lists where it tracks 
@@ -273,8 +260,10 @@ int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg);
 
 ssize_t astrid_get_voice_id();
 
+int decode_update_message_param(lpmsg_t * msg, uint16_t * id, float * value);
+int encode_update_message_param(lpmsg_t * msg);
+
 int send_message(char * qname, lpmsg_t msg);
-int encode_serial_msg(lpmsg_t * msg);
 int send_play_message(lpmsg_t msg);
 int send_serial_message(lpmsg_t msg);
 int get_play_message(char * instrument_name, lpmsg_t * msg);

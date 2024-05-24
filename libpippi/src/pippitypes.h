@@ -86,6 +86,12 @@ typedef struct lpmsg_t {
     char instrument_name[LPMAXNAME];
 } lpmsg_t;
 
+typedef struct lpserialmsg_t {
+    uint32_t size; // when greater than 0, the following bytes have a data payload of `size`
+    uint16_t type; // corresponds to LPMessageTypes enum from libpippi
+    char instrument_name[LPMAXNAME]; // the instrument name, for message routing
+} lpserialmsg_t;
+
 typedef struct lparray_t {
     int * data;
     size_t length;

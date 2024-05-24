@@ -908,7 +908,8 @@ int lpmidi_getnote(int device_id, int note) {
     return lpipc_getid(note_path);
 }
 
-/* MIDI STATUS IPC
+
+/* SERIAL STATUS IPC
  * GETTERS & SETTERS
  * ****************/
 int lpserial_setctl(int device_id, int param_id, size_t value) {
@@ -1497,6 +1498,23 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
 /* MESSAGE
  * QUEUES
  * ******/
+
+int init_instrument_message(lpmsg_t * msg, char * instrument_name) {
+    memset(msg, 0, sizeof(lpmsg_t));
+    strncpy(msg->instrument_name, instrument_name, LPMAXNAME-1);
+    return 0; 
+}
+
+lpmsg_t * create_instrument_message(char * instrument_name) {
+    lpmsg_t * msg;
+    msg = LPMemoryPool.alloc(1, sizeof(lpmsg_t));
+    if(init_instrument_message(msg, instrument_name) < 0) {
+        return NULL;
+    }
+
+    return msg;
+}
+
 int send_play_message(lpmsg_t msg) {
     mqd_t mqd;
     char qname[NAME_MAX] = {0};
@@ -1536,10 +1554,12 @@ int send_serial_message(lpmsg_t msg) {
 
     snprintf(qname, NAME_MAX, "/%s-serial-msgq", msg.instrument_name);
 
-    if(encode_serial_msg(&msg) < 0) {
+    /*
+    if(encode_update_message_param(&msg) < 0) {
         syslog(LOG_ERR, "Error encoding serial message: (%d) %s\n", errno, strerror(errno));
         return -1;
     }
+    */
 
     if((mqd = mq_open(qname, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
         syslog(LOG_ERR, "send_serial_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
@@ -1709,40 +1729,73 @@ int astrid_get_capture_device_id() {
     return astrid_get_playback_device_id();
 }
 
-int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg) {
-    int bytesread, a, i, length, voice_id;
-    char msgtype;
-    char message_params[LPMAXMSG] = {0};
-    char instrument_name[LPMAXNAME] = {0};
-    size_t instrument_name_length;
+int extract_int_from_token(char * token, uint16_t * val) {
+    // FIXME this handles overflows when the token 
+    // is a number larger than long as an error, but 
+    // ignores overflows when larger than uint16_t...
+    char * end;
+    int result = 0;
 
-    voice_id = 0;
-    instrument_name_length = 0;
-    msgtype = argv[arg_offset + 1][0];
+    errno = 0;
+    result = strtol(token, &end, 0);
 
-    /* Prepare the message param string */
-    bytesread = 0;
-    for(a=arg_offset+2; a < argc; a++) {
-        length = strlen(argv[a]);
-        if(a==arg_offset+2) {
-            instrument_name_length = (size_t)length;
-            memcpy(instrument_name, argv[a], instrument_name_length);
-            continue;
-        }
+    if(errno != 0) return -1;
+    if(*end != '\0') return -1;
 
-        for(i=0; i < length; i++) {
-            message_params[bytesread] = argv[a][i];
-            bytesread++;
-        }
-        message_params[bytesread] = SPACE;
-        bytesread++;
+    *val = result;
+    return 0;
+}
+
+int extract_float_from_token(char * token, float * val) {
+    char * end;
+    float result = 0;
+
+    errno = 0;
+    result = strtof(token, &end);
+
+    if(errno != 0) return -1;
+    if(*end != '\0') return -1;
+
+    *val = result;
+    return 0;
+}
+
+int decode_update_message_param(lpmsg_t * msg, uint16_t * id, float * value) {
+    memcpy(id, msg->msg, sizeof(uint16_t));
+    memcpy(value, msg->msg + sizeof(uint16_t), sizeof(float));
+    return 0;
+}
+
+int encode_update_message_param(lpmsg_t * msg) {
+    char *token, *save=NULL;
+    char param_copy[LPMAXMSG] = {0};
+
+    uint16_t vali = 0;
+    float valf = 0.f;
+
+    memcpy(param_copy, msg->msg, LPMAXMSG);
+    token = strtok_r(param_copy, " ", &save);
+
+    if(extract_int_from_token(token, &vali) < 0) {
+        return -1;
+    } 
+
+    syslog(LOG_DEBUG, "ENCODE UPDATE got ID %d\n", vali);
+    memcpy(msg->msg, &vali, sizeof(uint16_t));
+
+    if(extract_float_from_token(token, &valf) == 0) {
+        return -1;
     }
 
-    /* Set up the message struct */
-    strncpy(msg->instrument_name, instrument_name, instrument_name_length);
-    strncpy(msg->msg, message_params, bytesread);
+    syslog(LOG_DEBUG, "ENCODE UPDATE got VALUE %f\n", valf);
+    memcpy(msg->msg + sizeof(uint16_t), &valf, sizeof(float));
+   
+    return 0;
+}
 
-    /* Set the message type from the first arg */
+int prepare_message_from_type(lpmsg_t * msg, char msgtype) {
+    int voice_id = 0;
+
     switch(msgtype) {
         case PLAY_MESSAGE:
             msg->type = LPMSG_PLAY;
@@ -1758,6 +1811,7 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
 
         case UPDATE_MESSAGE:
             msg->type = LPMSG_UPDATE;
+            encode_update_message_param(msg);
             break;
 
         case LOAD_MESSAGE:
@@ -1794,9 +1848,48 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
     return 0;
 }
 
+int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * msg) {
+    int bytesread, a, i, length;
+    char msgtype;
+    char message_params[LPMAXMSG] = {0};
+    char instrument_name[LPMAXNAME] = {0};
+    size_t instrument_name_length;
+
+    instrument_name_length = 0;
+    msgtype = argv[arg_offset + 1][0];
+
+    /* Prepare the message param string */
+    bytesread = 0;
+    for(a=arg_offset+2; a < argc; a++) {
+        length = strlen(argv[a]);
+        if(a==arg_offset+2) {
+            instrument_name_length = (size_t)length;
+            memcpy(instrument_name, argv[a], instrument_name_length);
+            continue;
+        }
+
+        for(i=0; i < length; i++) {
+            message_params[bytesread] = argv[a][i];
+            bytesread++;
+        }
+        message_params[bytesread] = SPACE;
+        bytesread++;
+    }
+
+    /* Set up the message struct */
+    strncpy(msg->instrument_name, instrument_name, instrument_name_length);
+    strncpy(msg->msg, message_params, bytesread);
+
+    if(prepare_message_from_type(msg, msgtype) < 0) {
+        syslog(LOG_ERR, "Could not prepare message of type %c: (%d) %s\n", msgtype, errno, strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
 int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg) {
-    // FIXME it's all silly, silly, silly
-    int tokenlength, voice_id=0;
+    int tokenlength;
     char *token, *save=NULL;
     char msgtype;
     char cmd_copy[LPMAXMSG] = {0};
@@ -1814,54 +1907,10 @@ int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg) 
     memset(msg->msg, 0, LPMAXMSG);
     strncpy(msg->msg, cmdline + tokenlength, cmdlength - tokenlength);
 
-    /* Set the message type from the first arg */
-    switch(msgtype) {
-        case PLAY_MESSAGE:
-            msg->type = LPMSG_PLAY;
-            break;
-
-        case TRIGGER_MESSAGE:
-            msg->type = LPMSG_TRIGGER;
-            break;
-
-        case SERIAL_MESSAGE:
-            msg->type = LPMSG_SERIAL;
-            break;
-
-        case UPDATE_MESSAGE:
-            msg->type = LPMSG_UPDATE;
-            break;
-
-        case LOAD_MESSAGE:
-            msg->type = LPMSG_LOAD;
-            break;
-
-        case SCHEDULE_MESSAGE:
-            msg->type = LPMSG_SCHEDULE;
-            break;
-
-        case SHUTDOWN_MESSAGE:
-            msg->type = LPMSG_SHUTDOWN;
-            break;
-
-        case SET_COUNTER_MESSAGE:
-            msg->type = LPMSG_SET_COUNTER;
-            break;
-
-        default:
-            syslog(LOG_CRIT, "Bad msgtype! %c\n", msgtype);
-            return -1;
-    }
-
-    /* Get the voice ID from the voice ID counter */
-    if((voice_id = lpcounter_read_and_increment("voiceid")) < 0) {
-        syslog(LOG_ERR, "Error getting voice ID: (%d) %s\n", errno, strerror(errno));
+    if(prepare_message_from_type(msg, msgtype) < 0) {
+        syslog(LOG_ERR, "Could not prepare message of type %c: (%d) %s\n", msgtype, errno, strerror(errno));
         return -1;
     }
-
-    /* Initialize the count and set the voice_id */
-    msg->count = 0;
-    msg->voice_id = voice_id;
 
     return 0;
 }
@@ -2731,6 +2780,8 @@ void * instrument_message_thread(void * arg) {
 
             case LPMSG_SERIAL:
                 syslog(LOG_DEBUG, "C MSG: serial\n");
+                // serial messages get relayed from here to the special serial Q, 
+                // and then written out to the tty in the serial listener thread...
                 if(send_serial_message(instrument->msg) < 0) {
                     syslog(LOG_ERR, "Could not send serial message...\n");
                 }
@@ -2788,8 +2839,8 @@ int astrid_instrument_seq_start(lpinstrument_t * instrument) {
     return 0;
 }
 
-// FIXME this is a bit weird...? Break out the param parser into something more general and 
-// think about if wrapping messages like this is needed?
+#if 0
+// This was fun to write but...
 int encode_serial_msg(lpmsg_t * msg) {
     char c=0, lastc=SPACE;
     char token[100] = {0}; // 100 chars is prolly enough for single precision floats
@@ -2876,11 +2927,36 @@ int encode_serial_msg(lpmsg_t * msg) {
 
     return 0;
 }
+#endif
+
+void log_byte_buffer(unsigned char * buf, size_t size) {
+    size_t i;
+    for(i=0; i < size; i++) {
+        if(buf[i] == '\n') {
+            syslog(LOG_DEBUG, "%ld: \\n\n", i);
+        } else if(buf[i] == '\r') {
+            syslog(LOG_DEBUG, "%ld: \\r\n", i);
+        } else if(buf[i] == '\t') {
+            syslog(LOG_DEBUG, "%ld: \\t\n", i);
+        } else if(isprint(buf[i])) {
+            syslog(LOG_DEBUG, "%ld: %c\n", i, buf[i]);
+        } else {
+            syslog(LOG_DEBUG, "%ld: \\x%02X\n", i, buf[i]);
+        }
+    }
+}
 
 void * instrument_serial_listener_thread(void * arg) {
     struct termios options;
+    unsigned char serialmsgbuf[sizeof(lpserialmsg_t)] = {0};
+    lpserialmsg_t header = {0};
+    unsigned char * payload;
+    unsigned char c;
+    unsigned char ready = 'c';
     lpmsg_t msg = {0};
-    int tty=0, bytes_written=0;
+    fd_set read_fds;
+    int tty, biggest_fd, bytes_written, bytes_read, tty_is_ready=0;
+    size_t bytes_in_buf=0;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
     // Open the tty 
@@ -2892,33 +2968,133 @@ void * instrument_serial_listener_thread(void * arg) {
     }
 
     tcgetattr(tty, &options);
-    cfsetispeed(&options, B1000000);
+    //cfsetispeed(&options, B1000000);
+    //cfsetospeed(&options, B1000000);
+    cfmakeraw(&options);
     tcsetattr(tty, TCSANOW, &options);
-   
-    // create or open the serial message queue
+
+    while(!tty_is_ready) {
+        // signal the tty we've connected
+        bytes_written = write(tty, &ready, 1);
+        if(bytes_written != 1) {
+            syslog(LOG_ERR, "%s serial listener: unexpected number of bytes written to tty. (%d) Error: (%d) %s\n", instrument->name, bytes_written, errno, strerror(errno));
+            return NULL;
+        }
+
+        bytes_read = read(tty, &c, 1);
+        syslog(LOG_ERR, "%s serial listener: got %d byte: %c. ready for messages.\n", instrument->name, bytes_read, c);
+        if(bytes_read < 0) {
+            syslog(LOG_ERR, "%s serial listener: Could not read header from the tty. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+            return NULL;
+        } 
+        if(c == 'c') {
+            syslog(LOG_ERR, "%s serial listener: got ready byte %c\n", instrument->name, c);
+            tty_is_ready = 1;
+        }
+    }
 
     while(instrument->is_running) {
-        // if there's a message on the queue, write it to the tty
-        if(astrid_msgq_read(instrument->serialmsgq, &msg) == (mqd_t) -1) {
-            syslog(LOG_ERR, "%s serial listener: Could not read message from the q. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+        // FIXME before calling select, check the session for new / removed ttys and close 
+        // or open their handles for reading/writing, setting them each in the fds collections.
+        // Also keep an array of tty_is_ready[1024] mapped fd=readyval since select only works 
+        // with max 1024 file descriptors anyway. And adapt the biggest fd calc on each loop...
+        
+        FD_ZERO(&read_fds);
+        FD_SET(instrument->serialmsgq, &read_fds);
+        FD_SET(tty, &read_fds);
+
+        // nfds should be the biggest fd + 1 ...
+        biggest_fd = (tty > instrument->serialmsgq ? tty : instrument->serialmsgq) + 1;
+
+        // Wait forever until something is ready for reading or writing
+        if(select(biggest_fd, &read_fds, NULL, NULL, NULL) < 0) {
+            syslog(LOG_ERR, "%s serial listener: select. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             usleep((useconds_t)10000);
             continue;
         }
 
-        if(msg.type == LPMSG_SHUTDOWN) break;
+        // read some bytes from the tty if there are some
+        if(FD_ISSET(tty, &read_fds)) {
+            // Read the header
+            bytes_in_buf = 0;
+            while(bytes_in_buf < sizeof(lpserialmsg_t)) {
+                bytes_read = read(tty, serialmsgbuf+bytes_in_buf, sizeof(lpserialmsg_t)-bytes_in_buf);
+                //syslog(LOG_ERR, "%s serial listener: got header bytes %d\n", instrument->name, bytes_read);
+                //log_byte_buffer(serialmsgbuf, sizeof(lpserialmsg_t));
+                if(bytes_read < 0) {
+                    syslog(LOG_ERR, "%s serial listener: Could not read header from the tty. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+                    goto handle_serial_message_events;
+                } 
+                bytes_in_buf += bytes_read; 
+            }
 
-        syslog(LOG_DEBUG, "Got a serial message! Writing it to the tty...\n");
+            memcpy(&header, serialmsgbuf, sizeof(lpserialmsg_t));
+            if(header.size > 0) {
+                payload = (unsigned char *)malloc(header.size);
+                bytes_in_buf = 0;
+                while(bytes_in_buf < header.size) {
+                    bytes_read = read(tty, payload+bytes_in_buf, header.size-bytes_in_buf);
+                    //syslog(LOG_ERR, "%s serial listener: got payload bytes %d\n", instrument->name, bytes_read);
+                    //log_byte_buffer(payload, header.size);
 
-        bytes_written = write(tty, &msg.msg, sizeof(lpserialmsg_t));
-        if(bytes_written != sizeof(lpserialmsg_t)) {
-            syslog(LOG_ERR, "%s serial listener: unexpected number of bytes written to tty. (%d) Error: (%d) %s\n", instrument->name, bytes_written, errno, strerror(errno));
-            usleep((useconds_t)10000);
-            continue;
+                    if(bytes_read < 0) {
+                        syslog(LOG_ERR, "%s serial listener: Could not read payload from the tty. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+                        free(payload);
+                        goto handle_serial_message_events;
+                    } 
+                    bytes_in_buf += bytes_read;
+                }
+            }
+
+            // parse and handle the msg:
+            // write the payload into the session, and the payload ID into the msg_t
+            // Convert the message to msg_t update
+            memset(&msg, 0, sizeof(lpmsg_t));
+            msg.type = header.type;
+            memcpy(msg.instrument_name, header.instrument_name, LPMAXNAME);
+
+            if(header.size > 0 && header.type == LPMSG_UPDATE) {
+                // Update messages have a fixed size ID/value payload
+                memcpy(msg.msg, payload, header.size);
+                free(payload);
+            } else if(header.size > 0 && header.type == LPMSG_DATA) {
+                // Data messages get their payloads stored in shared memory (with a wrapper, probably?)
+                free(payload);
+            }
+            // Send it on the instrument msg queue
+            send_play_message(msg);
+
+            // when we're done reading the message, clear the buffer & header
+            memset(&serialmsgbuf, 0, sizeof(serialmsgbuf));
+            memset(&header, 0, sizeof(lpserialmsg_t));
+            bytes_in_buf = 0;
         }
 
-        syslog(LOG_DEBUG, "Got a serial message! Wrote %d bytes to the tty...\n", bytes_written);
+handle_serial_message_events:
+        // Handle messages on the serial queue if there are any
+        if(FD_ISSET(instrument->serialmsgq, &read_fds)) {
+            // if there's a message on the queue, write it to the tty
+            if(astrid_msgq_read(instrument->serialmsgq, &msg) == (mqd_t) -1) {
+                syslog(LOG_ERR, "%s serial listener: Could not read message from the q. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
+                usleep((useconds_t)10000);
+                continue;
+            }
 
-        // TODO if there's something on the tty, relay it to the instrument queue
+            if(msg.type == LPMSG_SHUTDOWN) break;
+
+            syslog(LOG_DEBUG, "Got a message to relay over serial! Writing it to the tty...\n");
+
+            // FIXME check write_fds here, and queue messages for writing later if 
+            // it's not possible to write (or just drop them I guess?)
+            bytes_written = write(tty, &msg.msg, sizeof(lpserialmsg_t));
+            if(bytes_written != sizeof(lpserialmsg_t)) {
+                syslog(LOG_ERR, "%s serial listener: unexpected number of bytes written to tty. (%d) Error: (%d) %s\n", instrument->name, bytes_written, errno, strerror(errno));
+                usleep((useconds_t)10000);
+                continue;
+            }
+
+            syslog(LOG_DEBUG, "Wrote %d bytes to the tty...\n", bytes_written);
+        }
     }
 
     syslog(LOG_INFO, "%s serial listener: shutting down here!\n", instrument->name);
@@ -3119,8 +3295,8 @@ lpinstrument_t * astrid_instrument_start(
     }
 
     /* Prepare the message structs */ 
-    strncpy(instrument->msg.instrument_name, instrument->name, LPMAXNAME-1);
-    strncpy(instrument->cmd.instrument_name, instrument->name, LPMAXNAME-1);
+    init_instrument_message(&instrument->msg, instrument->name);
+    init_instrument_message(&instrument->cmd, instrument->name);
 
     /* Start the sequencer thread */
     if(astrid_instrument_seq_start(instrument) < 0) {

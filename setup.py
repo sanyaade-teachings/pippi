@@ -58,13 +58,14 @@ ext_modules = cythonize([
             define_macros=MACROS
         ), 
         Extension('pippi.fx', [
+                'libpippi/vendor/fft/fft.c',
                 'libpippi/src/pippicore.c',
                 'libpippi/src/fx.softclip.c',
                 'pippi/fx.pyx'
             ],
             libraries=['soundpipe'], 
             library_dirs=['/usr/local/lib'],
-            include_dirs=INCLUDES + ['modules/fft'],
+            include_dirs=INCLUDES + ['libpippi/vendor/fft'],
             define_macros=MACROS
         ),
         Extension('pippi.grains', ['pippi/grains.pyx'],
@@ -93,8 +94,11 @@ ext_modules = cythonize([
             include_dirs=INCLUDES,
             define_macros=MACROS
         ),
-        Extension('pippi.fft', ['modules/fft/fft.c', 'pippi/fft.pyx'], 
-            include_dirs=INCLUDES + ['modules/fft'], 
+        Extension('pippi.fft', [
+                'libpippi/vendor/fft/fft.c',
+                'pippi/fft.pyx'
+            ], 
+            include_dirs=INCLUDES + ['libpippi/vendor'],
             define_macros=MACROS
         ), 
 
@@ -213,8 +217,11 @@ ext_modules = cythonize([
             define_macros=MACROS
         ), 
 
-        Extension('pippi.soundbuffer', ['pippi/soundbuffer.pyx'], 
-            include_dirs= INCLUDES + ['modules/fft'], 
+        Extension('pippi.soundbuffer', [
+                'libpippi/vendor/fft/fft.c',
+                'pippi/soundbuffer.pyx'
+            ], 
+            include_dirs=INCLUDES + ['libpippi/vendor/fft'],
             define_macros=MACROS
         ), 
         Extension('pippi.soundfont', ['pippi/soundfont.pyx'], 
