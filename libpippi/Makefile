@@ -52,8 +52,11 @@ osc-examples:
 	echo "Building shapeosc.c example...";
 	gcc $(LPFLAGS) examples/shapeosc.c $(LPSOURCES) $(LPLIBS) -o build/shapeosc
 
-	#echo "Building pulsarosc.c example...";
-	#gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
+	echo "Building pulsarosc-lfo.c example...";
+	gcc $(LPFLAGS) examples/pulsarosc-lfo.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc-lfo
+
+	echo "Building pulsarosc.c example...";
+	gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
 
 	#echo "Building pulsarosc2.c example...";
 	#gcc $(LPFLAGS) examples/pulsarosc2.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc2

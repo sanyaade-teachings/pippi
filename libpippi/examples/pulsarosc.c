@@ -5,9 +5,9 @@
 #define VOICES 4
 #define CHANNELS 2
 #define SR 48000
-#define num_wts 10
-#define num_wins 1
-#define TABLESIZE 128
+#define NUM_WTS 2
+#define NUM_WINS 2
+#define WTSIZE 4096
 
 /**
  * 1 open file
@@ -26,43 +26,19 @@
 int main() {
     size_t length = SR * 10;
     size_t i, c, v;
-    lpbuffer_t * wts;
-    lpbuffer_t * win;
-
-    size_t wt_onsets[num_wts] = {};
-    size_t wt_lengths[num_wts] = {};
-
-    size_t win_onsets[num_wins] = {};
-    size_t win_lengths[num_wins] = {};
 
     lpfloat_t sample = 0;
 
     lppulsarosc_t * oscs[VOICES];
     lpfloat_t freqs[VOICES] = {220., 330., 440., 550.};
-
-    wts = LPWavetable.create_stack(num_wts, 
-            wt_onsets, wt_lengths,
-            WT_SINE, 4096,
-            WT_RND, 4096,
-            WT_RND, 4096,
-            WT_RND, 4096,
-            WT_RND, 4096,
-            WT_RND, 4096,
-            WT_RND, 4096,
-            WT_RND, 4096,
-            WT_RND, 4096,
-            WT_SINE, 4096
-    );
-
-    win = LPWindow.create_stack(num_wins, 
-            win_onsets, win_lengths,
-            WIN_HANN, 4096
-    );
-
     lpbuffer_t * buf = LPBuffer.create(length, CHANNELS, SR);    
 
     for(i=0; i < VOICES; i++) {
-        oscs[i] = LPPulsarOsc.create(num_wts, wts->data, wts->length, wt_onsets, wt_lengths, num_wins, win->data, win->length, win_onsets, win_lengths);
+        oscs[i] = LPPulsarOsc.create(NUM_WTS, NUM_WINS, // number of wavetables, windows
+            WT_SINE, WTSIZE, WT_TRI2, WTSIZE,   // wavetables and sizes
+            WIN_SINE, WTSIZE, WIN_HANN, WTSIZE  // windows and sizes
+        );
+
         oscs[i]->samplerate = SR;
         oscs[i]->freq = freqs[i];
         oscs[i]->saturation = 1;
@@ -89,8 +65,6 @@ int main() {
     }
 
     LPBuffer.destroy(buf);
-    LPBuffer.destroy(wts);
-    LPBuffer.destroy(win);
 
     return 0;
 }

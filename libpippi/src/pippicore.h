@@ -88,6 +88,7 @@ typedef struct lpbuffer_factory_t {
     lpbuffer_t * (*create_from_float)(lpfloat_t value, size_t length, int channels, int samplerate);
     lpbuffer_t * (*create_from_bytes)(char * bytes, size_t length, int channels, int samplerate);
     void (*copy)(lpbuffer_t *, lpbuffer_t *);
+    lpbuffer_t * (*clone)(lpbuffer_t *);
     void (*clear)(lpbuffer_t *);
     void (*split2)(lpbuffer_t *, lpbuffer_t *, lpbuffer_t *);
     void (*scale)(lpbuffer_t *, lpfloat_t, lpfloat_t, lpfloat_t, lpfloat_t);

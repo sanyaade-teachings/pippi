@@ -1543,8 +1543,13 @@ int send_play_message(lpmsg_t msg) {
     return 0;
 }
 
-// FIXME this is dumb...
 int send_serial_message(lpmsg_t msg) {
+    /* Relays a message to the serial listener thread for a 
+     * given instrument, which will write the translated payload
+     * to the tty... only used for special solenoid trigger & 
+     * motor speed messages now... also for shutdown messages
+     * FIXME ... & probably needs some decode/encode fixes after recent changes
+     */
     mqd_t mqd;
     char qname[NAME_MAX] = {0};
     struct mq_attr attr;
@@ -1553,13 +1558,6 @@ int send_serial_message(lpmsg_t msg) {
     attr.mq_msgsize = sizeof(lpmsg_t);
 
     snprintf(qname, NAME_MAX, "/%s-serial-msgq", msg.instrument_name);
-
-    /*
-    if(encode_update_message_param(&msg) < 0) {
-        syslog(LOG_ERR, "Error encoding serial message: (%d) %s\n", errno, strerror(errno));
-        return -1;
-    }
-    */
 
     if((mqd = mq_open(qname, O_CREAT | O_WRONLY, LPIPC_PERMS, &attr)) == (mqd_t) -1) {
         syslog(LOG_ERR, "send_serial_message mq_open: Error opening message queue. Error: %s\n", strerror(errno));
@@ -1729,12 +1727,9 @@ int astrid_get_capture_device_id() {
     return astrid_get_playback_device_id();
 }
 
-int extract_int_from_token(char * token, uint16_t * val) {
-    // FIXME this handles overflows when the token 
-    // is a number larger than long as an error, but 
-    // ignores overflows when larger than uint16_t...
+int extract_int32_from_token(char * token, uint32_t * val) {
     char * end;
-    int result = 0;
+    long result = 0;
 
     errno = 0;
     result = strtol(token, &end, 0);
@@ -1742,7 +1737,9 @@ int extract_int_from_token(char * token, uint16_t * val) {
     if(errno != 0) return -1;
     if(*end != '\0') return -1;
 
-    *val = result;
+    if(result > INT_MAX) result = INT_MAX;
+
+    *val = (uint32_t)result;
     return 0;
 }
 
@@ -1766,22 +1763,26 @@ int decode_update_message_param(lpmsg_t * msg, uint16_t * id, float * value) {
     return 0;
 }
 
+/* FIXME these encode* functions can probably go away...? */
 int encode_update_message_param(lpmsg_t * msg) {
     char *token, *save=NULL;
     char param_copy[LPMAXMSG] = {0};
 
-    uint16_t vali = 0;
+    uint32_t vali32 = 0;
+    uint16_t vali16 = 0;
     float valf = 0.f;
 
     memcpy(param_copy, msg->msg, LPMAXMSG);
     token = strtok_r(param_copy, " ", &save);
 
-    if(extract_int_from_token(token, &vali) < 0) {
+    if(extract_int32_from_token(token, &vali32) < 0) {
         return -1;
     } 
 
-    syslog(LOG_DEBUG, "ENCODE UPDATE got ID %d\n", vali);
-    memcpy(msg->msg, &vali, sizeof(uint16_t));
+    syslog(LOG_DEBUG, "ENCODE UPDATE got ID %d\n", vali32);
+    if(vali32 > 32767) vali32 = 32767;
+    vali16 = (uint16_t)vali32;
+    memcpy(msg->msg, &vali16, sizeof(uint16_t));
 
     if(extract_float_from_token(token, &valf) == 0) {
         return -1;
@@ -1793,8 +1794,86 @@ int encode_update_message_param(lpmsg_t * msg) {
     return 0;
 }
 
-int prepare_message_from_type(lpmsg_t * msg, char msgtype) {
+int encode_update_message_param_float(uint16_t id, char * valstr, lpmsg_t * msg) {
+    float val = 0;
+    if(extract_float_from_token(valstr, &val) < 0) {
+        syslog(LOG_ERR, "encode_update_message_param_float: Could not extract float from token '%s'\n", valstr);
+        return -1;
+    }
+
+    memset(msg->msg, 0, sizeof(LPMAXMSG));
+    memcpy(msg->msg, &id, sizeof(uint16_t));
+    memcpy(msg->msg + sizeof(uint16_t), &val, sizeof(float));
+
+    return 0;
+}
+
+int encode_update_message_param_int32(uint16_t id, char * valstr, lpmsg_t * msg) {
+    uint32_t val = 0;
+    uint16_t val16 = 0;
+    if(extract_int32_from_token(valstr, &val) < 0) {
+        syslog(LOG_ERR, "encode_update_message_param_int32: Could not extract uint32_t from token '%s'\n", valstr);
+        return -1;
+    }
+
+    if(val > 32767) val = 32767;
+    val16 = (uint16_t)val;
+    memset(msg->msg, 0, sizeof(LPMAXMSG));
+    memcpy(msg->msg, &id, sizeof(uint16_t));
+    memcpy(msg->msg + sizeof(uint16_t), &val16, sizeof(uint16_t));
+
+    return 0;
+}
+
+// Takes the cmd on the instrument and runs each param through the 
+// instrument's param update callback.
+int process_param_updates(lpinstrument_t * instrument) {
+    char cmdline[LPMAXMSG] = {0};
+    char * paramline;
+    char * keytoken;
+    char * valtoken;
+    char * cmdline_save;
+    char * paramline_save;
+
+    if(instrument->cmd.type != LPMSG_UPDATE) {
+        syslog(LOG_WARNING, "process_param_updates: instrument->cmd.type is '%d' skipping...\n", instrument->cmd.type);
+        return 0;
+    }
+
+    memcpy(cmdline, instrument->cmd.msg, LPMAXMSG);
+
+    paramline = strtok_r(cmdline, " ", &cmdline_save);
+    while(paramline != NULL) {
+        keytoken = strtok_r(paramline, "=", &paramline_save);
+        if(keytoken != NULL) {
+            valtoken = strtok_r(NULL, "=", &paramline_save);
+            if(valtoken != NULL) {
+                syslog(LOG_DEBUG, "UPDATE Key: %s, Value: %s\n", keytoken, valtoken);
+                // TODO think about handling large / special values, like buffers...
+                // payload could be the shm ID like render complete messages...?
+                if(instrument->update(instrument, keytoken, valtoken) < 0) {
+                    syslog(LOG_ERR, "process_param_updates: failed to pass param (%s=%s) to update callback.\n", keytoken, valtoken);
+                }
+            }
+        }
+        paramline = strtok_r(NULL, " ", &cmdline_save);
+    }
+    return 0;
+}
+
+
+int prepare_and_send_instrument_message(lpmsg_t * msg, char msgtype) {
     int voice_id = 0;
+
+    /* Get the voice ID from the voice ID counter */
+    if((voice_id = lpcounter_read_and_increment("voiceid")) < 0) {
+        syslog(LOG_ERR, "Error getting voice ID: (%d) %s\n", errno, strerror(errno));
+        return -1;
+    }
+
+    /* Initialize the count and set the voice_id */
+    msg->count = 0;
+    msg->voice_id = voice_id;
 
     switch(msgtype) {
         case PLAY_MESSAGE:
@@ -1811,7 +1890,6 @@ int prepare_message_from_type(lpmsg_t * msg, char msgtype) {
 
         case UPDATE_MESSAGE:
             msg->type = LPMSG_UPDATE;
-            encode_update_message_param(msg);
             break;
 
         case LOAD_MESSAGE:
@@ -1835,15 +1913,13 @@ int prepare_message_from_type(lpmsg_t * msg, char msgtype) {
             return -1;
     }
 
-    /* Get the voice ID from the voice ID counter */
-    if((voice_id = lpcounter_read_and_increment("voiceid")) < 0) {
-        syslog(LOG_ERR, "Error getting voice ID: (%d) %s\n", errno, strerror(errno));
+    if(send_play_message(*msg) < 0) {
+        syslog(LOG_ERR, "Could not send play message...\n");
         return -1;
     }
 
-    /* Initialize the count and set the voice_id */
-    msg->count = 0;
-    msg->voice_id = voice_id;
+    // FIXME -- maybe set this elsewhere to let cleanup happen first?
+    //if(msg->type == LPMSG_SHUTDOWN) instrument->is_running = 0;
 
     return 0;
 }
@@ -1880,7 +1956,7 @@ int parse_message_from_args(int argc, int arg_offset, char * argv[], lpmsg_t * m
     strncpy(msg->instrument_name, instrument_name, instrument_name_length);
     strncpy(msg->msg, message_params, bytesread);
 
-    if(prepare_message_from_type(msg, msgtype) < 0) {
+    if(prepare_and_send_instrument_message(msg, msgtype) < 0) {
         syslog(LOG_ERR, "Could not prepare message of type %c: (%d) %s\n", msgtype, errno, strerror(errno));
         return -1;
     }
@@ -1907,7 +1983,7 @@ int parse_message_from_cmdline(char * cmdline, size_t cmdlength, lpmsg_t * msg) 
     memset(msg->msg, 0, LPMAXMSG);
     strncpy(msg->msg, cmdline + tokenlength, cmdlength - tokenlength);
 
-    if(prepare_message_from_type(msg, msgtype) < 0) {
+    if(prepare_and_send_instrument_message(msg, msgtype) < 0) {
         syslog(LOG_ERR, "Could not prepare message of type %c: (%d) %s\n", msgtype, errno, strerror(errno));
         return -1;
     }
@@ -2730,13 +2806,14 @@ void * instrument_message_thread(void * arg) {
         // Now the fun stuff
         switch(instrument->msg.type) {
             case LPMSG_RENDER_COMPLETE:
-                /* FIXME do this in another thread */
+                /* FIXME do this in another thread? */
                 // Renders from the internal callback AND/OR external renderers (AKA python)
                 if((buf = deserialize_buffer(instrument->msg.msg, &bufmsg)) == NULL) {
                     syslog(LOG_ERR, "DAC could not deserialize buffer. Error: (%d) %s\n", errno, strerror(errno));
                     continue;
                 }
 
+                // tracking the render time is still useful... this might not be right place tho
                 /*
                 if(lpscheduler_get_now_seconds(&now) < 0) {
                     syslog(LOG_ERR, "Could not get now seconds for loop retriggering\n");
@@ -2760,7 +2837,13 @@ void * instrument_message_thread(void * arg) {
 
             case LPMSG_UPDATE:
                 syslog(LOG_DEBUG, "C MSG: update\n");
-                if(instrument->update != NULL) instrument->update(instrument);
+                if(instrument->update == NULL) continue;
+                // decode each update param and call the callback with it
+                if(process_param_updates(instrument) < 0) {
+                    syslog(LOG_ERR, "Could not encode update messages...\n");
+                    continue;
+                }
+                //instrument->update(instrument);
                 break;
 
             case LPMSG_PLAY:
@@ -3111,7 +3194,7 @@ lpinstrument_t * astrid_instrument_start(
     void * ctx,
     int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
     int (*renderer)(void * instrument),
-    int (*update)(void * instrument),
+    int (*update)(void * instrument, char * key, char * val),
     int (*trigger)(void * instrument)
 ) {
     lpinstrument_t * instrument;
@@ -3657,15 +3740,45 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
 
     free(cmdline);
 
-    if(send_play_message(instrument->cmd) < 0) {
-        syslog(LOG_ERR, "Could not send play message...\n");
-        return -1;
-    }
-
-    if(instrument->cmd.type == LPMSG_SHUTDOWN) instrument->is_running = 0;
-
     return 0;
 }
+
+uint32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, uint32_t default_value) {
+    int rc;
+    MDB_val key, data;
+    uint32_t param = default_value;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(uint32_t);
+
+	rc = mdb_txn_renew(instrument->dbtxn_read);
+    rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
+    if(rc == 0) {
+        param = *((uint32_t *)data.mv_data);
+    }
+    mdb_txn_reset(instrument->dbtxn_read);
+
+    return param;
+}
+
+void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, uint32_t value) {
+    int rc;
+	MDB_val key, data;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(uint32_t);
+    data.mv_data = (void *)(&value);
+
+	rc = mdb_txn_begin(instrument->dbenv, NULL, 0, &instrument->dbtxn_write);
+    rc = mdb_put(instrument->dbtxn_write, instrument->dbi, &key, &data, 0);
+    rc = mdb_txn_commit(instrument->dbtxn_write);
+    if(rc) {
+        syslog(LOG_WARNING, "astrid_instrument_get_param_int32 mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
+    }
+}
+
 
 lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t default_value) {
     int rc;

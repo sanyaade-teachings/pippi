@@ -1,7 +1,7 @@
 #include "oscs.pulsar.h"
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 #if DEBUG
 #include <errno.h>
@@ -119,16 +119,18 @@ void create_pulsarosc_window_stack(lppulsarosc_t * p, int numtables, va_list vl)
 
 
 lppulsarosc_t * create_pulsarosc(int num_wavetables, int num_windows, ...) {
-    va_list vl;
+    va_list vl, vp;
     lppulsarosc_t * p = (lppulsarosc_t *)LPMemoryPool.alloc(1, sizeof(lppulsarosc_t));
 
     va_start(vl, num_windows);
     create_pulsarosc_wavetable_stack(p, num_wavetables, vl);
-    create_pulsarosc_window_stack(p, num_windows, vl);
+    va_copy(vp, vl);
+    create_pulsarosc_window_stack(p, num_windows, vp);
+    va_end(vp);
     va_end(vl);
 
-    p->wavetable_morph_freq = .12f;
-    p->window_morph_freq = .12f;
+    p->wavetable_morph_freq = num_wavetables > 0 ? .12f : 0;
+    p->window_morph_freq = num_windows > 0 ? .12f : 0;
 
     p->burst = NULL;
     p->burst_pos = 0;
@@ -145,18 +147,11 @@ lppulsarosc_t * create_pulsarosc(int num_wavetables, int num_windows, ...) {
 }
 
 lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
-    lpfloat_t ipw, isr, sample, mod, a, b, 
+    lpfloat_t ipw, isr, sample, a, b, 
               wtmorphpos, wtmorphfrac,
               winmorphpos, winmorphfrac;
     int wavetable_index, window_index;
     int burst;
-
-#if DEBUG
-    assert(p->wavetables != NULL);
-    assert(p->num_wavetables > 0);
-    assert(p->windows != NULL);
-    assert(p->num_windows > 0);
-#endif
 
     assert(p->samplerate > 0);
     wavetable_index = 0;
@@ -164,7 +159,6 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     isr = 1.f / (lpfloat_t)p->samplerate;
     ipw = 1.f;
     sample = 0.f;
-    mod = 0.f;
     burst = 1;
 
     /* Store the inverse pulsewidth if non-zero */
@@ -183,9 +177,10 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     /* If there's a non-zero pulsewidth, and the burst value is 1, 
      * then syntesize a pulse */
     if(ipw > 0 && burst) {
+        sample = 1.f; // When num_wavetables == 0, the window functions can be used like an LFO
         if(p->num_wavetables == 1) {
             sample = get_stack_value(p->wavetables, p->phase, 0, p->wavetables->length);
-        } else {
+        } else if(p->num_wavetables > 0) {
             wtmorphpos = p->wavetable_morph * p->num_wavetables;
             wavetable_index = (int)wtmorphpos;
             wtmorphfrac = wtmorphpos - wavetable_index;
@@ -203,9 +198,10 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
             sample = (1.f - wtmorphfrac) * a + (wtmorphfrac * b);
         }
 
+        // When num_windows == 0, this is a noop
         if(p->num_windows == 1) {
-            mod = get_stack_value(p->windows, p->phase, 0, p->windows->length);
-        } else {
+            sample *= get_stack_value(p->windows, p->phase, 0, p->windows->length);
+        } else if(p->num_windows > 0) {
             winmorphpos = p->window_morph * p->num_windows;
             window_index = (int)winmorphpos;
             winmorphfrac = winmorphpos - window_index;
@@ -220,7 +216,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
                 p->window_lengths[(window_index+1) % p->num_windows]
             );
 
-            mod = (1.f - winmorphfrac) * a + (winmorphfrac * b);
+            sample *= (1.f - winmorphfrac) * a + (winmorphfrac * b);
         }
     } 
 
@@ -246,7 +242,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     while(p->window_morph >= 1.f) p->window_morph -= 1.f;
     if(p->burst_size > 0) while(p->burst_pos >= p->burst_size) p->burst_pos -= p->burst_size;
 
-    return sample * mod;
+    return sample;
 }
 
 void destroy_pulsarosc(lppulsarosc_t* p) {

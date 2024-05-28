@@ -193,7 +193,7 @@ typedef struct lpinstrument_t {
     int (*trigger)(void * instrument);
 
     // Param update callback
-    int (*update)(void * instrument);
+    int (*update)(void * instrument, char * key, char * val);
 
     // Async renderer callback (C-compat only)
     int (*renderer)(void * instrument);
@@ -317,7 +317,7 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument), int (*trigger)(void * instrument));
+lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument, char * key, char * val), int (*trigger)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
@@ -331,6 +331,9 @@ int astrid_instrument_session_close(lpinstrument_t * instrument);
 int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size);
 int send_render_to_mixer(lpinstrument_t * instrument, lpbuffer_t * buf);
 int relay_message_to_seq(lpinstrument_t * instrument);
+
+int extract_int32_from_token(char * token, uint32_t * val);
+int extract_float_from_token(char * token, float * val);
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
 size_t lpdecode_with_prefix(char * encoded);

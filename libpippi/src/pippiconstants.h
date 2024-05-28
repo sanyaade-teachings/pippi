@@ -102,9 +102,11 @@ enum PanMethods {
 };
 
 enum LPMessageFlags {
-    LPFLAG_NONE,
-    LPFLAG_IS_SCHEDULED,
-    NUM_LPMESSAGEFLAGS
+    LPFLAG_NONE            =0,
+    LPFLAG_IS_SCHEDULED    =1 << 0,
+    LPFLAG_IS_ENCODED_PARAM=1 << 1,
+    LPFLAG_IS_FLOAT_ENCODED=1 << 2,
+    LPFLAG_IS_INT32_ENCODED=1 << 3,
 };
 
 enum LPParamTypes {

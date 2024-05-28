@@ -1,5 +1,3 @@
-default: build
-
 PYLIB := $(shell python -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBRARY')[3:-2])")
 
 LPDIR = ../libpippi
@@ -30,6 +28,8 @@ LPINCLUDES = -Isrc -I${LPDIR}../pippi -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0 -DNOPYTHON
 LPLIBS = -lm -ldl -lpthread -lrt -ljack
+
+default: littlefield
 
 clean:
 	rm -rf build/*
@@ -102,13 +102,21 @@ astrid-bufstr:
 	echo "Building astrid bufstr...";
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/bufstr.c $(LPLIBS) -o build/astrid-bufstr
 
+littlefield:
+	mkdir -p build
+
+	echo "Building littlefield...";
+
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/littlefield.c $(LPLIBS) -o build/littlefield
+	sudo cp build/littlefield /usr/local/bin/
+
+
 astrid-pulsar:
 	mkdir -p build
 
 	echo "Building astrid pulsar...";
 
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
-	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar2.c $(LPLIBS) -o build/astrid-pulsar2
 
 astrid-simple:
 	mkdir -p build

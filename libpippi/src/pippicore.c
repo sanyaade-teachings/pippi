@@ -22,6 +22,7 @@ void destroy_array(lparray_t * array);
 lpbuffer_t * create_buffer(size_t length, int channels, int samplerate);
 lpbuffer_t * create_buffer_from_float(lpfloat_t value, size_t length, int channels, int samplerate);
 lpbuffer_t * create_buffer_from_bytes(char * bytes, size_t length, int channels, int samplerate);
+lpbuffer_t * clone_buffer(lpbuffer_t * src);
 void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void clear_buffer(lpbuffer_t * buf);
 void scale_buffer(lpbuffer_t * buf, lpfloat_t from_min, lpfloat_t from_max, lpfloat_t to_min, lpfloat_t to_max);
@@ -47,7 +48,6 @@ void taper_buffer(lpbuffer_t * buf, size_t start, size_t end);
 lpbuffer_t * trim_buffer(lpbuffer_t * buf, size_t start, size_t end, lpfloat_t threshold, int window);
 void plot_buffer(lpbuffer_t * buf);
 lpfloat_t play_buffer(lpbuffer_t * buf, lpfloat_t speed);
-void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest);
 void split2_buffer(lpbuffer_t * src, lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * mix_buffers(lpbuffer_t * a, lpbuffer_t * b);
 lpbuffer_t * remix_buffer(lpbuffer_t * buf, int channels);
@@ -120,7 +120,7 @@ lprand_t LPRand = { LOGISTIC_SEED_DEFAULT, LOGISTIC_X_DEFAULT, \
     rand_base_stdlib, rand_rand, rand_randint, rand_randbool, rand_choice };
 lpmemorypool_factory_t LPMemoryPool = { 0, 0, 0, memorypool_init, memorypool_custom_init, memorypool_alloc, memorypool_custom_alloc, memorypool_free };
 const lparray_factory_t LPArray = { create_array, create_array_from, destroy_array };
-const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, copy_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_stereo_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, varispeed_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, taper_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer };
+const lpbuffer_factory_t LPBuffer = { create_buffer, create_buffer_from_float, create_buffer_from_bytes, copy_buffer, clone_buffer, clear_buffer, split2_buffer, scale_buffer, min_buffer, max_buffer, mag_buffer, play_buffer, pan_stereo_buffer, mix_buffers, remix_buffer, clip_buffer, cut_buffer, cut_into_buffer, varispeed_buffer, resample_buffer, multiply_buffer, scalar_multiply_buffer, add_buffers, scalar_add_buffer, subtract_buffers, scalar_subtract_buffer, divide_buffers, scalar_divide_buffer, concat_buffers, buffers_are_equal, buffers_are_close, dub_buffer, dub_scalar, env_buffer, pad_buffer, taper_buffer, trim_buffer, fill_buffer, repeat_buffer, reverse_buffer, resize_buffer, plot_buffer, destroy_buffer };
 const lpinterpolation_factory_t LPInterpolation = { interpolate_linear_pos, interpolate_linear_pos2, interpolate_linear, interpolate_linear_channel, interpolate_hermite_pos, interpolate_hermite };
 const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_int };
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
@@ -384,6 +384,22 @@ void copy_buffer(lpbuffer_t * src, lpbuffer_t * dest) {
         }
     }
 }
+
+lpbuffer_t * clone_buffer(lpbuffer_t * src) {
+    size_t i;
+    int c;
+
+    lpbuffer_t * out = create_buffer(src->length, src->channels, src->samplerate);
+
+    for(i=0; i < src->length; i++) {
+        for(c=0; c < src->channels; c++) {
+            out->data[i * src->channels + c] = src->data[i * src->channels + c];
+        }
+    }
+
+    return out;
+}
+
 
 void clear_buffer(lpbuffer_t * buf) {
     size_t i;
@@ -1700,7 +1716,6 @@ lpbuffer_t * lpbuffer_create_stack(lpbuffer_t * (*table_creator)(int name, size_
     memset(tablesizes, 0, numtables * sizeof(size_t));
     memset(tables, 0, numtables * sizeof(int));
 
-
     stacklength = 0;
 
     // first pass get all sizes
@@ -1708,8 +1723,9 @@ lpbuffer_t * lpbuffer_create_stack(lpbuffer_t * (*table_creator)(int name, size_
         tables[i] = va_arg(vl, int);
         if(tables[i] == WT_USER) {
             user_bufp = va_arg(vl, lpbuffer_t *);
-            bufs[i] = LPBuffer.create(user_bufp->length, user_bufp->channels, user_bufp->samplerate);
-            LPBuffer.copy(user_bufp, bufs[i]);
+            tablesizes[i] = user_bufp->length;
+            bufs[i] = LPBuffer.clone(user_bufp);
+            stacklength += tablesizes[i];
         } else {
             tablesize = va_arg(vl, int);
             stacklength += tablesize;
