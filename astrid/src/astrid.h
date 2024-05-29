@@ -320,11 +320,16 @@ void lptimeit_since(struct timespec * start);
 lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument, char * key, char * val), int (*trigger)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
+uint32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, uint32_t default_value);
+void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, uint32_t value);
+void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t * patternbuf);
+lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t default_patternbuf);
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
 lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t default_value);
 void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size);
 void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list);
 lpfloat_t astrid_instrument_get_param_float_list_item(lpinstrument_t * instrument, int param_index, size_t size, int item_index, lpfloat_t default_value);
+
 int astrid_instrument_tick(lpinstrument_t * instrument);
 int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
@@ -334,6 +339,7 @@ int relay_message_to_seq(lpinstrument_t * instrument);
 
 int extract_int32_from_token(char * token, uint32_t * val);
 int extract_float_from_token(char * token, float * val);
+int extract_patternbuf_from_token(char * token, unsigned char * patternbuf, size_t * pattern_length);
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);
 size_t lpdecode_with_prefix(char * encoded);

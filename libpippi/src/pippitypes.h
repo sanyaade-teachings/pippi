@@ -98,3 +98,9 @@ typedef struct lparray_t {
     lpfloat_t phase;
 } lparray_t;
 
+typedef struct lppatternbuf_t {
+    size_t length;
+    unsigned char pattern[LPMAXPAT];
+} lppatternbuf_t;
+
+

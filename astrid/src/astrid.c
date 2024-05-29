@@ -1757,6 +1757,20 @@ int extract_float_from_token(char * token, float * val) {
     return 0;
 }
 
+int extract_patternbuf_from_token(char * token, unsigned char * patternbuf, size_t * pattern_length) {
+    size_t i;
+
+    *pattern_length = strlen(token);
+    if(*pattern_length > LPMAXPAT) *pattern_length = LPMAXPAT;
+
+    memset(patternbuf, 0, LPMAXPAT);
+    for(i=0; i < *pattern_length; i++) {
+        patternbuf[i] = (token[i] == '1');
+    }
+
+    return 0;
+}
+
 int decode_update_message_param(lpmsg_t * msg, uint16_t * id, float * value) {
     memcpy(id, msg->msg, sizeof(uint16_t));
     memcpy(value, msg->msg + sizeof(uint16_t), sizeof(float));
@@ -3812,9 +3826,47 @@ void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_in
     rc = mdb_put(instrument->dbtxn_write, instrument->dbi, &key, &data, 0);
     rc = mdb_txn_commit(instrument->dbtxn_write);
     if(rc) {
-        syslog(LOG_WARNING, "astrid_instrument_get_param_float mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
+        syslog(LOG_WARNING, "astrid_instrument_set_param_float mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
     }
 }
+
+
+void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t * patternbuf) {
+    int rc;
+	MDB_val key, data;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(lppatternbuf_t);
+    data.mv_data = (void *)patternbuf;
+
+	rc = mdb_txn_begin(instrument->dbenv, NULL, 0, &instrument->dbtxn_write);
+    rc = mdb_put(instrument->dbtxn_write, instrument->dbi, &key, &data, 0);
+    rc = mdb_txn_commit(instrument->dbtxn_write);
+    if(rc) {
+        syslog(LOG_WARNING, "astrid_instrument_set_param_patternbuf mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
+    }
+}
+
+lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t default_patternbuf) {
+    int rc;
+    MDB_val key, data;
+    lppatternbuf_t patternbuf = default_patternbuf;
+
+    key.mv_size = sizeof(int);
+    key.mv_data = (void *)(&param_index);
+    data.mv_size = sizeof(lppatternbuf_t);
+
+	rc = mdb_txn_renew(instrument->dbtxn_read);
+    rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
+    if(rc == 0) {
+        patternbuf = *((lppatternbuf_t *)data.mv_data);
+    }
+    mdb_txn_reset(instrument->dbtxn_read);
+
+    return patternbuf;
+}
+
 
 void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size) {
     int rc;

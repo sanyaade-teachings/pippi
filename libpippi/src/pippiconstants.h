@@ -61,7 +61,7 @@
 
 #define LPMAXNAME 16
 #define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - (sizeof(uint16_t) * 2) - LPMAXNAME)
-
+#define LPMAXPAT 512 - sizeof(size_t)
 
 enum Wavetables {
     WT_SINE,
