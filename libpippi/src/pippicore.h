@@ -186,6 +186,8 @@ typedef struct lpfx_factory_t {
     lpfloat_t (*lpf1)(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
     void (*convolve)(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
     void (*norm)(lpbuffer_t * buf, lpfloat_t ceiling);
+    lpfloat_t (*fold)(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate);
+    lpfloat_t (*limit)(lpfloat_t val, lpfloat_t * prev, lpfloat_t threshold, lpfloat_t release, lpbuffer_t * del);
     lpfloat_t (*crush)(lpfloat_t val, int bits);
 } lpfx_factory_t;
 

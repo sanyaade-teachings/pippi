@@ -339,6 +339,7 @@ int relay_message_to_seq(lpinstrument_t * instrument);
 
 int extract_int32_from_token(char * token, uint32_t * val);
 int extract_float_from_token(char * token, float * val);
+int extract_floatlist_from_token(char * tokenlist, lpfloat_t * val, int size);
 int extract_patternbuf_from_token(char * token, unsigned char * patternbuf, size_t * pattern_length);
 
 int lpencode_with_prefix(char * prefix, size_t val, char * encoded);

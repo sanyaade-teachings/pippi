@@ -1757,6 +1757,37 @@ int extract_float_from_token(char * token, float * val) {
     return 0;
 }
 
+int extract_floatlist_from_token(char * tokenlist, lpfloat_t * val, int size) {
+    char * end, * save, * token;
+    char tokenlist_copy[LPMAXMSG] = {0};
+    float result = 0;
+    int count = 0, i = 0;
+
+    memcpy(tokenlist_copy, tokenlist, LPMAXMSG);
+    token = strtok_r(tokenlist_copy, ",", &save);
+
+    while(token != NULL) {
+        errno = 0;
+        result = strtof(token, &end);
+
+        if(errno != 0) return -1;
+        if(*end != '\0') return -1;
+        val[count] = result;
+
+        count += 1;
+        if(count >= size) break;
+
+        token = strtok_r(NULL, ",", &save);
+    }
+
+    for(i=count; i < size; i++) {
+        val[i] = val[0];
+    }
+
+    return count;
+}
+
+
 int extract_patternbuf_from_token(char * token, unsigned char * patternbuf, size_t * pattern_length) {
     size_t i;
 
@@ -1854,7 +1885,7 @@ int process_param_updates(lpinstrument_t * instrument) {
         return 0;
     }
 
-    memcpy(cmdline, instrument->cmd.msg, LPMAXMSG);
+    memcpy(cmdline, instrument->msg.msg, LPMAXMSG);
 
     paramline = strtok_r(cmdline, " ", &cmdline_save);
     while(paramline != NULL) {

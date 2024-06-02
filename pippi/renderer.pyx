@@ -227,6 +227,10 @@ cdef class EventTriggerFactory:
         params = self._parse_params(*args, **kwargs)
         return MessageEvent(onset, instrument_name, LPMSG_TRIGGER, params, 0)
 
+    def update(self, double onset, str instrument_name, *args, **kwargs):
+        params = self._parse_params(*args, **kwargs)
+        return MessageEvent(onset, instrument_name, LPMSG_UPDATE, params, 0)
+
     def serial(self, double onset, str tty, *args, **kwargs):
         params = self._parse_params(*args, **kwargs)
         return MessageEvent(onset, tty, LPMSG_SERIAL, params, 0)

@@ -157,7 +157,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     wavetable_index = 0;
     window_index = 0;
     isr = 1.f / (lpfloat_t)p->samplerate;
-    ipw = 1.f;
+    ipw = 0.f;
     sample = 0.f;
     burst = 1;
 
@@ -176,10 +176,10 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
 
     /* If there's a non-zero pulsewidth, and the burst value is 1, 
      * then syntesize a pulse */
-    if(ipw > 0 && burst) {
+    if(p->pulsewidth > 0 && burst && p->phase < p->pulsewidth) {
         sample = 1.f; // When num_wavetables == 0, the window functions can be used like an LFO
         if(p->num_wavetables == 1) {
-            sample = get_stack_value(p->wavetables, p->phase, 0, p->wavetables->length);
+            sample = get_stack_value(p->wavetables, p->phase, 0, p->wavetables->length * ipw);
         } else if(p->num_wavetables > 0) {
             wtmorphpos = p->wavetable_morph * p->num_wavetables;
             wavetable_index = (int)wtmorphpos;
@@ -187,12 +187,12 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
 
             a = get_stack_value(p->wavetables, p->phase,
                 p->wavetable_onsets[wavetable_index],
-                p->wavetable_lengths[wavetable_index]
+                p->wavetable_lengths[wavetable_index] * ipw
             );
 
             b = get_stack_value(p->wavetables, p->phase,
                 p->wavetable_onsets[(wavetable_index+1) % p->num_wavetables],
-                p->wavetable_lengths[(wavetable_index+1) % p->num_wavetables]
+                p->wavetable_lengths[(wavetable_index+1) % p->num_wavetables] * ipw
             );
 
             sample = (1.f - wtmorphfrac) * a + (wtmorphfrac * b);
@@ -200,7 +200,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
 
         // When num_windows == 0, this is a noop
         if(p->num_windows == 1) {
-            sample *= get_stack_value(p->windows, p->phase, 0, p->windows->length);
+            sample *= get_stack_value(p->windows, p->phase, 0, p->windows->length * ipw);
         } else if(p->num_windows > 0) {
             winmorphpos = p->window_morph * p->num_windows;
             window_index = (int)winmorphpos;
@@ -208,12 +208,12 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
 
             a = get_stack_value(p->windows, p->phase,
                 p->window_onsets[window_index], 
-                p->window_lengths[window_index]
+                p->window_lengths[window_index] * ipw
             );
 
             b = get_stack_value(p->windows, p->phase,
                 p->window_onsets[(window_index+1) % p->num_windows],
-                p->window_lengths[(window_index+1) % p->num_windows]
+                p->window_lengths[(window_index+1) % p->num_windows] * ipw
             );
 
             sample *= (1.f - winmorphfrac) * a + (winmorphfrac * b);
@@ -223,6 +223,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     // increment phases
     p->wavetable_morph += isr * p->wavetable_morph_freq;
     p->window_morph += isr * p->window_morph_freq;
+    //p->phase += isr * p->freq / (p->pulsewidth > 0 ? p->pulsewidth : 1.f);
     p->phase += isr * p->freq;
 
     if(p->burst != NULL && p->phase >= 1.f) p->burst_pos += 1;

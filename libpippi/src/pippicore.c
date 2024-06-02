@@ -67,6 +67,8 @@ lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, 
 lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
 void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
 void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling);
+lpfloat_t fx_fold(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate);
+lpfloat_t fx_limit(lpfloat_t val, lpfloat_t * prev, lpfloat_t threshold, lpfloat_t release, lpbuffer_t * del);
 lpfloat_t fx_crush(lpfloat_t val, int bits);
 
 lpbuffer_t * ringbuffer_create(size_t length, int channels, int samplerate);
@@ -126,7 +128,7 @@ const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_i
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
-const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_convolve, fx_norm, fx_crush };
+const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_convolve, fx_norm, fx_fold, fx_limit, fx_crush };
 
 /* Platform-specific random seed, called 
  * on program init (and on process pool init) 
@@ -1256,6 +1258,47 @@ lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t sample
     lpfloat_t gamma = 1.f - (lpfloat_t)exp(-(2.f * (lpfloat_t)PI) * (cutoff/samplerate));
     *y = (1.f - gamma) * (*y) + gamma * x;
     return *y;
+}
+
+lpfloat_t fx_fold(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate) {
+    // Adapted from https://ccrma.stanford.edu/~jatin/ComplexNonlinearities/Wavefolder.html
+    lpfloat_t out = 0;
+#if LP_FLOAT
+    lpfloat_t z = tanhf(val) + (tanhf(*prev) * 0.9f);
+    out = z + (-0.5f * sinf(2.f * (float)PI * val * (samplerate/2.f) / samplerate));
+#else
+    lpfloat_t z = tanh(val) + (tanh(*prev) * 0.9);
+    out = z + (-0.5 * sin(2. * PI * val * (samplerate/2.) / samplerate));
+#endif
+    *prev = out;
+    //return lpzapgremlins(out);
+    return out;
+}
+
+lpfloat_t fx_limit(lpfloat_t val, lpfloat_t * prev, lpfloat_t threshold, lpfloat_t release, lpbuffer_t * del) {
+    // Not gonna lie, chatgpt helped me with this... it's prolly wonky! 
+    // TODO: comparative reading on simple limiter implementations
+    lpfloat_t alpha, out, sample, absample, smoothgain, gain=1.f;
+    int sample_idx;
+
+    assert(del->channels == 1);
+    assert(del->samplerate > 0);
+
+    alpha = exp(-1.f / del->samplerate * release);
+    sample_idx = (del->pos - 100 + del->length) % del->length; // 100 sample delay
+    sample = del->data[sample_idx];
+
+    absample = fabs(sample);    
+    if(absample > threshold) gain = threshold / absample;
+
+    smoothgain = alpha * (*prev) + (1.f - alpha) * gain;
+    *prev = smoothgain;
+    out = smoothgain * val;
+
+    del->data[del->pos] = val;
+    del->pos = (del->pos + 1) % del->length;
+
+    return out;
 }
 
 void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling) {

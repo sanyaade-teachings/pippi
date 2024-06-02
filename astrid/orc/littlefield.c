@@ -9,7 +9,9 @@
 
 #define NUMOSCS 20
 #define WTSIZE 4096
-#define NUMFREQS 12
+#define MAXNUMFREQS NUMOSCS
+
+int num_freqs = MAXNUMFREQS;
 
 lppatternbuf_t default_patternbuf = {1,{1}};
 
@@ -30,30 +32,40 @@ lpfloat_t scale[] = {
 
 enum InstrumentParams {
     PARAM_NOOP,
-    PARAM_FREQ,
-    PARAM_FREQS,
-    PARAM_AMP,
-    PARAM_WINSPEED,
-    PARAM_WINFREQ,
+    PARAM_OSC_AMP,
     PARAM_OSC_MIX,
-    PARAM_MIC_MIX,
-    PARAM_ENV_MOD,
-    PARAM_OCTAVE,
+    PARAM_OSC_PULSEWIDTH,
+    PARAM_OSC_SATURATION,
+    PARAM_OSC_ENVELOPE_SPEED,
+    PARAM_OSC_DRIFT_DEPTH,
+    PARAM_OSC_DISTORTION_AMOUNT,
+    PARAM_OSC_OCTAVE_SPREAD,
+    PARAM_OSC_OCTAVE_OFFSET,
+    PARAM_OSC_FREQS,
+    PARAM_GATE_AMP,
+    PARAM_GATE_MIX,
+    PARAM_GATE_SPEED,
+    PARAM_GATE_PULSEWIDTH,
+    PARAM_GATE_SATURATION,
+    PARAM_GATE_SHAPE,
+    PARAM_GATE_DRIFT_DEPTH,
     PARAM_GATE_PATTERN,
-    PARAM_PW,
+    PARAM_GATE_PHASE_RESET,
+    PARAM_MIC_MIX,
     NUMPARAMS
 };
 
 typedef struct localctx_t {
     lppulsarosc_t * oscs[NUMOSCS];
     lppulsarosc_t * gate;
+    lpfloat_t foldprev;
+    lpfloat_t limitprev;
+    lpbuffer_t * limitbuf;
     lpbuffer_t * env;
-    int last;
-
     lpbuffer_t * curves[NUMOSCS];
     lpfloat_t env_phases[NUMOSCS];
     lpfloat_t env_phaseincs[NUMOSCS];
-    lpfloat_t selected_freqs[NUMFREQS];
+    lpfloat_t selected_freqs[MAXNUMFREQS];
 } localctx_t;
 
 lpfloat_t osc_mix(lpfloat_t pos, int chan) {
@@ -78,45 +90,75 @@ lpfloat_t mic_mix(lpfloat_t pos, int chan) {
 
 int param_map_callback(void * arg, char * keystr, char * valstr) {
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
-    localctx_t * ctx = (localctx_t *)instrument->context;
+    //localctx_t * ctx = (localctx_t *)instrument->context;
+    lpfloat_t val_floatlist[MAXNUMFREQS] = {220.};
     float val_f = 0;
     uint32_t val_i32 = 0;
     lppatternbuf_t val_pattern = {1,{1}};
 
     syslog(LOG_DEBUG, "Got param %s=%s\n", keystr, valstr);
 
-    if(strcmp(keystr, "amp") == 0) {
+    if(strcmp(keystr, "oamp") == 0) {
         extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_AMP, val_f);
-    } else if(strcmp(keystr, "pw") == 0) {
-        extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_PW, val_f);
-    } else if(strcmp(keystr, "ws") == 0) {
-        extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_WINSPEED, val_f);
-    } else if(strcmp(keystr, "wf") == 0) {
-        extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_WINFREQ, val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_AMP, val_f);
     } else if(strcmp(keystr, "omix") == 0) {
         extract_float_from_token(valstr, &val_f);
         astrid_instrument_set_param_float(instrument, PARAM_OSC_MIX, val_f);
-    } else if(strcmp(keystr, "mmix") == 0) {
+    } else if(strcmp(keystr, "opw") == 0) {
         extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_MIC_MIX, val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_PULSEWIDTH, val_f);
+    } else if(strcmp(keystr, "osat") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_SATURATION, val_f);
+    } else if(strcmp(keystr, "ospeed") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_ENVELOPE_SPEED, val_f);
+    } else if(strcmp(keystr, "odrift") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_DRIFT_DEPTH, val_f);
+    } else if(strcmp(keystr, "odist") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_DISTORTION_AMOUNT, val_f);
+    } else if(strcmp(keystr, "octspread") == 0) {
+        extract_int32_from_token(valstr, &val_i32);
+        astrid_instrument_set_param_int32(instrument, PARAM_OSC_OCTAVE_SPREAD, val_i32);
+    } else if(strcmp(keystr, "octoffset") == 0) {
+        extract_int32_from_token(valstr, &val_i32);
+        astrid_instrument_set_param_int32(instrument, PARAM_OSC_OCTAVE_OFFSET, val_i32);
+    } else if(strcmp(keystr, "freqs") == 0) {
+        num_freqs = extract_floatlist_from_token(valstr, val_floatlist, MAXNUMFREQS);
+        astrid_instrument_set_param_float_list(instrument, PARAM_OSC_FREQS, val_floatlist, num_freqs);
+    } else if(strcmp(keystr, "gamp") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_AMP, val_f);
+    } else if(strcmp(keystr, "gmix") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_MIX, val_f);
+    } else if(strcmp(keystr, "gspeed") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_SPEED, val_f);
+    } else if(strcmp(keystr, "gpw") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_PULSEWIDTH, val_f);
+    } else if(strcmp(keystr, "gsat") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_SATURATION, val_f);
+    } else if(strcmp(keystr, "gshape") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_SHAPE, val_f);
+    } else if(strcmp(keystr, "gdrift") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_DRIFT_DEPTH, val_f);
     } else if(strcmp(keystr, "gpat") == 0) {
         extract_patternbuf_from_token(valstr, val_pattern.pattern, &val_pattern.length);
         astrid_instrument_set_param_patternbuf(instrument, PARAM_GATE_PATTERN, &val_pattern);
-    } else if(strcmp(keystr, "emod") == 0) {
+    } else if(strcmp(keystr, "greset") == 0) {
+        astrid_instrument_set_param_int32(instrument, PARAM_GATE_PHASE_RESET, 1);
+    } else if(strcmp(keystr, "mmix") == 0) {
         extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_ENV_MOD, val_f);
-    } else if(strcmp(keystr, "freqs") == 0) {
-        extract_int32_from_token(valstr, &val_i32);
-        ctx->selected_freqs[LPRand.randint(0, NUMFREQS)] = scale[val_i32 % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
-        astrid_instrument_set_param_float_list(instrument, PARAM_FREQS, ctx->selected_freqs, NUMFREQS);
-    } else if (strcmp(keystr, "oct") == 0) {
-        extract_int32_from_token(valstr, &val_i32);
-        astrid_instrument_set_param_float(instrument, PARAM_OCTAVE, val_i32);
-    }
+        astrid_instrument_set_param_float(instrument, PARAM_MIC_MIX, val_f);
+    }    
+
     return 0;
 }
 
@@ -140,47 +182,68 @@ int renderer_callback(void * arg) {
 int audio_callback(size_t blocksize, float ** input, float ** output, void * arg) {
     size_t i;
     int j;
-    lpfloat_t freqs[NUMFREQS];
-    lpfloat_t sample, left, right, amp, env, pw, saturation, 
-              winspeed, winfreq,
-              osc_mix_ctl, mic_mix_ctl, in0, in1, env_mod;
+    lpfloat_t freqs[MAXNUMFREQS];
+    lpfloat_t sample, left, right, amp, env, in0, in1;
+    lpfloat_t osc_pw, osc_saturation, osc_env_speed, 
+              osc_distortion, osc_mix_ctl, osc_drift, 
+              mic_mix_ctl;
+    uint32_t octave_spread, octave_offset, gate_reset;
+    lpfloat_t gate_shape, gate_speed, gate_pw, 
+              gate_saturation;
     lppatternbuf_t gate_pattern = {1,{1}};
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
 
     if(!instrument->is_running) return 1;
 
-    amp = astrid_instrument_get_param_float(instrument, PARAM_AMP, 0.5f);
-    env_mod = astrid_instrument_get_param_float(instrument, PARAM_ENV_MOD, 0.999f);
+    amp = astrid_instrument_get_param_float(instrument, PARAM_OSC_AMP, 0.5f);
     osc_mix_ctl = astrid_instrument_get_param_float(instrument, PARAM_OSC_MIX, 0.5f);
-    mic_mix_ctl = astrid_instrument_get_param_float(instrument, PARAM_MIC_MIX, 0.25f);
-    winspeed = astrid_instrument_get_param_float(instrument, PARAM_WINSPEED, 0.5f) * 1000.f + 1.f;
-    winfreq = astrid_instrument_get_param_float(instrument, PARAM_WINFREQ, 1.f);
-    pw = astrid_instrument_get_param_float(instrument, PARAM_PW, 1.f);
-    astrid_instrument_get_param_float_list(instrument, PARAM_FREQS, NUMFREQS, freqs);
+    osc_pw = astrid_instrument_get_param_float(instrument, PARAM_OSC_PULSEWIDTH, 1.f);
+    osc_saturation = astrid_instrument_get_param_float(instrument, PARAM_OSC_SATURATION, 1.f);
+    osc_env_speed = astrid_instrument_get_param_float(instrument, PARAM_OSC_ENVELOPE_SPEED, 0.5f) * 1000.f + 1.f;
+    osc_drift = astrid_instrument_get_param_float(instrument, PARAM_OSC_DRIFT_DEPTH, 0.f);
+    osc_distortion = astrid_instrument_get_param_float(instrument, PARAM_OSC_DISTORTION_AMOUNT, 0.f);
+    octave_spread = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_SPREAD, 0);
+    octave_offset = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_OFFSET, 2);
+    astrid_instrument_get_param_float_list(instrument, PARAM_OSC_FREQS, num_freqs, freqs);
+
+    gate_reset = astrid_instrument_get_param_int32(instrument, PARAM_GATE_PHASE_RESET, 0);
+    gate_shape = astrid_instrument_get_param_float(instrument, PARAM_GATE_SHAPE, 0.f);
+    gate_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE_SPEED, 1.f);
+    gate_saturation = astrid_instrument_get_param_float(instrument, PARAM_GATE_SATURATION, 1.f);
+    gate_pw = astrid_instrument_get_param_float(instrument, PARAM_GATE_PULSEWIDTH, 1.f);
     gate_pattern = astrid_instrument_get_param_patternbuf(instrument, PARAM_GATE_PATTERN, default_patternbuf);
 
-    ctx->gate->window_morph = env_mod;
-    ctx->gate->freq = winfreq;
+    mic_mix_ctl = astrid_instrument_get_param_float(instrument, PARAM_MIC_MIX, 0.25f);
+
+
+    ctx->gate->window_morph = fmin(gate_shape, 0.999f); // TODO investigate overflows
+    ctx->gate->freq = gate_speed;
+    ctx->gate->pulsewidth = gate_pw;
+    ctx->gate->saturation = gate_saturation;
     LPPulsarOsc.burst_bytes(ctx->gate, gate_pattern.pattern, gate_pattern.length);
+
+    if(gate_reset) {
+        ctx->gate->phase = 0.f;
+        astrid_instrument_set_param_int32(instrument, PARAM_GATE_PHASE_RESET, 0);
+    }
 
     for(i=0; i < blocksize; i++) {
         sample = 0.f;
         for(j=0; j < NUMOSCS; j++) {
-            saturation = LPInterpolation.linear_pos(ctx->curves[j], ctx->curves[j]->phase) * 0.05f + 0.95f;
-            ctx->oscs[j]->saturation = saturation;
-            ctx->oscs[j]->pulsewidth = pw * input[0][i];
-            ctx->oscs[j]->freq = freqs[j % NUMFREQS] * 4.f;
+            // TODO use this LFO for the freq drift -- use phase offsets to vary the drift amount
+            //saturation = LPInterpolation.linear_pos(ctx->curves[j], ctx->curves[j]->phase) * 0.05f + 0.95f;
+            ctx->oscs[j]->saturation = osc_saturation;
+            ctx->oscs[j]->pulsewidth = osc_pw;
+            // TODO apply the octave spread here, use the drift LFO to vary the spread
+            ctx->oscs[j]->freq = freqs[j % num_freqs] * (osc_drift + 1.f);
 
             sample += LPPulsarOsc.process(ctx->oscs[j]) * LPInterpolation.linear_pos(ctx->env, ctx->env_phases[j]) * ((1.f/NUMOSCS)*3.f);
 
-            ctx->env_phases[j] += ctx->env_phaseincs[j] * (1.f+winspeed) * 3.f;
+            ctx->env_phases[j] += ctx->env_phaseincs[j] * (1.f+osc_env_speed) * 3.f;
 
             if(ctx->env_phases[j] >= 1.f) {
-                // change the pitch when the env boundry is crossed
-                ctx->selected_freqs[ctx->last] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * (1 << LPRand.randint(0, 4)) + LPRand.rand(0.f, 1.f);
-                ctx->last += 1;
-                while(ctx->last >= NUMFREQS) ctx->last -= NUMFREQS;
+                // something special on phase resets maybe?
             }
 
             while(ctx->env_phases[j] >= 1.f) ctx->env_phases[j] -= 1.f;
@@ -189,10 +252,19 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
             while(ctx->curves[j]->phase >= 1.f) ctx->curves[j]->phase -= 1.f;
         }
 
-        left = right = sample * amp;
+        sample *= amp;
+
+        if(sample > 1.f || sample < -1.f) {
+            sample = LPFX.fold(sample, &ctx->foldprev, instrument->samplerate);
+        }
+
+        sample = LPFX.limit(sample, &ctx->limitprev, 1.f, 0.2f, ctx->limitbuf);
+
+        left = right = sample;
 
         left *= osc_mix(osc_mix_ctl, 0);
         right *= osc_mix(osc_mix_ctl, 1);
+
         in0 = input[0][i] * mic_mix(mic_mix_ctl, 0) * MIC_ATTENUATION;
         in1 = input[1][i] * mic_mix(mic_mix_ctl, 1) * MIC_ATTENUATION;
 
@@ -216,6 +288,9 @@ int main() {
 
     // create env window for the footballs
     ctx->env = LPWindow.create(WIN_HANNOUT, 4096);
+    ctx->foldprev = 0.f;
+    ctx->limitprev = 1.f;
+    ctx->limitbuf = LPBuffer.create(1024, 1, (lpfloat_t)SR);
 
     // setup oscs and curves
     for(int i=0; i < NUMOSCS; i++) {
@@ -223,9 +298,10 @@ int main() {
         ctx->env_phaseincs[i] = (1.f/SR) * LPRand.rand(0.005f, 0.03f) * 0.5f;
         ctx->curves[i] = LPWindow.create(WIN_RND, 4096);
 
-        ctx->oscs[i] = LPPulsarOsc.create(2, 2, // number of wavetables, windows
-            WT_SINE, WTSIZE, WT_TRI2, WTSIZE,   // wavetables and sizes
-            WIN_SINE, WTSIZE, WIN_HANN, WTSIZE  // windows and sizes
+        ctx->oscs[i] = LPPulsarOsc.create(4, 2,
+            WT_SINE, WTSIZE, WT_TRI2, WTSIZE, 
+            WT_TRI2, WTSIZE, WT_SINE, WTSIZE,   
+            WIN_SINE, WTSIZE, WIN_HANN, WTSIZE 
         );
 
         ctx->oscs[i]->samplerate = (lpfloat_t)SR;
@@ -253,10 +329,10 @@ int main() {
     }
 
     /* now that LMDB is running, populate the initial freqs */
-    for(int i=0; i < NUMFREQS; i++) {
-        ctx->selected_freqs[i] = scale[LPRand.randint(0, NUMFREQS*2) % NUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
+    for(int i=0; i < MAXNUMFREQS; i++) {
+        ctx->selected_freqs[i] = scale[LPRand.randint(0, MAXNUMFREQS*2) % MAXNUMFREQS] * 0.5f + LPRand.rand(0.f, 1.f);
     }
-    astrid_instrument_set_param_float_list(instrument, PARAM_FREQS, ctx->selected_freqs, NUMFREQS);
+    astrid_instrument_set_param_float_list(instrument, PARAM_OSC_FREQS, ctx->selected_freqs, MAXNUMFREQS);
 
     /* twiddle thumbs until shutdown */
     while(instrument->is_running) {
@@ -277,6 +353,7 @@ int main() {
 
     LPPulsarOsc.destroy(ctx->gate);
     LPBuffer.destroy(ctx->env);
+    LPBuffer.destroy(ctx->limitbuf);
 
     free(ctx);
 
