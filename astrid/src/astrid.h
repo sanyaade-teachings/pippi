@@ -168,6 +168,9 @@ typedef struct lpinstrument_t {
     lpmsg_t msg;
     lpmsg_t cmd;
 
+    int tty_is_enabled;
+    char tty_path[NAME_MAX]; 
+
     // Message scheduling pq nodes
     pqueue_t * msgpq;
     lpmsgpq_node_t * pqnodes;
@@ -317,13 +320,13 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument, char * key, char * val), int (*trigger)(void * instrument));
+lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, char * tty, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument, char * key, char * val), int (*trigger)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
-uint32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, uint32_t default_value);
-void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, uint32_t value);
+int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value);
+void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, int32_t value);
 void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t * patternbuf);
-lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t default_patternbuf);
+lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index);
 void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value);
 lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t default_value);
 void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size);
@@ -337,7 +340,7 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
 int send_render_to_mixer(lpinstrument_t * instrument, lpbuffer_t * buf);
 int relay_message_to_seq(lpinstrument_t * instrument);
 
-int extract_int32_from_token(char * token, uint32_t * val);
+int extract_int32_from_token(char * token, int32_t * val);
 int extract_float_from_token(char * token, float * val);
 int extract_floatlist_from_token(char * tokenlist, lpfloat_t * val, int size);
 int extract_patternbuf_from_token(char * token, unsigned char * patternbuf, size_t * pattern_length);

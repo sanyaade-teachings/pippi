@@ -43,17 +43,18 @@ void burst_table_from_bytes(lppulsarosc_t * osc, unsigned char * bytes, size_t b
     int mask;
     size_t i, c, pos;
     bool * burst_table;
-    size_t num_bytes = burst_size / sizeof(unsigned char) + 1;
+    size_t num_bytes = (burst_size + sizeof(unsigned char) - 1) / sizeof(unsigned char);
 
     burst_table = (bool *)LPMemoryPool.alloc(burst_size, sizeof(bool));
+    if(burst_table == NULL) return;
 
     pos = 0;
     for(i=0; i < num_bytes; i++) {
         for(c=0; c < sizeof(unsigned char); c++) {
+            if(pos >= burst_size) break;
             mask = 1 << c;
             burst_table[pos] = (bool)((bytes[i] & mask) >> c);
             pos += 1;
-            if(pos >= burst_size) break;
         }
     }
 
@@ -63,7 +64,7 @@ void burst_table_from_bytes(lppulsarosc_t * osc, unsigned char * bytes, size_t b
 
 void burst_table_from_file(lppulsarosc_t * osc, char * filename, size_t burst_size) {
     int fp;
-    size_t num_bytes = burst_size / sizeof(unsigned char) + 1;
+    size_t num_bytes = (burst_size + sizeof(unsigned char) - 1) / sizeof(unsigned char);
     unsigned char burst_buffer[num_bytes];
 
     memset(burst_buffer, 0, num_bytes * sizeof(unsigned char));

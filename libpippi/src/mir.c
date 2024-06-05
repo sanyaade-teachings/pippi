@@ -67,6 +67,7 @@ lpfloat_t yin_process(lpyin_t * yin, lpfloat_t sample) {
         yin_difference_function(yin);
         yin_cumulative_mean_normalized_difference_function(yin);
         p = yin_get_pitch(yin);
+        yin->last_pitch = p;
         yin->elapsed = 0;
     } else {
         p = yin->last_pitch;

@@ -106,7 +106,7 @@ cdef class MessageEvent:
         strcpy(self.msg.msg, byte_params)
         strcpy(self.msg.instrument_name, byte_instrument_name)
 
-    cpdef int schedule(MessageEvent self, double now):
+    cpdef int schedule(MessageEvent self, double now=0):
         self.msg.initiated = now
         return send_play_message(self.msg[0])
 
@@ -337,7 +337,7 @@ cdef class Instrument:
         self.last_reload = 0
         self.max_processing_time = 0
 
-        self.i = astrid_instrument_start(self.ascii_name, channels, 1, adc_length, NULL, NULL, NULL, NULL, NULL)
+        self.i = astrid_instrument_start(self.ascii_name, channels, 1, adc_length, NULL, NULL, NULL, NULL, NULL, NULL)
         if self.i == NULL:
             raise InstrumentError('Could not initialize lpinstrument_t')
 
@@ -372,6 +372,10 @@ cdef class Instrument:
                 if hasattr(self.renderer, 'cache'):
                     self.cache = self.renderer.cache()
 
+                if hasattr(self.renderer, 'stream'):
+                    ctx = self.get_event_context()
+                    self.graph = self.renderer.stream(ctx)
+
                 if hasattr(self.renderer, 'MIDI_DEVICE'):
                     self.default_midi_device = self.renderer.MIDI_DEVICE
                 else:
@@ -387,8 +391,6 @@ cdef class Instrument:
 
         logger.info('loaded instrument, setting metadata')
         self.last_reload = os.path.getmtime(path)
-        #logger.info('registering midi triggers')
-        #self.register_midi_triggers()
 
     cpdef lpmsg_t get_message(Instrument self):
         cdef lpmsg_t msg
@@ -453,7 +455,6 @@ cdef class Instrument:
                 renderer._ = None
 
             self.renderer = renderer
-            self.register_midi_triggers()
         else:
             logger.error('Error reloading instrument. Null spec at path:\n  %s' % self.path)
 
@@ -461,31 +462,38 @@ cdef class Instrument:
         if hasattr(self.renderer, 'cache'):
             self.cache = self.renderer.cache()
 
-    def register_midi_triggers(self):
-        # FIXME prolly don't need this anymore?
-        if hasattr(self.renderer, 'MIDI'): 
-            devices = []
-            if isinstance(self.renderer.MIDI, list):
-                devices += self.renderer.MIDI
-            else:
-                devices = [ self.renderer.MIDI ]
+        if hasattr(self.renderer, 'stream'):
+            ctx = self.get_event_context()
+            self.graph = self.renderer.stream(ctx)
 
 
-cdef int stream_graph_update(object instrument):
-    cdef EventContext ctx 
+    def handle_update_message(self, str msgstr):
+        cdef EventContext ctx 
+        cdef dict params
+        cdef str p, k, v
 
-    if not hasattr(instrument.renderer, 'stream'):
-        return 0
+        if not hasattr(self.renderer, 'update'):
+            logger.warning('Ignoring update message: this instrument has no callback registered')
+            return None
 
-    ctx = instrument.get_event_context()
-    try:
-        # Update the graph
-        instrument.graph = instrument.renderer.stream(ctx)
-    except Exception as e:
-        logger.exception('Error during %s stream graph update: %s' % (ctx.instrument.name, e))
-        return -1
+        ctx = self.get_event_context()
+        params = dict()
 
-    return 0
+        try:
+            # read msg body, split and call update with each
+            for p in msgstr.split(' '):
+                if '=' in p:
+                    p = p.strip()
+                    k, v = tuple(p.split('='))
+                else:
+                    v = None
+                    k = p.strip()
+                    if k == '':
+                        continue
+                self.renderer.update(ctx, k.strip(), v.strip())
+        except Exception as e:
+            logger.exception('Error during %s update message handling: %s' % (self.name, e))
+
 
 cdef tuple collect_players(Instrument instrument):
     loop = False
@@ -701,15 +709,17 @@ def _run_forever(Instrument instrument,
     ):
     cdef lpmsg_t msg
 
-    logger.info(f'running forever... {script_path=} {instrument_name=}')
+    logger.info(f'PY: running forever... {script_path=} {instrument_name=}')
 
     while True:
-        logger.info('waiting for a message...')
+        logger.info('PY MSG: waiting for a message...')
         try:
             msg = instrument.get_message()
         except InstrumentError as e:
             print('There was a problem reading from the msg q. Maybe try turning it off and on again?')
             continue
+
+        logger.info('PY MSG: got one!')
 
         if msg.type == LPMSG_SHUTDOWN:
             logger.info('PY MSG: shutdown')
@@ -719,8 +729,7 @@ def _run_forever(Instrument instrument,
 
         elif msg.type == LPMSG_UPDATE:
             logger.info('PY MSG: update')
-            if stream_graph_update(instrument) < 0:
-                logger.error('Error trying to schedule python render...')
+            instrument.handle_update_message(msg.msg.decode('utf-8'))
 
         elif msg.type == LPMSG_PLAY:
             logger.info('PY MSG: play')
@@ -745,7 +754,7 @@ def _run_forever(Instrument instrument,
                 logger.error('Error trying to reload instrument. Shutting down...')
                 break
 
-    logger.info('python instrument shutting down...')
+    logger.info('PY: python instrument shutting down...')
 
 def run_forever(str script_path, str instrument_name=None, int channels=2, double adc_length=30):
     cdef Instrument instrument = None

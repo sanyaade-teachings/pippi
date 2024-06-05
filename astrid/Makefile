@@ -107,6 +107,7 @@ littlefield:
 
 	echo "Building littlefield...";
 
+	#$(CC) $(LPFLAGS) -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/littlefield.c $(LPLIBS) -o build/littlefield
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/littlefield.c $(LPLIBS) -o build/littlefield
 	sudo cp build/littlefield /usr/local/bin/
 

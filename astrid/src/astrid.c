@@ -1727,7 +1727,7 @@ int astrid_get_capture_device_id() {
     return astrid_get_playback_device_id();
 }
 
-int extract_int32_from_token(char * token, uint32_t * val) {
+int extract_int32_from_token(char * token, int32_t * val) {
     char * end;
     long result = 0;
 
@@ -1739,7 +1739,7 @@ int extract_int32_from_token(char * token, uint32_t * val) {
 
     if(result > INT_MAX) result = INT_MAX;
 
-    *val = (uint32_t)result;
+    *val = (int32_t)result;
     return 0;
 }
 
@@ -1813,8 +1813,8 @@ int encode_update_message_param(lpmsg_t * msg) {
     char *token, *save=NULL;
     char param_copy[LPMAXMSG] = {0};
 
-    uint32_t vali32 = 0;
-    uint16_t vali16 = 0;
+    int32_t vali32 = 0;
+    int16_t vali16 = 0;
     float valf = 0.f;
 
     memcpy(param_copy, msg->msg, LPMAXMSG);
@@ -1854,10 +1854,10 @@ int encode_update_message_param_float(uint16_t id, char * valstr, lpmsg_t * msg)
 }
 
 int encode_update_message_param_int32(uint16_t id, char * valstr, lpmsg_t * msg) {
-    uint32_t val = 0;
-    uint16_t val16 = 0;
+    int32_t val = 0;
+    int16_t val16 = 0;
     if(extract_int32_from_token(valstr, &val) < 0) {
-        syslog(LOG_ERR, "encode_update_message_param_int32: Could not extract uint32_t from token '%s'\n", valstr);
+        syslog(LOG_ERR, "encode_update_message_param_int32: Could not extract int32_t from token '%s'\n", valstr);
         return -1;
     }
 
@@ -1879,11 +1879,6 @@ int process_param_updates(lpinstrument_t * instrument) {
     char * valtoken;
     char * cmdline_save;
     char * paramline_save;
-
-    if(instrument->cmd.type != LPMSG_UPDATE) {
-        syslog(LOG_WARNING, "process_param_updates: instrument->cmd.type is '%d' skipping...\n", instrument->cmd.type);
-        return 0;
-    }
 
     memcpy(cmdline, instrument->msg.msg, LPMAXMSG);
 
@@ -3087,9 +3082,14 @@ void * instrument_serial_listener_thread(void * arg) {
     size_t bytes_in_buf=0;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
+    if(!instrument->tty_is_enabled) {
+        syslog(LOG_INFO, "%s serial listener: no tty requested, shutting down here!\n", instrument->name);
+        return NULL;
+    }
+
     // Open the tty 
     // TODO support multiple ttys, duuuh
-    tty = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+    tty = open(instrument->tty_path, O_RDWR | O_NOCTTY);
     if(tty < 0) {
         syslog(LOG_ERR, "Problem connecting to TTY -- shutting down serial listener thread...\n");
         return NULL;
@@ -3237,6 +3237,7 @@ lpinstrument_t * astrid_instrument_start(
     int ext_relay_enabled,
     double adc_length,
     void * ctx,
+    char * tty,
     int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
     int (*renderer)(void * instrument),
     int (*update)(void * instrument, char * key, char * val),
@@ -3290,6 +3291,12 @@ lpinstrument_t * astrid_instrument_start(
     // Set the message q names
     snprintf(instrument->qname, NAME_MAX, "/%s-msgq", instrument->name);
     snprintf(instrument->serial_message_q_name, NAME_MAX, "/%s-serial-msgq", instrument->name);
+
+    // Set the tty path
+    if(tty != NULL) {
+        snprintf(instrument->tty_path, NAME_MAX, "%s", tty);
+        instrument->tty_is_enabled = 1;
+    }
 
     if(instrument->ext_relay_enabled) {
         snprintf(instrument->external_relay_name, NAME_MAX, "/%s-extrelay-msgq", instrument->name);
@@ -3788,32 +3795,32 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
     return 0;
 }
 
-uint32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, uint32_t default_value) {
+int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value) {
     int rc;
     MDB_val key, data;
-    uint32_t param = default_value;
+    int32_t param = default_value;
 
     key.mv_size = sizeof(int);
     key.mv_data = (void *)(&param_index);
-    data.mv_size = sizeof(uint32_t);
+    data.mv_size = sizeof(int32_t);
 
 	rc = mdb_txn_renew(instrument->dbtxn_read);
     rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
     if(rc == 0) {
-        param = *((uint32_t *)data.mv_data);
+        param = *((int32_t *)data.mv_data);
     }
     mdb_txn_reset(instrument->dbtxn_read);
 
     return param;
 }
 
-void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, uint32_t value) {
+void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, int32_t value) {
     int rc;
 	MDB_val key, data;
 
     key.mv_size = sizeof(int);
     key.mv_data = (void *)(&param_index);
-    data.mv_size = sizeof(uint32_t);
+    data.mv_size = sizeof(int32_t);
     data.mv_data = (void *)(&value);
 
 	rc = mdb_txn_begin(instrument->dbenv, NULL, 0, &instrument->dbtxn_write);
@@ -3879,10 +3886,10 @@ void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int par
     }
 }
 
-lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t default_patternbuf) {
+lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index) {
     int rc;
     MDB_val key, data;
-    lppatternbuf_t patternbuf = default_patternbuf;
+    lppatternbuf_t patternbuf = {1,{1}};
 
     key.mv_size = sizeof(int);
     key.mv_data = (void *)(&param_index);

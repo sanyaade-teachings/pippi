@@ -151,6 +151,7 @@ cdef extern from "astrid.h":
         int ext_relay_enabled,
         double adc_length,
         void * ctx, 
+        char * tty,
         int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
         int (*renderer)(void * instrument),
         int (*update)(void * instrument),
@@ -167,7 +168,7 @@ cdef extern from "astrid.h":
 
 cdef class MessageEvent:
     cdef lpmsg_t * msg
-    cpdef int schedule(MessageEvent self, double now)
+    cpdef int schedule(MessageEvent self, double now=*)
 
 cdef class MidiEvent:
     cdef lpmidievent_t * event
