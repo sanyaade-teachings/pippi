@@ -43,6 +43,12 @@ lpfloat_t scale[] = {
     293.333f
 };
 
+enum DistortionTypes {
+    DISTORTION_FOLDBACK,
+    DISTORTION_BITCRUSH,
+    NUM_DISTORTIONS,
+};
+
 enum InstrumentParams {
     PARAM_NOOP,
     PARAM_OSC_AMP,
@@ -227,6 +233,7 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
 
     } else if(strcmp(keystr, "disttype") == 0) {
         extract_int32_from_token(valstr, &val_i32);
+        if(val_i32 < 0 || val_i32 >= NUM_DISTORTIONS) val_i32 = DISTORTION_FOLDBACK;
         astrid_instrument_set_param_int32(instrument, PARAM_DISTORTION_TYPE, val_i32);
     } else if(strcmp(keystr, "distmix") == 0) {
         extract_float_from_token(valstr, &val_f);
@@ -400,14 +407,12 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
         // apply distortion
         if(distortion_mix > 0 && distortion_amount > 0) {
             switch(distortion_type) {
-                case 0:
-                    // foldback distortion
+                case DISTORTION_FOLDBACK:
                     d1 = LPFX.fold(output[0][i] * (distortion_amount+1), &ctx->fold1prev, instrument->samplerate);
                     d2 = LPFX.fold(output[1][i] * (distortion_amount+1), &ctx->fold2prev, instrument->samplerate);
                     break;
 
-                case 1:
-                    // bitcrushing
+                case DISTORTION_BITCRUSH:
                     d1 = LPFX.crush(output[0][i], (1.f-distortion_amount) * 15 + 1);
                     d2 = LPFX.crush(output[1][i], (1.f-distortion_amount) * 15 + 1);
                     break;
