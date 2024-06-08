@@ -28,6 +28,7 @@ lpfloat_t terry[] = {
     15.f/8.f,    // M7  B
 };
 
+// this is just used as the default freq list on startup
 lpfloat_t scale[] = {
     55.000f, 
     110.000f, 
@@ -68,6 +69,9 @@ enum InstrumentParams {
     PARAM_GATE_SHAPE,
     PARAM_GATE_DRIFT_DEPTH,
     PARAM_GATE_DRIFT_SPEED,
+    PARAM_GATE_DRIFT_STABILITY,
+    PARAM_GATE_DRIFT_DENSITY,
+    PARAM_GATE_DRIFT_PERIODICITY,
     PARAM_GATE_PATTERN,
     PARAM_GATE_PHASE_RESET,
     PARAM_GATE_REPEAT,
@@ -108,7 +112,6 @@ typedef struct localctx_t {
     lpbuffer_t * gate_drift_win;
 
     lpbuffer_t * env;
-    lpbuffer_t * curves[NUMOSCS];
     lpbuffer_t * drifters[NUMOSCS];
     lpfloat_t drift_phaseincs[NUMOSCS];
 
@@ -195,6 +198,16 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
    } else if(strcmp(keystr, "gdspeed") == 0) {
         extract_float_from_token(valstr, &val_f);
         astrid_instrument_set_param_float(instrument, PARAM_GATE_DRIFT_SPEED, val_f);
+   } else if(strcmp(keystr, "gdstab") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_DRIFT_STABILITY, val_f);
+   } else if(strcmp(keystr, "gdden") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_DRIFT_DENSITY, val_f);
+   } else if(strcmp(keystr, "gdper") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_DRIFT_PERIODICITY, val_f);
+
     } else if(strcmp(keystr, "gpat") == 0) {
         extract_patternbuf_from_token(valstr, val_pattern.pattern, &val_pattern.length);
         astrid_instrument_set_param_patternbuf(instrument, PARAM_GATE_PATTERN, &val_pattern);
@@ -250,6 +263,7 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
     return 0;
 }
 
+// FIXME is this actually useful, or is it better to just do all the async stuff in python?
 int renderer_callback(void * arg) {
     lpbuffer_t * out;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
@@ -279,6 +293,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
               gated_sample, gate_amp, octave_mult,
               in1_out1_mix, in1_out2_mix, in2_out1_mix, in2_out2_mix,
               gate_shape, gate_speed, gate_pw, gate_drift_amount, gate_drift_speed,
+              gate_drift_stability, gate_drift_density, gate_drift_periodicity,
               gate_drift, gate_saturation, tracked_freq=220.f;
     int32_t octave_spread, octave_offset, gate_reset, gate_repeat, 
             pitch_tracking_is_enabled, distortion_type;
@@ -292,7 +307,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     distortion_mix = astrid_instrument_get_param_float(instrument, PARAM_DISTORTION_MIX, 0.f);
     distortion_type = astrid_instrument_get_param_int32(instrument, PARAM_DISTORTION_TYPE, 0);
 
-    osc_amp = astrid_instrument_get_param_float(instrument, PARAM_OSC_AMP, 0.5f);
+    osc_amp = astrid_instrument_get_param_float(instrument, PARAM_OSC_AMP, 0.f);
     osc_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_OSC_TO_OUT1, 0.5f);
     osc_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_OSC_TO_OUT2, 0.5f);
     osc_pw = astrid_instrument_get_param_float(instrument, PARAM_OSC_PULSEWIDTH, 1.f);
@@ -304,39 +319,43 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     octave_offset = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_OFFSET, 0);
     astrid_instrument_get_param_float_list(instrument, PARAM_OSC_FREQS, num_freqs, freqs);
 
-    gate_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE_AMP, 0.f);
+    gate_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE_AMP, 0.5f);
     gate_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_GATE_TO_OUT1, 0.5f);
     gate_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_GATE_TO_OUT2, 0.5f);
     gate_reset = astrid_instrument_get_param_int32(instrument, PARAM_GATE_PHASE_RESET, 0);
-    gate_repeat = astrid_instrument_get_param_int32(instrument, PARAM_GATE_REPEAT, 0);
+    gate_repeat = astrid_instrument_get_param_int32(instrument, PARAM_GATE_REPEAT, 1);
     gate_shape = astrid_instrument_get_param_float(instrument, PARAM_GATE_SHAPE, 0.f);
-    gate_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE_SPEED, 1.f);
+    gate_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE_SPEED, 2.f);
     gate_drift_amount = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_DEPTH, 0.f);
-    gate_drift_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_SPEED, 0.15f);
+    gate_drift_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_SPEED, 1.f) * 100.f;
+    gate_drift_stability = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_STABILITY, 0.1f) * 0.5f;
+    gate_drift_density = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_DENSITY, 1.f);
+    gate_drift_periodicity = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_PERIODICITY, 0.5f);
     gate_saturation = astrid_instrument_get_param_float(instrument, PARAM_GATE_SATURATION, 1.f);
     gate_pw = astrid_instrument_get_param_float(instrument, PARAM_GATE_PULSEWIDTH, 1.f);
     gate_pattern = astrid_instrument_get_param_patternbuf(instrument, PARAM_GATE_PATTERN);
 
-    in1_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_IN1_TO_OUT1, 0.5f);
-    in1_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_IN1_TO_OUT2, 0.5f);
-    in2_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_IN2_TO_OUT1, 0.5f);
-    in2_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_IN2_TO_OUT2, 0.5f);
+    in1_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_IN1_TO_OUT1, 0.f);
+    in1_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_IN1_TO_OUT2, 0.f);
+    in2_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_IN2_TO_OUT1, 0.f);
+    in2_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_IN2_TO_OUT2, 0.f);
 
     pitch_tracking_is_enabled = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_ENABLED, 0);
 
-    //gate_drift = LPInterpolation.linear_pos(ctx->gate_drifter, ctx->gate_drifter->phase) * gate_drift_amount;
+    // set gate osc params
     ctx->gate_drifter->freq = gate_drift_speed;
-    ctx->gate_drifter->minfreq = gate_drift_speed * 0.3f;
-    ctx->gate_drifter->maxfreq = gate_drift_speed * 3.f;
+    ctx->gate_drifter->minfreq = gate_drift_speed * 0.1f;
+    ctx->gate_drifter->maxfreq = gate_drift_speed * 10.f;
+    ctx->gate_drifter->stability = gate_drift_stability;
+    ctx->gate_drifter->density = gate_drift_density;
+    ctx->gate_drifter->periodicity = gate_drift_periodicity;
     gate_drift = LPShapeOsc.process(ctx->gate_drifter) * gate_drift_amount;
     ctx->gate->window_morph = fmin(gate_shape, 0.999f); // TODO investigate overflows
     ctx->gate->freq = gate_speed + gate_drift;
     ctx->gate->pulsewidth = gate_pw;
     ctx->gate->saturation = gate_saturation;
     LPPulsarOsc.burst_bytes(ctx->gate, gate_pattern.pattern, gate_pattern.length);
-
     ctx->gate->once = !gate_repeat;
-
 
     if(gate_reset) {
         ctx->gate->phase = 0.f;
@@ -346,17 +365,20 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     for(i=0; i < blocksize; i++) {
         sample = d1 = d2 = 0.f;
 
-        p = LPPitchTracker.yin_process(ctx->yin, input[0][i]);
-        if(p > 0 && p != last_p) {
-            tracked_freq = p;
-            last_p = p;
+        // track the pitch if it's enabled
+        if(pitch_tracking_is_enabled) {
+            p = LPPitchTracker.yin_process(ctx->yin, input[0][i]);
+            if(p > 0 && p != last_p) {
+                tracked_freq = p;
+                last_p = p;
+            }
+
+            tracked_freq = LPFX.lpf1(tracked_freq, &ctx->freqsmooth, 20.f, SR);
+
+            // track in a ~melodic range
+            while(tracked_freq >= 800) tracked_freq *= 0.5f;
+            while(tracked_freq <= 80) tracked_freq *= 2.f;
         }
-
-        tracked_freq = LPFX.lpf1(tracked_freq, &ctx->freqsmooth, 20.f, SR);
-
-        // track in a ~melodic range
-        while(tracked_freq >= 800) tracked_freq *= 0.5f;
-        while(tracked_freq <= 80) tracked_freq *= 2.f;
 
         for(j=0; j < NUMOSCS; j++) {
             ctx->oscs[j]->saturation = osc_saturation;
@@ -364,27 +386,29 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
 
             drift = LPInterpolation.linear_pos(ctx->drifters[j], ctx->drifters[j]->phase) * osc_drift_amount;
 
-            if(pitch_tracking_is_enabled && (j % 2 == 0)) {
-                ctx->oscs[j]->freq = tracked_freq * ctx->octave_mults[j] + drift;
-            } else {
-                ctx->oscs[j]->freq = freqs[j % num_freqs] * ctx->octave_mults[j] + drift;
-            }
+            // set the freq to the freqs table pitch or tracked pitch if tracking is enabled
+            ctx->oscs[j]->freq = freqs[j % num_freqs];
+            if(pitch_tracking_is_enabled) ctx->oscs[j]->freq = tracked_freq;
+            ctx->oscs[j]->freq *= ctx->octave_mults[j] + drift;
 
+            // mix in the enveloped osc voice
             sample += LPPulsarOsc.process(ctx->oscs[j]) * LPInterpolation.linear_pos(ctx->env, ctx->env_phases[j]) * ((1.f/NUMOSCS)*3.f);
 
+            // advance the voice envelope phase
             ctx->env_phases[j] += ctx->env_phaseincs[j] * (1.f+osc_env_speed) * 3.f;
 
+            // on voice envelope phase resets, recalculate the octave multiplier
             if(ctx->env_phases[j] >= 1.f) {
                 octave_mult = pow(2, octave_offset);
                 octave_spread = LPRand.randint(-octave_spread, octave_spread);
                 octave_mult *= pow(2, octave_spread);
                 ctx->octave_mults[j] = octave_mult;
+                syslog(LOG_ERR, "GDRIFT=%f GDRIFTSPEED=%f GDRIFTAMOUNT=%f\n",
+                        gate_drift, gate_drift_speed, gate_drift_amount);
             }
             while(ctx->env_phases[j] >= 1.f) ctx->env_phases[j] -= 1.f;
 
-            ctx->curves[j]->phase += ctx->env_phaseincs[j];
-            while(ctx->curves[j]->phase >= 1.f) ctx->curves[j]->phase -= 1.f;
-
+            // advance the osc freq drift LFO phases
             ctx->drifters[j]->phase += ctx->drift_phaseincs[j] * osc_drift_speed;
             while(ctx->drifters[j]->phase >= 1.f) ctx->drifters[j]->phase -= 1.f;
         }
@@ -452,11 +476,10 @@ int main() {
     ctx->limit1buf = LPBuffer.create(1024, 1, (lpfloat_t)SR);
     ctx->limit2buf = LPBuffer.create(1024, 1, (lpfloat_t)SR);
 
-    // setup oscs and curves
+    // setup oscs
     for(int i=0; i < NUMOSCS; i++) {
         ctx->env_phases[i] = LPRand.rand(0.f, 1.f);
         ctx->env_phaseincs[i] = (1.f/SR) * LPRand.rand(0.005f, 0.03f) * 0.5f;
-        ctx->curves[i] = LPWindow.create(WIN_RND, 4096);
         ctx->drifters[i] = LPWavetable.create(WT_RND, 4096);
         ctx->drift_phaseincs[i] = (1.f/SR) * LPRand.rand(0.005f, 0.03f);
         ctx->octave_mults[i] = 1.f;
@@ -487,7 +510,7 @@ int main() {
     ctx->gate->freq = 30.f;
     ctx->gate->phase = 0.f;
 
-    ctx->gate_drift_win = LPWindow.create(WIN_HANN, 4096);
+    ctx->gate_drift_win = LPWavetable.create(WT_SINE, 4096);
     ctx->gate_drifter = LPShapeOsc.create(ctx->gate_drift_win);
 
     // Set the callbacks for streaming, async renders and param updates
@@ -514,7 +537,6 @@ int main() {
     /* clean up local memory */
     for(int o=0; o < NUMOSCS; o++) {
         LPPulsarOsc.destroy(ctx->oscs[o]);
-        LPBuffer.destroy(ctx->curves[o]);
         LPBuffer.destroy(ctx->drifters[o]);
     }
 
