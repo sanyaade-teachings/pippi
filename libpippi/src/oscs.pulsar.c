@@ -175,6 +175,9 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
         burst = 0; 
     }
 
+    /* Treat the pulse as a one-shot. Reset the phase to rewind, or toggle once off */
+    if(p->phase >= 1.f && p->once) return 0.f;
+
     /* If there's a non-zero pulsewidth, and the burst value is 1, 
      * then syntesize a pulse */
     if(p->pulsewidth > 0 && burst && p->phase < p->pulsewidth) {
@@ -233,7 +236,8 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     // about phase boundries (and do things when they happen)
     p->pulse_edge = (p->phase >= 1.f);
 
-    // wrap phases
+    // wrap phases unless once is toggled
+    if(p->once) return sample;
     if(p->phase < 0) {
         while(p->phase < 0) p->phase += 1.f;
     } else if(p->phase >= 1.f) {

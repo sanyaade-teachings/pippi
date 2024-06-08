@@ -26,7 +26,7 @@ ext_modules = cythonize([
                 'libpippi/src/pippicore.c',
                 'astrid/src/astrid.c',
             ],
-            libraries=['jack', 'rt'], 
+            libraries=['jack', 'rt', 'asound'], 
             include_dirs=INCLUDES+[
                 'libpippi/vendor/libpqueue/src', 
                 'libpippi/vendor/linenoise', 

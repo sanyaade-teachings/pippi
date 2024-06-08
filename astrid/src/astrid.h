@@ -31,6 +31,7 @@
 #include "pqueue.h"
 #include <hiredis/hiredis.h>
 #include <jack/jack.h>
+#include <alsa/asoundlib.h>
 
 #define NUM_NODES 4096
 #define NUM_RENDERERS 10
@@ -180,6 +181,7 @@ typedef struct lpinstrument_t {
     pthread_t cleanup_thread;
     pthread_t message_feed_thread;
     pthread_t serial_listener_thread;
+    pthread_t midi_listener_thread;
     pthread_t message_scheduler_pq_thread;
     lpscheduler_t * async_mixer;
     lpbuffer_t * lastbuf;
@@ -294,6 +296,7 @@ int lpmidi_add_msg_to_notemap(int device_id, int note, lpmsg_t msg);
 int lpmidi_remove_msg_from_notemap(int device_id, int note, int index);
 int lpmidi_print_notemap(int device_id, int note);
 int lpmidi_trigger_notemap(int device_id, int note);
+int lpmidi_relay_to_instrument(char * instrument_name, unsigned char mtype, unsigned char mid, unsigned char mval);
 
 int lpserial_setctl(int device_id, int param_id, size_t value);
 int lpserial_getctl(int device_id, int ctl, lpfloat_t * value);

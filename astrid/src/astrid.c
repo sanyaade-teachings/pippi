@@ -1,5 +1,7 @@
 #include "astrid.h"
 
+int init_instrument_message(lpmsg_t * msg, char * instrument_name);
+
 static volatile int * astrid_instrument_is_running;
 static pthread_mutex_t astrid_nursery_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -1161,6 +1163,26 @@ int lpmidi_trigger_notemap(int device_id, int note) {
     }
 
     free(notemap_path);
+
+    return 0;
+}
+
+int lpmidi_relay_to_instrument(char * instrument_name, unsigned char mtype, unsigned char mid, unsigned char mval) {
+    lpmsg_t msg = {0};
+    size_t offset = 0;
+
+    init_instrument_message(&msg, instrument_name);
+    msg.type = LPMSG_MIDI_FROM_DEVICE;
+
+    memcpy(msg.msg, &mtype, sizeof(unsigned char));
+    offset += sizeof(unsigned char);
+
+    memcpy(msg.msg+offset, &mid, sizeof(unsigned char));
+    offset += sizeof(unsigned char);
+
+    memcpy(msg.msg+offset, &mval, sizeof(unsigned char));
+
+    send_play_message(msg);
 
     return 0;
 }
@@ -2613,12 +2635,14 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         }
     }
 
+#if 0
     /* clamp output */
     for(c=0; c < instrument->channels; c++) {
         for(i=0; i < (size_t)nframes; i++) {
             output_channels[c][i] = fmax(-1.f, fmin(output_channels[c][i], 1.f));
         }
     }
+#endif
 
     return 0;
 }
@@ -2920,6 +2944,14 @@ void * instrument_message_thread(void * arg) {
                 // maybe support raspberry pi GPIO pin toggling / triggers?
                 syslog(LOG_DEBUG, "C MSG: trigger\n");
                 if(instrument->trigger != NULL) instrument->trigger(instrument);
+                break;
+
+            case LPMSG_MIDI_FROM_DEVICE:
+                syslog(LOG_DEBUG, "C MSG: midi from device\n");
+                break;
+
+            case LPMSG_MIDI_TO_DEVICE:
+                syslog(LOG_DEBUG, "C MSG: midi to device\n");
                 break;
 
             default:
@@ -3231,6 +3263,55 @@ handle_serial_message_events:
     return 0;
 }
 
+void * instrument_midi_listener_thread(void * arg) {
+    snd_seq_t * seq_handle;
+    snd_seq_event_t * event;
+    int ret, port;
+
+    lpinstrument_t * instrument = (lpinstrument_t *)arg;
+
+    if((ret = snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_INPUT, 0)) < 0) {
+        syslog(LOG_ERR, "%s midi listener: Could not open ALSA seq. Error: (%d) %s\n", instrument->name, ret, snd_strerror(ret));
+        return 0;
+    }
+
+    snd_seq_set_client_name(seq_handle, "astrid_midi_listener");
+
+    if((port = snd_seq_create_simple_port(seq_handle, "input", 
+                    SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE, 
+                    SND_SEQ_PORT_TYPE_APPLICATION)) < 0) {
+        syslog(LOG_ERR, "%s midi listener: Could not create ALSA port. Error: (%d) %s\n", instrument->name, port, snd_strerror(port));
+        snd_seq_close(seq_handle);
+        return 0;
+    }
+
+    if((ret = snd_seq_connect_from(seq_handle, port, 20, 0)) < 0) {
+        syslog(LOG_ERR, "%s midi listener: Could not connect to ALSA port. Error: (%d) %s\n", instrument->name, ret, snd_strerror(ret));
+        snd_seq_close(seq_handle);
+        return 0;
+    }
+
+    while(instrument->is_running) {
+        snd_seq_event_input(seq_handle, &event);
+        switch(event->type) {
+            case SND_SEQ_EVENT_NOTEON:
+                lpmidi_relay_to_instrument(instrument->name, NOTE_ON, event->data.note.note, event->data.note.velocity);
+                break;
+            case SND_SEQ_EVENT_NOTEOFF:
+                lpmidi_relay_to_instrument(instrument->name, NOTE_OFF, event->data.note.note, event->data.note.velocity);
+                break;
+            case SND_SEQ_EVENT_CONTROLLER:
+                lpmidi_relay_to_instrument(instrument->name, CONTROL_CHANGE, event->data.control.param, event->data.control.value);
+                break;
+            default:
+                break;
+        }
+    }
+
+    snd_seq_close(seq_handle);
+    return 0;
+}
+
 lpinstrument_t * astrid_instrument_start(
     char * name, 
     int channels, 
@@ -3445,6 +3526,13 @@ lpinstrument_t * astrid_instrument_start(
         return NULL;
     }
 
+    /* Start listening for MIDI messages in the midi listener thread */
+    // TODO support multiple devices
+    if(pthread_create(&instrument->midi_listener_thread, NULL, instrument_midi_listener_thread, (void*)instrument) != 0) {
+        syslog(LOG_ERR, "Could not initialize instrument midi listener thread. Error: %s\n", strerror(errno));
+        return NULL;
+    }
+
     /* start the cleanup thread */
     if(pthread_create(&instrument->cleanup_thread, NULL, instrument_cleanup_thread, (void*)instrument) != 0) {
         syslog(LOG_ERR, "Could not initialize instrument cleanup thread. Error: %s\n", strerror(errno));
@@ -3504,6 +3592,14 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
         if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
         if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
         syslog(LOG_ERR, "Error while attempting to join with cleanup thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
+    }
+
+    syslog(LOG_DEBUG, "Joining with midi listener thread...\n");
+    if((ret = pthread_join(instrument->midi_listener_thread, NULL)) != 0) {
+        if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
+        if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
+        if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
+        syslog(LOG_ERR, "Error while attempting to join with midi listener thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
     }
 
     syslog(LOG_DEBUG, "Joining with serial listener thread...\n");

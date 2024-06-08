@@ -27,7 +27,7 @@ LPDBSOURCES = $(LPDIR)/vendor/sqlite3/sqlite3.c
 LPINCLUDES = -Isrc -I${LPDIR}../pippi -I$(LPDIR)/vendor -I$(LPDIR)/src -I${LPDIR}/vendor/linenoise -I${LPDIR}/vendor/libpqueue/src -I${LPDIR}/vendor/lmdb/libraries/liblmdb
 LPDBINCLUDES = -I${LPDIR}/vendor/sqlite3
 LPFLAGS = -g -std=gnu2x -Wall -Wextra -pedantic -O0 -DNOPYTHON
-LPLIBS = -lm -ldl -lpthread -lrt -ljack
+LPLIBS = -lm -ldl -lpthread -lrt -ljack -lasound
 
 default: littlefield
 

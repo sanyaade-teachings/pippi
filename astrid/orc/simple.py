@@ -1,5 +1,10 @@
 from pippi import dsp, oscs, renderer
 
+def midi_messages(ctx, mtype, mid, mval):
+    ctx.log(f'MIDI CALLBACK on instrument: {mtype=} {mid=} {mval=}')
+    if mtype == 144 and mid == 60:
+        ctx.t.play(0, 'simple').schedule()
+
 def trigger(ctx):
     #return None
     events = []
@@ -14,7 +19,7 @@ def update(ctx, k, v):
 
 def play(ctx):
     ctx.log('Rendering simple tone!')
-    yield oscs.SineOsc(freq=530, amp=0.5).play(1).env('pluckout')
+    yield oscs.SineOsc(freq=dsp.rand(300, 530), amp=0.5).play(1).env('pluckout')
 
 if __name__ == '__main__':
     renderer.run_forever(__file__)

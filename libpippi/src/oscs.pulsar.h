@@ -25,6 +25,8 @@ typedef struct lppulsarosc_t {
     size_t burst_size;
     size_t burst_pos; 
 
+    bool once;  /* if once is true, after the phase overflows the osc returns zeros
+                   instead of resetting the phase to 0, to use the osc as a one-shot... */
     bool pulse_edge;
     lpfloat_t phase;
     lpfloat_t saturation; /* Probability of all pulses to no pulses */

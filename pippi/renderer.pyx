@@ -18,9 +18,9 @@ import sys
 import time
 import warnings
 
+cimport cython
 import numpy as np
 cimport numpy as np
-cimport cython
 
 from pippi import dsp, midi, ugens
 from pippi.soundbuffer cimport SoundBuffer
@@ -401,7 +401,13 @@ cdef class Instrument:
 
     cpdef EventContext get_event_context(Instrument self, bint with_graph=False):
         cdef bytes render_params = self.msg.msg
-        msgstr = render_params.decode('ascii')
+
+        msgstr = ''
+        if self.msg.type != LPMSG_MIDI_FROM_DEVICE:
+            # FIXME use the is_encoded flag or something...
+            # or maybe I can ignore this and just decode from utf-8 like a criminal...
+            msgstr = render_params.decode('ascii')
+
         graph = None
         if with_graph:
             graph = ugens.Graph()
@@ -494,6 +500,23 @@ cdef class Instrument:
         except Exception as e:
             logger.exception('Error during %s update message handling: %s' % (self.name, e))
 
+    def handle_midi_message(self, char * payload):
+        cdef EventContext ctx 
+        cdef size_t offset = 0
+        cdef unsigned char mtype=0, mid=0, mval=0
+        if not hasattr(self.renderer, 'midi_messages'):
+            logger.warning('Ignoring MIDI message: this instrument has no callback registered')
+            return None
+
+        memcpy(&mtype, payload, sizeof(unsigned char))
+        offset += sizeof(unsigned char)
+        memcpy(&mid, payload+offset, sizeof(unsigned char))
+        offset += sizeof(unsigned char)
+        memcpy(&mval, payload+offset, sizeof(unsigned char))
+
+        logger.debug(f'PY handle_midi_message: {mtype=} {mid=} {mval=}')
+        ctx = self.get_event_context()
+        self.renderer.midi_messages(ctx, mtype, mid, mval)
 
 cdef tuple collect_players(Instrument instrument):
     loop = False
@@ -705,7 +728,7 @@ def _run_forever(Instrument instrument,
         str instrument_name, 
         int channels, 
         double adc_length,
-        object q
+        object q, 
     ):
     cdef lpmsg_t msg
 
@@ -731,6 +754,13 @@ def _run_forever(Instrument instrument,
             logger.info('PY MSG: update')
             instrument.handle_update_message(msg.msg.decode('utf-8'))
 
+        elif msg.type == LPMSG_MIDI_FROM_DEVICE:
+            logger.info('PY MSG: midi from device')
+            instrument.handle_midi_message(msg.msg)
+
+        elif msg.type == LPMSG_MIDI_TO_DEVICE:
+            logger.info('PY MSG: midi to device')
+
         elif msg.type == LPMSG_PLAY:
             logger.info('PY MSG: play')
             q.put(1)
@@ -751,7 +781,7 @@ def _run_forever(Instrument instrument,
                         instrument.reload()
                         instrument.last_reload = last_edit
             except InstrumentError as e:
-                logger.error('Error trying to reload instrument. Shutting down...')
+                logger.error('PY: Error trying to reload instrument. Shutting down...')
                 break
 
     logger.info('PY: python instrument shutting down...')
@@ -764,11 +794,11 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
 
     try:
         # Start the stream and setup the instrument
-        logger.info(f'loading python instrument... {script_path=} {instrument_name=}')
+        logger.info(f'PY: loading python instrument... {script_path=} {instrument_name=}')
         instrument = Instrument(instrument_name, script_path, channels, adc_length)
-        logger.info(f'started instrument... {script_path=} {instrument_name=}')
+        logger.info(f'PY: started instrument... {script_path=} {instrument_name=}')
     except InstrumentError as e:
-        logger.error('Error trying to start instrument. Shutting down...')
+        logger.error('PY: Error trying to start instrument. Shutting down...')
         return
 
     render_pool = []
@@ -786,14 +816,14 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
             # Read messages from the console and relay them to the q
             # Also does memory cleanup on spent shared memory buffers
             if astrid_instrument_tick(instrument.i) < 0:
-                logger.info('Could not read console line')
+                logger.info('PY: Could not read console line')
                 time.sleep(2)
                 continue
 
     except KeyboardInterrupt as e:
-        print('Got keyboard interrupt')
+        print('PY: Got keyboard interrupt')
 
-    print('Waiting for the render processes to complete')
+    print('Shutting down...')
     message_process.join()
     for r in render_pool:
         r.join()

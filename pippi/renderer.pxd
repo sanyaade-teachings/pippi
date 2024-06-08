@@ -68,8 +68,11 @@ cdef extern from "astrid.h":
         LPMSG_SCHEDULE,
         LPMSG_LOAD,
         LPMSG_RENDER_COMPLETE,
+        LPMSG_DATA,
         LPMSG_SHUTDOWN,
         LPMSG_SET_COUNTER,
+        LPMSG_MIDI_FROM_DEVICE,
+        LPMSG_MIDI_TO_DEVICE,
         NUM_LPMESSAGETYPES
 
     ctypedef struct lpmsg_t:
@@ -136,6 +139,7 @@ cdef extern from "astrid.h":
     int lpmidi_getcc(int device_id, int cc)
     int lpmidi_setnote(int device_id, int note, int velocity)
     int lpmidi_getnote(int device_id, int note)
+    int lpmidi_relay_to_instrument(char * instrument_name, unsigned char mtype, unsigned char mid, unsigned char mval)
 
     int lpserial_getctl(int device_id, int ctl, lpfloat_t * value)
 
