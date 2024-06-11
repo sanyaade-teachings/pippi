@@ -3285,7 +3285,7 @@ void * instrument_midi_listener_thread(void * arg) {
         return 0;
     }
 
-    if((ret = snd_seq_connect_from(seq_handle, port, 20, 0)) < 0) {
+    if((ret = snd_seq_connect_from(seq_handle, port, 24, 0)) < 0) {
         syslog(LOG_ERR, "%s midi listener: Could not connect to ALSA port. Error: (%d) %s\n", instrument->name, ret, snd_strerror(ret));
         snd_seq_close(seq_handle);
         return 0;
@@ -3890,6 +3890,215 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
 
     return 0;
 }
+
+
+int astrid_instrument_save_param_session_snapshot(lpinstrument_t * instrument, int num_params, int snapshot_id) {
+    int shmfd;
+    sem_t * sem;
+    void * shm_base;
+    size_t shm_size = 0;
+    size_t offset = 0;
+    char path[PATH_MAX] = {0};
+
+    // Generate the path for the shared memory and semaphore
+    snprintf(path, PATH_MAX, "%s-%s-%d", ASTRID_SESSION_SNAPSHOT_NAME, instrument->name, snapshot_id);
+
+    // Create and initialize the semaphore
+    if((sem = sem_open(path, O_CREAT, LPIPC_PERMS, 1)) == SEM_FAILED) {
+        syslog(LOG_ERR, "Could not create semaphore. (%s) %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    // Calculate the required size for shared memory
+    for(int i = 0; i < num_params; i++) {
+        MDB_val key, data;
+        key.mv_size = sizeof(int);
+        key.mv_data = &i;
+
+        int rc = mdb_txn_renew(instrument->dbtxn_read);
+        if(rc == 0 && mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data) == 0) {
+            shm_size += sizeof(int) + sizeof(size_t) + data.mv_size;
+        }
+        mdb_txn_reset(instrument->dbtxn_read);
+    }
+
+    // Create and truncate the shared memory segment
+    if((shmfd = shm_open(path, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "Could not create shared memory segment. (%s) %s\n", path, strerror(errno));
+        sem_close(sem);
+        sem_unlink(path);
+        return -1;
+    }
+
+    if(ftruncate(shmfd, shm_size) < 0) {
+        syslog(LOG_ERR, "Could not truncate shared memory segment to size %ld. (%s) %s\n", shm_size, path, strerror(errno));
+        close(shmfd);
+        sem_close(sem);
+        sem_unlink(path);
+        return -1;
+    }
+
+    if((shm_base = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "Could not mmap shared memory segment. (%s) %s\n", path, strerror(errno));
+        close(shmfd);
+        sem_close(sem);
+        sem_unlink(path);
+        return -1;
+    }
+
+    // Lock the semaphore
+    sem_wait(sem);
+
+    // Write data to shared memory
+    for(int i = 0; i < num_params; i++) {
+        MDB_val key, data;
+        key.mv_size = sizeof(int);
+        key.mv_data = &i;
+
+        int rc = mdb_txn_renew(instrument->dbtxn_read);
+        if (rc == 0 && mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data) == 0) {
+            memcpy((char *)shm_base + offset, &i, sizeof(int));
+            offset += sizeof(int);
+            size_t data_size = data.mv_size;
+            memcpy((char *)shm_base + offset, &data_size, sizeof(size_t));
+            offset += sizeof(size_t);
+            memcpy((char *)shm_base + offset, data.mv_data, data_size);
+            offset += data_size;
+        }
+        mdb_txn_reset(instrument->dbtxn_read);
+    }
+
+    // Unlock the semaphore
+    sem_post(sem);
+
+    // Clean up
+    close(shmfd);
+    sem_close(sem);
+
+    return 0;
+}
+
+int astrid_instrument_restore_param_session_snapshot(lpinstrument_t * instrument, int snapshot_id) {
+    int shmfd;
+    sem_t * sem;
+    void * shm_base;
+    size_t offset = 0;
+    char path[PATH_MAX] = {0};
+
+    // Generate the path for the shared memory and semaphore
+    snprintf(path, PATH_MAX, "%s-%s-%d", ASTRID_SESSION_SNAPSHOT_NAME, instrument->name, snapshot_id);
+
+    // Open the semaphore
+    if((sem = sem_open(path, 0)) == SEM_FAILED) {
+        syslog(LOG_ERR, "Could not open semaphore. (%s) %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    // Open the shared memory segment
+    if((shmfd = shm_open(path, O_RDWR, LPIPC_PERMS)) < 0) {
+        syslog(LOG_ERR, "Could not open shared memory segment. (%s) %s\n", path, strerror(errno));
+        sem_close(sem);
+        return -1;
+    }
+
+    // Get the size of the shared memory segment
+    struct stat shm_stat;
+    if(fstat(shmfd, &shm_stat) < 0) {
+        syslog(LOG_ERR, "Could not get shared memory segment size. (%s) %s\n", path, strerror(errno));
+        close(shmfd);
+        sem_close(sem);
+        return -1;
+    }
+    size_t shm_size = shm_stat.st_size;
+
+    if((shm_base = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
+        syslog(LOG_ERR, "Could not mmap shared memory segment. (%s) %s\n", path, strerror(errno));
+        close(shmfd);
+        sem_close(sem);
+        return -1;
+    }
+
+    // Lock the semaphore
+    sem_wait(sem);
+
+    // Read data from shared memory
+    while(offset < shm_size) {
+        int param_index;
+        size_t data_size;
+        void *data;
+
+        memcpy(&param_index, (char *)shm_base + offset, sizeof(int));
+        offset += sizeof(int);
+        memcpy(&data_size, (char *)shm_base + offset, sizeof(size_t));
+        offset += sizeof(size_t);
+
+        data = malloc(data_size);
+        if(!data) {
+            syslog(LOG_ERR, "Failed to allocate memory for parameter data.");
+            sem_post(sem);
+            munmap(shm_base, shm_size);
+            close(shmfd);
+            sem_close(sem);
+            return -1;
+        }
+
+        memcpy(data, (char *)shm_base + offset, data_size);
+        offset += data_size;
+
+        MDB_val key, mdb_data;
+        key.mv_size = sizeof(int);
+        key.mv_data = &param_index;
+        mdb_data.mv_size = data_size;
+        mdb_data.mv_data = data;
+
+        int rc = mdb_txn_begin(instrument->dbenv, NULL, 0, &instrument->dbtxn_write);
+        if(rc) {
+            syslog(LOG_ERR, "Failed to begin transaction: (%d) %s", rc, mdb_strerror(rc));
+            free(data);
+            sem_post(sem);
+            munmap(shm_base, shm_size);
+            close(shmfd);
+            sem_close(sem);
+            return -1;
+        }
+
+        rc = mdb_put(instrument->dbtxn_write, instrument->dbi, &key, &mdb_data, 0);
+        if(rc) {
+            syslog(LOG_ERR, "Failed to put parameter data: (%d) %s", rc, mdb_strerror(rc));
+            free(data);
+            mdb_txn_abort(instrument->dbtxn_write);
+            sem_post(sem);
+            munmap(shm_base, shm_size);
+            close(shmfd);
+            sem_close(sem);
+            return -1;
+        }
+
+        rc = mdb_txn_commit(instrument->dbtxn_write);
+        if(rc) {
+            syslog(LOG_ERR, "Failed to commit transaction: (%d) %s", rc, mdb_strerror(rc));
+            free(data);
+            sem_post(sem);
+            munmap(shm_base, shm_size);
+            close(shmfd);
+            sem_close(sem);
+            return -1;
+        }
+
+        free(data);
+    }
+
+    // Unlock the semaphore
+    sem_post(sem);
+
+    // Clean up
+    munmap(shm_base, shm_size);
+    close(shmfd);
+    sem_close(sem);
+
+    return 0;
+}
+
 
 int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value) {
     int rc;

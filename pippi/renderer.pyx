@@ -477,6 +477,12 @@ cdef class Instrument:
         cdef EventContext ctx 
         cdef dict params
         cdef str p, k, v
+        cdef size_t last_edit
+
+        last_edit = os.path.getmtime(self.path)
+        if last_edit > self.last_reload:
+            self.reload()
+            self.last_reload = last_edit
 
         if not hasattr(self.renderer, 'update'):
             logger.warning('Ignoring update message: this instrument has no callback registered')
