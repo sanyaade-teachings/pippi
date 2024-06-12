@@ -4101,7 +4101,7 @@ int astrid_instrument_restore_param_session_snapshot(lpinstrument_t * instrument
 
 
 int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value) {
-    int rc;
+    int rc, param_exists=0;
     MDB_val key, data;
     int32_t param = default_value;
 
@@ -4113,8 +4113,11 @@ int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param
     rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
     if(rc == 0) {
         param = *((int32_t *)data.mv_data);
+        param_exists = 1;
     }
     mdb_txn_reset(instrument->dbtxn_read);
+
+    if(!param_exists) astrid_instrument_set_param_int32(instrument, param_index, param);
 
     return param;
 }
@@ -4138,7 +4141,7 @@ void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_in
 
 
 lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t default_value) {
-    int rc;
+    int rc, param_exists=0;
     MDB_val key, data;
     lpfloat_t param = default_value;
 
@@ -4150,8 +4153,11 @@ lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int par
     rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
     if(rc == 0) {
         param = *((lpfloat_t *)data.mv_data);
+        param_exists = 1;
     }
     mdb_txn_reset(instrument->dbtxn_read);
+
+    if(!param_exists) astrid_instrument_set_param_float(instrument, param_index, param);
 
     return param;
 }
@@ -4192,7 +4198,7 @@ void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int par
 }
 
 lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index) {
-    int rc;
+    int rc, param_exists=0;
     MDB_val key, data;
     lppatternbuf_t patternbuf = {1,{1}};
 
@@ -4204,8 +4210,11 @@ lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrumen
     rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
     if(rc == 0) {
         patternbuf = *((lppatternbuf_t *)data.mv_data);
+        param_exists = 1;
     }
     mdb_txn_reset(instrument->dbtxn_read);
+
+    if(!param_exists) astrid_instrument_set_param_patternbuf(instrument, param_index, &patternbuf);
 
     return patternbuf;
 }
@@ -4229,7 +4238,7 @@ void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int par
 }
 
 void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list) {
-    int rc;
+    int rc, param_exists=0;
     MDB_val key, data;
 
     key.mv_size = sizeof(int);
@@ -4240,7 +4249,11 @@ void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int par
     rc = mdb_get(instrument->dbtxn_read, instrument->dbi, &key, &data);
     if(rc == 0) {
         memcpy(list, data.mv_data, data.mv_size);
+        param_exists = 1;
     }
+
+    if(!param_exists) astrid_instrument_set_param_float_list(instrument, param_index, list, size);
+
     mdb_txn_reset(instrument->dbtxn_read);
 }
 
