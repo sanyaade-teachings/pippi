@@ -227,6 +227,8 @@ int lpsessiondb_mark_voice_stopped(sqlite3 * db, int voice_id, size_t count) {
 /* SHARED MEMORY
  * COMMUNICATION TOOLS
  * *******************/
+// FIXME -- these get/set ID calls should be replaced with an LMDB 
+// backend which manages a global session of settings for all instruments
 int lpipc_setid(char * path, int id) {
     char val[20];
     int fd;
@@ -333,18 +335,6 @@ int lpipc_getid(char * path) {
     val[bytes_read] = '\0';
     id = atoi(val);
 
-    /*
-    idp = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    if(idp == MAP_FAILED) {
-        syslog(LOG_ERR, "lpipc_getid mmap: %s. (size: %d) Error: (%d) %s\n", path, (int)st.st_size, errno, strerror(errno));
-        close(fd);
-        return -1;
-    }
-
-    sscanf(idp, "%d", &id);
-    munmap(idp, st.st_size);
-    */
-
     if(flock(fd, LOCK_UN) < 0) {
         syslog(LOG_ERR, "lpipc_setid flock: %s. Could not unlock id file. Error: %s\n", path, strerror(errno));
         close(fd);
@@ -431,6 +421,9 @@ int lpipc_setvalue(char * path, void * value, size_t size) {
     /* Write the value into the shared memory segment */
     memcpy(shmaddr, value, size);
 
+    /* unmap the shared memory... */
+    munmap(shmaddr, size);
+
     /* Release the lock on the semaphore */
     if(sem_post(sem) < 0) {
         syslog(LOG_ERR, "lpipc_setvalue failed to unlock %s. Error: %s\n", semname, strerror(errno));
@@ -472,6 +465,9 @@ int lpipc_unsafe_getvalue(char * path, void ** value) {
     }
 
     memcpy(*value, shmaddr, statbuf.st_size);
+
+    /* unmap the shared memory... */
+    munmap(shmaddr, statbuf.st_size);
 
     close(fd);
 
@@ -519,6 +515,9 @@ int lpipc_getvalue(char * path, void ** value) {
     }
 
     memcpy(*value, shmaddr, statbuf.st_size);
+
+    /* unmap the shared memory... */
+    munmap(shmaddr, statbuf.st_size);
 
     /* Clean up sempahore resources */
     if(sem_close(sem) < 0) {
@@ -1274,6 +1273,7 @@ ssize_t lpcounter_create(char * name) {
     // Initialize the shared memory with 0
     memcpy(shmaddr, &counter_val, sizeof(size_t)); 
 
+    munmap(shmaddr, sizeof(size_t));
     close(shmfd);
 
     return counter_val;
@@ -1352,6 +1352,8 @@ ssize_t lpcounter_read_and_increment(char * name) {
         syslog(LOG_ERR, "lpipc_setvalue sem_close Could not close semaphore\n");
         return -1;
     }
+
+    munmap(shmaddr, sizeof(size_t));
 
     close(shmfd);
 
@@ -3857,6 +3859,9 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
         return 1;
     }
 
+    // unmap the memory...
+    munmap(shmaddr, size);
+
     close(shmfd);
 
     return 0;
@@ -3972,6 +3977,7 @@ int astrid_instrument_save_param_session_snapshot(lpinstrument_t * instrument, i
     sem_post(sem);
 
     // Clean up
+    munmap(shm_base, shm_size);
     close(shmfd);
     sem_close(sem);
 
