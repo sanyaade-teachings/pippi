@@ -324,7 +324,15 @@ cdef class EventContext:
         return self.p._params
 
 cdef class Instrument:
-    def __cinit__(self, str name, str path, int channels, double adc_length):
+    def __cinit__(self, str name, str path, int channels, double adc_length, str midi_device_name):
+        cdef char * midi_device_cstr
+        self.midi_device_name = NULL
+        if midi_device_name is not None:
+            midi_device_name_byte_string = midi_device_name.encode('UTF-8')
+            midi_device_cstr = midi_device_name_byte_string
+            self.midi_device_name = <char *>calloc(LPMAXNAME, sizeof(char))
+            strncpy(self.midi_device_name, midi_device_cstr, LPMAXNAME-1)
+
         instrument_byte_string = name.encode('UTF-8')
         cdef char * _instrument_ascii_name = instrument_byte_string
         # _instrument_ascii_name will get garbage collected at the end of this function
@@ -337,7 +345,9 @@ cdef class Instrument:
         self.last_reload = 0
         self.max_processing_time = 0
 
-        self.i = astrid_instrument_start(self.ascii_name, channels, 1, adc_length, NULL, NULL, NULL, NULL, NULL, NULL)
+        self.i = astrid_instrument_start(self.ascii_name, channels, 1, adc_length, NULL, NULL, 
+                                         self.midi_device_name,
+                                         NULL, NULL, NULL, NULL)
         if self.i == NULL:
             raise InstrumentError('Could not initialize lpinstrument_t')
 
@@ -792,7 +802,7 @@ def _run_forever(Instrument instrument,
 
     logger.info('PY: python instrument shutting down...')
 
-def run_forever(str script_path, str instrument_name=None, int channels=2, double adc_length=30):
+def run_forever(str script_path, str instrument_name=None, int channels=2, double adc_length=30, str midi_device_name=None):
     cdef Instrument instrument = None
     instrument_name = instrument_name if instrument_name is not None else Path(script_path).stem
     instrument_byte_string = instrument_name.encode('UTF-8')
@@ -800,8 +810,8 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
 
     try:
         # Start the stream and setup the instrument
-        logger.info(f'PY: loading python instrument... {script_path=} {instrument_name=}')
-        instrument = Instrument(instrument_name, script_path, channels, adc_length)
+        logger.info(f'PY: loading python instrument... {script_path=} {instrument_name=} {midi_device_name=}')
+        instrument = Instrument(instrument_name, script_path, channels, adc_length, midi_device_name)
         logger.info(f'PY: started instrument... {script_path=} {instrument_name=}')
     except InstrumentError as e:
         logger.error('PY: Error trying to start instrument. Shutting down...')

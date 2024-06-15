@@ -171,6 +171,8 @@ typedef struct lpinstrument_t {
     lpmsg_t msg;
     lpmsg_t cmd;
 
+    int midi_device_id;
+
     int tty_is_enabled;
     char tty_path[NAME_MAX]; 
 
@@ -300,6 +302,8 @@ int lpmidi_print_notemap(int device_id, int note);
 int lpmidi_trigger_notemap(int device_id, int note);
 int lpmidi_relay_to_instrument(char * instrument_name, unsigned char mtype, unsigned char mid, unsigned char mval);
 
+int lpmidi_get_device_id_by_name(const char * device_name);
+
 int lpserial_setctl(int device_id, int param_id, size_t value);
 int lpserial_getctl(int device_id, int ctl, lpfloat_t * value);
 
@@ -325,7 +329,7 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, char * tty, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument, char * key, char * val), int (*trigger)(void * instrument));
+lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, char * tty, char * midi_device_name, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument, char * key, char * val), int (*trigger)(void * instrument));
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value);

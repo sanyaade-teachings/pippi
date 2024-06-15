@@ -1186,6 +1186,42 @@ int lpmidi_relay_to_instrument(char * instrument_name, unsigned char mtype, unsi
     return 0;
 }
 
+int lpmidi_get_device_id_by_name(const char * device_name) {
+    snd_seq_t * seq_handle;
+    snd_seq_client_info_t * cinfo;
+    snd_seq_port_info_t * pinfo;
+    const char * port_name;
+    int err, client_id = -1;
+
+    if((err = snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0)) < 0) {
+        syslog(LOG_ERR, "Error opening ALSA sequencer: %s\n", snd_strerror(err));
+        return -1;
+    }
+
+    snd_seq_client_info_alloca(&cinfo);
+    snd_seq_port_info_alloca(&pinfo);
+
+    snd_seq_client_info_set_client(cinfo, -1);
+
+    while(snd_seq_query_next_client(seq_handle, cinfo) >= 0) {
+        int client = snd_seq_client_info_get_client(cinfo);
+        snd_seq_port_info_set_client(pinfo, client);
+        snd_seq_port_info_set_port(pinfo, -1);
+
+        while(snd_seq_query_next_port(seq_handle, pinfo) >= 0) {
+            port_name = snd_seq_port_info_get_name(pinfo);
+            if(strstr(port_name, device_name) != NULL) {
+                client_id = snd_seq_port_info_get_client(pinfo);
+                snd_seq_close(seq_handle);
+                return client_id;
+            }
+        }
+    }
+
+    snd_seq_close(seq_handle);
+    return -1;
+}
+
 /* VOICES
  * ******/
 #if 0
@@ -3272,6 +3308,8 @@ void * instrument_midi_listener_thread(void * arg) {
 
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
 
+    syslog(LOG_DEBUG, "%s MIDI listener thread starting for device ID %d\n", instrument->name, instrument->midi_device_id);
+
     if((ret = snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_INPUT, 0)) < 0) {
         syslog(LOG_ERR, "%s midi listener: Could not open ALSA seq. Error: (%d) %s\n", instrument->name, ret, snd_strerror(ret));
         return 0;
@@ -3287,7 +3325,7 @@ void * instrument_midi_listener_thread(void * arg) {
         return 0;
     }
 
-    if((ret = snd_seq_connect_from(seq_handle, port, 24, 0)) < 0) {
+    if((ret = snd_seq_connect_from(seq_handle, port, instrument->midi_device_id, 0)) < 0) {
         syslog(LOG_ERR, "%s midi listener: Could not connect to ALSA port. Error: (%d) %s\n", instrument->name, ret, snd_strerror(ret));
         snd_seq_close(seq_handle);
         return 0;
@@ -3321,6 +3359,7 @@ lpinstrument_t * astrid_instrument_start(
     double adc_length,
     void * ctx,
     char * tty,
+    char * midi_device_name,
     int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
     int (*renderer)(void * instrument),
     int (*update)(void * instrument, char * key, char * val),
@@ -3338,6 +3377,7 @@ lpinstrument_t * astrid_instrument_start(
     instrument = (lpinstrument_t *)LPMemoryPool.alloc(1, sizeof(lpinstrument_t));
     memset(instrument, 0, sizeof(lpinstrument_t));
 
+    openlog(name, LOG_PID, LOG_USER);
     syslog(LOG_DEBUG, "starting %s instrument...\n", name);
 
     instrument->name = name;
@@ -3350,7 +3390,11 @@ lpinstrument_t * astrid_instrument_start(
     instrument->trigger = trigger;
     instrument->ext_relay_enabled = ext_relay_enabled;
 
-    openlog(name, LOG_PID, LOG_USER);
+    instrument->midi_device_id = -1;
+    if(midi_device_name != NULL) {
+        instrument->midi_device_id = lpmidi_get_device_id_by_name(midi_device_name);
+        syslog(LOG_DEBUG, "Set MIDI device ID (%d) for %s\n", instrument->midi_device_id, midi_device_name);
+    }
 
     /* Seed the random number generator */
     LPRand.preseed();
@@ -3530,9 +3574,12 @@ lpinstrument_t * astrid_instrument_start(
 
     /* Start listening for MIDI messages in the midi listener thread */
     // TODO support multiple devices
-    if(pthread_create(&instrument->midi_listener_thread, NULL, instrument_midi_listener_thread, (void*)instrument) != 0) {
-        syslog(LOG_ERR, "Could not initialize instrument midi listener thread. Error: %s\n", strerror(errno));
-        return NULL;
+    if(instrument->midi_device_id >= 0) {
+        syslog(LOG_DEBUG, "We're gonna listen for some MIDI over here in %s-land!\n", instrument->name);
+        if(pthread_create(&instrument->midi_listener_thread, NULL, instrument_midi_listener_thread, (void*)instrument) != 0) {
+            syslog(LOG_ERR, "Could not initialize instrument midi listener thread. Error: %s\n", strerror(errno));
+            return NULL;
+        }
     }
 
     /* start the cleanup thread */
@@ -3596,12 +3643,14 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
         syslog(LOG_ERR, "Error while attempting to join with cleanup thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
     }
 
-    syslog(LOG_DEBUG, "Joining with midi listener thread...\n");
-    if((ret = pthread_join(instrument->midi_listener_thread, NULL)) != 0) {
-        if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
-        if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
-        if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
-        syslog(LOG_ERR, "Error while attempting to join with midi listener thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
+    if(instrument->midi_device_id >= 0) {
+        syslog(LOG_DEBUG, "Joining with midi listener thread...\n");
+        if((ret = pthread_join(instrument->midi_listener_thread, NULL)) != 0) {
+            if(ret == EINVAL) syslog(LOG_ERR, "EINVAL\n");
+            if(ret == EDEADLK) syslog(LOG_ERR, "DEADLOCK\n");
+            if(ret == ESRCH) syslog(LOG_ERR, "ESRCH\n");
+            syslog(LOG_ERR, "Error while attempting to join with midi listener thread. Ret: %d Errno: %d (%s)\n", ret, errno, strerror(ret));
+        }
     }
 
     syslog(LOG_DEBUG, "Joining with serial listener thread...\n");

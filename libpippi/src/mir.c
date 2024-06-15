@@ -223,13 +223,15 @@ lpenvelopefollower_t * envelopefollower_create(lpfloat_t interval) {
     return env; 
 }
 
-void envelopefollower_process(lpenvelopefollower_t * env, lpfloat_t input) {
+lpfloat_t envelopefollower_process(lpenvelopefollower_t * env, lpfloat_t input) {
     env->phase += 1;
     env->last = (lpfloat_t)fmax(env->last, (lpfloat_t)fabs(input));
     if(env->phase >= env->interval) {
         env->phase -= env->interval;        
         env->value = env->last;
     }
+
+    return env->value;
 }
 
 void envelopefollower_destroy(lpenvelopefollower_t * env) {
@@ -252,7 +254,7 @@ lppeakfollower_t * peakfollower_create(lpfloat_t interval) {
     return peak; 
 }
 
-void peakfollower_process(lppeakfollower_t * peak, lpfloat_t input) {
+lpfloat_t peakfollower_process(lppeakfollower_t * peak, lpfloat_t input) {
     peak->phase += 1;
     peak->last = lpfmax(peak->last, input);
     if(peak->phase >= peak->interval) {
@@ -262,6 +264,8 @@ void peakfollower_process(lppeakfollower_t * peak, lpfloat_t input) {
     } else {
         peak->change = 0;
     }
+
+    return peak->value;
 }
 
 void peakfollower_destroy(lppeakfollower_t * peak) {
@@ -286,7 +290,7 @@ lpcrossingfollower_t * crossingfollower_create() {
     return c; 
 }
 
-void crossingfollower_process(lpcrossingfollower_t * c, lpfloat_t input) {
+lpfloat_t crossingfollower_process(lpcrossingfollower_t * c, lpfloat_t input) {
     int current;
     current = signbit(input); 
     c->in_transition = 0;
@@ -302,6 +306,7 @@ void crossingfollower_process(lpcrossingfollower_t * c, lpfloat_t input) {
         }
     }
     c->lastsign = current;
+    return c->value;
 }
 
 void crossingfollower_destroy(lpcrossingfollower_t * crossing) {

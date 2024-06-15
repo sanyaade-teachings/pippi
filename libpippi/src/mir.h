@@ -107,19 +107,19 @@ typedef struct lpenvelopefollower_t {
 
 typedef struct lpmir_crossingfollower_factory_t {
     lpcrossingfollower_t * (*create)();
-    void (*process)(lpcrossingfollower_t *, lpfloat_t);
+    lpfloat_t (*process)(lpcrossingfollower_t *, lpfloat_t);
     void (*destroy)(lpcrossingfollower_t *);
 } lpmir_crossingfollower_factory_t;
 
 typedef struct lpmir_peakfollower_factory_t {
     lppeakfollower_t * (*create)(lpfloat_t);
-    void (*process)(lppeakfollower_t *, lpfloat_t);
+    lpfloat_t (*process)(lppeakfollower_t *, lpfloat_t);
     void (*destroy)(lppeakfollower_t *);
 } lpmir_peakfollower_factory_t;
 
 typedef struct lpmir_envelopefollower_factory_t {
     lpenvelopefollower_t * (*create)(lpfloat_t);
-    void (*process)(lpenvelopefollower_t *, lpfloat_t);
+    lpfloat_t (*process)(lpenvelopefollower_t *, lpfloat_t);
     void (*destroy)(lpenvelopefollower_t *);
 } lpmir_envelopefollower_factory_t;
 

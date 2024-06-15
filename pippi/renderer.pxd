@@ -156,6 +156,7 @@ cdef extern from "astrid.h":
         double adc_length,
         void * ctx, 
         char * tty,
+        char * midi_device_name,
         int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument),
         int (*renderer)(void * instrument),
         int (*update)(void * instrument),
@@ -208,7 +209,8 @@ cdef class Instrument:
     cdef public size_t last_reload
     cdef public double max_processing_time
     cdef public int default_midi_device
-    cdef char * ascii_name
+    cdef char * ascii_name # instrument name as a c string
+    cdef char * midi_device_name
     cdef lpinstrument_t * i
     cpdef EventContext get_event_context(Instrument self, bint with_graph=*)
     cpdef lpmsg_t get_message(Instrument self)

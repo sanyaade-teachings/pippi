@@ -90,6 +90,7 @@ enum InstrumentParams {
     PARAM_DISTORTION_AMOUNT,
     PARAM_DISTORTION_MIX,
 
+    PARAM_MIC_PITCH_TRACKING_THRESHOLD,
     PARAM_MIC_PITCH_TRACKING_ENABLED,
     NUMPARAMS
 };
@@ -98,6 +99,10 @@ typedef struct localctx_t {
     lppulsarosc_t * oscs[NUMOSCS];
     lpyin_t * yin;
     lpfloat_t freqsmooth;
+    lpenvelopefollower_t * envf;
+
+    lpfloat_t oscampsmooth;
+    lpfloat_t gateampsmooth;
 
     lpfloat_t fold1prev;
     lpfloat_t fold2prev;
@@ -183,7 +188,6 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
         extract_float_from_token(valstr, &val_f);
         astrid_instrument_set_param_float(instrument, PARAM_OSC_TO_OUT2, val_f);
 
-
     } else if(strcmp(keystr, "gamp") == 0) {
         extract_float_from_token(valstr, &val_f);
         astrid_instrument_set_param_float(instrument, PARAM_GATE_AMP, val_f);
@@ -258,6 +262,10 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
     } else if(strcmp(keystr, "mtrak") == 0) {
         extract_int32_from_token(valstr, &val_i32);
         astrid_instrument_set_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_ENABLED, val_i32);
+    } else if(strcmp(keystr, "pthresh") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_MIC_PITCH_TRACKING_THRESHOLD, val_f);
+
 
     } else if(strcmp(keystr, "save") == 0) {
         extract_int32_from_token(valstr, &val_i32);
@@ -315,6 +323,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     distortion_type = astrid_instrument_get_param_int32(instrument, PARAM_DISTORTION_TYPE, 0);
 
     osc_amp = astrid_instrument_get_param_float(instrument, PARAM_OSC_AMP, 1.f);
+    osc_amp = LPFX.lpf1(osc_amp, &ctx->oscampsmooth, 1000.f, SR);
     osc_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_OSC_TO_OUT1, 0.5f);
     osc_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_OSC_TO_OUT2, 0.5f);
     osc_pw = astrid_instrument_get_param_float(instrument, PARAM_OSC_PULSEWIDTH, 1.f);
@@ -327,6 +336,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     astrid_instrument_get_param_float_list(instrument, PARAM_OSC_FREQS, num_freqs, freqs);
 
     gate_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE_AMP, 0.f);
+    gate_amp = LPFX.lpf1(gate_amp, &ctx->gateampsmooth, 1000.f, SR);
     gate_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_GATE_TO_OUT1, 0.5f);
     gate_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_GATE_TO_OUT2, 0.5f);
     gate_reset = astrid_instrument_get_param_int32(instrument, PARAM_GATE_PHASE_RESET, 0);
@@ -348,6 +358,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     in2_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_IN2_TO_OUT2, 0.f);
 
     pitch_tracking_is_enabled = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_ENABLED, 0);
+    ctx->yin->threshold = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_THRESHOLD, 0.8f);
 
     // set gate osc params
     ctx->gate_drifter->freq = gate_drift_speed;
@@ -512,6 +523,8 @@ int main() {
     ctx->yin = LPPitchTracker.yin_create(4096, SR);
     ctx->yin->fallback = 220.f;
 
+    ctx->envf = LPEnvelopeFollower.create(0.012);
+
     ctx->gate->samplerate = (lpfloat_t)SR;
     ctx->gate->window_morph_freq = 0;
     ctx->gate->freq = 30.f;
@@ -522,7 +535,7 @@ int main() {
 
     // Set the callbacks for streaming, async renders and param updates
     if((instrument = astrid_instrument_start(NAME, CHANNELS, 0, ADC_LENGTH, (void*)ctx, 
-                    NULL, audio_callback, renderer_callback, param_map_callback, NULL)) == NULL) {
+                    NULL, NULL, audio_callback, renderer_callback, param_map_callback, NULL)) == NULL) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
