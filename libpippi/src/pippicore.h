@@ -232,6 +232,7 @@ lpfloat_t lpfmax(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfabs(lpfloat_t value);
 lpfloat_t lpfpow(lpfloat_t value, int exp);
+u_int32_t lphashstr(char * str);
 
 lpfloat_t lpphaseinc(lpfloat_t freq, lpfloat_t samplerate);
 

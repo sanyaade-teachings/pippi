@@ -107,6 +107,7 @@ littlefield:
 
 	echo "Building littlefield...";
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getmidideviceid.c $(LPLIBS) -o build/getmidideviceid
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/hashtest.c $(LPLIBS) -o build/hashtest
 
 	#$(CC) $(LPFLAGS) -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/littlefield.c $(LPLIBS) -o build/littlefield
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/littlefield.c $(LPLIBS) -o build/littlefield

@@ -118,7 +118,7 @@ typedef struct lpmir_peakfollower_factory_t {
 } lpmir_peakfollower_factory_t;
 
 typedef struct lpmir_envelopefollower_factory_t {
-    lpenvelopefollower_t * (*create)(lpfloat_t);
+    lpenvelopefollower_t * (*create)(lpfloat_t, lpfloat_t);
     lpfloat_t (*process)(lpenvelopefollower_t *, lpfloat_t);
     void (*destroy)(lpenvelopefollower_t *);
 } lpmir_envelopefollower_factory_t;

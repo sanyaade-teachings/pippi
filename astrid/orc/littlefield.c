@@ -101,6 +101,7 @@ typedef struct localctx_t {
     lpfloat_t freqsmooth;
     lpenvelopefollower_t * envf;
 
+    lpfloat_t ampmodsmooth;
     lpfloat_t oscampsmooth;
     lpfloat_t gateampsmooth;
 
@@ -305,7 +306,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
               osc_pw, osc_saturation, osc_env_speed, 
               osc_drift_amount, drift, osc_drift_speed,
               osc_out1_mix, osc_out2_mix, gate_out1_mix, gate_out2_mix,
-              gated_sample, gate_amp, octave_mult,
+              gated_sample, gate_amp, octave_mult, amp_mod,
               in1_out1_mix, in1_out2_mix, in2_out1_mix, in2_out2_mix,
               gate_shape, gate_speed, gate_pw, gate_drift_amount, gate_drift_speed,
               gate_drift_stability, gate_drift_density, gate_drift_periodicity,
@@ -358,7 +359,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     in2_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_IN2_TO_OUT2, 0.f);
 
     pitch_tracking_is_enabled = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_ENABLED, 0);
-    ctx->yin->threshold = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_THRESHOLD, 0.8f);
+    //ctx->yin->threshold = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_THRESHOLD, 0.8f);
 
     // set gate osc params
     ctx->gate_drifter->freq = gate_drift_speed;
@@ -383,6 +384,9 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     for(i=0; i < blocksize; i++) {
         sample = d1 = d2 = 0.f;
 
+        amp_mod = LPEnvelopeFollower.process(ctx->envf, input[0][i]);
+        amp_mod = LPFX.lpf1(amp_mod, &ctx->ampmodsmooth, 100.f, SR);
+
         // track the pitch if it's enabled
         if(pitch_tracking_is_enabled) {
             p = LPPitchTracker.yin_process(ctx->yin, input[0][i]);
@@ -391,11 +395,11 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
                 last_p = p;
             }
 
-            tracked_freq = LPFX.lpf1(tracked_freq, &ctx->freqsmooth, 100.f, SR);
+            tracked_freq = LPFX.lpf1(p, &ctx->freqsmooth, 500.f, SR);
 
             // track in a ~melodic range
-            while(tracked_freq >= 800) tracked_freq *= 0.5f;
-            while(tracked_freq <= 80) tracked_freq *= 2.f;
+            //while(tracked_freq >= 800) tracked_freq *= 0.5f;
+            //while(tracked_freq <= 80) tracked_freq *= 2.f;
         }
 
         for(j=0; j < NUMOSCS; j++) {
@@ -421,8 +425,12 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
                 octave_spread = LPRand.randint(-octave_spread, octave_spread);
                 octave_mult *= pow(2, octave_spread);
                 ctx->octave_mults[j] = octave_mult;
+                /*
                 syslog(LOG_ERR, "GDRIFT=%f GDRIFTSPEED=%f GDRIFTAMOUNT=%f\n",
                         gate_drift, gate_drift_speed, gate_drift_amount);
+                syslog(LOG_ERR, "VALUE %f\n", ctx->envf->value);
+                syslog(LOG_ERR, "AMPMOD %f\n", amp_mod);
+                */
             }
             while(ctx->env_phases[j] >= 1.f) ctx->env_phases[j] -= 1.f;
 
@@ -436,7 +444,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
         gated_sample = sample * env * gate_amp;
 
         // osc output
-        sample *= osc_amp;
+        sample *= osc_amp * amp_mod;
 
         // mic feedback
         in1 = input[0][i] * MIC_ATTENUATION;
@@ -523,7 +531,7 @@ int main() {
     ctx->yin = LPPitchTracker.yin_create(4096, SR);
     ctx->yin->fallback = 220.f;
 
-    ctx->envf = LPEnvelopeFollower.create(0.012);
+    ctx->envf = LPEnvelopeFollower.create(12.f, SR);
 
     ctx->gate->samplerate = (lpfloat_t)SR;
     ctx->gate->window_morph_freq = 0;

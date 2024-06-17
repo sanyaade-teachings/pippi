@@ -59,6 +59,10 @@
 #define PIPE_BUF 4096
 #endif
 
+/* Magic number for the FNV-1 hash from:
+ * http://www.isthe.com/chongo/src/fnv/fnv.h */
+#define FNV1_32_MAGIC_NUMBER ((u_int32_t)0x811c9dc5)
+
 #define LPMAXNAME 16
 #define LPMAXMSG (PIPE_BUF - (sizeof(double) * 4) - (sizeof(size_t) * 3) - (sizeof(uint16_t) * 2) - LPMAXNAME)
 #define LPMAXPAT 512 - sizeof(size_t)

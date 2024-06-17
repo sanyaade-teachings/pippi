@@ -1,10 +1,15 @@
 #cython: language_level=3
 
-from libc.stdint cimport uint16_t
+from libc.stdint cimport uint16_t, uint32_t, int32_t
 from pippi.soundbuffer cimport SoundBuffer
+
+cdef extern from "stdint.h":
+    ctypedef uint32_t u_int32_t
 
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
+
+    u_int32_t lphashstr(char * str)
 
     ctypedef struct lpbuffer_t:
         size_t length
@@ -143,6 +148,19 @@ cdef extern from "astrid.h":
 
     int lpserial_getctl(int device_id, int ctl, lpfloat_t * value)
 
+    int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value)
+    void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, int32_t value)
+    #void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t * patternbuf)
+    #lppatternbuf_t astrid_instrument_get_param_patternbuf(lpinstrument_t * instrument, int param_index)
+    void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t value)
+    lpfloat_t astrid_instrument_get_param_float(lpinstrument_t * instrument, int param_index, lpfloat_t default_value)
+    void astrid_instrument_set_param_float_list(lpinstrument_t * instrument, int param_index, lpfloat_t * value, size_t size)
+    void astrid_instrument_get_param_float_list(lpinstrument_t * instrument, int param_index, size_t size, lpfloat_t * list)
+    lpfloat_t astrid_instrument_get_param_float_list_item(lpinstrument_t * instrument, int param_index, size_t size, int item_index, lpfloat_t default_value)
+
+    int astrid_instrument_restore_param_session_snapshot(lpinstrument_t * instrument, int snapshot_id)
+    int astrid_instrument_save_param_session_snapshot(lpinstrument_t * instrument, int num_params, int snapshot_id)
+
     void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay)
     int lpscheduler_get_now_seconds(double * now)
 
@@ -179,9 +197,6 @@ cdef class MidiEvent:
     cdef lpmidievent_t * event
     cpdef int schedule(MidiEvent self, double now)
 
-cdef class SessionParamBucket:
-    cdef object _bus
-
 cdef class ParamBucket:
     cdef object _params
     cdef str _play_params
@@ -204,6 +219,8 @@ cdef class Instrument:
     cdef public str path
     cdef public object renderer
     cdef public object graph
+    cdef public dict instrument_param_type_map
+    cdef public dict instrument_param_hash_map
     cdef public dict cache
     cdef public lpmsg_t msg # a copy of the last message received
     cdef public size_t last_reload
@@ -215,6 +232,9 @@ cdef class Instrument:
     cpdef EventContext get_event_context(Instrument self, bint with_graph=*)
     cpdef lpmsg_t get_message(Instrument self)
     cdef SoundBuffer read_from_adc(Instrument self, double length, double offset=*, int channels=*, int samplerate=*)
+
+cdef class SessionParamBucket:
+    cdef Instrument instrument
 
 cdef class EventContext:
     cdef public dict cache

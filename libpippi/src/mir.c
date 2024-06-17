@@ -211,24 +211,25 @@ void coyote_destroy(lpcoyote_t * od) {
 /**
  * Envelope follower
  */
-lpenvelopefollower_t * envelopefollower_create(lpfloat_t interval) {
+lpenvelopefollower_t * envelopefollower_create(lpfloat_t interval, lpfloat_t samplerate) {
     lpenvelopefollower_t * env;
 
     env = (lpenvelopefollower_t *)LPMemoryPool.alloc(1, sizeof(lpenvelopefollower_t));
     env->value = 0.f;
     env->last = 0.f;
     env->phase = 0.f;
-    env->interval = interval;
+    env->interval = interval * samplerate * 0.01f;
 
     return env; 
 }
 
 lpfloat_t envelopefollower_process(lpenvelopefollower_t * env, lpfloat_t input) {
-    env->phase += 1;
+    env->phase += 1.f;
     env->last = (lpfloat_t)fmax(env->last, (lpfloat_t)fabs(input));
     if(env->phase >= env->interval) {
         env->phase -= env->interval;        
         env->value = env->last;
+        env->last = 0.f;
     }
 
     return env->value;

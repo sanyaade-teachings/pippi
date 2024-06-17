@@ -137,6 +137,7 @@ lppulsarosc_t * create_pulsarosc(int num_wavetables, int num_windows, ...) {
     p->burst_pos = 0;
     p->burst_size = 0;
 
+    p->saturation_toggle = 1;
     p->pulse_edge = 0;
     p->phase = 0.f;
     p->saturation = 1.f;
@@ -169,11 +170,7 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
      * In other words, bursting only happens when the burst 
      * table is non-NULL. Otherwise all pulses sound. */
     if(p->burst != NULL && p->burst_size > 0) burst = p->burst[p->burst_pos % p->burst_size];
-
-    /* Override burst if desaturation is triggered */
-    if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
-        burst = 0; 
-    }
+    if(!p->saturation_toggle) burst = 0;
 
     /* Treat the pulse as a one-shot. Reset the phase to rewind, or toggle once off */
     if(p->phase >= 1.f && p->once) return 0.f;
@@ -235,6 +232,15 @@ lpfloat_t process_pulsarosc(lppulsarosc_t * p) {
     // Set the pulse boundry flag so external programs can know
     // about phase boundries (and do things when they happen)
     p->pulse_edge = (p->phase >= 1.f);
+
+    /* Override burst on pulse edges if desaturation is triggered */
+    if(p->pulse_edge) {
+        if(p->saturation < 1.f && LPRand.rand(0.f, 1.f) > p->saturation) {
+            p->saturation_toggle = 0;
+        } else {
+            p->saturation_toggle = 1;
+        }
+    }
 
     // wrap phases unless once is toggled
     if(p->once) return sample;

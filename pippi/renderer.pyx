@@ -114,7 +114,6 @@ cdef class MessageEvent:
         if self.msg is not NULL:
             free(self.msg)
 
-
 cdef class MidiEvent:
     def __cinit__(self,
             double onset,
@@ -235,24 +234,65 @@ cdef class EventTriggerFactory:
         params = self._parse_params(*args, **kwargs)
         return MessageEvent(onset, tty, LPMSG_SERIAL, params, 0)
 
-
 cdef class SessionParamBucket:
     """ params[key] to params.key
 
         An interface to LMDB to get and set shared session params.
     """
+    def __cinit__(self, Instrument instrument):
+        self.instrument = instrument
+
     def __getattr__(self, key):
         return self.get(key)
 
-    def get(self, key, default=None):
-        v = None # FIXME look up param in LMDB
-        if v is None:
-            return default
-        return v.decode('utf-8')
+    def get(self, str key, object default=None):
+        cdef u_int32_t param_hash
+        cdef int32_t default_i32
+        cdef float default_f
+        v = default
 
-    def __setattr__(self, key, value):
-        # FIXME set param in LMDB
-        pass
+        if key not in self.instrument.instrument_param_type_map:
+            logger.warning('Unknown param "%s"' % key)
+            return default
+
+        param_type = self.instrument.instrument_param_type_map[key]
+        param_hash = self.instrument.instrument_param_hash_map[key]
+
+        if param_type == 'int':
+            default_i32 = int(default or 0)
+            v = self.instrument.get_session_int_param(param_hash, default_i32)
+
+        elif param_type == 'float':
+            default_f = float(default or 0)
+            v = self.instrument.get_session_float_param(param_hash, default_f)
+
+        else:
+            logger.warning('Incompatible param type %s' % param_type)
+
+        return v
+
+    def __setattr__(self, str key, object value):
+        cdef u_int32_t param_hash
+        cdef int32_t val_i32
+        cdef float val_f
+
+        if key not in self.instrument.instrument_param_type_map:
+            logger.warning('Unknown param "%s"' % key)
+            return
+
+        param_type = self.instrument.instrument_param_type_map[key]
+        param_hash = self.instrument.instrument_param_hash_map[key]
+
+        if param_type == 'int':
+            val_i32 = int(value or 0)
+            self.instrument.set_session_int_param(param_hash, val_i32)
+
+        elif param_type == 'float':
+            val_f = float(value or 0)
+            self.instrument.set_session_float_param(param_hash, val_f)
+
+        else:
+            logger.warning('Incompatible param type %s' % param_type)
 
 cdef class ParamBucket:
     """ params[key] to params.key
@@ -303,7 +343,7 @@ cdef class EventContext:
         self.graph = graph
         self.cache = cache
         self.p = ParamBucket(str(msg))
-        self.s = SessionParamBucket() 
+        self.s = SessionParamBucket(instrument) 
         self.t = EventTriggerFactory()
         self.m = MidiEventListenerProxy(default_midi_device)
         self.instrument = instrument
@@ -363,6 +403,7 @@ cdef class Instrument:
             Failure to load the module raises an 
             InstrumentNotFoundError
         """
+        cdef char * _k
         try:
             logger.debug('Loading instrument %s from %s' % (name, path))
             spec = importlib.util.spec_from_file_location(name, path)
@@ -390,6 +431,18 @@ cdef class Instrument:
                     self.default_midi_device = self.renderer.MIDI_DEVICE
                 else:
                     self.default_midi_device = 1
+
+                if hasattr(self.renderer, 'PARAMS'):
+                    logger.error('mapping params...')
+                    self.instrument_param_type_map = self.renderer.PARAMS
+                    self.instrument_param_hash_map = dict()
+                    for k, t in self.instrument_param_type_map.items():
+                        logger.error('mapping %s...' % k)
+                        k_byte_string = k.encode('UTF-8')
+                        _k = k_byte_string
+                        logger.error('        %s...' % _k)
+                        self.instrument_param_hash_map[k] = lphashstr(_k)
+                        logger.error('        %d...' % self.instrument_param_hash_map[k])
 
             else:
                 logger.error('Could not load instrument - spec is None: %s %s' % (path, name))
@@ -482,6 +535,20 @@ cdef class Instrument:
             ctx = self.get_event_context()
             self.graph = self.renderer.stream(ctx)
 
+
+    def get_session_int_param(self, u_int32_t hash_key, int default):
+        logger.debug('Getting INT param from key %d (with default %d)' % (hash_key, default))
+        return astrid_instrument_get_param_int32(self.i, hash_key, default)
+
+    def get_session_float_param(self, u_int32_t hash_key, float default):
+        return astrid_instrument_get_param_float(self.i, hash_key, default)
+
+    def set_session_int_param(self, u_int32_t hash_key, int value):
+        logger.debug('Setting INT param to key %d' % hash_key)
+        astrid_instrument_set_param_int32(self.i, hash_key, value)
+
+    def set_session_float_param(self, u_int32_t hash_key, float value):
+        astrid_instrument_set_param_float(self.i, hash_key, value)
 
     def handle_update_message(self, str msgstr):
         cdef EventContext ctx 
@@ -723,7 +790,6 @@ def render_executor(Instrument instrument, object q, int comrade_id):
 
         instrument.max_processing_time = max(instrument.max_processing_time, end - start)
         logger.info('%s render time: %f seconds' % (instrument.name, end - start))
-
 
 cdef int astrid_schedule_python_triggers(Instrument instrument) except -1:
     cdef size_t last_edit = os.path.getmtime(instrument.path)

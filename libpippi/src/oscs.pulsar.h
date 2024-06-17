@@ -22,6 +22,8 @@ typedef struct lppulsarosc_t {
     lpfloat_t window_morph_freq;
 
     bool * burst;         /* Burst table - null table == pulses always on */
+    bool saturation_toggle; /* On pulse edges calculate this boolean which may
+                               override the burst table */
     size_t burst_size;
     size_t burst_pos; 
 
