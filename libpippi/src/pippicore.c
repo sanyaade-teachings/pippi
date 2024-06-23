@@ -1942,6 +1942,10 @@ lpfloat_t lpzapgremlins(lpfloat_t x) {
     return (absx > (lpfloat_t)1e-15 && absx < (lpfloat_t)1e15) ? x : (lpfloat_t)0.f;
 }
 
+lpfloat_t lpfilternan(lpfloat_t x) {
+    return isnan(x) ? 0.f : x;
+}
+
 lpfloat_t lpwv(lpfloat_t value, lpfloat_t min, lpfloat_t max) {
     /* wrap value */
     if(value > max) value -= max;

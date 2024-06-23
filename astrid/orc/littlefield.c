@@ -5,6 +5,7 @@
 #define SR 48000
 #define CHANNELS 2
 #define ADC_LENGTH 30
+#define RESAMPLER_LENGTH 30
 #define MIC_ATTENUATION 0.2f
 
 #define NUMOSCS 10
@@ -60,10 +61,14 @@ enum InstrumentParams {
     PARAM_OSC_DRIFT_SPEED,
     PARAM_OSC_OCTAVE_SPREAD,
     PARAM_OSC_OCTAVE_OFFSET,
+    PARAM_OSC_FREQ_UPDATE_ON_ENV_RESET,
     PARAM_OSC_FREQS,
 
-    PARAM_GATE_AMP,
-    PARAM_GATE_SPEED,
+    PARAM_GATE1_AMP,
+    PARAM_GATE2_AMP,
+    PARAM_GATE1_SPEED,
+    PARAM_GATE2_SPEED,
+    PARAM_GATE_SPEED_MULTIPLIER,
     PARAM_GATE_PULSEWIDTH,
     PARAM_GATE_SATURATION,
     PARAM_GATE_SHAPE,
@@ -113,7 +118,8 @@ typedef struct localctx_t {
     lpbuffer_t * limit1buf;
     lpbuffer_t * limit2buf;
 
-    lppulsarosc_t * gate;
+    lppulsarosc_t * gate1;
+    lppulsarosc_t * gate2;
     lpshapeosc_t * gate_drifter;
     lpbuffer_t * gate_drift_win;
 
@@ -123,7 +129,8 @@ typedef struct localctx_t {
 
     lpfloat_t env_phases[NUMOSCS];
     lpfloat_t env_phaseincs[NUMOSCS];
-    lpfloat_t octave_mults[NUMOSCS];
+    lpfloat_t octave_offsets[NUMOSCS];
+    lpfloat_t octave_spreads[NUMOSCS];
 } localctx_t;
 
 lpfloat_t osc_mix(lpfloat_t pos, int chan) {
@@ -179,6 +186,9 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
     } else if(strcmp(keystr, "octoffset") == 0) {
         extract_int32_from_token(valstr, &val_i32);
         astrid_instrument_set_param_int32(instrument, PARAM_OSC_OCTAVE_OFFSET, val_i32);
+    } else if(strcmp(keystr, "freqsnap") == 0) {
+        extract_int32_from_token(valstr, &val_i32);
+        astrid_instrument_set_param_int32(instrument, PARAM_OSC_FREQ_UPDATE_ON_ENV_RESET, val_i32);
     } else if(strcmp(keystr, "freqs") == 0) {
         num_freqs = extract_floatlist_from_token(valstr, val_floatlist, MAXNUMFREQS);
         astrid_instrument_set_param_float_list(instrument, PARAM_OSC_FREQS, val_floatlist, num_freqs);
@@ -189,12 +199,22 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
         extract_float_from_token(valstr, &val_f);
         astrid_instrument_set_param_float(instrument, PARAM_OSC_TO_OUT2, val_f);
 
-    } else if(strcmp(keystr, "gamp") == 0) {
+    } else if(strcmp(keystr, "g1amp") == 0) {
         extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_GATE_AMP, val_f);
-    } else if(strcmp(keystr, "gspeed") == 0) {
+        astrid_instrument_set_param_float(instrument, PARAM_GATE1_AMP, val_f);
+    } else if(strcmp(keystr, "g1speed") == 0) {
         extract_float_from_token(valstr, &val_f);
-        astrid_instrument_set_param_float(instrument, PARAM_GATE_SPEED, val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE2_SPEED, val_f);
+    } else if(strcmp(keystr, "g2amp") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE2_AMP, val_f);
+    } else if(strcmp(keystr, "g2speed") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE2_SPEED, val_f);
+
+    } else if(strcmp(keystr, "gmult") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_GATE_SPEED_MULTIPLIER, val_f);
     } else if(strcmp(keystr, "gpw") == 0) {
         extract_float_from_token(valstr, &val_f);
         astrid_instrument_set_param_float(instrument, PARAM_GATE_PULSEWIDTH, val_f);
@@ -301,18 +321,20 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     size_t i;
     int j;
     lpfloat_t freqs[MAXNUMFREQS];
-    lpfloat_t sample, osc_amp, env, in1, in2, d1, d2, p, last_p=-1,
+    lpfloat_t osc_sample, osc_sample_group1, osc_sample_group2, 
+              osc_amp, env1, env2, in1, in2, d1, d2, p, last_p=-1,
               distortion_amount, distortion_mix,
               osc_pw, osc_saturation, osc_env_speed, 
               osc_drift_amount, drift, osc_drift_speed,
               osc_out1_mix, osc_out2_mix, gate_out1_mix, gate_out2_mix,
-              gated_sample, gate_amp, octave_mult, amp_mod,
+              gate1_sample, gate2_sample, gate1_amp, gate2_amp, amp_mod,
               in1_out1_mix, in1_out2_mix, in2_out1_mix, in2_out2_mix,
-              gate_shape, gate_speed, gate_pw, gate_drift_amount, gate_drift_speed,
+              gate_shape, gate1_speed, gate2_speed, gate_speed_multiplier, 
+              gate_pw, gate_drift_amount, gate_drift_speed,
               gate_drift_stability, gate_drift_density, gate_drift_periodicity,
               gate_drift, gate_saturation, tracked_freq=220.f;
     int32_t octave_spread, octave_offset, gate_reset, gate_repeat, 
-            pitch_tracking_is_enabled, distortion_type;
+            freq_snap, pitch_tracking_is_enabled, distortion_type;
     lppatternbuf_t gate_pattern;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
@@ -334,16 +356,23 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     osc_drift_speed = astrid_instrument_get_param_float(instrument, PARAM_OSC_DRIFT_SPEED, 0.5f);
     octave_spread = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_SPREAD, 6);
     octave_offset = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_OFFSET, -2);
+    freq_snap = astrid_instrument_get_param_int32(instrument, PARAM_OSC_FREQ_UPDATE_ON_ENV_RESET, 0);
     astrid_instrument_get_param_float_list(instrument, PARAM_OSC_FREQS, num_freqs, freqs);
 
-    gate_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE_AMP, 0.f);
-    gate_amp = LPFX.lpf1(gate_amp, &ctx->gateampsmooth, 1000.f, SR);
+    gate1_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE1_AMP, 0.f);
+    gate1_amp = LPFX.lpf1(gate1_amp, &ctx->gateampsmooth, 1000.f, SR);
+
+    gate2_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE2_AMP, 0.f);
+    gate2_amp = LPFX.lpf1(gate2_amp, &ctx->gateampsmooth, 1000.f, SR);
+
     gate_out1_mix = astrid_instrument_get_param_float(instrument, PARAM_GATE_TO_OUT1, 0.5f);
     gate_out2_mix = astrid_instrument_get_param_float(instrument, PARAM_GATE_TO_OUT2, 0.5f);
     gate_reset = astrid_instrument_get_param_int32(instrument, PARAM_GATE_PHASE_RESET, 0);
     gate_repeat = astrid_instrument_get_param_int32(instrument, PARAM_GATE_REPEAT, 1);
     gate_shape = astrid_instrument_get_param_float(instrument, PARAM_GATE_SHAPE, 0.f);
-    gate_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE_SPEED, 2.f);
+    gate1_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE1_SPEED, 2.f);
+    gate2_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE2_SPEED, 2.f);
+    gate_speed_multiplier = astrid_instrument_get_param_float(instrument, PARAM_GATE_SPEED_MULTIPLIER, 1.f);
     gate_drift_amount = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_DEPTH, 0.f);
     gate_drift_speed = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_SPEED, 1.f) * 100.f;
     gate_drift_stability = astrid_instrument_get_param_float(instrument, PARAM_GATE_DRIFT_STABILITY, 0.1f) * 0.5f;
@@ -369,20 +398,29 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     ctx->gate_drifter->density = gate_drift_density;
     ctx->gate_drifter->periodicity = gate_drift_periodicity;
     gate_drift = LPShapeOsc.process(ctx->gate_drifter) * gate_drift_amount;
-    ctx->gate->window_morph = fmin(gate_shape, 0.999f); // TODO investigate overflows
-    ctx->gate->freq = gate_speed + gate_drift;
-    ctx->gate->pulsewidth = gate_pw;
-    ctx->gate->saturation = gate_saturation;
-    LPPulsarOsc.burst_bytes(ctx->gate, gate_pattern.pattern, gate_pattern.length);
-    ctx->gate->once = !gate_repeat;
+
+    ctx->gate1->window_morph = fmin(gate_shape, 0.999f);
+    ctx->gate1->freq = (gate1_speed * gate_speed_multiplier) + gate_drift;
+    ctx->gate1->pulsewidth = gate_pw;
+    ctx->gate1->saturation = gate_saturation;
+    LPPulsarOsc.burst_bytes(ctx->gate1, gate_pattern.pattern, gate_pattern.length);
+    ctx->gate1->once = !gate_repeat;
+
+    ctx->gate2->window_morph = fmin(gate_shape, 0.999f);
+    ctx->gate2->freq = (gate2_speed * gate_speed_multiplier) + gate_drift;
+    ctx->gate2->pulsewidth = gate_pw;
+    ctx->gate2->saturation = gate_saturation;
+    LPPulsarOsc.burst_bytes(ctx->gate2, gate_pattern.pattern, gate_pattern.length);
+    ctx->gate2->once = !gate_repeat;
 
     if(gate_reset) {
-        ctx->gate->phase = 0.f;
+        ctx->gate1->phase = 0.f;
+        ctx->gate2->phase = 0.f;
         astrid_instrument_set_param_int32(instrument, PARAM_GATE_PHASE_RESET, 0);
     }
 
     for(i=0; i < blocksize; i++) {
-        sample = d1 = d2 = 0.f;
+        osc_sample_group1 = osc_sample_group2 = d1 = d2 = 0.f;
 
         amp_mod = LPEnvelopeFollower.process(ctx->envf, input[0][i]);
         amp_mod = LPFX.lpf1(amp_mod, &ctx->ampmodsmooth, 100.f, SR);
@@ -409,22 +447,30 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
             drift = LPInterpolation.linear_pos(ctx->drifters[j], ctx->drifters[j]->phase) * osc_drift_amount;
 
             // set the freq to the freqs table pitch or tracked pitch if tracking is enabled
+            if(!freq_snap) {
+                ctx->octave_offsets[j] = pow(2, octave_offset);
+            }
+
             ctx->oscs[j]->freq = freqs[j % num_freqs];
             if(pitch_tracking_is_enabled) ctx->oscs[j]->freq = tracked_freq;
-            ctx->oscs[j]->freq *= ctx->octave_mults[j] + drift;
+            ctx->oscs[j]->freq *= (ctx->octave_offsets[j] * ctx->octave_spreads[j]) + drift;
 
             // mix in the enveloped osc voice
-            sample += LPPulsarOsc.process(ctx->oscs[j]) * LPInterpolation.linear_pos(ctx->env, ctx->env_phases[j]) * ((1.f/NUMOSCS)*3.f);
+            if(j % 2 == 0) {
+                osc_sample_group1 += LPPulsarOsc.process(ctx->oscs[j]) * LPInterpolation.linear_pos(ctx->env, ctx->env_phases[j]) * ((1.f/NUMOSCS)*3.f);
+            } else {
+                osc_sample_group2 += LPPulsarOsc.process(ctx->oscs[j]) * LPInterpolation.linear_pos(ctx->env, ctx->env_phases[j]) * ((1.f/NUMOSCS)*3.f);
+            }
 
             // advance the voice envelope phase
             ctx->env_phases[j] += ctx->env_phaseincs[j] * (1.f+osc_env_speed) * 3.f;
 
             // on voice envelope phase resets, recalculate the octave multiplier
             if(ctx->env_phases[j] >= 1.f) {
-                octave_mult = pow(2, octave_offset);
                 octave_spread = LPRand.randint(-octave_spread, octave_spread);
-                octave_mult *= pow(2, octave_spread);
-                ctx->octave_mults[j] = octave_mult;
+                ctx->octave_spreads[j] = pow(2, octave_spread);
+                ctx->octave_offsets[j] = pow(2, octave_offset);
+
                 /*
                 syslog(LOG_ERR, "GDRIFT=%f GDRIFTSPEED=%f GDRIFTAMOUNT=%f\n",
                         gate_drift, gate_drift_speed, gate_drift_amount);
@@ -440,19 +486,23 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
         }
 
         // gated output
-        env = LPPulsarOsc.process(ctx->gate);
-        gated_sample = sample * env * gate_amp;
+        env1 = LPPulsarOsc.process(ctx->gate1);
+        gate1_sample = osc_sample_group1 * env1 * gate1_amp;
+
+        env2 = LPPulsarOsc.process(ctx->gate2);
+        gate2_sample = osc_sample_group2 * env2 * gate2_amp;
 
         // osc output
-        sample *= osc_amp * amp_mod;
+        osc_sample = osc_sample_group1 + osc_sample_group2;
+        osc_sample *= osc_amp * amp_mod;
 
         // mic feedback
         in1 = input[0][i] * MIC_ATTENUATION;
         in2 = input[1][i] * MIC_ATTENUATION;
 
         // mix everything
-        output[0][i] += (sample * osc_out1_mix) + (gated_sample * gate_out1_mix) + (in1 * in1_out1_mix) + (in2 * in2_out1_mix);
-        output[1][i] += (sample * osc_out2_mix) + (gated_sample * gate_out2_mix) + (in2 * in1_out2_mix) + (in2 * in2_out2_mix);
+        output[0][i] += (osc_sample * osc_out1_mix) + ((gate1_sample + gate2_sample) * gate_out1_mix) + (in1 * in1_out1_mix) + (in2 * in2_out1_mix);
+        output[1][i] += (osc_sample * osc_out2_mix) + ((gate1_sample + gate2_sample) * gate_out2_mix) + (in2 * in1_out2_mix) + (in2 * in2_out2_mix);
 
         // apply distortion
         if(distortion_amount > 0) {
@@ -508,7 +558,8 @@ int main() {
         ctx->env_phaseincs[i] = (1.f/SR) * LPRand.rand(0.005f, 0.03f) * 0.5f;
         ctx->drifters[i] = LPWavetable.create(WT_RND, 4096);
         ctx->drift_phaseincs[i] = (1.f/SR) * LPRand.rand(0.005f, 0.03f);
-        ctx->octave_mults[i] = 1.f;
+        ctx->octave_offsets[i] = 1.f;
+        ctx->octave_spreads[i] = 1.f;
 
         ctx->oscs[i] = LPPulsarOsc.create(4, 2,
             WT_SINE, WTSIZE, WT_TRI2, WTSIZE, 
@@ -521,7 +572,14 @@ int main() {
         ctx->oscs[i]->phase = 0.f;
     }
 
-    ctx->gate = LPPulsarOsc.create(0, 4,
+    ctx->gate1 = LPPulsarOsc.create(0, 4,
+        WIN_SINEOUT, WTSIZE, 
+        WIN_SINE, WTSIZE, 
+        WIN_PHASOR, WTSIZE, 
+        WIN_SINEOUT, WTSIZE
+    );
+
+    ctx->gate2 = LPPulsarOsc.create(0, 4,
         WIN_SINEOUT, WTSIZE, 
         WIN_SINE, WTSIZE, 
         WIN_PHASOR, WTSIZE, 
@@ -533,16 +591,21 @@ int main() {
 
     ctx->envf = LPEnvelopeFollower.create(12.f, SR);
 
-    ctx->gate->samplerate = (lpfloat_t)SR;
-    ctx->gate->window_morph_freq = 0;
-    ctx->gate->freq = 30.f;
-    ctx->gate->phase = 0.f;
+    ctx->gate1->samplerate = (lpfloat_t)SR;
+    ctx->gate1->window_morph_freq = 0;
+    ctx->gate1->freq = 30.f;
+    ctx->gate1->phase = 0.f;
+
+    ctx->gate2->samplerate = (lpfloat_t)SR;
+    ctx->gate2->window_morph_freq = 0;
+    ctx->gate2->freq = 30.f;
+    ctx->gate2->phase = 0.f;
 
     ctx->gate_drift_win = LPWavetable.create(WT_SINE, 4096);
     ctx->gate_drifter = LPShapeOsc.create(ctx->gate_drift_win);
 
     // Set the callbacks for streaming, async renders and param updates
-    if((instrument = astrid_instrument_start(NAME, CHANNELS, 0, ADC_LENGTH, (void*)ctx, 
+    if((instrument = astrid_instrument_start(NAME, CHANNELS, 0, ADC_LENGTH, RESAMPLER_LENGTH, (void*)ctx, 
                     NULL, NULL, audio_callback, renderer_callback, param_map_callback, NULL)) == NULL) {
         fprintf(stderr, "Could not start instrument: (%d) %s\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
@@ -568,7 +631,8 @@ int main() {
         LPBuffer.destroy(ctx->drifters[o]);
     }
 
-    LPPulsarOsc.destroy(ctx->gate);
+    LPPulsarOsc.destroy(ctx->gate1);
+    LPPulsarOsc.destroy(ctx->gate2);
     LPShapeOsc.destroy(ctx->gate_drifter);
     LPBuffer.destroy(ctx->gate_drift_win);
     LPBuffer.destroy(ctx->env);

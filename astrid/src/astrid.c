@@ -1,7 +1,5 @@
 #include "astrid.h"
 
-int init_instrument_message(lpmsg_t * msg, char * instrument_name);
-
 static volatile int * astrid_instrument_is_running;
 static pthread_mutex_t astrid_nursery_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -357,13 +355,14 @@ int lpipc_destroyid(char * path) {
 
 int lpipc_createvalue(char * path, size_t size) {
     int shmfd;
+    sem_t * sem;
     char * semname;
 
     /* Construct the sempahore name by stripping the /tmp prefix */
     semname = path + 4;
 
     /* Create the POSIX semaphore and initialize it to 1 */
-    if(sem_open(semname, O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
+    if((sem = sem_open(semname, O_CREAT | O_EXCL, LPIPC_PERMS, 1)) == NULL) {
         syslog(LOG_ERR, "lpipc_createvalue failed to create semaphore %s. Error: %s\n", semname, strerror(errno));
         return -1;
     }
@@ -376,6 +375,11 @@ int lpipc_createvalue(char * path, size_t size) {
 
     if(ftruncate(shmfd, size) < 0) {
         syslog(LOG_ERR, "lpipc_createvalue Could not truncate shared memory segment to size %ld. (%s) %s\n", size, semname, strerror(errno));
+        return -1;
+    }
+
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_createvalue sem_close Could not close semaphore\n");
         return -1;
     }
 
@@ -624,6 +628,11 @@ lpbuffer_t * lpsampler_create(char * name, double length_in_seconds, int channel
     buf->boundry = length-1;
     buf->range = length;
 
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpsampler_create sem_close Could not close semaphore\n");
+        return NULL;
+    }
+
     close(shmfd);
 
     return buf;
@@ -731,6 +740,56 @@ int lpsampler_release(char * name) {
     return 0;
 }
 
+int lpsampler_release_and_unmap(char * name, lpbuffer_t * buf) {
+    sem_t * sem;
+    char path[PATH_MAX] = {0};
+    lpsampler_get_path(name, path);
+
+    munmap(buf, buf->length * sizeof(lpfloat_t) + sizeof(lpbuffer_t));
+
+    /* Open the semaphore */
+    if((sem = sem_open(path, 0)) == SEM_FAILED) {
+        syslog(LOG_ERR, "lpipc_buffer_release failed to open semaphore %s. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    /* Release the lock on the semaphore */
+    if(sem_post(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release failed to unlock %s. Error: %s\n", path, strerror(errno));
+        return -1;
+    }
+
+    /* Clean up sempahore resources */
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpipc_buffer_release sem_close Could not close semaphore\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+int lpsampler_destroy_and_unmap(char * name, lpbuffer_t * buf) {
+    char path[PATH_MAX] = {0};
+    lpsampler_get_path(name, path);
+
+    /* Unmap the shared memory */
+    munmap(buf, buf->length * sizeof(lpfloat_t) + sizeof(lpbuffer_t));
+
+    /* Unlink the shared memory buffer */
+    if(shm_unlink(path) < 0) {
+        syslog(LOG_ERR, "lpsampler_destroy shm_unlink. Error: %s\n", strerror(errno));
+        return -1;
+    }
+
+    /* Unlink the sempahore */
+    if(sem_unlink(path) < 0) {
+        syslog(LOG_ERR, "lpsampler_destroy sem_unlink Could not destroy semaphore\n");
+        return -1;
+    }
+
+    return 0;
+}
+
 int lpsampler_destroy(char * name) {
     char path[PATH_MAX] = {0};
     lpsampler_get_path(name, path);
@@ -739,7 +798,6 @@ int lpsampler_destroy(char * name) {
     if(shm_unlink(path) < 0) {
         syslog(LOG_ERR, "lpsampler_destroy shm_unlink. Error: %s\n", strerror(errno));
         return -1;
-
     }
 
     /* Unlink the sempahore */
@@ -782,7 +840,7 @@ int lpsampler_write_ringbuffer_block(
         for(i=0; i < blocksize_in_frames; i++) {
             insert_pos = ((buf->pos+i) * channels + c) % boundry;
             sample = *channelp++;
-            buf->data[insert_pos] = sample;
+            buf->data[insert_pos] = lpfilternan(sample);
         }
     }
 
@@ -816,11 +874,11 @@ int lpsampler_read_ringbuffer_block(
     syslog(LOG_INFO, "READ RINGBUF: aquiring lock on  %s\n", name);
     /* Aquire a lock on the buffer */
     if(lpsampler_aquire(name) < 0) {
-        syslog(LOG_ERR, "Could not aquire ADC buffer shm for update\n");
+        syslog(LOG_ERR, "Could not aquire %s ring buffer shm for update\n", name);
         return -1;
     }
 
-    syslog(LOG_INFO, "READ RINGBUF: adc buffer has value 10 %f\n", buf->data[10]);
+    syslog(LOG_INFO, "READ RINGBUF: %s ring buffer has value 10 %f\n", name, buf->data[10]);
 
     /*
      * buf->pos is the last frame written to the circular buffer
@@ -832,7 +890,7 @@ int lpsampler_read_ringbuffer_block(
     for(i=0; i < out->length; i++) {
         bufidx = (start + i) % buf->length;
         for(c=0; c < buf->channels; c++) {
-            out->data[i * buf->channels + c] = buf->data[bufidx * buf->channels + c];
+            out->data[i * buf->channels + c] = lpfilternan(buf->data[bufidx * buf->channels + c]);
         }
     }
 
@@ -1309,6 +1367,11 @@ ssize_t lpcounter_create(char * name) {
     // Initialize the shared memory with 0
     memcpy(shmaddr, &counter_val, sizeof(size_t)); 
 
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "lpcounter_create sem_close Could not close semaphore\n");
+        return -1;
+    }
+
     munmap(shmaddr, sizeof(size_t));
     close(shmfd);
 
@@ -1547,6 +1610,11 @@ lpbuffer_t * deserialize_buffer(char * buffer_code, lpmsg_t * msg) {
     /* Unlink the sempahore */
     if(sem_unlink(buffer_code) < 0) {
         syslog(LOG_ERR, "deserialize_buffer sem_unlink Could not destroy semaphore\n");
+        return NULL;
+    }
+
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "deserialize_buffer sem_close Could not close semaphore\n");
         return NULL;
     }
 
@@ -2438,7 +2506,7 @@ static inline void scheduler_mix_buffers(lpscheduler_t * s) {
             sample += current->buf->data[current->pos * current->buf->channels + bufc];
         }
  
-        s->current_frame[c] = sample;
+        s->current_frame[c] = lpfilternan(sample);
     }
 }
 
@@ -2673,14 +2741,18 @@ int astrid_instrument_jack_callback(jack_nframes_t nframes, void * arg) {
         }
     }
 
-#if 0
     /* clamp output */
     for(c=0; c < instrument->channels; c++) {
         for(i=0; i < (size_t)nframes; i++) {
             output_channels[c][i] = fmax(-1.f, fmin(output_channels[c][i], 1.f));
         }
     }
-#endif
+
+    /* write the output block into the resampler ringbuffer */
+    if(lpsampler_write_ringbuffer_block(instrument->resamplername, instrument->resamplerbuf, output_channels, instrument->channels, nframes) < 0) {
+        syslog(LOG_ERR, "Error writing into adc ringbuf\n");
+        return 0;
+    }
 
     return 0;
 }
@@ -2793,7 +2865,7 @@ void * instrument_seq_pq(void * arg) {
     return 0;
 }
 
-int relay_message_to_seq(lpinstrument_t * instrument) {
+int relay_message_to_seq(lpinstrument_t * instrument, lpmsg_t msg) {
     lpmsgpq_node_t * d;
     double seq_delay, now=0;
 
@@ -2801,7 +2873,7 @@ int relay_message_to_seq(lpinstrument_t * instrument) {
     syslog(LOG_DEBUG, "SEQ PQ MSG: pqnode_index=%d\n", instrument->pqnode_index);
 
     d = &instrument->pqnodes[instrument->pqnode_index];
-    memcpy(&d->msg, &instrument->msg, sizeof(lpmsg_t));
+    memcpy(&d->msg, &msg, sizeof(lpmsg_t));
     instrument->pqnode_index += 1;
     while(instrument->pqnode_index >= NUM_NODES) instrument->pqnode_index -= NUM_NODES;
 
@@ -2812,8 +2884,11 @@ int relay_message_to_seq(lpinstrument_t * instrument) {
 
     /* Hold on to the message as long as possible while still 
      * trying to leave some time for processing before the target deadline */
-    seq_delay = instrument->msg.scheduled - (instrument->msg.max_processing_time * 2);
-    d->timestamp = instrument->msg.initiated + seq_delay;
+    seq_delay = msg.scheduled - (msg.max_processing_time * 2);
+    d->timestamp = msg.initiated + seq_delay;
+
+    syslog(LOG_ERR, "d->timestamp=%f msg.scheduled=%f msg.initiated=%f\n",
+                    d->timestamp, msg.scheduled, msg.initiated);
 
     // Remove the scheduled flag before relaying the message
     d->msg.flags &= ~LPFLAG_IS_SCHEDULED;
@@ -2859,12 +2934,12 @@ void * instrument_message_thread(void * arg) {
         }
 
         is_scheduled = ((instrument->msg.flags & LPFLAG_IS_SCHEDULED) == LPFLAG_IS_SCHEDULED);
-        syslog(LOG_DEBUG, "C MSG: name=%s\n", instrument->msg.instrument_name);
-        syslog(LOG_DEBUG, "C MSG: scheduled=%f\n", instrument->msg.scheduled);
-        syslog(LOG_DEBUG, "C MSG: voice_id=%d\n", (int)instrument->msg.voice_id);
-        syslog(LOG_DEBUG, "C MSG: type=%d\n", (int)instrument->msg.type);
-        syslog(LOG_DEBUG, "C MSG: flags=%d\n", (int)instrument->msg.flags);
-        syslog(LOG_DEBUG, "C MSG: is_scheduled=%d\n", is_scheduled);
+        syslog(LOG_ERR, "C MSG: name=%s\n", instrument->msg.instrument_name);
+        syslog(LOG_ERR, "C MSG: scheduled=%f\n", instrument->msg.scheduled);
+        syslog(LOG_ERR, "C MSG: voice_id=%d\n", (int)instrument->msg.voice_id);
+        syslog(LOG_ERR, "C MSG: type=%d\n", (int)instrument->msg.type);
+        syslog(LOG_ERR, "C MSG: flags=%d\n", (int)instrument->msg.flags);
+        syslog(LOG_ERR, "C MSG: is_scheduled=%d\n", is_scheduled);
 
         // Handle shutdown early
         if(instrument->msg.type == LPMSG_SHUTDOWN) {
@@ -2872,7 +2947,7 @@ void * instrument_message_thread(void * arg) {
             instrument->is_running = 0;
 
             // send the shutdown message to the seq thread and external relay
-            if(relay_message_to_seq(instrument) < 0) {
+            if(relay_message_to_seq(instrument, instrument->msg) < 0) {
                 syslog(LOG_ERR, "%s renderer: Could not read relay message to seq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             }
             if(instrument->ext_relay_enabled) {
@@ -2891,7 +2966,7 @@ void * instrument_message_thread(void * arg) {
         if(is_scheduled) {
             // Scheduled messages get sent to the sequencer for handling later
             syslog(LOG_ERR, "C IS SCHEDULED msg.scheduled %f\n", instrument->msg.scheduled);
-            if(relay_message_to_seq(instrument) < 0) {
+            if(relay_message_to_seq(instrument, instrument->msg) < 0) {
                 syslog(LOG_ERR, "%s renderer: Could not read relay message to seq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             }
             continue;
@@ -3357,6 +3432,7 @@ lpinstrument_t * astrid_instrument_start(
     int channels, 
     int ext_relay_enabled,
     double adc_length,
+    double resampler_length,
     void * ctx,
     char * tty,
     char * midi_device_name,
@@ -3377,6 +3453,7 @@ lpinstrument_t * astrid_instrument_start(
     instrument = (lpinstrument_t *)LPMemoryPool.alloc(1, sizeof(lpinstrument_t));
     memset(instrument, 0, sizeof(lpinstrument_t));
 
+    setlogmask(LOG_UPTO(LOG_ERR));
     openlog(name, LOG_PID, LOG_USER);
     syslog(LOG_DEBUG, "starting %s instrument...\n", name);
 
@@ -3389,6 +3466,7 @@ lpinstrument_t * astrid_instrument_start(
     instrument->update = update;
     instrument->trigger = trigger;
     instrument->ext_relay_enabled = ext_relay_enabled;
+    instrument->is_ready = 1;
 
     instrument->midi_device_id = -1;
     if(midi_device_name != NULL) {
@@ -3471,6 +3549,13 @@ lpinstrument_t * astrid_instrument_start(
     snprintf(instrument->adcname, PATH_MAX, "%s-adc", instrument->name);
     if((instrument->adcbuf = lpsampler_create(instrument->adcname, adc_length, instrument->channels, instrument->samplerate)) == NULL) {
         syslog(LOG_INFO, "Could not create instrument ADC buffer\n");
+        goto astrid_instrument_shutdown_with_error;
+    }
+
+    /* Create the internal ringbuffer for resampling */
+    snprintf(instrument->resamplername, PATH_MAX, "%s-resampler", instrument->name);
+    if((instrument->resamplerbuf = lpsampler_create(instrument->resamplername, resampler_length, instrument->channels, instrument->samplerate)) == NULL) {
+        syslog(LOG_INFO, "Could not create instrument resampler buffer\n");
         goto astrid_instrument_shutdown_with_error;
     }
 
@@ -3697,6 +3782,13 @@ int astrid_instrument_stop(lpinstrument_t * instrument) {
         return -1;
     }
 
+    syslog(LOG_DEBUG, "Cleaning up resampler ringbuf...\n");
+    if(lpsampler_destroy(instrument->resamplername) < 0) {
+        syslog(LOG_ERR, "Error while removing resampler ringbuf, dang! Other cleanup is done tho.\n");
+        closelog();
+        return -1;
+    }
+
     /* cleanup the pq memory */
     pqueue_free(instrument->msgpq);
     free(instrument->pqnodes);
@@ -3857,6 +3949,7 @@ int send_render_to_mixer(lpinstrument_t * instrument, lpbuffer_t * buf) {
 int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size) {
     int shmfd;
     void * shmaddr;
+    sem_t * sem;
     char buffer_code[LPKEY_MAXLENGTH] = {0};
     ssize_t buffer_id = 0;
     lpmsg_t msg = {0};
@@ -3874,7 +3967,7 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
 
     // write the bufstr to shared memory at the key location
     /* Create the POSIX semaphore and initialize it to 1 */
-    if(sem_open(buffer_code, O_CREAT | O_EXCL, LPIPC_PERMS, 1) == NULL) {
+    if((sem = sem_open(buffer_code, O_CREAT | O_EXCL, LPIPC_PERMS, 1)) == NULL) {
         syslog(LOG_ERR, "publish_bufstr: failed to create semaphore %s. Error: %s\n", buffer_code, strerror(errno));
         return -1;
     }
@@ -3911,38 +4004,72 @@ int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * buf
     // unmap the memory...
     munmap(shmaddr, size);
 
+    if(sem_close(sem) < 0) {
+        syslog(LOG_ERR, "publish_bufstr sem_close Could not close semaphore\n");
+        return -1;
+    }
+
     close(shmfd);
 
     return 0;
 }
 
-int astrid_instrument_tick(lpinstrument_t * instrument) {
+int astrid_instrument_process_command_tick(lpinstrument_t * instrument) {
     char * cmdline;
     size_t cmdlength;
 
-    if(instrument->is_running == 0) return 0;
+    cmdline = linenoiseEditFeed(&instrument->cmdstate);
 
-    cmdline = linenoise("^_- ");
+    if(cmdline != linenoiseEditMore) {
+        linenoiseEditStop(&instrument->cmdstate);
 
-    if(cmdline == NULL) {
-        return 0;
+        /* add the command to the history */
+        linenoiseHistoryAdd(cmdline);
+        linenoiseHistorySave("history.txt"); // FIXME put this in .local or etc
+
+        cmdlength = strnlen(cmdline, ASTRID_MAX_CMDLINE);
+
+        printf("processing msg: %s (%ld)\n", cmdline, cmdlength);
+        fflush(stdout);
+
+        if(parse_message_from_cmdline(cmdline, cmdlength, &instrument->cmd) < 0) {
+            syslog(LOG_ERR, "Could not parse message from cmdline %s\n", cmdline);
+            return -1;
+        }
+
+        free(cmdline);
+        instrument->is_ready = 1;
     }
-
-    /* add the command to the history */
-    linenoiseHistoryAdd(cmdline);
-
-    cmdlength = strnlen(cmdline, ASTRID_MAX_CMDLINE);
-
-    printf("msg: %s (%ld)\n", cmdline, cmdlength);
-
-    if(parse_message_from_cmdline(cmdline, cmdlength, &instrument->cmd) < 0) {
-        syslog(LOG_ERR, "Could not parse message from cmdline %s\n", cmdline);
-        return -1;
-    }
-
-    free(cmdline);
 
     return 0;
+}
+
+int astrid_instrument_tick(lpinstrument_t * instrument) {
+    struct timeval timeout;
+    fd_set readfds;
+    int ret;
+
+    if(instrument->is_running == 0) return 0;
+
+    if(instrument->is_ready) {
+        linenoiseEditStart(&instrument->cmdstate, -1, -1, instrument->cmdbuf, sizeof(instrument->cmdbuf), "^_- ");
+        instrument->is_ready = 0;
+    }
+
+    FD_ZERO(&readfds);
+    FD_SET(instrument->cmdstate.ifd, &readfds);
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+
+    if((ret = select(instrument->cmdstate.ifd+1, &readfds, NULL, NULL, &timeout)) < 0) {
+        syslog(LOG_ERR, "astrid_instrument_tick: select error (%d) %s\n", errno, strerror(errno));
+        return -1;
+    } 
+
+    // Yield for foreground bookkeeping on timeout
+    if(ret == 0) return 0;
+
+    return astrid_instrument_process_command_tick(instrument);
 }
 
 

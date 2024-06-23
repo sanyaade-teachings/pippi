@@ -227,6 +227,9 @@ cdef double[:,:] _norm(double[:,:] snd, double ceiling):
     cdef double normval = 1
     cdef double maxval = _mag(snd)
 
+    if maxval == 0:
+        return snd
+
     normval = ceiling / maxval
     for i in range(framelength):
         for c in range(channels):

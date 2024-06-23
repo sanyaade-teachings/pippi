@@ -141,10 +141,15 @@ typedef struct lpscheduler_t {
 typedef struct lpinstrument_t {
     char * name;
     int channels;
-    volatile int is_running;
-    volatile int is_waiting;
+    volatile int is_running; // threads, pools, loops, etc
+    volatile int is_waiting; // for lpmsg_t messages
+    volatile int is_ready;   // for console commands
     int has_been_initialized;
     lpfloat_t samplerate;
+
+    // linenoise cmd buf
+    struct linenoiseState cmdstate;
+    char cmdbuf[1024];
 
     // LMDB session refs
     MDB_cursor * dbcur;
@@ -159,6 +164,8 @@ typedef struct lpinstrument_t {
     // The adc ringbuf name
     char adcname[PATH_MAX];
     lpbuffer_t * adcbuf; // mmaped pointer to adcbuf
+    char resamplername[PATH_MAX];
+    lpbuffer_t * resamplerbuf; // mmaped pointer to adcbuf
 
     // The instrument message q(s)
     char qname[NAME_MAX]; 
@@ -272,6 +279,7 @@ ssize_t astrid_get_voice_id();
 int decode_update_message_param(lpmsg_t * msg, uint16_t * id, float * value);
 int encode_update_message_param(lpmsg_t * msg);
 
+int init_instrument_message(lpmsg_t * msg, char * instrument_name);
 int send_message(char * qname, lpmsg_t msg);
 int send_play_message(lpmsg_t msg);
 int send_serial_message(lpmsg_t msg);
@@ -311,12 +319,14 @@ int astrid_get_playback_device_id();
 int astrid_get_capture_device_id();
 
 lpbuffer_t * lpsampler_aquire_and_map(char * name);
+int lpsampler_release_and_unmap(char * name, lpbuffer_t * buf);
 int lpsampler_aquire(char * name);
 int lpsampler_release(char * name);
 int lpsampler_read_ringbuffer_block(char * name, lpbuffer_t * buf, size_t offset_in_frames, lpbuffer_t * out);
 int lpsampler_write_ringbuffer_block(char * name, lpbuffer_t * buf, float ** block, int channels, size_t blocksize_in_frames);
 lpbuffer_t * lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate);
 int lpsampler_destroy(char * name);
+int lpsampler_destroy_and_unmap(char * name, lpbuffer_t * buf);
 
 int lpipc_setid(char * path, int id); 
 int lpipc_getid(char * path); 
@@ -329,7 +339,21 @@ int lpipc_destroyvalue(char * id_path);
 
 void lptimeit_since(struct timespec * start);
 
-lpinstrument_t * astrid_instrument_start(char * name, int channels, int ext_relay_enabled, double adc_length, void * ctx, char * tty, char * midi_device_name, int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), int (*renderer)(void * instrument), int (*update)(void * instrument, char * key, char * val), int (*trigger)(void * instrument));
+lpinstrument_t * astrid_instrument_start(
+        char * name, 
+        int channels, 
+        int ext_relay_enabled, 
+        double adc_length, 
+        double resampler_length, 
+        void * ctx, 
+        char * tty, 
+        char * midi_device_name, 
+        int (*stream)(size_t blocksize, float ** input, float ** output, void * instrument), 
+        int (*renderer)(void * instrument), 
+        int (*update)(void * instrument, char * key, char * val), 
+        int (*trigger)(void * instrument)
+    );
+
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
 int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value);
@@ -350,7 +374,7 @@ int astrid_instrument_session_open(lpinstrument_t * instrument);
 int astrid_instrument_session_close(lpinstrument_t * instrument);
 int astrid_instrument_publish_bufstr(char * instrument_name, unsigned char * bufstr, size_t size);
 int send_render_to_mixer(lpinstrument_t * instrument, lpbuffer_t * buf);
-int relay_message_to_seq(lpinstrument_t * instrument);
+int relay_message_to_seq(lpinstrument_t * instrument, lpmsg_t msg);
 
 int extract_int32_from_token(char * token, int32_t * val);
 int extract_float_from_token(char * token, float * val);

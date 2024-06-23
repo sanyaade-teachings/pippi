@@ -106,8 +106,8 @@ littlefield:
 	mkdir -p build
 
 	echo "Building littlefield...";
-	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getmidideviceid.c $(LPLIBS) -o build/getmidideviceid
-	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/hashtest.c $(LPLIBS) -o build/hashtest
+	#$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/getmidideviceid.c $(LPLIBS) -o build/getmidideviceid
+	#$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c src/hashtest.c $(LPLIBS) -o build/hashtest
 
 	#$(CC) $(LPFLAGS) -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/littlefield.c $(LPLIBS) -o build/littlefield
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/littlefield.c $(LPLIBS) -o build/littlefield
@@ -121,11 +121,11 @@ astrid-pulsar:
 
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/pulsar.c $(LPLIBS) -o build/astrid-pulsar
 
-astrid-simple:
+simple:
 	mkdir -p build
 
-	$(CC) $(LPFLAGS) -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/astrid-simple
-	#$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/astrid-simple
+	$(CC) $(LPFLAGS) -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/simple-san
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/simple.c $(LPLIBS) -o build/simple
 
 
 build: clean astrid-q astrid-serial-tools astrid-ipc astrid-devices astrid-midimap astrid-pulsar astrid-simple

@@ -281,10 +281,20 @@ cdef class SoundBuffer:
                int samplerate=DEFAULT_SAMPLERATE, 
             object filename=None, 
                int offset=0, 
-       double[:,:] buf=None):
+       double[:,:] buf=None, int framelength=-1):
         self.samplerate = samplerate
         self.channels = max(channels, 1)
-        cdef int framelength = <int>(length * self.samplerate)
+
+        if frames is not None:
+            framelength = len(frames)
+
+        if length >= 0:
+            framelength = <int>(length * self.samplerate)
+        elif framelength >= 0:
+            length = framelength * samplerate
+        else:
+            raise ValueError('Missing length param')
+
         cdef double[:] tmplist
 
         if filename is not None:

@@ -25,7 +25,7 @@ cimport numpy as np
 from pippi import dsp, midi, ugens
 from pippi.soundbuffer cimport SoundBuffer
 
-NUM_COMRADES = 4
+NUM_COMRADES = 16
 
 class InstrumentError(Exception):
     pass
@@ -68,7 +68,7 @@ cdef bytes serialize_buffer(SoundBuffer buf, int is_looping, lpmsg_t msg):
 
     for i in range(length):
         for c in range(channels):
-            strbuf += struct.pack('d', buf.frames[i,c])
+            strbuf += struct.pack('d', lpfilternan(buf.frames[i,c]))
 
     msgview = <unsigned char[:msgsize]>(<unsigned char *>&msg)
     for i in range(msgsize):
@@ -85,6 +85,8 @@ cdef class MessageEvent:
             double max_processing_time,
         ):
         cdef size_t onset_frames = 0
+
+        logger.error('MessageEvent params: %s' % params)
 
         params_byte_string = params.encode('utf-8')
         instrument_name_byte_string = instrument_name.encode('utf-8')
@@ -198,6 +200,8 @@ cdef class EventTriggerFactory:
         params = ' '.join(map(str, args)) 
         params += ' ' 
         params += ' '.join([ '%s=%s' % (k, v) for k, v in kwargs.items() ])
+
+        logger.error('_parse_params params=%s' % params)
 
         return params
 
@@ -342,7 +346,7 @@ cdef class EventContext:
 
         self.graph = graph
         self.cache = cache
-        self.p = ParamBucket(str(msg))
+        self.p = ParamBucket(msg)
         self.s = SessionParamBucket(instrument) 
         self.t = EventTriggerFactory()
         self.m = MidiEventListenerProxy(default_midi_device)
@@ -357,6 +361,14 @@ cdef class EventContext:
     def adc(self, length=1, offset=0, channels=2):
         return self.instrument.read_from_adc(length, offset=offset, channels=channels)
 
+    def sample(self, str name, SoundBuffer snd=None):
+        if snd is None:
+            return self.instrument.read_from_sampler(name)
+        self.instrument.save_to_sampler(name, snd)
+
+    def resample(self, length=1, offset=0, channels=2, samplerate=48000, instrument=None):
+        return self.instrument.read_from_resampler(length, offset=offset, channels=channels, samplerate=samplerate, instrument=instrument)
+
     def log(self, msg):
         logger.info('ctx.log[%s] %s' % (self.instrument_name, msg))
 
@@ -364,7 +376,7 @@ cdef class EventContext:
         return self.p._params
 
 cdef class Instrument:
-    def __cinit__(self, str name, str path, int channels, double adc_length, str midi_device_name):
+    def __cinit__(self, str name, str path, int channels, double adc_length, double resampler_length, str midi_device_name):
         cdef char * midi_device_cstr
         self.midi_device_name = NULL
         if midi_device_name is not None:
@@ -385,11 +397,15 @@ cdef class Instrument:
         self.last_reload = 0
         self.max_processing_time = 0
 
-        self.i = astrid_instrument_start(self.ascii_name, channels, 1, adc_length, NULL, NULL, 
+        self.i = astrid_instrument_start(self.ascii_name, channels, 1, adc_length, resampler_length, NULL, NULL, 
                                          self.midi_device_name,
                                          NULL, NULL, NULL, NULL)
         if self.i == NULL:
             raise InstrumentError('Could not initialize lpinstrument_t')
+
+        # eh, why not. might be useful if the Instrument is available in the ctx too
+        self.samplerate = self.i.samplerate
+        self.channels = self.i.channels
 
         self.load_renderer(name, path)
 
@@ -462,14 +478,17 @@ cdef class Instrument:
         self.msg = msg # so many copies omg
         return msg
 
-    cpdef EventContext get_event_context(Instrument self, bint with_graph=False):
+    cpdef EventContext get_event_context(Instrument self, str msgstr=None, bint with_graph=False):
         cdef bytes render_params = self.msg.msg
 
-        msgstr = ''
-        if self.msg.type != LPMSG_MIDI_FROM_DEVICE:
-            # FIXME use the is_encoded flag or something...
-            # or maybe I can ignore this and just decode from utf-8 like a criminal...
-            msgstr = render_params.decode('ascii')
+        if msgstr is None:
+            msgstr = ''
+            if self.msg.type != LPMSG_MIDI_FROM_DEVICE:
+                # FIXME use the is_encoded flag or something...
+                # or maybe I can ignore this and just decode from utf-8 like a criminal...
+                msgstr = render_params.decode('ascii')
+
+        logger.error('PLAY PARAMS: %s' % msgstr)
 
         graph = None
         if with_graph:
@@ -509,6 +528,92 @@ cdef class Instrument:
         LPBuffer.destroy(out)
 
         return snd
+
+    cdef SoundBuffer read_from_resampler(Instrument self, double length, double offset=0, int channels=2, int samplerate=48000, str instrument=None):
+        cdef size_t i
+        cdef int c
+        cdef lpbuffer_t * out
+        cdef char * resampler_name
+
+        cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
+        cdef size_t length_in_frames = len(snd)
+        cdef size_t offset_in_frames = <size_t>(offset * samplerate)
+
+        out = LPBuffer.create(length_in_frames, channels, samplerate)
+
+        if instrument is None:
+            resampler_name = self.i.resamplername
+        else:
+            instrument = '%s-resampler' % instrument
+            resampler_name_bytes = instrument.encode('UTF-8')
+            resampler_name = resampler_name_bytes
+
+        if lpsampler_read_ringbuffer_block(resampler_name, self.i.resamplerbuf, offset_in_frames, out) < 0:
+            logger.error('pippi.renderer resampler read: failed to read %d frames at offset %d from resampler' % (length_in_frames, offset_in_frames))
+            return snd
+
+        for i in range(length_in_frames):
+            for c in range(channels):
+                snd.frames[i,c] = lpfilternan(out.data[i * channels + c])
+
+        LPBuffer.destroy(out)
+
+        return snd
+
+    cdef SoundBuffer read_from_sampler(Instrument self, str name):
+        cdef size_t i
+        cdef int c
+        cdef lpbuffer_t * out
+        cdef SoundBuffer snd 
+
+        name_bytes = name.encode('UTF-8')
+        cdef char * _name = name_bytes
+
+        out = lpsampler_aquire_and_map(_name)
+
+        if out == NULL or out.length <= 0 or out.channels <= 0:
+            logger.error('pippi.renderer sampler read: failed to read from %s' % _name)
+            if out != NULL:
+                logger.error('length=%s channels=%s' % (out.length, out.channels))
+            return None
+
+        snd = SoundBuffer(framelength=out.length, channels=self.channels, samplerate=self.samplerate)
+        logger.error('out.length=%s len(snd)=%s self.samplerate=%s' % (out.length, len(snd), self.samplerate))
+
+        if len(snd) == 0:
+            logger.error('BLOWUP! self.channels=%d self.samplerate=%s' % (self.channels, self.samplerate))
+            return None
+
+        for i in range(out.length):
+            for c in range(out.channels):
+                snd.frames[i,c] = out.data[i * out.channels + c]
+
+        if lpsampler_release_and_unmap(_name, out) < 0:
+            logger.error('Could not release %s sampler memory' % _name)
+
+        return snd
+
+    cdef void save_to_sampler(Instrument self, str name, SoundBuffer snd):
+        cdef size_t i
+        cdef int c
+        cdef lpbuffer_t * out
+
+        name_bytes = name.encode('UTF-8')
+        cdef char * _name = name_bytes
+
+        # create the shm buffer
+        logger.error('Creating %s buffer with frame 10,0=%s' % (name, snd.frames[10,0]))
+        out = lpsampler_create(_name, snd.dur, snd.channels, <int>self.samplerate)
+        logger.error('out.length=%s len(snd)=%s' % (out.length, len(snd)))
+
+        # write the data into it
+        for i in range(out.length):
+            for c in range(out.channels):
+                out.data[i * out.channels + c] = snd.frames[i,c]
+
+        if lpsampler_release_and_unmap(_name, out) < 0:
+            logger.error('Could not release %s sampler memory' % _name)
+
 
     def reload(self):
         logger.debug('Reloading instrument %s from %s' % (self.name, self.path))
@@ -630,7 +735,7 @@ cdef tuple collect_players(Instrument instrument):
     
     return players, loop
 
-cdef int render_event(Instrument instrument):
+cdef int render_event(Instrument instrument, str msgstr):
     cdef set players
     cdef bint loop
     cdef bytes bufstr
@@ -640,9 +745,9 @@ cdef int render_event(Instrument instrument):
     instrument_byte_string = instrument.name.encode('UTF-8')
     cdef char * _instrument_ascii_name = instrument_byte_string
 
-    ctx = instrument.get_event_context()
+    ctx = instrument.get_event_context(msgstr)
 
-    logger.debug('rendering event %s w/params %s' % (str(instrument), render_params))
+    logger.debug('rendering event %s w/params %s' % (str(instrument), msgstr))
 
     if hasattr(instrument.renderer, 'before'):
         instrument.renderer.before(ctx)
@@ -780,7 +885,7 @@ def render_executor(Instrument instrument, object q, int comrade_id):
             logger.exception('Error getting now seconds')
             return
 
-        if render_event(instrument) < 0:
+        if render_event(instrument, msg) < 0:
             logger.exception('Error trying to execute python render...')
             return
 
@@ -810,6 +915,7 @@ def _run_forever(Instrument instrument,
         str instrument_name, 
         int channels, 
         double adc_length,
+        double resampler_length,
         object q, 
     ):
     cdef lpmsg_t msg
@@ -845,7 +951,8 @@ def _run_forever(Instrument instrument,
 
         elif msg.type == LPMSG_PLAY:
             logger.info('PY MSG: play')
-            q.put(1)
+            logger.error('PY MSG: play params: %s' % msg.msg)
+            q.put(msg.msg.decode('utf-8'))
 
         elif msg.type == LPMSG_TRIGGER:
             logger.info('PY MSG: trigger')
@@ -856,7 +963,7 @@ def _run_forever(Instrument instrument,
             # FIXME pass this along to the comrades
             try:
                 if instrument is None:
-                    instrument = Instrument(instrument_name, script_path, channels, adc_length)
+                    instrument = Instrument(instrument_name, script_path, channels, adc_length, resampler_length)
                 else:
                     last_edit = os.path.getmtime(instrument.path)
                     if last_edit > instrument.last_reload:
@@ -868,7 +975,7 @@ def _run_forever(Instrument instrument,
 
     logger.info('PY: python instrument shutting down...')
 
-def run_forever(str script_path, str instrument_name=None, int channels=2, double adc_length=30, str midi_device_name=None):
+def run_forever(str script_path, str instrument_name=None, int channels=2, double adc_length=30, double resampler_length=30, str midi_device_name=None):
     cdef Instrument instrument = None
     instrument_name = instrument_name if instrument_name is not None else Path(script_path).stem
     instrument_byte_string = instrument_name.encode('UTF-8')
@@ -877,7 +984,7 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
     try:
         # Start the stream and setup the instrument
         logger.info(f'PY: loading python instrument... {script_path=} {instrument_name=} {midi_device_name=}')
-        instrument = Instrument(instrument_name, script_path, channels, adc_length, midi_device_name)
+        instrument = Instrument(instrument_name, script_path, channels, adc_length, resampler_length, midi_device_name)
         logger.info(f'PY: started instrument... {script_path=} {instrument_name=}')
     except InstrumentError as e:
         logger.error('PY: Error trying to start instrument. Shutting down...')
@@ -890,17 +997,25 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
         comrade.start()
         render_pool += [ comrade ]
 
-    message_process = Process(target=_run_forever, args=(instrument, script_path, instrument_name, channels, adc_length, render_q))
+    message_process = Process(target=_run_forever, args=(instrument, script_path, instrument_name, channels, adc_length, resampler_length, render_q))
     message_process.start()
 
     try:
         while instrument.i.is_running:
             # Read messages from the console and relay them to the q
-            # Also does memory cleanup on spent shared memory buffers
+            # times out after a second to allow for render pool cleanup
             if astrid_instrument_tick(instrument.i) < 0:
                 logger.info('PY: Could not read console line')
                 time.sleep(2)
                 continue
+
+            for comrade in render_pool:
+                if not comrade.is_alive():
+                    render_pool.remove(comrade)
+                    logger.error('Our comrade has become exhausted, and is being relieved')
+                    comrade = Process(target=render_executor, args=(instrument, render_q, i))
+                    comrade.start()
+                    render_pool += [ comrade ]
 
     except KeyboardInterrupt as e:
         print('PY: Got keyboard interrupt')

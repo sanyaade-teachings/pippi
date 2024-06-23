@@ -220,6 +220,8 @@ extern const lpinterpolation_factory_t LPInterpolation;
  */
 lpfloat_t lpzapgremlins(lpfloat_t x);
 
+lpfloat_t lpfilternan(lpfloat_t x);
+
 /* These are little value scaling helper routines. */
 /* lpwv wraps a given value between min and max through probably wrong basic arithmetic */
 lpfloat_t lpwv(lpfloat_t value, lpfloat_t min, lpfloat_t max);

@@ -9,6 +9,8 @@ cdef extern from "stdint.h":
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
 
+    lpfloat_t lpzapgremlins(lpfloat_t x);
+    lpfloat_t lpfilternan(lpfloat_t x);
     u_int32_t lphashstr(char * str)
 
     ctypedef struct lpbuffer_t:
@@ -115,6 +117,8 @@ cdef extern from "astrid.h":
 
         char adcname[4096]
         lpbuffer_t * adcbuf
+        char resamplername[4096]
+        lpbuffer_t * resamplerbuf
 
         char qname[NAME_MAX]
         char external_relay_name[NAME_MAX]
@@ -125,7 +129,15 @@ cdef extern from "astrid.h":
 
         lpscheduler_t * async_mixer
 
-    int lpsampler_read_ringbuffer_block(char * name, lpbuffer_t * buf, size_t offset_in_frames, lpbuffer_t * out)
+    lpbuffer_t * lpsampler_aquire_and_map(char * name);
+    int lpsampler_release_and_unmap(char * name, lpbuffer_t * buf);
+    int lpsampler_aquire(char * name);
+    int lpsampler_release(char * name);
+    int lpsampler_read_ringbuffer_block(char * name, lpbuffer_t * buf, size_t offset_in_frames, lpbuffer_t * out);
+    int lpsampler_write_ringbuffer_block(char * name, lpbuffer_t * buf, float ** block, int channels, size_t blocksize_in_frames);
+    lpbuffer_t * lpsampler_create(char * name, double length_in_seconds, int channels, int samplerate);
+    int lpsampler_destroy(char * name);
+    int lpsampler_destroy_and_unmap(char * name, lpbuffer_t * buf);
 
     int lpipc_getid(char * path)
     ssize_t astrid_get_voice_id()
@@ -172,6 +184,7 @@ cdef extern from "astrid.h":
         int channels, 
         int ext_relay_enabled,
         double adc_length,
+        double resampler_length,
         void * ctx, 
         char * tty,
         char * midi_device_name,
@@ -225,13 +238,18 @@ cdef class Instrument:
     cdef public lpmsg_t msg # a copy of the last message received
     cdef public size_t last_reload
     cdef public double max_processing_time
+    cdef public int channels
+    cdef public double samplerate
     cdef public int default_midi_device
     cdef char * ascii_name # instrument name as a c string
     cdef char * midi_device_name
     cdef lpinstrument_t * i
-    cpdef EventContext get_event_context(Instrument self, bint with_graph=*)
+    cpdef EventContext get_event_context(Instrument self, str msgstr=*, bint with_graph=*)
     cpdef lpmsg_t get_message(Instrument self)
     cdef SoundBuffer read_from_adc(Instrument self, double length, double offset=*, int channels=*, int samplerate=*)
+    cdef SoundBuffer read_from_resampler(Instrument self, double length, double offset=*, int channels=*, int samplerate=*, str instrument=*)
+    cdef SoundBuffer read_from_sampler(Instrument self, str name)
+    cdef void save_to_sampler(Instrument self, str name, SoundBuffer snd)
 
 cdef class SessionParamBucket:
     cdef Instrument instrument
@@ -254,7 +272,7 @@ cdef class EventContext:
     cdef public Instrument instrument
 
 cdef tuple collect_players(Instrument instrument)
-cdef int render_event(Instrument instrument)
+cdef int render_event(Instrument instrument, str msgstr)
 cdef set collect_trigger_planners(Instrument instrument)
 cdef int trigger_events(Instrument instrument)
 
