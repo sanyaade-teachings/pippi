@@ -601,23 +601,29 @@ lpbuffer_t * lpsampler_create(char * name, double length_in_seconds, int channel
 
     /* Create the POSIX semaphore and initialize it to 1 */
     if((sem = sem_open(path, O_CREAT, LPIPC_PERMS, 1)) == SEM_FAILED) {
-        syslog(LOG_ERR, "lpipc_buffer_create Could not create semaphore. (%s) %s\n", path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_create Could not create semaphore. (%s) %s\n", path, strerror(errno));
+        return NULL;
+    }
+
+    /* Aquire a lock on the semaphore */
+    if(sem_wait(sem) < 0) {
+        syslog(LOG_ERR, "lpsampler_create failed to lock %s sem. Error: %s\n", path, strerror(errno));
         return NULL;
     }
 
     /* initialize the shared memory segment for the lpbuffer_t struct */
     if((shmfd = shm_open(path, O_CREAT | O_RDWR, LPIPC_PERMS)) < 0) {
-        syslog(LOG_ERR, "Could not create shared memory segment. (%s) %s\n", path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_create Could not create shared memory segment. (%s) %s\n", path, strerror(errno));
         return NULL; 
     }
 
     if(ftruncate(shmfd, bufsize) < 0) {
-        syslog(LOG_ERR, "Could not truncate shared memory segment to size %ld. (%s) %s\n", sizeof(lpbuffer_t), path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_create Could not truncate shared memory segment to size %ld. (%s) %s\n", sizeof(lpbuffer_t), path, strerror(errno));
         return NULL;
     }
 
     if((buf = mmap(NULL, bufsize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0)) == MAP_FAILED) {
-        syslog(LOG_ERR, "Could not mmap shared memory segment to size %ld. (%s) %s\n", sizeof(lpbuffer_t), path, strerror(errno));
+        syslog(LOG_ERR, "lpsampler_create Could not mmap shared memory segment to size %ld. (%s) %s\n", sizeof(lpbuffer_t), path, strerror(errno));
         return NULL;
     }
 
@@ -627,6 +633,12 @@ lpbuffer_t * lpsampler_create(char * name, double length_in_seconds, int channel
     buf->samplerate = samplerate;
     buf->boundry = length-1;
     buf->range = length;
+
+    /* Release the lock on the semaphore */
+    if(sem_post(sem) < 0) {
+        syslog(LOG_ERR, "lpsampler_create failed to unlock %s sem. Error: %s\n", path, strerror(errno));
+        return NULL;
+    }
 
     if(sem_close(sem) < 0) {
         syslog(LOG_ERR, "lpsampler_create sem_close Could not close semaphore\n");
