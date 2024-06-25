@@ -191,6 +191,13 @@ typedef struct lpfx_factory_t {
     lpfloat_t (*crush)(lpfloat_t val, int bits);
 } lpfx_factory_t;
 
+typedef struct lpfilter_factory_t {
+    lpbfilter_t * (*create_bhp)(lpfloat_t cutoff, lpfloat_t samplerate);
+    lpfloat_t (*process_bhp)(lpbfilter_t * filter, lpfloat_t in);
+    lpbfilter_t * (*create_blp)(lpfloat_t cutoff, lpfloat_t samplerate);
+    lpfloat_t (*process_blp)(lpbfilter_t * filter, lpfloat_t in);
+} lpfilter_factory_t;
+
 /* Interfaces */
 extern const lparray_factory_t LPArray;
 extern const lpbuffer_factory_t LPBuffer;
@@ -199,6 +206,7 @@ extern const lpringbuffer_factory_t LPRingBuffer;
 extern const lpwavetable_factory_t LPWavetable;
 extern const lpwindow_factory_t LPWindow;
 extern const lpfx_factory_t LPFX;
+extern const lpfilter_factory_t LPFilter;
 
 extern lprand_t LPRand;
 extern const lpparam_factory_t LPParam;

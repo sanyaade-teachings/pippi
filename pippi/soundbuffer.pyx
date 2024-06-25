@@ -292,8 +292,8 @@ cdef class SoundBuffer:
             framelength = <int>(length * self.samplerate)
         elif framelength >= 0:
             length = framelength * samplerate
-        else:
-            raise ValueError('Missing length param')
+        elif filename is None and frames is None and buf is None:
+            length = 0
 
         cdef double[:] tmplist
 

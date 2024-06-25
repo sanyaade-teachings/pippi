@@ -104,3 +104,17 @@ typedef struct lppatternbuf_t {
 } lppatternbuf_t;
 
 
+/* This filter type is shared among the butterworth 
+ * filters ported from Paul Batchelor's Soundpipe.
+ * The original Soundpipe annotation is preserved below.
+ *
+ * Original Author(s): Paris Smaragdis, John ffitch
+ * Year: 1994
+ * Location: Opcodes/butter.c
+ */
+typedef struct lpbfilter_t {
+    lpfloat_t sr, freq, istor;
+    lpfloat_t lkf;
+    lpfloat_t a[8];
+    lpfloat_t pidsr;
+} lpbfilter_t;

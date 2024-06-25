@@ -61,10 +61,40 @@ cpdef list scale(list source, double fromlow=-1, double fromhigh=1, double tolow
     cdef double[:] _source = np.array(source, dtype='d')
     return np.array(lists._scale(out, _source, fromlow, fromhigh, tolow, tohigh, log), dtype='d').tolist()
 
+cpdef double scalef(double source, double fromlow=-1, double fromhigh=1, double tolow=0, double tohigh=1, bint log=False, bint exp=False):
+    cdef double out
+    cdef double _tolow = min(tolow, tohigh)
+    cdef double _tohigh = max(tolow, tohigh)
+    cdef double _fromlow = min(fromlow, fromhigh)
+    cdef double _fromhigh = max(fromlow, fromhigh)
+
+    cdef double todiff = _tohigh - _tolow
+    cdef double fromdiff = _fromhigh - _fromlow
+
+    if log:
+        out = ((source - _fromlow) / fromdiff)
+        out = math.log(out * (math.e-1) + 1)
+        out = out * todiff + tolow
+
+    elif exp:
+        out = ((source - _fromlow) / fromdiff)
+        out = math.exp(out * math.log(2)) - 1
+        out = out * todiff + tolow
+
+    else:
+        out = ((source - _fromlow) / fromdiff) * todiff + tolow
+
+    return out
+
+
 cpdef list snap(list source, double mult=0, object pattern=None):
     return lists.snap(source, mult, pattern)
 
 cpdef double tolog(double value, int base=10):
+    if value <= 0: return 0
+    return math.log(value * (base-1)+1) / math.log(base)
+
+cpdef double toexp(double value, int base=10):
     return (pow(base, value) - 1) / (base - 1)
 
 cpdef SoundBuffer mix(list sounds, align_end=False):
