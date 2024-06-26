@@ -87,6 +87,9 @@ enum InstrumentParams {
     PARAM_DISTORTION_AMOUNT,
     PARAM_DISTORTION_MIX,
 
+    PARAM_SAMPLEBANK1_REC_ENABLED,
+    PARAM_SAMPLEBANK2_REC_ENABLED,
+
     PARAM_MIC1_AMP,
     PARAM_MIC1_PAN,
     PARAM_MIC2_AMP,
@@ -128,6 +131,11 @@ typedef struct localctx_t {
     lpfloat_t env_phaseincs[NUMOSCS];
     lpfloat_t octave_offsets[NUMOSCS];
     lpfloat_t octave_spreads[NUMOSCS];
+
+    char samplebank1name[PATH_MAX];
+    char samplebank2name[PATH_MAX];
+    lpbuffer_t * samplebank1buf;
+    lpbuffer_t * samplebank2buf;
 } localctx_t;
 
 lpfloat_t osc_mix(lpfloat_t pos, int chan) {
@@ -280,6 +288,13 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
         extract_int32_from_token(valstr, &val_i32);
         astrid_instrument_set_param_int32(instrument, PARAM_MIC_ENVELOPE_TRACKING_ENABLED, val_i32);
 
+    } else if(strcmp(keystr, "rec1") == 0) {
+        extract_int32_from_token(valstr, &val_i32);
+        astrid_instrument_set_param_int32(instrument, PARAM_SAMPLEBANK1_REC_ENABLED, val_i32);
+    } else if(strcmp(keystr, "rec2") == 0) {
+        extract_int32_from_token(valstr, &val_i32);
+        astrid_instrument_set_param_int32(instrument, PARAM_SAMPLEBANK2_REC_ENABLED, val_i32);
+
     } else if(strcmp(keystr, "save") == 0) {
         extract_int32_from_token(valstr, &val_i32);
         astrid_instrument_save_param_session_snapshot(instrument, NUMPARAMS, val_i32);
@@ -327,7 +342,8 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
               gate_drift, gate_saturation, tracked_freq=220.f;
     int32_t octave_spread, octave_offset, gate_reset, gate_repeat, 
             freq_snap, pitch_tracking_is_enabled, distortion_type,
-            envelope_tracking_is_enabled;
+            envelope_tracking_is_enabled, 
+            samplebank1_rec_enabled, samplebank2_rec_enabled;
     lppatternbuf_t gate_pattern;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
@@ -343,7 +359,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     osc_pan = astrid_instrument_get_param_float(instrument, PARAM_OSC_PAN, 0.5f);
     osc_pw = astrid_instrument_get_param_float(instrument, PARAM_OSC_PULSEWIDTH, 1.f);
     osc_saturation = astrid_instrument_get_param_float(instrument, PARAM_OSC_SATURATION, 1.f);
-    osc_env_speed = astrid_instrument_get_param_float(instrument, PARAM_OSC_ENVELOPE_SPEED, 0.001f) * 100.f + 1.f;
+    osc_env_speed = astrid_instrument_get_param_float(instrument, PARAM_OSC_ENVELOPE_SPEED, 0.01f) * 100.f + 1.f;
     osc_drift_amount = astrid_instrument_get_param_float(instrument, PARAM_OSC_DRIFT_DEPTH, 0.f);
     osc_drift_speed = astrid_instrument_get_param_float(instrument, PARAM_OSC_DRIFT_SPEED, 0.5f);
     octave_spread = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_SPREAD, 6);
@@ -382,6 +398,9 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     envelope_tracking_is_enabled = astrid_instrument_get_param_int32(instrument, PARAM_MIC_ENVELOPE_TRACKING_ENABLED, 0);
     //ctx->yin->threshold = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_THRESHOLD, 0.8f);
 
+    samplebank1_rec_enabled = astrid_instrument_get_param_int32(instrument, PARAM_SAMPLEBANK1_REC_ENABLED, 1);
+    samplebank2_rec_enabled = astrid_instrument_get_param_int32(instrument, PARAM_SAMPLEBANK2_REC_ENABLED, 1);
+
     // set gate osc params
     ctx->gate_drifter->freq = gate_drift_speed;
     ctx->gate_drifter->minfreq = gate_drift_speed * 0.1f;
@@ -412,6 +431,19 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     }
 
     amp_mod = 1.f;
+
+    /* record into sample banks 1 and 2 */
+    if(samplebank1_rec_enabled) {
+        if(lpsampler_write_ringbuffer_block(ctx->samplebank1name, ctx->samplebank1buf, input, instrument->channels, blocksize) < 0) {
+            syslog(LOG_ERR, "Error writing into samplebank 1 ringbuf\n");
+        }
+    }
+    if(samplebank2_rec_enabled) {
+        if(lpsampler_write_ringbuffer_block(ctx->samplebank2name, ctx->samplebank2buf, input, instrument->channels, blocksize) < 0) {
+            syslog(LOG_ERR, "Error writing into samplebank 1 ringbuf\n");
+        }
+    }
+
 
     for(i=0; i < blocksize; i++) {
         osc_sample_group1 = osc_sample_group2 = d1 = d2 = 0.f;
@@ -613,6 +645,16 @@ int main() {
     ctx->gate_drift_win = LPWavetable.create(WT_SINE, 4096);
     ctx->gate_drifter = LPShapeOsc.create(ctx->gate_drift_win);
 
+    // set up the sampler circular buffers
+    snprintf(ctx->samplebank1name, PATH_MAX, "%s-bank1", NAME);
+    snprintf(ctx->samplebank2name, PATH_MAX, "%s-bank2", NAME);
+    if((ctx->samplebank1buf = lpsampler_create(ctx->samplebank1name, 30, CHANNELS, SR)) == NULL) {
+        syslog(LOG_ERR, "Could not create instrument samplebank1 buffer\n");
+    }
+    if((ctx->samplebank2buf = lpsampler_create(ctx->samplebank2name, 30, CHANNELS, SR)) == NULL) {
+        syslog(LOG_ERR, "Could not create instrument samplebank2 buffer\n");
+    }
+
     // Set the callbacks for streaming, async renders and param updates
     if((instrument = astrid_instrument_start(NAME, CHANNELS, 0, ADC_LENGTH, RESAMPLER_LENGTH, (void*)ctx, 
                     NULL, NULL, audio_callback, renderer_callback, param_map_callback, NULL)) == NULL) {
@@ -647,6 +689,8 @@ int main() {
     LPBuffer.destroy(ctx->env);
     LPBuffer.destroy(ctx->limit1buf);
     LPBuffer.destroy(ctx->limit2buf);
+    lpsampler_destroy(ctx->samplebank1name);
+    lpsampler_destroy(ctx->samplebank2name);
 
     free(ctx);
 

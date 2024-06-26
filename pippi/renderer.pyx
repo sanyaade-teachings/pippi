@@ -361,9 +361,14 @@ cdef class EventContext:
     def adc(self, length=1, offset=0, channels=2):
         return self.instrument.read_from_adc(length, offset=offset, channels=channels)
 
-    def sample(self, str name, SoundBuffer snd=None):
-        if snd is None:
+    def sample(self, str name, SoundBuffer snd=None, length=0, offset=0, channels=2):
+        if snd is None and length > 0:
+            # read a portion from the sample
+            return self.instrument.read_block_from_sampler(name, length, offset=offset, channels=channels)
+        elif snd is None:
+            # read the entire sample
             return self.instrument.read_from_sampler(name)
+        # write to the samplebank FIXME, should be able to use this like dub()
         self.instrument.save_to_sampler(name, snd)
 
     def resample(self, length=1, offset=0, channels=2, samplerate=48000, instrument=None):
@@ -589,6 +594,30 @@ cdef class Instrument:
                 snd.frames[i,c] = out.data[i * out.channels + c]
 
         if lpsampler_release_and_unmap(_name, out) < 0:
+            logger.error('Could not release %s sampler memory' % _name)
+
+        return snd
+
+    cdef SoundBuffer read_block_from_sampler(Instrument self, str name, double length, double offset=0, int channels=2, int samplerate=48000):
+        cdef size_t i, start, bufidx
+        cdef int c
+        cdef lpbuffer_t * bank
+        name_bytes = name.encode('UTF-8')
+        cdef char * _name = name_bytes
+
+        cdef SoundBuffer snd = SoundBuffer(length=length, channels=channels, samplerate=samplerate)
+        cdef size_t length_in_frames = len(snd)
+        cdef size_t offset_in_frames = <size_t>(offset * samplerate)
+
+        bank = lpsampler_aquire_and_map(_name)
+
+        start = (bank.pos - offset_in_frames - length_in_frames) % bank.length
+        for i in range(length_in_frames):
+            bufidx = (start + i) % bank.length
+            for c in range(channels):
+                snd.frames[i,c] = lpfilternan(bank.data[bufidx * channels + c])
+
+        if lpsampler_release_and_unmap(_name, bank) < 0:
             logger.error('Could not release %s sampler memory' % _name)
 
         return snd

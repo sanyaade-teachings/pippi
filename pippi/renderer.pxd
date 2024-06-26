@@ -248,6 +248,7 @@ cdef class Instrument:
     cpdef lpmsg_t get_message(Instrument self)
     cdef SoundBuffer read_from_adc(Instrument self, double length, double offset=*, int channels=*, int samplerate=*)
     cdef SoundBuffer read_from_resampler(Instrument self, double length, double offset=*, int channels=*, int samplerate=*, str instrument=*)
+    cdef SoundBuffer read_block_from_sampler(Instrument self, str name, double length, double offset=*, int channels=*, int samplerate=*)
     cdef SoundBuffer read_from_sampler(Instrument self, str name)
     cdef void save_to_sampler(Instrument self, str name, SoundBuffer snd)
 
