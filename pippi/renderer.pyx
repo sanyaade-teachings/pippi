@@ -25,7 +25,7 @@ cimport numpy as np
 from pippi import dsp, midi, ugens
 from pippi.soundbuffer cimport SoundBuffer
 
-NUM_COMRADES = 16
+NUM_COMRADES = 32
 
 class InstrumentError(Exception):
     pass
@@ -38,7 +38,7 @@ if not logger.handlers:
         log_path = '/dev/log'
 
     logger.addHandler(SysLogHandler(address=log_path))
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     warnings.simplefilter('always')
 
 
@@ -86,7 +86,7 @@ cdef class MessageEvent:
         ):
         cdef size_t onset_frames = 0
 
-        logger.error('MessageEvent params: %s' % params)
+        logger.debug('MessageEvent params: %s' % params)
 
         params_byte_string = params.encode('utf-8')
         instrument_name_byte_string = instrument_name.encode('utf-8')
@@ -201,7 +201,7 @@ cdef class EventTriggerFactory:
         params += ' ' 
         params += ' '.join([ '%s=%s' % (k, v) for k, v in kwargs.items() ])
 
-        logger.error('_parse_params params=%s' % params)
+        logger.debug('_parse_params params=%s' % params)
 
         return params
 
@@ -454,16 +454,16 @@ cdef class Instrument:
                     self.default_midi_device = 1
 
                 if hasattr(self.renderer, 'PARAMS'):
-                    logger.error('mapping params...')
+                    logger.debug('mapping params...')
                     self.instrument_param_type_map = self.renderer.PARAMS
                     self.instrument_param_hash_map = dict()
                     for k, t in self.instrument_param_type_map.items():
-                        logger.error('mapping %s...' % k)
+                        logger.debug('mapping %s...' % k)
                         k_byte_string = k.encode('UTF-8')
                         _k = k_byte_string
-                        logger.error('        %s...' % _k)
+                        logger.debug('        %s...' % _k)
                         self.instrument_param_hash_map[k] = lphashstr(_k)
-                        logger.error('        %d...' % self.instrument_param_hash_map[k])
+                        logger.debug('        %d...' % self.instrument_param_hash_map[k])
 
             else:
                 logger.error('Could not load instrument - spec is None: %s %s' % (path, name))
@@ -473,7 +473,7 @@ cdef class Instrument:
             logger.exception('TypeError loading renderer module: %s' % str(e))
             raise InstrumentError('Problem loading the python renderer') from e
 
-        logger.info('loaded instrument, setting metadata')
+        logger.debug('loaded instrument, setting metadata')
         self.last_reload = os.path.getmtime(path)
 
     cpdef lpmsg_t get_message(Instrument self):
@@ -493,7 +493,7 @@ cdef class Instrument:
                 # or maybe I can ignore this and just decode from utf-8 like a criminal...
                 msgstr = render_params.decode('ascii')
 
-        logger.error('PLAY PARAMS: %s' % msgstr)
+        logger.debug('PLAY PARAMS: %s' % msgstr)
 
         graph = None
         if with_graph:
@@ -583,10 +583,10 @@ cdef class Instrument:
             return None
 
         snd = SoundBuffer(framelength=out.length, channels=self.channels, samplerate=self.samplerate)
-        logger.error('out.length=%s len(snd)=%s self.samplerate=%s' % (out.length, len(snd), self.samplerate))
+        logger.debug('out.length=%s len(snd)=%s self.samplerate=%s' % (out.length, len(snd), self.samplerate))
 
         if len(snd) == 0:
-            logger.error('BLOWUP! self.channels=%d self.samplerate=%s' % (self.channels, self.samplerate))
+            logger.error('sampler BLOWUP! len(snd)==0 self.channels=%d self.samplerate=%s' % (self.channels, self.samplerate))
             return None
 
         for i in range(out.length):
@@ -631,9 +631,9 @@ cdef class Instrument:
         cdef char * _name = name_bytes
 
         # create the shm buffer
-        logger.error('Creating %s buffer with frame 10,0=%s' % (name, snd.frames[10,0]))
+        logger.debug('Creating %s buffer with frame 10,0=%s' % (name, snd.frames[10,0]))
         out = lpsampler_create(_name, snd.dur, snd.channels, <int>self.samplerate)
-        logger.error('out.length=%s len(snd)=%s' % (out.length, len(snd)))
+        logger.debug('out.length=%s len(snd)=%s' % (out.length, len(snd)))
 
         # write the data into it
         for i in range(out.length):
@@ -902,7 +902,7 @@ def render_executor(Instrument instrument, object q, int comrade_id):
         msg = q.get()
 
         if msg is None:
-            logger.info('Renderer comrade %d shutting down' % comrade_id)
+            logger.debug('Renderer comrade %d shutting down' % comrade_id)
             break
 
         last_edit = os.path.getmtime(instrument.path)
@@ -923,7 +923,7 @@ def render_executor(Instrument instrument, object q, int comrade_id):
             return
 
         instrument.max_processing_time = max(instrument.max_processing_time, end - start)
-        logger.info('%s render time: %f seconds' % (instrument.name, end - start))
+        logger.debug('%s render time: %f seconds' % (instrument.name, end - start))
 
 cdef int astrid_schedule_python_triggers(Instrument instrument) except -1:
     cdef size_t last_edit = os.path.getmtime(instrument.path)
@@ -952,39 +952,37 @@ def _run_forever(Instrument instrument,
     logger.info(f'PY: running forever... {script_path=} {instrument_name=}')
 
     while True:
-        logger.info('PY MSG: waiting for a message...')
+        logger.debug('PY MSG: waiting for a message...')
         try:
             msg = instrument.get_message()
         except InstrumentError as e:
             print('There was a problem reading from the msg q. Maybe try turning it off and on again?')
             continue
 
-        logger.info('PY MSG: got one!')
-
         if msg.type == LPMSG_SHUTDOWN:
-            logger.info('PY MSG: shutdown')
+            logger.debug('PY MSG: shutdown')
             for _ in range(NUM_COMRADES):
                 q.put(None)
             break
 
         elif msg.type == LPMSG_UPDATE:
-            logger.info('PY MSG: update')
+            logger.debug('PY MSG: update')
             instrument.handle_update_message(msg.msg.decode('utf-8'))
 
         elif msg.type == LPMSG_MIDI_FROM_DEVICE:
-            logger.info('PY MSG: midi from device')
+            logger.debug('PY MSG: midi from device')
             instrument.handle_midi_message(msg.msg)
 
         elif msg.type == LPMSG_MIDI_TO_DEVICE:
-            logger.info('PY MSG: midi to device')
+            logger.debug('PY MSG: midi to device')
 
         elif msg.type == LPMSG_PLAY:
-            logger.info('PY MSG: play')
-            logger.error('PY MSG: play params: %s' % msg.msg)
+            logger.debug('PY MSG: play')
+            logger.debug('PY MSG: play params: %s' % msg.msg)
             q.put(msg.msg.decode('utf-8'))
 
         elif msg.type == LPMSG_TRIGGER:
-            logger.info('PY MSG: trigger')
+            logger.debug('PY MSG: trigger')
             if astrid_schedule_python_triggers(instrument) < 0:
                 logger.error('Error trying to schedule python triggers...')
 
@@ -1034,7 +1032,7 @@ def run_forever(str script_path, str instrument_name=None, int channels=2, doubl
             # Read messages from the console and relay them to the q
             # times out after a second to allow for render pool cleanup
             if astrid_instrument_tick(instrument.i) < 0:
-                logger.info('PY: Could not read console line')
+                logger.error('PY: Could not read console line')
                 time.sleep(2)
                 continue
 

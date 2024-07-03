@@ -2899,7 +2899,7 @@ int relay_message_to_seq(lpinstrument_t * instrument, lpmsg_t msg) {
     seq_delay = msg.scheduled - (msg.max_processing_time * 2);
     d->timestamp = msg.initiated + seq_delay;
 
-    syslog(LOG_ERR, "d->timestamp=%f msg.scheduled=%f msg.initiated=%f\n",
+    syslog(LOG_DEBUG, "d->timestamp=%f msg.scheduled=%f msg.initiated=%f\n",
                     d->timestamp, msg.scheduled, msg.initiated);
 
     // Remove the scheduled flag before relaying the message
@@ -2946,12 +2946,12 @@ void * instrument_message_thread(void * arg) {
         }
 
         is_scheduled = ((instrument->msg.flags & LPFLAG_IS_SCHEDULED) == LPFLAG_IS_SCHEDULED);
-        syslog(LOG_ERR, "C MSG: name=%s\n", instrument->msg.instrument_name);
-        syslog(LOG_ERR, "C MSG: scheduled=%f\n", instrument->msg.scheduled);
-        syslog(LOG_ERR, "C MSG: voice_id=%d\n", (int)instrument->msg.voice_id);
-        syslog(LOG_ERR, "C MSG: type=%d\n", (int)instrument->msg.type);
-        syslog(LOG_ERR, "C MSG: flags=%d\n", (int)instrument->msg.flags);
-        syslog(LOG_ERR, "C MSG: is_scheduled=%d\n", is_scheduled);
+        syslog(LOG_DEBUG, "C MSG: name=%s\n", instrument->msg.instrument_name);
+        syslog(LOG_DEBUG, "C MSG: scheduled=%f\n", instrument->msg.scheduled);
+        syslog(LOG_DEBUG, "C MSG: voice_id=%d\n", (int)instrument->msg.voice_id);
+        syslog(LOG_DEBUG, "C MSG: type=%d\n", (int)instrument->msg.type);
+        syslog(LOG_DEBUG, "C MSG: flags=%d\n", (int)instrument->msg.flags);
+        syslog(LOG_DEBUG, "C MSG: is_scheduled=%d\n", is_scheduled);
 
         // Handle shutdown early
         if(instrument->msg.type == LPMSG_SHUTDOWN) {
@@ -2977,7 +2977,7 @@ void * instrument_message_thread(void * arg) {
 
         if(is_scheduled) {
             // Scheduled messages get sent to the sequencer for handling later
-            syslog(LOG_ERR, "C IS SCHEDULED msg.scheduled %f\n", instrument->msg.scheduled);
+            syslog(LOG_DEBUG, "C IS SCHEDULED msg.scheduled %f\n", instrument->msg.scheduled);
             if(relay_message_to_seq(instrument, instrument->msg) < 0) {
                 syslog(LOG_ERR, "%s renderer: Could not read relay message to seq. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             }
@@ -3267,13 +3267,13 @@ void * instrument_serial_listener_thread(void * arg) {
         }
 
         bytes_read = read(tty, &c, 1);
-        syslog(LOG_ERR, "%s serial listener: got %d byte: %c. ready for messages.\n", instrument->name, bytes_read, c);
+        syslog(LOG_DEBUG, "%s serial listener: got %d byte: %c. ready for messages.\n", instrument->name, bytes_read, c);
         if(bytes_read < 0) {
             syslog(LOG_ERR, "%s serial listener: Could not read header from the tty. Error: (%d) %s\n", instrument->name, errno, strerror(errno));
             return NULL;
         } 
         if(c == 'c') {
-            syslog(LOG_ERR, "%s serial listener: got ready byte %c\n", instrument->name, c);
+            syslog(LOG_DEBUG, "%s serial listener: got ready byte %c\n", instrument->name, c);
             tty_is_ready = 1;
         }
     }
@@ -4084,6 +4084,51 @@ int astrid_instrument_tick(lpinstrument_t * instrument) {
     return astrid_instrument_process_command_tick(instrument);
 }
 
+lpparamset_t astrid_instrument_create_paramset(char * paramset_defs) {
+    lpparamset_t paramset;
+    char * savea, * saveb, * token, * param_name, * param_type;
+    char defs_copy[LPMAXMSG] = {0};
+    int param_index = 0;
+
+    memcpy(defs_copy, paramset_defs, LPMAXMSG);
+    token = strtok_r(defs_copy, " ", &savea);
+
+    while(token != NULL) {
+        param_name = strtok_r(token, ":", &saveb);        
+        param_type = strtok_r(NULL, ":", &saveb);
+
+        if(param_name == NULL || param_type == NULL) {
+            syslog(LOG_WARNING, "Malformed param given: %s\n", token);
+            continue;
+        }
+
+        paramset.keys[param_index] = lphashstr(param_name);
+
+        if(strcmp(param_type, "i") == 0) {
+            paramset.types[param_index] = LPPARAM_INT32;
+        } else if(strcmp(param_type, "i32") == 0) {
+            paramset.types[param_index] = LPPARAM_INT32;
+        } else if(strcmp(param_type, "f") == 0) {
+            paramset.types[param_index] = LPPARAM_FLOAT;
+        } else if(strcmp(param_type, "d") == 0) {
+            paramset.types[param_index] = LPPARAM_DOUBLE;
+        } else if(strcmp(param_type, "fl") == 0) {
+            paramset.types[param_index] = LPPARAM_FLOATLIST;
+        } else if(strcmp(param_type, "pb") == 0) {
+            paramset.types[param_index] = LPPARAM_PATTERNBUF;
+        } else {
+            paramset.types[param_index] = LPPARAM_NONE;
+            syslog(LOG_WARNING, "Unknown param type given: %s\n", param_type);
+        }
+
+        token = strtok_r(NULL, " ", &savea);
+        param_index += 1;
+    }
+
+    paramset.num_params = param_index;
+
+    return paramset;
+}
 
 int astrid_instrument_save_param_session_snapshot(lpinstrument_t * instrument, int num_params, int snapshot_id) {
     int shmfd;
@@ -4372,7 +4417,6 @@ void astrid_instrument_set_param_float(lpinstrument_t * instrument, int param_in
         syslog(LOG_WARNING, "astrid_instrument_set_param_float mdb_txn_commit: (%d) %s\n", rc, mdb_strerror(rc));
     }
 }
-
 
 void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t * patternbuf) {
     int rc;

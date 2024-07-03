@@ -13,6 +13,7 @@
 #define MAXNUMFREQS NUMOSCS
 
 int num_freqs = MAXNUMFREQS;
+float ** pre;
 
 lpfloat_t terry[] = {
     1.f,         // P1  C
@@ -30,20 +31,8 @@ lpfloat_t terry[] = {
 };
 
 // this is just used as the default freq list on startup
-lpfloat_t scale[] = {
-    55.000f, 
-    110.000f, 
-    122.222f, 
-    137.500f, 
-    146.667f, 
-    165.000f, 
-    185.625f, 
-    206.250f, 
-    220.000f, 
-    244.444f, 
-    275.000f, 
-    293.333f
-};
+lpfloat_t scale[12] = {234.666f};
+
 
 enum DistortionTypes {
     DISTORTION_FOLDBACK,
@@ -86,9 +75,16 @@ enum InstrumentParams {
     PARAM_DISTORTION_TYPE,
     PARAM_DISTORTION_AMOUNT,
     PARAM_DISTORTION_MIX,
+    PARAM_OSC_FILTER_LOWPASS,
+    PARAM_OSC_FILTER_HIGHPASS,
+    PARAM_MIC_FILTER_LOWPASS,
+    PARAM_MIC_FILTER_HIGHPASS,
 
     PARAM_SAMPLEBANK1_REC_ENABLED,
     PARAM_SAMPLEBANK2_REC_ENABLED,
+    PARAM_SAMPLEBANK3_REC_ENABLED,
+    PARAM_SAMPLEBANK4_REC_ENABLED,
+
 
     PARAM_MIC1_AMP,
     PARAM_MIC1_PAN,
@@ -106,17 +102,19 @@ typedef struct localctx_t {
     lpfloat_t freqsmooth;
     lpenvelopefollower_t * envf;
 
+    lpbfilter_t * osc_hp;
+    lpbfilter_t * osc_lp;
+    lpbfilter_t * mic_hp;
+    lpbfilter_t * mic_lp;
+
     lpfloat_t ampmodsmooth;
     lpfloat_t oscampsmooth;
     lpfloat_t gateampsmooth;
 
-    lpfloat_t fold1prev;
-    lpfloat_t fold2prev;
+    lpfloat_t foldprev;
 
-    lpfloat_t limit1prev;
-    lpfloat_t limit2prev;
-    lpbuffer_t * limit1buf;
-    lpbuffer_t * limit2buf;
+    lpfloat_t limitprev;
+    lpbuffer_t * limitbuf;
 
     lppulsarosc_t * gate1;
     lppulsarosc_t * gate2;
@@ -134,8 +132,14 @@ typedef struct localctx_t {
 
     char samplebank1name[PATH_MAX];
     char samplebank2name[PATH_MAX];
+    char samplebank3name[PATH_MAX];
+    char samplebank4name[PATH_MAX];
+
     lpbuffer_t * samplebank1buf;
     lpbuffer_t * samplebank2buf;
+    lpbuffer_t * samplebank3buf;
+    lpbuffer_t * samplebank4buf;
+
 } localctx_t;
 
 lpfloat_t osc_mix(lpfloat_t pos, int chan) {
@@ -278,6 +282,21 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
         extract_float_from_token(valstr, &val_f);
         astrid_instrument_set_param_float(instrument, PARAM_DISTORTION_AMOUNT, val_f);
 
+    } else if(strcmp(keystr, "ohp") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_FILTER_HIGHPASS, val_f);
+    } else if(strcmp(keystr, "olp") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_OSC_FILTER_LOWPASS, val_f);
+
+    } else if(strcmp(keystr, "mhp") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_MIC_FILTER_HIGHPASS, val_f);
+    } else if(strcmp(keystr, "mlp") == 0) {
+        extract_float_from_token(valstr, &val_f);
+        astrid_instrument_set_param_float(instrument, PARAM_MIC_FILTER_LOWPASS, val_f);
+
+
     } else if(strcmp(keystr, "mtrak") == 0) {
         extract_int32_from_token(valstr, &val_i32);
         astrid_instrument_set_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_ENABLED, val_i32);
@@ -294,6 +313,12 @@ int param_map_callback(void * arg, char * keystr, char * valstr) {
     } else if(strcmp(keystr, "rec2") == 0) {
         extract_int32_from_token(valstr, &val_i32);
         astrid_instrument_set_param_int32(instrument, PARAM_SAMPLEBANK2_REC_ENABLED, val_i32);
+    } else if(strcmp(keystr, "rec3") == 0) {
+        extract_int32_from_token(valstr, &val_i32);
+        astrid_instrument_set_param_int32(instrument, PARAM_SAMPLEBANK3_REC_ENABLED, val_i32);
+    } else if(strcmp(keystr, "rec4") == 0) {
+        extract_int32_from_token(valstr, &val_i32);
+        astrid_instrument_set_param_int32(instrument, PARAM_SAMPLEBANK4_REC_ENABLED, val_i32);
 
     } else if(strcmp(keystr, "save") == 0) {
         extract_int32_from_token(valstr, &val_i32);
@@ -328,22 +353,27 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     size_t i;
     int j;
     lpfloat_t freqs[MAXNUMFREQS];
-    lpfloat_t osc_sample, osc_sample_group1, osc_sample_group2, 
-              osc_amp, osc_pan, env1, env2, in1, in2, d1, d2, p, last_p=-1,
-              osc_left, osc_right, gate_left, gate_right, mic1_left, mic1_right, mic2_left, mic2_right,
-              distortion_amount, distortion_mix,
+    lpfloat_t osc_sample, osc_sample_group1, osc_sample_group2, out_sample,
+              osc_amp, env1, env2, in1, in2, dist_sample, p, last_p=-1,
+              osc_pan, osc_left=0.f, osc_right=0.f,
+              mic_pan, mic_left=0.f, mic_right=0.f,
+              mic_sample, distortion_amount, distortion_mix,
               osc_pw, osc_saturation, osc_env_speed, 
               osc_drift_amount, drift, osc_drift_speed,
-              gate1_sample, gate2_sample, gate1_amp, gate2_amp, gate_pan, amp_mod,
-              mic1_amp, mic2_amp, mic1_pan, mic2_pan,
+              gate1_sample, gate2_sample, gate1_amp, gate2_amp, amp_mod,
+              gate_sample, mic1_amp, mic2_amp, 
               gate_shape, gate_speed, gate1_speed_multiplier, gate2_speed_multiplier, 
               gate_pw, gate_drift_amount, gate_drift_speed,
+              mic_highpass, mic_lowpass, osc_highpass, osc_lowpass,
+              mic_highpass_cutoff, mic_lowpass_cutoff,
+              osc_highpass_cutoff, osc_lowpass_cutoff,
               gate_drift_stability, gate_drift_density, gate_drift_periodicity,
               gate_drift, gate_saturation, tracked_freq=220.f;
     int32_t octave_spread, octave_offset, gate_reset, gate_repeat, 
             freq_snap, pitch_tracking_is_enabled, distortion_type,
             envelope_tracking_is_enabled, 
-            samplebank1_rec_enabled, samplebank2_rec_enabled;
+            samplebank1_rec_enabled, samplebank2_rec_enabled,
+            samplebank3_rec_enabled, samplebank4_rec_enabled;
     lppatternbuf_t gate_pattern;
     lpinstrument_t * instrument = (lpinstrument_t *)arg;
     localctx_t * ctx = (localctx_t *)instrument->context;
@@ -354,17 +384,27 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     distortion_mix = astrid_instrument_get_param_float(instrument, PARAM_DISTORTION_MIX, 0.f);
     distortion_type = astrid_instrument_get_param_int32(instrument, PARAM_DISTORTION_TYPE, 0);
 
-    osc_amp = astrid_instrument_get_param_float(instrument, PARAM_OSC_AMP, 1.f);
+    mic_lowpass = astrid_instrument_get_param_float(instrument, PARAM_MIC_FILTER_LOWPASS, 0.f);
+    mic_highpass = astrid_instrument_get_param_float(instrument, PARAM_MIC_FILTER_HIGHPASS, 0.f);
+    mic_highpass_cutoff = lpsv(mic_highpass, 10.f, 19990.f);
+    mic_lowpass_cutoff = lpsv(1.f-mic_lowpass, 10.f, 10000.f);
+
+    osc_lowpass = astrid_instrument_get_param_float(instrument, PARAM_OSC_FILTER_LOWPASS, 0.f);
+    osc_highpass = astrid_instrument_get_param_float(instrument, PARAM_OSC_FILTER_HIGHPASS, 0.8f);
+    osc_highpass_cutoff = lpsv(osc_highpass, 10.f, 19990.f);
+    osc_lowpass_cutoff = lpsv(1.f-osc_lowpass, 10.f, 10000.f);
+
+    osc_amp = astrid_instrument_get_param_float(instrument, PARAM_OSC_AMP, 0.f);
     osc_amp = LPFX.lpf1(osc_amp, &ctx->oscampsmooth, 1000.f, SR);
-    osc_pan = astrid_instrument_get_param_float(instrument, PARAM_OSC_PAN, 0.5f);
+    osc_pan = astrid_instrument_get_param_float(instrument, PARAM_OSC_PAN, 0.f);
     osc_pw = astrid_instrument_get_param_float(instrument, PARAM_OSC_PULSEWIDTH, 1.f);
     osc_saturation = astrid_instrument_get_param_float(instrument, PARAM_OSC_SATURATION, 1.f);
     osc_env_speed = astrid_instrument_get_param_float(instrument, PARAM_OSC_ENVELOPE_SPEED, 0.01f) * 100.f + 1.f;
     osc_drift_amount = astrid_instrument_get_param_float(instrument, PARAM_OSC_DRIFT_DEPTH, 0.f);
     osc_drift_speed = astrid_instrument_get_param_float(instrument, PARAM_OSC_DRIFT_SPEED, 0.5f);
-    octave_spread = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_SPREAD, 6);
-    octave_offset = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_OFFSET, -2);
-    freq_snap = astrid_instrument_get_param_int32(instrument, PARAM_OSC_FREQ_UPDATE_ON_ENV_RESET, 0);
+    octave_spread = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_SPREAD, 1);
+    octave_offset = astrid_instrument_get_param_int32(instrument, PARAM_OSC_OCTAVE_OFFSET, 0);
+    freq_snap = astrid_instrument_get_param_int32(instrument, PARAM_OSC_FREQ_UPDATE_ON_ENV_RESET, 1);
     astrid_instrument_get_param_float_list(instrument, PARAM_OSC_FREQS, num_freqs, freqs);
 
     gate1_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE1_AMP, 0.f);
@@ -373,7 +413,6 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     gate2_amp = astrid_instrument_get_param_float(instrument, PARAM_GATE2_AMP, 0.f);
     gate2_amp = LPFX.lpf1(gate2_amp, &ctx->gateampsmooth, 1000.f, SR);
 
-    gate_pan = astrid_instrument_get_param_float(instrument, PARAM_GATE_PAN, 0.5f);
     gate_reset = astrid_instrument_get_param_int32(instrument, PARAM_GATE_PHASE_RESET, 0);
     gate_repeat = astrid_instrument_get_param_int32(instrument, PARAM_GATE_REPEAT, 1);
     gate_shape = astrid_instrument_get_param_float(instrument, PARAM_GATE_SHAPE, 0.f);
@@ -390,16 +429,22 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
     gate_pattern = astrid_instrument_get_param_patternbuf(instrument, PARAM_GATE_PATTERN);
 
     mic1_amp = astrid_instrument_get_param_float(instrument, PARAM_MIC1_AMP, 0.f);
-    mic1_pan = astrid_instrument_get_param_float(instrument, PARAM_MIC1_PAN, 0.5f);
     mic2_amp = astrid_instrument_get_param_float(instrument, PARAM_MIC2_AMP, 0.f);
-    mic2_pan = astrid_instrument_get_param_float(instrument, PARAM_MIC2_PAN, 0.5f);
+    mic_pan = astrid_instrument_get_param_float(instrument, PARAM_MIC1_PAN, 0.f);
 
     pitch_tracking_is_enabled = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_ENABLED, 0);
     envelope_tracking_is_enabled = astrid_instrument_get_param_int32(instrument, PARAM_MIC_ENVELOPE_TRACKING_ENABLED, 0);
     //ctx->yin->threshold = astrid_instrument_get_param_int32(instrument, PARAM_MIC_PITCH_TRACKING_THRESHOLD, 0.8f);
 
+    ctx->mic_hp->freq = mic_highpass_cutoff;
+    ctx->mic_lp->freq = mic_lowpass_cutoff;
+    ctx->osc_hp->freq = osc_highpass_cutoff;
+    ctx->osc_lp->freq = osc_lowpass_cutoff;
+
     samplebank1_rec_enabled = astrid_instrument_get_param_int32(instrument, PARAM_SAMPLEBANK1_REC_ENABLED, 1);
     samplebank2_rec_enabled = astrid_instrument_get_param_int32(instrument, PARAM_SAMPLEBANK2_REC_ENABLED, 1);
+    samplebank3_rec_enabled = astrid_instrument_get_param_int32(instrument, PARAM_SAMPLEBANK3_REC_ENABLED, 1);
+    samplebank4_rec_enabled = astrid_instrument_get_param_int32(instrument, PARAM_SAMPLEBANK4_REC_ENABLED, 1);
 
     // set gate osc params
     ctx->gate_drifter->freq = gate_drift_speed;
@@ -446,7 +491,7 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
 
 
     for(i=0; i < blocksize; i++) {
-        osc_sample_group1 = osc_sample_group2 = d1 = d2 = 0.f;
+        osc_sample_group1 = osc_sample_group2 = dist_sample = mic_sample = 0.f;
 
         // attenuate the signal with the envelope follower if enabled
         if(envelope_tracking_is_enabled) {
@@ -500,6 +545,10 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
                 ctx->octave_spreads[j] = pow(2, octave_spread);
                 ctx->octave_offsets[j] = pow(2, octave_offset);
 
+                //syslog(LOG_ERR, "FILTERPOS=%f\n", filter_position);
+                //syslog(LOG_ERR, "HPCUTOFF=%f\n", highpass_cutoff);
+                //syslog(LOG_ERR, "LPCUTOFF=%f\n", lowpass_cutoff);
+
                 /*
                 syslog(LOG_ERR, "GDRIFT=%f GDRIFTSPEED=%f GDRIFTAMOUNT=%f\n",
                         gate_drift, gate_drift_speed, gate_drift_amount);
@@ -523,52 +572,60 @@ int audio_callback(size_t blocksize, float ** input, float ** output, void * arg
 
         // osc output
         osc_sample = osc_sample_group1 + osc_sample_group2;
+        //osc_sample = LPFilter.process_blp(ctx->osc_lp, osc_sample);
+        //osc_sample = lpzapgremlins(osc_sample);
+        //osc_sample = LPFilter.process_bhp(ctx->osc_hp, osc_sample);
+        //osc_sample = lpzapgremlins(osc_sample);
+        pre[0][i] = pre[1][i] = osc_sample * 0.1f;
         osc_sample *= osc_amp * amp_mod;
+        gate_sample = gate1_sample + gate2_sample;
 
         // mic feedback
         in1 = input[0][i] * MIC_ATTENUATION * mic1_amp;
         in2 = input[1][i] * MIC_ATTENUATION * mic2_amp;
+        mic_sample = in1 + in2;
+        mic_sample = LPFilter.process_blp(ctx->mic_lp, mic_sample);
+        mic_sample = LPFilter.process_bhp(ctx->mic_hp, mic_sample);
 
-        osc_left = osc_right = gate_left = gate_right = mic1_left = mic1_right = mic2_left = mic2_right = 0.f;
-        pan_stereo_constant(osc_pan, osc_sample, osc_sample, &osc_left, &osc_right);
-        pan_stereo_constant(gate_pan, gate1_sample+gate2_sample, gate1_sample+gate2_sample, &gate_left, &gate_right);
-        pan_stereo_constant(mic1_pan, in1, in1, &mic1_left, &mic1_right);
-        pan_stereo_constant(mic2_pan, in2, in2, &mic2_left, &mic2_right);
-
-        // mix everything
-        //output[0][i] += (osc_sample * osc_out1_mix) + ((gate1_sample + gate2_sample) * gate_out1_mix) + (in1 * in1_out1_mix) + (in2 * in2_out1_mix);
-        //output[1][i] += (osc_sample * osc_out2_mix) + ((gate1_sample + gate2_sample) * gate_out2_mix) + (in2 * in1_out2_mix) + (in2 * in2_out2_mix);
-
-        output[0][i] += osc_left + gate_left + mic1_left + mic2_left;
-        output[1][i] += osc_right + gate_right + mic1_right + mic2_right;
+        //out_sample = gate_sample;
 
         // apply distortion
         if(distortion_amount > 0) {
             switch(distortion_type) {
                 case DISTORTION_FOLDBACK:
-                    d1 = LPFX.fold(output[0][i] * (distortion_amount+1), &ctx->fold1prev, instrument->samplerate);
-                    d2 = LPFX.fold(output[1][i] * (distortion_amount+1), &ctx->fold2prev, instrument->samplerate);
+                    dist_sample = LPFX.fold(out_sample * (distortion_amount+1), &ctx->foldprev, instrument->samplerate);
                     break;
 
                 case DISTORTION_BITCRUSH:
-                    d1 = LPFX.crush(output[0][i], (1.f-distortion_amount) * 10.f + 1.f);
-                    d2 = LPFX.crush(output[1][i], (1.f-distortion_amount) * 10.f + 1.f);
+                    dist_sample = LPFX.crush(out_sample, (1.f-distortion_amount) * 10.f + 1.f);
                     break;
 
                 default:
                     break;
             }
 
-            d1 *= distortion_mix;
-            d2 *= distortion_mix;
-
-            output[0][i] = (output[0][i] * (1-distortion_mix)) + d1;
-            output[1][i] = (output[1][i] * (1-distortion_mix)) + d2;
+            dist_sample *= distortion_mix;
+            out_sample = (out_sample * (1-distortion_mix)) + dist_sample;
         }
 
         // limit
-        output[0][i] = LPFX.limit(output[0][i], &ctx->limit1prev, 1.f, 0.2f, ctx->limit1buf);
-        output[1][i] = LPFX.limit(output[1][i], &ctx->limit2prev, 1.f, 0.2f, ctx->limit2buf);
+        osc_sample = LPFX.limit(osc_sample+gate_sample, &ctx->limitprev, 1.f, 0.2f, ctx->limitbuf);
+
+        pan_stereo_constant(osc_pan, osc_sample, osc_sample, &osc_left, &osc_right);
+        pan_stereo_constant(mic_pan, mic_sample, mic_sample, &mic_left, &mic_right);
+        output[1][i] = mic_left + osc_left;
+        output[0][i] = mic_right + osc_right;
+    }
+
+    if(samplebank3_rec_enabled) {
+        if(lpsampler_write_ringbuffer_block(ctx->samplebank3name, ctx->samplebank3buf, pre, instrument->channels, blocksize) < 0) {
+            syslog(LOG_ERR, "Error writing into samplebank 3 ringbuf\n");
+        }
+    }
+    if(samplebank4_rec_enabled) {
+        if(lpsampler_write_ringbuffer_block(ctx->samplebank4name, ctx->samplebank4buf, pre, instrument->channels, blocksize) < 0) {
+            syslog(LOG_ERR, "Error writing into samplebank 4 ringbuf\n");
+        }
     }
 
     return 0;
@@ -584,14 +641,21 @@ int main() {
         exit(1);
     }
 
+    pre = (float**)LPMemoryPool.alloc(CHANNELS * 40960, sizeof(float *));
+    for(int i=0; i < CHANNELS; i++) {
+        pre[i] = (float*)LPMemoryPool.alloc(40960, sizeof(float));
+    }
+
     // create env window for the footballs
     ctx->env = LPWindow.create(WIN_HANNOUT, 4096);
-    ctx->fold1prev = 0.f;
-    ctx->fold2prev = 0.f;
-    ctx->limit1prev = 1.f;
-    ctx->limit2prev = 1.f;
-    ctx->limit1buf = LPBuffer.create(1024, 1, (lpfloat_t)SR);
-    ctx->limit2buf = LPBuffer.create(1024, 1, (lpfloat_t)SR);
+    ctx->foldprev = 0.f;
+    ctx->limitprev = 1.f;
+    ctx->limitbuf = LPBuffer.create(1024, 1, (lpfloat_t)SR);
+
+    ctx->mic_hp = LPFilter.create_bhp(1000, SR);
+    ctx->osc_hp = LPFilter.create_bhp(1000, SR);
+    ctx->mic_lp = LPFilter.create_blp(1000, SR);
+    ctx->osc_lp = LPFilter.create_blp(1000, SR);
 
     // setup oscs
     for(int i=0; i < NUMOSCS; i++) {
@@ -648,11 +712,20 @@ int main() {
     // set up the sampler circular buffers
     snprintf(ctx->samplebank1name, PATH_MAX, "%s-bank1", NAME);
     snprintf(ctx->samplebank2name, PATH_MAX, "%s-bank2", NAME);
+    snprintf(ctx->samplebank3name, PATH_MAX, "%s-bank3", NAME);
+    snprintf(ctx->samplebank4name, PATH_MAX, "%s-bank4", NAME);
+
     if((ctx->samplebank1buf = lpsampler_create(ctx->samplebank1name, 30, CHANNELS, SR)) == NULL) {
         syslog(LOG_ERR, "Could not create instrument samplebank1 buffer\n");
     }
     if((ctx->samplebank2buf = lpsampler_create(ctx->samplebank2name, 30, CHANNELS, SR)) == NULL) {
         syslog(LOG_ERR, "Could not create instrument samplebank2 buffer\n");
+    }
+    if((ctx->samplebank3buf = lpsampler_create(ctx->samplebank3name, 30, CHANNELS, SR)) == NULL) {
+        syslog(LOG_ERR, "Could not create instrument samplebank3 buffer\n");
+    }
+    if((ctx->samplebank4buf = lpsampler_create(ctx->samplebank4name, 30, CHANNELS, SR)) == NULL) {
+        syslog(LOG_ERR, "Could not create instrument samplebank4 buffer\n");
     }
 
     // Set the callbacks for streaming, async renders and param updates
@@ -687,10 +760,11 @@ int main() {
     LPShapeOsc.destroy(ctx->gate_drifter);
     LPBuffer.destroy(ctx->gate_drift_win);
     LPBuffer.destroy(ctx->env);
-    LPBuffer.destroy(ctx->limit1buf);
-    LPBuffer.destroy(ctx->limit2buf);
+    LPBuffer.destroy(ctx->limitbuf);
     lpsampler_destroy(ctx->samplebank1name);
     lpsampler_destroy(ctx->samplebank2name);
+    lpsampler_destroy(ctx->samplebank3name);
+    lpsampler_destroy(ctx->samplebank4name);
 
     free(ctx);
 

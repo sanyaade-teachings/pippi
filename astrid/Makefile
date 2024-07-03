@@ -102,6 +102,12 @@ astrid-bufstr:
 	echo "Building astrid bufstr...";
 	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/bufstr.c $(LPLIBS) -o build/astrid-bufstr
 
+astrid-paramset:
+	mkdir -p build
+
+	echo "Building astrid paramset...";
+	$(CC) $(LPFLAGS) $(LPINCLUDES) $(LPSOURCES) src/astrid.c orc/paramset.c $(LPLIBS) -o build/astrid-paramset
+
 littlefield:
 	mkdir -p build
 

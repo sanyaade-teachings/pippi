@@ -65,6 +65,7 @@ void destroy_buffer(lpbuffer_t * buf);
 
 lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew);
 lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
+lpfloat_t fx_hpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
 void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
 void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling);
 lpfloat_t fx_fold(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate);
@@ -132,7 +133,7 @@ const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_i
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
-const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_convolve, fx_norm, fx_fold, fx_limit, fx_crush };
+const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_hpf1, fx_convolve, fx_norm, fx_fold, fx_limit, fx_crush };
 const lpfilter_factory_t LPFilter = { fx_butthp_create, fx_butthp, fx_buttlp_create, fx_buttlp };
 
 /* Platform-specific random seed, called 
@@ -1259,6 +1260,19 @@ lpfloat_t read_skewed_buffer(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, 
     return LPInterpolation.linear(buf, (phase + (warp * buf->length)) * freq);
 }
 
+lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate) {
+    lpfloat_t gamma = 1.f - (lpfloat_t)exp(-(2.f * (lpfloat_t)PI) * (cutoff/samplerate));
+    *y = (1.f - gamma) * (*y) + gamma * x;
+    return *y;
+}
+
+lpfloat_t fx_hpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate) {
+    lpfloat_t gamma = 1.f - (lpfloat_t)exp(-(2.f * (lpfloat_t)PI) * (cutoff/samplerate));
+    *y = (1.f - gamma) * (*y) + gamma * x;
+    return x - *y;
+}
+
+
 /* These butterworth filters were ported from the filters
  * included with Paul Batchelor's Soundpipe, in turn ported 
  * from csound.
@@ -1349,12 +1363,6 @@ lpfloat_t fx_buttlp(lpbfilter_t * filter, lpfloat_t in) {
     return out;
 }
 
-
-lpfloat_t fx_lpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate) {
-    lpfloat_t gamma = 1.f - (lpfloat_t)exp(-(2.f * (lpfloat_t)PI) * (cutoff/samplerate));
-    *y = (1.f - gamma) * (*y) + gamma * x;
-    return *y;
-}
 
 lpfloat_t fx_fold(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate) {
     // Adapted from https://ccrma.stanford.edu/~jatin/ComplexNonlinearities/Wavefolder.html

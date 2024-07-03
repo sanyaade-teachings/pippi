@@ -61,6 +61,7 @@
 
 #define LPKEY_MAXLENGTH 4096
 #define ASTRID_MAX_CMDLINE 4096
+#define ASTRID_MAX_PARAMS 4096
 
 #ifndef NOTE_ON
 #define NOTE_ON 144
@@ -221,6 +222,11 @@ typedef struct lpinstrument_t {
     void (*shutdown)(int sig);
 } lpinstrument_t;
 
+typedef struct lpparamset_t {
+   u_int32_t keys[ASTRID_MAX_PARAMS]; 
+   u_int32_t types[ASTRID_MAX_PARAMS];
+   int num_params;
+} lpparamset_t;
 
 void scheduler_schedule_event(lpscheduler_t * s, lpbuffer_t * buf, size_t delay);
 void lpscheduler_tick(lpscheduler_t * s);
@@ -356,6 +362,7 @@ lpinstrument_t * astrid_instrument_start(
 
 int astrid_instrument_stop(lpinstrument_t * instrument);
 
+lpparamset_t astrid_instrument_create_paramset(char * paramset_defs);
 int32_t astrid_instrument_get_param_int32(lpinstrument_t * instrument, int param_index, int32_t default_value);
 void astrid_instrument_set_param_int32(lpinstrument_t * instrument, int param_index, int32_t value);
 void astrid_instrument_set_param_patternbuf(lpinstrument_t * instrument, int param_index, lppatternbuf_t * patternbuf);
