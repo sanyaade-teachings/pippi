@@ -69,6 +69,7 @@ lpfloat_t fx_hpf1(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t sample
 void fx_convolve(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
 void fx_norm(lpbuffer_t * buf, lpfloat_t ceiling);
 lpfloat_t fx_fold(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate);
+lpfloat_t fx_crossover(lpfloat_t val, lpfloat_t amount, lpfloat_t smooth, lpfloat_t fade);
 lpfloat_t fx_limit(lpfloat_t val, lpfloat_t * prev, lpfloat_t threshold, lpfloat_t release, lpbuffer_t * del);
 lpfloat_t fx_crush(lpfloat_t val, int bits);
 lpbfilter_t * fx_butthp_create(lpfloat_t cutoff, lpfloat_t samplerate);
@@ -133,7 +134,7 @@ const lpparam_factory_t LPParam = { param_create_from_float, param_create_from_i
 const lpwavetable_factory_t LPWavetable = { create_wavetable, create_wavetable_stack, destroy_wavetable };
 const lpwindow_factory_t LPWindow = { create_window, create_window_stack, destroy_window };
 const lpringbuffer_factory_t LPRingBuffer = { ringbuffer_create, ringbuffer_fill, ringbuffer_read, ringbuffer_readinto, ringbuffer_writefrom, ringbuffer_write, ringbuffer_readone, ringbuffer_writeone, ringbuffer_dub, ringbuffer_destroy };
-const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_hpf1, fx_convolve, fx_norm, fx_fold, fx_limit, fx_crush };
+const lpfx_factory_t LPFX = { read_skewed_buffer, fx_lpf1, fx_hpf1, fx_convolve, fx_norm, fx_crossover, fx_fold, fx_limit, fx_crush };
 const lpfilter_factory_t LPFilter = { fx_butthp_create, fx_butthp, fx_buttlp_create, fx_buttlp };
 
 /* Platform-specific random seed, called 
@@ -1289,7 +1290,7 @@ lpbfilter_t * fx_butthp_create(lpfloat_t cutoff, lpfloat_t samplerate) {
 
     filter->sr = samplerate;
     filter->freq = cutoff;
-    filter->pidsr = PI / samplerate;
+    filter->pidsr = (lpfloat_t)PI / samplerate;
 
     return filter;
 }
@@ -1307,11 +1308,11 @@ lpfloat_t fx_butthp(lpbfilter_t * filter, lpfloat_t in) {
         c = tanf(filter->pidsr * filter->lkf);
 #endif
         
-      filter->a[1] = 1.f / (1.f + ROOT2 * c + c * c);
+      filter->a[1] = 1.f / (1.f + (lpfloat_t)ROOT2 * c + c * c);
       filter->a[2] = -(filter->a[1] + filter->a[1]);
       filter->a[3] = filter->a[1];
       filter->a[4] = 2.f * (c*c - 1.f) * filter->a[1];
-      filter->a[5] = (1.f - ROOT2 * c + c * c) * filter->a[1];
+      filter->a[5] = (1.f - (lpfloat_t)ROOT2 * c + c * c) * filter->a[1];
     }
 
     t = in - filter->a[4] * filter->a[6] - filter->a[5] * filter->a[7];
@@ -1329,7 +1330,7 @@ lpbfilter_t * fx_buttlp_create(lpfloat_t cutoff, lpfloat_t samplerate) {
 
     filter->sr = samplerate;
     filter->freq = cutoff;
-    filter->pidsr = PI / samplerate;
+    filter->pidsr = (lpfloat_t)PI / samplerate;
 
     return filter;
 }
@@ -1347,11 +1348,11 @@ lpfloat_t fx_buttlp(lpbfilter_t * filter, lpfloat_t in) {
         c = 1.f / tanf(filter->pidsr * filter->lkf);
 #endif
         
-      filter->a[1] = 1.f / (1.f + ROOT2 * c + c * c);
+      filter->a[1] = 1.f / (1.f + (lpfloat_t)ROOT2 * c + c * c);
       filter->a[2] = filter->a[1] + filter->a[1];
       filter->a[3] = filter->a[1];
       filter->a[4] = 2.f * (1.f - c*c) * filter->a[1];
-      filter->a[5] = (1.f - ROOT2 * c + c * c) * filter->a[1];
+      filter->a[5] = (1.f - (lpfloat_t)ROOT2 * c + c * c) * filter->a[1];
     }
 
     t = in - filter->a[4] * filter->a[6] - filter->a[5] * filter->a[7];
@@ -1363,6 +1364,14 @@ lpfloat_t fx_buttlp(lpbfilter_t * filter, lpfloat_t in) {
     return out;
 }
 
+/* Crossover distortion ported from the supercollider CrossoverDistortion ugen */
+lpfloat_t fx_crossover(lpfloat_t val, lpfloat_t amount, lpfloat_t smooth, lpfloat_t fade) {
+    lpfloat_t out;
+    out = lpfabs(val) - amount;
+    if(out < 0.f) out *= (1.f + (out*fade)) * smooth;
+    if(val < 0.f) out *= -1.f;
+    return out;
+}
 
 lpfloat_t fx_fold(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate) {
     // Adapted from https://ccrma.stanford.edu/~jatin/ComplexNonlinearities/Wavefolder.html
@@ -1371,8 +1380,8 @@ lpfloat_t fx_fold(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate) {
     lpfloat_t z = tanhf(val) + (tanhf(*prev) * 0.9f);
     out = z + (-0.5f * sinf(2.f * (float)PI * val * (samplerate/2.f) / samplerate));
 #else
-    lpfloat_t z = tanh(val) + (tanh(*prev) * 0.9);
-    out = z + (-0.5 * sin(2. * PI * val * (samplerate/2.) / samplerate));
+    lpfloat_t z = tanh(val) + (tanh(*prev) * 0.9f);
+    out = z + (-0.5f * sin(2.f * (lpfloat_t)PI * val * (samplerate/2.f) / samplerate));
 #endif
     *prev = out;
     //return lpzapgremlins(out);
@@ -1997,7 +2006,9 @@ void window_hanning(lpfloat_t* out, int length) {
 /* create a window (0 to 1) */
 lpbuffer_t * create_window(int name, size_t length) {
     lpbuffer_t* buf = LPBuffer.create(length, 1, DEFAULT_SAMPLERATE);
-    if(name == WIN_SINE) {
+    if(name == WIN_NONE) {
+        memset(buf->data, 1.f, length * sizeof(lpfloat_t));
+    } else if(name == WIN_SINE) {
         window_sine(buf->data, length);            
     } else if (name == WIN_SINEIN) {
         window_sinein(buf->data, length);            
@@ -2097,6 +2108,14 @@ lpfloat_t lpfpow(lpfloat_t value, int exp) {
         result *= value;
     }
     return result;
+}
+
+lpfloat_t lpmstofreq(lpfloat_t ms) {
+    return 1.f / (ms * 0.001f);
+}
+
+lpfloat_t lpstofreq(lpfloat_t seconds) {
+    return 1.f / seconds;
 }
 
 /* FNV-1 hash implementation adapted from:

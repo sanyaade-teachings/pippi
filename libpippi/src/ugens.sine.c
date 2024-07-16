@@ -48,6 +48,12 @@ ugen_t * create_sine_ugen(void) {
     u->get_output = get_sine_ugen_output;
     u->set_param = set_sine_ugen_param;
 
+    u->num_outlets = 3; // three param outlets
+    u->num_inlets = 2; // two param inlets
+                      
+    u->num_outputs = 1; // one audio output
+    u->num_inputs = 0; // no audio inputs
+
     return u;
 }
 

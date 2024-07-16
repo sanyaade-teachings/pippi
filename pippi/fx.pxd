@@ -61,7 +61,31 @@ ctypedef struct HBAP:
 
 cdef extern from "pippicore.h":
     ctypedef double lpfloat_t
+    ctypedef struct lpbuffer_t:
+        size_t length;
+        int samplerate;
+        int channels;
+        lpfloat_t phase
+        size_t boundry
+        size_t range
+        size_t pos
+        size_t onset
+        int is_looping
+        lpfloat_t data[]
+
     cdef lpfloat_t lpzapgremlins(lpfloat_t x)
+    ctypedef struct lpfx_factory_t:
+        lpfloat_t (*read_skewed_buffer)(lpfloat_t freq, lpbuffer_t * buf, lpfloat_t phase, lpfloat_t skew)
+        lpfloat_t (*lpf1)(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate)
+        lpfloat_t (*hpf1)(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate)
+        void (*convolve)(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out)
+        void (*norm)(lpbuffer_t * buf, lpfloat_t ceiling)
+        lpfloat_t (*crossover)(lpfloat_t val, lpfloat_t amount, lpfloat_t smooth, lpfloat_t fade)
+        lpfloat_t (*fold)(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate)
+        lpfloat_t (*limit)(lpfloat_t val, lpfloat_t * prev, lpfloat_t threshold, lpfloat_t release, lpbuffer_t * d)
+        lpfloat_t (*crush)(lpfloat_t val, int bits)
+
+    extern const lpfx_factory_t LPFX
 
 cdef extern from "fx.softclip.h":
     ctypedef struct lpfxsoftclip_t:

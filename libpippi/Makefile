@@ -58,9 +58,6 @@ osc-examples:
 	echo "Building pulsarosc.c example...";
 	gcc $(LPFLAGS) examples/pulsarosc.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc
 
-	#echo "Building pulsarosc2.c example...";
-	#gcc $(LPFLAGS) examples/pulsarosc2.c $(LPSOURCES) $(LPLIBS) -o build/pulsarosc2
-
 	echo "Building phasorosc.c example...";
 	gcc $(LPFLAGS) examples/phasorosc.c $(LPSOURCES) $(LPLIBS) -o build/phasorosc
 
@@ -84,9 +81,6 @@ osc-examples:
 
 	echo "Building tapeosc.c example...";
 	gcc $(LPFLAGS) examples/tapeosc.c $(LPSOURCES) $(LPLIBS) -o build/tapeosc
-
-	echo "Building tapeosc2.c example...";
-	gcc $(LPFLAGS) examples/tapeosc2.c $(LPSOURCES) $(LPLIBS) -o build/tapeosc2
 
 	echo "Building additive_synthesis.c example...";
 	gcc $(LPFLAGS) examples/additive_synthesis.c $(LPSOURCES) $(LPLIBS) -o build/additive_synthesis
@@ -151,12 +145,6 @@ microsound-examples:
 
 	echo "Building grainformation.c example...";
 	gcc $(LPFLAGS) examples/grainformation.c $(LPSOURCES) $(LPLIBS) -o build/grainformation
-
-	echo "Building grainformation2.c example...";
-	gcc $(LPFLAGS) examples/grainformation2.c $(LPSOURCES) $(LPLIBS) -o build/grainformation2
-
-	echo "Building grainformation3.c example...";
-	gcc $(LPFLAGS) examples/grainformation3.c $(LPSOURCES) $(LPLIBS) -o build/grainformation3
 
 convolution-examples:
 	mkdir -p build renders

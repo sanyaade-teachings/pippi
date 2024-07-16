@@ -4,52 +4,38 @@
 #define CHANNELS 2
 
 int main() {
-    size_t i, c, length, numlayers, grainlength;
-    lpbuffer_t * fake_input;
-    lpbuffer_t * out;
-    lpbuffer_t * freq;
-    lpbuffer_t * amp;
+    size_t i, length;
+    lpbuffer_t * out, * src, * win;
     lpformation_t * formation;
-    lpsineosc_t * osc;
-    int window_type;
+    int c, numgrains=6;
 
-    length = 10 * SR;
-    numlayers = 1;
-    grainlength = SR/10.;
-    window_type = WIN_HANN;
+    src = LPSoundFile.read("../tests/sounds/living.wav");
+    win = LPWindow.create(WIN_HANN, 4096);
 
-    out = LPBuffer.create(length, CHANNELS, SR);
-    formation = LPFormation.create(window_type, numlayers, grainlength, length, CHANNELS, SR, NULL);
-
-    /* Render a sine tone and fill the ringbuffer with it, 
-     * to simulate a live input. */
-    osc = LPSineOsc.create();
-    osc->samplerate = SR;
-
-    freq = LPParam.from_float(440.0f);
-    amp = LPParam.from_float(0.8f);
-
-    fake_input = LPSineOsc.render(osc, length, freq, amp, CHANNELS);
-    LPRingBuffer.write(formation->rb, fake_input);
-
-    LPSoundFile.write("renders/grainformation-rb-out.wav", formation->rb);
+    length = 600 * src->samplerate;
+    out = LPBuffer.create(length, src->channels, src->samplerate);
+    formation = LPFormation.create(numgrains, src, win);
 
     /* Render each frame of the grainformation */
     for(i=0; i < length; i++) {
+        if(LPRand.rand(0,1) > 0.99f) {
+            formation->offset += LPRand.rand(0, LPRand.rand(.000005f, .0001f));
+            formation->speed = LPRand.randint(0,6)*0.5f+0.125f;
+            formation->grainlength = LPRand.rand(0.01f, 0.5f);
+        }
         LPFormation.process(formation);
-        for(c=0; c < CHANNELS; c++) {
-            out->data[i * CHANNELS + c] = formation->current_frame->data[c];
+
+        for(c=0; c < out->channels; c++) {
+            out->data[i * out->channels + c] = formation->current_frame->data[c];
         }
     }
 
-    printf("wat %f\n", amp->data[0]);
+    LPFX.norm(out, 0.8f);
     LPSoundFile.write("renders/grainformation-out.wav", out);
 
-    LPSineOsc.destroy(osc);
-    LPBuffer.destroy(freq);
-    LPBuffer.destroy(amp);
     LPBuffer.destroy(out);
-    LPBuffer.destroy(fake_input);
+    LPBuffer.destroy(src);
+    LPBuffer.destroy(win);
     LPFormation.destroy(formation);
 
     return 0;

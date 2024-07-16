@@ -57,6 +57,9 @@ cdef lpbuffer_t * to_lpbuffer_window_from_soundbuffer(SoundBuffer window):
     return win
 
 cdef int to_window_flag(str window_name=None):
+    if window_name == 'none':
+        return WIN_NONE
+
     if window_name == 'sine':
         return WIN_SINE
 
@@ -103,24 +106,23 @@ cdef class Cloud2:
             object amp=1.0,
             object speed=1.0, 
             object spread=0.0, 
-            object jitter=0.0, 
-            object grainlength=0.2, 
+            object pulsewidth=1.0,
+            object grainmaxjitter=0.5, 
+            object grainjitter=0.0, 
+            object grainlength=0.1, 
+            object gridmaxjitter=0.5, 
+            object gridjitter=0.0, 
             object grid=None,
             object mask=None,
-            object phase=None,
+            double phase=0,
             int numgrains=2,
             unsigned int wtsize=4096,
+            bint gridincrement=False,
         ):
-        """ TODO:
-            [ ] position
-            [ ] amp 
-            [ ] speed
-            [ ] spread
-            [ ] jitter
-            [ ] mask
-            [ ] numgrains modulation
-        """
 
+        # TODO: 
+        # - mask / burst support
+        # - set initial phase for formation
         cdef size_t i, c, sndlength
         cdef lpbuffer_t * win
         cdef int window_type
@@ -139,16 +141,22 @@ cdef class Cloud2:
 
         else:
             window_type = to_window_flag(window)
-            win = NULL
-
-        if phase is None:
-            phase = [0,1]
-        self.phase = to_window(phase)
+            win = LPWindow.create(window_type, 4096)
 
         if grid is None:
-            self.grid = np.multiply(self.grainlength, 0.3)
+            self.grid = np.multiply(self.grainlength, 0.5)
         else:
             self.grid = to_window(grid)
+
+        self.amp = to_window(amp)
+        self.speed = to_window(speed)
+        self.spread = to_window(spread)
+        self.pulsewidth = to_window(pulsewidth)
+        self.gridmaxjitter = to_window(gridmaxjitter)
+        self.gridjitter = to_window(gridjitter)
+        self.grainmaxjitter = to_window(grainmaxjitter)
+        self.grainjitter = to_window(grainjitter)
+        self.gridincrement = gridincrement
 
         sndlength = <size_t>len(snd.frames)
         srcbuf = LPBuffer.create(sndlength, self.channels, self.samplerate)
@@ -157,39 +165,51 @@ cdef class Cloud2:
             for c in range(self.channels):
                 srcbuf.data[i * self.channels + c] = snd.frames[i, c]
 
-        self.formation = LPFormation.create(
-                window_type,
-                numgrains, 
-                0, 
-                sndlength, 
-                self.channels, 
-                self.samplerate,
-                win
-        )
-
-        LPRingBuffer.write(self.formation.rb, srcbuf)
-        LPBuffer.destroy(srcbuf)
+        self.formation = LPFormation.create(numgrains, srcbuf, win)
 
     def __dealloc__(self):
         if self.formation != NULL:
             LPFormation.destroy(self.formation)
+            LPBuffer.destroy(self.formation.source)
+            LPBuffer.destroy(self.formation.window)
 
     def play(self, double length):
-        cdef size_t i, c, framelength
+        cdef size_t i, c, framelength, incpos, increment
         cdef SoundBuffer out
-        cdef double phase=0
+        cdef double pos, amp
 
+        increment = <size_t>(self.formation.grainlength * self.samplerate)
         framelength = <size_t>(length * self.samplerate)
         out = SoundBuffer(length=length, channels=self.channels, samplerate=self.samplerate)
 
+        incpos = 0
         for i in range(framelength):
-            phase = _linear_pos(self.phase, <double>i / framelength)
-            self.formation.grainlength = <size_t>(_linear_pos(self.grainlength, phase) * self.samplerate)
-            self.formation.graininterval = <size_t>(_linear_pos(self.grid, phase) * self.samplerate)
+            pos = i / <double>framelength
+            amp = _linear_pos(self.amp, pos)
+
+            self.formation.pulsewidth = _linear_pos(self.pulsewidth, pos)
+            self.formation.grainlength = _linear_pos(self.grainlength, pos)
+
+            self.formation.grainlength_jitter = _linear_pos(self.grainjitter, pos)
+            self.formation.grainlength_maxjitter = _linear_pos(self.grainmaxjitter, pos)
+            self.formation.speed = _linear_pos(self.speed, pos)
+            self.formation.spread = _linear_pos(self.spread, pos)
+            self.formation.grid_jitter = _linear_pos(self.gridjitter, pos)
+            self.formation.grid_maxjitter = _linear_pos(self.gridmaxjitter, pos)
+            
+            if not self.gridincrement:
+                self.formation.offset = pos * length
+            elif incpos >= increment:
+                self.formation.offset += _linear_pos(self.grid, pos)
+                while incpos >= increment:
+                    incpos -= increment
+                increment = <size_t>(self.formation.grainlength * self.samplerate)
 
             LPFormation.process(self.formation)
             for c in range(self.channels):
-                out.frames[i, c] = self.formation.current_frame.data[c]
+                out.frames[i, c] = self.formation.current_frame.data[c] * amp
+
+            incpos += 1
 
         return out
 

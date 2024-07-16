@@ -85,6 +85,7 @@ enum Wavetables {
 };
 
 enum Windows {
+    WIN_NONE,
     WIN_SINE,
     WIN_SINEIN,
     WIN_SINEOUT,

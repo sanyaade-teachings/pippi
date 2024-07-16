@@ -26,6 +26,14 @@
 /* ugen wrapper interface */
 typedef struct ugen_t ugen_t;
 struct ugen_t {
+    // outlets / inlets include all params
+    int num_outlets;
+    int num_inlets;
+
+    // audio-only inputs and outputs
+    int num_outputs;
+    int num_inputs;
+
     void * params;
     lpfloat_t (*get_output)(ugen_t * u, int index);
     void (*set_param)(ugen_t * u, int index, void * value);
@@ -187,6 +195,7 @@ typedef struct lpfx_factory_t {
     lpfloat_t (*hpf1)(lpfloat_t x, lpfloat_t * y, lpfloat_t cutoff, lpfloat_t samplerate);
     void (*convolve)(lpbuffer_t * a, lpbuffer_t * b, lpbuffer_t * out);
     void (*norm)(lpbuffer_t * buf, lpfloat_t ceiling);
+    lpfloat_t (*crossover)(lpfloat_t val, lpfloat_t amount, lpfloat_t smooth, lpfloat_t fade);
     lpfloat_t (*fold)(lpfloat_t val, lpfloat_t * prev, lpfloat_t samplerate);
     lpfloat_t (*limit)(lpfloat_t val, lpfloat_t * prev, lpfloat_t threshold, lpfloat_t release, lpbuffer_t * del);
     lpfloat_t (*crush)(lpfloat_t val, int bits);
@@ -243,6 +252,8 @@ lpfloat_t lpfmax(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfmin(lpfloat_t a, lpfloat_t b);
 lpfloat_t lpfabs(lpfloat_t value);
 lpfloat_t lpfpow(lpfloat_t value, int exp);
+lpfloat_t lpmstofreq(lpfloat_t ms);
+lpfloat_t lpstofreq(lpfloat_t seconds);
 u_int32_t lphashstr(char * str);
 
 lpfloat_t lpphaseinc(lpfloat_t freq, lpfloat_t samplerate);

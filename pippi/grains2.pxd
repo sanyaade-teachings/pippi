@@ -1,5 +1,6 @@
 cdef extern from "pippicore.h":
     cdef enum Windows:
+        WIN_NONE,
         WIN_SINE,
         WIN_SINEIN,
         WIN_SINEOUT,
@@ -82,10 +83,15 @@ cdef extern from "pippicore.h":
         void (*dub)(lpbuffer_t *, lpbuffer_t *)
         void (*destroy)(lpbuffer_t *)
 
+    ctypedef struct lpwindow_factory_t:
+        lpbuffer_t * (*create)(int name, size_t length)
+        lpbuffer_t * (*create_stack)(int numtables, size_t * onsets, size_t * lengths, ...)
+        void (*destroy)(lpbuffer_t*)
+
     extern const lpparam_factory_t LPParam
     extern const lpbuffer_factory_t LPBuffer
     extern const lpringbuffer_factory_t LPRingBuffer
-
+    extern const lpwindow_factory_t LPWindow
 
 cdef extern from "oscs.tape.h":
     ctypedef struct lptapeosc_t:
@@ -94,7 +100,6 @@ cdef extern from "oscs.tape.h":
         lpfloat_t pulsewidth
         lpfloat_t samplerate
         lpfloat_t start
-        lpfloat_t start_increment
         lpfloat_t range
         lpbuffer_t * buf
         lpbuffer_t * current_frame
@@ -104,52 +109,44 @@ cdef extern from "microsound.h":
     ctypedef struct lpgrain_t:
         size_t length
         int channels
-        lpfloat_t pulsewidth
+        lpfloat_t samplerate;
+        lpfloat_t pulsewidth 
+        lpfloat_t grainlength
+        lpfloat_t offset
 
-        size_t range
-        size_t start
-        size_t offset
-
-        lpfloat_t phase_offset
-        lpfloat_t phase
         lpfloat_t pan
         lpfloat_t amp
         lpfloat_t speed
         lpfloat_t skew
 
-        int unused
         int gate
 
-        lpbuffer_t * buf
-        lpbuffer_t * window
+        lptapeosc_t * src
+        lptapeosc_t * win
 
     ctypedef struct lpformation_t:
-        int num_active_grains
-        size_t numlayers
-        size_t grainlength
+        lpgrain_t grains[512]
+        int numgrains
+        lpfloat_t grainlength
         lpfloat_t grainlength_maxjitter
         lpfloat_t grainlength_jitter
-
-        size_t graininterval
-        lpfloat_t graininterval_phase
-        lpfloat_t graininterval_phase_inc
+        lpfloat_t grid_maxjitter
+        lpfloat_t grid_jitter
 
         lpfloat_t spread
         lpfloat_t speed
-        lpfloat_t scrub
         lpfloat_t offset
         lpfloat_t skew
         lpfloat_t amp
         lpfloat_t pan
-        lpfloat_t pulsewidth
+        lpfloat_t pulsewidth 
 
-        lpfloat_t pos
+        lpbuffer_t * source
         lpbuffer_t * window
         lpbuffer_t * current_frame
-        lpbuffer_t * rb
 
     ctypedef struct lpformation_factory_t:
-        lpformation_t * (*create)(int, int, size_t, size_t, int, int, lpbuffer_t *)
+        lpformation_t * (*create)(int numgrains, lpbuffer_t * src, lpbuffer_t * win);
         void (*process)(lpformation_t *)
         void (*destroy)(lpformation_t *)
 
@@ -161,17 +158,19 @@ cdef class Cloud2:
 
     cdef lpformation_t * formation
 
-    cdef double[:] grainlength
-    cdef double[:] grid
-    cdef double[:] phase
-
-    """
-    cdef double[:] position
     cdef double[:] amp
+    cdef double[:] pulsewidth
+    cdef double[:] grainlength
+    cdef double[:] grainmaxjitter
+    cdef double[:] grainjitter
+    cdef double[:] gridmaxjitter
+    cdef double[:] gridjitter
     cdef double[:] speed
     cdef double[:] spread
-    cdef double[:] jitter
+    cdef double[:] grid
+    cdef bint gridincrement
 
+    """
     cdef int[:] mask
     cdef bint has_mask
     """

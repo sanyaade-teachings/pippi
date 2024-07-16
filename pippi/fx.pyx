@@ -155,9 +155,8 @@ cpdef SoundBuffer softclip2(SoundBuffer snd):
 @cython.cdivision(True)
 cdef double[:,:] _crossover(double[:,:] snd, double[:,:] out, double[:] amount, double[:] smooth, double[:] fade):
     """ Crossover distortion ported from the supercollider CrossoverDistortion ugen """
-    cdef int i=0, c=0
-    cdef unsigned int framelength = len(snd)
-    cdef int channels = snd.shape[1]
+    cdef size_t i=0, framelength=len(snd)
+    cdef int c=0, channels=snd.shape[1]
     cdef double s=0, pos=0, a=0, f=0, m=0
 
     for i in range(framelength):
@@ -167,14 +166,7 @@ cdef double[:,:] _crossover(double[:,:] snd, double[:,:] out, double[:] amount, 
         f = _linear_pos(fade, pos)
 
         for c in range(channels):
-            s = abs(snd[i,c]) - a
-            if s < 0:
-                s *= (1.0 + (s * f)) * m
-
-            if snd[i,c] < 0:
-                s *= -1
-
-            out[i,c] = s
+            out[i,c] = LPFX.crossover(snd[i,c], a, m, f)
 
     return out
 
