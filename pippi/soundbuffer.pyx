@@ -20,7 +20,6 @@ from pippi cimport fft
 from pippi import graph
 from pippi.defaults cimport DEFAULT_SAMPLERATE, DEFAULT_CHANNELS, DEFAULT_SOUNDFILE, PI
 from pippi cimport grains2
-from pippi cimport grains
 from pippi cimport soundpipe
 
 np.import_array()
@@ -716,7 +715,6 @@ cdef class SoundBuffer:
         """ Create a new Cloud from this SoundBuffer
         """
         return grains2.Cloud2(self, *args, **kwargs).play(length)
-        #return grains.Cloud(self, *args, **kwargs).play(length)
 
     def copy(self):
         """ Return a new copy of this SoundBuffer.

@@ -68,12 +68,6 @@ ext_modules = cythonize([
             include_dirs=INCLUDES + ['libpippi/vendor/fft'],
             define_macros=MACROS
         ),
-        Extension('pippi.grains', ['pippi/grains.pyx'],
-            libraries=['soundpipe'], 
-            library_dirs=['/usr/local/lib'],
-            include_dirs=INCLUDES,
-            define_macros=MACROS
-        ),
         Extension('pippi.grains2', [
                 'libpippi/src/pippicore.c',
                 'libpippi/src/oscs.tape.c',
@@ -83,7 +77,6 @@ ext_modules = cythonize([
             include_dirs=INCLUDES,
             define_macros=MACROS
         ),
-
         Extension('pippi.lists', ['pippi/lists.pyx'],
             include_dirs=INCLUDES, 
             define_macros=MACROS

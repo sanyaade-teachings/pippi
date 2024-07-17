@@ -47,7 +47,7 @@ class TestShapes(TestCase):
                 grid=grid, 
                 speed=dsp.win(shapes.win('sine', length=1), 0.03, 2),
                 spread='rnd', 
-                jitter='rnd'
+                grainjitter='rnd'
             )
 
         out.write('tests/renders/shape_pulsar.wav')

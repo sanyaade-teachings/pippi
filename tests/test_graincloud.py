@@ -5,7 +5,7 @@ import tempfile
 from unittest import TestCase
 
 from pippi.soundbuffer import SoundBuffer
-from pippi import dsp, grains, grains2, fx, shapes
+from pippi import dsp, grains2, fx, shapes
 
 class TestCloud(TestCase):
     def setUp(self):
@@ -36,40 +36,24 @@ class TestCloud(TestCase):
         out.write('tests/renders/graincloud_libpippi_grainlength_modulated.wav')
 
     def test_user_window(self):
-        # Alix Dobkin
         snd = dsp.read('tests/sounds/living.wav')
 
-        length = 12
+        length = 2
 
-        # right half of a sharply tapered hann window, basically
         win = dsp.win('pluckout').taper(dsp.randint(10, 100))
-
-        # empty buffer 2x the length of the sample
         out = dsp.buffer(length=length, channels=snd.channels, samplerate=snd.samplerate)
 
-        # four layers of grains
         for _ in range(4):
-            # grain playback speed
             speed = shapes.win('sine', dsp.rand(0.125, 0.5), dsp.rand(1, 2))
-
             amp = shapes.win('sine', 0.3, 1) 
-
-            # stereo spread
             spread = shapes.win('sine', 0, 1) 
-
-            # start increment in seconds
             grid = shapes.win('sine', -1, 1, length=dsp.rand(1, 10))
-
-            # length of the grain in seconds
             grainlength = shapes.win('sine', dsp.MS*1, 0.4, length=dsp.rand(1, 10))
 
             gridjitter = shapes.win('sine', 0, 1)
             grainjitter = shapes.win('sine', 0, 1)
-
-            # pulsewidth of the grain window between 0 & 1
             pulsewidth = shapes.win('sine', 0.5, 2)
 
-            # render the layer
             layer = snd.cloud(length, 
                 amp=amp,
                 window=win, 
@@ -84,22 +68,15 @@ class TestCloud(TestCase):
                 gridmaxjitter=dsp.rand(0.01,1),
                 gridjitter=gridjitter,
             )
-
-            # and dub it into the output buffer
             out.dub(layer)
 
-        # squish
         out = fx.compressor(out*8, -15, 15)
         out = fx.norm(out, 1)
-
-        # done
         out.write('tests/renders/graincloud_libpippi_user_window.wav')
 
     def test_phase_modulation(self):
         snd = dsp.read('tests/sounds/living.wav')
-        phase = [1,0.5,1,0,0.5]
-        phase = 3
-        out = snd.cloud(snd.dur*2, grainlength=0.1, phase=phase)
+        out = snd.cloud(snd.dur*2, grainlength=0.1, phase=0.3)
         out = fx.norm(out, 1)
         out.write('tests/renders/graincloud_libpippi_phase_modulated.wav')
 
@@ -116,8 +93,6 @@ class TestCloud(TestCase):
         out = fx.norm(out, 1)
         out.write('tests/renders/graincloud_libpippi_speed_modulated.wav')
 
-
-    """
     def test_libpippi_pulsed_graincloud(self):
         sound = SoundBuffer(filename='tests/sounds/living.wav')
         out = sound.cloud(10, grainlength=0.06, grid=0.12)
@@ -185,4 +160,3 @@ class TestCloud(TestCase):
             )
 
         out.write('tests/renders/graincloud_libpippi_grainsize.wav')
-    """
